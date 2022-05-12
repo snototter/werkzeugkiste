@@ -12,6 +12,12 @@ project(werkzeugkiste-examples-fetched)
 # into your executable/library (no need to fiddle around with INCLUDE_DIRS
 # or the like)
 
+
+# Ensure that we only build the werkzeugkiste libraries after fetching:
+set(werkzeugkiste_WITH_EXAMPLES OFF)
+set(werkzeugkiste_WITH_TESTS OFF)
+
+# Fetch the library:
 include(FetchContent)
 FetchContent_Declare(
   werkzeugkiste
