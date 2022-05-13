@@ -38,11 +38,10 @@ foreach(p LIB INCLUDE CMAKE)
 endforeach()
 
 
-# Set compiler options
-#FIXME use target_compile_options for these
-set(CMAKE_CXX_STANDARD 14)     # We use std::exchange
+# Set compiler options for all targets
+set(CMAKE_CXX_STANDARD 14)     # TODO if we use std::exchange
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)  # only std c++14, not gnu++14
+set(CMAKE_CXX_EXTENSIONS OFF)  # no compiler-specific extensions to be portable
 
 #FIXME adapt to modern cmake
 # check https://stackoverflow.com/questions/33829152/for-cmake-can-you-modify-the-release-debug-compiler-flags-with-add-compiler-fl
@@ -62,7 +61,11 @@ endif()
 # FIXME can we change this to only this project?
 # Set default build type if not specified
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
+
+if(NOT CMAKE_DEBUG_POSTFIX)
+    set(CMAKE_DEBUG_POSTFIX "d")
 endif()
 
 
@@ -82,6 +85,7 @@ set(wkzgtiming_PUBLIC_HEADER_FILES
 
 # Source files
 set(wkzgtiming_SOURCE_FILES
+    src/timing/stopwatch.cpp
     src/timing/tictoc.cpp)
 
 add_library(werkzeugkiste-timing
@@ -97,7 +101,8 @@ target_include_directories(werkzeugkiste-timing
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
 
 
-#set_target_properties(werkzeugkiste-timing PROPERTIES
+set_target_properties(werkzeugkiste-timing PROPERTIES
+    EXPORT_NAME timing)
 #    PUBLIC_HEADER "${wkzgtiming_PUBLIC_HEADER_FILES}"
 #    OUTPUT_NAME werkzeugkiste-timing
 #    DEBUG_POSTFIX "d")
@@ -114,7 +119,7 @@ configure_file(
     ${werkzeugkiste_VERSION_HEADER})
 
 
-if (INSTALL_werkzeugkiste)
+if(INSTALL_werkzeugkiste)
 #FIXME public_header destination will not work
     #TODO Install header files separately per target
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
@@ -156,7 +161,7 @@ configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
     INSTALL_DESTINATION ${INSTALL_DIR_CMAKE})
 
 # Install config files
-if (INSTALL_werkzeugkiste)
+if(INSTALL_werkzeugkiste)
     install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfigVersion.cmake"
