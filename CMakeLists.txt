@@ -19,23 +19,11 @@ option(INSTALL_werkzeugkiste "Configure installation target." ON)
 #set_property(CACHE werkzeugkiste_LOG_LEVEL PROPERTY STRINGS disable trace debug info warn error critical)
 
 
-# Offer the user the choice of overriding the installation (sub-)directories
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    # will not take effect without FORCE
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install/v${werkzeugkiste_VERSION}"
-        CACHE PATH "Installation top-level directory" FORCE)
-endif()
-set(INSTALL_DIR_LIB lib CACHE PATH "Installation directory for library (relative to CMAKE_INSTALL_PREFIX or absolute)")
-set(INSTALL_DIR_INCLUDE include CACHE PATH "Installation directory for header files (relative to CMAKE_INSTALL_PREFIX or absolute)")
-set(INSTALL_DIR_CMAKE cmake CACHE PATH "Installation directory for CMake files (relative to CMAKE_INSTALL_PREFIX or absolute)")
-
-# Ensure all paths are absolute (needed later on)
-foreach(p LIB INCLUDE CMAKE)
-    set(var INSTALL_DIR_${p})
-    if(NOT IS_ABSOLUTE "${${var}}")
-        set(${var} "${CMAKE_INSTALL_PREFIX}/${${var}}")
-    endif()
-endforeach()
+include(GNUInstallDirs)
+set(INSTALL_DIR_INCLUDE ${CMAKE_INSTALL_INCLUDEDIR})
+set(INSTALL_DIR_LIB ${CMAKE_INSTALL_LIBDIR})
+# One standard location for the CMake config files is lib/cmake/<package-name>
+set(INSTALL_DIR_CMAKE ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
 
 # Set compiler options for all targets
@@ -94,8 +82,7 @@ add_library(werkzeugkiste::timing ALIAS werkzeugkiste-timing)
 
 
 target_include_directories(werkzeugkiste-timing
-    # Where external projects will look for the timeutils headers
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
 
 
@@ -126,8 +113,7 @@ add_library(werkzeugkiste::strings ALIAS werkzeugkiste-strings)
 
 target_include_directories(werkzeugkiste-strings
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-    # Where external projects will look for the timeutils headers
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
 
 
@@ -148,12 +134,11 @@ configure_file(
 
 
 if(INSTALL_werkzeugkiste)
-#FIXME public_header destination will not work
-    #TODO Install header files separately per target
+    #TODO We need to install header files separately per target (to ensure the hierarchy)
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
     install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
     install(FILES ${wkzgstrings_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/strings)
-    
+
     install(TARGETS
         werkzeugkiste-timing
         werkzeugkiste-strings
