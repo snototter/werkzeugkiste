@@ -39,12 +39,15 @@ endforeach()
 
 
 # Set compiler options for all targets
-set(CMAKE_CXX_STANDARD 14)     # TODO if we use std::exchange
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)  # no compiler-specific extensions to be portable
+if(NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 14)     # TODO if we use std::exchange
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+    set(CMAKE_CXX_EXTENSIONS OFF)  # no compiler-specific extensions to be portable
+endif()
 
 #FIXME adapt to modern cmake
 # check https://stackoverflow.com/questions/33829152/for-cmake-can-you-modify-the-release-debug-compiler-flags-with-add-compiler-fl
+#FIXME check spdlog's CMakeLists on what to set extra for MSVC :/
 
 if (MSVC)
     # warning level 4
@@ -58,7 +61,6 @@ else()
     )
 endif()
 
-# FIXME can we change this to only this project?
 # Set default build type if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose Release or Debug" FORCE)
