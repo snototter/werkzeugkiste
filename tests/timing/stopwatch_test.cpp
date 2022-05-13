@@ -121,3 +121,25 @@ TEST(StopWatchTest, CastToTicks) {
   EXPECT_DOUBLE_EQ(wkt::ToNanoseconds(std::chrono::microseconds(789)), 789000.0);
   EXPECT_DOUBLE_EQ(wkt::ToNanoseconds(std::chrono::nanoseconds(951)), 951.0);
 }
+
+
+TEST(StopWatchTest, StringRepresentation) {
+  EXPECT_EQ(wkt::SecondsToString(0), "0 seconds");
+  EXPECT_EQ(wkt::SecondsToString(1), "1 second");
+  EXPECT_EQ(wkt::SecondsToString(59), "59 seconds");
+  EXPECT_EQ(wkt::SecondsToString(60), "1 minute");
+  EXPECT_EQ(wkt::SecondsToString(61), "1 minute 1 second");
+  EXPECT_EQ(wkt::SecondsToString(121), "2 minutes 1 second");
+  EXPECT_EQ(wkt::SecondsToString(185), "3 minutes 5 seconds");
+  EXPECT_EQ(wkt::SecondsToString(3599), "59 minutes 59 seconds");
+  EXPECT_EQ(wkt::SecondsToString(3600), "1 hour");
+  EXPECT_EQ(wkt::SecondsToString(3601), "1 hour");
+  EXPECT_EQ(wkt::SecondsToString(3666), "1 hour 1 minute");
+  EXPECT_EQ(wkt::SecondsToString(86399), "23 hours 59 minutes");
+  EXPECT_EQ(wkt::SecondsToString(86400), "1 day");
+  EXPECT_EQ(wkt::SecondsToString(86405), "1 day");
+  EXPECT_EQ(wkt::SecondsToString(86460), "1 day 1 minute");
+  EXPECT_EQ(wkt::SecondsToString(86465), "1 day 1 minute");
+  EXPECT_EQ(wkt::SecondsToString(86520), "1 day 2 minutes");
+  EXPECT_EQ(wkt::SecondsToString(88650), "1 day 37 minutes");
+}

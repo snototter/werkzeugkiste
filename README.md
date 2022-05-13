@@ -1,6 +1,19 @@
-# Werkzeugkiste - A small C++ Utility Library
-Trying to refactor all the frequently copy-pasted code snippets into a single toolbox/utility library (and spice it up with some more modern C++).
-And since there's tons of utilities, utils, tools & toolboxes out there (and I happen to know some german), this is going to be my **werkzeugkiste**.
+# Werkzeugkiste - Yet Another C++ Utility Library
+This is a collection of all the frequently used code snippets copy-pasted across too many projects I'd like to admit.
+And since there's tons of so-called utilities, utils, tools & toolboxes out there, this is going to be my **`werkzeugkiste`** (German for toolbox).
+
+**Roadmap**
+* [ ] Collect all utilities, refactor where needed & ensure everything is properly tested
+  * [ ] Basic math
+  * [ ] 2D geometry
+  * [ ] 3D geometry
+  * [ ] Basic file utilities
+  * [ ] Sorting utilities
+  * [x] Stop watch
+  * [x] Strings
+* [ ] Decide if some of the utils would be us
+* [ ] Raise requirements to C++17 and extend with `filesystem` and `string_view` magic
+
 
 ## Requirements
 TODO
@@ -16,8 +29,8 @@ Test
 
 ## Functionality
 * Basic geometry
-* String utilities
-* Stopwatch
+* `strings`: Helpers for string manipulation
+* `timing`: A simple stop watch & helpers on top of `std::chrono`
 
 ## Usage
 Two major usage scenarios:

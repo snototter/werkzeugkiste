@@ -135,14 +135,13 @@ std::vector<std::string> Split(const std::string &s, char delim) {
 }
 
 
-//TODO use std::size_t!
 std::string Replace(const std::string &str, const std::string &search,
                     const std::string &replacement) {
   if ((str.length() == 0) || (search.length() == 0)) {
     return str;
   }
 
-  size_t start_pos = str.find(search);
+  std::size_t start_pos = str.find(search);
   if(start_pos == std::string::npos) {
     return str;
   }
@@ -156,69 +155,11 @@ std::string Replace(const std::string &str, const std::string &search,
   return s;
 }
 
-std::string ToStr(const bool &v) {
-  if (v) {
-    return "true";
-  } else {
-    return "false";
-  }
-}
-
-
-//TODO move to timings
-std::string SecondsToStr(int seconds)
-{
-  std::stringstream str;
-
-  const int days = seconds/86400;
-  bool needs_space = false;
-  if (days > 0)
-  {
-    seconds -= 86400*days;
-    str << days << " day";
-    if (days > 1)
-      str << "s";
-    needs_space = true;
-  }
-
-  const int hours = seconds/3600;
-  if (hours > 0)
-  {
-    if (needs_space)
-      str << " ";
-    str << hours << " hour";
-    if (hours > 1)
-      str << "s";
-    seconds -= 3600*hours;
-    needs_space = true;
-  }
-
-  const int mins = seconds/60;
-  if (mins > 0)
-  {
-    if (needs_space)
-      str << " ";
-    str << mins << " minute";
-    if (mins > 1)
-      str << "s";
-  }
-  else
-  {
-    // Only show seconds if we had no larger unit before
-    if (hours == 0 && days == 0)
-    {
-      str << seconds << " second";
-      if (seconds > 1)
-        str << "s";
-    }
-  }
-  return str.str();
-}
 
 /** @brief Sets protocol to URL's protocol (or empty string). */
 bool GetUrlProtocol(const std::string &url, std::string &protocol, std::string &remainder)
 {
-  const size_t protocol_pos = url.find("://");
+  const std::size_t protocol_pos = url.find("://");
   if (protocol_pos == std::string::npos)
   {
     protocol = "";
@@ -239,7 +180,7 @@ std::string ObscureUrlAuthentication(const std::string &url)
   std::string protocol, clipped;
   const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
 
-  const size_t at_pos = clipped.find('@');
+  const std::size_t at_pos = clipped.find('@');
   if (at_pos == std::string::npos)
     return url;
 
@@ -255,7 +196,7 @@ std::string ClipUrl(const std::string &url)
   std::string protocol, clipped;
   const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
 
-  const size_t path_del_pos = clipped.find('/');
+  const std::size_t path_del_pos = clipped.find('/');
   if (path_del_pos != std::string::npos)
     clipped = clipped.substr(0, path_del_pos);
 

@@ -20,8 +20,8 @@ int main(int /* argc */, char ** /* argv */) {
     std::cout << "Input: " << s << "\n"
               << "+ Upper: " << wks::Upper(s)
               << "\n+ Lower: " << wks::Lower(s)
-              << "\n+ Prefix 'a':  " << wks::ToStr(wks::StartsWith(s, 'a'))
-              << "\n+ Suffix \"is\": " << wks::ToStr(wks::EndsWith(s, "is"))
+              << "\n+ Prefix 'a':  " << wks::StartsWith(s, 'a')
+              << "\n+ Suffix \"is\": " << wks::EndsWith(s, "is")
               << std::endl << std::endl;
   }
 

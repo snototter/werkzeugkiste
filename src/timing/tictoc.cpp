@@ -48,7 +48,7 @@ double ttoc(const std::string &label) {
   if (it != active_watches.end()) {
     return it->second.ElapsedAs<_period>();
   } else {
-    std::stringstream s;
+    std::ostringstream s;
     s << "StopWatch \"" << label
       << "\" has not been started - check for label typo or did you forget tic()?";
     throw std::invalid_argument(s.str());

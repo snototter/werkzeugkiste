@@ -47,7 +47,7 @@ std::string DurationAbbreviation() {
     return "yrs";
 #endif  // C++20
 
-  std::stringstream s;
+  std::ostringstream s;
   s << "Precision type \"" << typeid(P).name()
     << "\" has not been mapped yet.";
   throw std::runtime_error(s.str());
@@ -79,7 +79,7 @@ std::string ClockTypeName() {
     return "std::chrono::local_t";
 #endif  // C++20
 
-  std::stringstream s;
+  std::ostringstream s;
   s << "Precision type \"" << typeid(C).name()
     << "\" has not been mapped yet.";
   throw std::runtime_error(s.str());
@@ -115,7 +115,7 @@ std::string PrecisionTypeName() {
     return "std::chrono::years";
 #endif  // C++20
 
-  std::stringstream s;
+  std::ostringstream s;
   s << "Precision type \"" << typeid(P).name()
     << "\" has not been mapped yet.";
   throw std::runtime_error(s.str());
@@ -161,6 +161,15 @@ template<typename P>
 inline double ToNanoseconds(const P &duration) {
   return CastToTicks<P, std::chrono::nanoseconds>(duration);
 }
+
+
+/**
+ * @brief Returns a human readable string approximating the given time.
+ *
+ * For example, SecondsToString(3700 * 24 + 50) = '1 day 40 minutes'
+ */
+std::string SecondsToString(unsigned int seconds);
+
 
 
 /**
