@@ -95,7 +95,7 @@ add_library(werkzeugkiste::timing ALIAS werkzeugkiste-timing)
 
 target_include_directories(werkzeugkiste-timing
     # Where external projects will look for the timeutils headers
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
 
 
@@ -127,7 +127,7 @@ add_library(werkzeugkiste::strings ALIAS werkzeugkiste-strings)
 target_include_directories(werkzeugkiste-strings
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
     # Where external projects will look for the timeutils headers
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
 
 
