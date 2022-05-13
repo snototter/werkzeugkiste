@@ -2,11 +2,8 @@
 #include <iterator>
 #include <fstream>
 #include <sstream>
-
-
+#include <cctype>
 #include <string>
-#include <stdexcept>
-
 
 #include <werkzeugkiste/strings/strings.h>
 #include <werkzeugkiste_macros.h>
@@ -14,7 +11,6 @@
 namespace werkzeugkiste {
 namespace strings {
 
-//TODO finish porting to werkzeugkiste - clean up; test; example
 
 bool EndsWith(const std::string &s, const std::string &suffix) {
   if ((s.length() > 0) && (suffix.length() > 0)
@@ -156,58 +152,74 @@ std::string Replace(const std::string &str, const std::string &search,
 }
 
 
-/** @brief Sets protocol to URL's protocol (or empty string). */
-bool GetUrlProtocol(const std::string &url, std::string &protocol, std::string &remainder)
-{
+bool GetUrlProtocol(const std::string &url,
+                    std::string &protocol,
+                    std::string &remainder) {
   const std::size_t protocol_pos = url.find("://");
-  if (protocol_pos == std::string::npos)
-  {
+  if (protocol_pos == std::string::npos) {
     protocol = "";
     remainder = url;
-  }
-  else
-  {
+    return false;
+  } else {
     protocol = url.substr(0, protocol_pos+3);
     remainder = url.substr(protocol_pos+3);
+    return true;
   }
-  return protocol_pos != std::string::npos;
 }
 
-//TODO add SplitUrl(returning scheme, userinfo, host, port, path, query, fragment
+//TODO(snototter) feature-request SplitUrl
+// extract protocol/schema, userinfo, host, port,
+// path, query, and fragment of a URL/URI
 
-std::string ObscureUrlAuthentication(const std::string &url)
-{
+
+std::string ObscureUrlAuthentication(const std::string &url) {
   std::string protocol, clipped;
   const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
 
   const std::size_t at_pos = clipped.find('@');
-  if (at_pos == std::string::npos)
+  if (at_pos == std::string::npos) {
     return url;
+  }
 
   const std::string obscured = "<auth>" + clipped.substr(at_pos);
-  if (has_protocol)
+  if (has_protocol) {
     return protocol + obscured;
+  }
   return obscured;
 }
 
 
-std::string ClipUrl(const std::string &url)
-{
+std::string ClipUrl(const std::string &url) {
   std::string protocol, clipped;
   const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
 
-  const std::size_t path_del_pos = clipped.find('/');
-  if (path_del_pos != std::string::npos)
-    clipped = clipped.substr(0, path_del_pos);
+  // Special handling of file:// URLs, there's no
+  // authentication information
+  if (has_protocol && (Lower(protocol).compare("file://") == 0)) {
+    return url;
+  }
 
-  if (has_protocol)
+  // Strip path
+  std::size_t path_del_pos = clipped.find('/');
+  if (path_del_pos != std::string::npos) {
+    clipped = clipped.substr(0, path_del_pos);
+  }
+
+  // Strip parameters
+  path_del_pos = clipped.find('?');
+  if (path_del_pos != std::string::npos) {
+    clipped = clipped.substr(0, path_del_pos);
+  }
+
+  if (has_protocol) {
     return protocol + ObscureUrlAuthentication(clipped);
-  return ObscureUrlAuthentication(clipped);
+  } else {
+    return ObscureUrlAuthentication(clipped);
+  }
 }
 
 
-std::string Remove(const std::string &s, const char c)
-{
+std::string Remove(const std::string &s, const char c) {
   std::string removed;
   std::remove_copy(s.begin(), s.end(),
                    std::back_inserter(removed), c);
@@ -215,8 +227,8 @@ std::string Remove(const std::string &s, const char c)
 }
 
 
-std::string Remove(const std::string &s, std::initializer_list<char> chars)
-{
+std::string Remove(const std::string &s,
+                   std::initializer_list<char> chars) {
   std::string copy(s);
   for (const auto c : chars) {
     copy = Remove(copy, c);
@@ -226,21 +238,24 @@ std::string Remove(const std::string &s, std::initializer_list<char> chars)
 
 
 std::string Slug(const std::string &s,
-                    bool strip_dashes) {
-//TODO use algorithm + ::is_space, etc is_alpha
-  std::string canonic =
-      Replace(
-        Replace(
-          Replace(
-            Remove(
-              Lower(Trim(s)),
-              {'?', '!', ':', '\'', '"', '%', '/', '\\'}),
-            "#", "nr"),
-          " ", "-"),
-        "_", "-");
-  if (strip_dashes)
-    return Remove(canonic, '-');
-  return canonic;
+                 bool strip_dashes) {
+  std::string replaced = Replace(Lower(Trim(s)),
+                                 "#", "nr");
+
+  std::ostringstream out;
+  // Start with flag set to return "-" if the string
+  // contains exclusively non-alphanumeric characters
+  bool prev_alphanum = true;
+  for (std::size_t i = 0; i < replaced.length(); ++i) {
+    if (std::isalnum(replaced[i])) {
+      out << replaced[i];
+      prev_alphanum = true;
+    } else if (prev_alphanum && !strip_dashes) {
+      out << '-';
+      prev_alphanum = false;
+    }
+  }
+  return out.str();
 }
 } // namespace string
 } // namespace werkzeug

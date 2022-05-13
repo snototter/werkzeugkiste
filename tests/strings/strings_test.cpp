@@ -73,6 +73,11 @@ TEST(StringUtilsTest, IsNumeric) {
   EXPECT_TRUE(wks::IsNumeric("+42"));
   EXPECT_FALSE(wks::IsNumeric("0!"));
   EXPECT_FALSE(wks::IsNumeric("a!"));
+  EXPECT_FALSE(wks::IsNumeric("123 456"));
+
+  EXPECT_TRUE(wks::IsNumeric("1234567890000000000000000000"));
+  EXPECT_TRUE(wks::IsNumeric("12345678900000000000000000000000000000"));
+  EXPECT_TRUE(wks::IsNumeric("12345678900000000000000000000000000000.123456"));
 
   EXPECT_FALSE(wks::IsNumeric(""));
   EXPECT_FALSE(wks::IsNumeric("-"));
@@ -105,7 +110,6 @@ TEST(StringUtilsTest, Tokenize) {
 
 
 TEST(StringUtilsTest, Replace) {
-  //TODO
   EXPECT_TRUE(wks::Replace("", "", "").empty());
   EXPECT_TRUE(wks::Replace("", "abc", "def").empty());
   EXPECT_TRUE(wks::Replace("", "", "def").empty());
@@ -113,10 +117,6 @@ TEST(StringUtilsTest, Replace) {
   // Nothing changes if search string is empty
   EXPECT_EQ(wks::Replace("ABC123abc;:_", "", "!!!!!"),
             "ABC123abc;:_");
-
-  // We can also remove substrings
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "bc", ""),
-            "ABC123a;:_");
 
   EXPECT_EQ(wks::Replace("ABC123abc;:_", "a", "!!"),
             "ABC123!!bc;:_");
@@ -126,29 +126,91 @@ TEST(StringUtilsTest, Replace) {
 
   EXPECT_EQ(wks::Replace("ABC123abc;:_", "BC", ""),
             "A123abc;:_");
+
+  // All occurrences should be replaced
+  EXPECT_EQ(wks::Replace("ABC123abc123ABC123abc123", "BC", ".."),
+            "A..123abc123A..123abc123");
+
+  // We can also remove substrings
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", "bc", ""),
+            "ABC123a;:_");
 }
 
 
 TEST(StringUtilsTest, Remove) {
-  //TODO
+  EXPECT_EQ(wks::Remove("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>", '\\'),
+            "1234567890+*~#'-_.:,;´`?}=])[({/&%$§3!^°@<|>");
+
+  EXPECT_EQ(wks::Remove("abcDEFghiABCdefGHIabc", 'a'),
+            "bcDEFghiABCdefGHIbc");
+
+  EXPECT_EQ(wks::Remove("abcDEFghiABCdefGHIabc", {'a', 'b', 'C'}),
+            "cDEFghiABdefGHIc");
 }
 
 
 TEST(StringUtilsTest, URL) {
-  //TODO
+  // Simplistic URL parsing (downstream I need to be able
+  // to distinguish web URLs from file paths, e.g. to properly
+  // load a camera's SDP description)
+  std::string protocol, remainder;
+  EXPECT_TRUE(wks::GetUrlProtocol("file://foo.txt", protocol, remainder));
+  EXPECT_EQ(protocol, "file://");
+  EXPECT_EQ(remainder, "foo.txt");
+
+  EXPECT_TRUE(wks::GetUrlProtocol("UnChecked://SomeU.R.I:?asdf=foo",
+                                  protocol, remainder));
+  EXPECT_EQ(protocol, "UnChecked://");
+  EXPECT_EQ(remainder, "SomeU.R.I:?asdf=foo");
+
+  EXPECT_FALSE(wks::GetUrlProtocol("foo.txt", protocol, remainder));
+  EXPECT_TRUE(protocol.empty());
+  EXPECT_EQ(remainder, "foo.txt");
+
+  // When logging connection strings, I want to hide
+  // any potential authentication information (but still
+  // know that it was actually provided in the URL string):
+  EXPECT_EQ(wks::ObscureUrlAuthentication("file://foobar"),
+            "file://foobar");
+
+  EXPECT_EQ(wks::ObscureUrlAuthentication("http://user:pass@foo.bar"),
+            "http://<auth>@foo.bar");
+
+  EXPECT_EQ(wks::ObscureUrlAuthentication("rtsp://user:pass@foo.bar:12345"),
+            "rtsp://<auth>@foo.bar:12345");
+
+  EXPECT_EQ(wks::ObscureUrlAuthentication("https://user@192.168.0.1:8080/cam.cgi"),
+            "https://<auth>@192.168.0.1:8080/cam.cgi");
+
+  EXPECT_EQ(wks::ObscureUrlAuthentication("user:pass@some.thing:12345"),
+            "<auth>@some.thing:12345");
+
+
+  // If we want to strip the subpaths and parameters of a URL:
+  EXPECT_EQ(wks::ClipUrl("https://root@192.168.0.1:8080/cam.cgi"),
+            "https://<auth>@192.168.0.1:8080");
+
+  EXPECT_EQ(wks::ClipUrl("https://192.168.0.1:8080?image=still&overlay=off"),
+            "https://192.168.0.1:8080");
+
+  EXPECT_EQ(wks::ClipUrl("file:///a/file/needs/special/handling.txt"),
+            "file:///a/file/needs/special/handling.txt");
 }
 
 
 TEST(StringUtilsTest, Slug) {
-  //TODO
   EXPECT_EQ(wks::Slug("nothing-to-be-slugged"),
             "nothing-to-be-slugged");
 
-  EXPECT_EQ(wks::Slug(" replace:\tsome_spaces and underscores  _-"),
-            "-replace-some-spaces-and-underscores----");
+  EXPECT_EQ(wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
+            "replace-some-spaces-and-underscores-");
 
-  EXPECT_EQ(wks::Slug(" \r\n\t\v\f"),
-            "------");
+  EXPECT_EQ(wks::Slug(" \r\n\t\v\f"), "");
+  EXPECT_EQ(wks::Slug("a \r\n\t\v\f"), "a");
+  EXPECT_EQ(wks::Slug(" \r\n\t\v\fb"), "b");
+  EXPECT_EQ(wks::Slug("A \r\n\t\v\fB"), "a-b");
 
-  EXPECT_TRUE(wks::Slug(":#!").empty());
+  EXPECT_EQ(wks::Slug(":?`!"), "-");
+  EXPECT_EQ(wks::Slug("#2"), "nr2");
+  EXPECT_TRUE(wks::Slug("").empty());
 }

@@ -107,6 +107,15 @@ std::string Replace(const std::string &str, const std::string &search, const std
 std::string ClipUrl(const std::string &url);
 
 
+/**
+ * @brief Sets `protocol` to the URL's protocol, e.g. `https://`, `rtp://`, etc.
+ *
+ * Returns true if the `url` string contained a protocol part.
+ */
+bool GetUrlProtocol(const std::string &url,
+                    std::string &protocol,
+                    std::string &remainder);
+
 /** @brief Returns the given URL after replacing the user's authentication data. */
 std::string ObscureUrlAuthentication(const std::string &url);
 
@@ -122,12 +131,11 @@ std::string Remove(const std::string &s, const char c);
 /** @brief Returns a slug representation of the string.
  *
  * The input will be converted to lower case & trimmed.
- * All remaining spaces and underscores will be replaced
- * by dashes.
- * TODO document which symbols will be removed!
- * If `strip_dashes` is true, remaining dashes of the above
- * substitutions will also be stripped - so " img_dir" would
- * become "imgdir".
+ * The number sign/hash will be replaced by "nr". Any
+ * other non-alphanumeric symbols will be replaced by
+ * dashes.
+ * If `strip_dashes` is true, the remaining dashes will
+ * then also be stripped - so " img_dir" would become "imgdir".
  */
 std::string Slug(const std::string &s,
                  bool strip_dashes=false);
