@@ -64,10 +64,6 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-if(NOT CMAKE_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX "d")
-endif()
-
 
 #FIXME can we change this to only this project/all (sub)targets?
 # Compile library with position-independent code (-fPIC)
@@ -102,10 +98,40 @@ target_include_directories(werkzeugkiste-timing
 
 
 set_target_properties(werkzeugkiste-timing PROPERTIES
-    EXPORT_NAME timing)
+    EXPORT_NAME timing
 #    PUBLIC_HEADER "${wkzgtiming_PUBLIC_HEADER_FILES}"
 #    OUTPUT_NAME werkzeugkiste-timing
-#    DEBUG_POSTFIX "d")
+    DEBUG_POSTFIX "d")
+
+
+#########################################################################################
+# String Utils: werkzeugkiste::strings
+
+# Header files
+set(wkzgstrings_PUBLIC_HEADER_FILES
+    include/werkzeugkiste/strings/strings.h)
+
+# Source files
+set(wkzgstrings_SOURCE_FILES
+    src/strings/strings.cpp)
+
+add_library(werkzeugkiste-strings
+    ${wkzgstrings_PUBLIC_HEADER_FILES}
+    ${wkzgstrings_SOURCE_FILES})
+# Add a namespace'd alias
+add_library(werkzeugkiste::strings ALIAS werkzeugkiste-strings)
+
+
+target_include_directories(werkzeugkiste-strings
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+    # Where external projects will look for the timeutils headers
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
+
+
+set_target_properties(werkzeugkiste-strings PROPERTIES
+    EXPORT_NAME strings
+    DEBUG_POSTFIX "d")
 
 
 
@@ -124,8 +150,12 @@ if(INSTALL_werkzeugkiste)
     #TODO Install header files separately per target
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
     install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
+    install(FILES ${wkzgstrings_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/strings)
     
-    install(TARGETS werkzeugkiste-timing  #TODO add other exported targets here
+    install(TARGETS
+        werkzeugkiste-timing
+        werkzeugkiste-strings
+        #TODO add other exported targets here
         EXPORT werkzeugkisteTargets
         LIBRARY DESTINATION ${INSTALL_DIR_LIB}
         ARCHIVE DESTINATION ${INSTALL_DIR_LIB})
@@ -214,8 +244,10 @@ if(werkzeugkiste_WITH_TESTS)
     FetchContent_MakeAvailable(googletest)
     enable_testing()
 
+    #TODO add future utils
     add_executable(tests-werkzeugkiste
 #        src/helpers/enum.h
+        tests/strings/strings_test.cpp
         tests/timing/test_utils.h
         tests/timing/test_utils.cpp
         tests/timing/stopwatch_test.cpp
@@ -224,11 +256,11 @@ if(werkzeugkiste_WITH_TESTS)
 #    target_include_directories(werkzeugkiste-tests
 #        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
+    #TODO add future utils
     target_link_libraries(tests-werkzeugkiste
         PRIVATE gtest_main 
-        werkzeugkiste::timing
-        #TODO add future utils
-    )
+        werkzeugkiste::strings
+        werkzeugkiste::timing)
 
 #    target_compile_definitions(${TARGET_CPP_TEST} PRIVATE
 #        EXAMPLE_IMAGE_WIDTH=400

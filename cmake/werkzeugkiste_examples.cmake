@@ -8,6 +8,12 @@
 # invoke this from the corresponding list file:
 
 function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
+    ## werkzeugkiste::strings
+    add_executable(example-strings
+        ${EXAMPLE_SRC_DIR}/strings_example.cpp)
+    target_link_libraries(example-strings
+        PRIVATE werkzeugkiste::strings)
+
     ## werkzeugkiste::timing
     add_executable(example-timing
         ${EXAMPLE_SRC_DIR}/timing_example.cpp)
@@ -16,7 +22,6 @@ function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
 
     #TODO add future (sub-)library demos here!
 
-    ## TODO werkzeugkiste::strings
     ## TODO werkzeugkiste::geometry
 endfunction()
 
