@@ -20,7 +20,7 @@ namespace timing {
 namespace tictoc_ {
 /** Dictionary holding the active stop watches for tic/toc. */
 static std::unordered_map<std::string,
-                          stop_watch> active_watches;
+                          StopWatch> active_watches;
 
 /** Toggle output in toc_xxx. */
 static bool display_output = true;
@@ -117,7 +117,7 @@ void unmute_toc() {
 void tic(const std::string &label) {
   auto it = tictoc_::active_watches.find(label);
   if (it == tictoc_::active_watches.end()) {
-    tictoc_::active_watches.insert(std::make_pair(label, stop_watch()));
+    tictoc_::active_watches.insert(std::make_pair(label, StopWatch()));
     tictoc_::max_label_length = std::max(tictoc_::max_label_length,
                                         static_cast<int>(label.length()));
   } else {

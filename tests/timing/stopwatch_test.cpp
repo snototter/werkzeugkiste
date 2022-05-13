@@ -11,19 +11,19 @@
 namespace wkt = werkzeugkiste::timing;
 
 TEST(StopWatchTest, Watches) {
-  auto w1 = wkt::stop_watch();
+  auto w1 = wkt::StopWatch();
   EXPECT_EQ(w1.ClockName(), "std::chrono::steady_clock");
   EXPECT_TRUE(w1.IsSteady());
   EXPECT_GT(w1.YearsUntilOverflow(), 292);
 
-  auto w2 = wkt::StopWatch<std::chrono::system_clock>();
+  auto w2 = wkt::stop_watch<std::chrono::system_clock>();
   EXPECT_EQ(w2.ClockName(), "std::chrono::system_clock");
   EXPECT_FALSE(w2.IsSteady());
 }
 
 
 TEST(StopWatchTest, Timings) {
-  auto w1 = wkt::stop_watch();
+  auto w1 = wkt::StopWatch();
 
   // The watch is started upon construction
   std::this_thread::sleep_for(std::chrono::milliseconds(120));

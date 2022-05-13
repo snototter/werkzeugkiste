@@ -176,19 +176,19 @@ inline double ToNanoseconds(const P &duration) {
  * not guaranteed to be steady).
  */
 template <typename C = std::chrono::steady_clock>
-class StopWatch {
+class stop_watch {
  public:
   using clock_type = C;  /**< @brief Clock type used by this stop watch. */
 
 
   /** @brief C'tor starts the stop watch. */
-  StopWatch() {
+  stop_watch() {
     Start();
   }
 
 
   /** @brief Copies start time point. */
-  StopWatch(const StopWatch &other)
+  stop_watch(const stop_watch &other)
     : t_start_(other.t_start_)
   {}
 
@@ -279,7 +279,7 @@ class StopWatch {
   typename clock_type::time_point t_start_;
 };
 
-typedef StopWatch<std::chrono::steady_clock> stop_watch;
+typedef stop_watch<std::chrono::steady_clock> StopWatch;
 
 }  // namespace timing
 }  // namespace werkzeugkiste

@@ -6,6 +6,9 @@
 #include <string>
 #include <vector>
 
+// Only needed to query the library version:
+#include <werkzeugkiste/version.h>
+
 #include <werkzeugkiste/timing/stopwatch.h>
 
 // If you #define NO_TICTOC before including tictoc.h, all
@@ -14,14 +17,12 @@
 //#define NO_TICTOC
 #include <werkzeugkiste/timing/tictoc.h>
 
-// Only included to print the library version:
-#include <werkzeugkiste/version.h>
 
 int main(int /* argc */, char ** /* argv */) {
   namespace wtu = werkzeugkiste::timing;
-  wtu::stop_watch watch;
+  wtu::StopWatch watch;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v " << WERKZEUGKISTE_VERSION << "\n"
+            << "    Werkzeugkiste v" << WERKZEUGKISTE_VERSION << "\n"
             << "    Stopwatch demo\n"
             << "--------------------------------------------------\n"
             << "Underlying clock:      " << watch.ClockName()
