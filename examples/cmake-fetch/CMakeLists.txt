@@ -13,9 +13,12 @@ project(werkzeugkiste-examples-fetched)
 # or the like)
 
 
-# Ensure that we only build the werkzeugkiste libraries after fetching:
+# Ensure that we only build the werkzeugkiste libraries
+# after fetching. No testing, no examples, and we don't
+# want to install it for this usage scenario:
 set(werkzeugkiste_WITH_EXAMPLES OFF)
 set(werkzeugkiste_WITH_TESTS OFF)
+set(INSTALL_werkzeugkiste OFF)
 
 # Fetch the library:
 include(FetchContent)
