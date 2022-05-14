@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.15)
 
 # Ensure we know the current version
 if(NOT werkzeugkiste_VERSION)
-  file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" werkzeugkiste_VERSION)
+  file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION" werkzeugkiste_VERSION)
 endif()
 
 # Set up the project
