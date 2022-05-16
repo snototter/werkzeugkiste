@@ -9,6 +9,12 @@
 
 function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
     ## werkzeugkiste::strings
+    add_executable(example-geometry
+        ${EXAMPLE_SRC_DIR}/geometry_example.cpp)
+    target_link_libraries(example-geometry
+        PRIVATE werkzeugkiste::geometry)
+
+    ## werkzeugkiste::strings
     add_executable(example-strings
         ${EXAMPLE_SRC_DIR}/strings_example.cpp)
     target_link_libraries(example-strings

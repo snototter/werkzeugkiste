@@ -122,6 +122,36 @@ set_target_properties(werkzeugkiste-strings PROPERTIES
     DEBUG_POSTFIX "d")
 
 
+#########################################################################################
+# Math/Geometry Utils: werkzeugkiste::geometry
+
+# Header files
+set(wkzggeometry_PUBLIC_HEADER_FILES
+    include/werkzeugkiste/geometry/utils.h
+    include/werkzeugkiste/geometry/vector.h)
+
+# Source files
+set(wkzggeometry_SOURCE_FILES
+    src/geometry/vector.cpp)
+
+add_library(werkzeugkiste-geometry
+    ${wkzggeometry_PUBLIC_HEADER_FILES}
+    ${wkzggeometry_SOURCE_FILES})
+# Add a namespace'd alias
+add_library(werkzeugkiste::geometry ALIAS werkzeugkiste-geometry)
+
+
+target_include_directories(werkzeugkiste-geometry
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
+
+
+set_target_properties(werkzeugkiste-geometry PROPERTIES
+#    EXPORT_NAME geometry #FIXME check if this is the target or archive export name (we only want the namespaced alias to be exported!)
+    DEBUG_POSTFIX "d")
+
+
 
 #########################################################################################
 # Installation & Exports
@@ -138,10 +168,13 @@ if(INSTALL_werkzeugkiste)
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
     install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
     install(FILES ${wkzgstrings_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/strings)
+    install(FILES ${wkzggeometry_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/geometry)
+
 
     install(TARGETS
         werkzeugkiste-timing
         werkzeugkiste-strings
+        werkzeugkiste-geometry
         #TODO add other exported targets here
         EXPORT werkzeugkisteTargets
         LIBRARY DESTINATION ${INSTALL_DIR_LIB}
@@ -234,6 +267,7 @@ if(werkzeugkiste_WITH_TESTS)
     #TODO add future utils
     add_executable(tests-werkzeugkiste
 #        src/helpers/enum.h
+        tests/geometry/vector_test.cpp
         tests/strings/strings_test.cpp
         tests/timing/test_utils.h
         tests/timing/test_utils.cpp
@@ -246,6 +280,7 @@ if(werkzeugkiste_WITH_TESTS)
     #TODO add future utils
     target_link_libraries(tests-werkzeugkiste
         PRIVATE gtest_main 
+        werkzeugkiste::geometry
         werkzeugkiste::strings
         werkzeugkiste::timing)
 
