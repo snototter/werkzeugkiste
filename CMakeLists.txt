@@ -121,6 +121,33 @@ set_target_properties(werkzeugkiste-geometry PROPERTIES
 
 
 #########################################################################################
+# Sort Utils: werkzeugkiste::sort
+
+# Header files
+set(wkzgsort_PUBLIC_HEADER_FILES
+    include/werkzeugkiste/sort/sort.h)
+
+# Library
+add_library(werkzeugkiste-sort
+    ${wkzgsort_PUBLIC_HEADER_FILES})
+
+# Add a namespace'd alias
+add_library(werkzeugkiste::sort ALIAS werkzeugkiste-sort)
+
+# Include directories for the different usage scenarios
+target_include_directories(werkzeugkiste-sort
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
+
+# Other properties
+set_target_properties(werkzeugkiste-sort PROPERTIES
+    EXPORT_NAME sort
+    LINKER_LANGUAGE CXX
+    DEBUG_POSTFIX "d")
+
+
+#########################################################################################
 # String Utils: werkzeugkiste::strings
 
 # Header files
@@ -197,14 +224,16 @@ if(INSTALL_werkzeugkiste)
     #TODO(snototter) New libraries: Install header files per library target
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
     install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
+    install(FILES ${wkzgsort_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/sort)
     install(FILES ${wkzgstrings_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/strings)
     install(FILES ${wkzggeometry_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/geometry)
 
     #TODO(snototter) New libraries: Add targets for export
     install(TARGETS
-        werkzeugkiste-timing
-        werkzeugkiste-strings
         werkzeugkiste-geometry
+        werkzeugkiste-sort
+        werkzeugkiste-strings
+        werkzeugkiste-timing
         EXPORT werkzeugkisteTargets
         LIBRARY DESTINATION ${INSTALL_DIR_LIB}
         ARCHIVE DESTINATION ${INSTALL_DIR_LIB})
@@ -299,6 +328,7 @@ if(werkzeugkiste_WITH_TESTS)
     add_executable(tests-werkzeugkiste
 #        src/helpers/enum.h
         tests/geometry/vector_test.cpp
+        tests/sort/sort_utils_test.cpp
         tests/strings/strings_test.cpp
         tests/timing/test_utils.h
         tests/timing/test_utils.cpp
@@ -313,6 +343,7 @@ if(werkzeugkiste_WITH_TESTS)
     target_link_libraries(tests-werkzeugkiste
         PRIVATE gtest_main 
         werkzeugkiste::geometry
+        werkzeugkiste::sort
         werkzeugkiste::strings
         werkzeugkiste::timing)
 
