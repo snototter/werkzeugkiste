@@ -9,11 +9,17 @@ cmake_minimum_required(VERSION 3.15)
 
 # Load the library version
 if(NOT werkzeugkiste_VERSION)
-  file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION" werkzeugkiste_VERSION)
+    file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION" werkzeugkiste_VERSION)
 endif()
-# If included via CMake's FetchContent, we want to pass the version
-# explicitly to the parent scope:
-set(werkzeugkiste_VERSION ${werkzeugkiste_VERSION} PARENT_SCOPE)
+
+# If a parent project includes this CMakeLists (e.g. if you use CMake's
+# FetchContent), we want to pass the version explicitly to the parent scope.
+# If we currently are the top level project, then skip this call to avoid
+# an unnecessary CMake warning:
+get_directory_property(HAS_PARENT PARENT_DIRECTORY)
+if(HAS_PARENT)
+    set(werkzeugkiste_VERSION ${werkzeugkiste_VERSION} PARENT_SCOPE)
+endif()
 
 # Set up the project
 project(werkzeugkiste VERSION ${werkzeugkiste_VERSION} LANGUAGES CXX)

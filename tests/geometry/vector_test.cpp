@@ -184,3 +184,5 @@ TEST(VectorTest, All) {
   EXPECT_EQ(v2i.DirectionVector(zero2i), -v2i);
   EXPECT_EQ(v2i.DirectionVector(v2i), zero2i);
 }
+
+//TODO test vector math! projections, angles, etc.

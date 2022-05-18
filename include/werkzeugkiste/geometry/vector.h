@@ -34,7 +34,6 @@ class Vec {
 
   /**
    * @brief Allow casting each vector to its double-precision counterpart.
-   * Needed because we work with Cairo, which heavily uses doubles.
    */
   explicit operator Vec<double, dim>() const;
 
@@ -53,6 +52,12 @@ class Vec {
 //   * Vectors with 2 dimensions can also define a size.
 //   * For clarity, I want to be able to access 'size' elements
 //   * as width() and height().
+//   *
+//   * ---- This worked as expected, but I opted against ----
+//   * ---- it, because it made the python bindings much ----
+//   * ---- more complex (and I prefer a simple python   ----
+//   * ---- wrapper + some extra methods on 3+ dim Vecs  ----
+//   * ---- over a "clean" template interface)           ----
 //   *
 //   * Note that to perform SFINAE, the dummy template
 //   * argument (T = _Tp) must be specified. Otherwise, this would
@@ -216,7 +221,6 @@ typedef Vec<int, 3> Vec3i;
 
 
 //---------------------------------------------------- Math/Geometry Helpers
-//TODO MOVE TO GEOMETRY
 /** @brief Project point onto line. */
 Vec2d ProjectPointOntoLine(const Vec2d &pt, const Vec2d &line_from, const Vec2d &line_to);
 
