@@ -11,6 +11,9 @@ cmake_minimum_required(VERSION 3.15)
 if(NOT werkzeugkiste_VERSION)
   file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION" werkzeugkiste_VERSION)
 endif()
+# If included via CMake's FetchContent, we want to pass the version
+# explicitly to the parent scope:
+set(werkzeugkiste_VERSION ${werkzeugkiste_VERSION} PARENT_SCOPE)
 
 # Set up the project
 project(werkzeugkiste VERSION ${werkzeugkiste_VERSION} LANGUAGES CXX)
