@@ -6,10 +6,12 @@
 #include <gtest/gtest.h>
 
 #include <werkzeugkiste/timing/tictoc.h>
+#include <werkzeugkiste/strings/strings.h>
 
 #include "test_utils.h"
 
 namespace wkt = werkzeugkiste::timing;
+namespace wks = werkzeugkiste::strings;
 
 TEST(TicTocTest, ElapsedTimes) {
   wkt::tic();
@@ -42,32 +44,32 @@ TEST(TicTocTest, TocOutput) {
   // Output seconds
   testing::internal::CaptureStdout();
   wkt::toc_sec();
-  std::string output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, "Elapsed time: 0.1"));
-  EXPECT_TRUE(EndsWith(output, " sec"));
+  std::string output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, "Elapsed time: 0.1"));
+  EXPECT_TRUE(wks::EndsWith(output, " sec"));
 
   // Output milliseconds
   testing::internal::CaptureStdout();
   wkt::toc_ms();
-  output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, "Elapsed time: "));
-  EXPECT_TRUE(EndsWith(output, " ms"));
+  output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, "Elapsed time: "));
+  EXPECT_TRUE(wks::EndsWith(output, " ms"));
 
   // Output microseconds
   const std::string label("wat!ch");
   wkt::tic(label);
   testing::internal::CaptureStdout();
   wkt::toc_us(label);
-  output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, label));
-  EXPECT_TRUE(EndsWith(output, " us"));
+  output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, label));
+  EXPECT_TRUE(wks::EndsWith(output, " us"));
 
   // Output nanoseconds
   testing::internal::CaptureStdout();
   wkt::toc_ns(label);
-  output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, label));
-  EXPECT_TRUE(EndsWith(output, " ns"));
+  output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, label));
+  EXPECT_TRUE(wks::EndsWith(output, " ns"));
 }
 
 
@@ -76,9 +78,9 @@ TEST(TicTocTest, TocMuted) {
   // By default, we should see some output
   testing::internal::CaptureStdout();
   wkt::toc_sec();
-  std::string output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, "Elapsed time: "));
-  EXPECT_TRUE(EndsWith(output, " sec"));
+  std::string output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, "Elapsed time: "));
+  EXPECT_TRUE(wks::EndsWith(output, " sec"));
 
   wkt::mute_toc();
   testing::internal::CaptureStdout();
@@ -89,9 +91,9 @@ TEST(TicTocTest, TocMuted) {
   wkt::unmute_toc();
   testing::internal::CaptureStdout();
   wkt::toc_sec();
-  output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, "Elapsed time: "));
-  EXPECT_TRUE(EndsWith(output, " sec"));
+  output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, "Elapsed time: "));
+  EXPECT_TRUE(wks::EndsWith(output, " sec"));
 }
 
 
@@ -101,9 +103,9 @@ TEST(TicTocTest, TocFormat) {
   wkt::tic();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   wkt::toc_sec();
-  std::string output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, "Elapsed time: 0.1"));
-  EXPECT_TRUE(EndsWith(output, " sec"));
+  std::string output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, "Elapsed time: 0.1"));
+  EXPECT_TRUE(wks::EndsWith(output, " sec"));
 
   // 2 digits after the comma
   wkt::set_toc_fmt(false, 0, 2);
@@ -111,9 +113,9 @@ TEST(TicTocTest, TocFormat) {
   wkt::tic();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
   wkt::toc_sec();
-  output = Trim(testing::internal::GetCapturedStdout());
-  EXPECT_TRUE(StartsWith(output, "Elapsed time: 0.1"));
-  EXPECT_TRUE(EndsWith(output, " sec"));
+  output = wks::Trim(testing::internal::GetCapturedStdout());
+  EXPECT_TRUE(wks::StartsWith(output, "Elapsed time: 0.1"));
+  EXPECT_TRUE(wks::EndsWith(output, " sec"));
   EXPECT_EQ(output.length(), 22);  // 2nd digit after comma might be arbitrary
 
   // 1 digit after the comma, number width should be 9
@@ -122,7 +124,7 @@ TEST(TicTocTest, TocFormat) {
   wkt::tic();
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
   wkt::toc_sec();
-  output = Trim(testing::internal::GetCapturedStdout());
+  output = wks::Trim(testing::internal::GetCapturedStdout());
   EXPECT_EQ(output, "Elapsed time:       0.2 sec");
 
   // 1 digit after the comma, number width should be 5, custom labels
@@ -134,13 +136,13 @@ TEST(TicTocTest, TocFormat) {
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
   testing::internal::CaptureStdout();
   wkt::toc_sec();
-  output = Trim(testing::internal::GetCapturedStdout());
+  output = wks::Trim(testing::internal::GetCapturedStdout());
   testing::internal::CaptureStdout();
   wkt::toc_sec("lbl 1");
-  std::string out1 = Trim(testing::internal::GetCapturedStdout());
+  std::string out1 = wks::Trim(testing::internal::GetCapturedStdout());
   testing::internal::CaptureStdout();
   wkt::toc_sec("label 2");
-  std::string out2 = Trim(testing::internal::GetCapturedStdout());
+  std::string out2 = wks::Trim(testing::internal::GetCapturedStdout());
   EXPECT_EQ(output, "Elapsed time:   0.2 sec");
   EXPECT_EQ(out1, "lbl 1:     0.2 sec");
   EXPECT_EQ(out2, "label 2:   0.2 sec");
