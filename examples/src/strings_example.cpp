@@ -21,7 +21,7 @@ int main(int /* argc */, char ** /* argv */) {
   namespace wks = werkzeugkiste::strings;
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << WERKZEUGKISTE_VERSION << "\n"
-            << "    String utilites demo\n"
+            << "    String utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;
 

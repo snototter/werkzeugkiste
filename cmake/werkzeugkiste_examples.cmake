@@ -8,6 +8,12 @@
 # invoke this from the corresponding list file:
 
 function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
+    ## werkzeugkiste::container
+    add_executable(example-container
+        ${EXAMPLE_SRC_DIR}/container_example.cpp)
+    target_link_libraries(example-container
+        PRIVATE werkzeugkiste::container)
+
     ## werkzeugkiste::strings
     add_executable(example-geometry
         ${EXAMPLE_SRC_DIR}/geometry_example.cpp)

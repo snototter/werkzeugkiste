@@ -121,28 +121,30 @@ set_target_properties(werkzeugkiste-geometry PROPERTIES
 
 
 #########################################################################################
-# Sort Utils: werkzeugkiste::sort
+# Container Utils: werkzeugkiste::container
 
 # Header files
-set(wkzgsort_PUBLIC_HEADER_FILES
-    include/werkzeugkiste/sort/sort.h)
+set(wkzgcontainer_PUBLIC_HEADER_FILES
+    include/werkzeugkiste/container/circular_buffer.h
+    include/werkzeugkiste/container/sort.h)
 
 # Library
-add_library(werkzeugkiste-sort
-    ${wkzgsort_PUBLIC_HEADER_FILES})
+add_library(werkzeugkiste-container
+    ${wkzgcontainer_PUBLIC_HEADER_FILES})
 
 # Add a namespace'd alias
-add_library(werkzeugkiste::sort ALIAS werkzeugkiste-sort)
+add_library(werkzeugkiste::container ALIAS werkzeugkiste-container)
 
 # Include directories for the different usage scenarios
-target_include_directories(werkzeugkiste-sort
+target_include_directories(werkzeugkiste-container
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
 
 # Other properties
-set_target_properties(werkzeugkiste-sort PROPERTIES
-    EXPORT_NAME sort
+set_target_properties(werkzeugkiste-container PROPERTIES
+    EXPORT_NAME container
+# To export a header only target, the linker needs to know the programming language
     LINKER_LANGUAGE CXX
     DEBUG_POSTFIX "d")
 
@@ -220,66 +222,66 @@ configure_file(
     ${werkzeugkiste_VERSION_HEADER})
 
 
+#TODO(snototter) New libraries: Add targets for export
+# Create the werkzeugkisteTargets export (this only registers
+# the targets, CMake will not install it yet)
+install(TARGETS
+    werkzeugkiste-geometry
+    werkzeugkiste-container
+    werkzeugkiste-strings
+    werkzeugkiste-timing
+    EXPORT werkzeugkisteTargets
+    LIBRARY DESTINATION ${INSTALL_DIR_LIB}
+    ARCHIVE DESTINATION ${INSTALL_DIR_LIB})
+# We don't have any installable executables, so we don't need to set
+#    RUNTIME DESTINATION ${INSTALL_DIR_BIN}
+# We can't use the PUBLIC_HEADER destination because all registered headers
+# will be copied (flattened) directly into this destination
+#    PUBLIC_HEADER DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
+# Since we already defined the PUBLIC include directories for our target,
+# the INCLUDES DESTINATION should also not be specified. Doing this would not
+# result in an error, but would simply cause a duplicated path entry in the
+# generated .cmake file
+#    INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}
+
+# Generate the export targets for the build tree
+# https://cmake.org/cmake/help/latest/guide/importing-exporting/index.html#exporting-targets-from-the-build-tree
+export(EXPORT werkzeugkisteTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/werkzeugkisteTargets.cmake"
+    NAMESPACE werkzeugkiste::)
+
+# If installation is requested:
 if(INSTALL_werkzeugkiste)
     #TODO(snototter) New libraries: Install header files per library target
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
     install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
-    install(FILES ${wkzgsort_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/sort)
+    install(FILES ${wkzgcontainer_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/sort)
     install(FILES ${wkzgstrings_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/strings)
     install(FILES ${wkzggeometry_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/geometry)
-
-    #TODO(snototter) New libraries: Add targets for export
-    install(TARGETS
-        werkzeugkiste-geometry
-        werkzeugkiste-sort
-        werkzeugkiste-strings
-        werkzeugkiste-timing
-        EXPORT werkzeugkisteTargets
-        LIBRARY DESTINATION ${INSTALL_DIR_LIB}
-        ARCHIVE DESTINATION ${INSTALL_DIR_LIB})
-    # We don't have any installable executables, so we don't need to set
-    #    RUNTIME DESTINATION ${INSTALL_DIR_BIN}
-    # We can't use the PUBLIC_HEADER destination because all registered headers
-    # will be copied (flattened) directly into this destination
-    #    PUBLIC_HEADER DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
-    # Since we already defined the PUBLIC include directories for our target,
-    # the INCLUDES DESTINATION should also not be specified. Doing this would not
-    # result in an error, but would simply cause a duplicated path entry in the
-    # generated .cmake file
-    #    INCLUDES DESTINATION ${INSTALL_INCLUDE_DIR}
 
     # Where to export the targets:
     install(EXPORT werkzeugkisteTargets
         FILE werkzeugkisteTargets.cmake
         NAMESPACE werkzeugkiste::
         DESTINATION ${INSTALL_DIR_CMAKE})
-endif()
-        
 
-# Set up the CMake config file, so that we can link to werkzeugkiste::<target> in other projects
-include(CMakePackageConfigHelpers)
-# Generate the version file for the config file
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfigVersion.cmake"
-    VERSION "${werkzeugkiste_VERSION}"
-    COMPATIBILITY AnyNewerVersion)
+    # Set up the CMake config file, so that we can link to werkzeugkiste::<target> in other projects
+    include(CMakePackageConfigHelpers)
+    # Generate the version file for the config file
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfigVersion.cmake"
+        VERSION "${werkzeugkiste_VERSION}"
+        COMPATIBILITY AnyNewerVersion)
 
-# Create config file
-configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfig.cmake"
-    INSTALL_DESTINATION ${INSTALL_DIR_CMAKE})
+    # Create config file
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfig.cmake"
+        INSTALL_DESTINATION ${INSTALL_DIR_CMAKE})
 
-# Install config files
-if(INSTALL_werkzeugkiste)
     install(FILES
         "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/werkzeugkisteConfigVersion.cmake"
         DESTINATION ${INSTALL_DIR_CMAKE})
-
-    # Generate the export targets for the build tree
-    export(EXPORT werkzeugkisteTargets
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/werkzeugkisteTargets.cmake"
-        NAMESPACE werkzeugkiste::)
 endif()
 
 
@@ -328,7 +330,8 @@ if(werkzeugkiste_WITH_TESTS)
     add_executable(tests-werkzeugkiste
 #        src/helpers/enum.h
         tests/geometry/vector_test.cpp
-        tests/sort/sort_utils_test.cpp
+        tests/container/sort_utils_test.cpp
+        tests/container/circular_buffer_test.cpp
         tests/strings/strings_test.cpp
         tests/timing/test_utils.h
         tests/timing/test_utils.cpp
@@ -343,7 +346,7 @@ if(werkzeugkiste_WITH_TESTS)
     target_link_libraries(tests-werkzeugkiste
         PRIVATE gtest_main 
         werkzeugkiste::geometry
-        werkzeugkiste::sort
+#        werkzeugkiste::container
         werkzeugkiste::strings
         werkzeugkiste::timing)
 

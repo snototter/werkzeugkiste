@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_SORT_SORT_H__
-#define __WERKZEUGKISTE_SORT_SORT_H__
+#ifndef __WERKZEUGKISTE_CONTAINER_SORT_H__
+#define __WERKZEUGKISTE_CONTAINER_SORT_H__
 
 #include <vector>
 #include <map>
@@ -12,7 +12,7 @@
 
 namespace werkzeugkiste {
 //TODO doc
-namespace sort {
+namespace container {
 /** @brief Extracts the keys from a map container. */
 template <typename M>
 std::vector<typename M::key_type> GetMapKeys(const M &map) {
@@ -126,30 +126,49 @@ std::vector<_Td> SortByExternalKeys(const std::vector<_Td> &data,
 }
 
 
-/** @brief Returns the sorted vector (handy if you don't want to change the input data. */
-template <typename _T>
-std::vector<_T> SortVector(const std::vector<_T> &data,
-                           bool (*cmp)(const _T &, const _T &) = CmpAsc<_T>) {
-  // Copy, then sort
-  std::vector<_T> copy;
-  copy.reserve(data.size());
-  for (const _T &e : data) {
-    copy.push_back(e);
-  }
-  std::sort(copy.begin(), copy.end(), cmp);
-  return copy;
-}
+//TODO more general sort, i.e. C Sort(C, cmp)
+///** @brief Returns the sorted vector (handy if you don't want to change the input data. */
+//template <typename _T>
+//std::vector<_T> SortVector(const std::vector<_T> &data,
+//                           bool (*cmp)(const _T &, const _T &) = CmpAsc<_T>) {
+//  // Copy, then sort
+//  std::vector<_T> copy;
+//  copy.reserve(data.size());
+//  for (const _T &e : data) {
+//    copy.push_back(e);
+//  }
+//  std::sort(copy.begin(), copy.end(), cmp);
+//  return copy;
+//}
+//template<typename C,
+//    typename T = std::decay_t<
+//        decltype(*begin(std::declval<C>()))>>
+//C Sort(const C &container,
+//       bool (*cmp)(const T &, const T &) = CmpAsc<T>) {
+//  // Copy, then sort:
+//  C copy;
+//  for (const auto &e : container) {
+//    copy
+//  }
+//  return copy;
+//}
+//TODO Sort:
+// std::sort requires randomaccess (
 
 //TODO sfinae to accept all iterable containers
 /** @brief Finds all duplicate entries in 'data' and stores their frequencies in item_count. */
-template <typename _T>
-std::map<_T, std::size_t> FindDuplicates(const std::vector<_T> &data) {
-  std::map<_T, size_t> item_count;
-  std::map<_T, size_t> item_count_tmp;
+//template <typename _T>
+//std::map<_T, std::size_t> FindDuplicates(const std::vector<_T> &data) {
+template<typename C,
+    typename T = std::decay_t<
+        decltype(*begin(std::declval<C>()))>>
+std::map<T, std::size_t> FindDuplicates(const C &container) {
+  std::map<T, std::size_t> item_count;
+  std::map<T, std::size_t> item_count_tmp;
 
   // Compute frequency for each item
-  for (const auto &item : data) {
-    auto itmp = item_count_tmp.insert(std::pair<_T, size_t>(item, 1));
+  for (const auto &item : container) {
+    auto itmp = item_count_tmp.insert(std::pair<T, size_t>(item, 1));
     // If insertion fails, the key existed already
     if (itmp.second == false) {
       itmp.first->second++;
@@ -160,7 +179,7 @@ std::map<_T, std::size_t> FindDuplicates(const std::vector<_T> &data) {
   for (auto it = item_count_tmp.begin();
        it != item_count_tmp.end(); it++) {
     if (it->second > 1) {
-      item_count.insert(it);
+      item_count.insert(*it);
     }
   }
   return item_count;
@@ -171,10 +190,21 @@ std::map<_T, std::size_t> FindDuplicates(const std::vector<_T> &data) {
  * in the given vector. Simply a convienience wrapper
  * to @see `FindDuplicates()`.
  */
-template <typename _T>
-bool HasUniqueItems(const std::vector<_T> &data) {
-  std::map<_T, size_t> duplicates;
-  FindDuplicates(data, duplicates);
+//TODO iterable
+// sfinae testing value_type & begin/end functionality
+//   https://devblogs.microsoft.com/oldnewthing/20190619-00/?p=102599
+// e.g. test for ::key_type https://en.cppreference.com/w/cpp/named_req/AssociativeContainer
+// or specialized is_xy template: https://stackoverflow.com/questions/22156957/detect-whether-type-is-associative-container
+// general template with specialization for each class
+//   https://stackoverflow.com/questions/42485829/c-stl-stdfind-with-stdmap
+//
+//template <typename _T>
+//bool HasUniqueItems(const std::vector<_T> &data) {
+template<typename C,
+    typename T = std::decay_t<
+        decltype(*begin(std::declval<C>()))>>
+bool HasUniqueItems(const C &container) {
+  auto duplicates = FindDuplicates(container);
   return duplicates.empty();
 }
 
@@ -185,15 +215,16 @@ bool HasUniqueItems(const std::vector<_T> &data) {
 //  return std::find(begin, end, value) != end;
 //}
 
-template <typename _T>
-bool Contains(const std::vector<_T> &container, const _T &value) {
-  return std::find(container.cbegin(), container.cend(),
-                   value) != container.cend();
-}
+//template <typename _T>
+//bool Contains(const std::vector<_T> &container, const _T &value) {
+//  return std::find(container.cbegin(), container.cend(),
+//                   value) != container.cend();
+//}
 
+//TODO contains_key/contains_value?
 template <typename _Tv, typename... _Ts>
-bool Contains(const std::map<_Ts...> &container, const _Tv &value) {
-  return container.find(value) != std::end(container);
+bool ContainsKey(const std::map<_Ts...> &container, const _Tv &key) {
+  return container.find(key) != std::end(container);
 }
 
 
@@ -214,7 +245,7 @@ bool Contains(const std::map<_Ts...> &container, const _Tv &value) {
 
 
 
-} // namespace sort
-} // namespace werkzeugkiste
+}  // namespace container
+}  // namespace werkzeugkiste
 
-#endif  // __WERKZEUGKISTE_SORT_SORT_H__
+#endif  // __WERKZEUGKISTE_CONTAINER_SORT_H__
