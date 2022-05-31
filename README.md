@@ -1,6 +1,6 @@
 # Werkzeugkiste - Yet Another C++ Utility Library
-This is a collection of all the frequently used code snippets copy-pasted across too many projects I'd like to admit.
-And since there's tons of so-called utilities, utils, tools & toolboxes out there, this is going to be my **`werkzeugkiste`** (German for toolbox).
+This is a collection of frequently used C++ snippets copy-pasted across way too many of my projects.
+And since there's tons of so-called utilities, utils, tools & toolboxes out there, this is going to be my own **`werkzeugkiste`** (the German word for toolbox).
 
 **Roadmap**
 * [ ] Collect all utilities, refactor where needed & ensure everything is properly tested
@@ -8,33 +8,25 @@ And since there's tons of so-called utilities, utils, tools & toolboxes out ther
   * [ ] 2D geometry
   * [ ] 3D geometry
   * [ ] Basic file utilities
-  * [ ] Sorting utilities
+  * [x] Container / sorting utilities
   * [x] Stop watch
   * [x] Strings
-* [ ] Decide if some of the utils would be us
-* [ ] Raise requirements to C++17 and extend with `filesystem` and `string_view` magic
+* [ ] Raise requirements to C++17 and extend with `filesystem` and `string_view`
 
 
 ## Requirements
-TODO
-Build
-* CMake
-* make or ninja-build, ...
-* g++, msvc, ...
-* std=c++14
-
-Test
-* googletest
+* A C++ compiler supporting at least C++14
+* [CMake](https://cmake.org/) >= 3.15 and a [compatible build tool](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html), like [Make](https://www.gnu.org/software/make/), [Ninja](https://ninja-build.org/), etc.
 
 
 ## Functionality
-* Basic geometry
+* `container`: Sorting utilities and a custom circular buffer
+* `geometry`: Math utilities (not surprisingly focusing on basic 2D & 3D geometry)
 * `strings`: Helpers for string manipulation
 * `timing`: A simple stop watch & helpers on top of `std::chrono`
 
 ## Usage
-Two major usage scenarios:
-TODO actually 3 (needs verification!) separate cmake project, include werkzeugkiste via add_dir...
+TODO 2 major usage scenarios: fetch_content or install + findpackage
 
 ### Fetch from github via CMake
 TODO
@@ -58,14 +50,14 @@ see examples/installed-locally
 * [ ] Check external inclusion via cmake FetchContent
 * [ ] Utils:
   * [ ] Enumeration utils (iterator + flags)
-  * [ ] strings
-  * [ ] circular buffer
+  * [x] strings
+  * [x] circular buffer
   * [ ] file stuff (will be obsolete once C++17 support is more widespread)
-  * [ ] sort utils
-  * [ ] vec/basicmath
-  * [ ] Simplified logging? (static library set up to ensure default log is set up :thinking-face:)
-  
-* [ ] check if static lib setup works when linked into consuming application/library
+  * [x] sort utils
+  * [x] vec/basicmath
+  * [ ] geo2d
+  * [ ] geo3d
+* [x] check if static lib setup works when linked into consuming application/library
 * [ ] Delete time-utils repository
 * [ ] After initial release --> consider upgrading to C++17 and supporting string_views; or maybe backporting a string_view?
 
