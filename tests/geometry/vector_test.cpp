@@ -77,6 +77,14 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
   vec2 = vec + zero;
   EXPECT_EQ(vec2, vec);
 
+  // Add/subtract scalars
+  auto add1 = vec + 17.0;
+  auto sub1 = vec - 42.0;
+  for (int i = 0; i < dim; ++i) {
+    EXPECT_DOUBLE_EQ(add1[i], vec[i] + 17);
+    EXPECT_DOUBLE_EQ(sub1[i], vec[i] - 42);
+  }
+
   // Test negation (unary operator-)
   auto negated = -vec;
 

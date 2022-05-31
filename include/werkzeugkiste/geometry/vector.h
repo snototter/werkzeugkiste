@@ -195,6 +195,11 @@ template<typename _Tp, int dim>
 Vec<_Tp, dim> operator-(Vec<_Tp, dim> lhs, const Vec<_Tp, dim>& rhs);
 
 
+/** Add scalar to each dimension. */
+template<typename _Tp, int dim>
+Vec<_Tp, dim> operator+(Vec<_Tp, dim> lhs, double rhs);
+
+/** Subtract scalar from each dimension. */
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator-(Vec<_Tp, dim> lhs, double rhs);
 
