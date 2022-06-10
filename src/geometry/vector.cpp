@@ -541,6 +541,16 @@ Vec<_Tp, dim> operator/(Vec<_Tp, dim> lhs, double scale) {
 }
 
 
+template<typename _Tp, int dim>
+double LengthPolygon(const std::vector<Vec<_Tp, dim>> &points) {
+  double length = 0.0;
+  for (std::size_t idx = 1; idx < points.size(); ++idx) {
+    length += points[idx-1].Distance(points[idx]);
+  }
+  return length;
+}
+
+
 //---------------------------------------------------- Explicit vector instantiation
 // Explicit instantiation:
 template class Vec<double, 2>;
@@ -562,6 +572,7 @@ template Vec2d operator-(Vec2d lhs, double rhs);
 template Vec2d operator*(Vec2d lhs, double scale);
 template Vec2d operator*(double scale, Vec2d rhs);
 template Vec2d operator/(Vec2d lhs, double scale);
+template double LengthPolygon(const std::vector<Vec2d> &points);
 
 
 // Comparison Vec3d
@@ -575,6 +586,7 @@ template Vec3d operator-(Vec3d lhs, double rhs);
 template Vec3d operator*(Vec3d lhs, double scale);
 template Vec3d operator*(double scale, Vec3d rhs);
 template Vec3d operator/(Vec3d lhs, double scale);
+template double LengthPolygon(const std::vector<Vec3d> &points);
 
 
 // Comparison Vec4d
@@ -588,6 +600,7 @@ template Vec4d operator-(Vec4d lhs, double rhs);
 template Vec4d operator*(Vec4d lhs, double scale);
 template Vec4d operator*(double scale, Vec4d rhs);
 template Vec4d operator/(Vec4d lhs, double scale);
+template double LengthPolygon(const std::vector<Vec4d> &points);
 
 
 // Comparison Vec2i
@@ -601,6 +614,7 @@ template Vec2i operator-(Vec2i lhs, double rhs);
 template Vec2i operator*(Vec2i lhs, double scale);
 template Vec2i operator*(double scale, Vec2i rhs);
 template Vec2i operator/(Vec2i lhs, double scale);
+template double LengthPolygon(const std::vector<Vec2i> &points);
 
 
 // Comparison Vec3i
@@ -614,6 +628,7 @@ template Vec3i operator-(Vec3i lhs, double rhs);
 template Vec3i operator*(Vec3i lhs, double scale);
 template Vec3i operator*(double scale, Vec3i rhs);
 template Vec3i operator/(Vec3i lhs, double scale);
+template double LengthPolygon(const std::vector<Vec3i> &points);
 
 
 //---------------------------------------------------- Math/Geometry Helpers

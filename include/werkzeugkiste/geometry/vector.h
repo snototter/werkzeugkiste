@@ -6,6 +6,7 @@
 #include <ostream>
 #include <initializer_list>
 #include <cmath>
+#include <vector>
 
 
 namespace werkzeugkiste {
@@ -214,6 +215,11 @@ Vec<_Tp, dim> operator*(double lhs, Vec<_Tp, dim> rhs);
 /** Divide (scale) by scalar. */
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator/(Vec<_Tp, dim> lhs, double rhs);
+
+
+/** Returns the length of the given polygon. */
+template<typename _Tp, int dim>
+double LengthPolygon(const std::vector<Vec<_Tp, dim>> &points);
 
 
 //-------------------------------------------------  Available specializations:

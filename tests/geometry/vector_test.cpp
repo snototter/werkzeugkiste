@@ -62,6 +62,14 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
   vec *= 2;
   EXPECT_EQ(vec, vec2);
 
+  std::vector<wkg::Vec<_Tp, dim>> poly{vec, vec2};
+  double poly_len = wkg::LengthPolygon(poly);
+  EXPECT_DOUBLE_EQ(poly_len, vec.Distance(vec2));
+
+  poly.push_back(vec);
+  poly_len = wkg::LengthPolygon(poly);
+  EXPECT_DOUBLE_EQ(poly_len, 2 * vec.Distance(vec2));
+
   vec /= 2;
   EXPECT_EQ(vec2 / 2, vec);
 
@@ -71,6 +79,24 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
 
   auto vec3 = vec + vec2 + copy;
   EXPECT_EQ(3 * vec, vec3);
+
+  poly.clear();
+  poly_len = wkg::LengthPolygon(poly);
+  EXPECT_DOUBLE_EQ(poly_len, 0.0);
+  poly.push_back(vec);
+  poly_len = wkg::LengthPolygon(poly);
+  EXPECT_DOUBLE_EQ(poly_len, 0.0);
+  poly.push_back(vec3);
+  poly_len = wkg::LengthPolygon(poly);
+  EXPECT_DOUBLE_EQ(poly_len, vec.Distance(vec3));
+  poly.push_back(vec);
+  poly_len = wkg::LengthPolygon(poly);
+  EXPECT_DOUBLE_EQ(poly_len, 2 * vec.Distance(vec3));
+  poly.push_back(vec3);
+  poly_len = wkg::LengthPolygon(poly);
+  EXPECT_DOUBLE_EQ(poly_len, 3 * vec.Distance(vec3));
+
+
 
   // Add 0 vector
   wkg::Vec<_Tp, dim> zero;
