@@ -11,9 +11,11 @@
 
 
 namespace werkzeugkiste {
-//TODO doc
+// Utility functions for standard containers.
 namespace container {
-/** @brief Extracts the keys from a map container. */
+
+// Returns the keys from a map container (i.e. any
+// associative container).
 template <typename M>
 std::vector<typename M::key_type> GetMapKeys(const M &map) {
   std::vector<typename M::key_type> vec;
@@ -26,87 +28,98 @@ std::vector<typename M::key_type> GetMapKeys(const M &map) {
 }
 
 
-/** @brief Sort comparator using `operator<`. */
+// A sort comparator for ascending order, which uses `operator<`.
 template <typename _T>
 bool CmpAsc(const _T &a, const _T &b) {
   return a < b;
 }
 
 
-/** @brief Sort comparator using `operator<`. */
+// A sort comparator for descending order, which uses `operator<`.
 template <typename _T>
 bool CmpDesc(const _T &a, const _T &b) {
   return b < a;
 }
 
 
-/** @brief Utility class to get the ordering (i.e. the sorted indices) of a vector. */
-template <typename _T>
+// Utility class to get the sorted indices
+// of a sequence container.
+template <class Container>
 class Ordering {
- public:
+public:
   Ordering() = delete;
 
-  Ordering(const std::vector<_T> &data)
-    : data_(data), cmp_(CmpAsc<_T>)
-  {}
-
-  Ordering(const std::vector<_T> &data,
-           bool (*cmp)(const _T &, const _T &))
+  Ordering(const Container &data,
+           bool (*cmp)(const typename Container::value_type &,
+                       const typename Container::value_type &))
     : data_(data), cmp_(cmp)
   {}
 
-  std::vector<size_t> GetSortedIndices() {
+  Ordering(const Container &data)
+    : Ordering(data, CmpAsc<typename Container::value_type>)
+  {}
+
+  std::vector<std::size_t> GetSortedIndices() {
     InitIndices();
     std::sort(indices_.begin(), indices_.end(), *this);
     return indices_;
   }
 
-  bool operator()(size_t const &a, size_t const &b) {
+  bool operator()(std::size_t const &a, std::size_t const &b) {
     return cmp_(data_[a], data_[b]);
   }
 
- private:
-  const std::vector<_T> &data_;
-  std::vector<size_t> indices_;
-  bool (*cmp_)(const _T &, const _T &);
+private:
+  const Container &data_;
+  std::vector<std::size_t> indices_;
+  bool (*cmp_)(const typename Container::value_type &,
+               const typename Container::value_type &);
 
   void InitIndices() {
     indices_.clear();
     indices_.reserve(data_.size());
-    for (size_t i = 0; i < data_.size(); ++i) {
+    for (std::size_t i = 0; i < data_.size(); ++i) {
       indices_.push_back(i);
     }
   }
 };
 
 
-/** @brief Returns the indices corresponding to a sorted data vector. */
-template <typename _T>
-std::vector<size_t> GetSortedIndices(const std::vector<_T> &data,
-                                     bool (*cmp)(const _T &, const _T &) = CmpAsc<_T>) {
-  Ordering<_T> ordering(data, cmp);
+// Returns the indices which correspond to a sorted `data` vector.
+template <class Container>
+std::vector<std::size_t> GetSortedIndices(
+    const Container &data,
+    bool (*cmp)(const typename Container::value_type &,
+                const typename Container::value_type &) = CmpAsc<typename Container::value_type>) {
+  Ordering<Container> ordering(data, cmp);
   return ordering.GetSortedIndices();
 }
 
 
-/** @brief Remaps the data vector by the given indices. */
-template <typename _T>
-std::vector<_T> ApplyIndexLookup(const std::vector<_T> &data,
-                                 const std::vector<size_t> &indices) {
+// Returns a vector obtained by remapping the given
+// `data` container by the `indices`.
+template <class _T>
+std::vector<_T> ApplyIndexLookup(
+    const std::vector<_T> &data,
+    const std::vector<std::size_t> &indices) {
   std::vector<_T> remapped;
+  // TODO For a more generic template, I need to dig deeper
+  // into container types and maybe SFINAE: `reserve` is not
+  // required by the sequence container interface...
   remapped.reserve(data.size());
-  for (size_t i = 0; i < data.size(); ++i) {
+  for (std::size_t i = 0; i < data.size(); ++i) {
     remapped.push_back(data[indices[i]]);
   }
   return remapped;
 }
 
 
-/** @brief Returns the data vector sorted by the given external keys. */
+// Returns the data vector sorted by the given external keys.
 template <typename _Td, typename _Tk>
-std::vector<_Td> SortByExternalKeys(const std::vector<_Td> &data,
-                                    const std::vector<_Tk> &keys,
-                                    bool (*cmp)(const _Tk &, const _Tk &) = CmpAsc<_Tk>) {
+std::vector<_Td> SortByExternalKeys(
+    const std::vector<_Td> &data,
+    const std::vector<_Tk> &keys,
+    bool (*cmp)(const _Tk &, const _Tk &) = CmpAsc<_Tk>) {
   if (data.empty()) {
     return std::vector<_Td>();
   }
@@ -119,7 +132,7 @@ std::vector<_Td> SortByExternalKeys(const std::vector<_Td> &data,
   }
 
   // Sort the indices
-  const std::vector<size_t> indices = GetSortedIndices<_Tk>(keys, cmp);
+  const std::vector<std::size_t> indices = GetSortedIndices<_Tk>(keys, cmp);
 
   // Remap the input vector
   return ApplyIndexLookup<_Td>(data, indices);
@@ -155,10 +168,10 @@ std::vector<_Td> SortByExternalKeys(const std::vector<_Td> &data,
 //TODO Sort:
 // std::sort requires randomaccess (
 
-//TODO sfinae to accept all iterable containers
-/** @brief Finds all duplicate entries in 'data' and stores their frequencies in item_count. */
-//template <typename _T>
-//std::map<_T, std::size_t> FindDuplicates(const std::vector<_T> &data) {
+//TODO If needed more frequently, refactor with SFINAE to accept all iterable containers
+
+// Returns a map containing all duplicate entries in 'data' along
+// with their their frequencies.
 template<typename C,
     typename T = std::decay_t<
         decltype(*begin(std::declval<C>()))>>
@@ -168,7 +181,7 @@ std::map<T, std::size_t> FindDuplicates(const C &container) {
 
   // Compute frequency for each item
   for (const auto &item : container) {
-    auto itmp = item_count_tmp.insert(std::pair<T, size_t>(item, 1));
+    auto itmp = item_count_tmp.insert(std::pair<T, std::size_t>(item, 1));
     // If insertion fails, the key existed already
     if (itmp.second == false) {
       itmp.first->second++;
@@ -185,21 +198,8 @@ std::map<T, std::size_t> FindDuplicates(const C &container) {
   return item_count;
 }
 
-/**
- * @brief Returns true if there are no duplicates
- * in the given vector. Simply a convienience wrapper
- * to @see `FindDuplicates()`.
- */
-//TODO iterable
-// sfinae testing value_type & begin/end functionality
-//   https://devblogs.microsoft.com/oldnewthing/20190619-00/?p=102599
-// e.g. test for ::key_type https://en.cppreference.com/w/cpp/named_req/AssociativeContainer
-// or specialized is_xy template: https://stackoverflow.com/questions/22156957/detect-whether-type-is-associative-container
-// general template with specialization for each class
-//   https://stackoverflow.com/questions/42485829/c-stl-stdfind-with-stdmap
-//
-//template <typename _T>
-//bool HasUniqueItems(const std::vector<_T> &data) {
+// Returns true if there are no duplicates in the given
+// sequence container.
 template<typename C,
     typename T = std::decay_t<
         decltype(*begin(std::declval<C>()))>>
@@ -207,6 +207,16 @@ bool HasUniqueItems(const C &container) {
   auto duplicates = FindDuplicates(container);
   return duplicates.empty();
 }
+
+
+//TODO iterable
+// sfinae testing value_type & begin/end functionality
+//   https://devblogs.microsoft.com/oldnewthing/20190619-00/?p=102599
+// e.g. test for ::key_type https://en.cppreference.com/w/cpp/named_req/AssociativeContainer
+// or specialized is_xy template: https://stackoverflow.com/questions/22156957/detect-whether-type-is-associative-container
+// general template with specialization for each class
+//   https://stackoverflow.com/questions/42485829/c-stl-stdfind-with-stdmap
+
 
 
 ////TODO doc
@@ -241,8 +251,6 @@ bool ContainsKey(const std::map<_Ts...> &container, const _Tv &key) {
 //but watch out for caveats, like using ::is_pair can also be true
 // for array/vector which contains pairs...
 // e.g. https://stackoverflow.com/a/42485895/400948
-
-
 
 
 }  // namespace container

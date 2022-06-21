@@ -126,7 +126,8 @@ set_target_properties(werkzeugkiste-geometry PROPERTIES
 # Header files
 set(wkzgcontainer_PUBLIC_HEADER_FILES
     include/werkzeugkiste/container/circular_buffer.h
-    include/werkzeugkiste/container/sort.h)
+    include/werkzeugkiste/container/sort.h
+    include/werkzeugkiste/container/math.h)
 
 # Library
 add_library(werkzeugkiste-container

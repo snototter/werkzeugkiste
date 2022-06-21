@@ -248,13 +248,14 @@ double AngleRadFromDirectionVec(const Vec2d &vec);
 double AngleDegFromDirectionVec(const Vec2d &vec);
 
 
-/** Computes the direction vector given its angle (in radians) w.r.t. the positive X axis. */
+// Returns the unit direction vector given its angle (in
+// radians) w.r.t. the positive X axis.
 Vec2d DirectionVecFromAngleRad(double rad);
 
 
-/** Computes the direction vector given its angle (in radians) w.r.t. the positive X axis. */
+// Returns the unit direction vector given its angle (in
+// degrees) w.r.t. the positive X axis.
 Vec2d DirectionVecFromAngleDeg(double deg);
-
 
 } // namespace geometry
 } // namespace werkzeugkiste
