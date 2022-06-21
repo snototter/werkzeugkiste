@@ -3,6 +3,7 @@
 
 #include <cstddef>
 #include <algorithm>
+#include <stdexcept>
 
 namespace werkzeugkiste {
 // Utility functions for standard containers.
@@ -19,8 +20,9 @@ namespace container {
 //   data: Any sequence container which can be accessed
 //     sequentially. Must provide `size()`, `push_back()`
 //     and a `value_type`.
-//   span: Length of the smoothing window. Must be **odd**
-//     and `>=3`.
+//   window_size: Length of the smoothing window. Must
+//     be **odd** and `>=3` or `<=0` (no smoothing).
+//     For span 1 and 2, an invalid_argument will be thrown.
 //
 //  Example for span = 5:
 //    output[0] = data[0]
@@ -29,9 +31,18 @@ namespace container {
 //    output[3] = (data[1] + ... + data[5]) / 5
 template <class Container>
 Container SmoothMovingAverage(
-    const Container &data, int span) {
+    const Container &data, int window_size) {
+  if (window_size <= 0) {
+    return data;
+  }
+
+  if ((window_size < 3) || ((window_size % 2) == 0)) {
+    throw std::invalid_argument(
+          "Window size must be `>= 3` and odd!");
+  }
+
   Container smoothed_data;
-  const int neighbors = (span - 1) / 2;
+  const int neighbors = (window_size - 1) / 2;
   for (std::size_t ti = 0; ti < data.size(); ++ti) {
     const int idx_int = static_cast<int>(ti);
     int from = std::max(0, idx_int - neighbors);
@@ -39,16 +50,16 @@ Container SmoothMovingAverage(
           static_cast<int>(data.size()-1),
           idx_int + neighbors);
 
-    // Reduce span at the beginning/end (where there
+    // Reduce window size at the beginning/end (where there
     // are less neighbors).
     const int n = std::min(idx_int - from, to - idx_int);
     from = idx_int - n;
     to = idx_int + n;
 
-    // Average all values within the span.
+    // Average all values within the window.
     typename Container::value_type average = data[from];
     for (int win_idx = from + 1; win_idx <= to; ++win_idx) {
-      average += trajectory[win_idx];
+      average += data[win_idx];
     }
     average /= static_cast<double>((2 * n) + 1);
     smoothed_data.push_back(average);

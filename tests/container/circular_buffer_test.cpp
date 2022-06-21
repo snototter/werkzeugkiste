@@ -9,8 +9,9 @@
 
 #include <gtest/gtest.h>
 
-//#include <werkzeugkiste/container/sort.h>
+#include <werkzeugkiste/container/sort.h>
 #include <werkzeugkiste/container/circular_buffer.h>
+#include <werkzeugkiste/container/math.h>
 
 namespace wkc = werkzeugkiste::container;
 
@@ -94,7 +95,7 @@ TEST(ContainerUtilsTest, CircularBuffer) {
  EXPECT_TRUE(buffer.empty());
 }
 
-//TODO test buffer with complex type (memory allocation and cleanup!)
+//TODO test buffer with complex type (memory allocation and cleanup!) --> create a mock class instead
 //#ifdef WITH_OPENCV
 //TEST(CircularBuffer, Mat) {
 // circular_buffer<cv::Mat> cb(2);
@@ -326,4 +327,105 @@ TEST(ContainerUtilsTest, PopIterators) {
   EXPECT_EQ(*rit, 23);
   it = buffer.begin();
   EXPECT_EQ(*it, 23);
+}
+
+
+TEST(ContainerUtilsTest, CircularBufferSort) {
+  typedef wkc::circular_buffer<int> cb;
+  cb buffer(5);
+
+  buffer.push_back(17);
+  buffer.push_back(99);
+  buffer.push_back(1);
+
+  std::vector<std::size_t> indices = wkc::GetSortedIndices(buffer, wkc::CmpAsc<int>);
+  EXPECT_EQ(indices.size(), 3);
+  EXPECT_EQ(indices[0], 2);
+  EXPECT_EQ(indices[1], 0);
+  EXPECT_EQ(indices[2], 1);
+
+  // Assert that the original buffer didn't change
+  EXPECT_EQ(buffer[0], 17);
+  EXPECT_EQ(buffer[1], 99);
+  EXPECT_EQ(buffer[2], 1);
+
+  indices = wkc::GetSortedIndices(buffer, wkc::CmpDesc<int>);
+  EXPECT_EQ(indices.size(), 3);
+  EXPECT_EQ(indices[0], 1);
+  EXPECT_EQ(indices[1], 0);
+  EXPECT_EQ(indices[2], 2);
+
+  // Assert that the original buffer didn't change
+  EXPECT_EQ(buffer[0], 17);
+  EXPECT_EQ(buffer[1], 99);
+  EXPECT_EQ(buffer[2], 1);
+
+  cb remapped = wkc::ApplyIndexLookup(buffer, indices);
+  EXPECT_EQ(remapped.size(), 3);
+  EXPECT_EQ(remapped[0], 99);
+  EXPECT_EQ(remapped[1], 17);
+  EXPECT_EQ(remapped[2], 1);
+
+  // Assert that the original buffer didn't change
+  EXPECT_EQ(buffer[0], 17);
+  EXPECT_EQ(buffer[1], 99);
+  EXPECT_EQ(buffer[2], 1);
+
+  buffer.push_back(0);
+  buffer.push_back(55);
+  buffer.push_back(101);
+
+  EXPECT_EQ(buffer.size(), 5);
+  indices = wkc::GetSortedIndices(buffer, wkc::CmpDesc<int>);
+  EXPECT_EQ(indices.size(), 5);
+  EXPECT_EQ(indices[0], 4);
+  EXPECT_EQ(indices[1], 0);
+  EXPECT_EQ(indices[2], 3);
+  EXPECT_EQ(indices[3], 1);
+  EXPECT_EQ(indices[4], 2);
+}
+
+
+TEST(ContainerUtilsTest, CircularBufferSmooth) {
+  typedef wkc::circular_buffer<int> cb;
+  cb buffer(7);
+
+  buffer.push_back(1);
+  buffer.push_back(2);
+  buffer.push_back(3);
+  buffer.push_back(4);
+  buffer.push_back(5);
+  buffer.push_back(6);
+  buffer.push_back(7);
+
+  EXPECT_THROW(wkc::SmoothMovingAverage(buffer, 1), std::invalid_argument);
+  EXPECT_THROW(wkc::SmoothMovingAverage(buffer, 2), std::invalid_argument);
+  EXPECT_NO_THROW(wkc::SmoothMovingAverage(buffer, 0));
+  EXPECT_NO_THROW(wkc::SmoothMovingAverage(buffer, -1));
+
+  cb smooth = wkc::SmoothMovingAverage(buffer, 3);
+  EXPECT_EQ(smooth.size(), 7);
+  // No smoothing at head & tail:
+  EXPECT_EQ(smooth[0], buffer[0]);
+  EXPECT_EQ(smooth[6], buffer[6]);
+  for (std::size_t i = 1; i < 6; ++i) {
+    EXPECT_EQ(smooth[i],
+              (buffer[i-1] + buffer[i] + buffer[i+1]) / 3.0);
+  }
+
+  smooth = wkc::SmoothMovingAverage(buffer, 5);
+  EXPECT_EQ(smooth.size(), 7);
+  // No smoothing at head & tail:
+  EXPECT_EQ(smooth[0], buffer[0]);
+  EXPECT_EQ(smooth[6], buffer[6]);
+  // Window size should increase at the head/tail:
+  EXPECT_EQ(smooth[1],
+            (buffer[0] + buffer[1] + buffer[2]) / 3.0);
+  EXPECT_EQ(smooth[5],
+            (buffer[4] + buffer[5] + buffer[6]) / 3.0);
+
+  for (std::size_t i = 2; i < 5; ++i) {
+    EXPECT_EQ(smooth[i],
+              (buffer[i-2] + buffer[i-1] + buffer[i] + buffer[i+1] + + buffer[i+2]) / 5.0);
+  }
 }

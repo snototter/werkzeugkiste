@@ -96,18 +96,32 @@ std::vector<std::size_t> GetSortedIndices(
 }
 
 
-// Returns a vector obtained by remapping the given
+//FIXME Returns a vector obtained by remapping the given
 // `data` container by the `indices`.
-template <class _T>
-std::vector<_T> ApplyIndexLookup(
-    const std::vector<_T> &data,
+//template <typename _T>
+//std::vector<_T> ApplyIndexLookup(
+//    const std::vector<_T> &data,
+//    const std::vector<std::size_t> &indices) {
+//  std::vector<_T> remapped;
+//  // TODO For a more generic template, I need to dig deeper
+//  // into container types and maybe SFINAE: `reserve` is not
+//  // required by the sequence container interface...
+//  remapped.reserve(data.size());
+//  for (std::size_t i = 0; i < data.size(); ++i) {
+//    remapped.push_back(data[indices[i]]);
+//  }
+//  return remapped;
+//}
+template <class Container>
+Container ApplyIndexLookup(
+    const Container &data,
     const std::vector<std::size_t> &indices) {
-  std::vector<_T> remapped;
+  Container remapped;
   // TODO For a more generic template, I need to dig deeper
   // into container types and maybe SFINAE: `reserve` is not
   // required by the sequence container interface...
-  remapped.reserve(data.size());
-  for (std::size_t i = 0; i < data.size(); ++i) {
+//  remapped.reserve(data.size());
+  for (std::size_t i = 0; i < indices.size(); ++i) {
     remapped.push_back(data[indices[i]]);
   }
   return remapped;
