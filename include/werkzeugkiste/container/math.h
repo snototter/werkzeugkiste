@@ -28,7 +28,7 @@ namespace container {
 //    output[2] = (data[0] + ... + data[4]) / 5
 //    output[3] = (data[1] + ... + data[5]) / 5
 template <class Container>
-Container SmoothTrajectoryMovingAverage(
+Container SmoothMovingAverage(
     const Container &data, int span) {
   Container smoothed_data;
   const int neighbors = (span - 1) / 2;
