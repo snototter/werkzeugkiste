@@ -8,29 +8,29 @@
 
 
 namespace werkzeugkiste {
-// Utility functions for standard containers.
+/// Utility functions for standard containers.
 namespace container {
 
-// Smoothes the given data points.
-//
-// Smoothes the points such that each point is the average over a
-// window of "span" values centered on the processed point.
-// The first and last points won't be smoothed, *i.e.* the
-// behavior is similar to MATLAB's ``smooth``.
-//
-// Args:
-//   data: Any sequence container which can be accessed
-//     sequentially. Must provide `size()`, `push_back()`
-//     and a `value_type`.
-//   window_size: Length of the smoothing window. Must
-//     be **odd** and `>=3` or `<=0` (no smoothing).
-//     For span 1 and 2, an invalid_argument will be thrown.
-//
-//  Example for span = 5:
-//    output[0] = data[0]
-//    output[1] = (data[0] + data[1] + data[2]) / 3
-//    output[2] = (data[0] + ... + data[4]) / 5
-//    output[3] = (data[1] + ... + data[5]) / 5
+/// Smoothes the given data points.
+///
+/// Smoothes the points such that each point is the average over a
+/// window of "span" values centered on the processed point.
+/// The first and last points won't be smoothed, *i.e.* the
+/// behavior is similar to MATLAB's ``smooth``.
+///
+/// Args:
+///   data: Any sequence container which can be accessed
+///     sequentially. Must provide `size()`, `push_back()`
+///     and a `value_type`.
+///   window_size: Length of the smoothing window. Must
+///     be **odd** and `>=3` or `<=0` (no smoothing).
+///     For span 1 and 2, an invalid_argument will be thrown.
+///
+///  Example for span = 5:
+///    output[0] = data[0]
+///    output[1] = (data[0] + data[1] + data[2]) / 3
+///    output[2] = (data[0] + ... + data[4]) / 5
+///    output[3] = (data[1] + ... + data[5]) / 5
 template <class Container>
 Container SmoothMovingAverage(
     const Container &data, int window_size) {
@@ -82,13 +82,15 @@ double Mean(const Container &values) {
 }
 
 
-
+/// Computes the minimum & maximum of the given
+/// STL-like sequence container.
+/// The underlying `value_type` must support
+/// comparisons via `operator<`.
 template <class Container>
 void MinMax(
     const Container &values,
     typename Container::value_type *min = nullptr,
     typename Container::value_type *max = nullptr) {
-  //TODO doc
   if (values.empty()) {
     return;
   }
@@ -98,7 +100,7 @@ void MinMax(
     if (values[idx] < values[idx_min]) {
       idx_min = idx;
     }
-    if (values[idx] > values[idx_max]) {
+    if (values[idx_max] < values[idx]) {
       idx_max = idx;
     }
   }

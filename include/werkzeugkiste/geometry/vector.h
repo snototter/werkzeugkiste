@@ -13,8 +13,17 @@ namespace werkzeugkiste {
 namespace geometry {
 
 //------------------------------------------------- Vectors/Coordinates
-//TODO(snototter) check detailed testing of vector class (with dev task list)!
-/** @brief Template class to represent a vector/coordinate. */
+
+/// Template class to represent a vector/coordinate.
+/// Provides named access for the first 4 dimensions as
+/// `x`, `y`, `z` and `w`.
+///
+/// Any dimension can be accessed via random access,
+/// i.e. `operator[]`, or via its `val` array member.
+///
+/// 2D vectors additionally provide access via
+/// `width`/`height`, so using them to hold
+/// dimensions/size feels lexically correct.
 template<typename _Tp, int dim>
 class Vec {
  public:
@@ -33,9 +42,8 @@ class Vec {
   Vec<_Tp, dim> &operator=(Vec<_Tp, dim> &&other) noexcept;
 
 
-  /**
-   * @brief Allow casting each vector to its double-precision counterpart.
-   */
+  /// Allow explicitly casting each vector to its
+  /// double-precision counterpart.
   explicit operator Vec<double, dim>() const;
 
 
@@ -49,6 +57,7 @@ class Vec {
   const _Tp &height() const;
   const _Tp &z() const;
   const _Tp &w() const;
+
 //  /**
 //   * Vectors with 2 dimensions can also define a size.
 //   * For clarity, I want to be able to access 'size' elements
@@ -83,6 +92,7 @@ class Vec {
   _Tp &z();
   _Tp &w();
 
+
   void SetX(_Tp x);
   void SetY(_Tp y);
   void SetWidth(_Tp width);
@@ -103,69 +113,69 @@ class Vec {
   Vec<_Tp, dim> &operator/=(double scale);
 
 
-  /** @brief Returns a vector where each dimension is negated. */
+  /// Returns a vector where each dimension is negated.
   Vec<_Tp, dim> operator-() const;
 
 
-  /** @brief Returns the maximum dimension value. */
+  /// Returns the maximum dimension value.
   _Tp MaxValue() const;
 
 
-  /** @brief Returns the minimum dimension value. */
+  /// Returns the minimum dimension value.
   _Tp MinValue() const;
 
 
-  /** @brief Returns the index/dimension holding the maximum value. */
+  /// Returns the index/dimension holding the maximum value.
   int MaxIndex() const;
 
 
-  /** @brief Returns the index/dimension holding the minimum value. */
+  /// Returns the index/dimension holding the minimum value.
   int MinIndex() const;
 
 
-  /** @brief Computes the dot product. */
+  /// Computes the dot product.
   _Tp Dot(const Vec<_Tp, dim>& other) const;
 
 
-  /** @brief Returns the vector's length. */
+  /// Returns the vector's length.
   Vec<_Tp, dim> Cross(const Vec<_Tp, dim>& other) const;
 
 
-  /** @brief Returns the vector's length. */
+  /// Returns the vector's length.
   double Length() const;
 
 
-  /** @brief Returns the squared vector's length. */
+  /// Returns the squared vector's length.
   double LengthSquared() const;
 
 
-  /** @brief Computes the distance between this and the other. */
+  /// Computes the distance between this and the other.
   double Distance(const Vec<_Tp, dim>& other) const;
 
 
-  /** @brief Returns the direction vector from 'this' to 'to'. */
+  /// Returns the direction vector from `this` to `to`.
   Vec<_Tp, dim> DirectionVector(const Vec<_Tp, dim>& to) const;
 
 
-  /** @brief Returns the unit vector. */
+  /// Returns the unit vector.
   Vec<double, dim> UnitVector() const;
 
 
-  /** @brief Returns a human-readable string representation. */
+  /// Returns a human-readable string representation.
   std::string ToString() const;
 
 
-  /** @brief Overloaded stream operator. */
+  /// Overloaded stream operator.
   friend std::ostream &operator<<(std::ostream &os, const Vec<_Tp, dim> &vec) {
     os << vec.ToString();
     return os;
   }
 
 
-  /** @brief Returns the class type name, e.g. "Vec2d". */
+  /// Returns the class type name, e.g. "Vec2d".
   static std::string TypeName();
 
-  //TODO doc, test, bind
+  /// Returns a vector with all coordinates set to `value`.
   static Vec<_Tp, dim> All(_Tp value);
 };
 
@@ -183,41 +193,45 @@ bool operator!=(const Vec<_Tp, dim>& lhs, const Vec<_Tp, dim>& rhs);
 
 
 //-------------------------------------------------  Arithmetic operators
-// If you implement another operator, don't forget
-// to add the corresponding explicit vector instantiation
-// in primitives.cpp
+// TODO(new-features) If you implement another operator,
+// don't forget to add the corresponding explicit vector
+// instantiation in vector.cpp
 
-/** Vector addition. */
+/// Vector addition.
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator+(Vec<_Tp, dim> lhs, const Vec<_Tp, dim>& rhs);
 
-/** Vector subtraction. */
+
+/// Vector subtraction.
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator-(Vec<_Tp, dim> lhs, const Vec<_Tp, dim>& rhs);
 
 
-/** Add scalar to each dimension. */
+/// Add scalar to each dimension.
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator+(Vec<_Tp, dim> lhs, double rhs);
 
-/** Subtract scalar from each dimension. */
+
+/// Subtract scalar from each dimension.
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator-(Vec<_Tp, dim> lhs, double rhs);
 
-/** Multiply (rhs) by scalar. */
+
+/// Multiply (rhs) by scalar.
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator*(Vec<_Tp, dim> lhs, double rhs);
 
-/** Multiply (lhs) by scalar. */
+/// Multiply (lhs) by scalar.
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator*(double lhs, Vec<_Tp, dim> rhs);
 
-/** Divide (scale) by scalar. */
+
+/// Divide (scale) by scalar.
 template<typename _Tp, int dim>
 Vec<_Tp, dim> operator/(Vec<_Tp, dim> lhs, double rhs);
 
 
-/** Returns the length of the given polygon. */
+/// Returns the length of the given polygon.
 template<typename _Tp, int dim>
 double LengthPolygon(const std::vector<Vec<_Tp, dim>> &points);
 
@@ -232,31 +246,60 @@ typedef Vec<int, 3> Vec3i;
 
 
 //---------------------------------------------------- Math/Geometry Helpers
-/** @brief Project point onto line. */
+
+
+/// Project point onto line.
 Vec2d ProjectPointOntoLine(const Vec2d &pt, const Vec2d &line_from, const Vec2d &line_to);
 
 
-/** Computes the determinant of the two 2d vectors. */
+/// Computes the determinant of the two 2d vectors.
 double Determinant(const Vec2d &a, const Vec2d &b);
 
 
-/** Computes the angle (in radians) of a 2d direction vector w.r.t. the positive X axis. */
+/// Computes the angle (in radians) of a 2d direction vector w.r.t. the positive X axis.
 double AngleRadFromDirectionVec(const Vec2d &vec);
 
 
-/** Computes the angle (in degrees) of a 2d direction vector w.r.t. the positive X axis. */
+/// Computes the angle (in degrees) of a 2d direction vector w.r.t. the positive X axis.
 double AngleDegFromDirectionVec(const Vec2d &vec);
 
 
-// Returns the unit direction vector given its angle (in
-// radians) w.r.t. the positive X axis.
+/// Returns the unit direction vector given its angle (in
+/// radians) w.r.t. the positive X axis.
 Vec2d DirectionVecFromAngleRad(double rad);
 
 
-// Returns the unit direction vector given its angle (in
-// degrees) w.r.t. the positive X axis.
+/// Returns the unit direction vector given its angle (in
+/// degrees) w.r.t. the positive X axis.
 Vec2d DirectionVecFromAngleDeg(double deg);
 
+
+/// Computes the minimum/maximum along each dimension.
+///
+/// Useful to get axis-aligned bounding boxes, a starting
+/// point for hull computations, etc.
+template <typename _Tp, int dim,
+          template<typename...> class Container = std::vector>
+void MinMaxCoordinates(
+    const Container<Vec<_Tp, dim>> &values,
+    Vec<_Tp, dim> &min, Vec<_Tp, dim> &max) {
+  if (values.empty()) {
+    return;
+  }
+
+  min = *values.begin();
+  max = *values.begin();
+  for (const Vec<_Tp, dim> &v : values) {
+    for (int i = 0; i < dim; ++i) {
+      if (v[i] < min[i]) {
+        min[i] = v[i];
+      }
+      if (max[i] < v[i]) {
+        max[i] = v[i];
+      }
+    }
+  }
+}
 } // namespace geometry
 } // namespace werkzeugkiste
 

@@ -1,6 +1,8 @@
 #include <exception>
 #include <initializer_list>
 #include <cmath>
+#include <vector>
+#include <list>
 
 #include <gtest/gtest.h>
 
@@ -217,6 +219,34 @@ TEST(VectorTest, All) {
   EXPECT_TRUE(std::fabs(unit2i.y() + 2.0 / 9.219544457) < 1e-6);
   EXPECT_EQ(v2i.DirectionVector(zero2i), -v2i);
   EXPECT_EQ(v2i.DirectionVector(v2i), zero2i);
+}
+
+
+TEST(VectorTest, MinMaxCoordinates) {
+  std::vector<wkg::Vec2i> data2i {
+    {1, 0}, {10, -3}, {-15, 1}, {17, 42}};
+  wkg::Vec2i min, max;
+  wkg::MinMaxCoordinates(data2i, min, max);
+
+  EXPECT_EQ(min.x(), -15);
+  EXPECT_EQ(min.y(), -3);
+
+  EXPECT_EQ(max.x(), 17);
+  EXPECT_EQ(max.y(), 42);
+
+
+  std::list<wkg::Vec3d> data3d {
+    {10, 0, 1}, {100, -3, 17}, {1, 0, -1}};
+  wkg::Vec3d min3, max3;
+  wkg::MinMaxCoordinates(data3d, min3, max3);
+
+  EXPECT_DOUBLE_EQ(min3.x(), 1.0);
+  EXPECT_DOUBLE_EQ(min3.y(), -3.0);
+  EXPECT_DOUBLE_EQ(min3.z(), -1.0);
+
+  EXPECT_DOUBLE_EQ(max3.x(), 100.0);
+  EXPECT_DOUBLE_EQ(max3.y(), 0.0);
+  EXPECT_DOUBLE_EQ(max3.z(), 17.0);
 }
 
 //TODO test vector math! projections, angles, etc.
