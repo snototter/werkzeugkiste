@@ -24,12 +24,13 @@ endif()
 # Set up the project
 project(werkzeugkiste VERSION ${werkzeugkiste_VERSION} LANGUAGES CXX)
 
-#TODO(snototter) Before release, disable examples and tests by default
+#TODO(documentation) Provide a library usage example which disables
+# examples/tests (not needed for library users by default).
 option(werkzeugkiste_WITH_EXAMPLES "Build examples." ON)
 option(werkzeugkiste_WITH_TESTS "Build test suite." ON)
 option(INSTALL_werkzeugkiste "Configure installation target." ON)
 
-#TODO(snototter) Use logging, similar to viren2d
+#TODO(implementation) Use logging, similar to viren2d
 #set(werkzeugkiste_LOG_LEVEL "info" CACHE STRING "Select log level")
 #set_property(CACHE werkzeugkiste_LOG_LEVEL PROPERTY STRINGS disable trace debug info warn error critical)
 
@@ -43,19 +44,18 @@ set(INSTALL_DIR_LIB ${CMAKE_INSTALL_LIBDIR})
 set(INSTALL_DIR_CMAKE ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 
 
-#TODO(snototter) I could instead set CXX_STANDARD, etc per target
+#TODO(library-usage-improvement) I could instead set CXX_STANDARD, etc *per target*
 # Set compiler options for all targets
 if(NOT CMAKE_CXX_STANDARD)
-    #TODO(snototter) Check C++ standard (14 for std::exchange, 17 for string_view/filesystem, anything else is 11)
+    # c++14 is required for std::exchange
+    # c++17 for string_view/filesystem, anything else is c++11
     set(CMAKE_CXX_STANDARD 14)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     # To ensure portability, turn off compiler-specific extensions
     set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
 
-#FIXME adapt to modern cmake
-# check https://stackoverflow.com/questions/33829152/for-cmake-can-you-modify-the-release-debug-compiler-flags-with-add-compiler-fl
-#FIXME check spdlog's CMakeLists on what to set extra for MSVC :/
+#FIXME(msvc-support) check spdlog's CMakeLists on what we would need additionally for MSVC :/
 
 if (MSVC)
     # warning level 4
@@ -223,9 +223,9 @@ configure_file(
     ${werkzeugkiste_VERSION_HEADER})
 
 
-#TODO(snototter) New libraries: Add targets for export
 # Create the werkzeugkisteTargets export (this only registers
 # the targets, CMake will not install it yet)
+#TODO(new-library-extensions) Add export targets here.
 install(TARGETS
     werkzeugkiste-geometry
     werkzeugkiste-container
@@ -253,7 +253,7 @@ export(EXPORT werkzeugkisteTargets
 
 # If installation is requested:
 if(INSTALL_werkzeugkiste)
-    #TODO(snototter) New libraries: Install header files per library target
+    #TODO(new-library-extensions) Install header files per target
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
     install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
     install(FILES ${wkzgcontainer_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/sort)
@@ -303,7 +303,8 @@ endif()
 # Set up examples
 
 if(werkzeugkiste_WITH_EXAMPLES)
-    #TODO(snototter) New libraries: Add example application
+    #TODO(new-library-extensions) Add example applications in the
+    # included cmake script.
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/werkzeugkiste_examples.cmake)
     register_werkzeugkiste_examples("${CMAKE_CURRENT_SOURCE_DIR}/examples/src")
 endif()
@@ -327,11 +328,11 @@ if(werkzeugkiste_WITH_TESTS)
     FetchContent_MakeAvailable(googletest)
     enable_testing()
 
-    #TODO(snototter) New libraries: Add test suite
+    #TODO(new-library-extensions) Add test suite:
     add_executable(tests-werkzeugkiste
-#        src/helpers/enum.h
         tests/geometry/vector_test.cpp
         tests/container/sort_utils_test.cpp
+        tests/container/math_utils_test.cpp
         tests/container/circular_buffer_test.cpp
         tests/strings/strings_test.cpp
         tests/timing/test_utils.h
@@ -339,11 +340,12 @@ if(werkzeugkiste_WITH_TESTS)
         tests/timing/stopwatch_test.cpp
         tests/timing/tictoc_test.cpp)
 
-    #TODO(snototter) If we need to add private headers just for testing:
+    #TODO(new-library-extensions) If we need to add private
+    # headers just for testing):
 #    target_include_directories(werkzeugkiste-tests
 #        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
 
-    #TODO(snototter) New libraries: Add link dependency
+    #TODO(new-library-extensions) Add link dependencies:
     target_link_libraries(tests-werkzeugkiste
         PRIVATE gtest_main 
         werkzeugkiste::geometry
@@ -351,7 +353,8 @@ if(werkzeugkiste_WITH_TESTS)
         werkzeugkiste::strings
         werkzeugkiste::timing)
 
-    #TODO(snototter) If we need to provide preprocessor definitions:
+    #TODO(new-library-extensions) If we need to provide
+    # preprocessor definitions:
 #    target_compile_definitions(${TARGET_CPP_TEST} PRIVATE
 #        EXAMPLE_IMAGE_WIDTH=400
 #        EXAMPLE_IMAGE_HEIGHT=400)

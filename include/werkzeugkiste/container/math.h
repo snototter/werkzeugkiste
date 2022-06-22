@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <algorithm>
 #include <stdexcept>
+#include <numeric>
+
 
 namespace werkzeugkiste {
 // Utility functions for standard containers.
@@ -65,6 +67,48 @@ Container SmoothMovingAverage(
     smoothed_data.push_back(average);
   }
   return smoothed_data;
+}
+
+
+template <class Container>
+double Mean(const Container &values) {
+  if (values.size() == 0) {
+    return 0.0;
+  }
+  typename Container::value_type sum = std::accumulate(
+        values.begin(), values.end(),
+        static_cast<typename Container::value_type>(0));
+  return static_cast<double>(sum) / values.size();
+}
+
+
+
+template <class Container>
+void MinMax(
+    const Container &values,
+    typename Container::value_type *min = nullptr,
+    typename Container::value_type *max = nullptr) {
+  //TODO doc
+  if (values.empty()) {
+    return;
+  }
+  std::size_t idx_min = 0;
+  std::size_t idx_max = 0;
+  for (std::size_t idx = 1; idx < values.size(); ++idx) {
+    if (values[idx] < values[idx_min]) {
+      idx_min = idx;
+    }
+    if (values[idx] > values[idx_max]) {
+      idx_max = idx;
+    }
+  }
+
+  if (min) {
+    *min = values[idx_min];
+  }
+  if (max) {
+    *max = values[idx_max];
+  }
 }
 
 }  // namespace container
