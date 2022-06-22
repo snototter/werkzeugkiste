@@ -12,28 +12,27 @@ namespace werkzeugkiste {
 namespace strings {
 
 
-bool EndsWith(const std::string &s, const std::string &suffix) {
-  if ((s.length() > 0) && (suffix.length() > 0)
+bool EndsWith(
+    const std::string &s,
+    const std::string &suffix) {
+  if ((s.length() > 0)
+      && (suffix.length() > 0)
       && (s.length() >= suffix.length())) {
-    return (s.compare(s.length() - suffix.length(),
-                      suffix.length(), suffix) == 0);
+    return (s.compare(
+              s.length() - suffix.length(),
+              suffix.length(),
+              suffix) == 0);
   } else {
     return false;
   }
 }
 
 
-bool EndsWith(const std::string &s, char end) {
-  if (s.length() > 0) {
-    return (s.at(s.length()-1) == end);
-  } else {
-    return false;
-  }
-}
-
-
-bool StartsWith(const std::string &s, const std::string &prefix) {
-  if ((s.length() > 0) && (prefix.length() > 0)
+bool StartsWith(
+    const std::string &s,
+    const std::string &prefix) {
+  if ((s.length() > 0)
+      && (prefix.length() > 0)
       && (s.length() >= prefix.length())) {
     return s.compare(0, prefix.length(), prefix) == 0;
   } else {
@@ -42,25 +41,9 @@ bool StartsWith(const std::string &s, const std::string &prefix) {
 }
 
 
-bool StartsWith(const std::string &s, char first) {
-  if (s.length() > 0) {
-    return s[0] == first;
-  } else {
-    return false;
-  }
-}
-
-
 void ToLower(std::string &s) {
-  std::transform(s.begin(), s.end(), s.begin(),
-                 ::tolower);
-}
-
-
-std::string Lower(const std::string &s) {
-  std::string tmp(s);
-  ToLower(tmp);
-  return tmp;
+  std::transform(
+        s.begin(), s.end(), s.begin(), ::tolower);
 }
 
 
@@ -70,25 +53,25 @@ void ToUpper(std::string &s) {
 }
 
 
-std::string Upper(const std::string &s) {
-  std::string tmp(s);
-  ToUpper(tmp);
-  return tmp;
-}
-
-
 std::string LTrim(const std::string &totrim) {
   std::string s(totrim);
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                                  std::not1(std::ptr_fun<int, int>(std::isspace))));
+  s.erase(
+        s.begin(),
+        std::find_if(
+          s.begin(), s.end(),
+          std::not1(std::ptr_fun<int, int>(std::isspace))));
   return s;
 }
 
 
 std::string RTrim(const std::string &totrim) {
   std::string s(totrim);
-  s.erase(std::find_if(s.rbegin(), s.rend(),
-                       std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+  s.erase(
+        std::find_if(
+          s.rbegin(), s.rend(),
+          std::not1(std::ptr_fun<int, int>(std::isspace))
+        ).base(),
+        s.end());
   return s;
 }
 
@@ -114,47 +97,46 @@ bool IsNumeric(const std::string &s) {
 }
 
 
-void Split(const std::string &s, char delim,
-           std::vector<std::string> &elems) {
+std::vector<std::string> Split(
+    const std::string &s,
+    char delim) {
+  std::vector<std::string> elems;
   std::stringstream ss(s);
   std::string item;
   while (std::getline(ss, item, delim)) {
     elems.push_back(item);
   }
-}
-
-
-std::vector<std::string> Split(const std::string &s, char delim) {
-  std::vector<std::string> elems;
-  Split(s, delim, elems);
   return elems;
 }
 
 
-std::string Replace(const std::string &str, const std::string &search,
-                    const std::string &replacement) {
-  if ((str.length() == 0) || (search.length() == 0)) {
-    return str;
+std::string Replace(
+    const std::string &haystack,
+    const std::string &needle,
+    const std::string &replacement) {
+  if ((haystack.length() == 0) || (needle.length() == 0)) {
+    return haystack;
   }
 
-  std::size_t start_pos = str.find(search);
+  std::size_t start_pos = haystack.find(needle);
   if(start_pos == std::string::npos) {
-    return str;
+    return haystack;
   }
 
-  std::string s = str;
+  std::string s = haystack;
   do {
-    s.replace(start_pos, search.length(), replacement);
-    start_pos = s.find(search);
+    s.replace(start_pos, needle.length(), replacement);
+    start_pos = s.find(needle);
   } while (start_pos != std::string::npos);
 
   return s;
 }
 
 
-bool GetUrlProtocol(const std::string &url,
-                    std::string &protocol,
-                    std::string &remainder) {
+bool GetUrlProtocol(
+    const std::string &url,
+    std::string &protocol,
+    std::string &remainder) {
   const std::size_t protocol_pos = url.find("://");
   if (protocol_pos == std::string::npos) {
     protocol = "";
@@ -167,14 +149,16 @@ bool GetUrlProtocol(const std::string &url,
   }
 }
 
-//TODO(snototter) feature-request SplitUrl
-// extract protocol/schema, userinfo, host, port,
-// path, query, and fragment of a URL/URI
+//TODO(feature-request) SplitUrl
+//  extract protocol/schema, userinfo, host, port,
+//  path, query, and fragment of a URL/URI
 
 
-std::string ObscureUrlAuthentication(const std::string &url) {
+std::string ObscureUrlAuthentication(
+    const std::string &url) {
   std::string protocol, clipped;
-  const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
+  const bool has_protocol = GetUrlProtocol(
+        url, protocol, clipped);
 
   const std::size_t at_pos = clipped.find('@');
   if (at_pos == std::string::npos) {
@@ -191,11 +175,14 @@ std::string ObscureUrlAuthentication(const std::string &url) {
 
 std::string ClipUrl(const std::string &url) {
   std::string protocol, clipped;
-  const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
+  const bool has_protocol = GetUrlProtocol(
+        url, protocol, clipped);
 
-  // Special handling of file:// URLs, there's no
-  // authentication information
-  if (has_protocol && (Lower(protocol).compare("file://") == 0)) {
+  // Special handling of file:// URLs, as there's no
+  // authentication information. But potentially lots
+  // of forward slashes:
+  if (has_protocol
+      && (Lower(protocol).compare("file://") == 0)) {
     return url;
   }
 
@@ -221,14 +208,16 @@ std::string ClipUrl(const std::string &url) {
 
 std::string Remove(const std::string &s, const char c) {
   std::string removed;
-  std::remove_copy(s.begin(), s.end(),
-                   std::back_inserter(removed), c);
+  std::remove_copy(
+        s.begin(), s.end(),
+        std::back_inserter(removed), c);
   return removed;
 }
 
 
-std::string Remove(const std::string &s,
-                   std::initializer_list<char> chars) {
+std::string Remove(
+    const std::string &s,
+    std::initializer_list<char> chars) {
   std::string copy(s);
   for (const auto c : chars) {
     copy = Remove(copy, c);
@@ -237,10 +226,11 @@ std::string Remove(const std::string &s,
 }
 
 
-std::string Slug(const std::string &s,
-                 bool strip_dashes) {
-  std::string replaced = Replace(Lower(Trim(s)),
-                                 "#", "nr");
+std::string Slug(
+    const std::string &s,
+    bool strip_dashes) {
+  std::string replaced = Replace(
+        Lower(Trim(s)), "#", "nr");
 
   std::ostringstream out;
   // Start with flag set to return "-" if the string
@@ -257,5 +247,50 @@ std::string Slug(const std::string &s,
   }
   return out.str();
 }
+
+
+std::string Shorten(
+    const std::string &s,
+    std::size_t desired_length,
+    int ellipsis_position,
+    const std::string &ellipsis) {
+  if (s.empty() || (desired_length >= s.length())) {
+    return s;
+  }
+
+  if (desired_length == 0) {
+    return "";
+  }
+
+  if (desired_length < ellipsis.length()) {
+    std::ostringstream msg;
+    msg << "Desired length ("
+        << desired_length
+        << ") is shorter than the ellipsis ("
+        << ellipsis.length() << ")!";
+    throw std::invalid_argument(msg.str());
+  }
+
+  std::ostringstream shortened;
+  const std::size_t remaining_text_len = desired_length - ellipsis.length();
+  if (ellipsis_position == 0) {
+    //center
+
+    const std::size_t num_left = remaining_text_len / 2;
+    const std::size_t num_right = remaining_text_len - num_left;
+
+    shortened << s.substr(0, num_left)
+              << ellipsis
+              << s.substr(s.length() - num_right);
+  } else if (ellipsis_position < 0){
+    shortened << ellipsis
+              << s.substr(s.length() - remaining_text_len);
+  } else {
+    shortened << s.substr(0, remaining_text_len)
+              << ellipsis;
+  }
+  return shortened.str();
+}
+
 } // namespace string
 } // namespace werkzeug

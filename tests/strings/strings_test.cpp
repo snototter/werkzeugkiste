@@ -214,3 +214,40 @@ TEST(StringUtilsTest, Slug) {
   EXPECT_EQ(wks::Slug("#2"), "nr2");
   EXPECT_TRUE(wks::Slug("").empty());
 }
+
+
+TEST(StringUtilsTest, Shorten) {
+  // Edge cases: empty & desired length 0 or longer than string
+  EXPECT_EQ(wks::Shorten("", 4), "");
+  EXPECT_EQ(wks::Shorten("abc", 0), "");
+  EXPECT_EQ(wks::Shorten("abc", 3), "abc");
+  EXPECT_EQ(wks::Shorten("abc", 10), "abc");
+
+  // Desired length shorter than (custom) ellipsis
+  EXPECT_THROW(wks::Shorten("abc", 2), std::invalid_argument);
+  EXPECT_THROW(wks::Shorten("0123456789", 3, -1, "abcd"), std::invalid_argument);
+
+  // Ellipsis left
+  EXPECT_EQ(wks::Shorten("0123456789", 3, -1), "...");
+  EXPECT_EQ(wks::Shorten("0123456789", 4, -1), "...9");
+  EXPECT_EQ(wks::Shorten("0123456789", 5, -1), "...89");
+  EXPECT_EQ(wks::Shorten("0123456789", 4, -1, "_"), "_789");
+  EXPECT_EQ(wks::Shorten("0123456789", 5, -1, "_"), "_6789");
+
+  // Ellipsis centered
+  EXPECT_EQ(wks::Shorten("0123456789", 3, 0), "...");
+  EXPECT_EQ(wks::Shorten("0123456789", 4, 0), "...9");
+  EXPECT_EQ(wks::Shorten("0123456789", 5, 0), "0...9");
+  EXPECT_EQ(wks::Shorten("0123456789", 1, 0, "_"), "_");
+  EXPECT_EQ(wks::Shorten("0123456789", 2, 0, "_"), "_9");
+  EXPECT_EQ(wks::Shorten("0123456789", 3, 0, "_"), "0_9");
+  EXPECT_EQ(wks::Shorten("0123456789", 4, 0, "_"), "0_89");
+  EXPECT_EQ(wks::Shorten("0123456789", 5, 0, "_"), "01_89");
+
+  // Ellipsis right
+  EXPECT_EQ(wks::Shorten("0123456789", 3, 1), "...");
+  EXPECT_EQ(wks::Shorten("0123456789", 4, 1), "0...");
+  EXPECT_EQ(wks::Shorten("0123456789", 5, 1), "01...");
+  EXPECT_EQ(wks::Shorten("0123456789", 4, 1, "_"), "012_");
+  EXPECT_EQ(wks::Shorten("0123456789", 5, 1, "_"), "0123_");
+}
