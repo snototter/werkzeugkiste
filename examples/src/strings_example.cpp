@@ -25,6 +25,19 @@ int main(int /* argc */, char ** /* argv */) {
             << "--------------------------------------------------\n"
             << std::endl;
 
+  //TODO
+  std::cout << "Shorten 5: " << wks::Shorten("0123456789", 5)
+            << "\nShorten 7: " << wks::Shorten("0123456789", 7)
+            << "\nShorten 10: " << wks::Shorten("0123456789", 10)
+            << "\nShorten ellipsis center 5: " << wks::Shorten("0123456789", 5, 0)
+            << "\nShorten ellipsis center 6: " << wks::Shorten("0123456789", 6, 0)
+            << "\nShorten ellipsis center 7: " << wks::Shorten("0123456789", 7, 0)
+            << "\nShorten ellipsis right:  " << wks::Shorten("0123456789", 5, 1)
+            << "\nShorten 3 custom ellipsis: " << wks::Shorten("0123456789", 3, 0, "*!*")
+            << "\nShorten 4 custom ellipsis: " << wks::Shorten("0123456789", 4, 0, "*!*")
+            << "\nShorten 5 custom ellipsis: " << wks::Shorten("0123456789", 5, 0, "*!*")
+            << std::endl << std::endl;
+
   std::vector<std::string> examples {"This", "is", "a", "LiSt", "oF", "\"ExAmPlEs\"", "-_1,2;3:'#!"};
   for (const auto &s : examples) {
     std::cout << "Input: " << s << "\n"
