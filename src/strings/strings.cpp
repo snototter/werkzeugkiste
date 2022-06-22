@@ -133,6 +133,16 @@ std::string Replace(
 }
 
 
+std::string Replace(
+    const std::string &haystack, char needle, char replacement) {
+  std::string cp(haystack);
+  std::replace(
+        cp.begin(), cp.end(),
+        needle, replacement);
+  return cp;
+}
+
+
 bool GetUrlProtocol(
     const std::string &url,
     std::string &protocol,

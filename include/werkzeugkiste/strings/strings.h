@@ -105,6 +105,12 @@ std::string Replace(
     const std::string &replacement);
 
 
+/// Replaces all occurences of the given character.
+std::string Replace(
+    const std::string &haystack,
+    char needle, char replacement);
+
+
 /// Clips the given URL string to include only the
 /// protocol and domain, *i.e.* server paths & parameters
 /// will be excluded.

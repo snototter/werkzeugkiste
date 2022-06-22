@@ -131,9 +131,16 @@ TEST(StringUtilsTest, Replace) {
   EXPECT_EQ(wks::Replace("ABC123abc123ABC123abc123", "BC", ".."),
             "A..123abc123A..123abc123");
 
-  // We can also remove substrings
+  // Use 'Replace' to 'Remove' a substring
   EXPECT_EQ(wks::Replace("ABC123abc;:_", "bc", ""),
             "ABC123a;:_");
+
+  // Also, the character-only version should be tested
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", 'a', '0'),
+            "ABC1230bc;:_");
+
+  EXPECT_EQ(wks::Replace("ABC1A3abc;:_", 'A', '!'),
+            "!BC1!3abc;:_");
 }
 
 
