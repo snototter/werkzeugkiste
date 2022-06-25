@@ -47,17 +47,18 @@ see examples/installed-locally
 ## TODOs
 
 * [ ] Install globally or locally via `cmake --install .`
-* [ ] Check external inclusion via cmake FetchContent
+* [x] Check external inclusion via cmake FetchContent
 * [ ] Utils:
-  * [ ] Enumeration utils (iterator + flags)
+  * [x] Enumeration utils (iterator + flags)
   * [x] strings
   * [x] circular buffer
   * [ ] file stuff (will be obsolete once C++17 support is more widespread)
   * [x] sort utils
   * [x] vec/basicmath
-  * [ ] geo2d
+  * [ ] geo2d (WIP)
   * [ ] geo3d
+    * [ ] Pinhole camera class which takes care of storing intrinsics/extrinsics, projects points, etc.
 * [x] check if static lib setup works when linked into consuming application/library
-* [ ] Delete time-utils repository
-* [ ] After initial release --> consider upgrading to C++17 and supporting string_views; or maybe backporting a string_view?
+* [x] Delete time-utils repository
+* [ ] After initial release --> consider upgrading to C++17 and supporting string_views?
 
