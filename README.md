@@ -58,7 +58,14 @@ see examples/installed-locally
   * [ ] geo2d (WIP)
   * [ ] geo3d
     * [ ] Pinhole camera class which takes care of storing intrinsics/extrinsics, projects points, etc.
+  * [ ] Trajectory smoothing
+    * [x] Moving average, similar to MATLAB's `smooth`
+    * [ ] Sketch filtering (xkcd-ify), e.g. via [1D interpolation](https://github.com/slayton/matlab-xkcdify),
+      or [as in matplotlib](https://github.com/JohannesBuchner/matplotlib-xkcdify), although the latter would be
+      a major effort due to spline fitting (*e.g.* via [ALGLIB](http://www.alglib.net/interpolation/spline3.php#header7)
+      or [NCAR/EOL bspline](https://github.com/NCAR/bspline)).
 * [x] check if static lib setup works when linked into consuming application/library
 * [x] Delete time-utils repository
 * [ ] After initial release --> consider upgrading to C++17 and supporting string_views?
+
 
