@@ -12,8 +12,8 @@ if(NOT werkzeugkiste_VERSION)
     file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION" werkzeugkiste_VERSION)
 endif()
 
-# If a parent project includes this CMakeLists (e.g. if you use CMake's
-# FetchContent), we want to pass the version explicitly to the parent scope.
+# If a parent project includes this CMakeLists (e.g. if you integrate werkzeugkiste
+# via CMake's FetchContent), we want to pass the version explicitly to the parent scope.
 # If we currently are the top level project, then skip this call to avoid
 # an unnecessary CMake warning:
 get_directory_property(HAS_PARENT PARENT_DIRECTORY)
@@ -25,10 +25,11 @@ endif()
 project(werkzeugkiste VERSION ${werkzeugkiste_VERSION} LANGUAGES CXX)
 
 #TODO(documentation) Provide a library usage example which disables
-# examples/tests (not needed for library users by default).
+# examples/tests (as this is not needed if we just want to use the library).
 option(werkzeugkiste_WITH_EXAMPLES "Build examples." ON)
 option(werkzeugkiste_WITH_TESTS "Build test suite." ON)
-option(INSTALL_werkzeugkiste "Configure installation target." ON)
+option(werkzeugkiste_INSTALL "Generate the install target." ON)
+
 
 #TODO(implementation) Use logging, similar to viren2d
 #set(werkzeugkiste_LOG_LEVEL "info" CACHE STRING "Select log level")
@@ -48,18 +49,21 @@ set(INSTALL_DIR_CMAKE ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
 # Set compiler options for all targets
 if(NOT CMAKE_CXX_STANDARD)
     # c++14 is required for std::exchange
-    # c++17 for string_view/filesystem, anything else is c++11
+    # c++17 for string_view/filesystem
+    # anything else is c++11
     set(CMAKE_CXX_STANDARD 14)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     # To ensure portability, turn off compiler-specific extensions
     set(CMAKE_CXX_EXTENSIONS OFF)
 endif()
 
-#FIXME(msvc-support) check spdlog's CMakeLists on what we would need additionally for MSVC :/
 
+#TODO(windows-support) check spdlog's CMakeLists (msvc vs cygwin vs msys)
 if (MSVC)
     # warning level 4
     add_compile_options(/W4)
+    # make sure __cplusplus is defined when using msvc and enable parallel build
+    string(APPEND CMAKE_CXX_FLAGS " /Zc:__cplusplus /MP")
 else()
     # be pedantic
     add_compile_options(-Wall -Wextra -pedantic)
@@ -67,6 +71,7 @@ else()
         "$<$<CONFIG:RELEASE>:-O3>"
         "$<$<CONFIG:DEBUG>:-g3>")
 endif()
+
 
 # Set default build type if not specified
 if(NOT CMAKE_BUILD_TYPE)
@@ -252,7 +257,7 @@ export(EXPORT werkzeugkisteTargets
     NAMESPACE werkzeugkiste::)
 
 # If installation is requested:
-if(INSTALL_werkzeugkiste)
+if(werkzeugkiste_INSTALL)
     #TODO(new-library-extensions) Install header files per target
     install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
     install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
