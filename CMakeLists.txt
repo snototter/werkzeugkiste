@@ -26,8 +26,8 @@ project(werkzeugkiste VERSION ${werkzeugkiste_VERSION} LANGUAGES CXX)
 
 #TODO(documentation) Provide a library usage example which disables
 # examples/tests (as this is not needed if we just want to use the library).
-option(werkzeugkiste_WITH_EXAMPLES "Build examples." ON)
-option(werkzeugkiste_WITH_TESTS "Build test suite." ON)
+option(werkzeugkiste_BUILD_EXAMPLES "Build the examples." ON)
+option(werkzeugkiste_BUILD_TESTS "Build the test suite." ON)
 option(werkzeugkiste_INSTALL "Generate the install target." ON)
 
 
@@ -307,7 +307,7 @@ endif()
 #########################################################################################
 # Set up examples
 
-if(werkzeugkiste_WITH_EXAMPLES)
+if(werkzeugkiste_BUILD_EXAMPLES)
     #TODO(new-library-extensions) Add example applications in the
     # included cmake script.
     include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/werkzeugkiste_examples.cmake)
@@ -318,7 +318,7 @@ endif()
 #########################################################################################
 # Set up tests
 
-if(werkzeugkiste_WITH_TESTS)
+if(werkzeugkiste_BUILD_TESTS)
     # Prevent gtest from adding itself to the install target
     set(INSTALL_GTEST OFF)
     set(BUILD_GMOCK OFF)
