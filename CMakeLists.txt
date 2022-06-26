@@ -156,40 +156,6 @@ set_target_properties(werkzeugkiste-container PROPERTIES
 
 
 #########################################################################################
-# File Utils: werkzeugkiste::files
-
-# Header files
-set(wkzgfiles_PUBLIC_HEADER_FILES
-    include/werkzeugkiste/files/fileio.h
-    include/werkzeugkiste/files/filesys.h)
-
-# Source files
-set(wkzgfiles_SOURCE_FILES
-    src/files/fileio.cpp
-    src/files/filesys.cpp)
-
-# Library
-add_library(werkzeugkiste-files
-    ${wkzgfiles_PUBLIC_HEADER_FILES}
-    ${wkzgfiles_SOURCE_FILES})
-
-
-# Add a namespace'd alias
-add_library(werkzeugkiste::files ALIAS werkzeugkiste-files)
-
-# Include directories for the different usage scenarios
-target_include_directories(werkzeugkiste-files
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-           $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
-
-# Other properties
-set_target_properties(werkzeugkiste-files PROPERTIES
-    EXPORT_NAME files
-    DEBUG_POSTFIX "d")
-
-
-#########################################################################################
 # String Utils: werkzeugkiste::strings
 
 # Header files
@@ -217,6 +183,44 @@ target_include_directories(werkzeugkiste-strings
 # Other properties
 set_target_properties(werkzeugkiste-strings PROPERTIES
     EXPORT_NAME strings
+    DEBUG_POSTFIX "d")
+
+
+#########################################################################################
+# File Utils: werkzeugkiste::files
+# Must be declared after ::strings
+
+# Header files
+set(wkzgfiles_PUBLIC_HEADER_FILES
+    include/werkzeugkiste/files/fileio.h
+    include/werkzeugkiste/files/filesys.h)
+
+# Source files
+set(wkzgfiles_SOURCE_FILES
+    src/files/fileio.cpp
+    src/files/filesys.cpp)
+
+# Library
+add_library(werkzeugkiste-files
+    ${wkzgfiles_PUBLIC_HEADER_FILES}
+    ${wkzgfiles_SOURCE_FILES})
+
+
+# Add a namespace'd alias
+add_library(werkzeugkiste::files ALIAS werkzeugkiste-files)
+
+# Include directories for the different usage scenarios
+target_include_directories(werkzeugkiste-files
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
+
+target_link_libraries(werkzeugkiste-files
+        PRIVATE werkzeugkiste::strings)
+
+# Other properties
+set_target_properties(werkzeugkiste-files PROPERTIES
+    EXPORT_NAME files
     DEBUG_POSTFIX "d")
 
 
