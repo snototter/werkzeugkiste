@@ -156,6 +156,40 @@ set_target_properties(werkzeugkiste-container PROPERTIES
 
 
 #########################################################################################
+# File Utils: werkzeugkiste::files
+
+# Header files
+set(wkzgfiles_PUBLIC_HEADER_FILES
+    include/werkzeugkiste/files/fileio.h
+    include/werkzeugkiste/files/filesys.h)
+
+# Source files
+set(wkzgfiles_SOURCE_FILES
+    src/files/fileio.cpp
+    src/files/filesys.cpp)
+
+# Library
+add_library(werkzeugkiste-files
+    ${wkzgfiles_PUBLIC_HEADER_FILES}
+    ${wkzgfiles_SOURCE_FILES})
+
+
+# Add a namespace'd alias
+add_library(werkzeugkiste::files ALIAS werkzeugkiste-files)
+
+# Include directories for the different usage scenarios
+target_include_directories(werkzeugkiste-files
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+           $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
+
+# Other properties
+set_target_properties(werkzeugkiste-files PROPERTIES
+    EXPORT_NAME files
+    DEBUG_POSTFIX "d")
+
+
+#########################################################################################
 # String Utils: werkzeugkiste::strings
 
 # Header files
@@ -234,6 +268,7 @@ configure_file(
 install(TARGETS
     werkzeugkiste-geometry
     werkzeugkiste-container
+    werkzeugkiste-files
     werkzeugkiste-strings
     werkzeugkiste-timing
     EXPORT werkzeugkisteTargets
@@ -259,11 +294,12 @@ export(EXPORT werkzeugkisteTargets
 # If installation is requested:
 if(werkzeugkiste_INSTALL)
     #TODO(new-library-extensions) Install header files per target
-    install(FILES ${werkzeugkiste_VERSION_HEADER} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
-    install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
-    install(FILES ${wkzgcontainer_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/sort)
-    install(FILES ${wkzgstrings_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/strings)
-    install(FILES ${wkzggeometry_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/geometry)
+    install(FILES ${werkzeugkiste_VERSION_HEADER}      DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste)
+    install(FILES ${wkzgcontainer_PUBLIC_HEADER_FILES} DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/container)
+    install(FILES ${wkzgfiles_PUBLIC_HEADER_FILES}     DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/files)
+    install(FILES ${wkzggeometry_PUBLIC_HEADER_FILES}  DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/geometry)
+    install(FILES ${wkzgstrings_PUBLIC_HEADER_FILES}   DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/strings)
+    install(FILES ${wkzgtiming_PUBLIC_HEADER_FILES}    DESTINATION ${INSTALL_DIR_INCLUDE}/werkzeugkiste/timing)
 
     # Where to export the targets:
     install(EXPORT werkzeugkisteTargets
@@ -339,6 +375,8 @@ if(werkzeugkiste_BUILD_TESTS)
         tests/container/sort_utils_test.cpp
         tests/container/math_utils_test.cpp
         tests/container/circular_buffer_test.cpp
+        tests/files/fileio_test.cpp
+        tests/files/filesys_test.cpp
         tests/strings/strings_test.cpp
         tests/timing/test_utils.h
         tests/timing/test_utils.cpp
@@ -354,7 +392,8 @@ if(werkzeugkiste_BUILD_TESTS)
     target_link_libraries(tests-werkzeugkiste
         PRIVATE gtest_main 
         werkzeugkiste::geometry
-#        werkzeugkiste::container
+        werkzeugkiste::container
+        werkzeugkiste::files
         werkzeugkiste::strings
         werkzeugkiste::timing)
 

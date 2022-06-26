@@ -302,5 +302,21 @@ std::string Shorten(
   return shortened.str();
 }
 
+
+std::string Indent(
+    const std::string &s, std::size_t n, char character) {
+  std::string out;
+  out.reserve(s.length() + n);
+  for (std::size_t idx = 0; idx < n; ++idx) {
+    out[idx] = character;
+  }
+
+  for (std::size_t idx = 0; idx < s.length(); ++idx) {
+    out[idx + n] = s[idx];
+  }
+
+  return out;
+}
+
 } // namespace string
 } // namespace werkzeug

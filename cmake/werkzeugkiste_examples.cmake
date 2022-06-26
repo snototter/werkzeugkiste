@@ -14,11 +14,17 @@ function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
     target_link_libraries(example-container
         PRIVATE werkzeugkiste::container)
 
-    ## werkzeugkiste::strings
+    ## werkzeugkiste::geometry
     add_executable(example-geometry
         ${EXAMPLE_SRC_DIR}/geometry_example.cpp)
     target_link_libraries(example-geometry
         PRIVATE werkzeugkiste::geometry)
+
+    ## werkzeugkiste::files
+    add_executable(example-files
+        ${EXAMPLE_SRC_DIR}/files_example.cpp)
+    target_link_libraries(example-files
+        PRIVATE werkzeugkiste::files)
 
     ## werkzeugkiste::strings
     add_executable(example-strings

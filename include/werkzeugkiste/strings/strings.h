@@ -173,6 +173,13 @@ std::string Shorten(
     int ellipsis_position = -1,
     const std::string &ellipsis = "...");
 
+
+/// Returns the string indented by n-times the given character.
+std::string Indent(
+    const std::string &s,
+    std::size_t n,
+    char character=' ');
+
 } // namespace strings
 } // namespace werkzeug
 
