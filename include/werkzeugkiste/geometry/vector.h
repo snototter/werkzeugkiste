@@ -27,6 +27,10 @@ namespace geometry {
 template<typename _Tp, int dim>
 class Vec {
  public:
+  using value_type = _Tp;
+  static constexpr int ndim = dim;
+//  constexpr int ndim() const { return dim; }
+
   //------------------------------------------------- Initialization
   Vec();
   Vec(_Tp x, _Tp y);
