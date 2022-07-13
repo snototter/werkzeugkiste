@@ -31,6 +31,7 @@ int main(int /* argc */, char ** /* argv */) {
             << "\nHomogeneous: " << wkg::VecToEigenHomogeneous(v1)
             << "\nMat(3 vecs): " << wkg::VecsToEigen(v1, v1, v1)
             << std::endl;
+
   std::cout << "Conversion: " << wkg::VecToEigen(v2)
             << "\nHomogeneous: " << wkg::VecToEigenHomogeneous(v2)
             << "\nMat(3 vecs): " << wkg::VecsToEigen(v1, static_cast<wkg::Vec2d>(v2), v1)
