@@ -174,20 +174,30 @@ std::map<T, std::size_t> FindDuplicates(const C &container) {
 
 /// Returns true if there are no duplicates in the given
 /// sequence container.
-template<typename C,
-    typename T = std::decay_t<
-        decltype(*begin(std::declval<C>()))>>
-bool HasUniqueItems(const C &container) {
+template<typename _C,
+    typename _T = std::decay_t<
+        decltype(*begin(std::declval<_C>()))>>
+bool HasUniqueItems(const _C &container) {
   auto duplicates = FindDuplicates(container);
   return duplicates.empty();
 }
 
 
 /// Returns true if the given key exists within the map.
-template <typename _Tv, typename... _Ts>
+template <typename _Tv, typename... _Ts> inline
 bool ContainsKey(const std::map<_Ts...> &container, const _Tv &key) {
   return container.find(key) != std::end(container);
 }
+
+
+/// Returns true if the given element exists within the container.
+template<typename _C,
+    typename _T = std::decay_t<
+        decltype(*begin(std::declval<_C>()))>>
+bool ContainsValue(const _C &container, const _T &value) {
+  return std::find(container.begin(), container.end(), value) != container.end();
+}
+
 
 }  // namespace container
 }  // namespace werkzeugkiste

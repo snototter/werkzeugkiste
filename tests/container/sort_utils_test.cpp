@@ -90,14 +90,18 @@ TEST(SortUtilsTest, Contains) {
 TEST(SortUtilsTest, Duplicates) {
   const std::vector<int> c1{-3, 0, 10, 17, 0, 4, 6, -3, 32};
   EXPECT_FALSE(wkc::HasUniqueItems(c1));
+  EXPECT_TRUE(wkc::ContainsValue(c1, 4));
+  EXPECT_TRUE(wkc::ContainsValue(c1, -3));
+  EXPECT_FALSE(wkc::ContainsValue(c1, 99));
+
   auto dup1 = wkc::FindDuplicates(c1);
   EXPECT_TRUE(wkc::HasUniqueItems(dup1));
   EXPECT_EQ(dup1.size(), 2);
   EXPECT_TRUE(wkc::ContainsKey(dup1, -3));
   EXPECT_TRUE(wkc::ContainsKey(dup1, 0));
 
-  const std::vector<std::string> c2{"0", "", "10", "foo", "0",
-                                    "Foo", "foo", "foo", "", "-3"};
+  const std::vector<std::string> c2{
+    "0", "", "10", "foo", "0", "Foo", "foo", "foo", "", "-3"};
   EXPECT_FALSE(wkc::HasUniqueItems(c2));
   auto dup2 = wkc::FindDuplicates(c2);
   EXPECT_TRUE(wkc::HasUniqueItems(dup2));
@@ -120,9 +124,8 @@ TEST(SortUtilsTest, Duplicates) {
   EXPECT_EQ(dup3[-3], 2);
 
 
-
-  const std::list<std::string> c4{"bcd", "ABC", "foo", "3", "bar",
-                                  "bce", "bcd"};
+  const std::list<std::string> c4{
+    "bcd", "ABC", "foo", "3", "bar", "bce", "bcd"};
   EXPECT_FALSE(wkc::HasUniqueItems(c4));
   auto dup4 = wkc::FindDuplicates(c4);
   EXPECT_TRUE(wkc::HasUniqueItems(dup4));
