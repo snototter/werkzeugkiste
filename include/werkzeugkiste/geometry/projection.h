@@ -1,6 +1,9 @@
 #ifndef __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
 #define __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
 
+#include <tuple>
+#include <utility>
+
 #include <Eigen/Core>
 
 #include <werkzeugkiste/geometry/vector.h>
@@ -69,9 +72,11 @@ Vec<_Tp, dim> Transform(const MatrixBase<_Tp, dim, dim> &M, const Vec<_Tp, dim> 
 // TODO check https://www.fluentcpp.com/2021/06/07/how-to-define-a-variadic-number-of-arguments-of-the-same-type-part-5/
 //template <typename _Tp, typename... _Ts, typename = SameType<_Tp, _Ts...>> inline
 
+  //TODO: could result in compiler issues with gcc < 8? https://gcc.gnu.org/bugzilla/show_bug.cgi?id=51155#c1
 template <typename _Tp, typename... _Ts> inline
-MatrixBaseDynWidth<typename _Tp::value_type, _Tp::ndim>
-VecsToEigen(const _Tp &vec0, const _Ts &...others) {
+//MatrixBaseDynWidth<typename _Tp::value_type, _Tp::ndim>
+MatrixBase<typename _Tp::value_type, _Tp::ndim, 1 + sizeof...(_Ts)>
+VecsToEigen(const _Tp &vec0, const _Ts &... others) {
   const int num_vecs = 1 + sizeof...(others);
   const _Tp vecs[num_vecs] {
     vec0, static_cast<const _Tp &>(others)...};
@@ -83,6 +88,36 @@ VecsToEigen(const _Tp &vec0, const _Ts &...others) {
     }
   }
   return m;
+}
+
+
+
+//TODO!!tuple cat https://stackoverflow.com/a/10015033
+template <typename _Tp>
+std::tuple<_Tp> VecsToTuple(const _Tp & vec) { //TODO
+  return std::tuple<_Tp>(vec);
+}
+
+template <typename _First, typename _Second, typename... _Rest>
+std::tuple<_First, _Second, _Rest...> VecsToTuple(const _First &v0, const _Second &v1, const _Rest&... others) {
+  //_First vec; //TODO
+  return std::tuple_cat(
+        std::tuple<_First>(v0),//std::tuple<_First>(std::move(vec)),
+        VecsToTuple<_Second, _Rest...>(v1, others...));//VecsToTuple<_Second, _Rest...>(std::move(v1), std::move(others)...));
+}
+
+//todo likely needs smth like 'apply' https://stackoverflow.com/a/34994591
+template <typename _Tp, typename... _Ts> inline
+std::tuple<_Tp, _Tp, _Ts...> TransformVecs(
+      const MatrixBase<typename _Tp::value_type, _Tp::ndim, _Tp::ndim> &M,
+      const _Tp &vec0, const _Tp &vec1, const _Ts &... others) {
+  const int num_vecs = 2 + sizeof...(others);
+  MatrixBase<typename _Tp::value_type, _Tp::ndim, num_vecs> transformed;
+  transformed = M * VecsToEigen(vec0, vec1, std::forward<_Tp>(others)...); // fwd uses _Tp to ensure they're all the same type!
+
+  _Tp results[num_vecs];
+  return VecsToTuple<_Tp, _Tp, _Ts...>(std::initializer_list<_Tp>{results});
+  //return VecsToTuple<_Tp, _Ts...>();//FIXMEtransformed);
 }
 
 } // namespace geometry

@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <ostream>
+#include <utility>
 
 // Only needed to query the library version:
 #include <werkzeugkiste/version.h>
@@ -36,6 +37,11 @@ int main(int /* argc */, char ** /* argv */) {
             << "\nHomogeneous: " << wkg::VecToEigenHomogeneous(v2)
             << "\nMat(3 vecs): " << wkg::VecsToEigen(v1, static_cast<wkg::Vec2d>(v2), v1)
             << std::endl;
+
+  wkg::Vec2d a, b;
+  auto trafo = wkg::VecsToEigen(v1, static_cast<wkg::Vec2d>(v2), v1);
+  std::tie(a, b) = wkg::TransformVecs(trafo, v1, v1);
+  //std::tie(a,b);
 
  return 0;
 }
