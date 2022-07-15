@@ -257,12 +257,11 @@ typedef Vec<int, 3> Vec3i;
 //---------------------------------------------------- Math/Geometry Helpers
 
 
-/// Project point onto line.
-Vec2d ProjectPointOntoLine(const Vec2d &pt, const Vec2d &line_from, const Vec2d &line_to);
-
-
 /// Computes the determinant of the two 2d vectors.
-double Determinant(const Vec2d &a, const Vec2d &b);
+template <typename _Tp>
+_Tp Determinant(const Vec<_Tp, 2> &a, const Vec<_Tp, 2> &b) {
+  return a.x() * b.y() - b.x() * a.y();
+}
 
 
 /// Computes the angle (in radians) of a 2d direction vector w.r.t. the positive X axis.

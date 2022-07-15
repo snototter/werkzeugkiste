@@ -643,23 +643,6 @@ template double LengthPolygon(const std::vector<Vec3i> &points);
 
 
 //---------------------------------------------------- Math/Geometry Helpers
-Vec2d ProjectPointOntoLine(const Vec2d &pt,
-                           const Vec2d &line_from, const Vec2d &line_to) {
-
-
-  // Vector from line start to point:
-  const Vec2d v = line_from.DirectionVector(pt);
-  // Project point onto line via dot product:
-  const Vec2d unit_direction = line_from.DirectionVector(line_to).UnitVector();
-  const double lambda = unit_direction.Dot(v);
-  return line_from + lambda * unit_direction;
-}
-
-
-double Determinant(const Vec2d &a, const Vec2d &b) {
-  return a.x() * b.y() - b.x() * a.y();
-}
-
 
 double AngleRadFromDirectionVec(const Vec2d &vec) {
   // Dot product is proportional to the cosine, whereas

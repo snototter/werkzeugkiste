@@ -42,8 +42,9 @@ public:
   const vec_type &To() const { return pt_to_; }
 
 
-  /// For a segment, this returns the length from the start to the end point.
-  double SegmentLength() const { return Direction().Length(); }
+  /// Returns the length from the start to the end point. As such, it's only
+  /// meaningful for a line segment.
+  double Length() const { return Direction().Length(); }
 
 
   /// Returns the non-normalized direction vector from the start point to the
@@ -104,7 +105,7 @@ public:
     if (lambda < 0.0) {
       return pt_from_;
     } else {
-      if (lambda > SegmentLength()) {
+      if (lambda > Length()) {
         return pt_to_;
       } else {
         return pt_from_ + lambda * unit_direction;
@@ -114,22 +115,18 @@ public:
 
 
   /// Returns the minimum distance between the point and this line.
-  double DistancePointLine(const vec_type &point) const {
+  double DistancePointToLine(const vec_type &point) const {
     const vec_type closest_point = ProjectPointOntoLine(point);
     return point.Distance(closest_point);
   }
 
 
-//  //TODO
-//  /// Returns the minimum distance between the point and this segment.
-//  double DistancePointSegment(const vec_type &point) {
-//    // Compute lambda s.t. l=0: start point, l=1: end point of the segment.
-//    const vec_type direction = Direction();
-//    const double lambda = (point - pt_from_).Dot(direction) / direction.LengthSquared();
+  /// Returns the minimum distance between the point and this segment.
+  double DistancePointToSegment(const vec_type &point) const {
+    const vec_type closest = ClosestPointOnSegment(point);
+    return closest.Distance(point);
+  }
 
-//    const vec_typecv::Vec2d closest_point = line_segment.From() + std::min(1.0, std::max(0.0, lambda)) * line_direction;
-//    return Distance(point, closest_point);
-//  }
 
   /// Returns true if the two lines are collinear.
   bool IsCollinear(const Line2d_ &other) const {
