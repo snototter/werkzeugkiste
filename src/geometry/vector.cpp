@@ -396,9 +396,9 @@ _Tp Vec<_Tp, dim>::Dot(const Vec<_Tp, dim>& other) const {
 template<typename _Tp, int dim>
 Vec<_Tp, dim> Vec<_Tp, dim>::Cross(const Vec<_Tp, dim>& other) const {
   if (dim != 3)
-    throw std::logic_error("Cross product is only defined for 3d vectors!");
-  // There's actually an analog for 2d space, but I didn't need
-  // it yet: https://mathworld.wolfram.com/CrossProduct.html
+    throw std::logic_error(
+        "Cross product is only defined for 3d vectors! For 2d vectors, use "
+        "Cross2d instead!");
 
   return Vec<_Tp, dim>(val[1] * other.val[2] - val[2] * other.val[1],
                        val[2] * other.val[0] - val[0] * other.val[2],

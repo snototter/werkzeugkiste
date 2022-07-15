@@ -29,7 +29,6 @@ class Vec {
  public:
   using value_type = _Tp;
   static constexpr int ndim = dim;
-//  constexpr int ndim() const { return dim; }
 
   //------------------------------------------------- Initialization
   Vec();
@@ -50,7 +49,9 @@ class Vec {
   /// double-precision counterpart.
   explicit operator Vec<double, dim>() const;
 
-  //TODO
+
+  /// Returns the homogeneous representation of this vector, *i.e.* the vector
+  /// has an additional dimension which is set to 1.
   Vec<_Tp, dim+1> Homogeneous() const;
 
 
@@ -144,7 +145,8 @@ class Vec {
   _Tp Dot(const Vec<_Tp, dim>& other) const;
 
 
-  /// Returns the vector's length.
+  /// Returns the vector cross product. Only supported for 3-dimensional
+  /// vectors.
   Vec<_Tp, dim> Cross(const Vec<_Tp, dim>& other) const;
 
 

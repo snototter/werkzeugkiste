@@ -12,6 +12,7 @@
 #include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/geometry/projection.h>
 #include <werkzeugkiste/geometry/camera.h>
+#include <werkzeugkiste/geometry/primitives.h>
 
 
 //template <typename _V>
@@ -141,14 +142,35 @@ int main(int /* argc */, char ** /* argv */) {
        0, 1, 0,
        0, 0, 1;
 
+  wkg::Matrix<double, 3, 4> Rt;
+  Rt << R, wkg::VecToEigen(t);
+
   wkg::Mat3x4d cam_prj = wkg::ProjectionMatrixFromKRt(K, R, t);
 
   std::cout << "Projection matrix:\nK = " << K << ", R = " << R << ", t = " << t << " --> P = \n" << cam_prj << std::endl;
 
-  std::cout << "Camera center: " << wkg::CameraCenterFromRt(R, t) << std::endl;
+  std::cout << "GP-2-image:\n" << wkg::GroundplaneToImageHomography(cam_prj)
+            << "\nImage-2-GP:\n" << wkg::ImageToGroundplaneHomography(cam_prj)
+            << "\n... must equal GP-2-img^(-1):\n" << wkg::GroundplaneToImageHomography(cam_prj).inverse() << std::endl;
+
+  std::cout << "Camera center (R, t): " << wkg::CameraCenterFromRt(R, t) << std::endl
+            << "Camera center (Rt):   " << wkg::CameraCenterFromRt(Rt) << std::endl;
 
   std::cout << "Rotation matrix (float):\n" << wkg::RotationMatrix<float>(10, 20, 30, true) << std::endl
             << "Rotation matrix (double):\n" << wkg::RotationMatrix<double>(10, 20, 30, true) << std::endl;
+
+
+
+
+  wkg::Line2d line1({0.0, 0.0}, {3.0, 0.0});
+  wkg::Line2d line2({1.0, -0.6}, {-17.0, -0.6});
+  wkg::Line2d line3({-100.0, -0.6}, {-170.0, -0.6});
+
+  std::cout << "Lines: " << line1 << " and " << line2 << std::endl
+            << "collinear? " << line1.IsCollinear(line2) << std::endl
+            << "collinear " << line2 << " and " << line3 << "? " << line2.IsCollinear(line3) << std::endl
+            << "Closest point (" << line1.To() << ")\n  to line2 " << line2.ClosestPointOnLine(line1.To()) << std::endl
+            << "  to segment2: " << line2.ClosestPointOnSegment(line1.To()) << std::endl;
 
   return 0;
 }
