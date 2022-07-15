@@ -8,6 +8,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <Eigen/Eigen>
 
 #include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
@@ -15,6 +16,9 @@
 
 namespace werkzeugkiste {
 namespace geometry {
+
+//-----------------------------------------------------------------------------
+// Matrix definitions
 
 template <typename _Tp, int Rows, int Columns>
 using Matrix = Eigen::Matrix<_Tp, Rows, Columns, (Columns > 1) ? Eigen::RowMajor : 0>;
@@ -31,6 +35,9 @@ using Mat3x3d = Matrix<double, 3, 3>;
 using Mat3x4d = Matrix<double, 3, 4>;
 
 
+//-----------------------------------------------------------------------------
+// Conversion between werkzeugkiste and Eigen
+
 /// Converts a werkzeugkiste vector to an Eigen vector (single-column matrix).
 template <typename _V> inline
 Matrix<typename _V::value_type, _V::ndim, 1>
@@ -41,19 +48,6 @@ VecToEigen(const _V &vec) {
   }
   return mat;
 }
-
-
-///// Converts a werkzeugkiste vector to an Eigen vector (i.e. single-column
-///// matrix) and adds a homogeneous coordinate (set to 1).
-//template <typename _Tp, int dim> inline
-//VectorBase<_Tp, dim + 1> VecToEigenColHomogeneous(const Vec<_Tp, dim> &vec) {
-//  VectorBase<_Tp, dim + 1> m;
-//  for (int i = 0; i < dim; ++i) {
-//    m[i] = vec[i];
-//  }
-//  m[dim] = static_cast<_Tp>(1);
-//  return m;
-//}
 
 
 /// Returns a vector for the given matrix column.
@@ -67,7 +61,6 @@ Vec<_Tp, Rows> EigenColToVec(
   }
   return v;
 }
-
 
 
 /// Returns a matrix where each column holds one vector.
@@ -134,6 +127,7 @@ auto ArrayToTuple(const Array &arr, std::index_sequence<Idx...>) {
 }
 
 
+/// Returns a tuple of vectors (one vector per matrix column).
 template <typename _Tp, int Rows, int Columns> inline
 auto EigenMatToVecTuple(
     const Matrix<_Tp, Rows, Columns> &vec_mat) {
@@ -144,6 +138,9 @@ auto EigenMatToVecTuple(
   return ArrayToTuple(arr, std::make_index_sequence<Columns>{});
 }
 
+
+//-----------------------------------------------------------------------------
+// Transformation/projection utitilites
 
 /// Computes `mat * [vec0, ...]` and returns the result as a matrix.
 template <typename _V, typename... _Vs, int Rows> inline
@@ -177,10 +174,6 @@ TransformToVecs(
   const auto transformed = TransformToMat(mat, vec0, others...);
   return EigenMatToVecTuple<typename _V::value_type, Rows, num_vecs>(transformed);
 }
-
-
-
-
 
 
 /// Computes `mat * [vec0, vec1, ...]` and divides the result by the
@@ -274,9 +267,12 @@ ProjectInhomogeneousToVecs(
 
 
 // TODO project with scale --> project, then scale.
+
+
+//-----------------------------------------------------------------------------
+// Rotation utilities
+
 // RotationMatrixToEulerAngles --> projection.h
-// RotationX , Y, Z
-// RotationMatrix
 
 /// Returns the 3x3 rotation matrix, rotating around the x-axis.
 template <typename _Tp> inline
@@ -308,7 +304,6 @@ Matrix<_Tp, 3, 3> RotationY(double angle, bool angle_in_deg) {
 }
 
 
-
 /// Returns the 3x3 rotation matrix, rotating around the z-axis.
 template <typename _Tp> inline
 Matrix<_Tp, 3, 3> RotationZ(double angle, bool angle_in_deg) {
@@ -324,7 +319,6 @@ Matrix<_Tp, 3, 3> RotationZ(double angle, bool angle_in_deg) {
 }
 
 
-
 /// Returns the 3x3 rotation matrix in ZYX order.
 template <typename _Tp> inline
 Matrix<_Tp, 3, 3> RotationMatrix(
@@ -334,7 +328,6 @@ Matrix<_Tp, 3, 3> RotationMatrix(
   auto Rz = RotationZ<_Tp>(angle_z, angles_in_deg);
   return Rx * (Ry * Rz);
 }
-
 
 
 } // namespace geometry

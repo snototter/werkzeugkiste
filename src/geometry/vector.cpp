@@ -396,9 +396,9 @@ _Tp Vec<_Tp, dim>::Dot(const Vec<_Tp, dim>& other) const {
 template<typename _Tp, int dim>
 Vec<_Tp, dim> Vec<_Tp, dim>::Cross(const Vec<_Tp, dim>& other) const {
   if (dim != 3)
-    throw std::logic_error("Cross product is only defined for 3d vectors!");
-  // There's actually an analog for 2d space, but I didn't need
-  // it yet: https://mathworld.wolfram.com/CrossProduct.html
+    throw std::logic_error(
+        "Cross product is only defined for 3d vectors! For 2d vectors, use "
+        "Cross2d instead!");
 
   return Vec<_Tp, dim>(val[1] * other.val[2] - val[2] * other.val[1],
                        val[2] * other.val[0] - val[0] * other.val[2],
@@ -643,23 +643,6 @@ template double LengthPolygon(const std::vector<Vec3i> &points);
 
 
 //---------------------------------------------------- Math/Geometry Helpers
-Vec2d ProjectPointOntoLine(const Vec2d &pt,
-                           const Vec2d &line_from, const Vec2d &line_to) {
-
-
-  // Vector from line start to point:
-  const Vec2d v = line_from.DirectionVector(pt);
-  // Project point onto line via dot product:
-  const Vec2d unit_direction = line_from.DirectionVector(line_to).UnitVector();
-  const double lambda = unit_direction.Dot(v);
-  return line_from + lambda * unit_direction;
-}
-
-
-double Determinant(const Vec2d &a, const Vec2d &b) {
-  return a.x() * b.y() - b.x() * a.y();
-}
-
 
 double AngleRadFromDirectionVec(const Vec2d &vec) {
   // Dot product is proportional to the cosine, whereas
