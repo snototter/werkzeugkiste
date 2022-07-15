@@ -11,6 +11,7 @@
 
 #include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/geometry/projection.h>
+#include <werkzeugkiste/geometry/camera.h>
 
 
 //template <typename _V>
@@ -128,5 +129,26 @@ int main(int /* argc */, char ** /* argv */) {
   std::cout << "Projection homogeneous, single vec:\n" << P << " * " << PrettyPrint({v3.Homogeneous()}, 0, 8)
             << " =\n" << PrettyPrint({p3}) << std::endl;
 
- return 0;
+
+  //TODO refactor demo
+  wkg::Mat3x3d K, R;
+  wkg::Vec3d t{0.5, 0.3, 0.1};
+
+  K << 400, 0, 300,
+       0, 400, 300,
+      0, 0, 1;
+  R << 1, 0, 0,
+       0, 1, 0,
+       0, 0, 1;
+
+  wkg::Mat3x4d cam_prj = wkg::ProjectionMatrixFromKRt(K, R, t);
+
+  std::cout << "Projection matrix:\nK = " << K << ", R = " << R << ", t = " << t << " --> P = \n" << cam_prj << std::endl;
+
+  std::cout << "Camera center: " << wkg::CameraCenterFromRt(R, t) << std::endl;
+
+  std::cout << "Rotation matrix (float):\n" << wkg::RotationMatrix<float>(10, 20, 30, true) << std::endl
+            << "Rotation matrix (double):\n" << wkg::RotationMatrix<double>(10, 20, 30, true) << std::endl;
+
+  return 0;
 }

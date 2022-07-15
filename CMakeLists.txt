@@ -101,7 +101,8 @@ find_package(Eigen3)
 if (TARGET Eigen3::Eigen)
     set(wkzggeometry_PUBLIC_HEADER_FILES
         ${wkzggeometry_PUBLIC_HEADER_FILES}
-        include/werkzeugkiste/geometry/projection.h)
+        include/werkzeugkiste/geometry/projection.h
+        include/werkzeugkiste/geometry/camera.h)
 endif (TARGET Eigen3::Eigen)
 
 # Library

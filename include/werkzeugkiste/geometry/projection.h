@@ -1,14 +1,15 @@
 #ifndef __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
 #define __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
 
+#include <cmath>
 #include <tuple>
 #include <utility>
 #include <type_traits>
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <Eigen/Eigen>
 
+#include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
 
 
@@ -21,20 +22,20 @@ using Matrix = Eigen::Matrix<_Tp, Rows, Columns, (Columns > 1) ? Eigen::RowMajor
 template <typename _Tp, int Rows>
 using MatrixDynWidth = Eigen::Matrix<_Tp, Rows, Eigen::Dynamic, Eigen::RowMajor>;
 
-// row-major layout is not supported for vectors in eigen (and being a vector, the layout doesn't matter anyhow)
-template <typename _Tp, int Dimension>
-using VectorBase = Eigen::Matrix<_Tp, Dimension, 1>;
+//// row-major layout is not supported for vectors in eigen (and being a vector, the layout doesn't matter anyhow)
+//template <typename _Tp, int Dimension>
+//using VectorBase = Eigen::Matrix<_Tp, Dimension, 1>;
 
-using Mat2x2d = Matrix<double, 2, 2>;
+//using Mat2x2d = Matrix<double, 2, 2>;
 using Mat3x3d = Matrix<double, 3, 3>;
 using Mat3x4d = Matrix<double, 3, 4>;
 
 
 /// Converts a werkzeugkiste vector to an Eigen vector (single-column matrix).
 template <typename _V> inline
-VectorBase<typename _V::value_type, _V::ndim>
-VecToEigenCol(const _V &vec) {
-  VectorBase<typename _V::value_type, _V::ndim> mat;
+Matrix<typename _V::value_type, _V::ndim, 1>
+VecToEigen(const _V &vec) {
+  Matrix<typename _V::value_type, _V::ndim, 1> mat;
   for (int i = 0; i < _V::ndim; ++i) {
     mat[i] = vec[i];
   }
@@ -42,26 +43,26 @@ VecToEigenCol(const _V &vec) {
 }
 
 
-/// Converts a werkzeugkiste vector to an Eigen vector (i.e. single-column
-/// matrix) and adds a homogeneous coordinate (set to 1).
-template <typename _Tp, int dim> inline
-VectorBase<_Tp, dim + 1> VecToEigenColHomogeneous(const Vec<_Tp, dim> &vec) {
-  VectorBase<_Tp, dim + 1> m;
-  for (int i = 0; i < dim; ++i) {
-    m[i] = vec[i];
-  }
-  m[dim] = static_cast<_Tp>(1);
-  return m;
-}
+///// Converts a werkzeugkiste vector to an Eigen vector (i.e. single-column
+///// matrix) and adds a homogeneous coordinate (set to 1).
+//template <typename _Tp, int dim> inline
+//VectorBase<_Tp, dim + 1> VecToEigenColHomogeneous(const Vec<_Tp, dim> &vec) {
+//  VectorBase<_Tp, dim + 1> m;
+//  for (int i = 0; i < dim; ++i) {
+//    m[i] = vec[i];
+//  }
+//  m[dim] = static_cast<_Tp>(1);
+//  return m;
+//}
 
 
 /// Returns a vector for the given matrix column.
-template <typename _Tp, int Columns>
-_Tp EigenColToVec(
-    const Matrix<typename _Tp::value_type, _Tp::ndim, Columns> &eig, int col) {
+template <typename _Tp, int Rows, int Columns>
+Vec<_Tp, Rows> EigenColToVec(
+    const Matrix<_Tp, Rows, Columns> &eig, int col) {
 //    const VectorBase<typename _Tp::value_type, _Tp::ndim> &eig) {
-  _Tp v;
-  for (int i = 0; i < _Tp::ndim; ++i) {
+  Vec<_Tp, Rows> v;
+  for (int i = 0; i < Rows; ++i) {
     v[i] = eig(i, col);
   }
   return v;
@@ -138,24 +139,10 @@ auto EigenMatToVecTuple(
     const Matrix<_Tp, Rows, Columns> &vec_mat) {
   std::array<Vec<_Tp, Rows>, Columns> arr;
   for (int c = 0; c < Columns; ++c) {
-    arr[c] = EigenColToVec<Vec<_Tp, Rows>, Columns>(vec_mat, c);//vec_mat.col(c));
+    arr[c] = EigenColToVec<_Tp, Rows, Columns>(vec_mat, c);//vec_mat.col(c));
   }
   return ArrayToTuple(arr, std::make_index_sequence<Columns>{});
 }
-
-
-///// Applies the `Rows x Dim` transformation matrix on the given Dim-dimensional
-///// vector, *i.e.* returns `mat * vec`, which is a Rows-dimensional vector.
-//template <typename _V, int Rows> inline
-//Vec<typename _V::value_type, Rows>
-//Transform(
-//    const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
-//    const _V &vec) {
-//  const VectorBase<
-//      typename _V::value_type, _V::ndim> res = mat * VecToEigenCol(vec);
-//  return EigenColToVec(res);
-//}
-
 
 
 /// Computes `mat * [vec0, ...]` and returns the result as a matrix.
@@ -284,6 +271,71 @@ ProjectInhomogeneousToVecs(
   const auto projected = ProjectInhomogeneousToMat(mat, vec0, others...);
   return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
 }
+
+
+// TODO project with scale --> project, then scale.
+// RotationMatrixToEulerAngles --> projection.h
+// RotationX , Y, Z
+// RotationMatrix
+
+/// Returns the 3x3 rotation matrix, rotating around the x-axis.
+template <typename _Tp> inline
+Matrix<_Tp, 3, 3> RotationX(double angle, bool angle_in_deg) {
+  const double rad = angle_in_deg ? deg2rad(angle) : angle;
+  const double ct = std::cos(rad);
+  const double st = std::sin(rad);
+
+  Matrix<_Tp, 3, 3> R;
+  R << 1.0, 0.0, 0.0,
+       0.0,  ct, -st,
+       0.0,  st,  ct;
+  return R;
+}
+
+
+/// Returns the 3x3 rotation matrix, rotating around the y-axis.
+template <typename _Tp> inline
+Matrix<_Tp, 3, 3> RotationY(double angle, bool angle_in_deg) {
+  const double rad = angle_in_deg ? deg2rad(angle) : angle;
+  const double ct = std::cos(rad);
+  const double st = std::sin(rad);
+
+  Matrix<_Tp, 3, 3> R;
+  R << ct, 0.0,  st,
+      0.0, 1.0, 0.0,
+      -st, 0.0,  ct;
+  return R;
+}
+
+
+
+/// Returns the 3x3 rotation matrix, rotating around the z-axis.
+template <typename _Tp> inline
+Matrix<_Tp, 3, 3> RotationZ(double angle, bool angle_in_deg) {
+  const double rad = angle_in_deg ? deg2rad(angle) : angle;
+  const double ct = std::cos(rad);
+  const double st = std::sin(rad);
+
+  Matrix<_Tp, 3, 3> R;
+  R << ct, -st, 0.0,
+       st,  ct, 0.0,
+      0.0, 0.0, 1.0;
+  return R;
+}
+
+
+
+/// Returns the 3x3 rotation matrix in ZYX order.
+template <typename _Tp> inline
+Matrix<_Tp, 3, 3> RotationMatrix(
+    double angle_x, double angle_y, double angle_z, bool angles_in_deg) {
+  auto Rx = RotationX<_Tp>(angle_x, angles_in_deg);
+  auto Ry = RotationY<_Tp>(angle_y, angles_in_deg);
+  auto Rz = RotationZ<_Tp>(angle_z, angles_in_deg);
+  return Rx * (Ry * Rz);
+}
+
+
 
 } // namespace geometry
 } // namespace werkzeugkiste

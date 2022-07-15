@@ -12,13 +12,15 @@ namespace werkzeugkiste {
  */
 namespace geometry {
 
-inline double deg2rad(double deg) {
-  return deg * M_PI / 180.0;
+template <typename _Tp> inline
+_Tp deg2rad(_Tp deg) {
+  return static_cast<_Tp>(deg * M_PI / 180.0);
 }
 
 
-inline double rad2deg(double rad) {
-  return rad * 180.0 / M_PI;
+template <typename _Tp> inline
+_Tp rad2deg(_Tp rad) {
+  return static_cast<_Tp>(rad * 180.0 / M_PI);
 }
 
 
