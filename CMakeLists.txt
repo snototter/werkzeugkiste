@@ -86,6 +86,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 #########################################################################################
 # Math/Geometry Utils: werkzeugkiste::geometry
 
+
 # Header files
 set(wkzggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/geometry/utils.h
@@ -94,6 +95,15 @@ set(wkzggeometry_PUBLIC_HEADER_FILES
 # Source files
 set(wkzggeometry_SOURCE_FILES
     src/geometry/vector.cpp)
+
+# If Eigen3 is available, add the projection utils
+find_package(Eigen3)
+if (TARGET Eigen3::Eigen)
+    set(wkzggeometry_PUBLIC_HEADER_FILES
+        ${wkzggeometry_PUBLIC_HEADER_FILES}
+        include/werkzeugkiste/geometry/projection.h
+        include/werkzeugkiste/geometry/camera.h)
+endif (TARGET Eigen3::Eigen)
 
 # Library
 add_library(werkzeugkiste-geometry
@@ -108,6 +118,12 @@ target_include_directories(werkzeugkiste-geometry
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
+
+# Add the Eigen dependency if available
+if (TARGET Eigen3::Eigen)
+    target_link_libraries(werkzeugkiste-geometry
+        PUBLIC Eigen3::Eigen)
+endif (TARGET Eigen3::Eigen)
 
 # Other properties
 set_target_properties(werkzeugkiste-geometry PROPERTIES

@@ -27,6 +27,10 @@ namespace geometry {
 template<typename _Tp, int dim>
 class Vec {
  public:
+  using value_type = _Tp;
+  static constexpr int ndim = dim;
+//  constexpr int ndim() const { return dim; }
+
   //------------------------------------------------- Initialization
   Vec();
   Vec(_Tp x, _Tp y);
@@ -45,6 +49,9 @@ class Vec {
   /// Allow explicitly casting each vector to its
   /// double-precision counterpart.
   explicit operator Vec<double, dim>() const;
+
+  //TODO
+  Vec<_Tp, dim+1> Homogeneous() const;
 
 
   //------------------------------------------------- Value access
