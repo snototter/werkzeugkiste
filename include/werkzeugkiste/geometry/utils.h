@@ -12,15 +12,13 @@ namespace werkzeugkiste {
  */
 namespace geometry {
 
-template <typename _Tp> inline
-_Tp deg2rad(_Tp deg) {
-  return static_cast<_Tp>(deg * M_PI / 180.0);
+inline double deg2rad(double deg) {
+  return deg * M_PI / 180.0;
 }
 
 
-template <typename _Tp> inline
-_Tp rad2deg(_Tp rad) {
-  return static_cast<_Tp>(rad * 180.0 / M_PI);
+inline double rad2deg(double rad) {
+  return rad * 180.0 / M_PI;
 }
 
 
@@ -31,7 +29,7 @@ _Tp rad2deg(_Tp rad) {
 template<typename T>
 inline bool eps_zero(T x) {
   if (std::is_floating_point<T>::value)   {
-    return std::fabs(x) < 2*std::numeric_limits<T>::epsilon();
+    return std::fabs(x) < (2 * std::numeric_limits<T>::epsilon());
   } else {
     return x == static_cast<T>(0);
   }
