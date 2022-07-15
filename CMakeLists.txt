@@ -386,6 +386,8 @@ if(werkzeugkiste_BUILD_TESTS)
 
     #TODO(new-library-extensions) Add test suite:
     add_executable(tests-werkzeugkiste
+        tests/geometry/utils_test.cpp    
+        tests/geometry/projection_test.cpp
         tests/geometry/vector_test.cpp
         tests/container/sort_utils_test.cpp
         tests/container/math_utils_test.cpp

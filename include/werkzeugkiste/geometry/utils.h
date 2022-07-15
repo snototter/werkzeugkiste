@@ -12,11 +12,13 @@ namespace werkzeugkiste {
  */
 namespace geometry {
 
+/// Convert angle from degrees to radians.
 inline double deg2rad(double deg) {
   return deg * M_PI / 180.0;
 }
 
 
+/// Convert angle from radians to degrees.
 inline double rad2deg(double rad) {
   return rad * 180.0 / M_PI;
 }
