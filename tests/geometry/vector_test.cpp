@@ -248,5 +248,3 @@ TEST(VectorTest, MinMaxCoordinates) {
   EXPECT_DOUBLE_EQ(max3.y(), 0.0);
   EXPECT_DOUBLE_EQ(max3.z(), 17.0);
 }
-
-//TODO test vector math! projections, angles, etc.
