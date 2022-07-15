@@ -91,6 +91,17 @@ Vec<_Tp, dim>::Vec(Vec<_Tp, dim> &&other) noexcept {
 
 
 template<typename _Tp, int dim>
+Vec<_Tp, dim+1> Vec<_Tp, dim>::Homogeneous() const {
+  Vec<_Tp, dim+1> vh;
+  for (int i = 0; i < dim; ++i) {
+    vh[i] = val[i];
+  }
+  vh[dim] = static_cast<_Tp>(1);
+  return vh;
+}
+
+
+template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator=(const Vec<_Tp, dim> &other) {
   for (int i = 0; i < dim; ++i)
     val[i] = other.val[i];

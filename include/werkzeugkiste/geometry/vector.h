@@ -50,6 +50,9 @@ class Vec {
   /// double-precision counterpart.
   explicit operator Vec<double, dim>() const;
 
+  //TODO
+  Vec<_Tp, dim+1> Homogeneous() const;
+
 
   //------------------------------------------------- Value access
   const _Tp &operator[](int i) const;

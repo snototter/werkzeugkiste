@@ -109,31 +109,31 @@ VecsToEigenMat(
 }
 
 
-/// Base case for making a tuple out of a variadic number of vectors.
-template <typename _Tp> inline
-std::tuple<_Tp> VecsToTuple(_Tp &&vec) {
-  return std::tuple<_Tp>(std::move(vec));
-}
+///// Base case for making a tuple out of a variadic number of vectors.
+//template <typename _Tp> inline
+//std::tuple<_Tp> VecsToTuple(_Tp &&vec) {
+//  return std::tuple<_Tp>(std::move(vec));
+//}
 
 
-/// Returns a tuple of vectors.
-template <typename _V0, typename _V1, typename... _Vs> inline
-std::tuple<_V0, _V1, _Vs...>
-VecsToTuple(
-    _V0 &&v0, _V1 &&v1, _Vs&&... others) {
-  return std::tuple_cat(
-        std::tuple<_V0>(std::move(v0)),
-        VecsToTuple<_V1, _Vs...>(std::move(v1), std::move(others)...));
-}
+///// Returns a tuple of vectors.
+//template <typename _V0, typename _V1, typename... _Vs> inline
+//std::tuple<_V0, _V1, _Vs...>
+//VecsToTuple(
+//    _V0 &&v0, _V1 &&v1, _Vs&&... others) {
+//  return std::tuple_cat(
+//        std::tuple<_V0>(std::move(v0)),
+//        VecsToTuple<_V1, _Vs...>(std::move(v1), std::move(others)...));
+//}
 
 
-template <typename Array, std::size_t... Idx>
+template <typename Array, std::size_t... Idx> inline
 auto ArrayToTuple(const Array &arr, std::index_sequence<Idx...>) {
   return std::make_tuple(arr[Idx]...);
 }
 
 
-template <typename _Tp, int Rows, int Columns>
+template <typename _Tp, int Rows, int Columns> inline
 auto EigenMatToVecTuple(
     const Matrix<_Tp, Rows, Columns> &vec_mat) {
   std::array<Vec<_Tp, Rows>, Columns> arr;
@@ -155,6 +155,7 @@ auto EigenMatToVecTuple(
 //      typename _V::value_type, _V::ndim> res = mat * VecToEigenCol(vec);
 //  return EigenColToVec(res);
 //}
+
 
 
 /// Computes `mat * [vec0, ...]` and returns the result as a matrix.
@@ -224,16 +225,43 @@ TransformToVecs(
 
 
 
+// TODO input vectors must have the correct dimensionality
 template <typename _V, typename... _Vs, int Rows> inline
-Matrix<typename _V::value_type, Rows, 1 + sizeof...(_Vs)>
-////Matrix<typename _V::value_type, Rows, Eigen::Dynamic>
-//auto
+Matrix<typename _V::value_type, Rows - 1, 1 + sizeof...(_Vs)>
+ProjectHomogeneousToMat(
+      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
+      const _V &vec0, const _Vs &... others) {
+
+  constexpr int num_vecs = 1 + sizeof...(others);
+  const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
+      mat * VecsToEigenMat<_V::ndim>(vec0, others...);
+
+  return transformed.colwise().hnormalized();
+}
+
+// TODO input vectors must have the correct dimensionality
+template <typename _V, typename... _Vs, int Rows> inline
+std::tuple<
+  Vec<typename _V::value_type, Rows - 1>,
+  Vec<typename _Vs::value_type, Rows - 1>...>
+ProjectHomogeneousToVecs(
+      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
+      const _V &vec0, const _Vs &... others) {
+
+  constexpr int num_vecs = 1 + sizeof...(others);
+  const auto projected = ProjectHomogeneousToMat(mat, vec0, others...);
+  return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
+}
+
+
+// TODO input vector dimension must be num_cols - 1!
+template <typename _V, typename... _Vs, int Rows> inline
+Matrix<typename _V::value_type, Rows - 1, 1 + sizeof...(_Vs)>
 ProjectInhomogeneousToMat(
       const Matrix<typename _V::value_type, Rows, _V::ndim + 1> &mat,
       const _V &vec0, const _Vs &... others) {
 
   constexpr int num_vecs = 1 + sizeof...(others);
-
   const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
       mat * VecsToEigenMat<_V::ndim + 1>(vec0, others...);
 
@@ -241,6 +269,7 @@ ProjectInhomogeneousToMat(
 }
 
 
+// TODO input vector dimension must be num_cols - 1!
 template <typename _V, typename... _Vs, int Rows> inline
 std::tuple<
   Vec<typename _V::value_type, Rows - 1>,
@@ -250,16 +279,8 @@ ProjectInhomogeneousToVecs(
       const _V &vec0, const _Vs &... others) {
 
   constexpr int num_vecs = 1 + sizeof...(others);
-
-//  const auto hnormed = ProjectInhomogeneousToMat(mat, vec0, others...);
-
-////  const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
-////      TransformToMat(mat, vec0, vec1, others...);
-  const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
-      mat * VecsToEigenMat<_V::ndim + 1>(vec0, others...);
-
-  const auto hnormed = transformed.colwise().hnormalized();
-  return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(hnormed);
+  const auto projected = ProjectInhomogeneousToMat(mat, vec0, others...);
+  return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
 }
 
 } // namespace geometry
