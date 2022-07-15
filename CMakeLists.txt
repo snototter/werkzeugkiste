@@ -388,6 +388,7 @@ if(werkzeugkiste_BUILD_TESTS)
     add_executable(tests-werkzeugkiste
         tests/geometry/utils_test.cpp    
         tests/geometry/projection_test.cpp
+        tests/geometry/primitives_test.cpp
         tests/geometry/vector_test.cpp
         tests/container/sort_utils_test.cpp
         tests/container/math_utils_test.cpp
