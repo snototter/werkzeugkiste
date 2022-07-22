@@ -88,21 +88,31 @@ TEST(ProjectionTest, Projections) {
 
 
 TEST(ProjectionTest, PinholeCamera) {
+  // Within field of view:
+  EXPECT_TRUE(wkg::IsPointInsideImage(wkg::Vec2d{0, 0}, {3, 7}));
+  EXPECT_FALSE(wkg::IsPointInsideImage(wkg::Vec2d{-1, 0}, {3, 7}));
+  EXPECT_TRUE(wkg::IsPointInsideImage(wkg::Vec2d{2.9, 0}, {3, 7}));
+  EXPECT_FALSE(wkg::IsPointInsideImage(wkg::Vec2d{3, 0}, {3, 7}));
+
 //  FIXME test camera-related utils
-//  wkg::Mat3x3d K, R;
-//  wkg::Vec3d t{0.5, 0.3, 0.1};
+  wkg::Mat3x3d K, R;
+  wkg::Vec3d t{0.5, 0.3, 0.1};
 
-//  K << 400, 0, 300,
-//       0, 400, 300,
-//      0, 0, 1;
-//  R << 1, 0, 0,
-//       0, 1, 0,
-//       0, 0, 1;
+  K << 400, 0, 300,
+       0, 400, 300,
+      0, 0, 1;
+  R << 1, 0, 0,
+       0, 1, 0,
+       0, 0, 1;
 
-//  wkg::Matrix<double, 3, 4> Rt;
-//  Rt << R, wkg::VecToEigen(t);
+  wkg::Matrix<double, 3, 4> Rt;
+  Rt << R, wkg::VecToEigen(t);
 
 //  wkg::Mat3x4d cam_prj = wkg::ProjectionMatrixFromKRt(K, R, t);
+
+  wkg::Plane img_plane = wkg::ImagePlaneInWorldCoordinateSystem(R, {0, 0, 0});
+  EXPECT_TRUE(img_plane.Normal() == wkg::Vec3d(0, 0, 1));
+  EXPECT_DOUBLE_EQ(img_plane.Offset(), -1.0);
 
 //  std::cout << "Projection matrix:\nK = " << K << ", R = " << R << ", t = " << t << " --> P = \n" << cam_prj << std::endl;
 

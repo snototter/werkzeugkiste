@@ -123,8 +123,8 @@ Plane_<_Tp> ImagePlaneInWorldCoordinateSystem(
   // Rotate the image plane normal to express it in the world reference frame:
   const Plane_<_Tp> img_plane_cam = ImagePlaneInCameraCoordinateSystem<_Tp>();
   Vec<_Tp, 3> normal_world;
-  std::tie(normal_world) = TransformToVecs(
-        R.transpose(), img_plane_cam.Normal());
+  const Matrix<_Tp, 3, 3> Rinv = R.transpose();
+  std::tie(normal_world) = TransformToVecs(Rinv, img_plane_cam.Normal());
 
   // The world origin in camera coordinates is t = -R*C = [R|t] * (0, 0, 0, 1).
   const _Tp offset = img_plane_cam.DistancePointToPlane(t);
@@ -175,7 +175,9 @@ bool IsInFrontOfImagePlane(
 // Field-of-View
 template <typename _Tp> inline
 bool IsPointInsideImage(const Vec<_Tp, 2> &pt, const Vec2i &img_size) {
-  return IsPointInsideRectangle<_Tp>(pt, {0, 0}, img_size);
+  return IsPointInsideRectangle<_Tp>(
+        pt, Vec<_Tp, 2>{0.0, 0.0}, Vec<_Tp, 2>{
+          static_cast<_Tp>(img_size.x()), static_cast<_Tp>(img_size.y())});
 }
 
 
@@ -190,8 +192,7 @@ bool ProjectsPointOntoImage(
   Vec<_Tp, 2> pt_img;
   std::tie(pt_img) = ProjectToVecs(P, pt_world);
   if (projected) {
-    projected->SetX(pt_img.x());
-    projected->SetY(pt_img.y());
+    *projected = pt_img;
   }
   return IsPointInsideImage(pt_img, img_size);
 }
