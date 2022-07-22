@@ -29,6 +29,8 @@ namespace geometry {
 // TODO Polygon Inside/Outside/Distance, ConvexHull
 // TODO RDP
 
+
+/// Returns true if the given point is within the rectangle.
 template <typename _Tp> inline
 bool IsPointInsideRectangle(
     const Vec<_Tp, 2> &pt, const Vec<_Tp, 2> &top_left,
@@ -92,7 +94,7 @@ public:
   bool IsValid() const { return !eps_equal(pt_from_, pt_to_); }
 
 
-  /// Returns the angle between the line and v.
+  /// Returns the angle between the line and the given vector (not point(!)).
   double Angle(const vec_type &v) const {
     return std::acos(std::max(-1.0, std::min(1.0,
         static_cast<double>(UnitDirection().Dot(v.UnitVector())))));
@@ -100,8 +102,10 @@ public:
 
 
   /// Returns the line in homogeneous coordinates, *i.e.* a 3-element vector
-  /// in P^2 (Projective 2-space). For more details on lines in projective space, refer to
-  /// `Bob Fisher's CVonline <http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/BEARDSLEY/node2.html>`__, or
+  /// in P^2 (Projective 2-space). For more details on lines in projective
+  /// space, refer to
+  /// `Bob Fisher's CVonline <http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/BEARDSLEY/node2.html>`__,
+  /// or
   /// `Stan Birchfield's notes <http://robotics.stanford.edu/~birch/projective/node4.html>`__.
   vec3_type HomogeneousForm() const {
     return vec3_type{pt_from_[0], pt_from_[1], 1}.Cross(
@@ -109,7 +113,8 @@ public:
   }
 
 
-  /// Computes the projection of the given point onto this line.
+  /// Returns the closes point on the line, i.e. the projection of the given
+  /// point onto this line.
   vec_type ClosestPointOnLine(const vec_type &point) const {
     // Vector from line start to point:
     const vec_type v = pt_from_.DirectionVector(point);
@@ -120,7 +125,8 @@ public:
   }
 
 
-  /// Returns the point on this line segment(!) which is closest.
+  /// Returns the point on this line segment(!) which is closest to the
+  /// given point.
   vec_type ClosestPointOnSegment(const vec_type &point) const {
     // Vector from segment start to point:
     const vec_type v = pt_from_.DirectionVector(point);
@@ -271,8 +277,6 @@ public:
       // Lines are collinear. They intersect if there is any overlap.
       const _Tp t0 = (q-p).Dot(r) / r.Dot(r);
       const double t1 = t0 + s.Dot(r) / r.Dot(r);
-      // FIXME double-check this implementation! [t0,t1] must intersect [0,1] if s.dot(r) >= 0; otherwise,
-      // we must check the interval [t1,t0] against [0,1]
       if ((t0 >= 0.0f) && (t0 <= 1.0f)) {
         if (intersection_point) {
           *intersection_point = p + t0 * r;
@@ -308,8 +312,12 @@ public:
       }
     }
   }
-//  int IntersectionLineCircle(const vec_type &center, _Tp radius, vec_type *intersection1, vec_type *intersection2) const;
-//  int IntersectionLineSegmentCircle(const vec_type &center, _Tp radius, vec_type *intersection1, vec_type *intersection2) const;
+
+  //TODO(vcp) int IntersectionLineCircle(const vec_type &center, _Tp radius, vec_type *intersection1, vec_type *intersection2) const;
+  //TODO(vcp) int IntersectionLineSegmentCircle(const vec_type &center, _Tp radius, vec_type *intersection1, vec_type *intersection2) const;
+
+  /// Clips this line(!) such that only the part within the rectangle
+  /// remains, check via `IsValid()` afterwards.
   Line2d_<_Tp> ClipLineByRectangle(
       const vec_type &top_left, const vec_type &size) const {
     const vec_type top_right{top_left.x() + size.width(), top_left.y()};
@@ -351,6 +359,9 @@ public:
     }
   }
 
+
+  /// Clips this line segment(!) such that only the part within the rectangle
+  /// remains, check via `IsValid()` afterwards.
   Line2d_<_Tp> ClipLineSegmentByRectangle(
       const vec_type &top_left, const vec_type &size) const {
     const bool is_from_inside = IsPointInsideRectangle(
@@ -408,14 +419,21 @@ public:
   }
 
 private:
+  /// Starting point of a line segment or one direction-defining point on a
+  /// line.
   vec_type pt_from_;
+
+  /// Ending point of a line segment or the second direction-defining point on
+  /// a line.
   vec_type pt_to_;
 };
 
 
+/// A 2-dimensional line using double precision.
 typedef Line2d_<double> Line2d;
 
 
+/// Represents a plane in 3d Euclidean space.
 template <typename _Tp>
 class Plane_ {
 public:
@@ -425,17 +443,20 @@ public:
 
   using vec_type = Vec<_Tp, 3>;
 
+  /// Constructs an invalid plane.
   Plane_()
     : normal_(0, 0, 0), offset_(0)
   {}
 
 
+  /// Constructs a plane from its Hessian form.
   Plane_(const vec_type &normal, _Tp offset)
     : normal_(normal.UnitVector()), offset_(offset)
   {}
 
 
-  /// Constructs a plane from 3 points. Throws if the points are collinear
+  /// Constructs a plane from 3 points. If the points are collinear, the plane
+  /// will be invalid.
   Plane_(const vec_type &p, const vec_type &q, const vec_type &r)
     : Plane_() {
     const vec_type pq = p.DirectionVector(q);
@@ -445,33 +466,39 @@ public:
     if (!eps_zero(cross.LengthSquared())) {
       normal_ = cross.UnitVector();
       offset_ = -normal_.Dot(p);
-//      std::string s("Cannot construct a plane from 3 collinear points: ");
-//      s += p.ToString(false) + ", " + q.ToString(false) + ", " + r.ToString(false) + '!';
-//      throw std::logic_error(s);
     }
+    // TODO: implement logging and warn about 3 collinear points.
   }
 
+  /// Returns true if the plane has a valid normal vector.
   bool IsValid() const {
-    return normal_.LengthSquared() > 0.0;
+    return eps_equal(normal_.LengthSquared(), 1.0);
   }
 
 
+  /// Returns the plane's normal vector.
   vec_type Normal() const { return normal_; }
 
 
+  /// Returns the plane's offset, i.e. the distance from the plane to
+  /// the coordinate system origin, measured along the plane's normal.
   _Tp Offset() const { return offset_; }
 
 
+  /// Returns the distance from the given point to the plane.
   _Tp DistancePointToPlane(const vec_type &pt) const {
     return (normal_.Dot(pt) + offset_);
   }
 
 
+  /// Returns true if the given point is in front of the plane, i.e. the
+  /// side where the plane's normal points to.
   bool IsPointInFrontOfPlane(const vec_type &pt) const {
     return DistancePointToPlane(pt) >= 0.0f;
   }
 
 
+  /// Returns true if the given point lies exactly on the plane.
   bool IsPointOnPlane(const vec_type &pt) const {
     return eps_zero(DistancePointToPlane(pt));
   }
@@ -485,11 +512,12 @@ public:
     return std::acos(std::max(-1.0, std::min(1.0, normal_.Dot(other.normal_))));
   }
 
-  //TODO AngleLinePlane
-  //TODO IntersectionLinePlane
-  //TODO IntersectionLineSegmentPlane
-  //TODO AddPoly/IsInsidePolygon
-  //TODO Origin/e1/e2
+  //TODO(vcp) AngleLinePlane
+  //TODO(vcp) IntersectionLinePlane
+  //TODO(vcp) IntersectionLineSegmentPlane
+  //TODO(vcp/viren2d) AddPoly/IsInsidePolygon
+  //TODO(vcp/viren2d) Origin/e1/e2
+
 
   /// Returns the plane's x-, y- and z-intercepts.
   vec_type XYZIntercepts() const {
@@ -503,7 +531,6 @@ public:
   }
 
 
-
   /// Overloaded output stream operator.
   friend std::ostream &operator<< (std::ostream &stream, const Plane_ &plane) {
     stream << "Plane(" << plane.normal_.ToString(false) << ", " << plane.offset_ << ')';
@@ -511,10 +538,15 @@ public:
   }
 
 private:
+  /// The plane's normal vector.
   vec_type normal_;
+
+  /// Distance between plane and origin of the coordinate system.
   _Tp offset_;
 };
 
+
+/// The default plane type which uses double precision.
 typedef Plane_<double> Plane;
 
 
