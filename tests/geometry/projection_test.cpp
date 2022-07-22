@@ -15,24 +15,16 @@ TEST(ProjectionTest, Transformations) {
   wkg::Vec2d v1{17, 42};
   wkg::Vec2d v2{-3, 0.5};
   wkg::Matrix<double, 4, 2> M;
-  M << 1, 2, 3, 4,
-       5, 6, 7, 8;
+  M << 1, 2, 3, 4, 5, 6, 7, 8;
 
-  // First transform to mat, then convert mat to tuple
-  wkg::Matrix<double, 4, 2> mat_res = wkg::TransformToMat(M, v1, v2);
-  wkg::Vec4d a, b;
-  std::tie(a, b) = wkg::EigenMatToVecTuple<double, 4, 2>(mat_res);
-
-  wkg::Vec4d exp1{
+  const wkg::Vec4d exp1{
     (17 + 84), (3 * 17 + 4 * 42), (5 * 17 + 6 * 42), (7 * 17 + 8 * 42)};
-  wkg::Vec4d exp2{
+  const wkg::Vec4d exp2{
     (-3 + 1), (-3 * 3 + 2), (-5 * 3 + 3), (-7 * 3 + 4)};
-  EXPECT_EQ(a, exp1);
-  EXPECT_EQ(b, exp2);
 
-  // Test the convenience util which directly outputs the tuple
-  wkg::Vec4d c, d;
-  std::tie(c, d) = wkg::TransformToVecs(M, v1, v2);
+  wkg::Vec4d a, b;
+  // Test the convenience util which directly outputs the tuple  wkg::Vec4d c, d;
+  std::tie(a, b) = wkg::TransformToVecs(M, v1, v2);
   EXPECT_EQ(a, exp1);
   EXPECT_EQ(b, exp2);
 
@@ -41,6 +33,18 @@ TEST(ProjectionTest, Transformations) {
   EXPECT_EQ(a, exp2);
   std::tie(a) = wkg::TransformToVecs(M, v1);
   EXPECT_EQ(a, exp1);
+
+
+  // Test with implicitly added homogeneous coordinate:
+  wkg::Matrix<double, 4, 3> N;
+  N << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
+  std::tie(a, b) = wkg::TransformToVecs(N, v1, v2);
+  const wkg::Vec4d exp3{
+    (17 + 84 + 3), (4 * 17 + 5 * 42 + 6), (7 * 17 + 8 * 42 + 9), (10 * 17 + 11 * 42 + 12)};
+  const wkg::Vec4d exp4{
+    (-3 + 1 + 3), (-3 * 4 + 2.5 + 6), (-7 * 3 + 4 + 9), (-10 * 3 + 5.5 + 12)};
+  EXPECT_EQ(a, exp3);
+  EXPECT_EQ(b, exp4);
 }
 
 
@@ -56,7 +60,7 @@ TEST(ProjectionTest, Projections) {
 
   // Test util which adds the homogeneous coordinate on its own
   wkg::Vec2d p1, p2, p3;
-  std::tie(p1, p2) = wkg::ProjectInhomogeneousToVecs(P, v1, v2);
+  std::tie(p1, p2) = wkg::ProjectToVecs(P, v1, v2);
 
   wkg::Vec2d exp1{0.22413793, 0.61206897};
   wkg::Vec2d exp2{-0.125, 0.4375};
@@ -65,20 +69,20 @@ TEST(ProjectionTest, Projections) {
   EXPECT_EQ(p2, exp2);
 
   // Test projection with only a single vector
-  std::tie(p3) = wkg::ProjectInhomogeneousToVecs(P, v3);
+  std::tie(p3) = wkg::ProjectToVecs(P, v3);
   wkg::Vec2d exp3{0.25, 0.625};
   EXPECT_EQ(p3, exp3);
 
 
   // Test the same, but this time already provide homogeneous coordinates
-  std::tie(p2, p1) = wkg::ProjectHomogeneousToVecs(P, v1.Homogeneous(), v2.Homogeneous());
+  std::tie(p2, p1) = wkg::ProjectToVecs(P, v1.Homogeneous(), v2.Homogeneous());
   // Tuple assignment flipped on purpose
   EXPECT_TRUE(std::abs(p2[0] - exp1[0]) < 1e-6);
   EXPECT_TRUE(std::abs(p2[1] - exp1[1]) < 1e-6);
   EXPECT_EQ(p1, exp2);
 
   // Again with only a single vector
-  std::tie(p1) = wkg::ProjectHomogeneousToVecs(P, v3.Homogeneous());
+  std::tie(p1) = wkg::ProjectToVecs(P, v3.Homogeneous());
   EXPECT_EQ(p1, exp3);
 }
 

@@ -1,11 +1,13 @@
 #ifndef __WERKZEUGKISTE_GEOMETRY_CAMERA_H__
 #define __WERKZEUGKISTE_GEOMETRY_CAMERA_H__
 
+#include <type_traits>
 
 #include <Eigen/Core>
 
 #include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/geometry/projection.h>
+#include <werkzeugkiste/geometry/primitives.h>
 
 
 namespace werkzeugkiste {
@@ -100,25 +102,68 @@ Matrix<_Tp, 3, 3> ImageToGroundplaneHomography(const Matrix<_Tp, 3, 4> &P) {
 //-----------------------------------------------------------------------------
 // Image Plane
 
-///// Returns the Hessian normal form of the image plane given the camera's
-///// extrinsic parameters.
-//template <typename _Tp> inline
-//Vec<_Tp, 4> ImagePlaneInWorldCoordinateSystem(
-//    const Matrix<_Tp, 3, 3> &R, const Matrix<_Tp, 3, 3> &t) {
-//  // Camera looks along the positive z-axis.
-//  // Get the distance between the image plane and the world origin (in camera coordinates).
-//  // World origin in camera coordinates is t = -RC = [R|t] (0,0,0,1).
-//  // Image plane in camera coordinates is the xy plane, at z=1. Thus, its Hessian form is
-//  // [0,0,1,-1] (distance=-1 because the camera center (origin) is *behind* the image plane!
-//  const Vec<_Tp, 3> unit_vec_z {0, 0, 1};
-//  const double distance = DistancePointPlane(vcp::convert::ToVec3d(t), MakePlane(unit_vec_z, -1.0));
-//  // Rotate plane normal to express it in the world reference frame:
-//  const cv::Mat Rinv = R.t();
-//  Vec3d plane_normal = Apply3x3(Rinv, unit_vec_z); // In world reference
-//  return MakePlane(plane_normal, distance);
-//}
+template <typename _Tp> inline
+Plane_<_Tp> ImagePlaneInCameraCoordinateSystem() {
+  // Pinhole camera looks along the positive z-axis and the image plane is
+  // at z = 1 in the camera reference frame. Thus, it's Hessian form is
+  // n = (0, 0, 1), d = -1:
+  return Plane_<_Tp>{{0, 0, 1}, -1};
+}
 
 
+/// Returns the image plane in the world reference frame, given the camera's
+/// extrinsic parameters.
+template <typename _Tp> inline
+Plane_<_Tp> ImagePlaneInWorldCoordinateSystem(
+    const Matrix<_Tp, 3, 3> &R, const Vec<_Tp, 3> &t) {
+  static_assert(
+      std::is_floating_point<_Tp>::value,
+      "Template type must be float or double!");
+
+  // Rotate the image plane normal to express it in the world reference frame:
+  const Plane_<_Tp> img_plane_cam = ImagePlaneInCameraCoordinateSystem<_Tp>();
+  Vec<_Tp, 3> normal_world;
+  std::tie(normal_world) = TransformToVecs(
+        R.transpose(), img_plane_cam.Normal());
+
+  // The world origin in camera coordinates is t = -R*C = [R|t] * (0, 0, 0, 1).
+  const _Tp offset = img_plane_cam.DistancePointToPlane(t);
+
+  return Plane_<_Tp>(normal_world, offset);
+}
+
+
+/// Returns true if the world point lies in front of the image plane.
+template <typename _Tp> inline
+bool IsInFrontOfImagePlane(
+    const Vec<_Tp, 3> &pt_world, const Matrix<_Tp, 3, 4> &Rt) {
+  static_assert(
+      std::is_floating_point<_Tp>::value,
+      "Template type must be float or double!");
+  Vec<_Tp, 3> pt_cam;
+  std::tie(pt_cam) = TransformToVecs(Rt, pt_world);
+
+  const Plane_<_Tp> img_plane_cam = ImagePlaneInCameraCoordinateSystem<_Tp>();
+  return img_plane_cam.IsPointInFrontOfPlane(pt_cam);
+}
+
+
+/// Returns true if the world point lies in front of the image plane.
+template <typename _Tp> inline
+bool IsInFrontOfImagePlane(
+    const Vec<_Tp, 3> &pt_world, const Matrix<_Tp, 3, 3> &R,
+    const Vec<_Tp, 3> &t) {
+  static_assert(
+      std::is_floating_point<_Tp>::value,
+      "Template type must be float or double!");
+  Matrix<_Tp, 3, 4> Rt;
+  Rt << R, t;
+  return IsInFrontOfImagePlane(pt_world, Rt);
+}
+
+
+//-----------------------------------------------------------------------------
+// Horizon
 ///** @brief Returns a the projected line of horizon for the given camera intrinsics/extrinsics. If a valid image size
 //  * is given, the line will be clipped to the visible region (in this case, check result.empty() as the horizon may lie
 //  * outside of the image.
@@ -126,10 +171,35 @@ Matrix<_Tp, 3, 3> ImageToGroundplaneHomography(const Matrix<_Tp, 3, 4> &P) {
 //Line2d GetProjectionOfHorizon(const cv::Mat &K, const cv::Mat &R, const cv::Mat &t, const cv::Size &image_size=cv::Size());
 
 
+//-----------------------------------------------------------------------------
+// Field-of-View
+template <typename _Tp> inline
+bool IsPointInsideImage(const Vec<_Tp, 2> &pt, const Vec2i &img_size) {
+  return IsPointInsideRectangle<_Tp>(pt, {0, 0}, img_size);
+}
+
+
+
+/// Returns true if the given world point would be visible if projected into
+/// the camera image. If `projected` is a valid pointer, it will be set to
+/// the projected image coordinates.
+template <typename _Tp> inline
+bool ProjectsPointOntoImage(
+    const Vec<_Tp, 3> &pt_world, const Matrix<_Tp, 3, 4> &P, const Vec2i &img_size,
+    Vec<_Tp, 2> *projected) {
+  Vec<_Tp, 2> pt_img;
+  std::tie(pt_img) = ProjectToVecs(P, pt_world);
+  if (projected) {
+    projected->SetX(pt_img.x());
+    projected->SetY(pt_img.y());
+  }
+  return IsPointInsideImage(pt_img, img_size);
+}
+
+
+
 //////// TODOs
-// ImagePlaneInWorldCoordinateSystem
 // ClipLineSegmentByPlane / Line/Plane, ...
-// bool IsInFrontOfImagePlane(vec3 pt, Rt)
 // ProjectsOntoImage(Vec3d pt, P, image_size, Vec2d *projected)
 
 

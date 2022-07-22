@@ -91,12 +91,13 @@ int main(int /* argc */, char ** /* argv */) {
   wkg::Matrix<double, 4, 2> M;
   M << 1, 2, 3, 4,
        5, 6, 7, 8;
-  wkg::Matrix<double, 4, 3> mat_res = wkg::TransformToMat(M, v1, v2, v3);
+  //TODO remove if we drop transformtomat finally
+//  wkg::Matrix<double, 4, 3> mat_res = wkg::TransformToMat(M, v1, v2, v3);
 
   wkg::Vec4d a, b, c;
-  std::tie(a, b, c) = wkg::EigenMatToVecTuple(mat_res);//, std::make_index_sequence<3>{});
-  std::cout << "Transformation v1:\n" << M << " * " << PrettyPrint({v1, v2, v3}, 0, 6)
-            << " =\n" << PrettyPrint({a, b, c}) << std::endl;
+//  std::tie(a, b, c) = wkg::EigenMatToVecTuple(mat_res);//, std::make_index_sequence<3>{});
+//  std::cout << "Transformation v1:\n" << M << " * " << PrettyPrint({v1, v2, v3}, 0, 6)
+//            << " =\n" << PrettyPrint({a, b, c}) << std::endl;
 
   std::tie(a, b, c) = wkg::TransformToVecs(M, v1, v2, v3);
   std::cout << "Transformation v2:\n" << M << " * " << PrettyPrint({v1, v2, v3}, 0, 6)
@@ -111,23 +112,23 @@ int main(int /* argc */, char ** /* argv */) {
        4, 5, 6,
        7, 8, 9;
   wkg::Vec2d p1, p2, p3;
-  std::tie(p1, p2) = wkg::ProjectInhomogeneousToVecs(P, v1, v2);
+  std::tie(p1, p2) = wkg::ProjectToVecs(P, v1, v2);
 
-  std::cout << "Projection inhomogeneous:\n" << P << " * " << PrettyPrint({v1, v2}, 0, 8)
+  std::cout << "Projection (homogeneous coord implicitly added):\n" << P << " * " << PrettyPrint({v1, v2}, 0, 8)
             << " =\n" << PrettyPrint({p1, p2}) << std::endl;
 
-  std::tie(p3) = wkg::ProjectInhomogeneousToVecs(P, v3);
-  std::cout << "Projection inhomogeneous, single vec:\n" << P << " * " << PrettyPrint({v3}, 0, 8)
+  std::tie(p3) = wkg::ProjectToVecs(P, v3);
+  std::cout << "Projection (homogeneous coord implicitly added), single vec:\n" << P << " * " << PrettyPrint({v3}, 0, 8)
             << " =\n" << PrettyPrint({p3}) << std::endl;
 
 
-  std::tie(p1, p2) = wkg::ProjectHomogeneousToVecs(P, v1.Homogeneous(), v2.Homogeneous());
+  std::tie(p1, p2) = wkg::ProjectToVecs(P, v1.Homogeneous(), v2.Homogeneous());
 
-  std::cout << "Projection homogeneous:\n" << P << " * " << PrettyPrint({v1.Homogeneous(), v2.Homogeneous()}, 0, 8)
+  std::cout << "Projection (inputs already homogeneous):\n" << P << " * " << PrettyPrint({v1.Homogeneous(), v2.Homogeneous()}, 0, 8)
             << " =\n" << PrettyPrint({p1, p2}) << std::endl;
 
-  std::tie(p3) = wkg::ProjectHomogeneousToVecs(P, v3.Homogeneous());
-  std::cout << "Projection homogeneous, single vec:\n" << P << " * " << PrettyPrint({v3.Homogeneous()}, 0, 8)
+  std::tie(p3) = wkg::ProjectToVecs(P, v3.Homogeneous());
+  std::cout << "Projection (inputs already homogeneous), single vec:\n" << P << " * " << PrettyPrint({v3.Homogeneous()}, 0, 8)
             << " =\n" << PrettyPrint({p3}) << std::endl;
 
 

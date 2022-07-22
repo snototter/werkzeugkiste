@@ -142,64 +142,155 @@ auto EigenMatToVecTuple(
 //-----------------------------------------------------------------------------
 // Transformation/projection utitilites
 
-/// Computes `mat * [vec0, ...]` and returns the result as a matrix.
-template <typename _V, typename... _Vs, int Rows> inline
-Matrix<typename _V::value_type, Rows, 1 + sizeof...(_Vs)>
-TransformToMat(
-      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
-      const _V &vec0, const _Vs &... others) {
-  return mat * VecsToEigenMat<_V::ndim>(vec0, others...);
-}
+//TODO remove
+///// Computes `mat * [vec0, ...]` and returns the result as a matrix.
+//template <typename _V, typename... _Vs, int Rows> inline
+//Matrix<typename _V::value_type, Rows, 1 + sizeof...(_Vs)>
+//TransformToMat(
+//      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
+//      const _V &vec0, const _Vs &... others) {
+//  return mat * VecsToEigenMat<_V::ndim>(vec0, others...);
+//}
 
 
-/// Computes `mat * [vec0, vec1, ...]` and returns a tuple of vectors.
+/// Computes `mat * [vec0, vec1, ...]` and returns the result as a tuple
+/// of vectors.
+///
+/// The vector dimensionality must be either equal to or 1 less than the number
+/// of projection matrix columns. If not equal, a homogeneous coordinate will
+/// be implicitly added to each vector, *i.e.* [vec0.x(), vec0.y(), ..., 1].
 ///
 /// Example:
 ///   >>> wkg::Vec2d v1{17, 42}, v2{9, -3}, v3{0, 0.01};
 ///   >>> wkg::Matrix<double, 4, 2> M;
-///   >>> M << 1, 2, 3, 4,
-///   >>>      5, 6, 7, 8;
+///   >>> M << 1, 2, 3, 4, 5, 6, 7, 8;
 ///   >>> wkg::Vec4d a, b, c;
 ///   >>> std::tie(out1, out2, out3) = TransformToVecs(
 ///   >>>   T_matrix, in1, in2, in3);
-template <typename _V, typename... _Vs, int Rows> inline
+///   >>> // Or with padded homogeneous coordinate:
+///   >>> wkg::Matrix<double, 4, 3> M;
+///   >>> M << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
+///   >>> wkg::Vec4d a, b, c;
+///   >>> std::tie(out1, out2, out3) = TransformToVecs(
+///   >>>   T_matrix, in1, in2, in3);
+template <typename _V, typename... _Vs, int Rows, int Columns> inline
 std::tuple<
   Vec<typename _V::value_type, Rows>,
   Vec<typename _Vs::value_type, Rows>...>
 TransformToVecs(
-      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
+      const Matrix<typename _V::value_type, Rows, Columns> &mat,
       const _V &vec0, const _Vs &... others) {
+  static_assert(
+      (Columns == _V::ndim) || (Columns == (_V::ndim + 1)),
+      "Invalid dimensions: vector dimensionality must be equal or 1 less than"
+      "the number of matrix columns!");
 
   constexpr int num_vecs = 1 + sizeof...(others);
-  const auto transformed = TransformToMat(mat, vec0, others...);
+  const Matrix<
+      typename _V::value_type, Columns, num_vecs> vec_mat = VecsToEigenMat<Columns>(vec0, others...);
+  const auto transformed = mat * vec_mat;
+//  const auto transformed = TransformToMat(mat, vec0, others...);
   return EigenMatToVecTuple<typename _V::value_type, Rows, num_vecs>(transformed);
 }
 
 
-/// Computes `mat * [vec0, vec1, ...]` and divides the result by the
-/// homogeneous coordinate (last row).
-///
-/// The vector dimensionality must match the number of columns of
-/// the projection matrix. Alternatively, use `ProjectInhomogeneousToMat`
-template <typename _V, typename... _Vs, int Rows> inline
-Matrix<typename _V::value_type, Rows - 1, 1 + sizeof...(_Vs)>
-ProjectHomogeneousToMat(
-      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
-      const _V &vec0, const _Vs &... others) {
+//TODO remove
+///// Computes `mat * [vec0, vec1, ...]` and divides the result by the
+///// homogeneous coordinate (last row).
+/////
+///// The vector dimensionality must match the number of columns of
+///// the projection matrix. Alternatively, use `ProjectInhomogeneousToMat`
+//template <int Rows, typename _V, typename... _Vs> inline
+//Matrix<typename _V::value_type, Rows - 1, 1 + sizeof...(_Vs)>
+//ProjectionUtilHomogeneousToMat(
+//      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
+//      const _V &vec0, const _Vs &... others) {
 
-  constexpr int num_vecs = 1 + sizeof...(others);
-  const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
-      mat * VecsToEigenMat<_V::ndim>(vec0, others...);
+//  constexpr int num_vecs = 1 + sizeof...(others);
+//  const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
+//      mat * VecsToEigenMat<_V::ndim>(vec0, others...);
 
-  return transformed.colwise().hnormalized();
-}
+//  return transformed.colwise().hnormalized();
+//}
+
+//TODO remove
+///// Computes `mat * [vec0, vec1, ...]`, divides the result by the
+///// homogeneous coordinate (last row) and returns a tuple of vectors.
+/////
+///// The vector dimensionality must match the number of columns of
+///// the projection matrix. Alternatively, use `ProjectInhomogeneousToMat`
+/////
+///// Example:
+/////   >>> wkg::Vec3d v1{17, 42, 1}, v2{9, -3, 1};
+/////   >>> wkg::Matrix<double, 3, 3> H;
+/////   >>> H << 1, 2, 3,
+/////   >>>      4, 5, 6,
+/////   >>>      7, 8, 9;
+/////   >>> wkg::Vec2d out1, out2;
+/////   >>> std::tie(out1, out2) = TransformToVecs(H, v1, v2);
+//template <typename _V, typename... _Vs, int Rows> inline
+//std::tuple<
+//  Vec<typename _V::value_type, Rows - 1>,
+//  Vec<typename _Vs::value_type, Rows - 1>...>
+//ProjectHomogeneousToVecs(
+//      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
+//      const _V &vec0, const _Vs &... others) {
+
+//  constexpr int num_vecs = 1 + sizeof...(others);
+//  const auto projected = ProjectHomogeneousToMat(mat, vec0, others...);
+//  return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
+//}
+
+//TODO remove
+///// Adds the homogeneous coordinate to each vector and then
+///// computes `mat * [vec0, vec1, ...]`. Finally, the result is divided by the
+///// homogeneous coordinate.
+//template <typename _V, typename... _Vs, int Rows> inline
+//Matrix<typename _V::value_type, Rows - 1, 1 + sizeof...(_Vs)>
+//ProjectionUtilInhomogeneousToMat(
+//      const Matrix<typename _V::value_type, Rows, _V::ndim + 1> &mat,
+//      const _V &vec0, const _Vs &... others) {
+
+//  constexpr int num_vecs = 1 + sizeof...(others);
+//  const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
+//      mat * VecsToEigenMat<_V::ndim + 1>(vec0, others...);
+
+//  return transformed.colwise().hnormalized();
+//}
+
+//TODO remove
+///// Adds the homogeneous coordinate to each vector and then
+///// computes `mat * [vec0, vec1, ...]`. Finally, the result is divided by the
+///// homogeneous coordinate.
+/////
+///// Example:
+/////   >>> wkg::Vec2d v1{17, 42}, v2{9, -3};
+/////   >>> wkg::Matrix<double, 3, 3> H;
+/////   >>> H << 1, 2, 3,
+/////   >>>      4, 5, 6,
+/////   >>>      7, 8, 9;
+/////   >>> wkg::Vec2d out1, out2;
+/////   >>> std::tie(out1, out2) = TransformToVecs(H, v1, v2);
+//template <typename _V, typename... _Vs, int Rows> inline
+//std::tuple<
+//  Vec<typename _V::value_type, Rows - 1>,
+//  Vec<typename _Vs::value_type, Rows - 1>...>
+//ProjectionUtilInhomogeneousToVecs(
+//      const Matrix<typename _V::value_type, Rows, _V::ndim + 1> &mat,
+//      const _V &vec0, const _Vs &... others) {
+
+//  constexpr int num_vecs = 1 + sizeof...(others);
+//  const auto projected = ProjectionUtilInhomogeneousToMat(mat, vec0, others...);
+//  return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
+//}
 
 
 /// Computes `mat * [vec0, vec1, ...]`, divides the result by the
-/// homogeneous coordinate (last row) and returns a tuple of vectors.
+/// homogeneous coordinate (*i.e.* last row) and returns a tuple of vectors.
 ///
-/// The vector dimensionality must match the number of columns of
-/// the projection matrix. Alternatively, use `ProjectInhomogeneousToMat`
+/// The vector dimensionality must be either equal to or 1 less than the number
+/// of projection matrix columns. If not equal, a homogeneous coordinate will
+/// be implicitly added to each vector, *i.e.* [vec0.x(), vec0.y(), ..., 1].
 ///
 /// Example:
 ///   >>> wkg::Vec3d v1{17, 42, 1}, v2{9, -3, 1};
@@ -208,63 +299,27 @@ ProjectHomogeneousToMat(
 ///   >>>      4, 5, 6,
 ///   >>>      7, 8, 9;
 ///   >>> wkg::Vec2d out1, out2;
-///   >>> std::tie(out1, out2) = TransformToVecs(H, v1, v2);
-template <typename _V, typename... _Vs, int Rows> inline
+///   >>> std::tie(out1, out2) = ProjectToVecs(H, v1, v2);
+template <typename _V, typename... _Vs, int Rows, int Columns> inline
 std::tuple<
   Vec<typename _V::value_type, Rows - 1>,
   Vec<typename _Vs::value_type, Rows - 1>...>
-ProjectHomogeneousToVecs(
-      const Matrix<typename _V::value_type, Rows, _V::ndim> &mat,
+ProjectToVecs(
+      const Matrix<typename _V::value_type, Rows, Columns> &mat,
       const _V &vec0, const _Vs &... others) {
+  static_assert(
+      (Columns == _V::ndim) || (Columns == (_V::ndim + 1)),
+      "Invalid dimensions: vector dimensionality must be equal or 1 less than"
+      "the number of matrix columns!");
 
   constexpr int num_vecs = 1 + sizeof...(others);
-  const auto projected = ProjectHomogeneousToMat(mat, vec0, others...);
+
+  const Matrix<
+      typename _V::value_type, Columns, num_vecs> vec_mat = VecsToEigenMat<Columns>(vec0, others...);
+  const auto transformed = mat * vec_mat;
+  const auto projected = transformed.colwise().hnormalized();
   return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
 }
-
-
-/// Adds the homogeneous coordinate to each vector and then
-/// computes `mat * [vec0, vec1, ...]`. Finally, the result is divided by the
-/// homogeneous coordinate.
-template <typename _V, typename... _Vs, int Rows> inline
-Matrix<typename _V::value_type, Rows - 1, 1 + sizeof...(_Vs)>
-ProjectInhomogeneousToMat(
-      const Matrix<typename _V::value_type, Rows, _V::ndim + 1> &mat,
-      const _V &vec0, const _Vs &... others) {
-
-  constexpr int num_vecs = 1 + sizeof...(others);
-  const Matrix<typename _V::value_type, Rows, num_vecs> transformed =
-      mat * VecsToEigenMat<_V::ndim + 1>(vec0, others...);
-
-  return transformed.colwise().hnormalized();
-}
-
-
-/// Adds the homogeneous coordinate to each vector and then
-/// computes `mat * [vec0, vec1, ...]`. Finally, the result is divided by the
-/// homogeneous coordinate.
-///
-/// Example:
-///   >>> wkg::Vec2d v1{17, 42}, v2{9, -3};
-///   >>> wkg::Matrix<double, 3, 3> H;
-///   >>> H << 1, 2, 3,
-///   >>>      4, 5, 6,
-///   >>>      7, 8, 9;
-///   >>> wkg::Vec2d out1, out2;
-///   >>> std::tie(out1, out2) = TransformToVecs(H, v1, v2);
-template <typename _V, typename... _Vs, int Rows> inline
-std::tuple<
-  Vec<typename _V::value_type, Rows - 1>,
-  Vec<typename _Vs::value_type, Rows - 1>...>
-ProjectInhomogeneousToVecs(
-      const Matrix<typename _V::value_type, Rows, _V::ndim + 1> &mat,
-      const _V &vec0, const _Vs &... others) {
-
-  constexpr int num_vecs = 1 + sizeof...(others);
-  const auto projected = ProjectInhomogeneousToMat(mat, vec0, others...);
-  return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
-}
-
 
 // TODO project with scale --> project, then scale.
 

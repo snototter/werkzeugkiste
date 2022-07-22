@@ -470,10 +470,12 @@ Vec<_Tp, dim> Vec<_Tp, dim>::All(_Tp value) {
 
 
 template<typename _Tp, int dim>
-std::string Vec<_Tp, dim>::ToString() const {
+std::string Vec<_Tp, dim>::ToString(bool include_type) const {
   std::stringstream s;
-  s << Vec<_Tp, dim>::TypeName() << "("
-    << std::fixed << std::setprecision(2);
+  if (include_type) {
+    s << Vec<_Tp, dim>::TypeName();
+  }
+  s << '(' << std::fixed << std::setprecision(2);
 
   for (int i = 0; i < dim; ++i) {
     s << val[i];
@@ -481,7 +483,7 @@ std::string Vec<_Tp, dim>::ToString() const {
       s << ", ";
   }
 
-  s << ")";
+  s << ')';
   return s.str();
 }
 

@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <cmath>
 #include <vector>
+#include <type_traits>
 
 
 namespace werkzeugkiste {
@@ -171,7 +172,9 @@ class Vec {
 
 
   /// Returns a human-readable string representation.
-  std::string ToString() const;
+  /// If `include_type` is false, it will only return
+  /// the coordinates within parentheses, e.g. "(13, 77)".
+  std::string ToString(bool include_type = true) const;
 
 
   /// Overloaded stream operator.
@@ -258,9 +261,35 @@ typedef Vec<int, 3> Vec3i;
 
 
 /// Computes the determinant of the two 2d vectors.
-template <typename _Tp>
+template <typename _Tp> inline
 _Tp Determinant(const Vec<_Tp, 2> &a, const Vec<_Tp, 2> &b) {
   return a.x() * b.y() - b.x() * a.y();
+}
+
+
+/// Scalar projection is the length of the vector projection, which is the
+/// vector component of a in the direction of b.
+/// See also: https://en.wikipedia.org/wiki/Vector_projection
+template <typename _Tp, int dim> inline
+_Tp ScalarProjection(const Vec<_Tp, dim> &a, const Vec<_Tp, dim> &b) {
+  static_assert(
+      std::is_floating_point<_Tp>::value,
+      "Vector type must be float or double!");
+  return a.Dot(b.UnitVector());
+}
+
+
+/// Returns :math:`\operatorname{proj}_{\mathbf{b}} \mathbf{a}`, *i.e.* the
+/// projection of a onto b
+/// See also: https://en.wikipedia.org/wiki/Vector_projection
+template <typename _Tp, int dim> inline
+Vec<_Tp, dim> VectorProjection(const Vec<_Tp, dim> &a, const Vec<_Tp, dim> &b) {
+  static_assert(
+      std::is_floating_point<_Tp>::value,
+      "Vector type must be float or double!");
+  // Alternative formulation would be ScalarProjection(a, b) * b.UnitVector(),
+  // but we can save some computation via:
+  return (a.Dot(b) / b.LengthSquared()) * b;
 }
 
 
