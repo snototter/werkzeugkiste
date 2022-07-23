@@ -564,7 +564,7 @@ double LengthPolygon(const std::vector<Vec<_Tp, dim>> &points) {
 }
 
 
-//---------------------------------------------------- Explicit vector instantiation
+//----------------------------------------------------
 // Explicit instantiation:
 template class Vec<double, 2>;
 template class Vec<double, 3>;
@@ -643,32 +643,6 @@ template Vec3i operator*(double scale, Vec3i rhs);
 template Vec3i operator/(Vec3i lhs, double scale);
 template double LengthPolygon(const std::vector<Vec3i> &points);
 
-
-//---------------------------------------------------- Math/Geometry Helpers
-
-double AngleRadFromDirectionVec(const Vec2d &vec) {
-  // Dot product is proportional to the cosine, whereas
-  // the determinant is proportional to the sine.
-  // See: https://math.stackexchange.com/a/879474
-  Vec2d ref(1, 0);
-  Vec2d unit = vec.UnitVector();
-  return std::atan2(Determinant(ref, unit), ref.Dot(unit));
-}
-
-
-double AngleDegFromDirectionVec(const Vec2d &vec) {
-  return rad2deg(AngleRadFromDirectionVec(vec));
-}
-
-
-Vec2d DirectionVecFromAngleRad(double rad) {
-  return Vec2d(std::cos(rad), std::sin(rad)); // TODO verify it's unit length
-}
-
-
-Vec2d DirectionVecFromAngleDeg(double deg) {
-  return DirectionVecFromAngleRad(deg2rad(deg));
-}
 
 } // namespace geometry
 } // namespace werkzeugkiste

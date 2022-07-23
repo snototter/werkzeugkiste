@@ -4,12 +4,10 @@
 #include <limits>
 #include <type_traits>
 
-#include <math.h>
+#include <cmath>
 
 namespace werkzeugkiste {
-/**
- TODO doc
- */
+//TODO add namespace documentation
 namespace geometry {
 
 /// Convert angle from degrees to radians.

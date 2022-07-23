@@ -9,6 +9,7 @@
 #include <vector>
 #include <type_traits>
 
+#include <werkzeugkiste/geometry/utils.h>
 
 namespace werkzeugkiste {
 namespace geometry {
@@ -293,22 +294,62 @@ Vec<_Tp, dim> VectorProjection(const Vec<_Tp, dim> &a, const Vec<_Tp, dim> &b) {
 }
 
 
-/// Computes the angle (in radians) of a 2d direction vector w.r.t. the positive X axis.
-double AngleRadFromDirectionVec(const Vec2d &vec);
+/// Computes the angle (in radians) of a 2d direction vector w.r.t. the
+/// positive X axis.
+template <typename _Tp> inline
+double AngleRadFromDirectionVec(const Vec<_Tp, 2> &vec) {
+  // Dot product is proportional to the cosine, whereas
+  // the determinant is proportional to the sine.
+  // See: https://math.stackexchange.com/a/879474
+  const Vec<double, 2> ref(1, 0);
+  const Vec<double, 2> unit = vec.UnitVector();
+  return std::atan2(Determinant(ref, unit), ref.Dot(unit));
+}
 
 
-/// Computes the angle (in degrees) of a 2d direction vector w.r.t. the positive X axis.
-double AngleDegFromDirectionVec(const Vec2d &vec);
+/// Computes the angle (in degrees) of a 2d direction vector w.r.t. the
+/// positive X axis.
+template <typename _Tp> inline
+double AngleDegFromDirectionVec(const Vec<_Tp, 2> &vec) {
+  return rad2deg(AngleRadFromDirectionVec(vec));
+}
 
 
 /// Returns the unit direction vector given its angle (in
 /// radians) w.r.t. the positive X axis.
-Vec2d DirectionVecFromAngleRad(double rad);
+inline Vec2d DirectionVecFromAngleRad(double rad) {
+  return Vec2d(std::cos(rad), std::sin(rad)); // TODO test case to ensure numerical stability at edge cases
+}
 
 
 /// Returns the unit direction vector given its angle (in
 /// degrees) w.r.t. the positive X axis.
-Vec2d DirectionVecFromAngleDeg(double deg);
+inline Vec2d DirectionVecFromAngleDeg(double deg) {
+  return DirectionVecFromAngleRad(deg2rad(deg));
+}
+
+
+
+/// Rotates the vector by the given radians, assuming a right-handed(!)
+/// coordinate system.
+inline Vec2d RotateVector(const Vec2d &vec, double theta) {
+  // 2D rotation matrix R = [[ct, -st], [st, ct]]
+  const double ct = std::cos(theta);
+  const double st = std::sin(theta);
+  return Vec2d{
+    (ct * vec.val[0]) - (st * vec.val[1]),
+    (st * vec.val[0]) + (ct * vec.val[1])
+  };
+}
+
+
+/// Rotates the vector by the given radians about the given rotation
+/// center, assuming a right-handed(!) coordinate system.
+inline Vec2d RotateVector(
+    const Vec2d &vec, const Vec2d &rotation_center, double theta) {
+  return RotateVector(vec - rotation_center, theta) + rotation_center;
+}
+
 
 
 /// Computes the minimum/maximum along each dimension.
