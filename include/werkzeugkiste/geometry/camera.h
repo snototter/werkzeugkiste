@@ -2,6 +2,7 @@
 #define __WERKZEUGKISTE_GEOMETRY_CAMERA_H__
 
 #include <type_traits>
+#include <tuple>
 
 #include <Eigen/Core>
 
@@ -42,7 +43,7 @@ Matrix<_Tp, 3, 4> ProjectionMatrixFromKRt(
     const Matrix<_Tp, 3, 3> &K,
     const Matrix<_Tp, 3, 3> &R,
     const Vec<_Tp, 3> &t) {
-  return ProjectionMatrixFromKRt(K, R, VecToEigen(t));
+  return ProjectionMatrixFromKRt(K, R, VecToEigenMat<3>(t));
 }
 
 
@@ -61,7 +62,7 @@ Vec<_Tp, 3> CameraCenterFromRt(
 template <typename _Tp> inline
 Vec<_Tp, 3> CameraCenterFromRt(
       const Matrix<_Tp, 3, 3> &R, const Vec<_Tp, 3> &t) {
-  return CameraCenterFromRt(R, VecToEigen(t));
+  return CameraCenterFromRt(R, VecToEigenMat<3>(t));
 }
 
 
@@ -164,11 +165,51 @@ bool IsInFrontOfImagePlane(
 
 //-----------------------------------------------------------------------------
 // Horizon
-///** @brief Returns a the projected line of horizon for the given camera intrinsics/extrinsics. If a valid image size
-//  * is given, the line will be clipped to the visible region (in this case, check result.empty() as the horizon may lie
-//  * outside of the image.
-//  */
-//Line2d GetProjectionOfHorizon(const cv::Mat &K, const cv::Mat &R, const cv::Mat &t, const cv::Size &image_size=cv::Size());
+
+/// Returns a the projected line of horizon for the given pinhole camera
+/// calibration. If a valid image size is given, the line will be clipped
+/// to the visible region. Check `result.IsValid()`, as the horizon may lie
+/// outside of the image.
+template <typename _Tp> inline
+Line2d GetProjectionOfHorizon(
+    const Matrix<_Tp, 3, 3> &K, const Matrix<_Tp, 3, 3> &R,
+    const Vec<_Tp, 3> &t, const Vec2i &image_size = {0, 0}) {
+  static_assert(
+      std::is_floating_point<_Tp>::value,
+      "Template type must be float or double!");
+  // Get a vector pointing along the camera's optical axis, which is orthogonal
+  // to the ground plane normal:
+  const Vec<_Tp, 3> img_plane_normal =
+      ImagePlaneInWorldCoordinateSystem(R, t).Normal();
+  const Vec2d horizon_dir = Vec<_Tp, 2>(
+        img_plane_normal[0], img_plane_normal[1]).UnitVector();
+  if (eps_zero(horizon_dir[0]) && eps_zero(horizon_dir[1])) {
+    // Camera points along the world's z-axis. Horizon is not visible.
+    return Line2d();
+  } else {
+    // Get two points in front of the camera, which project onto the horizon
+    // line, i.e. all points at the same height as the camera.
+    const Vec<_Tp, 3> camera_center3d = CameraCenterFromRt(R, t);
+    const Vec2d camera_center2d(camera_center3d[0], camera_center3d[1]);
+
+    const Vec2d perpendicular_dir(horizon_dir[1], -horizon_dir[0]);
+    const Vec2d pt1 = camera_center2d + 1000.0 * horizon_dir;
+    const Vec2d pt2 = pt1 + 500.0 * perpendicular_dir;
+
+    const Matrix<_Tp, 3, 4> P = ProjectionMatrixFromKRt(K, R, t);
+    Vec<_Tp, 2> prj1, prj2;
+    std::tie(prj1, prj2) = ProjectToVecs(
+          P, Vec<_Tp, 3>(pt1[0], pt1[1], camera_center3d[2]),
+             Vec<_Tp, 3>(pt2[0], pt2[1], camera_center3d[2]));
+
+    Line2d horizon(prj1, prj2);
+    if ((image_size.width() > 0) && (image_size.height() > 0)) {
+      return horizon.ClipLineByRectangle({0, 0}, image_size);
+    } else {
+      return horizon;
+    }
+  }
+}
 
 
 //-----------------------------------------------------------------------------
