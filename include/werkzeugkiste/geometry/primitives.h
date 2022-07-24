@@ -393,6 +393,8 @@ public:
 
   /// Returns the plane's offset, i.e. the distance from the plane to
   /// the coordinate system origin, measured along the plane's normal.
+  /// Put differently, this is the minimum distance between the plane
+  /// and the origin.
   _Tp Offset() const { return offset_; }
 
 
