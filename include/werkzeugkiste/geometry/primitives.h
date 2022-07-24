@@ -185,7 +185,7 @@ public:
 
 
   /// Returns a line with flipped direction vector.
-  inline Line2d_ Flipped() const { return Line2d_<_Tp>(pt_to_, pt_from_); }
+  inline Line2d_ Reversed() const { return Line2d_<_Tp>(pt_to_, pt_from_); }
 
 
   /// For a segment, this returns the start point. For a line, it's simply one
