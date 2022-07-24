@@ -36,12 +36,22 @@ using Mat3x4d = Matrix<double, 3, 4>;
 // Conversion between werkzeugkiste and Eigen
 
 /// Converts a werkzeugkiste vector to an Eigen vector (single-column matrix).
-template <typename _V> inline
-Matrix<typename _V::value_type, _V::ndim, 1>
-VecToEigen(const _V &vec) {
-  Matrix<typename _V::value_type, _V::ndim, 1> mat;
+template <int Rows, typename _V> inline
+Matrix<typename _V::value_type, Rows, 1>
+VecToEigenMat(const _V &vec) {
+  static_assert(
+    (Rows == _V::ndim) || (Rows == (_V::ndim + 1)),
+    "Invalid number of rows for the matrix - must be either the vector "
+    "dimension or 1 more (for automatically added homogeneous coordinate)!");
+
+  Matrix<typename _V::value_type, Rows, 1> mat;
   for (int i = 0; i < _V::ndim; ++i) {
     mat[i] = vec[i];
+  }
+
+  if (Rows == _V::ndim + 1) {
+    // Add homogeneous coordinate:
+    mat[_V::ndim] = static_cast<typename _V::value_type>(1);
   }
   return mat;
 }
@@ -78,7 +88,8 @@ VecsToEigenMat(
   const int num_vecs = 1 + sizeof...(others);
   static_assert(
     num_vecs <= 32,
-    "TODO warning text: Fixed size matrix...");
+    "Fixed size matrices should not be used for operations "
+    "with more than (roughly) 32 vectors.");
 
   const _V vecs[num_vecs] {
     vec0, static_cast<const _V &>(others)...};
@@ -179,6 +190,24 @@ TransformToVecs(
 }
 
 
+/// Convenience utility to avoid using std::tie() for a single vector.
+/// See `TransformToVecs`.
+template <typename _V, typename... _Vs, int Rows, int Columns> inline
+Vec<typename _V::value_type, Rows>
+TransformToVec(
+      const Matrix<typename _V::value_type, Rows, Columns> &mat,
+      const _V &vec) {
+  static_assert(
+      (Columns == _V::ndim) || (Columns == (_V::ndim + 1)),
+      "Invalid dimensions: vector dimensionality must be equal or 1 less than"
+      "the number of matrix columns!");
+  const Matrix<
+      typename _V::value_type, Columns, 1> vec_mat = VecToEigenMat<Columns>(vec);
+  const auto transformed = mat * vec_mat;
+  return EigenColToVec<typename _V::value_type, Rows, 1>(transformed, 0);
+}
+
+
 /// Computes `mat * [vec0, vec1, ...]`, divides the result by the
 /// homogeneous coordinate (*i.e.* last row) and returns a tuple of vectors.
 ///
@@ -213,6 +242,25 @@ ProjectToVecs(
   const auto transformed = mat * vec_mat;
   const auto projected = transformed.colwise().hnormalized();
   return EigenMatToVecTuple<typename _V::value_type, Rows - 1, num_vecs>(projected);
+}
+
+
+/// Convenience utility to avoid using std::tie() for a single vector.
+/// See `ProjectToVecs`.
+template <typename _V, typename... _Vs, int Rows, int Columns> inline
+Vec<typename _V::value_type, Rows - 1>
+ProjectToVec(
+      const Matrix<typename _V::value_type, Rows, Columns> &mat,
+      const _V &vec) {
+  static_assert(
+      (Columns == _V::ndim) || (Columns == (_V::ndim + 1)),
+      "Invalid dimensions: vector dimensionality must be equal or 1 less than"
+      "the number of matrix columns!");
+  const Matrix<
+      typename _V::value_type, Columns, 1> vec_mat = VecToEigenMat<Columns>(vec);
+  const auto transformed = mat * vec_mat;
+  const auto projected = transformed.colwise().hnormalized();
+  return EigenColToVec<typename _V::value_type, Rows - 1, 1>(projected, 0);
 }
 
 

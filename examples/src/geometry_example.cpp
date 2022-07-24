@@ -144,11 +144,13 @@ int main(int /* argc */, char ** /* argv */) {
        0, 0, 1;
 
   wkg::Matrix<double, 3, 4> Rt;
-  Rt << R, wkg::VecToEigen(t);
+  Rt << R, wkg::VecToEigenMat<3>(t);
 
   wkg::Mat3x4d cam_prj = wkg::ProjectionMatrixFromKRt(K, R, t);
 
   std::cout << "Projection matrix:\nK = " << K << ", R = " << R << ", t = " << t << " --> P = \n" << cam_prj << std::endl;
+
+  std::cout << "Line of horizon: " << wkg::GetProjectionOfHorizon(K, R, t) << std::endl;
 
   std::cout << "GP-2-image:\n" << wkg::GroundplaneToImageHomography(cam_prj)
             << "\nImage-2-GP:\n" << wkg::ImageToGroundplaneHomography(cam_prj)

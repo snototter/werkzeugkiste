@@ -106,7 +106,7 @@ TEST(ProjectionTest, PinholeCamera) {
        0, 0, 1;
 
   wkg::Matrix<double, 3, 4> Rt;
-  Rt << R, wkg::VecToEigen(t);
+  Rt << R, wkg::VecToEigenMat<3>(t);
 
 //  wkg::Mat3x4d cam_prj = wkg::ProjectionMatrixFromKRt(K, R, t);
 

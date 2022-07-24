@@ -47,9 +47,9 @@ class Vec {
   Vec<_Tp, dim> &operator=(Vec<_Tp, dim> &&other) noexcept;
 
 
-  /// Allow explicitly casting each vector to its
+  /// Allow implicitly casting each vector to its
   /// double-precision counterpart.
-  explicit operator Vec<double, dim>() const;
+  operator Vec<double, dim>() const;
 
 
   /// Returns the homogeneous representation of this vector, *i.e.* the vector
