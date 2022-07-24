@@ -243,7 +243,7 @@ public:
   }
 
 
-  /// Returns the closes point on the line, i.e. the projection of the given
+  /// Returns the closest point on the line, i.e. the projection of the given
   /// point onto this line.
   vec_type ClosestPointOnLine(const vec_type &point) const;
 
