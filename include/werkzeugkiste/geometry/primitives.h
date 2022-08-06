@@ -243,6 +243,14 @@ public:
   }
 
 
+  /// Returns the point which is offset * Direction() away from the line's
+  /// starting point, i.e. offset == 0 is the starting point, offset == 1
+  /// is the end point.
+  vec_type PointAtOffset(double offset_factor) const {
+    return pt_from_ + offset_factor * Direction();
+  }
+
+
   /// Returns the closest point on the line, i.e. the projection of the given
   /// point onto this line.
   vec_type ClosestPointOnLine(const vec_type &point) const;
