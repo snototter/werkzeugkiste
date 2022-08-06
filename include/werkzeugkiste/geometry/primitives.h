@@ -188,14 +188,29 @@ public:
   inline Line2d_ Reversed() const { return Line2d_<_Tp>(pt_to_, pt_from_); }
 
 
+  /// Returns a line where from/to are sorted left-to-right. If the line is
+  /// vertical, they will be sorted top-to-bottom.
+  Line2d_ LeftToRight() const;
+
+
   /// For a segment, this returns the start point. For a line, it's simply one
   /// of the given points to construct the line in the first place.
   const vec_type &From() const { return pt_from_; }
 
 
+  /// Sets the first reference point (starting point of a line segment; or any
+  /// point on a line).
+  void SetFrom(const vec_type &from) { pt_from_ = from; }
+
+
   /// For a segment, this returns the end point. For a line, it's simply one
   /// of the given points to construct the line in the first place.
   const vec_type &To() const { return pt_to_; }
+
+
+  /// Sets the second reference point (end point of a line segment; or any
+  /// point on a line).
+  void SetTo(const vec_type &to) { pt_to_ = to; }
 
 
   /// Returns the length from the start to the end point. As such, it's only

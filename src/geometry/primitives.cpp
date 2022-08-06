@@ -382,6 +382,26 @@ template class Circle_<double>;
 // Line2d
 
 template <typename _Tp>
+Line2d_<_Tp> Line2d_<_Tp>::LeftToRight() const {
+  if (eps_equal(pt_from_.x(), pt_to_.x())) {
+    // A vertical line will be sorted top-to-bottom:
+    if (pt_from_.y() < pt_to_.y()) {
+      return Line2d_<_Tp>(pt_from_, pt_to_);
+    } else {
+      return Line2d_<_Tp>(pt_to_, pt_from_);
+    }
+  } else {
+    // A horizontal line will be sorted left-to-right:
+    if (pt_from_.x() < pt_to_.x()) {
+      return Line2d_<_Tp>(pt_from_, pt_to_);
+    } else {
+      return Line2d_<_Tp>(pt_to_, pt_from_);
+    }
+  }
+}
+
+
+template <typename _Tp>
 typename Line2d_<_Tp>::vec_type Line2d_<_Tp>::ClosestPointOnLine(
     const vec_type &point) const {
   // Vector from line start to point:

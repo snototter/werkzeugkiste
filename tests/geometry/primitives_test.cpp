@@ -87,6 +87,29 @@ TEST(GeometricPrimitives, Line2) {
   EXPECT_EQ(line2.ClosestPointOnLine(line1.To()), wkg::Vec2d(3.0, -0.6));
   EXPECT_EQ(line2.ClosestPointOnSegment(line1.To()), line2.From());
 
+  // Sort from left-to-right (and vertical lines from top-to-bottom):
+  wkg::Line2d sorted = line1.LeftToRight();
+  EXPECT_EQ(sorted.From(), line1.From());
+  EXPECT_EQ(sorted.To(), line1.To());
+
+  sorted = line2.LeftToRight();
+  EXPECT_EQ(sorted.From(), line2.To());
+  EXPECT_EQ(sorted.To(), line2.From());
+
+  wkg::Line2d line4({70.0, -0.6}, {70.0, -0.6});
+  EXPECT_FALSE(line4.IsValid());
+  line4.SetTo({70.0, 300.2});
+  EXPECT_TRUE(line4.IsValid());
+  sorted = line4.LeftToRight();
+  EXPECT_EQ(sorted.From(), line4.From());
+  EXPECT_EQ(sorted.To(), line4.To());
+
+  line4.SetTo({70.0, -300.2});
+  EXPECT_TRUE(line4.IsValid());
+  sorted = line4.LeftToRight();
+  EXPECT_EQ(sorted.From(), line4.To());
+  EXPECT_EQ(sorted.To(), line4.From());
+
   //TODO extend test suite
 }
 
