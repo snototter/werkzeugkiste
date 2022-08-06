@@ -74,7 +74,7 @@ TEST(GeometricPrimitives, Circle) {
 }
 
 
-TEST(GeometricPrimitives, Line2) {
+TEST(GeometricPrimitives, Line2d) {
   wkg::Line2d line1({0.0, 0.0}, {3.0, 0.0});
   wkg::Line2d line2({1.0, -0.6}, {-17.0, -0.6});
   wkg::Line2d line3({-100.0, -0.6}, {-170.0, -0.6});
@@ -86,6 +86,13 @@ TEST(GeometricPrimitives, Line2) {
 
   EXPECT_EQ(line2.ClosestPointOnLine(line1.To()), wkg::Vec2d(3.0, -0.6));
   EXPECT_EQ(line2.ClosestPointOnSegment(line1.To()), line2.From());
+
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 0}), 0);
+  EXPECT_DOUBLE_EQ(line2.AngleDeg({17, 0}), 180);
+  EXPECT_DOUBLE_EQ(line2.AngleDeg({3, 0}), 180);
+  EXPECT_DOUBLE_EQ(line3.AngleDeg({1, 0}), 180);
+  EXPECT_DOUBLE_EQ(line3.AngleDeg({0, 1}), 90);
+  EXPECT_DOUBLE_EQ(line3.AngleDeg({-1, 0}), 0);
 
   // Sort from left-to-right (and vertical lines from top-to-bottom):
   wkg::Line2d sorted = line1.LeftToRight();
@@ -109,6 +116,11 @@ TEST(GeometricPrimitives, Line2) {
   sorted = line4.LeftToRight();
   EXPECT_EQ(sorted.From(), line4.To());
   EXPECT_EQ(sorted.To(), line4.From());
+
+  EXPECT_DOUBLE_EQ(line4.AngleDeg({0, -1}), 0);
+  EXPECT_DOUBLE_EQ(sorted.AngleDeg({0, -1}), 180);
+  EXPECT_DOUBLE_EQ(line4.AngleDeg({1, -1}), 45);
+  EXPECT_DOUBLE_EQ(sorted.AngleDeg({1, -1}), 135);
 
   //TODO extend test suite
 }

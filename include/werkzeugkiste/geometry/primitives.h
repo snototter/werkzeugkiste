@@ -239,10 +239,18 @@ public:
   }
 
 
-  /// Returns the angle between the line and the given vector (not point(!)).
-  inline double Angle(const vec_type &v) const {
+  /// Returns the angle between the line and the given directional vector.
+  /// The angle will be between 0 and Pi.
+  inline double AngleRad(const vec_type &v) const {
     return std::acos(std::max(-1.0, std::min(1.0,
         static_cast<double>(UnitDirection().Dot(v.UnitVector())))));
+  }
+
+
+  /// Returns the angle between the line and the given directional vector.
+  /// The angle will be between 0 and 180 degrees.
+  inline double AngleDeg(const vec_type &v) const {
+    return rad2deg(AngleRad(v));
   }
 
 
