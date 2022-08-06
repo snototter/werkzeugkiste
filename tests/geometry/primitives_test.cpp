@@ -126,6 +126,44 @@ TEST(GeometricPrimitives, Line2d) {
 }
 
 
+
+TEST(GeometricPrimitives, Line3d) {
+  wkg::Line3d line1({0.0, 0.0, 0.0}, {3.0, 0.0, 0.0});
+  EXPECT_TRUE(line1.IsValid());
+
+  EXPECT_EQ(line1.ClosestPointOnLine({0, 0, 1}), wkg::Vec3d(0, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({-1, 1, 0}), wkg::Vec3d(0, 0, 0));
+
+  EXPECT_EQ(line1.ClosestPointOnLine({2, 1, 4}), wkg::Vec3d(2, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({2, 1, 4}), wkg::Vec3d(2, 0, 0));
+
+  EXPECT_EQ(line1.ClosestPointOnLine({4, 1, 2}), wkg::Vec3d(4, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({4, 1, 2}), wkg::Vec3d(3, 0, 0));
+
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 0, 0}), 0);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({-1, 0, 0}), 180);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({0, 1, 0}), 90);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({0, -1, 0}), 90);
+
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({0, 0, 1}), 90);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({0, 0, -1}), 90);
+
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 1, 0}), 45);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({1, -1, 0}), 45);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({-1, 1, 0}), 135);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({-1, -1, 0}), 135);
+
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 0, 1}), 45);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 0, -1}), 45);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({-1, 0, 1}), 135);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg({-1, 0, -1}), 135);
+
+
+  //TODO extend test suite
+}
+
+
+
 TEST(GeometricPrimitives, Plane) {
   wkg::Plane plane_inv({-7, 3, 0}, {3, 3, 10}, {5, 3, 12});
   EXPECT_FALSE(plane_inv.IsValid());

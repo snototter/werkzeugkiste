@@ -15,11 +15,6 @@ namespace geometry {
 
 //TODO line2d, line3d, plane
 
-// TODO Circles
-// PointsOfTangencyPointToCircle
-// TransverseCommonTangentsBetweenCircles
-// DirectCommonTangentsBetweenCircles
-
 // TODO Triangles
 
 // TODO (Rotated) Rectangles IoU/Area
@@ -378,7 +373,152 @@ typedef Line2d_<double> Line2d;
 //----------------------------------------------------
 // Line in 3D
 
-//FIXME
+/// Represents a line/segment in 3d Euclidean space.
+template <typename _Tp>
+class Line3d_ {
+public:
+  static_assert(
+      std::is_floating_point<_Tp>::value,
+      "3D line type must be float or double!");
+
+  using vec_type = Vec<_Tp, 3>;
+//  using vec4_type = Vec<_Tp, 4>;
+
+  /// Default constructor yields an invalid line/segment
+  Line3d_() : pt_from_(0, 0), pt_to_(0, 0) {}
+
+
+  /// Construct a line from 2 real valued points. In case of a segment, these
+  /// denote the start and end points.
+  Line3d_(const vec_type &from, const vec_type &to)
+    : pt_from_(from), pt_to_(to) {}
+
+
+  /// Returns a line with flipped direction vector.
+  inline Line3d_ Reversed() const { return Line3d_<_Tp>(pt_to_, pt_from_); }
+
+
+  /// For a segment, this returns the start point. For a line, it's simply one
+  /// of the given points to construct the line in the first place.
+  const vec_type &From() const { return pt_from_; }
+
+
+  /// Sets the first reference point (starting point of a line segment; or any
+  /// point on a line).
+  void SetFrom(const vec_type &from) { pt_from_ = from; }
+
+
+  /// For a segment, this returns the end point. For a line, it's simply one
+  /// of the given points to construct the line in the first place.
+  const vec_type &To() const { return pt_to_; }
+
+
+  /// Sets the second reference point (end point of a line segment; or any
+  /// point on a line).
+  void SetTo(const vec_type &to) { pt_to_ = to; }
+
+
+  /// Returns the length from the start to the end point. As such, it's only
+  /// meaningful for a line segment.
+  inline double Length() const { return Direction().Length(); }
+
+
+  /// Returns the non-normalized direction vector from the start point to the
+  /// end point.
+  inline vec_type Direction() const { return pt_from_.DirectionVector(pt_to_); }
+
+
+  /// Returns the unit direction vector from the start point to the end point.
+  inline vec_type UnitDirection() const { return Direction().UnitVector(); }
+
+
+  /// Returns the point halfway between from and to.
+  inline vec_type MidPoint() const { return 0.5 * (pt_from_ + pt_to_); }
+
+
+  /// Returns true if the line object is valid, *i.e.* start and end points
+  /// are not the same.
+  inline bool IsValid() const {
+    // Safe to use, because vec_type uses eps_equal for element comparison:
+    return pt_from_ != pt_to_;
+  }
+
+
+  /// Returns the angle between the line and the given directional vector.
+  /// The angle will be between 0 and Pi.
+  inline double AngleRad(const vec_type &v) const {
+    return std::acos(std::max(-1.0, std::min(1.0,
+        static_cast<double>(UnitDirection().Dot(v.UnitVector())))));
+  }
+
+
+  /// Returns the angle between the line and the given directional vector.
+  /// The angle will be between 0 and 180 degrees.
+  inline double AngleDeg(const vec_type &v) const {
+    return rad2deg(AngleRad(v));
+  }
+
+
+  /// Returns the point which is offset * Direction() away from the line's
+  /// starting point, i.e. offset == 0 is the starting point, offset == 1
+  /// is the end point.
+  vec_type PointAtOffset(double offset_factor) const {
+    return pt_from_ + offset_factor * Direction();
+  }
+
+
+  /// Returns the closest point on the line, i.e. the projection of the given
+  /// point onto this line.
+  vec_type ClosestPointOnLine(const vec_type &point) const;
+
+
+  /// Returns the point on this line segment(!) which is closest to the
+  /// given point.
+  vec_type ClosestPointOnSegment(const vec_type &point) const;
+
+
+  /// Returns the minimum distance between the point and this line.
+  inline double DistancePointToLine(const vec_type &point) const {
+    const vec_type closest_point = ClosestPointOnLine(point);
+    return point.Distance(closest_point);
+  }
+
+
+  /// Returns the minimum distance between the point and this segment.
+  inline double DistancePointToSegment(const vec_type &point) const {
+    const vec_type closest = ClosestPointOnSegment(point);
+    return closest.Distance(point);
+  }
+
+
+//  /// Returns true if the two lines are collinear.
+//  bool IsCollinear(const Line3d_ &other) const;
+
+//TODO double AngleLinePlane(const Line3d &line, const cv::Vec4d &plane);
+//TODO bool IntersectionLinePlane(const Line3d &line, const cv::Vec4d &plane, cv::Vec3d *intersection_point=nullptr);
+//TODO bool IntersectionLineSegmentPlane(const Line3d &line_segment, const cv::Vec4d &plane, cv::Vec3d *intersection_point=nullptr);
+//TODO Line3d ClipLineSegmentByPlane(const Line3d &line_segment, const cv::Vec4d &plane);
+
+  /// Overloaded output stream operator.
+  friend std::ostream &operator<< (std::ostream &stream, const Line3d_ &line) {
+    stream << "Line(" << line.pt_from_.ToString(false) << " --> "
+           << line.pt_to_.ToString(false) << ')';
+    return stream;
+  }
+
+private:
+  /// Starting point of a line segment or one direction-defining point on a
+  /// line.
+  vec_type pt_from_;
+
+  /// Ending point of a line segment or the second direction-defining point on
+  /// a line.
+  vec_type pt_to_;
+};
+
+
+/// A 3-dimensional line using double precision.
+typedef Line3d_<double> Line3d;
 
 
 

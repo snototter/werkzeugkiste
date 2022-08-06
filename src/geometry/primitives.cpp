@@ -803,7 +803,43 @@ template class Line2d_<double>;
 
 //----------------------------------------------------
 // Line3d
-//TODO
+
+template <typename _Tp>
+typename Line3d_<_Tp>::vec_type Line3d_<_Tp>::ClosestPointOnLine(
+    const vec_type &point) const {
+  // Vector from line start to point:
+  const vec_type v = pt_from_.DirectionVector(point);
+  // Project onto line and get closest point on line:
+  const vec_type unit_dir = UnitDirection();
+  const _Tp lambda = unit_dir.Dot(v);
+  return pt_from_ + lambda * unit_dir;
+}
+
+
+template <typename _Tp>
+typename Line3d_<_Tp>::vec_type Line3d_<_Tp>::ClosestPointOnSegment(
+    const vec_type &point) const {
+  // Vector from segment start to point:
+  const vec_type v = pt_from_.DirectionVector(point);
+  // Project v onto segment:
+  const vec_type direction = Direction();
+  const vec_type unit_direction = direction.UnitVector();
+  const double lambda = static_cast<double>(unit_direction.Dot(v));
+
+  if (lambda < 0.0) {
+    return pt_from_;
+  } else {
+    if (lambda > Length()) {
+      return pt_to_;
+    } else {
+      return pt_from_ + lambda * unit_direction;
+    }
+  }
+}
+
+
+// Explicit instantiation:
+template class Line3d_<double>;
 
 
 //----------------------------------------------------
