@@ -383,6 +383,10 @@ template class Circle_<double>;
 
 template <typename _Tp>
 Line2d_<_Tp> Line2d_<_Tp>::LeftToRight() const {
+  if (!IsValid()) {
+    return Line2d_<_Tp>();
+  }
+
   if (eps_equal(pt_from_.x(), pt_to_.x())) {
     // A vertical line will be sorted top-to-bottom:
     if (pt_from_.y() < pt_to_.y()) {

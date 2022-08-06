@@ -204,9 +204,9 @@ Line2d GetProjectionOfHorizon(
 
     Line2d horizon(prj1, prj2);
     if ((image_size.width() > 0) && (image_size.height() > 0)) {
-      return horizon.ClipLineByRectangle({0, 0}, image_size);
+      return horizon.ClipLineByRectangle({0, 0}, image_size).LeftToRight();
     } else {
-      return horizon;
+      return horizon.LeftToRight();
     }
   }
 }
