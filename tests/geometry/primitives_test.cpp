@@ -87,6 +87,14 @@ TEST(GeometricPrimitives, Line2d) {
   EXPECT_EQ(line2.ClosestPointOnLine(line1.To()), wkg::Vec2d(3.0, -0.6));
   EXPECT_EQ(line2.ClosestPointOnSegment(line1.To()), line2.From());
 
+  EXPECT_EQ(line2.ClosestPointOnSegment({-99, 0}), wkg::Vec2d(-17, -0.6));
+  EXPECT_EQ(line2.ClosestPointOnSegment({-17, 0}), wkg::Vec2d(-17, -0.6));
+  EXPECT_EQ(line2.ClosestPointOnSegment({-16, 0}), wkg::Vec2d(-16, -0.6));
+  EXPECT_EQ(line2.ClosestPointOnSegment({0, 0}), wkg::Vec2d(0, -0.6));
+  EXPECT_EQ(line2.ClosestPointOnSegment({0, 3}), wkg::Vec2d(0, -0.6));
+  EXPECT_EQ(line2.ClosestPointOnSegment({1, 3}), wkg::Vec2d(1, -0.6));
+  EXPECT_EQ(line2.ClosestPointOnSegment({2, 3}), wkg::Vec2d(1, -0.6));
+
   EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 0}), 0);
   EXPECT_DOUBLE_EQ(line2.AngleDeg({17, 0}), 180);
   EXPECT_DOUBLE_EQ(line2.AngleDeg({3, 0}), 180);
@@ -133,6 +141,12 @@ TEST(GeometricPrimitives, Line3d) {
 
   EXPECT_EQ(line1.ClosestPointOnLine({0, 0, 1}), wkg::Vec3d(0, 0, 0));
   EXPECT_EQ(line1.ClosestPointOnSegment({-1, 1, 0}), wkg::Vec3d(0, 0, 0));
+
+  EXPECT_EQ(line1.ClosestPointOnSegment({0, 1, 1}), wkg::Vec3d(0, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({1, 1, 1}), wkg::Vec3d(1, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({2, 1, 1}), wkg::Vec3d(2, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({3, 1, 1}), wkg::Vec3d(3, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({4, 1, 1}), wkg::Vec3d(3, 0, 0));
 
   EXPECT_EQ(line1.ClosestPointOnLine({2, 1, 4}), wkg::Vec3d(2, 0, 0));
   EXPECT_EQ(line1.ClosestPointOnSegment({2, 1, 4}), wkg::Vec3d(2, 0, 0));

@@ -426,7 +426,7 @@ typename Line2d_<_Tp>::vec_type Line2d_<_Tp>::ClosestPointOnSegment(
   const vec_type direction = Direction();
   const vec_type unit_direction = direction.UnitVector();
   const double lambda = std::min(
-        1.0, std::max(0.0, static_cast<double>(unit_direction.Dot(v))));
+        Length(), std::max(0.0, static_cast<double>(unit_direction.Dot(v))));
 
   return pt_from_ + lambda * unit_direction;
 }
@@ -806,6 +806,7 @@ typename Line3d_<_Tp>::vec_type Line3d_<_Tp>::ClosestPointOnLine(
   const vec_type unit_dir = UnitDirection();
   const _Tp lambda = unit_dir.Dot(v);
   return pt_from_ + lambda * unit_dir;
+
 }
 
 
@@ -818,7 +819,7 @@ typename Line3d_<_Tp>::vec_type Line3d_<_Tp>::ClosestPointOnSegment(
   const vec_type direction = Direction();
   const vec_type unit_direction = direction.UnitVector();
   const double lambda = std::min(
-        1.0, std::max(0.0, static_cast<double>(unit_direction.Dot(v))));
+        Length(), std::max(0.0, static_cast<double>(unit_direction.Dot(v))));
 
   return pt_from_ + lambda * unit_direction;
 }
