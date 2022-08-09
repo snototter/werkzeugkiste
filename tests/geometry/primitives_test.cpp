@@ -159,6 +159,40 @@ TEST(GeometricPrimitives, Line3d) {
   EXPECT_DOUBLE_EQ(line1.AngleDeg({-1, 0, -1}), 135);
 
 
+  // Line/Plane
+  wkg::Plane plane_xy({0, 0, 1}, 0);
+  EXPECT_TRUE(plane_xy.IsValid());
+  EXPECT_DOUBLE_EQ(line1.AngleDeg(plane_xy), 0);
+
+  wkg::Line3d line2({0, 0, 0}, {1, 0, 1});
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_xy), 45);
+
+  line2 = wkg::Line3d({17, 17, 17}, {17, 17, 18});
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_xy), 90);
+
+  line2 = wkg::Line3d({17, 17, 17}, {17, 17, 0});
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_xy), -90);
+
+
+  wkg::Plane plane_45({1, 1, 1}, {1, 0, 0}, {0, 0, 0});
+  EXPECT_TRUE(plane_45.IsValid());
+  EXPECT_DOUBLE_EQ(plane_xy.AngleDeg(plane_45), 135);
+
+  EXPECT_DOUBLE_EQ(line1.AngleDeg(plane_45), 0);
+  EXPECT_DOUBLE_EQ(line1.AngleDeg(plane_45), plane_45.AngleDeg(line1));
+
+  line2 = wkg::Line3d({0, 0, 0}, {0, 1, 0});
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_45), 45);
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_45), plane_45.AngleDeg(line2));
+
+  line2 = wkg::Line3d({0, 0, 0}, {1, 1, 0});
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_45), 30);
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_45), plane_45.AngleDeg(line2));
+
+  line2 = wkg::Line3d({0, 0, 0}, {1, 0, 1});
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_45), -30);
+  EXPECT_DOUBLE_EQ(line2.AngleDeg(plane_45), plane_45.AngleDeg(line2));
+
   //TODO extend test suite
 }
 

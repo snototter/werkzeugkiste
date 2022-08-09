@@ -373,6 +373,10 @@ typedef Line2d_<double> Line2d;
 //----------------------------------------------------
 // Line in 3D
 
+// Forward declaration needed by Circle_.
+template <typename _Tp> class Plane_;
+
+
 /// Represents a line/segment in 3d Euclidean space.
 template <typename _Tp>
 class Line3d_ {
@@ -459,6 +463,21 @@ public:
   }
 
 
+  /// Returns the angle between the line and the plane.
+  /// The angle will be between -Pi/2 and Pi/2.
+  inline double AngleRad(const Plane_<_Tp> &plane) const {
+    return std::asin(std::max(-1.0, std::min(1.0,
+        static_cast<double>(UnitDirection().Dot(plane.Normal())))));
+  }
+
+
+  /// Returns the angle between the line and the plane.
+  /// The angle will be between -90 and +90 degrees.
+  inline double AngleDeg(const Plane_<_Tp> &plane) const {
+    return rad2deg(AngleRad(plane));
+  }
+
+
   /// Returns the point which is offset * Direction() away from the line's
   /// starting point, i.e. offset == 0 is the starting point, offset == 1
   /// is the end point.
@@ -494,7 +513,6 @@ public:
 //  /// Returns true if the two lines are collinear.
 //  bool IsCollinear(const Line3d_ &other) const;
 
-//TODO double AngleLinePlane(const Line3d &line, const cv::Vec4d &plane);
 //TODO bool IntersectionLinePlane(const Line3d &line, const cv::Vec4d &plane, cv::Vec3d *intersection_point=nullptr);
 //TODO bool IntersectionLineSegmentPlane(const Line3d &line_segment, const cv::Vec4d &plane, cv::Vec3d *intersection_point=nullptr);
 //TODO Line3d ClipLineSegmentByPlane(const Line3d &line_segment, const cv::Vec4d &plane);
@@ -589,8 +607,8 @@ public:
 
 
   /// Returns the dihedral angle, *i.e.* the angle between the two planes,
-  /// in radians.
-  inline double Angle(const Plane_ &other) const {
+  /// in radians. The angle will be between 0 and Pi.
+  inline double AngleRad(const Plane_ &other) const {
     // Clamp the dot product to avoid numerical issues. Although unlikely,
     // these can occur (and they are a pain to debug, thus I prefer to err
     // on the safe side).
@@ -598,7 +616,28 @@ public:
           std::max(-1.0, std::min(1.0, normal_.Dot(other.normal_))));
   }
 
-  //TODO(vcp) AngleLinePlane
+
+  /// Returns the dihedral angle, *i.e.* the angle between the two planes,
+  /// in degrees. The angle will be between 0 and 180.
+  inline double AngleDeg(const Plane_ &other) const {
+    return rad2deg(AngleRad(other));
+  }
+
+
+  /// Returns the angle between this plane and the line in radians.
+  /// The angle will be between -Pi/2 and Pi/2.
+  inline double AngleRad(const Line3d_<_Tp> &line) const {
+    return line.AngleRad(*this);
+  }
+
+
+  /// Returns the angle between this plane and the line in degrees.
+  /// The angle will be between -90 and +90.
+  inline double AngleDeg(const Line3d_<_Tp> &line) const {
+    return line.AngleDeg(*this);
+  }
+
+
   //TODO(vcp) IntersectionLinePlane
   //TODO(vcp) IntersectionLineSegmentPlane
   //TODO(vcp/viren2d) AddPoly/IsInsidePolygon
