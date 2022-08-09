@@ -237,6 +237,9 @@ public:
   /// Returns the angle between the line and the given directional vector.
   /// The angle will be between 0 and Pi.
   inline double AngleRad(const vec_type &v) const {
+    // Clamp the dot product to avoid numerical issues. Although unlikely,
+    // these can occur (and they are a pain to debug, thus I prefer to err
+    // on the safe side).
     return std::acos(std::max(-1.0, std::min(1.0,
         static_cast<double>(UnitDirection().Dot(v.UnitVector())))));
   }
@@ -609,9 +612,6 @@ public:
   /// Returns the dihedral angle, *i.e.* the angle between the two planes,
   /// in radians. The angle will be between 0 and Pi.
   inline double AngleRad(const Plane_ &other) const {
-    // Clamp the dot product to avoid numerical issues. Although unlikely,
-    // these can occur (and they are a pain to debug, thus I prefer to err
-    // on the safe side).
     return std::acos(
           std::max(-1.0, std::min(1.0, normal_.Dot(other.normal_))));
   }
