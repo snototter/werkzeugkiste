@@ -43,3 +43,31 @@ TEST(GeometryUtilsTest, FloatingPointEquality) {
   EXPECT_TRUE(wkg::eps_equal(3.000000001f, 3.000000002f));
   EXPECT_FALSE(wkg::eps_equal(5.0f, 5.0001f));
 }
+
+
+TEST(GeometryUtilsTest, Signum) {
+  EXPECT_EQ(wkg::sgn(0), 0);
+  EXPECT_EQ(wkg::sgn(-0), 0);
+
+  EXPECT_EQ(wkg::sgn(static_cast<unsigned short>(0)), 0);
+  EXPECT_EQ(wkg::sgn(static_cast<unsigned int>(0)), 0);
+  EXPECT_EQ(wkg::sgn(0.0f), 0);
+  EXPECT_EQ(wkg::sgn(0.0), 0);
+
+  EXPECT_EQ(wkg::sgn(1), 1);
+  EXPECT_EQ(wkg::sgn(-1), -1);
+  EXPECT_EQ(wkg::sgn(static_cast<unsigned short>(1)), 1);
+  EXPECT_EQ(wkg::sgn(static_cast<unsigned int>(1)), 1);
+
+  EXPECT_EQ(wkg::sgn(23), 1);
+  EXPECT_EQ(wkg::sgn(-13), -1);
+
+  EXPECT_EQ(wkg::sgn(47.3), 1);
+  EXPECT_EQ(wkg::sgn(-0.1), -1);
+
+  EXPECT_EQ(wkg::sgn(0.001), 1);
+  EXPECT_EQ(wkg::sgn(-0.001), -1);
+  EXPECT_EQ(wkg::sgn(1e-6), 1);
+  EXPECT_EQ(wkg::sgn(-(1e-6)), -1);
+}
+
