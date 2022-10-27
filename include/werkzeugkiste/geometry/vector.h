@@ -160,8 +160,12 @@ class Vec {
   double LengthSquared() const;
 
 
-  /// Computes the distance between this and the other.
+  /// Computes the L2 distance between this and the other.
   double Distance(const Vec<_Tp, dim>& other) const;
+
+
+  /// Computes the L1 distance between this and the other.
+  double DistanceManhattan(const Vec<_Tp, dim>& other) const;
 
 
   /// Returns the direction vector from `this` to `to`.

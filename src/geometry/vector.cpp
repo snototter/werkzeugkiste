@@ -426,6 +426,17 @@ double Vec<_Tp, dim>::Distance(const Vec<_Tp, dim>& other) const {
 
 
 template<typename _Tp, int dim>
+double Vec<_Tp, dim>::DistanceManhattan(const Vec<_Tp, dim>& other) const {
+  auto diff = *this - other;
+  double abs_sum = 0.0;
+  for (int i = 0; i < dim; ++i) {
+    abs_sum += std::abs(diff[i]);
+  }
+  return abs_sum;
+}
+
+
+template<typename _Tp, int dim>
 Vec<_Tp, dim> Vec<_Tp, dim>::DirectionVector(const Vec<_Tp, dim>& to) const {
   return to - *this;
 }
