@@ -90,26 +90,35 @@ template <class Container>
 void MinMax(
     const Container &values,
     typename Container::value_type *min = nullptr,
-    typename Container::value_type *max = nullptr) {
+    typename Container::value_type *max = nullptr,
+    std::size_t *idx_min = nullptr,
+    std::size_t *idx_max = nullptr) {
   if (values.empty()) {
     return;
   }
-  std::size_t idx_min = 0;
-  std::size_t idx_max = 0;
+  std::size_t _idx_min = 0;
+  std::size_t _idx_max = 0;
   for (std::size_t idx = 1; idx < values.size(); ++idx) {
-    if (values[idx] < values[idx_min]) {
-      idx_min = idx;
+    if (values[idx] < values[_idx_min]) {
+      _idx_min = idx;
     }
-    if (values[idx_max] < values[idx]) {
-      idx_max = idx;
+    if (values[_idx_max] < values[idx]) {
+      _idx_max = idx;
     }
   }
 
   if (min) {
-    *min = values[idx_min];
+    *min = values[_idx_min];
   }
+  if (idx_min) {
+    *idx_min = _idx_min;
+  }
+
   if (max) {
-    *max = values[idx_max];
+    *max = values[_idx_max];
+  }
+  if (idx_max) {
+    *idx_max = _idx_max;
   }
 }
 
