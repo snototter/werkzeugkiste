@@ -116,7 +116,9 @@ target_include_directories(werkzeugkiste-geometry
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
            $<INSTALL_INTERFACE:${INSTALL_DIR_INCLUDE}>)
-
+target_include_directories(werkzeugkiste-geometry
+    PUBLIC ${EIGEN3_INCLUDE_DIR})
+#message(FATAL_ERROR "eigen3 inc dir: ${EIGEN3_INCLUDE_DIR}")
 target_link_libraries(werkzeugkiste-geometry
     PUBLIC Eigen3::Eigen)
 
