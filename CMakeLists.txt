@@ -49,7 +49,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME container
-    OUTPUT_NAME container
+#FIXME see other libs    OUTPUT_NAME container
     LINKER_LANGUAGE CXX
 )
 
@@ -68,9 +68,18 @@ target_include_directories(
 target_compile_features(werkzeugkiste-container PUBLIC cxx_std_17)
 
 
+### FIXME how to generate the export header for a common target?
+generate_export_header(
+    werkzeugkiste-container
+    BASE_NAME werkzeugkiste
+    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.hpp
+    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
+)
+
+
 #########################################################################################
 # Math/Geometry Utils: werkzeugkiste::geometry
-find_package(Eigen3)
+find_package(Eigen3 REQUIRED NO_MODULE)
 # Header files
 set(wkzggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/geometry/geometry.h
@@ -90,6 +99,8 @@ add_library(werkzeugkiste-geometry
 # Add a namespace'd alias
 add_library(werkzeugkiste::geometry ALIAS werkzeugkiste-geometry)
 
+target_link_libraries(werkzeugkiste-geometry PUBLIC Eigen3::Eigen)
+
 set_target_properties(
     werkzeugkiste-geometry PROPERTIES
     CXX_VISIBILITY_PRESET hidden
@@ -97,7 +108,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME geometry
-    OUTPUT_NAME geometry
+#FIXME would lead to libgeometry.a    OUTPUT_NAME geometry
     LINKER_LANGUAGE CXX
 )
 
@@ -112,8 +123,6 @@ target_include_directories(
     PUBLIC
     "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
 )
-
-target_link_libraries(werkzeugkiste-geometry PUBLIC Eigen3::Eigen)
 
 target_compile_features(werkzeugkiste-geometry PUBLIC cxx_std_17)
 
@@ -140,7 +149,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME strings
-    OUTPUT_NAME strings
+#FIXME see other libs    OUTPUT_NAME strings
     LINKER_LANGUAGE CXX
 )
 
@@ -190,7 +199,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME files
-    OUTPUT_NAME files
+#FIXME see other libs    OUTPUT_NAME files
     LINKER_LANGUAGE CXX
 )
 
@@ -230,13 +239,6 @@ add_library(werkzeugkiste-timing
     ${wkzgtiming_SOURCE_FILES})
 # Add a namespace'd alias
 add_library(werkzeugkiste::timing ALIAS werkzeugkiste-timing)
-# Export header
-generate_export_header(
-    werkzeugkiste-timing
-    BASE_NAME werkzeugkiste
-    EXPORT_FILE_NAME export/werkzeugkiste/timing_export.hpp
-    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
-)
 # Static build
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(werkzeugkiste-timing PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
@@ -249,7 +251,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME timing
-    OUTPUT_NAME timing
+#FIXME see other libs    OUTPUT_NAME timing
     LINKER_LANGUAGE CXX
 )
 
