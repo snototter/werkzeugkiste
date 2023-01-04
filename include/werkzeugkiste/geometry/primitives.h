@@ -67,7 +67,7 @@ public:
 
 
   /// Returns true if this is a valid circle.
-  inline bool IsValid() const { return radius_ > 0.0f; }
+  inline bool IsValid() const { return Sign(radius_) > 0; }
 
 
   /// Returns the center point as 2d vector.
@@ -152,7 +152,7 @@ private:
 
 
 /// Available specialization:
-typedef Circle_<double> Circle;
+using Circle = Circle_<double>;
 
 
 //----------------------------------------------------
@@ -248,7 +248,7 @@ public:
   /// Returns the angle between the line and the given directional vector.
   /// The angle will be between 0 and 180 degrees.
   inline double AngleDeg(const vec_type &v) const {
-    return rad2deg(AngleRad(v));
+    return Rad2Deg(AngleRad(v));
   }
 
 
@@ -370,7 +370,7 @@ private:
 
 
 /// A 2-dimensional line using double precision.
-typedef Line2d_<double> Line2d;
+using Line2d = Line2d_<double>;
 
 
 //----------------------------------------------------
@@ -462,7 +462,7 @@ public:
   /// Returns the angle between the line and the given directional vector.
   /// The angle will be between 0 and 180 degrees.
   inline double AngleDeg(const vec_type &v) const {
-    return rad2deg(AngleRad(v));
+    return Rad2Deg(AngleRad(v));
   }
 
 
@@ -477,7 +477,7 @@ public:
   /// Returns the angle between the line and the plane.
   /// The angle will be between -90 and +90 degrees.
   inline double AngleDeg(const Plane_<_Tp> &plane) const {
-    return rad2deg(AngleRad(plane));
+    return Rad2Deg(AngleRad(plane));
   }
 
 
@@ -539,7 +539,7 @@ private:
 
 
 /// A 3-dimensional line using double precision.
-typedef Line3d_<double> Line3d;
+using Line3d = Line3d_<double>;
 
 
 
@@ -575,7 +575,7 @@ public:
 
   /// Returns true if the plane has a valid normal vector.
   bool IsValid() const {
-    return eps_equal(normal_.LengthSquared(), 1.0);
+    return IsEpsEqual(normal_.LengthSquared(), 1.0);
   }
 
 
@@ -599,13 +599,13 @@ public:
   /// Returns true if the given point is in front of the plane, i.e. the
   /// side where the plane's normal points to.
   inline bool IsPointInFrontOfPlane(const vec_type &pt) const {
-    return DistancePointToPlane(pt) >= 0.0f;
+    return Sign(DistancePointToPlane(pt)) >= 0;
   }
 
 
   /// Returns true if the given point lies exactly on the plane.
   inline bool IsPointOnPlane(const vec_type &pt) const {
-    return eps_zero(DistancePointToPlane(pt));
+    return IsEpsZero(DistancePointToPlane(pt));
   }
 
 
@@ -620,7 +620,7 @@ public:
   /// Returns the dihedral angle, *i.e.* the angle between the two planes,
   /// in degrees. The angle will be between 0 and 180.
   inline double AngleDeg(const Plane_ &other) const {
-    return rad2deg(AngleRad(other));
+    return Rad2Deg(AngleRad(other));
   }
 
 
@@ -647,11 +647,11 @@ public:
   /// Returns the plane's x-, y- and z-intercepts.
   inline vec_type XYZIntercepts() const {
     return vec_type(
-          eps_zero(normal_.x())
+          IsEpsZero(normal_.x())
             ? std::numeric_limits<_Tp>::infinity() : (-offset_ / normal_.x()),
-          eps_zero(normal_.y())
+          IsEpsZero(normal_.y())
             ? std::numeric_limits<_Tp>::infinity() : (-offset_ / normal_.y()),
-          eps_zero(normal_.z())
+          IsEpsZero(normal_.z())
             ? std::numeric_limits<_Tp>::infinity() : (-offset_ / normal_.z()));
   }
 
@@ -672,7 +672,7 @@ private:
 
 
 /// The default plane type which uses double precision.
-typedef Plane_<double> Plane;
+using Plane = Plane_<double>;
 
 
 } // namespace geometry

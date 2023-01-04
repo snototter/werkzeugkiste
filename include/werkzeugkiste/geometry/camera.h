@@ -183,7 +183,7 @@ Line2d GetProjectionOfHorizon(
       ImagePlaneInWorldCoordinateSystem(R, t).Normal();
   const Vec2d horizon_dir = Vec<_Tp, 2>(
         img_plane_normal[0], img_plane_normal[1]).UnitVector();
-  if (eps_zero(horizon_dir[0]) && eps_zero(horizon_dir[1])) {
+  if (IsEpsZero(horizon_dir[0]) && IsEpsZero(horizon_dir[1])) {
     // Camera points along the world's z-axis. Horizon is not visible.
     return Line2d();
   } else {

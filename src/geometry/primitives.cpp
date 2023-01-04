@@ -44,7 +44,7 @@ bool Circle_<_Tp>::IsPointInCircle(
     const vec_type &pt, bool *is_on_circle) const {
   const double distance = pt.Distance(center_);
 
-  if (eps_equal(distance, radius_)) {
+  if (IsEpsEqual(distance, radius_)) {
     if (is_on_circle) {
       *is_on_circle = true;
     }
@@ -147,7 +147,7 @@ int Circle_<_Tp>::DirectCommonTangents(
   // * abs(r1-r2) == center_dist: 1 tangent
   // * center_dist < abs(r1-r2): no tangent
 
-  if ((center_ == other.center_) && eps_equal(radius_, other.radius_)) {
+  if ((center_ == other.center_) && IsEpsEqual(radius_, other.radius_)) {
     // No tangent if the circles are the same
     return 0;
   }
@@ -159,7 +159,7 @@ int Circle_<_Tp>::DirectCommonTangents(
   } else {
     const Line2d_<_Tp> center_line(center_, other.center_);
 
-    if (eps_equal(center_distance, std::fabs(radius_ - other.radius_))) {
+    if (IsEpsEqual(center_distance, std::fabs(radius_ - other.radius_))) {
       // C1 is inside C2 (or vice versa) and they intersect in exactly one
       // point.
       if (tangent1) {
@@ -173,7 +173,7 @@ int Circle_<_Tp>::DirectCommonTangents(
     } else {
       // In all other cases, there exist two direct common tangents.
       if (tangent1 || tangent2) {
-        if (eps_equal(radius_, other.radius_)) {
+        if (IsEpsEqual(radius_, other.radius_)) {
           // Tangents are parallel to the center-connecting line
           const vec_type dir = radius_ * center_line.UnitDirection();
           const vec_type orth_dir{dir.y(), -dir.x()};
@@ -232,7 +232,7 @@ int Circle_<_Tp>::TransverseCommonTangents(
   }
 
   const Line2d_<_Tp> center_line(center_, other.center_);
-  if (eps_equal(distance, sum_radii)) {
+  if (IsEpsEqual(distance, sum_radii)) {
     if (tangent1) {
       // Compute the single intersection point
       const vec_type unit_dir = center_line.UnitDirection();
@@ -307,7 +307,7 @@ int Circle_<_Tp>::IntersectionCircleCircle(
   const double distance = center_.Distance(other.center_);
 
   // Are the circles the same?
-  if (eps_zero(distance) && eps_equal(radius_, other.radius_)) {
+  if (IsEpsZero(distance) && IsEpsEqual(radius_, other.radius_)) {
     return -1;
   }
 
@@ -343,7 +343,7 @@ int Circle_<_Tp>::IntersectionCircleCircle(
     *intersection1 = vec_type{ix1, iy1};
   }
 
-  if (eps_zero(gx) && eps_zero(gy)) {
+  if (IsEpsZero(gx) && IsEpsZero(gy)) {
     return 1;
   } else {
     if (intersection2) {
@@ -387,7 +387,7 @@ Line2d_<_Tp> Line2d_<_Tp>::LeftToRight() const {
     return Line2d_<_Tp>();
   }
 
-  if (eps_equal(pt_from_.x(), pt_to_.x())) {
+  if (IsEpsEqual(pt_from_.x(), pt_to_.x())) {
     // A vertical line will be sorted top-to-bottom:
     if (pt_from_.y() < pt_to_.y()) {
       return Line2d_<_Tp>(pt_from_, pt_to_);
@@ -444,7 +444,7 @@ bool Line2d_<_Tp>::IsCollinear(const Line2d_ &other) const {
   const _Tp rxs = Determinant(r, s);
   const _Tp qmpxr = Determinant((q-p), r);
 
-  return (eps_zero(rxs) && eps_zero(qmpxr));
+  return (IsEpsZero(rxs) && IsEpsZero(qmpxr));
 }
 
 
@@ -455,7 +455,7 @@ bool Line2d_<_Tp>::IsPointLeftOfLine(
 
   // If the "2d cross product" (i.e. determinant) is 0, the points are
   // collinear, and thus, would be on the line.
-  if (eps_zero(det)) {
+  if (IsEpsZero(det)) {
     if (is_on_line) {
       *is_on_line = true;
     }
@@ -464,7 +464,7 @@ bool Line2d_<_Tp>::IsPointLeftOfLine(
     if (is_on_line) {
       *is_on_line = false;
     }
-    return det > 0.0;
+    return Sign(det) > 0;
   }
 }
 
@@ -473,7 +473,7 @@ template <typename _Tp>
 bool Line2d_<_Tp>::IntersectionLineLine(
     const Line2d_ &other, vec_type *intersection_point) const {
   const vec3_type ip = HomogeneousForm().Cross(other.HomogeneousForm());
-  if (eps_zero(ip[2])) {
+  if (IsEpsZero(ip[2])) {
     // Intersection at infinity
     return false;
   } else {
@@ -499,14 +499,14 @@ bool Line2d_<_Tp>::IntersectionLineLineSegment(
   const _Tp rxs = Determinant(r, s);
   const _Tp qmpxr = Determinant((q-p), r);
 
-  if (eps_zero(rxs) && eps_zero(qmpxr)) {
+  if (IsEpsZero(rxs) && IsEpsZero(qmpxr)) {
     // Line and segment are collinear.
     if (intersection_point) {
       *intersection_point = segment.From();
     }
     return true;
   } else {
-    if (eps_zero(rxs)) {
+    if (IsEpsZero(rxs)) {
       // Parallel and not intersecting
       return false;
     } else {
@@ -541,17 +541,17 @@ bool Line2d_<_Tp>::IntersectionLineSegmentLineSegment(
   const _Tp rxs = Determinant(r, s);
   const _Tp qmpxr = Determinant((q-p), r);
 
-  if (eps_zero(rxs) && eps_zero(qmpxr)) {
+  if (IsEpsZero(rxs) && IsEpsZero(qmpxr)) {
     // Lines are collinear. They intersect if there is any overlap.
     const _Tp t0 = (q-p).Dot(r) / r.Dot(r);
     const double t1 = t0 + s.Dot(r) / r.Dot(r);
-    if ((t0 >= 0.0f) && (t0 <= 1.0f)) {
+    if ((t0 >= 0) && (t0 <= 1)) {
       if (intersection_point) {
         *intersection_point = p + t0 * r;
       }
       return true;
     } else {
-      if ((t1 >= 0.0f) && (t1 <= 1.0f)) {
+      if ((t1 >= 0) && (t1 <= 1)) {
         if (intersection_point) {
           *intersection_point = p + t1 * r;
         }
@@ -561,7 +561,7 @@ bool Line2d_<_Tp>::IntersectionLineSegmentLineSegment(
       return false;
     }
   } else {
-    if (eps_zero(rxs)) {
+    if (IsEpsZero(rxs)) {
       // Segments are parallel and not intersecting
       return false;
     } else {
@@ -605,7 +605,7 @@ int Line2d_<_Tp>::IntersectionLineCircle(
   const double discriminant = (circle.Radius() * circle.Radius() * dr_sqr) - (D * D);
   const double discriminant_sqrt = std::sqrt(discriminant);
   const double sgn = (dy < 0.0) ? -1.0 : 1.0;
-  if (eps_zero(discriminant)) {
+  if (IsEpsZero(discriminant)) {
     // discriminant == 0: line is a tangent
     if (intersection1) {
       intersection1->SetX(
@@ -615,7 +615,7 @@ int Line2d_<_Tp>::IntersectionLineCircle(
     }
     return 1;
   } else {
-    if (discriminant > 0.0) {
+    if (Sign(discriminant) > 0) {
       // 2 intersection points
       if (intersection1) {
         intersection1->SetX(
@@ -653,7 +653,7 @@ int Line2d_<_Tp>::IntersectionLineSegmentCircle(
   }
 
   const double dist1 = DistancePointToSegment(line_intersect1);
-  const bool on_segment1 = eps_zero(dist1);
+  const bool on_segment1 = IsEpsZero(dist1);
 
   if (line_intersections == 1) {
     // If there is only a single intersection point with the line, it will be
@@ -668,7 +668,7 @@ int Line2d_<_Tp>::IntersectionLineSegmentCircle(
   } else {
     // We have two line-circle intersection points and need to check both.
     const double dist2 = DistancePointToSegment(line_intersect2);
-    const bool on_segment2 = eps_zero(dist2);
+    const bool on_segment2 = IsEpsZero(dist2);
 
     int num_intersections = 0;
     if (on_segment1) {
@@ -839,7 +839,7 @@ Plane_<_Tp>::Plane_(
   const vec_type pr = q.DirectionVector(r);
   const vec_type cross = pq.Cross(pr);
 
-  if (!eps_zero(cross.LengthSquared())) {
+  if (!IsEpsZero(cross.LengthSquared())) {
     normal_ = cross.UnitVector();
     offset_ = -normal_.Dot(p);
   }

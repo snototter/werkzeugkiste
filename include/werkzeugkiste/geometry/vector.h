@@ -39,7 +39,7 @@ class Vec {
   Vec(_Tp x, _Tp y, _Tp z, _Tp w);
   Vec(std::initializer_list<_Tp> values);
 
-  ~Vec() {}
+  ~Vec() = default;
 
   Vec(const Vec<_Tp, dim>& other);
   Vec(Vec<_Tp, dim> &&other) noexcept;
@@ -49,7 +49,7 @@ class Vec {
 
   /// Allow implicitly casting each vector to its
   /// double-precision counterpart.
-  operator Vec<double, dim>() const;
+  operator Vec<double, dim>() const;  // NOLINT
 
 
   /// Returns the homogeneous representation of this vector, *i.e.* the vector
@@ -115,6 +115,7 @@ class Vec {
 
 
   //------------------------------------------------- Arithmetics
+  //FIXME disable division on integral types, or implement explicit clipping?
   Vec<_Tp, dim> &operator+=(const Vec<_Tp, dim>& rhs);
   Vec<_Tp, dim> &operator+=(double value);
   Vec<_Tp, dim> &operator-=(const Vec<_Tp, dim>& rhs);
@@ -254,12 +255,12 @@ double LengthPolygon(const std::vector<Vec<_Tp, dim>> &points);
 
 
 //-------------------------------------------------  Available specializations:
-typedef Vec<double, 2> Vec2d;
-typedef Vec<double, 3> Vec3d;
-typedef Vec<double, 4> Vec4d;
+using Vec2d = Vec<double, 2>;
+using Vec3d = Vec<double, 3>;
+using Vec4d = Vec<double, 4>;
 
-typedef Vec<int, 2> Vec2i;
-typedef Vec<int, 3> Vec3i;
+using Vec2i = Vec<int, 2>;
+using Vec3i = Vec<int, 3>;
 
 
 //---------------------------------------------------- Math/Geometry Helpers
@@ -315,7 +316,7 @@ double AngleRadFromDirectionVec(const Vec<_Tp, 2> &vec) {
 /// positive X axis.
 template <typename _Tp> inline
 double AngleDegFromDirectionVec(const Vec<_Tp, 2> &vec) {
-  return rad2deg(AngleRadFromDirectionVec(vec));
+  return Rad2Deg(AngleRadFromDirectionVec(vec));
 }
 
 
@@ -329,7 +330,7 @@ inline Vec2d DirectionVecFromAngleRad(double rad) {
 /// Returns the unit direction vector given its angle (in
 /// degrees) w.r.t. the positive X axis.
 inline Vec2d DirectionVecFromAngleDeg(double deg) {
-  return DirectionVecFromAngleRad(deg2rad(deg));
+  return DirectionVecFromAngleRad(Deg2Rad(deg));
 }
 
 

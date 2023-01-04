@@ -14,8 +14,9 @@ namespace werkzeugkiste {
 namespace geometry {
 template<typename _Tp, int dim>
 Vec<_Tp, dim>::Vec() {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] = static_cast<_Tp>(0);
+  }
 }
 
 template<typename _Tp, int dim>
@@ -48,16 +49,19 @@ Vec<_Tp, dim>::Vec(std::initializer_list<_Tp> values) {
       (values.size() != static_cast<size_t>(dim))) {
     std::stringstream s;
     s << "You cannot initialize " << TypeName()
-      << " with " << values.size() << " values";
+      << " with " << values.size() << " values. The initializer list must"
+         " either be empty, or contain " << dim << " values!";
     throw std::invalid_argument(s.str());
   }
 
   if (values.size() == 0) {
-    for (int i = 0; i < dim; ++i)
+    for (int i = 0; i < dim; ++i) {
       val[i] = static_cast<_Tp>(0);
+    }
   } else {
-    for (size_t i = 0; i < values.size(); ++i)
+    for (size_t i = 0; i < values.size(); ++i) {
       val[i] = values.begin()[i];
+    }
   }
 }
 
@@ -78,15 +82,17 @@ Vec<_Tp, dim>::Vec(_Tp x, _Tp y, _Tp z, _Tp w) {
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim>::Vec(const Vec<_Tp, dim>& other) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] = other.val[i];
+  }
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim>::Vec(Vec<_Tp, dim> &&other) noexcept {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] = other.val[i];
+  }
 }
 
 
@@ -103,16 +109,18 @@ Vec<_Tp, dim+1> Vec<_Tp, dim>::Homogeneous() const {
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator=(const Vec<_Tp, dim> &other) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] = other.val[i];
+  }
   return *this;
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator=(Vec<_Tp, dim> &&other) noexcept {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] = other.val[i];
+  }
   return *this;
 }
 
@@ -120,8 +128,9 @@ Vec<_Tp, dim> &Vec<_Tp, dim>::operator=(Vec<_Tp, dim> &&other) noexcept {
 template<typename _Tp, int dim>
 Vec<_Tp, dim>::operator Vec<double, dim>() const {
   Vec<double, dim> conv;
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     conv.val[i] = static_cast<double>(val[i]);
+  }
   return conv;
 }
 
@@ -170,18 +179,20 @@ const _Tp& Vec<_Tp, dim>::y() const {
 
 template<typename _Tp, int dim>
 const _Tp& Vec<_Tp, dim>::width() const {
-  if (dim != 2)
+  if (dim != 2) {
     throw std::logic_error("Only 2D vectors support"
                            " member access via width().");
+  }
   return x();
 }
 
 
 template<typename _Tp, int dim>
 const _Tp& Vec<_Tp, dim>::height() const {
-  if (dim != 2)
-    throw std::logic_error("Only 2D vectors support"
-                           " member access via height().");
+  if (dim != 2) {
+    throw std::logic_error(
+          "Only 2D vectors support member access via height().");
+  }
   return y();
 }
 
@@ -212,18 +223,20 @@ _Tp& Vec<_Tp, dim>::y() {
 
 template<typename _Tp, int dim>
 _Tp& Vec<_Tp, dim>::width() {
-  if (dim != 2)
-    throw std::logic_error("Only 2D vectors support"
-                           " member access via width().");
+  if (dim != 2) {
+    throw std::logic_error(
+          "Only 2D vectors support member access via width().");
+  }
   return x();
 }
 
 
 template<typename _Tp, int dim>
 _Tp& Vec<_Tp, dim>::height() {
-  if (dim != 2)
-    throw std::logic_error("Only 2D vectors support"
-                           " member access via height().");
+  if (dim != 2) {
+    throw std::logic_error(
+          "Only 2D vectors support member access via height().");
+  }
   return y();
 }
 
@@ -254,18 +267,20 @@ void Vec<_Tp, dim>::SetY(_Tp y) {
 
 template<typename _Tp, int dim>
 void Vec<_Tp, dim>::SetWidth(_Tp width) {
-  if (dim != 2)
-    throw std::logic_error("Only 2D vectors support"
-                           " setting the x dimension via SetWidth().");
+  if (dim != 2) {
+    throw std::logic_error(
+          "Only 2D vectors support setting the x dimension via SetWidth().");
+  }
   SetX(width);
 }
 
 
 template<typename _Tp, int dim>
 void Vec<_Tp, dim>::SetHeight(_Tp height) {
-  if (dim != 2)
-    throw std::logic_error("Only 2D vectors support"
-                           " setting the x dimension via SetHeight().");
+  if (dim != 2) {
+    throw std::logic_error(
+          "Only 2D vectors support setting the x dimension via SetHeight().");
+  }
   SetY(height);
 }
 
@@ -284,48 +299,54 @@ void Vec<_Tp, dim>::SetW(_Tp w) {
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator+=(const Vec<_Tp, dim>& rhs) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] += rhs[i];
+  }
   return *this;
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator+=(double value) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] += value;
+  }
   return *this;
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator-=(const Vec<_Tp, dim>& rhs) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] -= rhs[i];
+  }
   return *this;
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator-=(double value) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] -= value;
+  }
   return *this;
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator*=(double scale) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] *= scale;
+  }
   return *this;
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> &Vec<_Tp, dim>::operator/=(double scale) {
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     val[i] /= scale;
+  }
   return *this;
 }
 
@@ -334,7 +355,7 @@ template<typename _Tp, int dim>
 Vec<_Tp, dim> Vec<_Tp, dim>::operator-() const {
   Vec<_Tp, dim> cp(*this);
   for (int i = 0; i < dim; ++i) {
-    cp[i] *= -1.0;
+    cp[i] *= -1;
   }
   return cp;
 }
@@ -344,8 +365,9 @@ template<typename _Tp, int dim>
 _Tp Vec<_Tp, dim>::MaxValue() const {
   _Tp max = val[0];
   for (int i = 1; i < dim; ++i) {
-    if (val[i] > max)
+    if (val[i] > max) {
       max = val[i];
+    }
   }
   return max;
 }
@@ -355,8 +377,9 @@ template<typename _Tp, int dim>
 _Tp Vec<_Tp, dim>::MinValue() const {
   _Tp min = val[0];
   for (int i = 1; i < dim; ++i) {
-    if (val[i] < min)
+    if (val[i] < min) {
       min = val[i];
+    }
   }
   return min;
 }
@@ -366,8 +389,9 @@ template<typename _Tp, int dim>
 int Vec<_Tp, dim>::MaxIndex() const {
   int max_idx = 0;
   for (int i = 1; i < dim; ++i) {
-    if (val[i] > val[max_idx])
+    if (val[i] > val[max_idx]) {
       max_idx = i;
+    }
   }
   return max_idx;
 }
@@ -377,8 +401,9 @@ template<typename _Tp, int dim>
 int Vec<_Tp, dim>::MinIndex() const {
   int min_idx = 0;
   for (int i = 1; i < dim; ++i) {
-    if (val[i] < val[min_idx])
+    if (val[i] < val[min_idx]) {
       min_idx = i;
+    }
   }
   return min_idx;
 }
@@ -387,22 +412,25 @@ int Vec<_Tp, dim>::MinIndex() const {
 template<typename _Tp, int dim>
 _Tp Vec<_Tp, dim>::Dot(const Vec<_Tp, dim>& other) const {
   _Tp s = static_cast<_Tp>(0);
-  for (int i = 0; i < dim; ++i)
+  for (int i = 0; i < dim; ++i) {
     s += val[i] * other.val[i];
+  }
   return s;
 }
 
 
 template<typename _Tp, int dim>
 Vec<_Tp, dim> Vec<_Tp, dim>::Cross(const Vec<_Tp, dim>& other) const {
-  if (dim != 3)
+  if (dim != 3) {
     throw std::logic_error(
         "Cross product is only defined for 3d vectors! For 2d vectors, use "
         "Cross2d instead!");
+  }
 
-  return Vec<_Tp, dim>(val[1] * other.val[2] - val[2] * other.val[1],
-                       val[2] * other.val[0] - val[0] * other.val[2],
-                       val[0] * other.val[1] - val[1] * other.val[0]);
+  return Vec<_Tp, dim>(
+      val[1] * other.val[2] - val[2] * other.val[1],
+      val[2] * other.val[0] - val[0] * other.val[2],
+      val[0] * other.val[1] - val[1] * other.val[0]);
 }
 
 
@@ -490,8 +518,9 @@ std::string Vec<_Tp, dim>::ToString(bool include_type) const {
 
   for (int i = 0; i < dim; ++i) {
     s << val[i];
-    if (i < dim -1)
+    if (i < dim -1) {
       s << ", ";
+    }
   }
 
   s << ')';
@@ -502,7 +531,7 @@ std::string Vec<_Tp, dim>::ToString(bool include_type) const {
 template<typename _Tp, int dim>
 bool operator==(const Vec<_Tp, dim>& lhs, const Vec<_Tp, dim>& rhs) {
   for (int i = 0; i < dim; ++i) {
-    if (!eps_equal(lhs.val[i], rhs.val[i])) {
+    if (!IsEpsEqual(lhs.val[i], rhs.val[i])) {
       return false;
     }
   }
@@ -545,22 +574,22 @@ Vec<_Tp, dim> operator-(Vec<_Tp, dim> lhs, double rhs) {
 
 
 template<typename _Tp, int dim>
-Vec<_Tp, dim> operator*(Vec<_Tp, dim> lhs, double scale) {
-  lhs *= scale;
+Vec<_Tp, dim> operator*(Vec<_Tp, dim> lhs, double rhs) {
+  lhs *= rhs;
   return lhs;
 }
 
 
 template<typename _Tp, int dim>
-Vec<_Tp, dim> operator*(double scale, Vec<_Tp, dim> rhs) {
-  rhs *= scale;
+Vec<_Tp, dim> operator*(double lhs, Vec<_Tp, dim> rhs) {
+  rhs *= lhs;
   return rhs;
 }
 
 
 template<typename _Tp, int dim>
-Vec<_Tp, dim> operator/(Vec<_Tp, dim> lhs, double scale) {
-  lhs /= scale;
+Vec<_Tp, dim> operator/(Vec<_Tp, dim> lhs, double rhs) {
+  lhs /= rhs;
   return lhs;
 }
 

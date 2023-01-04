@@ -1,5 +1,5 @@
-#include <werkzeugkiste/timing/stopwatch.h>
 #include <sstream>
+#include <werkzeugkiste/timing/stopwatch.h>
 
 namespace werkzeugkiste {
 namespace timing {
