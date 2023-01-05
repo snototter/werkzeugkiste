@@ -1,9 +1,11 @@
-#ifndef __WERKZEUGKISTE_TEST_UTILS_H__
-#define __WERKZEUGKISTE_TEST_UTILS_H__
+#ifndef WERKZEUGKISTE_TEST_UTILS_H
+#define WERKZEUGKISTE_TEST_UTILS_H
 
 #include <gtest/gtest.h>
 
-/** Check if an elapsed time "tick value" is within the range [expected-pm, expected+pm]. */
-::testing::AssertionResult CheckElapsedTime(double val, double expected, double pm);
+/// Check if an elapsed time "tick value" is within the
+/// range [expected-pm, expected+pm].
+::testing::AssertionResult CheckElapsedTime(
+    double val, double expected, double pm);
 
-#endif  // __WERKZEUGKISTE_TEST_UTILS_H__
+#endif  // WERKZEUGKISTE_TEST_UTILS_H

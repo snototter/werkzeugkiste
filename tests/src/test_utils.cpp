@@ -1,9 +1,12 @@
 #include "test_utils.h"
 
-::testing::AssertionResult CheckElapsedTime(double val, double expected, double pm) {
-  if((val >= expected - pm) && (val <= expected + pm))
+::testing::AssertionResult CheckElapsedTime(
+    double val, double expected, double pm) {
+  if((val >= (expected - pm)) && (val <= (expected + pm))) {
     return ::testing::AssertionSuccess();
-  else
+  } else {  // NOLINT
     return ::testing::AssertionFailure()
-           << "Elapsed time " << val << " is not within " << expected << " +/- " << pm;
+           << "Elapsed time " << val << " is not within "
+           << expected << " +/- " << pm;
+  }
 }

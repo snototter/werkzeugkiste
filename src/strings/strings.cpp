@@ -11,52 +11,57 @@
 namespace werkzeugkiste {
 namespace strings {
 
-namespace slug_ {
+namespace slug_utils {
 //TODO should we use char32_t instead?
 //TODO # -- nr
-std::unordered_map<std::string, std::string> replacements {
-  //TODO expand list: https://unicode-table.com/en/blocks/latin-1-supplement/
+const std::unordered_map<std::string, std::string> &Replacements() {
+  static const std::unordered_map<std::string, std::string> replacements {
+    //TODO expand list: https://unicode-table.com/en/blocks/latin-1-supplement/
 
-  // ASCII
-  {"!", ""}, {"\"", ""}, {"#", "nr"},
-  {"$", "dollar"}, {"%", "pc"}, {"&", "and"},
-  {"'", ""}, {",", ""}, {".", "-"},
-  {"/", "-"}, {":", ""}, {";", ""},
-  {"<", "gt"}, {"=", "eq"}, {">", "lt"},
-  {"?", ""}, {"@", "at"},
-  {"\\", "-"}, {"^", ""},
-  {"_", "-"}, {"`", ""}, // Grave accent
-  //TODO tilde?
+    // ASCII
+    {"!", ""}, {"\"", ""}, {"#", "nr"},
+    {"$", "dollar"}, {"%", "pc"}, {"&", "and"},
+    {"'", ""}, {",", ""}, {".", "-"},
+    {"/", "-"}, {":", ""}, {";", ""},
+    {"<", "gt"}, {"=", "eq"}, {">", "lt"},
+    {"?", ""}, {"@", "at"},
+    {"\\", "-"}, {"^", ""},
+    {"_", "-"}, {"`", ""}, // Grave accent
+    //TODO tilde?
 
-  // Latin 1 supplement
-  {"´", ""}, // Acute accent
+    // Latin 1 supplement
+    {"´", ""}, // Acute accent
 
-  {"\u00a9", "(c)"},  // Copyright sign
-  {"\u00ae", "(r)"},  // Registered sign
-  {"\u00b1", "pm"},   // Plus-minus sign
-  {"\u2213", "mp"},   // Minus-plus sign
-  {"\u00b0", "deg"},  // Degree sign
-  {"\u00b5", "mu"},   // Mu/micro sign
-  {"\u00b7", "cdot"},   // Middle dot
+    {"\u00a9", "(c)"},  // Copyright sign
+    {"\u00ae", "(r)"},  // Registered sign
+    {"\u00b1", "pm"},   // Plus-minus sign
+    {"\u2213", "mp"},   // Minus-plus sign
+    {"\u00b0", "deg"},  // Degree sign
+    {"\u00b5", "mu"},   // Mu/micro sign
+    {"\u00b7", "cdot"},   // Middle dot
 
-  {"\u00a3", "pound"},
-  {"\u00a5", "yen"},
-  {"\u00a7", "par"}, // Paragraph
-  {"\u20ac", "euro"},
+    {"\u00a3", "pound"},
+    {"\u00a5", "yen"},
+    {"\u00a7", "par"}, // Paragraph
+    {"\u20ac", "euro"},
 
-  {"\u00d7", "x"}, // times
+    {"\u00d7", "x"}, // times
 
-  {"\u00c5", "Ae"}, // Capital A with diaeresis
-  {"\u00e4", "ae"}, // Small a with diaeresis
-  {"\u00cb", "E"}, // Capital E with diaeresis
-  {"\u00eb", "e"}, // Small e with diaeresis
-  {"\u00d6", "Oe"}, // Capital O with diaeresis
-  {"\u00f6", "oe"}, // Small o with diaeresis
-  {"\u00dc", "Ue"}, // Capital U with diaeresis
-  {"\u00fc", "Ue"}, // Small u with diaeresis
-  //TODO continue
-};
-}  // namespace slug_
+    {"\u00c4", "Ae"}, // Capital A with diaeresis
+    {"\u00c5", "A"},  // Capital A with ring
+    {"\u00e4", "ae"}, // Small a with diaeresis
+    {"\u00cb", "E"}, // Capital E with diaeresis
+    {"\u00eb", "e"}, // Small e with diaeresis
+    {"\u00d6", "Oe"}, // Capital O with diaeresis
+    {"\u00f6", "oe"}, // Small o with diaeresis
+    {"\u00dc", "Ue"}, // Capital U with diaeresis
+    {"\u00fc", "Ue"}, // Small u with diaeresis
+    //TODO continue
+  };
+  return replacements;
+}
+}  // namespace slug_utils
+
 
 void ToLower(std::string &s) {
   std::transform(
@@ -103,8 +108,8 @@ bool IsNumeric(const std::string &s) {
   if (s.length() > 0) {
     char *pd, *pl;
 
-    // Check long
-    long dummyl = strtol(s.c_str(), &pl, 10);
+    // Check long long
+    int64_t dummyl = strtoll(s.c_str(), &pl, 10);
     WERKZEUGKISTE_UNUSED_VAR(dummyl);
 
     // Check double
@@ -166,7 +171,7 @@ bool GetUrlProtocol(
     protocol = "";
     remainder = url;
     return false;
-  } else {
+  } else { // NOLINT
     protocol = url.substr(0, protocol_pos+3);
     remainder = url.substr(protocol_pos+3);
     return true;
@@ -206,7 +211,7 @@ std::string ClipUrl(const std::string &url) {
   // authentication information. But potentially lots
   // of forward slashes:
   if (has_protocol
-      && (Lower(protocol).compare("file://") == 0)) {
+      && (Lower(protocol).compare("file://") == 0)) {  // NOLINT
     return url;
   }
 
@@ -230,7 +235,7 @@ std::string ClipUrl(const std::string &url) {
 }
 
 
-std::string Remove(std::string_view s, const char c) {
+std::string Remove(std::string_view s, char c) {
   std::string removed;
   std::remove_copy(
         s.begin(), s.end(),
@@ -258,18 +263,18 @@ std::string Slug(
   //TODO a) inefficient
   //TODO b) update documentation
 
-  for (const auto &replacement : slug_::replacements) {
+  for (const auto &replacement : slug_utils::Replacements()) {
     replaced = Replace(replaced, replacement.first, replacement.second);
   }
   replaced = Lower(replaced);
 
   std::ostringstream out;
-  // Start with flag set to return "-" if the string
+  // Start with flag set to true, to return "-" if the string
   // contains exclusively non-alphanumeric characters
   bool prev_alphanum = true;
-  for (std::size_t i = 0; i < replaced.length(); ++i) {
-    if (std::isalnum(replaced[i]) != 0) {
-      out << replaced[i];
+  for (char c : replaced) {
+    if (std::isalnum(c) != 0) {
+      out << c;
       prev_alphanum = true;
     } else if (prev_alphanum && !strip_dashes) {
       out << '-';
