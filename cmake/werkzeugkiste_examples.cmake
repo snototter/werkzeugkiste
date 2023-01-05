@@ -36,7 +36,7 @@ function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
     add_executable(example-timing
         ${EXAMPLE_SRC_DIR}/timing_example.cpp)
     target_link_libraries(example-timing
-        PRIVATE werkzeugkiste::timing)
+        PRIVATE werkzeugkiste::werkzeugkiste)
 
     #TODO add future (sub-)library demos here!
 

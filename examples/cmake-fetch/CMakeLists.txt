@@ -27,6 +27,7 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/snototter/werkzeugkiste.git
   GIT_TAG refactor-cmake-init
 )
+message(STATUS "Preparing werkzeugkiste library via FetchContent")
 FetchContent_MakeAvailable(werkzeugkiste)
 
 
