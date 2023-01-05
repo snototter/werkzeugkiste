@@ -25,7 +25,7 @@ include(FetchContent)
 FetchContent_Declare(
   werkzeugkiste
   GIT_REPOSITORY https://github.com/snototter/werkzeugkiste.git
-  GIT_TAG main
+  GIT_TAG refactor-cmake-init
 )
 FetchContent_MakeAvailable(werkzeugkiste)
 

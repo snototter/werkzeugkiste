@@ -2,12 +2,15 @@ cmake_minimum_required(VERSION 3.14)
 
 include(cmake/prelude.cmake)
 
-# ---- Load the library version ----
+#########################################################################################
+# ---- Load the library version from the file ----
 
 if(NOT werkzeugkiste_VERSION)
     file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION" werkzeugkiste_VERSION)
 endif()
 
+
+#########################################################################################
 # ---- Set up the project ----
 
 project(
@@ -21,25 +24,38 @@ project(
 include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
-#########################################################################################
-# ---- Declare libraries ----
-include(GenerateExportHeader)
 
 #########################################################################################
-# Container Utils: werkzeugkiste::container
-# Header files
+# ---- Declare libraries ----
+# TODO document - separate libraries + all-in-one target
+
+# ---- Auto-generate werkzeugkiste's version.h file ----
+set(werkzeugkiste_VERSION_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/werkzeugkiste/version.h)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in
+    ${werkzeugkiste_VERSION_HEADER}
+)
+
+
+#########################################################################################
+# ---- Container Utils: werkzeugkiste::container ----
+
+# Header files (this utility is header-only)
 set(wkzgcontainer_PUBLIC_HEADER_FILES
     include/werkzeugkiste/container/circular_buffer.h
     include/werkzeugkiste/container/sort.h
-    include/werkzeugkiste/container/math.h)
+    include/werkzeugkiste/container/math.h
+    ${werkzeugkiste_VERSION_HEADER}
+)
 # Library
 add_library(werkzeugkiste-container
-    ${wkzgcontainer_PUBLIC_HEADER_FILES})
-# Add a namespace'd alias
+    ${wkzgcontainer_PUBLIC_HEADER_FILES}
+)
+# Namespace'd alias
 add_library(werkzeugkiste::container ALIAS werkzeugkiste-container)
-# Static build
+
 if(NOT BUILD_SHARED_LIBS)
-  target_compile_definitions(werkzeugkiste-container PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+    target_compile_definitions(werkzeugkiste-container PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
 endif()
 
 set_target_properties(
@@ -49,7 +65,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME container
-#FIXME see other libs    OUTPUT_NAME container
+    OUTPUT_NAME werkzeugkiste-container
     LINKER_LANGUAGE CXX
 )
 
@@ -68,17 +84,9 @@ target_include_directories(
 target_compile_features(werkzeugkiste-container PUBLIC cxx_std_17)
 
 
-### FIXME how to generate the export header for a common target?
-generate_export_header(
-    werkzeugkiste-container
-    BASE_NAME werkzeugkiste
-    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.hpp
-    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
-)
-
-
 #########################################################################################
-# Math/Geometry Utils: werkzeugkiste::geometry
+# ---- Math/Geometry Utils: werkzeugkiste::geometry ----
+# Adds a dependency to Eigen3::Eigen
 find_package(Eigen3 REQUIRED NO_MODULE)
 # Header files
 set(wkzggeometry_PUBLIC_HEADER_FILES
@@ -87,16 +95,20 @@ set(wkzggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/geometry/vector.h
     include/werkzeugkiste/geometry/projection.h
     include/werkzeugkiste/geometry/camera.h
-    include/werkzeugkiste/geometry/primitives.h)
+    include/werkzeugkiste/geometry/primitives.h
+    ${werkzeugkiste_VERSION_HEADER}
+)
 # Source files
 set(wkzggeometry_SOURCE_FILES
     src/geometry/primitives.cpp
-    src/geometry/vector.cpp)
+    src/geometry/vector.cpp
+)
 # Library
 add_library(werkzeugkiste-geometry
     ${wkzggeometry_PUBLIC_HEADER_FILES}
-    ${wkzggeometry_SOURCE_FILES})
-# Add a namespace'd alias
+    ${wkzggeometry_SOURCE_FILES}
+)
+# Namespace'd alias
 add_library(werkzeugkiste::geometry ALIAS werkzeugkiste-geometry)
 
 target_link_libraries(werkzeugkiste-geometry PUBLIC Eigen3::Eigen)
@@ -108,7 +120,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME geometry
-#FIXME would lead to libgeometry.a    OUTPUT_NAME geometry
+    OUTPUT_NAME werkzeugkiste-geometry
     LINKER_LANGUAGE CXX
 )
 
@@ -131,15 +143,19 @@ target_compile_features(werkzeugkiste-geometry PUBLIC cxx_std_17)
 # String Utils: werkzeugkiste::strings
 # Header files
 set(wkzgstrings_PUBLIC_HEADER_FILES
-    include/werkzeugkiste/strings/strings.h)
+    include/werkzeugkiste/strings/strings.h
+    ${werkzeugkiste_VERSION_HEADER}
+)
 # Source files
 set(wkzgstrings_SOURCE_FILES
-    src/strings/strings.cpp)
+    src/strings/strings.cpp
+)
 # Library
 add_library(werkzeugkiste-strings
     ${wkzgstrings_PUBLIC_HEADER_FILES}
-    ${wkzgstrings_SOURCE_FILES})
-# Add a namespace'd alias
+    ${wkzgstrings_SOURCE_FILES}
+)
+# Namespace'd alias
 add_library(werkzeugkiste::strings ALIAS werkzeugkiste-strings)
 
 set_target_properties(
@@ -149,7 +165,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME strings
-#FIXME see other libs    OUTPUT_NAME strings
+    OUTPUT_NAME werkzeugkiste-strings
     LINKER_LANGUAGE CXX
 )
 
@@ -175,21 +191,26 @@ target_compile_features(werkzeugkiste-strings PUBLIC cxx_std_17)
 
 
 #########################################################################################
-# File Utils: werkzeugkiste::files
-# Must be declared after ::strings
+# ---- File Utils: werkzeugkiste::files ----
+# ---- Note: Library must be declared after ::strings ----
+#FIXME replace code by c++17 filesystem
 # Header files
 set(wkzgfiles_PUBLIC_HEADER_FILES
     include/werkzeugkiste/files/fileio.h
-    include/werkzeugkiste/files/filesys.h)
+    include/werkzeugkiste/files/filesys.h
+    ${werkzeugkiste_VERSION_HEADER}
+)
 # Source files
 set(wkzgfiles_SOURCE_FILES
     src/files/fileio.cpp
-    src/files/filesys.cpp)
+    src/files/filesys.cpp
+)
 # Library
 add_library(werkzeugkiste-files
     ${wkzgfiles_PUBLIC_HEADER_FILES}
-    ${wkzgfiles_SOURCE_FILES})
-# Add a namespace'd alias
+    ${wkzgfiles_SOURCE_FILES}
+)
+# Namespace'd alias
 add_library(werkzeugkiste::files ALIAS werkzeugkiste-files)
 
 set_target_properties(
@@ -199,7 +220,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME files
-#FIXME see other libs    OUTPUT_NAME files
+    OUTPUT_NAME werkzeugkiste-files
     LINKER_LANGUAGE CXX
 )
 
@@ -224,24 +245,28 @@ target_compile_features(werkzeugkiste-files PUBLIC cxx_std_17)
 
 
 #########################################################################################
-# Container Utils: werkzeugkiste::timing
+# ---- Clock Utils: werkzeugkiste::timing ----
 # Header files
 set(wkzgtiming_PUBLIC_HEADER_FILES
     include/werkzeugkiste/timing/stopwatch.h
-    include/werkzeugkiste/timing/tictoc.h)
+    include/werkzeugkiste/timing/tictoc.h
+    ${werkzeugkiste_VERSION_HEADER}
+)
 # Source files
 set(wkzgtiming_SOURCE_FILES
     src/timing/stopwatch.cpp
-    src/timing/tictoc.cpp)
+    src/timing/tictoc.cpp
+)
 # Library
 add_library(werkzeugkiste-timing
     ${wkzgtiming_PUBLIC_HEADER_FILES}
-    ${wkzgtiming_SOURCE_FILES})
-# Add a namespace'd alias
+    ${wkzgtiming_SOURCE_FILES}
+)
+# Namespace'd alias
 add_library(werkzeugkiste::timing ALIAS werkzeugkiste-timing)
-# Static build
+
 if(NOT BUILD_SHARED_LIBS)
-  target_compile_definitions(werkzeugkiste-timing PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+    target_compile_definitions(werkzeugkiste-timing PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
 endif()
 
 set_target_properties(
@@ -268,6 +293,76 @@ target_include_directories(
 )
 
 target_compile_features(werkzeugkiste-timing PUBLIC cxx_std_17)
+
+
+#########################################################################################
+# ---- The "all-in-one" target ---- FIXME check if this works as intended!
+
+add_library(werkzeugkiste-werkzeugkiste
+    ${wkzgcontainer_PUBLIC_HEADER_FILES}
+    ${wkzggeometry_PUBLIC_HEADER_FILES}
+#    ${wkzggeometry_SOURCE_FILES}
+    ${wkzgstrings_PUBLIC_HEADER_FILES}
+#    ${wkzgstrings_SOURCE_FILES}
+    ${wkzgfiles_PUBLIC_HEADER_FILES}
+#    ${wkzgfiles_SOURCE_FILES}
+    ${wkzgtiming_PUBLIC_HEADER_FILES}
+#    ${wkzgtiming_SOURCE_FILES}
+    ${werkzeugkiste_VERSION_HEADER}
+)
+# ---- Namespace'd alias ----
+add_library(werkzeugkiste::werkzeugkiste ALIAS werkzeugkiste-werkzeugkiste)
+
+# ---- Generate the shared export header ----
+include(GenerateExportHeader)
+generate_export_header(
+    werkzeugkiste-werkzeugkiste
+    BASE_NAME werkzeugkiste
+    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.hpp
+    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
+)
+
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(
+        werkzeugkiste-werkzeugkiste PUBLIC WERKZEUGKISTE_STATIC_DEFINE
+    )
+endif()
+
+set_target_properties(
+    werkzeugkiste-werkzeugkiste PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+    VERSION "${PROJECT_VERSION}"
+    SOVERSION "${PROJECT_VERSION_MAJOR}"
+    EXPORT_NAME werkzeugkiste
+    OUTPUT_NAME werkzeugkiste-werkzeugkiste
+)
+
+target_include_directories(
+    werkzeugkiste-werkzeugkiste ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+)
+
+target_include_directories(
+    werkzeugkiste-werkzeugkiste SYSTEM
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
+)
+
+target_compile_features(werkzeugkiste-werkzeugkiste PUBLIC cxx_std_17)
+
+target_link_libraries(
+    werkzeugkiste-werkzeugkiste
+    PUBLIC
+    werkzeugkiste::container
+    werkzeugkiste::files
+    werkzeugkiste::geometry
+    werkzeugkiste::strings
+    werkzeugkiste::timing
+)
+
+
 
 #
 #add_library(
@@ -311,13 +406,16 @@ target_compile_features(werkzeugkiste-timing PUBLIC cxx_std_17)
 #
 #target_compile_features(werkzeugkiste_werkzeugkiste PUBLIC cxx_std_17)
 
+
+#########################################################################################
 # ---- Install rules ----
 
 if(NOT CMAKE_SKIP_INSTALL_RULES)
-  include(cmake/install-rules.cmake)
+    include(cmake/install-rules.cmake)
 endif()
 
 
+#########################################################################################
 # ---- Add custom uninstall target ----
 
 if(NOT TARGET uninstall)
@@ -330,25 +428,27 @@ if(NOT TARGET uninstall)
         COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-
-# ---- Examples ----
+#########################################################################################
+# ---- Include optional examples ----
 
 if(PROJECT_IS_TOP_LEVEL)
-  option(BUILD_EXAMPLES "Build examples tree." "${werkzeugkiste_DEVELOPER_MODE}")
-  if(BUILD_EXAMPLES)
-    add_subdirectory(examples)
-  endif()
+    option(BUILD_EXAMPLES "Build examples tree." "${werkzeugkiste_DEVELOPER_MODE}")
+    if(BUILD_EXAMPLES)
+        add_subdirectory(examples)
+    endif()
 endif()
 
+
+#########################################################################################
 # ---- Developer mode ----
 
 if(NOT werkzeugkiste_DEVELOPER_MODE)
-  return()
+    return()
 elseif(NOT PROJECT_IS_TOP_LEVEL)
-  message(
-      AUTHOR_WARNING
-      "Developer mode is intended for developers of werkzeugkiste"
-  )
+    message(
+        AUTHOR_WARNING
+        "Developer mode is only intended for developers of werkzeugkiste"
+    )
 endif()
 
 include(cmake/dev-mode.cmake)

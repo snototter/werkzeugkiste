@@ -9,10 +9,6 @@ project(werkzeugkiste-examples-installed)
 # (3) Link the appropriate werkzeugkiste::<target> to your executable/library (no need
 #     to fiddle around with INCLUDE_DIRS, xxx_LIB, or the like)
 
-#FIXME Eigen3 is not properly exported by my werkzeugkiste installation :/
-# This line should NOT be needed if I would have set up the INSTALL/LINK interface properly
-#find_package(Eigen3 REQUIRED NO_MODULE)
-
 # This demo assumes that you installed werkzeugkiste using the default CMAKE_INSTALL_PREFIX.
 # Thus, we don't need to set the CMAKE_PREFIX_PATH manually and CMake will easily
 # locate the library via
