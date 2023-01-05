@@ -36,10 +36,12 @@ function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
     add_executable(example-timing
         ${EXAMPLE_SRC_DIR}/timing_example.cpp)
     target_link_libraries(example-timing
-        PRIVATE werkzeugkiste::werkzeugkiste)
+        PRIVATE werkzeugkiste::timing)
 
     #TODO add future (sub-)library demos here!
 
     ## TODO werkzeugkiste::geometry
+
+    ##TODO add an example which uses the all-in-one target werkzeugkiste::werkzeugkiste
 endfunction()
 

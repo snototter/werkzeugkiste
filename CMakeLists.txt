@@ -27,7 +27,9 @@ include(cmake/variables.cmake)
 
 #########################################################################################
 # ---- Declare libraries ----
-# TODO document - separate libraries + all-in-one target
+# This toolbox consists of several "sub-utilities", each of which provides a separate
+# library to be consumed. For the lazy, there is a single werkzeugkiste::werkzeugkiste
+# target, which includes all "sub-utilities" in its link interface.
 
 # ---- Auto-generate werkzeugkiste's version.h file ----
 set(werkzeugkiste_VERSION_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/include/werkzeugkiste/version.h)
@@ -35,6 +37,8 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/version.h.in
     ${werkzeugkiste_VERSION_HEADER}
 )
+
+#FIXME use the export header s.t. it can be used as a shared library!!!
 
 
 #########################################################################################
@@ -276,7 +280,7 @@ set_target_properties(
     VERSION "${PROJECT_VERSION}"
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME timing
-#FIXME see other libs    OUTPUT_NAME timing
+    OUTPUT_NAME werkzeugkiste-timing
     LINKER_LANGUAGE CXX
 )
 
@@ -296,24 +300,28 @@ target_compile_features(werkzeugkiste-timing PUBLIC cxx_std_17)
 
 
 #########################################################################################
-# ---- The "all-in-one" target ---- FIXME check if this works as intended!
+# ---- The "all-in-one" target ----
+# FIXME check if this works as intended!
+# [ ] TODO automate these build checks!
+# [x] worked for static build & fetch content example
+# [ ] to test: shared build, fetch content
+# [ ] to test: static build, local install
+# [ ] to test: shared build, local install
 
+# TODO does the all-in-one target need the other headers explicitly? they should be implicitly
+# deployed by the corresponding sub-utilitiy target (?)
 add_library(werkzeugkiste-werkzeugkiste
     ${wkzgcontainer_PUBLIC_HEADER_FILES}
     ${wkzggeometry_PUBLIC_HEADER_FILES}
-#    ${wkzggeometry_SOURCE_FILES}
     ${wkzgstrings_PUBLIC_HEADER_FILES}
-#    ${wkzgstrings_SOURCE_FILES}
     ${wkzgfiles_PUBLIC_HEADER_FILES}
-#    ${wkzgfiles_SOURCE_FILES}
     ${wkzgtiming_PUBLIC_HEADER_FILES}
-#    ${wkzgtiming_SOURCE_FILES}
     ${werkzeugkiste_VERSION_HEADER}
 )
 # ---- Namespace'd alias ----
 add_library(werkzeugkiste::werkzeugkiste ALIAS werkzeugkiste-werkzeugkiste)
 
-# ---- Generate the shared export header ----
+# ---- Generate the shared export header to be used by all targets ----
 include(GenerateExportHeader)
 generate_export_header(
     werkzeugkiste-werkzeugkiste
