@@ -1,5 +1,6 @@
 # ---- Variables ----
-
+#FIXME include requires lcov 1.14
+#FIXME exclude eigen & gtest!
 # We use variables separate from what CTest uses, because those have
 # customization issues
 set(

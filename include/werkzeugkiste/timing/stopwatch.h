@@ -1,7 +1,7 @@
 #ifndef WERKZEUGKISTE_TIMING_STOPWATCH_H
 #define WERKZEUGKISTE_TIMING_STOPWATCH_H
 
-#include <chrono>  // NOLINT [build/c++11]
+#include <chrono>  // NOLINT
 #include <string>
 #include <stdexcept>
 #include <sstream>
@@ -240,7 +240,7 @@ class stop_watch {
     const auto duration_hrs =
         std::chrono::duration_cast<std::chrono::hours>(clock_type::time_point::max() - clock_type::now());
     // Convert to years, similar to C++20's std::chrono::years definition
-    return duration_hrs.count() / 8765.82;  // = 24 * 365.2425
+    return static_cast<double>(duration_hrs.count()) / 8765.82;  // = 24 * 365.2425
   }
 
 

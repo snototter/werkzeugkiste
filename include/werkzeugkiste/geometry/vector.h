@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_GEOMETRY_VECTOR_H__
-#define __WERKZEUGKISTE_GEOMETRY_VECTOR_H__
+#ifndef WERKZEUGKISTE_GEOMETRY_VECTOR_H
+#define WERKZEUGKISTE_GEOMETRY_VECTOR_H
 
 #include <stdexcept>
 #include <string>
@@ -386,4 +386,4 @@ void MinMaxCoordinates(
 } // namespace geometry
 } // namespace werkzeugkiste
 
-#endif // __WERKZEUGKISTE_GEOMETRY_VECTOR_H__
+#endif // WERKZEUGKISTE_GEOMETRY_VECTOR_H

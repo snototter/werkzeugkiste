@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_GEOMETRY_UTILS_H__
-#define __WERKZEUGKISTE_GEOMETRY_UTILS_H__
+#ifndef WERKZEUGKISTE_GEOMETRY_UTILS_H
+#define WERKZEUGKISTE_GEOMETRY_UTILS_H
 
 #include <limits>
 #include <type_traits>
@@ -48,7 +48,7 @@ inline bool _eps_zero(T x, std::true_type /* is_floating_point */) { // NOLINT
 /// Helper to check if the integral number x is zero.
 template <typename T>
 inline bool _eps_zero(T x, std::false_type /* is_floating_point */) { // NOLINT
-  return x == 0;
+  return x == T(0);
 }
 
 
@@ -139,4 +139,4 @@ int Sign(T x) {
 } // namespace geometry
 } // namespace werkzeugkiste
 
-#endif // __WERKZEUGKISTE_GEOMETRY_UTILS_H__
+#endif // WERKZEUGKISTE_GEOMETRY_UTILS_H

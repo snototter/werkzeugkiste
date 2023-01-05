@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_GEOMETRY_CAMERA_H__
-#define __WERKZEUGKISTE_GEOMETRY_CAMERA_H__
+#ifndef WERKZEUGKISTE_GEOMETRY_CAMERA_H
+#define WERKZEUGKISTE_GEOMETRY_CAMERA_H
 
 #include <type_traits>
 #include <tuple>
@@ -248,4 +248,4 @@ bool ProjectsPointOntoImage(
 } // namespace geometry
 } // namespace werkzeugkiste
 
-#endif // __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
+#endif // WERKZEUGKISTE_GEOMETRY_PROJECTION_H

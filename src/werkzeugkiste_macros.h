@@ -1,8 +1,8 @@
-#ifndef __WERKZEUGKISTE_MACROS_H__
-#define __WERKZEUGKISTE_MACROS_H__
+#ifndef WERKZEUGKISTE_MACROS_H
+#define WERKZEUGKISTE_MACROS_H
 
-/** @brief Macro to suppress "unused variable" warnings. */
+/// Macro to suppress "unused variable" warnings.
 #define WERKZEUGKISTE_UNUSED_VAR(var) (void)(var)
 
-#endif  // __WERKZEUGKISTE_MACROS_H__
+#endif  // WERKZEUGKISTE_MACROS_H
 

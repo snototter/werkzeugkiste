@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
-#define __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
+#ifndef WERKZEUGKISTE_GEOMETRY_PROJECTION_H
+#define WERKZEUGKISTE_GEOMETRY_PROJECTION_H
 
 #include <cmath>
 #include <tuple>
@@ -327,4 +327,4 @@ Matrix<_Tp, 3, 3> RotationMatrix(
 } // namespace geometry
 } // namespace werkzeugkiste
 
-#endif // __WERKZEUGKISTE_GEOMETRY_PROJECTION_H__
+#endif // WERKZEUGKISTE_GEOMETRY_PROJECTION_H

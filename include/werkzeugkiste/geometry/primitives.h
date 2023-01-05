@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_GEOMETRY_PRIMITIVES_H__
-#define __WERKZEUGKISTE_GEOMETRY_PRIMITIVES_H__
+#ifndef WERKZEUGKISTE_GEOMETRY_PRIMITIVES_H
+#define WERKZEUGKISTE_GEOMETRY_PRIMITIVES_H
 
 #include <cmath>
 #include <limits>
@@ -678,4 +678,4 @@ using Plane = Plane_<double>;
 } // namespace geometry
 } // namespace werkzeugkiste
 
-#endif // __WERKZEUGKISTE_GEOMETRY_UTILS_H__
+#endif // WERKZEUGKISTE_GEOMETRY_UTILS_H

@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_CONTAINER_MATH_H__
-#define __WERKZEUGKISTE_CONTAINER_MATH_H__
+#ifndef WERKZEUGKISTE_CONTAINER_MATH_H
+#define WERKZEUGKISTE_CONTAINER_MATH_H
 
 #include <cstddef>
 #include <algorithm>
@@ -125,4 +125,4 @@ void MinMax(
 }  // namespace container
 }  // namespace werkzeugkiste
 
-#endif  // __WERKZEUGKISTE_CONTAINER_MATH_H__
+#endif  // WERKZEUGKISTE_CONTAINER_MATH_H

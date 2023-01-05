@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_STRINGS_STRINGS_H__
-#define __WERKZEUGKISTE_STRINGS_STRINGS_H__
+#ifndef WERKZEUGKISTE_STRINGS_STRINGS_H
+#define WERKZEUGKISTE_STRINGS_STRINGS_H
 
 #include <sstream>
 #include <iomanip>
@@ -183,4 +183,4 @@ std::string Indent(
 } // namespace strings
 } // namespace werkzeug
 
-#endif  // __WERKZEUGKISTE_STRINGS_STRINGS_H__
+#endif  // WERKZEUGKISTE_STRINGS_STRINGS_H

@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_FILES_FILESYS_H__
-#define __WERKZEUGKISTE_FILES_FILESYS_H__
+#ifndef WERKZEUGKISTE_FILES_FILESYS_H
+#define WERKZEUGKISTE_FILES_FILESYS_H
 
 #include <string>
 #include <vector>
@@ -31,4 +31,4 @@ std::string DirName(const std::string &path);
 } // namespace files
 } // namespace werkzeugkiste
 
-#endif // __WERKZEUGKISTE_FILES_FILEIO_H__
+#endif // WERKZEUGKISTE_FILES_FILEIO_H

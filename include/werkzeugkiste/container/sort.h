@@ -1,5 +1,5 @@
-#ifndef __WERKZEUGKISTE_CONTAINER_SORT_H__
-#define __WERKZEUGKISTE_CONTAINER_SORT_H__
+#ifndef WERKZEUGKISTE_CONTAINER_SORT_H
+#define WERKZEUGKISTE_CONTAINER_SORT_H
 
 #include <vector>
 #include <map>
@@ -202,4 +202,4 @@ bool ContainsValue(const _C &container, const _T &value) {
 }  // namespace container
 }  // namespace werkzeugkiste
 
-#endif  // __WERKZEUGKISTE_CONTAINER_SORT_H__
+#endif  // WERKZEUGKISTE_CONTAINER_SORT_H
