@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <cctype>
-#include <string>
+#include <unordered_map>
 
 #include <werkzeugkiste/strings/strings.h>
 #include <werkzeugkiste_macros.h>
@@ -11,35 +11,52 @@
 namespace werkzeugkiste {
 namespace strings {
 
+namespace slug_ {
+//TODO should we use char32_t instead?
+//TODO # -- nr
+std::unordered_map<std::string, std::string> replacements {
+  //TODO expand list: https://unicode-table.com/en/blocks/latin-1-supplement/
 
-bool EndsWith(
-    const std::string &s,
-    const std::string &suffix) {
-  if ((s.length() > 0)
-      && (suffix.length() > 0)
-      && (s.length() >= suffix.length())) {
-    return (s.compare(
-              s.length() - suffix.length(),
-              suffix.length(),
-              suffix) == 0);
-  } else {
-    return false;
-  }
-}
+  // ASCII
+  {"!", ""}, {"\"", ""}, {"#", "nr"},
+  {"$", "dollar"}, {"%", "pc"}, {"&", "and"},
+  {"'", ""}, {",", ""}, {".", "-"},
+  {"/", "-"}, {":", ""}, {";", ""},
+  {"<", "gt"}, {"=", "eq"}, {">", "lt"},
+  {"?", ""}, {"@", "at"},
+  {"\\", "-"}, {"^", ""},
+  {"_", "-"}, {"`", ""}, // Grave accent
+  //TODO tilde?
 
+  // Latin 1 supplement
+  {"´", ""}, // Acute accent
 
-bool StartsWith(
-    const std::string &s,
-    const std::string &prefix) {
-  if ((s.length() > 0)
-      && (prefix.length() > 0)
-      && (s.length() >= prefix.length())) {
-    return s.compare(0, prefix.length(), prefix) == 0;
-  } else {
-    return false;
-  }
-}
+  {"\u00a9", "(c)"},  // Copyright sign
+  {"\u00ae", "(r)"},  // Registered sign
+  {"\u00b1", "pm"},   // Plus-minus sign
+  {"\u2213", "mp"},   // Minus-plus sign
+  {"\u00b0", "deg"},  // Degree sign
+  {"\u00b5", "mu"},   // Mu/micro sign
+  {"\u00b7", "cdot"},   // Middle dot
 
+  {"\u00a3", "pound"},
+  {"\u00a5", "yen"},
+  {"\u00a7", "par"}, // Paragraph
+  {"\u20ac", "euro"},
+
+  {"\u00d7", "x"}, // times
+
+  {"\u00c5", "Ae"}, // Capital A with diaeresis
+  {"\u00e4", "ae"}, // Small a with diaeresis
+  {"\u00cb", "E"}, // Capital E with diaeresis
+  {"\u00eb", "e"}, // Small e with diaeresis
+  {"\u00d6", "Oe"}, // Capital O with diaeresis
+  {"\u00f6", "oe"}, // Small o with diaeresis
+  {"\u00dc", "Ue"}, // Capital U with diaeresis
+  {"\u00fc", "Ue"}, // Small u with diaeresis
+  //TODO continue
+};
+}  // namespace slug_
 
 void ToLower(std::string &s) {
   std::transform(
@@ -53,7 +70,7 @@ void ToUpper(std::string &s) {
 }
 
 
-std::string LTrim(const std::string &totrim) {
+std::string LTrim(std::string_view totrim) {
   std::string s(totrim);
   s.erase(
         s.begin(),
@@ -64,7 +81,7 @@ std::string LTrim(const std::string &totrim) {
 }
 
 
-std::string RTrim(const std::string &totrim) {
+std::string RTrim(std::string_view totrim) {
   std::string s(totrim);
   s.erase(
         std::find_if(
@@ -76,32 +93,34 @@ std::string RTrim(const std::string &totrim) {
 }
 
 
-std::string Trim(const std::string &s) {
+std::string Trim(std::string_view s) {
   return LTrim(RTrim(s));
 }
 
 
 bool IsNumeric(const std::string &s) {
-  if (s.length() == 0) {
-    return false;
-  }
+  bool is_numeric{false};
+  if (s.length() > 0) {
+    char *pd, *pl;
 
-  char *pd, *pl;
-  // Check long
-  long dummyl = strtol(s.c_str(), &pl, 10);
-  WERKZEUGKISTE_UNUSED_VAR(dummyl);
-  // Check double
-  double dummyd = strtod(s.c_str(), &pd);
-  WERKZEUGKISTE_UNUSED_VAR(dummyd);
-  return (*pd == 0) || (*pl == 0);
+    // Check long
+    long dummyl = strtol(s.c_str(), &pl, 10);
+    WERKZEUGKISTE_UNUSED_VAR(dummyl);
+
+    // Check double
+    double dummyd = strtod(s.c_str(), &pd);
+    WERKZEUGKISTE_UNUSED_VAR(dummyd);
+
+    is_numeric = (*pd == 0) || (*pl == 0);
+  }
+  return is_numeric;
 }
 
 
-std::vector<std::string> Split(
-    const std::string &s,
+std::vector<std::string> Split(std::string_view s,
     char delim) {
   std::vector<std::string> elems;
-  std::stringstream ss(s);
+  std::istringstream ss(std::string(s), std::ios_base::in);
   std::string item;
   while (std::getline(ss, item, delim)) {
     elems.push_back(item);
@@ -110,31 +129,26 @@ std::vector<std::string> Split(
 }
 
 
-std::string Replace(
-    const std::string &haystack,
-    const std::string &needle,
-    const std::string &replacement) {
+std::string Replace(std::string_view haystack,
+    std::string_view needle,
+    std::string_view replacement) {
+  std::string result{haystack};
   if ((haystack.length() == 0) || (needle.length() == 0)) {
-    return haystack;
+    return result;
   }
 
-  std::size_t start_pos = haystack.find(needle);
-  if(start_pos == std::string::npos) {
-    return haystack;
+  std::size_t start_pos = result.find(needle);
+  while (start_pos != std::string::npos) {
+    result.replace(start_pos, needle.length(), replacement);
+    start_pos = result.find(needle);
   }
 
-  std::string s = haystack;
-  do {
-    s.replace(start_pos, needle.length(), replacement);
-    start_pos = s.find(needle);
-  } while (start_pos != std::string::npos);
-
-  return s;
+  return result;
 }
 
 
 std::string Replace(
-    const std::string &haystack, char needle, char replacement) {
+    std::string_view haystack, char needle, char replacement) {
   std::string cp(haystack);
   std::replace(
         cp.begin(), cp.end(),
@@ -142,7 +156,7 @@ std::string Replace(
   return cp;
 }
 
-
+//TODO continue string_view replacements below
 bool GetUrlProtocol(
     const std::string &url,
     std::string &protocol,
@@ -210,13 +224,13 @@ std::string ClipUrl(const std::string &url) {
 
   if (has_protocol) {
     return protocol + ObscureUrlAuthentication(clipped);
-  } else {
+  } else { // NOLINT
     return ObscureUrlAuthentication(clipped);
   }
 }
 
 
-std::string Remove(const std::string &s, const char c) {
+std::string Remove(std::string_view s, const char c) {
   std::string removed;
   std::remove_copy(
         s.begin(), s.end(),
@@ -226,7 +240,7 @@ std::string Remove(const std::string &s, const char c) {
 
 
 std::string Remove(
-    const std::string &s,
+    std::string_view s,
     std::initializer_list<char> chars) {
   std::string copy(s);
   for (const auto c : chars) {
@@ -237,17 +251,24 @@ std::string Remove(
 
 
 std::string Slug(
-    const std::string &s,
+    std::string_view s,
     bool strip_dashes) {
-  std::string replaced = Replace(
-        Lower(Trim(s)), "#", "nr");
+  std::string replaced = Trim(s);
+
+  //TODO a) inefficient
+  //TODO b) update documentation
+
+  for (const auto &replacement : slug_::replacements) {
+    replaced = Replace(replaced, replacement.first, replacement.second);
+  }
+  replaced = Lower(replaced);
 
   std::ostringstream out;
   // Start with flag set to return "-" if the string
   // contains exclusively non-alphanumeric characters
   bool prev_alphanum = true;
   for (std::size_t i = 0; i < replaced.length(); ++i) {
-    if (std::isalnum(replaced[i])) {
+    if (std::isalnum(replaced[i]) != 0) {
       out << replaced[i];
       prev_alphanum = true;
     } else if (prev_alphanum && !strip_dashes) {
@@ -260,12 +281,12 @@ std::string Slug(
 
 
 std::string Shorten(
-    const std::string &s,
+    std::string_view s,
     std::size_t desired_length,
     int ellipsis_position,
-    const std::string &ellipsis) {
+    std::string_view ellipsis) {
   if (s.empty() || (desired_length >= s.length())) {
-    return s;
+    return std::string(s);
   }
 
   if (desired_length == 0) {
@@ -274,9 +295,9 @@ std::string Shorten(
 
   if (desired_length < ellipsis.length()) {
     std::ostringstream msg;
-    msg << "Desired length ("
-        << desired_length
-        << ") is shorter than the ellipsis ("
+    msg << "Desired length (" << desired_length
+        << ") is shorter than the ellipsis (\""
+        << ellipsis << "\", length "
         << ellipsis.length() << ")!";
     throw std::invalid_argument(msg.str());
   }
@@ -285,7 +306,6 @@ std::string Shorten(
   const std::size_t remaining_text_len = desired_length - ellipsis.length();
   if (ellipsis_position == 0) {
     //center
-
     const std::size_t num_left = remaining_text_len / 2;
     const std::size_t num_right = remaining_text_len - num_left;
 
@@ -293,9 +313,11 @@ std::string Shorten(
               << ellipsis
               << s.substr(s.length() - num_right);
   } else if (ellipsis_position < 0){
+    // left
     shortened << ellipsis
               << s.substr(s.length() - remaining_text_len);
   } else {
+    // right
     shortened << s.substr(0, remaining_text_len)
               << ellipsis;
   }
@@ -304,7 +326,9 @@ std::string Shorten(
 
 
 std::string Indent(
-    const std::string &s, std::size_t n, char character) {
+    std::string_view s,
+    std::size_t n,
+    char character) {
   std::string out;
   out.reserve(s.length() + n);
   for (std::size_t idx = 0; idx < n; ++idx) {
@@ -318,5 +342,5 @@ std::string Indent(
   return out;
 }
 
-} // namespace string
-} // namespace werkzeug
+}  // namespace strings
+}  // namespace werkzeugkiste

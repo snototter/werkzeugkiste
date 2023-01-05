@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -14,15 +15,28 @@ namespace werkzeugkiste {
 namespace strings {
 
 /// Returns true if the string ends with the given suffix.
+inline constexpr
 bool EndsWith(
-    const std::string &s,
-    const std::string &suffix);
+    std::string_view s,
+    std::string_view suffix) noexcept {
+  if ((s.length() > 0)
+      && (suffix.length() > 0)
+      && (s.length() >= suffix.length())) {
+    return (s.compare(
+              s.length() - suffix.length(),
+              suffix.length(),
+              suffix) == 0);
+  } else {
+    return false;
+  }
+}
 
 
 /// Returns true if the string ends with the given character.
-inline bool EndsWith(
-    const std::string &s,
-    char end) {
+inline constexpr
+bool EndsWith(
+    std::string_view s,
+    char end) noexcept {
   if (s.length() > 0) {
     return (s.at(s.length()-1) == end);
   } else {
@@ -32,15 +46,25 @@ inline bool EndsWith(
 
 
 /// Returns true if the given string starts with the prefix.
+inline constexpr
 bool StartsWith(
-    const std::string &s,
-    const std::string &prefix);
+    std::string_view s,
+    std::string_view prefix) noexcept {
+  if ((s.length() > 0)
+      && (prefix.length() > 0)
+      && (s.length() >= prefix.length())) {
+    return s.compare(0, prefix.length(), prefix) == 0;
+  } else {
+    return false;
+  }
+}
 
 
 /// Returns true if the string starts with the given character.
-inline bool StartsWith(
-    const std::string &s,
-    char first) {
+inline constexpr
+bool StartsWith(
+    std::string_view s,
+    char first) noexcept {
   if (s.length() > 0) {
     return s[0] == first;
   } else {
@@ -54,7 +78,7 @@ void ToLower(std::string &s);
 
 
 /// Returns a copy, converted to lower case.
-inline std::string Lower(const std::string &s) {
+inline std::string Lower(std::string_view s) {
   std::string tmp(s);
   ToLower(tmp);
   return tmp;
@@ -75,39 +99,38 @@ inline std::string Upper(const std::string &s) {
 
 /// Returns a copy with leading & trailing
 /// white space removed.
-std::string Trim(const std::string &s);
+std::string Trim(std::string_view s);
 
 
 /// Returns a copy with leading white space removed.
-std::string LTrim(const std::string &totrim);
+std::string LTrim(std::string_view totrim);
 
 
 /// Returns a copy with trailing white space removed.
-std::string RTrim(const std::string &totrim);
+std::string RTrim(std::string_view totrim);
 
 
 /// Returns true if the string can be safely cast into
-/// a number (checks for `long` and `double`).
+/// eiter a `long` or a `double` type.
 bool IsNumeric(const std::string &s);
 
 
 /// Tokenizes the string by the given delimiter.
 std::vector<std::string> Split(
-    const std::string &s,
+    std::string_view s,
     char delim);
 
 
 /// Replaces all occurences of the given search
 /// string `needle` within the `haystack`.
 std::string Replace(
-    const std::string &haystack,
-    const std::string &needle,
-    const std::string &replacement);
+    std::string_view haystack,
+    std::string_view needle,
+    std::string_view replacement);
 
 
 /// Replaces all occurences of the given character.
-std::string Replace(
-    const std::string &haystack,
+std::string Replace(std::string_view haystack,
     char needle, char replacement);
 
 
@@ -134,13 +157,13 @@ std::string ObscureUrlAuthentication(const std::string &url);
 
 /// Returns a copy where all given characters have been removed.
 std::string Remove(
-    const std::string &s,
+    std::string_view s,
     std::initializer_list<char> chars);
 
 
 /// Returns a copy where the given character has been removed.
 std::string Remove(
-    const std::string &s,
+    std::string_view s,
     const char c);
 
 
@@ -154,8 +177,8 @@ std::string Remove(
 /// then also be stripped: e.g. ` img_dir` would
 /// become `imgdir`.
 std::string Slug(
-    const std::string &s,
-    bool strip_dashes=false);
+    std::string_view s,
+    bool strip_dashes = false);
 
 
 /// Returns a string with length <= `desired_length`,
@@ -168,15 +191,15 @@ std::string Slug(
 /// * `0`: Centered
 /// * `> 0`: Right
 std::string Shorten(
-    const std::string &s,
+    std::string_view s,
     std::size_t desired_length,
     int ellipsis_position = -1,
-    const std::string &ellipsis = "...");
+    std::string_view ellipsis = "...");
 
 
 /// Returns the string indented by n-times the given character.
 std::string Indent(
-    const std::string &s,
+    std::string_view s,
     std::size_t n,
     char character=' ');
 

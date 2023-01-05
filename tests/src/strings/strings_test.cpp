@@ -208,20 +208,28 @@ TEST(StringUtilsTest, URL) {
 
 
 TEST(StringUtilsTest, Slug) {
-  EXPECT_EQ(wks::Slug("nothing-to-be-slugged"),
-            "nothing-to-be-slugged");
+  EXPECT_EQ(
+        wks::Slug("nothing-to-be-slugged"),
+        "nothing-to-be-slugged");
 
-  EXPECT_EQ(wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
-            "replace-some-spaces-and-underscores-");
+  EXPECT_EQ(
+        wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
+        "replace-some-spaces-and-underscores-");
 
   EXPECT_EQ(wks::Slug(" \r\n\t\v\f"), "");
   EXPECT_EQ(wks::Slug("a \r\n\t\v\f"), "a");
   EXPECT_EQ(wks::Slug(" \r\n\t\v\fb"), "b");
   EXPECT_EQ(wks::Slug("A \r\n\t\v\fB"), "a-b");
 
-  EXPECT_EQ(wks::Slug(":?`!"), "-");
-  EXPECT_EQ(wks::Slug("#2"), "nr2");
+  EXPECT_EQ(wks::Slug("#2 \u00b123%"), "nr2-pm23pc");
+  EXPECT_TRUE(wks::Slug(":?`!").empty());
   EXPECT_TRUE(wks::Slug("").empty());
+
+  EXPECT_EQ(wks::Slug("Österreich!"), "oesterreich");
+  EXPECT_EQ(wks::Slug("€ $ µ "), "euro-dollar-mu");
+  EXPECT_EQ(wks::Slug("ÄäÖöÜü"), "aeaeoeoeueue");
+
+  //TODO test all replacement characters!
 }
 
 
