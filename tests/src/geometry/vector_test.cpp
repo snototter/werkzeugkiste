@@ -24,29 +24,29 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
 
   // Check usage as 2d size representation
   if (dim == 2) {
-    EXPECT_DOUBLE_EQ(vec.x(), vec.width());
-    EXPECT_DOUBLE_EQ(vec.y(), vec.height());
+    EXPECT_DOUBLE_EQ(vec.X(), vec.Width());
+    EXPECT_DOUBLE_EQ(vec.Y(), vec.Height());
 
-    vec.SetWidth(2 * vec.x());
-    vec.SetHeight(3 * vec.y());
+    vec.SetWidth(2 * vec.X());
+    vec.SetHeight(3 * vec.Y());
 
-    EXPECT_DOUBLE_EQ(vec.x(), vec.width());
-    EXPECT_DOUBLE_EQ(vec.y(), vec.height());
+    EXPECT_DOUBLE_EQ(vec.X(), vec.Width());
+    EXPECT_DOUBLE_EQ(vec.Y(), vec.Height());
 
     // Restore original input vector
     vec.val[0] /= 2;
     vec.val[1] /= 3;
 
-    EXPECT_THROW(vec.z(), std::logic_error);
-    EXPECT_THROW(vec.w(), std::logic_error);
+    EXPECT_THROW(vec.Z(), std::logic_error);
+    EXPECT_THROW(vec.W(), std::logic_error);
   } else {
     // Other dimensional vectors should not support
     // this functionality
-    EXPECT_THROW(vec.width(), std::logic_error);
-    EXPECT_THROW(vec.height(), std::logic_error);
+    EXPECT_THROW(vec.Width(), std::logic_error);
+    EXPECT_THROW(vec.Height(), std::logic_error);
 
     if (dim == 3) {
-      EXPECT_THROW(vec.w(), std::logic_error);
+      EXPECT_THROW(vec.W(), std::logic_error);
     }
   }
 
@@ -150,43 +150,43 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
     EXPECT_THROW(vec.Cross(other), std::logic_error);
   } else {
     auto cross = vec.Cross(other);
-    wkg::Vec<_Tp, dim> expected(
-          vec.y() * other.z() - vec.z() * other.y(),
-          vec.z() * other.x() - vec.x() * other.z(),
-          vec.x() * other.y() - vec.y() * other.x());
-    EXPECT_DOUBLE_EQ(cross.x(), expected.x());
-    EXPECT_DOUBLE_EQ(cross.y(), expected.y());
-    EXPECT_DOUBLE_EQ(cross.z(), expected.z());
+    wkg::Vec<_Tp, dim> expected{
+          vec.Y() * other.Z() - vec.Z() * other.Y(),
+          vec.Z() * other.X() - vec.X() * other.Z(),
+          vec.X() * other.Y() - vec.Y() * other.X()};
+    EXPECT_DOUBLE_EQ(cross.X(), expected.X());
+    EXPECT_DOUBLE_EQ(cross.Y(), expected.Y());
+    EXPECT_DOUBLE_EQ(cross.Z(), expected.Z());
   }
 }
 
 
 TEST(VectorTest, All) {
-  EXPECT_THROW(wkg::Vec2d(1, 2, 3), std::invalid_argument);
-  EXPECT_THROW(wkg::Vec3d(2, 17), std::invalid_argument);
-  EXPECT_THROW(wkg::Vec4d(2, 17), std::invalid_argument);
-  EXPECT_THROW(wkg::Vec4d(2, 17, 3), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec2d{1, 2, 3}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec3d{2, 17}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec4d{2, 17}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec4d{2, 17, 3}), std::invalid_argument);
 
   wkg::Vec2d zero2d;
 
-  wkg::Vec2d v2d_a(23, 17);
+  wkg::Vec2d v2d_a{23, 17};
   VectorTestHelper(v2d_a);
 
   auto unit2d = v2d_a.UnitVector();
   EXPECT_DOUBLE_EQ(unit2d.Length(), 1.0);
-  EXPECT_TRUE(std::fabs(unit2d.x() - 23 / 28.600699292) < 1e-6);
-  EXPECT_TRUE(std::fabs(unit2d.y() - 17 / 28.600699292) < 1e-6);
+  EXPECT_TRUE(std::fabs(unit2d.X() - 23 / 28.600699292) < 1e-6);
+  EXPECT_TRUE(std::fabs(unit2d.Y() - 17 / 28.600699292) < 1e-6);
   EXPECT_EQ(v2d_a.DirectionVector(zero2d), -v2d_a);
   EXPECT_EQ(v2d_a.DirectionVector(v2d_a), zero2d);
 
-  wkg::Vec2d v2d_b(0.01, -9.001);
+  wkg::Vec2d v2d_b{0.01, -9.001};
   EXPECT_DOUBLE_EQ(v2d_b.MaxValue(), 0.01);
   EXPECT_DOUBLE_EQ(v2d_b.MinValue(), -9.001);
   EXPECT_EQ(v2d_b.MaxIndex(), 0);
   EXPECT_EQ(v2d_b.MinIndex(), 1);
   VectorTestHelper(v2d_b);
 
-  wkg::Vec2d v2d_c(-735.008, -0.99);
+  wkg::Vec2d v2d_c{-735.008, -0.99};
   EXPECT_DOUBLE_EQ(v2d_c.MaxValue(), -0.99);
   EXPECT_DOUBLE_EQ(v2d_c.MinValue(), -735.008);
   EXPECT_EQ(v2d_c.MaxIndex(), 1);
@@ -194,17 +194,17 @@ TEST(VectorTest, All) {
   VectorTestHelper(v2d_c);
 
 
-  wkg::Vec3d v3d_a(1, 2, 3);
+  wkg::Vec3d v3d_a{1, 2, 3};
   EXPECT_DOUBLE_EQ(v3d_a.MaxValue(), 3);
   EXPECT_DOUBLE_EQ(v3d_a.MinValue(), 1);
   EXPECT_EQ(v3d_a.MaxIndex(), 2);
   EXPECT_EQ(v3d_a.MinIndex(), 0);
   VectorTestHelper(v3d_a);
 
-  wkg::Vec3d v3d_b(-0.1, 99, -15.3);
+  wkg::Vec3d v3d_b{-0.1, 99, -15.3};
   VectorTestHelper(v3d_b);
 
-  wkg::Vec3d v3d_c(12.3, -0.42, 77.7);
+  wkg::Vec3d v3d_c{12.3, -0.42, 77.7};
   VectorTestHelper(v3d_c);
 
 
@@ -212,13 +212,13 @@ TEST(VectorTest, All) {
   EXPECT_DOUBLE_EQ(zero2i.Length(), 0);
   EXPECT_EQ(zero2i.UnitVector(), wkg::Vec2d());
 
-  wkg::Vec2i v2i(9, -2);
+  wkg::Vec2i v2i{9, -2};
   VectorTestHelper(v2i);
 
   auto unit2i = v2i.UnitVector();
   EXPECT_DOUBLE_EQ(unit2i.Length(), 1.0);
-  EXPECT_TRUE(std::fabs(unit2i.x() - 9.0 / 9.219544457) < 1e-6);
-  EXPECT_TRUE(std::fabs(unit2i.y() + 2.0 / 9.219544457) < 1e-6);
+  EXPECT_TRUE(std::fabs(unit2i.X() - 9.0 / 9.219544457) < 1e-6);
+  EXPECT_TRUE(std::fabs(unit2i.Y() + 2.0 / 9.219544457) < 1e-6);
   EXPECT_EQ(v2i.DirectionVector(zero2i), -v2i);
   EXPECT_EQ(v2i.DirectionVector(v2i), zero2i);
 }
@@ -230,11 +230,11 @@ TEST(VectorTest, MinMaxCoordinates) {
   wkg::Vec2i min, max;
   wkg::MinMaxCoordinates(data2i, min, max);
 
-  EXPECT_EQ(min.x(), -15);
-  EXPECT_EQ(min.y(), -3);
+  EXPECT_EQ(min.X(), -15);
+  EXPECT_EQ(min.Y(), -3);
 
-  EXPECT_EQ(max.x(), 17);
-  EXPECT_EQ(max.y(), 42);
+  EXPECT_EQ(max.X(), 17);
+  EXPECT_EQ(max.Y(), 42);
 
 
   std::list<wkg::Vec3d> data3d {
@@ -242,13 +242,13 @@ TEST(VectorTest, MinMaxCoordinates) {
   wkg::Vec3d min3, max3;
   wkg::MinMaxCoordinates(data3d, min3, max3);
 
-  EXPECT_DOUBLE_EQ(min3.x(), 1.0);
-  EXPECT_DOUBLE_EQ(min3.y(), -3.0);
-  EXPECT_DOUBLE_EQ(min3.z(), -1.0);
+  EXPECT_DOUBLE_EQ(min3.X(), 1.0);
+  EXPECT_DOUBLE_EQ(min3.Y(), -3.0);
+  EXPECT_DOUBLE_EQ(min3.Z(), -1.0);
 
-  EXPECT_DOUBLE_EQ(max3.x(), 100.0);
-  EXPECT_DOUBLE_EQ(max3.y(), 0.0);
-  EXPECT_DOUBLE_EQ(max3.z(), 17.0);
+  EXPECT_DOUBLE_EQ(max3.X(), 100.0);
+  EXPECT_DOUBLE_EQ(max3.Y(), 0.0);
+  EXPECT_DOUBLE_EQ(max3.Z(), 17.0);
 }
 
 // NOLINTEND

@@ -21,8 +21,8 @@ TEST(GeometricPrimitives, Circle) {
   const double r = 5.0;
   wkg::Circle c2({x, y + r}, {x, y - r}, {x + r, y});
   EXPECT_TRUE(c2.IsValid());
-  EXPECT_DOUBLE_EQ(c2.cx(), x);
-  EXPECT_DOUBLE_EQ(c2.cy(), y);
+  EXPECT_DOUBLE_EQ(c2.CenterX(), x);
+  EXPECT_DOUBLE_EQ(c2.CenterY(), y);
   EXPECT_DOUBLE_EQ(c2.Radius(), r);
 
 
@@ -55,18 +55,18 @@ TEST(GeometricPrimitives, Circle) {
 
 
   // Line intersection:
-  wkg::Circle circle({2.5, 0.5}, 1.0);
-  wkg::Line2d l1({1.0, 1.5}, {2.0, 1.7});
+  wkg::Circle circle{{2.5, 0.5}, 1.0};
+  wkg::Line2d l1{{1.0, 1.5}, {2.0, 1.7}};
   EXPECT_EQ(circle.IntersectionCircleLine(l1), 0);
   EXPECT_EQ(l1.IntersectionLineCircle(circle), 0);
 
   // Tangent to the circle
-  wkg::Line2d l2({1.0, 1.5}, {2.0, 1.5});
+  wkg::Line2d l2{{1.0, 1.5}, {2.0, 1.5}};
   EXPECT_EQ(circle.IntersectionCircleLine(l2), 1);
   EXPECT_EQ(l2.IntersectionLineCircle(circle), 1);
 
   // Finally, two intersection points
-  wkg::Line2d l3({1.0, 1.3}, {7.0, 0.5});
+  wkg::Line2d l3{{1.0, 1.3}, {7.0, 0.5}};
   EXPECT_EQ(circle.IntersectionCircleLine(l3), 2);
   EXPECT_EQ(l3.IntersectionLineCircle(circle), 2);
 
@@ -75,25 +75,33 @@ TEST(GeometricPrimitives, Circle) {
 
 
 TEST(GeometricPrimitives, Line2d) {
-  wkg::Line2d line1({0.0, 0.0}, {3.0, 0.0});
-  wkg::Line2d line2({1.0, -0.6}, {-17.0, -0.6});
-  wkg::Line2d line3({-100.0, -0.6}, {-170.0, -0.6});
+  wkg::Line2d line1{{0.0, 0.0}, {3.0, 0.0}};
+  wkg::Line2d line2{{1.0, -0.6}, {-17.0, -0.6}};
+  wkg::Line2d line3{{-100.0, -0.6}, {-170.0, -0.6}};
 
   EXPECT_FALSE(line1.IsCollinear(line2));
   EXPECT_FALSE(line2.IsCollinear(line1));
   EXPECT_TRUE(line2.IsCollinear(line3));
   EXPECT_TRUE(line3.IsCollinear(line2));
 
-  EXPECT_EQ(line2.ClosestPointOnLine(line1.To()), wkg::Vec2d(3.0, -0.6));
+  wkg::Vec2d expected{3.0, -0.6};
+  EXPECT_EQ(line2.ClosestPointOnLine(line1.To()), expected);
   EXPECT_EQ(line2.ClosestPointOnSegment(line1.To()), line2.From());
 
-  EXPECT_EQ(line2.ClosestPointOnSegment({-99, 0}), wkg::Vec2d(-17, -0.6));
-  EXPECT_EQ(line2.ClosestPointOnSegment({-17, 0}), wkg::Vec2d(-17, -0.6));
-  EXPECT_EQ(line2.ClosestPointOnSegment({-16, 0}), wkg::Vec2d(-16, -0.6));
-  EXPECT_EQ(line2.ClosestPointOnSegment({0, 0}), wkg::Vec2d(0, -0.6));
-  EXPECT_EQ(line2.ClosestPointOnSegment({0, 3}), wkg::Vec2d(0, -0.6));
-  EXPECT_EQ(line2.ClosestPointOnSegment({1, 3}), wkg::Vec2d(1, -0.6));
-  EXPECT_EQ(line2.ClosestPointOnSegment({2, 3}), wkg::Vec2d(1, -0.6));
+  expected = {-17.0, -0.6};
+  EXPECT_EQ(line2.ClosestPointOnSegment({-99, 0}), expected);
+  EXPECT_EQ(line2.ClosestPointOnSegment({-17, 0}), expected);
+
+  expected = {-16, -0.6};
+  EXPECT_EQ(line2.ClosestPointOnSegment({-16, 0}), expected);
+
+  expected = {0.0, -0.6};
+  EXPECT_EQ(line2.ClosestPointOnSegment({0, 0}), expected);
+  EXPECT_EQ(line2.ClosestPointOnSegment({0, 3}), expected);
+
+  expected = {1.0, -0.6};
+  EXPECT_EQ(line2.ClosestPointOnSegment({1, 3}), expected);
+  EXPECT_EQ(line2.ClosestPointOnSegment({2, 3}), expected);
 
   EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 0}), 0);
   EXPECT_DOUBLE_EQ(line2.AngleDeg({17, 0}), 180);
@@ -139,20 +147,27 @@ TEST(GeometricPrimitives, Line3d) {
   wkg::Line3d line1({0.0, 0.0, 0.0}, {3.0, 0.0, 0.0});
   EXPECT_TRUE(line1.IsValid());
 
-  EXPECT_EQ(line1.ClosestPointOnLine({0, 0, 1}), wkg::Vec3d(0, 0, 0));
-  EXPECT_EQ(line1.ClosestPointOnSegment({-1, 1, 0}), wkg::Vec3d(0, 0, 0));
+  wkg::Vec3d expected;
+  EXPECT_EQ(line1.ClosestPointOnLine({0, 0, 1}), expected);
+  EXPECT_EQ(line1.ClosestPointOnSegment({-1, 1, 0}), expected);
 
-  EXPECT_EQ(line1.ClosestPointOnSegment({0, 1, 1}), wkg::Vec3d(0, 0, 0));
-  EXPECT_EQ(line1.ClosestPointOnSegment({1, 1, 1}), wkg::Vec3d(1, 0, 0));
-  EXPECT_EQ(line1.ClosestPointOnSegment({2, 1, 1}), wkg::Vec3d(2, 0, 0));
-  EXPECT_EQ(line1.ClosestPointOnSegment({3, 1, 1}), wkg::Vec3d(3, 0, 0));
-  EXPECT_EQ(line1.ClosestPointOnSegment({4, 1, 1}), wkg::Vec3d(3, 0, 0));
+  EXPECT_EQ(line1.ClosestPointOnSegment({0, 1, 1}), expected);
 
-  EXPECT_EQ(line1.ClosestPointOnLine({2, 1, 4}), wkg::Vec3d(2, 0, 0));
-  EXPECT_EQ(line1.ClosestPointOnSegment({2, 1, 4}), wkg::Vec3d(2, 0, 0));
+  expected = {1, 0, 0};
+  EXPECT_EQ(line1.ClosestPointOnSegment({1, 1, 1}), expected);
 
-  EXPECT_EQ(line1.ClosestPointOnLine({4, 1, 2}), wkg::Vec3d(4, 0, 0));
-  EXPECT_EQ(line1.ClosestPointOnSegment({4, 1, 2}), wkg::Vec3d(3, 0, 0));
+  expected = {2, 0, 0};
+  EXPECT_EQ(line1.ClosestPointOnSegment({2, 1, 1}), expected);
+  EXPECT_EQ(line1.ClosestPointOnLine({2, 1, 4}), expected);
+  EXPECT_EQ(line1.ClosestPointOnSegment({2, 1, 4}), expected);
+
+  expected = {3, 0, 0};
+  EXPECT_EQ(line1.ClosestPointOnSegment({3, 1, 1}), expected);
+  EXPECT_EQ(line1.ClosestPointOnSegment({4, 1, 1}), expected);
+  EXPECT_EQ(line1.ClosestPointOnSegment({4, 1, 2}), expected);
+
+  expected = {4, 0, 0};
+  EXPECT_EQ(line1.ClosestPointOnLine({4, 1, 2}), expected);
 
   EXPECT_DOUBLE_EQ(line1.AngleDeg({1, 0, 0}), 0);
   EXPECT_DOUBLE_EQ(line1.AngleDeg({-1, 0, 0}), 180);
@@ -225,7 +240,7 @@ TEST(GeometricPrimitives, Plane) {
   // Point on the plane
   wkg::Vec3d pt3{3, 0, 0};
 
-  EXPECT_DOUBLE_EQ(plane.DistancePointToPlane(pt1), plane.Normal().x());
+  EXPECT_DOUBLE_EQ(plane.DistancePointToPlane(pt1), plane.Normal().X());
   EXPECT_EQ(static_cast<int>(100 * plane.DistancePointToPlane(pt2)), -314);
   EXPECT_DOUBLE_EQ(plane.DistancePointToPlane(pt3), 0.0);
 
@@ -260,8 +275,6 @@ TEST(GeometricPrimitives, Plane) {
 
 //  wkg::Plane xy_plane({-1, 0, 0}, {0, 0, 0}, {1, 1, 0});
 //  EXPECT_TRUE(xy_plane.IsValid());
-
-
 
 
   //TODO extend test suite

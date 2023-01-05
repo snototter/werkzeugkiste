@@ -10,8 +10,7 @@
 #include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/geometry/utils.h>
 
-namespace werkzeugkiste {
-namespace geometry {
+namespace werkzeugkiste::geometry {
 
 //TODO line2d, line3d, plane
 
@@ -23,12 +22,12 @@ namespace geometry {
 
 
 /// Returns true if the given point is within the rectangle.
-template <typename _Tp> inline
+template <typename T> inline
 bool IsPointInsideRectangle(
-    const Vec<_Tp, 2> &pt, const Vec<_Tp, 2> &top_left,
-    const Vec<_Tp, 2> &size) {
-  return (pt.x() >= top_left.x()) && (pt.x() < (top_left.x() + size.width()))
-      && (pt.y() >= top_left.y()) && (pt.y() < (top_left.y() + size.height()));
+    const Vec<T, 2> &pt, const Vec<T, 2> &top_left,
+    const Vec<T, 2> &size) {
+  return (pt.X() >= top_left.X()) && (pt.X() < (top_left.X() + size.Width()))
+      && (pt.Y() >= top_left.Y()) && (pt.Y() < (top_left.Y() + size.Height()));
 }
 
 
@@ -36,28 +35,26 @@ bool IsPointInsideRectangle(
 // Circle
 
 // Forward declaration needed by Circle_.
-template <typename _Tp> class Line2d_;
+template <typename T> class Line2d_;
 
 
-template <typename _Tp>
-class Circle_ {
+template <typename T>
+class Circle_ {  // NOLINT(readability-identifier-naming)
 public:
   static_assert(
-      std::is_floating_point<_Tp>::value,
+      std::is_floating_point<T>::value,
       "Circle type must be float or double!");
 
-  using vec_type = Vec<_Tp, 2>;
+  using vec_type = Vec<T, 2>;  // NOLINT(readability-identifier-naming)
 
 
   /// Constructs an invalid circle.
-  Circle_()
-    : center_(0, 0), radius_(0.0f)
-  {}
+  Circle_() = default;
 
 
   /// Circle from center and radius.
-  Circle_(const vec_type &center, _Tp radius)
-    : center_(center), radius_(radius)
+  Circle_(vec_type center, T radius)
+    : center_{std::move(center)}, radius_{radius}
   {}
 
 
@@ -75,19 +72,19 @@ public:
 
 
   /// Returns the x-coordinate of the center point.
-  _Tp cx() const { return center_.x(); }
+  T CenterX() const { return center_.X(); }
 
 
   /// Returns the y-coordinate of the center point.
-  _Tp cy() const { return center_.y(); }
+  T CenterY() const { return center_.Y(); }
 
 
   /// Returns the radius.
-  _Tp Radius() const { return radius_; }
+  T Radius() const { return radius_; }
 
 
   /// Returns the area.
-  _Tp Area() const { return M_PI * radius_ * radius_; }
+  T Area() const { return M_PI * radius_ * radius_; }
 
 
   /// Returns true if the point is inside the circle. If you need to
@@ -100,15 +97,17 @@ public:
   /// circle and the given point. Optionally sets the points of tangency.
   int PointsOfTangency(
       const vec_type &pt,
-      vec_type *pot1 = nullptr, vec_type *pot2 = nullptr) const;
+      vec_type *pot1 = nullptr,
+      vec_type *pot2 = nullptr) const;
 
 
   /// Returns the number of direct common tangents (German "aeussere
   /// Tangenten") between the two circles.
   /// Optionally sets the tangent lines.
   int DirectCommonTangents(
-      const Circle_<_Tp> &other,
-      Line2d_<_Tp> *tangent1 = nullptr, Line2d_<_Tp> *tangent2 = nullptr) const;
+      const Circle_<T> &other,
+      Line2d_<T> *tangent1 = nullptr,
+      Line2d_<T> *tangent2 = nullptr) const;
 
 
   /// Returns the number of transverse common tangents (German "innere
@@ -117,15 +116,17 @@ public:
   /// circles do not touch.
   /// Optionally sets the tangent lines.
   int TransverseCommonTangents(
-      const Circle_<_Tp> &other,
-      Line2d_<_Tp> *tangent1 = nullptr, Line2d_<_Tp> *tangent2 = nullptr) const;
+      const Circle_<T> &other,
+      Line2d_<T> *tangent1 = nullptr,
+      Line2d_<T> *tangent2 = nullptr) const;
 
 
   /// Returns the number of intersections (0, 1, or 2) of the two circles.
   /// Returns -1 if the circles are equal and thus every point on the circles
   /// is an intersection point.
   /// Optionally sets the intersection points.
-  int IntersectionCircleCircle(const Circle_<_Tp> &other,
+  int IntersectionCircleCircle(
+      const Circle_<T> &other,
       vec_type *intersection1 = nullptr,
       vec_type *intersection2 = nullptr) const;
 
@@ -133,7 +134,7 @@ public:
   /// Returns the number of intersections (0, 1, or 2) of this circle and the
   /// line. Optionally sets the intersection points.
   int IntersectionCircleLine(
-      const Line2d_<_Tp>& line,
+      const Line2d_<T>& line,
       vec_type *intersection1 = nullptr,
       vec_type *intersection2 = nullptr) const;
 
@@ -141,13 +142,13 @@ public:
   /// Returns the number of intersections (0, 1, or 2) of this circle and the
   /// line segment(!). Optionally sets the intersection points.
   int IntersectionCircleLineSegment(
-      const Line2d_<_Tp>& segment,
+      const Line2d_<T>& segment,
       vec_type *intersection1 = nullptr,
       vec_type *intersection2 = nullptr) const;
 
 private:
-  vec_type center_;
-  _Tp radius_;
+  vec_type center_{0, 0};
+  T radius_{0};
 };
 
 
@@ -159,28 +160,29 @@ using Circle = Circle_<double>;
 // Line in 2D
 
 /// Represents a line/segment in 2d Euclidean space.
-template <typename _Tp>
-class Line2d_ {
+template <typename T>
+class Line2d_ {  // NOLINT(readability-identifier-naming)
 public:
   static_assert(
-      std::is_floating_point<_Tp>::value,
+      std::is_floating_point<T>::value,
       "2D line type must be float or double!");
 
-  using vec_type = Vec<_Tp, 2>;
-  using vec3_type = Vec<_Tp, 3>;
+  using vec_type = Vec<T, 2>;   // NOLINT(readability-identifier-naming)
+  using vec3_type = Vec<T, 3>;  // NOLINT(readability-identifier-naming)
 
   /// Default constructor yields an invalid line/segment
-  Line2d_() : pt_from_(0, 0), pt_to_(0, 0) {}
+  Line2d_() = default;
 
 
   /// Construct a line from 2 real valued points. In case of a segment, these
   /// denote the start and end points.
-  Line2d_(const vec_type &from, const vec_type &to)
-    : pt_from_(from), pt_to_(to) {}
+  Line2d_(vec_type from, vec_type to)
+    : pt_from_{std::move(from)}, pt_to_{std::move(to)}
+  {}
 
 
   /// Returns a line with flipped direction vector.
-  inline Line2d_ Reversed() const { return Line2d_<_Tp>(pt_to_, pt_from_); }
+  inline Line2d_ Reversed() const { return Line2d_<T>{pt_to_, pt_from_}; }
 
 
   /// Returns a line where from/to are sorted left-to-right. If the line is
@@ -223,7 +225,9 @@ public:
 
 
   /// Returns the point halfway between from and to.
-  inline vec_type MidPoint() const { return 0.5 * (pt_from_ + pt_to_); }
+  inline vec_type MidPoint() const {
+    return 0.5 * (pt_from_ + pt_to_); // NOLINT
+  }
 
 
   /// Returns true if the line object is valid, *i.e.* start and end points
@@ -328,26 +332,26 @@ public:
   /// Returns the number of intersections (0, 1, or 2) of this line and
   /// the circle. Optionally sets the intersection points.
   int IntersectionLineCircle(
-      const Circle_<_Tp> &circle,
+      const Circle_<T> &circle,
       vec_type *intersection1 = nullptr, vec_type *intersection2 = nullptr) const;
 
 
   /// Returns the number of intersections (0, 1, or 2) of this line segment(!)
   /// and the circle. Optionally sets the intersection points.
   int IntersectionLineSegmentCircle(
-      const Circle_<_Tp> &circle,
+      const Circle_<T> &circle,
       vec_type *intersection1 = nullptr, vec_type *intersection2 = nullptr) const;
 
 
   /// Clips this line(!) such that only the part within the rectangle
   /// remains, check via `IsValid()` afterwards.
-  Line2d_<_Tp> ClipLineByRectangle(
+  Line2d_<T> ClipLineByRectangle(
       const vec_type &top_left, const vec_type &size) const;
 
 
   /// Clips this line segment(!) such that only the part within the rectangle
   /// remains, check via `IsValid()` afterwards.
-  Line2d_<_Tp> ClipLineSegmentByRectangle(
+  Line2d_<T> ClipLineSegmentByRectangle(
       const vec_type &top_left, const vec_type &size) const;
 
 
@@ -361,11 +365,11 @@ public:
 private:
   /// Starting point of a line segment or one direction-defining point on a
   /// line.
-  vec_type pt_from_;
+  vec_type pt_from_{0, 0};
 
   /// Ending point of a line segment or the second direction-defining point on
   /// a line.
-  vec_type pt_to_;
+  vec_type pt_to_{0, 0};
 };
 
 
@@ -377,32 +381,32 @@ using Line2d = Line2d_<double>;
 // Line in 3D
 
 // Forward declaration needed by Circle_.
-template <typename _Tp> class Plane_;
+template <typename T> class Plane_;
 
 
 /// Represents a line/segment in 3d Euclidean space.
-template <typename _Tp>
-class Line3d_ {
+template <typename T>
+class Line3d_ {  // NOLINT(readability-identifier-naming)
 public:
   static_assert(
-      std::is_floating_point<_Tp>::value,
+      std::is_floating_point<T>::value,
       "3D line type must be float or double!");
 
-  using vec_type = Vec<_Tp, 3>;
-//  using vec4_type = Vec<_Tp, 4>;
+  using vec_type = Vec<T, 3>;  // NOLINT(readability-identifier-naming)
 
   /// Default constructor yields an invalid line/segment
-  Line3d_() : pt_from_(0, 0), pt_to_(0, 0) {}
+  Line3d_() = default;
 
 
   /// Construct a line from 2 real valued points. In case of a segment, these
   /// denote the start and end points.
-  Line3d_(const vec_type &from, const vec_type &to)
-    : pt_from_(from), pt_to_(to) {}
+  Line3d_(vec_type from, vec_type to)
+    : pt_from_{std::move(from)}, pt_to_{std::move(to)}
+  {}
 
 
   /// Returns a line with flipped direction vector.
-  inline Line3d_ Reversed() const { return Line3d_<_Tp>(pt_to_, pt_from_); }
+  inline Line3d_ Reversed() const { return Line3d_<T>{pt_to_, pt_from_}; }
 
 
   /// For a segment, this returns the start point. For a line, it's simply one
@@ -440,7 +444,9 @@ public:
 
 
   /// Returns the point halfway between from and to.
-  inline vec_type MidPoint() const { return 0.5 * (pt_from_ + pt_to_); }
+  inline vec_type MidPoint() const {
+    return 0.5 * (pt_from_ + pt_to_);  // NOLINT
+  }
 
 
   /// Returns true if the line object is valid, *i.e.* start and end points
@@ -468,7 +474,7 @@ public:
 
   /// Returns the angle between the line and the plane.
   /// The angle will be between -Pi/2 and Pi/2.
-  inline double AngleRad(const Plane_<_Tp> &plane) const {
+  inline double AngleRad(const Plane_<T> &plane) const {
     return std::asin(std::max(-1.0, std::min(1.0,
         static_cast<double>(UnitDirection().Dot(plane.Normal())))));
   }
@@ -476,7 +482,7 @@ public:
 
   /// Returns the angle between the line and the plane.
   /// The angle will be between -90 and +90 degrees.
-  inline double AngleDeg(const Plane_<_Tp> &plane) const {
+  inline double AngleDeg(const Plane_<T> &plane) const {
     return Rad2Deg(AngleRad(plane));
   }
 
@@ -530,11 +536,11 @@ public:
 private:
   /// Starting point of a line segment or one direction-defining point on a
   /// line.
-  vec_type pt_from_;
+  vec_type pt_from_{0, 0, 0};
 
   /// Ending point of a line segment or the second direction-defining point on
   /// a line.
-  vec_type pt_to_;
+  vec_type pt_to_{0, 0, 0};
 };
 
 
@@ -547,24 +553,22 @@ using Line3d = Line3d_<double>;
 // Plane
 
 /// Represents a plane in 3d Euclidean space.
-template <typename _Tp>
-class Plane_ {
+template <typename T>
+class Plane_ { // NOLINT(readability-identifier-naming)
 public:
   static_assert(
-      std::is_floating_point<_Tp>::value,
+      std::is_floating_point<T>::value,
       "Plane type must be float or double!");
 
-  using vec_type = Vec<_Tp, 3>;
+  using vec_type = Vec<T, 3>; // NOLINT(readability-identifier-naming)
 
   /// Constructs an invalid plane.
-  Plane_()
-    : normal_(0, 0, 0), offset_(0)
-  {}
+  Plane_() = default;
 
 
   /// Constructs a plane from its Hessian form.
-  Plane_(const vec_type &normal, _Tp offset)
-    : normal_(normal.UnitVector()), offset_(offset)
+  Plane_(const vec_type &normal, T offset)
+    : normal_{normal.UnitVector()}, offset_{offset}
   {}
 
 
@@ -587,11 +591,11 @@ public:
   /// the coordinate system origin, measured along the plane's normal.
   /// Put differently, this is the minimum distance between the plane
   /// and the origin.
-  _Tp Offset() const { return offset_; }
+  T Offset() const { return offset_; }
 
 
   /// Returns the distance from the given point to the plane.
-  inline _Tp DistancePointToPlane(const vec_type &pt) const {
+  inline T DistancePointToPlane(const vec_type &pt) const {
     return (normal_.Dot(pt) + offset_);
   }
 
@@ -626,14 +630,14 @@ public:
 
   /// Returns the angle between this plane and the line in radians.
   /// The angle will be between -Pi/2 and Pi/2.
-  inline double AngleRad(const Line3d_<_Tp> &line) const {
+  inline double AngleRad(const Line3d_<T> &line) const {
     return line.AngleRad(*this);
   }
 
 
   /// Returns the angle between this plane and the line in degrees.
   /// The angle will be between -90 and +90.
-  inline double AngleDeg(const Line3d_<_Tp> &line) const {
+  inline double AngleDeg(const Line3d_<T> &line) const {
     return line.AngleDeg(*this);
   }
 
@@ -646,13 +650,14 @@ public:
 
   /// Returns the plane's x-, y- and z-intercepts.
   inline vec_type XYZIntercepts() const {
-    return vec_type(
-          IsEpsZero(normal_.x())
-            ? std::numeric_limits<_Tp>::infinity() : (-offset_ / normal_.x()),
-          IsEpsZero(normal_.y())
-            ? std::numeric_limits<_Tp>::infinity() : (-offset_ / normal_.y()),
-          IsEpsZero(normal_.z())
-            ? std::numeric_limits<_Tp>::infinity() : (-offset_ / normal_.z()));
+    return vec_type{
+          IsEpsZero(normal_.X())
+            ? std::numeric_limits<T>::infinity() : (-offset_ / normal_.X()),
+          IsEpsZero(normal_.Y())
+            ? std::numeric_limits<T>::infinity() : (-offset_ / normal_.Y()),
+          IsEpsZero(normal_.Z())
+            ? std::numeric_limits<T>::infinity() : (-offset_ / normal_.Z())
+    };
   }
 
 
@@ -664,18 +669,16 @@ public:
 
 private:
   /// The plane's normal vector.
-  vec_type normal_;
+  vec_type normal_{0, 0, 0};
 
   /// Distance between plane and origin of the coordinate system.
-  _Tp offset_;
+  T offset_{0};
 };
 
 
 /// The default plane type which uses double precision.
 using Plane = Plane_<double>;
 
-
-} // namespace geometry
-} // namespace werkzeugkiste
+} // namespace werkzeugkiste::geometry
 
 #endif // WERKZEUGKISTE_GEOMETRY_UTILS_H

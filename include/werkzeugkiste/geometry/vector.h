@@ -26,47 +26,93 @@ namespace geometry {
 /// 2D vectors additionally provide access via
 /// `width`/`height`, so using them to hold
 /// dimensions/size feels lexically correct.
-template<typename _Tp, int dim>
+template<typename T, int Dim>
 class Vec {
  public:
-  using value_type = _Tp;
-  static constexpr int ndim = dim;
+  using value_type = T;  // NOLINT(readability-identifier-naming)
+  static constexpr int ndim = Dim;
 
   //------------------------------------------------- Initialization
-  Vec();
-  Vec(_Tp x, _Tp y);
-  Vec(_Tp x, _Tp y, _Tp z);
-  Vec(_Tp x, _Tp y, _Tp z, _Tp w);
-  Vec(std::initializer_list<_Tp> values);
+  Vec() noexcept {
+    for (int i = 0; i < Dim; ++i) {
+      val[i] = static_cast<T>(0);
+    }
+  }
+
+
+  Vec(T x, T y);
+  Vec(T x, T y, T z);
+  Vec(T x, T y, T z, T w);
+
+  Vec(std::initializer_list<T> values);
 
   ~Vec() = default;
-
-  Vec(const Vec<_Tp, dim>& other);
-  Vec(Vec<_Tp, dim> &&other) noexcept;
-  Vec<_Tp, dim> &operator=(const Vec<_Tp, dim> &other);
-  Vec<_Tp, dim> &operator=(Vec<_Tp, dim> &&other) noexcept;
+  Vec(const Vec<T, Dim>& other);
+  Vec(Vec<T, Dim> &&other) noexcept;
+  Vec<T, Dim> &operator=(const Vec<T, Dim> &other);
+  Vec<T, Dim> &operator=(Vec<T, Dim> &&other) noexcept;
 
 
   /// Allow implicitly casting each vector to its
   /// double-precision counterpart.
-  operator Vec<double, dim>() const;  // NOLINT
+  operator Vec<double, Dim>() const;  // NOLINT
 
 
   /// Returns the homogeneous representation of this vector, *i.e.* the vector
   /// has an additional dimension which is set to 1.
-  Vec<_Tp, dim+1> Homogeneous() const;
+  inline constexpr
+  Vec<T, Dim+1> Homogeneous() const {
+    Vec<T, Dim+1> vh;
+    for (int i = 0; i < Dim; ++i) {
+      vh[i] = val[i];
+    }
+    vh[Dim] = static_cast<T>(1);
+    return vh;
+  }
 
 
   //------------------------------------------------- Value access
-  const _Tp &operator[](int i) const;
-  _Tp &operator[](int i);
+  T &operator[](int i);
 
-  const _Tp &x() const;
-  const _Tp &y() const;
-  const _Tp &width() const;
-  const _Tp &height() const;
-  const _Tp &z() const;
-  const _Tp &w() const;
+  const T &operator[](int i) const;
+
+
+  inline const T &X() const {
+    return (*this)[0];
+  }
+
+
+  inline const T &Y() const {
+    return (*this)[1];
+  }
+
+
+  inline const T &Width() const {
+    if (Dim != 2) {
+        throw std::logic_error(
+            "Only 2D vectors support member access via Width().");
+    }
+    return X();
+  }
+
+
+  inline const T &Height() const {
+    if (Dim != 2) {
+        throw std::logic_error(
+            "Only 2D vectors support member access via Height().");
+    }
+    return Y();
+  }
+
+
+  inline const T &Z() const {
+    return (*this)[2];
+  }
+
+
+  inline const T &W() const {
+    return (*this)[3];
+  }
 
 //  /**
 //   * Vectors with 2 dimensions can also define a size.
@@ -80,60 +126,123 @@ class Vec {
 //   * ---- over a "clean" template interface)           ----
 //   *
 //   * Note that to perform SFINAE, the dummy template
-//   * argument (T = _Tp) must be specified. Otherwise, this would
-//   * not compile, because at compilation time, _Tp is already
+//   * argument (_Tp = T) must be specified. Otherwise, this would
+//   * not compile, because at compilation time, T is already
 //   * known (from the class definition). Useful SO thread on SFINAE:
 //   * https://stackoverflow.com/a/13401982/400948
 //   */
-//  template<typename T = _Tp>
-//  const typename std::enable_if<(dim == 2), T>::type& width() const {
+//  template<typename _Tp = T>
+//  const typename std::enable_if<(dim == 2), _Tp>::type& width() const {
 //    return x();
 //  }
 //
-//  template<typename T = _Tp>
-//  const typename std::enable_if<(dim == 2), T>::type& height() const {
+//  template<typename _Tp = T>
+//  const typename std::enable_if<(dim == 2), _Tp>::type& height() const {
 //    return y();
 //  }
 
-  _Tp &x();
-  _Tp &y();
-  _Tp &width();
-  _Tp &height();
-  _Tp &z();
-  _Tp &w();
+  inline T &X() {
+    return (*this)[0];
+  }
 
 
-  void SetX(_Tp x);
-  void SetY(_Tp y);
-  void SetWidth(_Tp width);
-  void SetHeight(_Tp height);
-  void SetZ(_Tp z);
-  void SetW(_Tp w);
+  inline T &Y() {
+    return (*this)[1];
+  }
 
 
-  _Tp val[dim];  ///< Holds the values of this vector.
+  inline T &Width() {
+    if (Dim != 2) {
+      throw std::logic_error(
+          "Only 2D vectors support member access via Width().");
+    }
+    return X();
+  }
+
+
+  inline T &Height() {
+    if (Dim != 2) {
+      throw std::logic_error(
+          "Only 2D vectors support member access via Height().");
+    }
+    return Y();
+  }
+
+
+  inline T &Z() {
+    return (*this)[2];
+  }
+
+
+  inline T &W() {
+    return (*this)[3];
+  }
+
+
+  inline void SetX(T x) {
+    (*this)[0] = x;
+  }
+
+
+  inline void SetY(T y) {
+    (*this)[1] = y;
+  }
+
+
+  inline void SetWidth(T width) {
+    if (Dim != 2) {
+      throw std::logic_error(
+            "Only 2D vectors support "
+            "setting the x dimension via SetWidth().");
+    }
+    SetX(width);
+  }
+
+
+  inline void SetHeight(T height) {
+    if (Dim != 2) {
+      throw std::logic_error(
+            "Only 2D vectors support "
+            "setting the Y dimension via SetHeight().");
+    }
+    SetY(height);
+  }
+
+
+  inline void SetZ(T z) {
+    (*this)[2] = z;
+  }
+
+
+  inline void SetW(T w) {
+    (*this)[3] = w;
+  }
+
+
+  /// Holds the values of this vector.
+  T val[Dim];  // NOLINT
 
 
   //------------------------------------------------- Arithmetics
   //FIXME disable division on integral types, or implement explicit clipping?
-  Vec<_Tp, dim> &operator+=(const Vec<_Tp, dim>& rhs);
-  Vec<_Tp, dim> &operator+=(double value);
-  Vec<_Tp, dim> &operator-=(const Vec<_Tp, dim>& rhs);
-  Vec<_Tp, dim> &operator-=(double value);
-  Vec<_Tp, dim> &operator*=(double scale);
-  Vec<_Tp, dim> &operator/=(double scale);
+  Vec<T, Dim> &operator+=(const Vec<T, Dim>& rhs);
+  Vec<T, Dim> &operator+=(double value);
+  Vec<T, Dim> &operator-=(const Vec<T, Dim>& rhs);
+  Vec<T, Dim> &operator-=(double value);
+  Vec<T, Dim> &operator*=(double scale);
+  Vec<T, Dim> &operator/=(double scale);
 
 
   /// Returns a vector where each dimension is negated.
-  Vec<_Tp, dim> operator-() const;
+  Vec<T, Dim> operator-() const;
 
 
   /// Returns the maximum dimension value.
-  _Tp MaxValue() const;
+  T MaxValue() const;
 
 
   /// Returns the minimum dimension value.
-  _Tp MinValue() const;
+  T MinValue() const;
 
 
   /// Returns the index/dimension holding the maximum value.
@@ -145,12 +254,12 @@ class Vec {
 
 
   /// Computes the dot product.
-  _Tp Dot(const Vec<_Tp, dim>& other) const;
+  T Dot(const Vec<T, Dim>& other) const;
 
 
   /// Returns the vector cross product. Only supported for 3-dimensional
   /// vectors.
-  Vec<_Tp, dim> Cross(const Vec<_Tp, dim>& other) const;
+  Vec<T, Dim> Cross(const Vec<T, Dim>& other) const;
 
 
   /// Returns the vector's length.
@@ -162,19 +271,19 @@ class Vec {
 
 
   /// Computes the L2 distance between this and the other.
-  double Distance(const Vec<_Tp, dim>& other) const;
+  double Distance(const Vec<T, Dim>& other) const;
 
 
   /// Computes the L1 distance between this and the other.
-  double DistanceManhattan(const Vec<_Tp, dim>& other) const;
+  double DistanceManhattan(const Vec<T, Dim>& other) const;
 
 
   /// Returns the direction vector from `this` to `to`.
-  Vec<_Tp, dim> DirectionVector(const Vec<_Tp, dim>& to) const;
+  Vec<T, Dim> DirectionVector(const Vec<T, Dim>& to) const;
 
 
   /// Returns the unit vector.
-  Vec<double, dim> UnitVector() const;
+  Vec<double, Dim> UnitVector() const;
 
 
   /// Returns a human-readable string representation.
@@ -184,7 +293,7 @@ class Vec {
 
 
   /// Overloaded stream operator.
-  friend std::ostream &operator<<(std::ostream &os, const Vec<_Tp, dim> &vec) {
+  friend std::ostream &operator<<(std::ostream &os, const Vec<T, Dim> &vec) {
     os << vec.ToString();
     return os;
   }
@@ -194,7 +303,7 @@ class Vec {
   static std::string TypeName();
 
   /// Returns a vector with all coordinates set to `value`.
-  static Vec<_Tp, dim> All(_Tp value);
+  static Vec<T, Dim> All(T value);
 };
 
 
@@ -203,11 +312,11 @@ class Vec {
 // to add the corresponding explicit vector instantiation
 // in primitives.cpp
 
-template<typename _Tp, int dim>
-bool operator==(const Vec<_Tp, dim>& lhs, const Vec<_Tp, dim>& rhs);
+template<typename T, int Dim>
+bool operator==(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs);
 
-template<typename _Tp, int dim>
-bool operator!=(const Vec<_Tp, dim>& lhs, const Vec<_Tp, dim>& rhs);
+template<typename T, int Dim>
+bool operator!=(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs);
 
 
 //-------------------------------------------------  Arithmetic operators
@@ -216,42 +325,42 @@ bool operator!=(const Vec<_Tp, dim>& lhs, const Vec<_Tp, dim>& rhs);
 // instantiation in vector.cpp
 
 /// Vector addition.
-template<typename _Tp, int dim>
-Vec<_Tp, dim> operator+(Vec<_Tp, dim> lhs, const Vec<_Tp, dim>& rhs);
+template<typename T, int Dim>
+Vec<T, Dim> operator+(Vec<T, Dim> lhs, const Vec<T, Dim>& rhs);
 
 
 /// Vector subtraction.
-template<typename _Tp, int dim>
-Vec<_Tp, dim> operator-(Vec<_Tp, dim> lhs, const Vec<_Tp, dim>& rhs);
+template<typename T, int Dim>
+Vec<T, Dim> operator-(Vec<T, Dim> lhs, const Vec<T, Dim>& rhs);
 
 
 /// Add scalar to each dimension.
-template<typename _Tp, int dim>
-Vec<_Tp, dim> operator+(Vec<_Tp, dim> lhs, double rhs);
+template<typename T, int Dim>
+Vec<T, Dim> operator+(Vec<T, Dim> lhs, double rhs);
 
 
 /// Subtract scalar from each dimension.
-template<typename _Tp, int dim>
-Vec<_Tp, dim> operator-(Vec<_Tp, dim> lhs, double rhs);
+template<typename T, int Dim>
+Vec<T, Dim> operator-(Vec<T, Dim> lhs, double rhs);
 
 
 /// Multiply (rhs) by scalar.
-template<typename _Tp, int dim>
-Vec<_Tp, dim> operator*(Vec<_Tp, dim> lhs, double rhs);
+template<typename T, int Dim>
+Vec<T, Dim> operator*(Vec<T, Dim> lhs, double rhs);
 
 /// Multiply (lhs) by scalar.
-template<typename _Tp, int dim>
-Vec<_Tp, dim> operator*(double lhs, Vec<_Tp, dim> rhs);
+template<typename T, int Dim>
+Vec<T, Dim> operator*(double lhs, Vec<T, Dim> rhs);
 
 
 /// Divide (scale) by scalar.
-template<typename _Tp, int dim>
-Vec<_Tp, dim> operator/(Vec<_Tp, dim> lhs, double rhs);
+template<typename T, int Dim>
+Vec<T, Dim> operator/(Vec<T, Dim> lhs, double rhs);
 
 
 /// Returns the length of the given polygon.
-template<typename _Tp, int dim>
-double LengthPolygon(const std::vector<Vec<_Tp, dim>> &points);
+template<typename T, int Dim>
+double LengthPolygon(const std::vector<Vec<T, Dim>> &points);
 
 
 //-------------------------------------------------  Available specializations:
@@ -267,19 +376,19 @@ using Vec3i = Vec<int, 3>;
 
 
 /// Computes the determinant of the two 2d vectors.
-template <typename _Tp> inline
-_Tp Determinant(const Vec<_Tp, 2> &a, const Vec<_Tp, 2> &b) {
-  return a.x() * b.y() - b.x() * a.y();
+template <typename T> inline
+T Determinant(const Vec<T, 2> &a, const Vec<T, 2> &b) {
+  return a.X() * b.Y() - b.X() * a.Y();
 }
 
 
 /// Scalar projection is the length of the vector projection, which is the
 /// vector component of a in the direction of b.
 /// See also: https://en.wikipedia.org/wiki/Vector_projection
-template <typename _Tp, int dim> inline
-_Tp ScalarProjection(const Vec<_Tp, dim> &a, const Vec<_Tp, dim> &b) {
+template <typename T, int Dim> inline
+T ScalarProjection(const Vec<T, Dim> &a, const Vec<T, Dim> &b) {
   static_assert(
-      std::is_floating_point<_Tp>::value,
+      std::is_floating_point<T>::value,
       "Vector type must be float or double!");
   return a.Dot(b.UnitVector());
 }
@@ -288,10 +397,10 @@ _Tp ScalarProjection(const Vec<_Tp, dim> &a, const Vec<_Tp, dim> &b) {
 /// Returns :math:`\operatorname{proj}_{\mathbf{b}} \mathbf{a}`, *i.e.* the
 /// projection of a onto b
 /// See also: https://en.wikipedia.org/wiki/Vector_projection
-template <typename _Tp, int dim> inline
-Vec<_Tp, dim> VectorProjection(const Vec<_Tp, dim> &a, const Vec<_Tp, dim> &b) {
+template <typename T, int Dim> inline
+Vec<T, Dim> VectorProjection(const Vec<T, Dim> &a, const Vec<T, Dim> &b) {
   static_assert(
-      std::is_floating_point<_Tp>::value,
+      std::is_floating_point<T>::value,
       "Vector type must be float or double!");
   // Alternative formulation would be ScalarProjection(a, b) * b.UnitVector(),
   // but we can save some computation via:
@@ -301,12 +410,12 @@ Vec<_Tp, dim> VectorProjection(const Vec<_Tp, dim> &a, const Vec<_Tp, dim> &b) {
 
 /// Computes the angle (in radians) of a 2d direction vector w.r.t. the
 /// positive X axis.
-template <typename _Tp> inline
-double AngleRadFromDirectionVec(const Vec<_Tp, 2> &vec) {
+template <typename T> inline
+double AngleRadFromDirectionVec(const Vec<T, 2> &vec) {
   // Dot product is proportional to the cosine, whereas
   // the determinant is proportional to the sine.
   // See: https://math.stackexchange.com/a/879474
-  const Vec<double, 2> ref(1, 0);
+  const Vec<double, 2> ref{1, 0};
   const Vec<double, 2> unit = vec.UnitVector();
   return std::atan2(Determinant(ref, unit), ref.Dot(unit));
 }
@@ -314,8 +423,8 @@ double AngleRadFromDirectionVec(const Vec<_Tp, 2> &vec) {
 
 /// Computes the angle (in degrees) of a 2d direction vector w.r.t. the
 /// positive X axis.
-template <typename _Tp> inline
-double AngleDegFromDirectionVec(const Vec<_Tp, 2> &vec) {
+template <typename T> inline
+double AngleDegFromDirectionVec(const Vec<T, 2> &vec) {
   return Rad2Deg(AngleRadFromDirectionVec(vec));
 }
 
@@ -323,7 +432,7 @@ double AngleDegFromDirectionVec(const Vec<_Tp, 2> &vec) {
 /// Returns the unit direction vector given its angle (in
 /// radians) w.r.t. the positive X axis.
 inline Vec2d DirectionVecFromAngleRad(double rad) {
-  return Vec2d(std::cos(rad), std::sin(rad)); // TODO test case to ensure numerical stability at edge cases
+  return Vec2d{std::cos(rad), std::sin(rad)}; // TODO test case to ensure numerical stability at edge cases
 }
 
 
@@ -361,19 +470,19 @@ inline Vec2d RotateVector(
 ///
 /// Useful to get axis-aligned bounding boxes, a starting
 /// point for hull computations, etc.
-template <typename _Tp, int dim,
+template <typename T, int Dim,
           template<typename...> class Container = std::vector>
 void MinMaxCoordinates(
-    const Container<Vec<_Tp, dim>> &values,
-    Vec<_Tp, dim> &min, Vec<_Tp, dim> &max) {
+    const Container<Vec<T, Dim>> &values,
+    Vec<T, Dim> &min, Vec<T, Dim> &max) {
   if (values.empty()) {
     return;
   }
 
   min = *values.begin();
   max = *values.begin();
-  for (const Vec<_Tp, dim> &v : values) {
-    for (int i = 0; i < dim; ++i) {
+  for (const Vec<T, Dim> &v : values) {
+    for (int i = 0; i < Dim; ++i) {
       if (v[i] < min[i]) {
         min[i] = v[i];
       }

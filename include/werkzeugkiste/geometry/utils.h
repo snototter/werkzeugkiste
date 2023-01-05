@@ -17,14 +17,14 @@ namespace geometry {
 /// Convert angle from degrees to radians.
 inline constexpr
 double Deg2Rad(double deg) {
-  return deg * M_PI / 180.0;
+  return deg * M_PI / 180.0; // NOLINT
 }
 
 
 /// Convert angle from radians to degrees.
 inline constexpr
 double Rad2Deg(double rad) {
-  return rad * 180.0 / M_PI;
+  return rad * 180.0 / M_PI; // NOLINT
 }
 
 

@@ -203,7 +203,7 @@ Line2d GetProjectionOfHorizon(
              Vec<_Tp, 3>(pt2[0], pt2[1], camera_center3d[2]));
 
     Line2d horizon(prj1, prj2);
-    if ((image_size.width() > 0) && (image_size.height() > 0)) {
+    if ((image_size.Width() > 0) && (image_size.Height() > 0)) {
       return horizon.ClipLineByRectangle({0, 0}, image_size).LeftToRight();
     } else {
       return horizon.LeftToRight();
@@ -217,8 +217,10 @@ Line2d GetProjectionOfHorizon(
 template <typename _Tp> inline
 bool IsPointInsideImage(const Vec<_Tp, 2> &pt, const Vec2i &img_size) {
   return IsPointInsideRectangle<_Tp>(
-        pt, Vec<_Tp, 2>{0.0, 0.0}, Vec<_Tp, 2>{
-          static_cast<_Tp>(img_size.x()), static_cast<_Tp>(img_size.y())});
+        pt, Vec<_Tp, 2>{0.0, 0.0},
+        Vec<_Tp, 2>{
+          static_cast<_Tp>(img_size.Width()),
+          static_cast<_Tp>(img_size.Height())});
 }
 
 

@@ -113,7 +113,8 @@ TEST(ProjectionTest, PinholeCamera) {
 //  wkg::Mat3x4d cam_prj = wkg::ProjectionMatrixFromKRt(K, R, t);
 
   wkg::Plane img_plane = wkg::ImagePlaneInWorldCoordinateSystem(R, {0, 0, 0});
-  EXPECT_TRUE(img_plane.Normal() == wkg::Vec3d(0, 0, 1));
+  wkg::Vec3d zaxis{0, 0, 1};
+  EXPECT_TRUE(img_plane.Normal() == zaxis);
   EXPECT_DOUBLE_EQ(img_plane.Offset(), -1.0);
 
 //  std::cout << "Projection matrix:\nK = " << K << ", R = " << R << ", t = " << t << " --> P = \n" << cam_prj << std::endl;
