@@ -326,7 +326,7 @@ include(GenerateExportHeader)
 generate_export_header(
     werkzeugkiste-werkzeugkiste
     BASE_NAME werkzeugkiste
-    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.hpp
+    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.h
     CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
 )
 
@@ -382,7 +382,7 @@ target_link_libraries(
 #generate_export_header(
 #    werkzeugkiste_werkzeugkiste
 #    BASE_NAME werkzeugkiste
-#    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.hpp
+#    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.h
 #    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
 #)
 #

@@ -14,7 +14,7 @@
 namespace werkzeugkiste::timing {
 
 /// Internal tic/toc utilities not to be publicly exposed.
-namespace tictoc_ {
+namespace tictoc_internals {
 
 /// Dictionary holding the active stop watches for tic/toc.
 static std::unordered_map<std::string, StopWatch> active_watches;
@@ -95,33 +95,33 @@ void TocTemplate(const std::string &label) {
   // Reset stream formatting
   std::cout.copyfmt(init);
 }
-}  // namespace tictoc_
+}  // namespace tictoc_internals
 
 
 void SetTocFormat(
     bool print_labels_aligned, int fixed_number_width, int number_precision) {
-  tictoc_::print_labels_aligned = print_labels_aligned;
-  tictoc_::number_width = fixed_number_width;
-  tictoc_::number_precision = number_precision;
+  tictoc_internals::print_labels_aligned = print_labels_aligned;
+  tictoc_internals::number_width = fixed_number_width;
+  tictoc_internals::number_precision = number_precision;
 }
 
 
 void MuteToc() {
-  tictoc_::display_output = false;
+  tictoc_internals::display_output = false;
 }
 
 
 void UnmuteToc() {
-  tictoc_::display_output = true;
+  tictoc_internals::display_output = true;
 }
 
 
 void Tic(const std::string &label) {
-  auto it = tictoc_::active_watches.find(label);
-  if (it == tictoc_::active_watches.end()) {
-    tictoc_::active_watches.insert(std::make_pair(label, StopWatch()));
-    tictoc_::max_label_length = std::max(
-          tictoc_::max_label_length, static_cast<int>(label.length()));
+  auto it = tictoc_internals::active_watches.find(label);
+  if (it == tictoc_internals::active_watches.end()) {
+    tictoc_internals::active_watches.insert(std::make_pair(label, StopWatch()));
+    tictoc_internals::max_label_length = std::max(
+          tictoc_internals::max_label_length, static_cast<int>(label.length()));
   } else {
     it->second.Start();
   }
@@ -129,42 +129,42 @@ void Tic(const std::string &label) {
 
 
 void TocSeconds(const std::string &label) {
-  tictoc_::TocTemplate<std::chrono::seconds>(label);
+  tictoc_internals::TocTemplate<std::chrono::seconds>(label);
 }
 
 
 void TocMilliseconds(const std::string &label) {
-  tictoc_::TocTemplate<std::chrono::milliseconds>(label);
+  tictoc_internals::TocTemplate<std::chrono::milliseconds>(label);
 }
 
 
 void TocMicroseconds(const std::string &label) {
-  tictoc_::TocTemplate<std::chrono::microseconds>(label);
+  tictoc_internals::TocTemplate<std::chrono::microseconds>(label);
 }
 
 
 void TocNanoseconds(const std::string &label) {
-  tictoc_::TocTemplate<std::chrono::nanoseconds>(label);
+  tictoc_internals::TocTemplate<std::chrono::nanoseconds>(label);
 }
 
 
 double TTocSeconds(const std::string &label) {
-  return tictoc_::TToc<std::ratio<1>>(label);
+  return tictoc_internals::TToc<std::ratio<1>>(label);
 }
 
 
 double TTocMilliseconds(const std::string &label) {
-  return tictoc_::TToc<std::milli>(label);
+  return tictoc_internals::TToc<std::milli>(label);
 }
 
 
 double TTocMicroseconds(const std::string &label) {
-  return tictoc_::TToc<std::micro>(label);
+  return tictoc_internals::TToc<std::micro>(label);
 }
 
 
 double TTocNanoseconds(const std::string &label) {
-  return tictoc_::TToc<std::nano>(label);
+  return tictoc_internals::TToc<std::nano>(label);
 }
 
 }  // namespace werkzeugkiste::timing

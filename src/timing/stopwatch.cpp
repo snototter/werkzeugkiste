@@ -10,17 +10,20 @@ template class stop_watch<std::chrono::steady_clock>;
 std::string SecondsToString(unsigned int seconds) {
   std::ostringstream str;
 
-  const unsigned int days = seconds / 86400;
+  constexpr unsigned int sec_per_day = 86400;
+  constexpr unsigned int sec_per_hour = 3600;
+  constexpr unsigned int sec_per_min = 60;
+  const unsigned int days = seconds / sec_per_day;
 
   bool needs_space = false;
   if (days > 0) {
     str << days
         << ((days > 1) ? " days" : " day");
     needs_space = true;
-    seconds -= 86400*days;
+    seconds -= (sec_per_day * days);
   }
 
-  const unsigned int hours = seconds / 3600;
+  const unsigned int hours = seconds / sec_per_hour;
 
   if (hours > 0) {
     if (needs_space) {
@@ -29,10 +32,10 @@ std::string SecondsToString(unsigned int seconds) {
     str << hours
         << ((hours > 1) ? " hours" : " hour");
     needs_space = true;
-    seconds -= hours * 3600;
+    seconds -= (hours * sec_per_hour);
   }
 
-  const unsigned int mins = seconds / 60;
+  const unsigned int mins = seconds / sec_per_min;
   if (mins > 0) {
     if (needs_space) {
       str << " ";
@@ -40,7 +43,7 @@ std::string SecondsToString(unsigned int seconds) {
     str << mins
         << ((mins > 1) ? " minutes" : " minute");
     needs_space = true;
-    seconds -= mins * 60;
+    seconds -= (mins * sec_per_min);
   }
 
   // Skip seconds if we already reported a larger unit

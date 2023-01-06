@@ -29,12 +29,13 @@ std::string DurationAbbreviation() {
     return "min";
   } else if (std::is_same<Duration, std::chrono::hours>::value) {
     return "hrs";
+  }
 #if __cplusplus >= 202002L // C++20
   // Trivia: MSVC didn't properly define __cplusplus until
   // early 2018. Since it is 2022, we don't need to add support
   // for outdated MSVC versions.
   // https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus
-  } else if (std::is_same<Duration, std::chrono::days>::value) {
+  else if (std::is_same<Duration, std::chrono::days>::value) {
     return "days";
   } else if (std::is_same<Duration, std::chrono::weeks>::value) {
     return "wks";
@@ -42,8 +43,8 @@ std::string DurationAbbreviation() {
     return "mth";
   } else if (std::is_same<Duration, std::chrono::years>::value) {
     return "yrs";
-#endif  // C++20
   }
+#endif  // C++20
   std::ostringstream s;
   s << "Duration \"" << typeid(Duration).name()
     << "\" has not been mapped to its abbreviation yet.";
@@ -63,8 +64,9 @@ std::string ClockTypeName() {
     // The highres clock should just be an alias to system or steady (C++11),
     // thus we should never enter (but it doesn't hurt to include it either).
     return "std::chrono::high_resolution_clock";
+  }
 #if __cplusplus >= 202002L // C++20
-  } else if (std::is_same<Clock, std::chrono::utc_clock>::value) {
+  else if (std::is_same<Clock, std::chrono::utc_clock>::value) {
     return "std::chrono::utc_clock";
   } else if (std::is_same<Clock, std::chrono::tai_clock>::value) {
     return "std::chrono::tai_clock";
@@ -74,8 +76,8 @@ std::string ClockTypeName() {
     return "std::chrono::file_clock";
   } else if (std::is_same<Clock, std::chrono::local_t>::value) {
     return "std::chrono::local_t";
-#endif  // C++20
   }
+#endif  // C++20
 
   std::ostringstream s;
   s << "Clock type \"" << typeid(Clock).name()
@@ -100,8 +102,9 @@ std::string PrecisionTypeName() {
     return "std::chrono::minutes";
   } else if (std::is_same<Duration, std::chrono::hours>::value) {
     return "std::chrono::hours";
+  }
 #if __cplusplus >= 202002L // C++20
-  } else if (std::is_same<Duration, std::chrono::days>::value) {
+  else if (std::is_same<Duration, std::chrono::days>::value) {
     return "std::chrono::days";
   } else if (std::is_same<Duration, std::chrono::weeks>::value) {
     return "std::chrono::weeks";
@@ -109,8 +112,8 @@ std::string PrecisionTypeName() {
     return "std::chrono::months";
   } else if (std::is_same<Duration, std::chrono::years>::value) {
     return "std::chrono::years";
-#endif  // C++20
   }
+#endif  // C++20
 
   std::ostringstream s;
   s << "Duration type \"" << typeid(Duration).name()
@@ -179,10 +182,10 @@ std::string SecondsToString(unsigned int seconds);
 /// explicitly default to ``steady_clock`` (since ``high_resolution_clock`` is
 /// not guaranteed to be steady).
 template <typename Clock = std::chrono::steady_clock>
-class stop_watch {
+class stop_watch {  // NOLINT
  public:
   /// Clock type used by this stop watch.
-  using clock_type = Clock;
+  using clock_type = Clock;  // NOLINT
 
 
   /// Constructor starts the stop watch.
@@ -193,8 +196,22 @@ class stop_watch {
 
   /// Copy-constructor copies the other's start time point.
   stop_watch(const stop_watch &other)
-    : t_start_(other.t_start_)
+    : t_start_{other.t_start_}
   {}
+
+
+  // TODO future extension: similar to a scoped guard, add an
+  // "disarm" method. Otherwise, the destructor could print
+  // the elapsed time.
+  // Requires a 2nd tpl parameter (default to millisec) that
+  // specifies the unit to print the elapsed time...
+  // Then, the move ctor/assignments should be implemented
+  // properly (and disarm the moved instance)
+  ~stop_watch() = default;
+
+  stop_watch(stop_watch &&other) noexcept = default;
+  stop_watch &operator=(const stop_watch &other) = default;
+  stop_watch &operator=(stop_watch &&other) noexcept = default;
 
 
   /// Starts or restarts the stop watch.
@@ -245,7 +262,8 @@ class stop_watch {
   /// will overflow.
   double YearsUntilOverflow() const {
     const auto duration_hrs =
-        std::chrono::duration_cast<std::chrono::hours>(clock_type::time_point::max() - clock_type::now());
+        std::chrono::duration_cast<std::chrono::hours>(
+            clock_type::time_point::max() - clock_type::now());
     // Convert to years, similar to C++20's std::chrono::years definition
     constexpr double hrs_per_year = 8765.82; // = 24 * 365.2425
     return static_cast<double>(duration_hrs.count()) / hrs_per_year;
@@ -267,7 +285,7 @@ class stop_watch {
 
  private:
   /// Time point from which we measure the elapsed time.
-  typename clock_type::time_point t_start_;
+  typename clock_type::time_point t_start_{};
 };
 
 using StopWatch = stop_watch<std::chrono::steady_clock>;

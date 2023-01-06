@@ -11,8 +11,8 @@ default(
     PATTERNS
     src/*.cpp src/*.h
     include/*.h
-    test/*.cpp test/*.h
-    example/*.cpp example/*.h
+    tests/*.cpp tests/*.h
+    examples/*.cpp examples/*.h
 )
 default(FIX NO)
 

@@ -11,9 +11,9 @@ endif()
 
 # ---- Suppress C4251 on Windows ----
 
-# Please see include/werkzeugkiste/werkzeugkiste.hpp for more details
+# Please see include/werkzeugkiste/werkzeugkiste.h for more details
 set(pragma_suppress_c4251 "
-/* This needs to suppress only for MSVC */
+/* This is needed to suppress spurious warnings for MSVC */
 #if defined(_MSC_VER) && !defined(__ICL)
 #  define WERKZEUGKISTE_SUPPRESS_C4251 _Pragma(\"warning(suppress:4251)\")
 #else
