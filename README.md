@@ -98,6 +98,7 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
 <details>
 <summary>Task list overview / TODOs:</summary>
 
+* [ ] Disable shared or, preferably, make it a real shared library.
 * [ ] Change to newer gcc and add `-Wextra-semi` to dev presets
 * [ ] Check coverage target and set up codecov.io on push/release
 * [ ] Utils:
