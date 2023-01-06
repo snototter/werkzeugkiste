@@ -1,5 +1,10 @@
 # Building with CMake
 
+<!--
+**TODO** adjust auto-generated doc!
+
+-->
+
 ## Build
 
 This project doesn't require any special command-line flags to build to keep

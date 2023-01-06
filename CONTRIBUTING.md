@@ -1,9 +1,28 @@
 # Contributing
 
 <!--
+**TODO** adjust auto-generated doc!
+
     Short overview, rules, general guidelines, notes about pull requests and
     style should go here.
+
+TODO merge code of conduct into here
 -->
+
+* For each library, there should be a demo binary within `examples/`  
+  Note, however, that demos are the lowest priority features on my list for
+  this toolbox. Most importantly, this library should keep a high code
+  coverage!
+<!-- TODO update
+TODO automate consumer use cases
+TODO make it more easily testable
+
+* Ensure it is working with:
+  * `cmake -Dwerkzeugkiste_WITH_EXAMPLES=ON`
+  * `examples/cmake-fetch`
+  * `examples/installed-locally`
+-->
+
 
 ## Code of Conduct
 

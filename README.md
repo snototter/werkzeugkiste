@@ -95,22 +95,8 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
 </details>
 
 
-
-
-# DEPRECATED - NOT YET MERGED 
-
-TODO move to contributing/hacking/building/etc
-
-
-## Development Notes
-* For each library, there should be a demo binary within `examples/`  
-  Note, however, that demos are the lowest priority features on my list for this toolbox
-* Ensure it is working with:
-  * `cmake -Dwerkzeugkiste_WITH_EXAMPLES=ON`
-  * `examples/cmake-fetch`
-  * `examples/installed-locally`
-
-## TODOs
+<details>
+<summary>Task list overview / TODOs:</summary>
 
 * [ ] Change to newer gcc and add `-Wextra-semi` to dev presets
 * [x] Check external inclusion via cmake FetchContent
@@ -132,7 +118,7 @@ TODO move to contributing/hacking/building/etc
       a major effort due to spline fitting (*e.g.* via [ALGLIB](http://www.alglib.net/interpolation/spline3.php#header7)
       or [NCAR/EOL bspline](https://github.com/NCAR/bspline)).
 * [ ] Future: after upgrading to C++17, add support for `string_view` manipulation and change `::files` to use `std::filesystem` instead
-
+</details>
 
 
 [1]: https://cmake.org/
