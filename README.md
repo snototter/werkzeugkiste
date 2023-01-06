@@ -26,10 +26,11 @@ Currently, it provides the following functionality. Note that the namespace name
 
 ### Developers
 <details>
-<summary>Developers of `werkzeugkiste` need additionally tools:</summary>
-* **Note:** This library is primarily developed on Unix. Since it was set up using
-  [cmake-init][10], **Windows users** should check the [cmake-init README][11]
-  for required changes or suggested alternatives.
+<summary>Developers of <tt>werkzeugkiste</tt> need additionally tools:</summary>
+
+**Note:** This library is primarily developed on Unix. Since it was set up using
+[cmake-init][10], **Windows users** should check the [cmake-init README][11]
+for required changes or suggested toolchain alternatives.
 
 * A recent [clang-tidy][5] version >= 14.  
 
@@ -56,7 +57,10 @@ Currently, it provides the following functionality. Note that the namespace name
 
 
 ## Usage
-The recommended way to include `werkzeugkiste` in your C++ project is via [CMake's FetchContent][9]:
+<details>
+<summary>The recommended way to include <tt>werkzeugkiste</tt> in your C++
+project is via [CMake's FetchContent][9]:</summary>
+
 ```cmake
 # Fetch the library:
 include(FetchContent)
@@ -80,6 +84,7 @@ target_link_libraries(
 
 *Note:* The `werkzeugkiste::werkzeugkiste` target is an _all-in-one_ target, _i.e._ it includes all utilities.
 Typically, you will only want to link against a specific utility target, _e.g._ `werkzeugkiste::geometry`.
+</details>
 
 For details on *building and installing* this library, refer to [BUILDING.md](BUILDING.md)
 
