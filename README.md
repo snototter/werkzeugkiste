@@ -24,7 +24,7 @@ Currently, it provides the following functionality. Note that the namespace name
 * The linear algebra library [Eigen3](https://eigen.tuxfamily.org/)
 
 ## Usage
-For details on manually building and installing this library, refer to the
+If you need to **manually build and install** `werkzeugkiste`, refer to the
 separate [BUILDING](BUILDING.md) document.
 
 <details>
