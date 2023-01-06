@@ -99,12 +99,12 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
 <summary>Task list overview / TODOs:</summary>
 
 * [ ] Change to newer gcc and add `-Wextra-semi` to dev presets
-* [x] Check external inclusion via cmake FetchContent
+* [ ] Check coverage target and set up codecov.io on push/release
 * [ ] Utils:
   * [x] Enumeration utils (iterator + flags)
   * [x] strings
   * [x] circular buffer
-  * [ ] file stuff (will be obsolete once C++17 support is more widespread)
+  * [ ] port file stuff to C++17
   * [x] sort utils
   * [x] vec/basicmath
   * [x] geo2d
