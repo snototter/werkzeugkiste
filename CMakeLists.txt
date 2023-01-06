@@ -444,6 +444,9 @@ if(PROJECT_IS_TOP_LEVEL)
     if(BUILD_EXAMPLES)
         add_subdirectory(examples)
     endif()
+else()
+    # Let the consumer know which version of this library they are using
+    set(werkzeugkiste_VERSION ${werkzeugkiste_VERSION} PARENT_SCOPE)
 endif()
 
 

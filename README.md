@@ -1,39 +1,55 @@
 # Werkzeugkiste - Yet Another C++ Utility Library
-This is a collection of frequently used C++ snippets copy-pasted across way too many of my projects.
-And since there's tons of so-called utilities, utils, tools & toolboxes out there, I prefer to call this one **`werkzeugkiste`** (the German word for toolbox).
-
-
-## Requirements
-* A C++ compiler supporting at least C++14
-* [CMake](https://cmake.org/) >= 3.15 and a [compatible build tool](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html), like [Make](https://www.gnu.org/software/make/), [Ninja](https://ninja-build.org/), etc.
+This library is a collection of frequently used C++ snippets copy-pasted across way too many of my projects.
+Since there's tons of so-called utilities, utils, tools & toolboxes out there, I prefer to call this one **`werkzeugkiste`** (the German word for toolbox).
 
 
 ## Functionality
 
-This toolbox will only receive sporadic updates: I will add features whenever I have to reuse some of my older code.
-So far, it supports:
-* `container`: Sorting utilities and a custom (`stl`-like) circular buffer
-* `files`: Basic file I/O and filesystem utilities  
-  _Caveat:_ These utilities are only tested on GNU/Linux and you will be better of using C++17's `std::filesystem`.
-* `geometry`: Math utilities, unsurprisingly focused on basic 2D & 3D geometry
-  * Type-safe number comparisons (`eps_equal`, `eps_zero`) and basic math utils (such as `sgn`).
+This toolbox will only receive sporadic updates, basically whenever I have to reuse (and modernize) some of my older code.
+Currently, it provides:
+* `werkzeugkiste::container`: Sorting utilities and a custom (`stl`-like) circular buffer.
+* `werkzeugkiste::files`: Basic file I/O and filesystem utilities.  
+  _Caveat:_ These utilities are only tested on GNU/Linux and will be replaced by wrappers to C++17's `std::filesystem`.
+* `werkzeugkiste::geometry`: Math utilities, focused on basic 2D & 3D geometry.
+  * Type-safe number comparisons (`IsEpsEqual`, `IsEpsZero`) and basic math utils (such as `Sign`).
   * 2D geometry: Circles & lines.
   * 3D geometry: Planes & lines.
-* `timing`: A stop watch & additional helpers on top of `std::chrono` (hiding some of its template boilerplate)
-* `strings`: Common `std::string` manipulation  
-  Currently, I'm focused at C++14 and thus, there is no support for `std::string_view`.
+* `werkzeugkiste::strings`: Common string manipulation.
+* `werkzeugkiste::timing`: Provides a stop watch & additional helpers on top of `std::chrono` (hiding some of its template boilerplate).
+
+
+## Requirements
+### For Library Users
+* A C++ compiler supporting at least C++17
+* [CMake][1] >= 3.14 and a [compatible build tool][2], like [Make][3], [Ninja][4], etc.
+* The linear algebra library [Eigen3](https://eigen.tuxfamily.org/)
+
+### For Developers
+Developers of `werkzeugkiste` additionally need:
+* A recent [clang-tidy][5] version >= 14.  
+
+  CI will always run clang-tidy for you, so it is entirely optional to install
+  and use it locally, but it is recommended.
+
+  **For Windows users**, if you wish to use clang-tidy, then you must install
+  [Ninja][4] and set the `generator` field in your `dev` preset to `Ninja`. The
+  reason for this is that only [Makefiles and Ninja][6] are supported with CMake
+  for use with clang-tidy. For other generators, this feature is a no-op.
+* Additional static analysis is run by [cppcheck][7].  
+
+  CI will always run cppcheck for you, so it is entirely optional to install and
+  use it locally, but it is recommended.
+
+  **For Windows users**, if you wish to use cppcheck, then you must install
+  [Ninja][4] and set the `generator` field in your `dev` preset to `Ninja`. The
+  reason for this is that only [Makefiles and Ninja][8] are supported with CMake
+  for use with cppcheck.
+* 
 
 
 ## Usage
-The recommended way to include `werkzeugkiste` in your C++ project is via CMake's FetchContent:
+The recommended way to include `werkzeugkiste` in your C++ project is via [CMake's FetchContent][9]:
 ```cmake
-# The consuming target only needs the toolbox (no examples, no testing)
-set(werkzeugkiste_BUILD_EXAMPLES OFF)
-set(werkzeugkiste_BUILD_TESTS OFF)
-# You might need werkzeugkiste's `install` targets, e.g. if you use some
-# of its classes in your (library) targets `public` interface.
-# set(werkzeugkiste_INSTALL ON)
-
 # Fetch the library:
 include(FetchContent)
 FetchContent_Declare(
@@ -91,4 +107,13 @@ See the [BUILDING](BUILDING.md) document.
 
 See the [CONTRIBUTING](CONTRIBUTING.md) document.
 
+[1]: https://cmake.org/
+[2]: https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html
+[3]: https://www.gnu.org/software/make/
+[4]: https://ninja-build.org/
+[5]: https://clang.llvm.org/extra/clang-tidy/
+[6]: https://cmake.org/cmake/help/latest/prop_tgt/LANG_CLANG_TIDY.html
+[7]: https://cppcheck.sourceforge.io/
+[8]: https://cmake.org/cmake/help/latest/prop_tgt/LANG_CPPCHECK.html
+[9]: https://cmake.org/cmake/help/latest/module/FetchContent.html
 
