@@ -19,18 +19,56 @@ Currently, it provides the following functionality. Note that the namespace name
 
 
 ## Requirements
-### Library Users
 * A C++ compiler supporting at least C++17
 * [CMake][1] >= 3.14 and a [compatible build tool][2], like [Make][3], [Ninja][4], etc.
 * The linear algebra library [Eigen3](https://eigen.tuxfamily.org/)
 
-### Developers
+## Usage
+For details on manually building and installing this library, refer to the
+separate [BUILDING](BUILDING.md) document.
+
+<details>
+<summary>The <b>recommended way</b> to include <tt>werkzeugkiste</tt> in your C++
+project is via CMake's <tt>FetchContent</tt>:</summary>
+
+Since v3.14, CMake provides the [functionality][9] to set up an external
+dependency as simple as:
+```cmake
+# Fetch the library:
+include(FetchContent)
+FetchContent_Declare(
+    werkzeugkiste
+    GIT_REPOSITORY https://github.com/snototter/werkzeugkiste.git
+    GIT_TAG main)
+FetchContent_MakeAvailable(werkzeugkiste)
+
+# Optionally print the available library version:
+message(STATUS "Using werkzeugkiste v${werkzeugkiste_VERSION}")
+```
+
+Afterwards, add it to your consuming executable/library via:
+```cmake
+target_link_libraries(
+    your_target PRIVATE
+    werkzeugkiste::werkzeugkiste
+)
+```
+
+*Note:* The `werkzeugkiste::werkzeugkiste` target is an _all-in-one_ target, _i.e._ it includes all utilities.
+Typically, you will only want to link against a specific utility target, _e.g._ `werkzeugkiste::geometry`.
+The available target names are listed in the [functionality overview][#functionality].
+</details>
+
+# Contributing
+
+Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) document.
+
 <details>
 <summary>Developers of <tt>werkzeugkiste</tt> need additionally tools:</summary>
 
-**Note:** This library is primarily developed on Unix. Since it was set up using
-[cmake-init][10], **Windows users** should check the [cmake-init README][11]
-for required changes or suggested toolchain alternatives.
+* <b>Note:</b> This library is primarily developed on Unix. Since it was set up using
+  [cmake-init][10], **Windows users** should check the [cmake-init README][11]
+  for required changes or suggested toolchain alternatives.
 
 * A recent [clang-tidy][5] version >= 14.  
 
@@ -56,41 +94,6 @@ for required changes or suggested toolchain alternatives.
 </details>
 
 
-## Usage
-<details>
-<summary>The recommended way to include <tt>werkzeugkiste</tt> in your C++
-project is via [CMake's FetchContent][9]:</summary>
-
-```cmake
-# Fetch the library:
-include(FetchContent)
-FetchContent_Declare(
-    werkzeugkiste
-    GIT_REPOSITORY https://github.com/snototter/werkzeugkiste.git
-    GIT_TAG refactor-cmake-init)
-FetchContent_MakeAvailable(werkzeugkiste)
-
-# Optionally print the available library version:
-message(STATUS "Using werkzeugkiste v${werkzeugkiste_VERSION}")
-```
-
-Afterwards, add it to your consuming executable/library via:
-```cmake
-target_link_libraries(
-    your_target PRIVATE
-    werkzeugkiste::werkzeugkiste
-)
-```
-
-*Note:* The `werkzeugkiste::werkzeugkiste` target is an _all-in-one_ target, _i.e._ it includes all utilities.
-Typically, you will only want to link against a specific utility target, _e.g._ `werkzeugkiste::geometry`.
-</details>
-
-For details on *building and installing* this library, refer to [BUILDING.md](BUILDING.md)
-
-## Contributing
-
-See the [CONTRIBUTING](CONTRIBUTING.md) document.
 
 
 # DEPRECATED - NOT YET MERGED 
