@@ -7,9 +7,8 @@
 #include <sstream>
 #include <cmath>
 
-namespace werkzeugkiste {
 /// Math utils for 2D/3D geometry.
-namespace geometry {
+namespace werkzeugkiste::geometry {
 
 //-----------------------------------------------------------------------------
 // Angle conversions.
@@ -48,7 +47,7 @@ inline bool _eps_zero(T x, std::true_type /* is_floating_point */) { // NOLINT
 /// Helper to check if the integral number x is zero.
 template <typename T>
 inline bool _eps_zero(T x, std::false_type /* is_floating_point */) { // NOLINT
-  return x == T(0);
+  return x == static_cast<T>(0);
 }
 
 
@@ -112,7 +111,7 @@ bool IsEpsEqual(T x, T y, unsigned int ulp=2) {
 /// Signum helper for unsigned types (to avoid compiler warnings).
 template <typename T> inline constexpr
 int _sgn(T x, std::false_type /*is_signed*/) {  // NOLINT
-  return T(0) < x;
+  return static_cast<T>(0) < x;
 }
 
 
@@ -120,7 +119,7 @@ int _sgn(T x, std::false_type /*is_signed*/) {  // NOLINT
 /// unsigned types).
 template <typename T> inline constexpr
 int _sgn(T x, std::true_type /*is_signed*/) {  // NOLINT
-   return (T(0) < x) - (x < T(0));
+   return (static_cast<T>(0) < x) - (x < static_cast<T>(0));
 }
 
 
@@ -136,7 +135,6 @@ int Sign(T x) {
   return _sgn(x, std::is_signed<T>());
 }
 
-} // namespace geometry
-} // namespace werkzeugkiste
+} // namespace werkzeugkiste::geometry
 
 #endif // WERKZEUGKISTE_GEOMETRY_UTILS_H

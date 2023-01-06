@@ -14,8 +14,7 @@
 #include <werkzeugkiste/geometry/vector.h>
 
 
-namespace werkzeugkiste {
-namespace geometry {
+namespace werkzeugkiste::geometry {
 
 //-----------------------------------------------------------------------------
 // Matrix definitions
@@ -324,7 +323,6 @@ Matrix<_Tp, 3, 3> RotationMatrix(
 
 // TODO(vcp) RotationMatrixToEulerAngles
 
-} // namespace geometry
-} // namespace werkzeugkiste
+} // namespace werkzeugkiste::geometry
 
 #endif // WERKZEUGKISTE_GEOMETRY_PROJECTION_H

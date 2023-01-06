@@ -11,8 +11,7 @@
 // TODO(snototter) nice-to-have: investigate potential speed up using string_view or C strings (i.e. const char *)
 // However, with newer compilers, at least the C strings version seems obsolete: https://stackoverflow.com/a/21946709
 
-namespace werkzeugkiste {
-namespace timing {
+namespace werkzeugkiste::timing {
 
 /// Internal tic/toc utilities not to be publicly exposed.
 namespace tictoc_ {
@@ -168,5 +167,4 @@ double TTocNanoseconds(const std::string &label) {
   return tictoc_::TToc<std::nano>(label);
 }
 
-}  // namespace timing
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::timing

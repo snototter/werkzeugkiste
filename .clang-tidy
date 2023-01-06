@@ -13,6 +13,8 @@ Checks: "*,\
   -modernize-use-nodiscard,\
   -modernize-use-trailing-return-type,\
   -cppcoreguidelines-pro-bounds-constant-array-index,\
+  -readability-identifier-length,\
+  -bugprone-easily-swappable-parameters,\
   -misc-non-private-member-variables-in-classes"
 WarningsAsErrors: ''
 CheckOptions:

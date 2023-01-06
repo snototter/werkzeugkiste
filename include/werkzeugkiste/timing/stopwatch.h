@@ -7,11 +7,11 @@
 #include <sstream>
 
 
-namespace werkzeugkiste {
-
 /// Stop watch & additional helpers on top of `std::chrono` (to hide
 /// some of its template boilerplate).
-namespace timing {
+namespace werkzeugkiste::timing {
+
+// NOLINTBEGIN(*-else-after-return)
 
 /// Returns the abbreviation for the given
 /// duration type, e.g. std::chrono::hours --> "hrs".
@@ -55,24 +55,27 @@ std::string DurationAbbreviation() {
 /// given clock type, e.g. "std::chrono::system_clock".
 template <typename Clock>
 std::string ClockTypeName() {
-  if (std::is_same<Clock, std::chrono::steady_clock>::value)
+  if (std::is_same<Clock, std::chrono::steady_clock>::value) {
     return "std::chrono::steady_clock";
-  else if (std::is_same<Clock, std::chrono::system_clock>::value)
+  } else if (std::is_same<Clock, std::chrono::system_clock>::value) {
     return "std::chrono::system_clock";
-  else if (std::is_same<Clock, std::chrono::high_resolution_clock>::value)  // Should just be an alias to system or steady (C++11), thus we should
-    return "std::chrono::high_resolution_clock";                            // never enter (doesn't hurt to include it either)
+  } else if (std::is_same<Clock, std::chrono::high_resolution_clock>::value) {
+    // The highres clock should just be an alias to system or steady (C++11),
+    // thus we should never enter (but it doesn't hurt to include it either).
+    return "std::chrono::high_resolution_clock";
 #if __cplusplus >= 202002L // C++20
-  else if (std::is_same<Clock, std::chrono::utc_clock>::value)
+  } else if (std::is_same<Clock, std::chrono::utc_clock>::value) {
     return "std::chrono::utc_clock";
-  else if (std::is_same<Clock, std::chrono::tai_clock>::value)
+  } else if (std::is_same<Clock, std::chrono::tai_clock>::value) {
     return "std::chrono::tai_clock";
-  else if (std::is_same<Clock, std::chrono::gps_clock>::value)
+  } else if (std::is_same<Clock, std::chrono::gps_clock>::value) {
     return "std::chrono::gps_clock";
-  else if (std::is_same<Clock, std::chrono::file_clock>::value)
+  } else if (std::is_same<Clock, std::chrono::file_clock>::value) {
     return "std::chrono::file_clock";
-  else if (std::is_same<Clock, std::chrono::local_t>::value)
+  } else if (std::is_same<Clock, std::chrono::local_t>::value) {
     return "std::chrono::local_t";
 #endif  // C++20
+  }
 
   std::ostringstream s;
   s << "Clock type \"" << typeid(Clock).name()
@@ -85,28 +88,29 @@ std::string ClockTypeName() {
 /// duration type, e.g. "std::chrono::nanoseconds".
 template <typename Duration>
 std::string PrecisionTypeName() {
-  if (std::is_same<Duration, std::chrono::nanoseconds>::value)
+  if (std::is_same<Duration, std::chrono::nanoseconds>::value) {
     return "std::chrono::nanoseconds";
-  else if (std::is_same<Duration, std::chrono::microseconds>::value)
+  } else if (std::is_same<Duration, std::chrono::microseconds>::value) {
     return "std::chrono::microseconds";
-  else if (std::is_same<Duration, std::chrono::milliseconds>::value)
+  } else if (std::is_same<Duration, std::chrono::milliseconds>::value) {
     return "std::chrono::milliseconds";
-  else if (std::is_same<Duration, std::chrono::seconds>::value)
+  } else if (std::is_same<Duration, std::chrono::seconds>::value) {
     return "std::chrono::seconds";
-  else if (std::is_same<Duration, std::chrono::minutes>::value)
+  } else if (std::is_same<Duration, std::chrono::minutes>::value) {
     return "std::chrono::minutes";
-  else if (std::is_same<Duration, std::chrono::hours>::value)
+  } else if (std::is_same<Duration, std::chrono::hours>::value) {
     return "std::chrono::hours";
 #if __cplusplus >= 202002L // C++20
-  else if (std::is_same<Duration, std::chrono::days>::value)
+  } else if (std::is_same<Duration, std::chrono::days>::value) {
     return "std::chrono::days";
-  else if (std::is_same<Duration, std::chrono::weeks>::value)
+  } else if (std::is_same<Duration, std::chrono::weeks>::value) {
     return "std::chrono::weeks";
-  else if (std::is_same<Duration, std::chrono::months>::value)
+  } else if (std::is_same<Duration, std::chrono::months>::value) {
     return "std::chrono::months";
-  else if (std::is_same<Duration, std::chrono::years>::value)
+  } else if (std::is_same<Duration, std::chrono::years>::value) {
     return "std::chrono::years";
 #endif  // C++20
+  }
 
   std::ostringstream s;
   s << "Duration type \"" << typeid(Duration).name()
@@ -115,41 +119,44 @@ std::string PrecisionTypeName() {
 }
 
 
+// NOLINTEND(*-else-after-return)
+
+
 /// Returns the number of ticks for the given
 /// std::chrono::duration with a different precision.
-template<typename _DurationFrom, typename _DurationTo>
-inline double CastToTicks(const _DurationFrom &duration) {
+template<typename DurationFrom, typename DurationTo> inline constexpr
+double CastToTicks(const DurationFrom &duration) {
   // Floating-point duration requires no explicit duration_cast
   // https://en.cppreference.com/w/cpp/chrono/duration/duration_cast
-  const std::chrono::duration<double, typename _DurationTo::period> target(duration);
+  const std::chrono::duration<double, typename DurationTo::period> target(duration);
   return target.count();
 }
 
 
 /// Returns the number of seconds for the given std::chrono::duration.
-template<typename Duration>
-inline double ToSeconds(const Duration &duration) {
+template<typename Duration> inline constexpr
+double ToSeconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::seconds>(duration);
 }
 
 
 /// Returns the number of milliseconds for the given std::chrono::duration.
-template<typename Duration>
-inline double ToMilliseconds(const Duration &duration) {
+template<typename Duration> inline constexpr
+double ToMilliseconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::milliseconds>(duration);
 }
 
 
 /// Returns the number of microseconds for the given std::chrono::duration.
-template<typename Duration>
-inline double ToMicroseconds(const Duration &duration) {
+template<typename Duration> inline constexpr
+double ToMicroseconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::microseconds>(duration);
 }
 
 
 /// Returns the number of nanoseconds for the given std::chrono::duration.
-template<typename Duration>
-inline double ToNanoseconds(const Duration &duration) {
+template<typename Duration> inline constexpr
+double ToNanoseconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::nanoseconds>(duration);
 }
 
@@ -201,11 +208,11 @@ class stop_watch {
   /// is a rational fraction - std::ratio - representing the
   /// time in seconds from one tick to the next, i.e. similar
   /// to the Period template parameter in ``std::chrono::duration``).
-  template<typename _ratio>
+  template<typename Ratio>
   double ElapsedAs() const {
     const auto t_end = clock_type::now();
     // Floating-point duration requires no explicit duration_cast
-    const std::chrono::duration<double, _ratio> duration = t_end - t_start_;
+    const std::chrono::duration<double, Ratio> duration = t_end - t_start_;
     return duration.count();
   }
 
@@ -240,7 +247,8 @@ class stop_watch {
     const auto duration_hrs =
         std::chrono::duration_cast<std::chrono::hours>(clock_type::time_point::max() - clock_type::now());
     // Convert to years, similar to C++20's std::chrono::years definition
-    return static_cast<double>(duration_hrs.count()) / 8765.82;  // = 24 * 365.2425
+    constexpr double hrs_per_year = 8765.82; // = 24 * 365.2425
+    return static_cast<double>(duration_hrs.count()) / hrs_per_year;
   }
 
 
@@ -264,7 +272,6 @@ class stop_watch {
 
 using StopWatch = stop_watch<std::chrono::steady_clock>;
 
-}  // namespace timing
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::timing
 
 #endif  // WERKZEUGKISTE_TIMING_STOPWATCH_H

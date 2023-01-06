@@ -8,11 +8,9 @@
 #include <vector>
 
 
-namespace werkzeugkiste {
-
 /// Common string manipulation & checks. The kind you've
 /// already re-implemented/copied at least a dozen times.
-namespace strings {
+namespace werkzeugkiste::strings {
 
 /// Returns true if the string ends with the given suffix.
 inline constexpr
@@ -200,7 +198,6 @@ std::string Indent(
     std::size_t n,
     char character=' ');
 
-} // namespace strings
-} // namespace werkzeugkiste
+} // namespace werkzeugkiste::strings
 
 #endif  // WERKZEUGKISTE_STRINGS_STRINGS_H

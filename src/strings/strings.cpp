@@ -8,8 +8,7 @@
 #include <werkzeugkiste/strings/strings.h>
 #include <werkzeugkiste_macros.h>
 
-namespace werkzeugkiste {
-namespace strings {
+namespace werkzeugkiste::strings {
 
 namespace slug_utils {
 //TODO should we use char32_t instead?
@@ -104,19 +103,21 @@ std::string Trim(std::string_view s) {
 
 
 bool IsNumeric(const std::string &s) {
+  //TODO replace by std::stoll
   bool is_numeric{false};
   if (s.length() > 0) {
-    char *pd, *pl;
-
     // Check long long
-    int64_t dummyl = strtoll(s.c_str(), &pl, 10);
+    char *pl_end{};
+    // NOLINTNEXTLINE(*-magic-numbers)
+    int64_t dummyl = strtoll(s.c_str(), &pl_end, 10);
     WERKZEUGKISTE_UNUSED_VAR(dummyl);
 
     // Check double
-    double dummyd = strtod(s.c_str(), &pd);
+    char *pd_end{};
+    double dummyd = strtod(s.c_str(), &pd_end);
     WERKZEUGKISTE_UNUSED_VAR(dummyd);
 
-    is_numeric = (*pd == 0) || (*pl == 0);
+    is_numeric = (*pd_end == 0) || (*pl_end == 0);
   }
   return is_numeric;
 }
@@ -185,7 +186,8 @@ bool GetUrlProtocol(
 
 std::string ObscureUrlAuthentication(
     const std::string &url) {
-  std::string protocol, clipped;
+  std::string protocol;
+  std::string clipped;
   const bool has_protocol = GetUrlProtocol(
         url, protocol, clipped);
 
@@ -194,7 +196,7 @@ std::string ObscureUrlAuthentication(
     return url;
   }
 
-  const std::string obscured = "<auth>" + clipped.substr(at_pos);
+  std::string obscured = "<auth>" + clipped.substr(at_pos);
   if (has_protocol) {
     return protocol + obscured;
   }
@@ -203,7 +205,8 @@ std::string ObscureUrlAuthentication(
 
 
 std::string ClipUrl(const std::string &url) {
-  std::string protocol, clipped;
+  std::string protocol;
+  std::string clipped;
   const bool has_protocol = GetUrlProtocol(
         url, protocol, clipped);
 
@@ -347,5 +350,4 @@ std::string Indent(
   return out;
 }
 
-}  // namespace strings
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::strings

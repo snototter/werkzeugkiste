@@ -11,8 +11,7 @@
 #include <werkzeugkiste/geometry/primitives.h>
 
 
-namespace werkzeugkiste {
-namespace geometry {
+namespace werkzeugkiste::geometry {
 
 //-----------------------------------------------------------------------------
 // Camera projection matrix
@@ -247,7 +246,6 @@ bool ProjectsPointOntoImage(
 // ProjectsOntoImage(Vec3d pt, P, image_size, Vec2d *projected)
 
 
-} // namespace geometry
-} // namespace werkzeugkiste
+} // namespace werkzeugkiste::geometry
 
 #endif // WERKZEUGKISTE_GEOMETRY_PROJECTION_H

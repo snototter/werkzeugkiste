@@ -4,8 +4,7 @@
 #include <chrono>  // NOLINT [build/c++11]
 #include <string>
 
-namespace werkzeugkiste {
-namespace timing {
+namespace werkzeugkiste::timing {
 /// @brief Set output format for the toc_xxx() functions.
 ///
 /// @param print_labels_aligned If true, all timer labels
@@ -92,9 +91,10 @@ double TTocMicroseconds(const std::string &label = std::string());
 /// @param label Label of the corresponding @see tic() call.
 double TTocNanoseconds(const std::string &label = std::string());
 
-}  // namespace timing
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::timing
 
+
+//NOLINTBEGIN(*-macro-usage)
 
 /// Preprocessor macros to:
 ///   a) easily use TIC/TOC and
@@ -121,5 +121,7 @@ double TTocNanoseconds(const std::string &label = std::string());
 #  define TOC_NS(...)   werkzeugkiste::timing::TocNanoseconds(__VA_ARGS__)
 #  define TTOC_NS(...)  werkzeugkiste::timing::TTocNanoseconds(__VA_ARGS__)
 #endif  // NO_TICTOC
+
+//NOLINTEND(*-macro-usage)
 
 #endif  // WERKZEUGKISTE_TIMING_TICTOC_H

@@ -1,8 +1,7 @@
 #include <sstream>
 #include <werkzeugkiste/timing/stopwatch.h>
 
-namespace werkzeugkiste {
-namespace timing {
+namespace werkzeugkiste::timing {
 
 // Explicit template instantiation
 template class stop_watch<std::chrono::steady_clock>;
@@ -57,5 +56,4 @@ std::string SecondsToString(unsigned int seconds) {
   return str.str();
 }
 
-}  // namespace timing
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::timing

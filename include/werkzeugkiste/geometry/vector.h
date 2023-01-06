@@ -11,8 +11,7 @@
 
 #include <werkzeugkiste/geometry/utils.h>
 
-namespace werkzeugkiste {
-namespace geometry {
+namespace werkzeugkiste::geometry {
 
 //------------------------------------------------- Vectors/Coordinates
 
@@ -220,7 +219,7 @@ class Vec {
 
 
   /// Holds the values of this vector.
-  T val[Dim];  // NOLINT
+  T val[static_cast<std::size_t>(Dim)];  // NOLINT
 
 
   //------------------------------------------------- Arithmetics
@@ -492,7 +491,7 @@ void MinMaxCoordinates(
     }
   }
 }
-} // namespace geometry
-} // namespace werkzeugkiste
+
+} // namespace werkzeugkiste::geometry
 
 #endif // WERKZEUGKISTE_GEOMETRY_VECTOR_H

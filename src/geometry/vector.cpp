@@ -541,5 +541,4 @@ template Vec3i operator*(double scale, Vec3i rhs);
 template Vec3i operator/(Vec3i lhs, double scale);
 template double LengthPolygon(const std::vector<Vec3i> &points);
 
-
 } // namespace werkzeugkiste::geometry
