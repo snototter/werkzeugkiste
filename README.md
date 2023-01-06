@@ -31,8 +31,9 @@ separate [BUILDING](BUILDING.md) document.
 <summary>The <b>recommended way</b> to include <tt>werkzeugkiste</tt> in your C++
 project is via CMake's <tt>FetchContent</tt>:</summary>
 
-Since v3.14, CMake provides the [functionality][9] to set up an external
-dependency as simple as:
+
+Since v3.14, CMake provides [_FetchContent_MakeAvailable_][9], which allows us
+to easily set up `werkzeugkiste` in your CMake project as:
 ```cmake
 # Fetch the library:
 include(FetchContent)
