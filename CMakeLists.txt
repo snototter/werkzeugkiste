@@ -344,6 +344,7 @@ set_target_properties(
     SOVERSION "${PROJECT_VERSION_MAJOR}"
     EXPORT_NAME werkzeugkiste
     OUTPUT_NAME werkzeugkiste-werkzeugkiste
+    LINKER_LANGUAGE CXX
 )
 
 target_include_directories(

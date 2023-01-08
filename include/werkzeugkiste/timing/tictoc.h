@@ -4,6 +4,8 @@
 #include <chrono>  // NOLINT [build/c++11]
 #include <string>
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 namespace werkzeugkiste::timing {
 /// @brief Set output format for the toc_xxx() functions.
 ///
@@ -16,6 +18,7 @@ namespace werkzeugkiste::timing {
 ///
 /// @param number_precision If > 0, defines the decimal
 ///            precision for displaying time measurements.
+WERKZEUGKISTE_EXPORT
 void SetTocFormat(
     bool print_labels_aligned=false,
     int fixed_number_width=0,
@@ -31,64 +34,75 @@ void SetTocFormat(
 /// With mute() you still "suffer" from unnecessary function call
 /// overheads, whereas with NO_TICTOC all function calls would be
 /// eliminated.
+WERKZEUGKISTE_EXPORT
 void MuteToc();
 
 
 /// @brief Unmute, i.e. future toc_xxx calls will display the elapsed time again.
+WERKZEUGKISTE_EXPORT
 void UnmuteToc();
 
 
 /// @brief Starts (or restarts) a @see StopWatch
 ///
 /// @param label You can specify a label to differentiate multiple StopWatches.
+WERKZEUGKISTE_EXPORT
 void Tic(const std::string &label = std::string());
 
 
 /// @brief Displays the elapsed time in seconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 void TocSeconds(const std::string &label = std::string());
 
 
 /// @brief Displays the elapsed time in milliseconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 void TocMilliseconds(const std::string &label = std::string());
 
 
 /// @brief Displays the elapsed time in microseconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 void TocMicroseconds(const std::string &label = std::string());
 
 
 /// @brief Displays the elapsed time in nanoseconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 void TocNanoseconds(const std::string &label = std::string());
 
 
 /// @brief Returns the elapsed time in seconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 double TTocSeconds(const std::string &label = std::string());
 
 
 /// @brief Returns the elapsed time in milliseconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 double TTocMilliseconds(const std::string &label = std::string());
 
 
 /// @brief Returns the elapsed time in microseconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 double TTocMicroseconds(const std::string &label = std::string());
 
 
 /// @brief Returns the elapsed time in nanoseconds.
 ///
 /// @param label Label of the corresponding @see tic() call.
+WERKZEUGKISTE_EXPORT
 double TTocNanoseconds(const std::string &label = std::string());
 
 }  // namespace werkzeugkiste::timing

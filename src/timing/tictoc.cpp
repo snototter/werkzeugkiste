@@ -13,6 +13,10 @@
 
 namespace werkzeugkiste::timing {
 
+// TODO change to singleton
+// protect tic by mutex guard
+// multi-threaded read (toc) is fine - handled by the stl
+
 /// Internal tic/toc utilities not to be publicly exposed.
 namespace tictoc_internals {
 

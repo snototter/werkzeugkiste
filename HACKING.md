@@ -1,5 +1,20 @@
 # Hacking
 
+<!-- TODO update document
+check exported symbols of shared libs:
+readelf -s libwerkzeugkiste-timing.so
+objdump -T --demangle libwerkzeugkiste-timing.so
+
+TODO fix werkzeugkiste.so - should link/refer to all sub-libs somehow (?)
+
+ldd examples/timing
+
+TODO rename examples and tests
+executables should be:
+example-timing
+tests, e.g. test-timing (or are they derived from the filename - thus, underscore is a must)
+-->
+
 Here is some wisdom to help you build and test this project as a developer and
 potential contributor.
 
