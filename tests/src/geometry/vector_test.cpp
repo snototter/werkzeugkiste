@@ -13,6 +13,28 @@ namespace wkg = werkzeugkiste::geometry;
 
 // NOLINTBEGIN
 
+
+template<typename T>
+void TestVec2dSpecialties(wkg::Vec<T, 2> &vec) {
+  auto perpendicular = vec.PerpendicularClockwise();
+  EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), vec.Y()));
+  EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.Y(), -vec.X()));
+
+  perpendicular = vec.PerpendicularCounterClockwise();
+  EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), -vec.Y()));
+  EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.Y(), vec.X()));
+}
+
+
+template<typename T, int Dim>
+void Test2dSpecials(wkg::Vec<T, Dim> &vec) {
+  if constexpr (Dim == 2) {
+    TestVec2dSpecialties<T>(vec);
+  }
+}
+
+
+
 template<typename _Tp, int dim>
 void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
   EXPECT_GE(dim, 2);
@@ -21,6 +43,10 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
   for (int i = 0; i < dim; ++i) {
     EXPECT_EQ(vec.val[dim - i - 1], vec[-(i+1)]);
   }
+
+  EXPECT_EQ(-vec, -1 * vec); //TODO
+
+  Test2dSpecials(vec);
 
   // Check usage as 2d size representation
   if (dim == 2) {

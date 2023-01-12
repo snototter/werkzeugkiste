@@ -54,7 +54,7 @@ Vec<T, Dim>::Vec(T x, T y, T z, T w) {
 template<typename T, int Dim>
 Vec<T, Dim>::Vec(std::initializer_list<T> values) {
   if ((values.size() != 0) &&
-      (values.size() != static_cast<size_t>(Dim))) {
+      (values.size() != static_cast<std::size_t>(Dim))) {
     std::ostringstream s;
     s << "You cannot initialize " << TypeName()
       << " with " << values.size() << " values. The initializer list must"

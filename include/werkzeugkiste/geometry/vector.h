@@ -54,7 +54,8 @@ class Vec {
 
   /// Allow implicitly casting each vector to its
   /// double-precision counterpart.
-  operator Vec<double, Dim>() const;  // NOLINT
+  operator Vec<double, Dim>() const;
+  //TODO make explicit
 
 
   /// Returns the homogeneous representation of this vector, *i.e.* the vector
@@ -219,7 +220,7 @@ class Vec {
 
 
   /// Holds the values of this vector.
-  T val[static_cast<std::size_t>(Dim)];  // NOLINT
+  T val[static_cast<std::size_t>(Dim)] = {0};
 
 
   //------------------------------------------------- Arithmetics
@@ -283,6 +284,22 @@ class Vec {
 
   /// Returns the unit vector.
   Vec<double, Dim> UnitVector() const;
+
+//  //TODO fix return types (unit/length/normalized, etc --> floating point type)
+//  //TODO Clock-wise if right-handed coordinate system
+  template<typename _Tp = T>
+  const Vec<typename std::enable_if<(Dim == 2), _Tp>::type, Dim>
+  PerpendicularClockwise() const {
+    return Vec<T, Dim>{Y(), -X()};
+//    return Vec<T, Dim>{val[1], -val[0]};
+  }
+
+
+  template<typename _Tp = T>
+  const Vec<typename std::enable_if<(Dim == 2), _Tp>::type, Dim>
+  PerpendicularCounterClockwise() const {
+    return Vec<T, Dim>{-Y(), X()};
+  }
 
 
   /// Returns a human-readable string representation.
