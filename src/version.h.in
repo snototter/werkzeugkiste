@@ -1,14 +1,17 @@
 #ifndef WERKZEUGKISTE_VERSION_H
 #define WERKZEUGKISTE_VERSION_H
 
-//NOLINTBEGIN(*-macro-usage)
+#include<string>
 
-#define WERKZEUGKISTE_VERSION  "@PROJECT_VERSION@"
-#define WERKZEUGKISTE_VERSION_MAJOR "@PROJECT_VERSION_MAJOR@"
-#define WERKZEUGKISTE_VERSION_MINOR "@PROJECT_VERSION_MINOR@"
-#define WERKZEUGKISTE_VERSION_PATCH "@PROJECT_VERSION_PATCH@"
+namespace werkzeugkiste {
 
-//NOLINTEND(*-macro-usage)
+inline constexpr unsigned VERSION_MAJOR = @PROJECT_VERSION_MAJOR@;
+inline constexpr unsigned VERSION_MINOR = @PROJECT_VERSION_MINOR@;
+inline constexpr unsigned VERSION_PATCH = @PROJECT_VERSION_PATCH@;
+
+inline const std::string VERSION = "@PROJECT_VERSION@";
+
+}  // namespace werkzeugkiste
 
 #endif  // WERKZEUGKISTE_VERSION_H
 

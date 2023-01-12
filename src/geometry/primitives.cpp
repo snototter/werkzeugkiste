@@ -32,7 +32,7 @@ Circle_<T>::Circle_(
     if (exists) {
     //FIXME warn that intersection of the bisecting lines does not exist (most
     //  likely due to numerical issue)
-      radius_ = p.Distance(center_);
+      radius_ = p.DistanceEuclidean(center_);
     }
   }
 }
@@ -41,7 +41,7 @@ Circle_<T>::Circle_(
 template <typename T>
 bool Circle_<T>::IsPointInCircle(
     const vec_type &pt, bool *is_on_circle) const {
-  const double distance = pt.Distance(center_);
+  const double distance = pt.DistanceEuclidean(center_);
 
   bool in_circle {false};
 
@@ -107,7 +107,7 @@ int Circle_<T>::PointsOfTangency(
 
   if (pot1 || pot2) {
     // Pythagoras
-    const double hypotenuse = pt.Distance(center_);
+    const double hypotenuse = pt.DistanceEuclidean(center_);
     const double radius_sqr = radius_ * radius_;
     const double distance = std::sqrt((hypotenuse * hypotenuse) - radius_sqr);
 
@@ -156,7 +156,7 @@ int Circle_<T>::DirectCommonTangents(
     return 0;
   }
 
-  const double center_distance = center_.Distance(other.center_);
+  const double center_distance = center_.DistanceEuclidean(other.center_);
   if (center_distance < std::fabs(radius_ - other.radius_)) {
     // C1 is inside C2 (or vice versa) and they don't touch.
     return 0;
@@ -228,7 +228,7 @@ template <typename T>
 int Circle_<T>::TransverseCommonTangents(
     const Circle_<T> &other, Line2d_<T> *tangent1,
     Line2d_<T> *tangent2) const {
-  const double distance = center_.Distance(other.center_);
+  const double distance = center_.DistanceEuclidean(other.center_);
   const double sum_radii = radius_ + other.radius_;
 
   if (distance < sum_radii) {
@@ -263,7 +263,7 @@ int Circle_<T>::TransverseCommonTangents(
     // https://doubleroot.in/lessons/coordinate-geometry-basics/section-formula/
 
     // Pythagoras
-    const double hypotenuse = intersection.Distance(center_);
+    const double hypotenuse = intersection.DistanceEuclidean(center_);
     const double radius1_sqr = radius_ * radius_;
     // Euclid (German "Kathetensatz"):
     const double q = radius1_sqr / hypotenuse;
@@ -309,7 +309,7 @@ template <typename T>
 int Circle_<T>::IntersectionCircleCircle(
     const Circle_<T> &other, vec_type *intersection1,
     vec_type *intersection2) const {
-  const double distance = center_.Distance(other.center_);
+  const double distance = center_.DistanceEuclidean(other.center_);
 
   // Are the circles the same?
   if (IsEpsZero(distance) && IsEpsEqual(radius_, other.radius_)) {

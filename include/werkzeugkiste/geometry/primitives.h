@@ -289,14 +289,14 @@ public:
   /// Returns the minimum distance between the point and this line.
   inline double DistancePointToLine(const vec_type &point) const {
     const vec_type closest_point = ClosestPointOnLine(point);
-    return point.Distance(closest_point);
+    return point.DistanceEuclidean(closest_point);
   }
 
 
   /// Returns the minimum distance between the point and this segment.
   inline double DistancePointToSegment(const vec_type &point) const {
     const vec_type closest = ClosestPointOnSegment(point);
-    return closest.Distance(point);
+    return closest.DistanceEuclidean(point);
   }
 
 
@@ -345,8 +345,7 @@ public:
 
   /// Clips this line(!) such that only the part within the rectangle
   /// remains, check via `IsValid()` afterwards.
-  Line2d_<T> ClipLineByRectangle(
-      const vec_type &top_left, const vec_type &size) const;
+  Line2d_<T> ClipLineByRectangle(const vec_type &top_left, const vec_type &size) const;
 
 
   /// Clips this line segment(!) such that only the part within the rectangle
@@ -508,14 +507,14 @@ public:
   /// Returns the minimum distance between the point and this line.
   inline double DistancePointToLine(const vec_type &point) const {
     const vec_type closest_point = ClosestPointOnLine(point);
-    return point.Distance(closest_point);
+    return point.DistanceEuclidean(closest_point);
   }
 
 
   /// Returns the minimum distance between the point and this segment.
   inline double DistancePointToSegment(const vec_type &point) const {
     const vec_type closest = ClosestPointOnSegment(point);
-    return closest.Distance(point);
+    return closest.DistanceEuclidean(point);
   }
 
 

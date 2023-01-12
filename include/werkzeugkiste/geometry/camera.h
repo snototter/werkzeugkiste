@@ -203,7 +203,8 @@ Line2d GetProjectionOfHorizon(
 
     Line2d horizon(prj1, prj2);
     if ((image_size.Width() > 0) && (image_size.Height() > 0)) {
-      return horizon.ClipLineByRectangle({0, 0}, image_size).LeftToRight();
+      return horizon.ClipLineByRectangle(
+            {0, 0}, static_cast<Line2d::vec_type>(image_size)).LeftToRight();
     } else {
       return horizon.LeftToRight();
     }

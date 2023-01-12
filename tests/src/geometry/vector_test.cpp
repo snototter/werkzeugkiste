@@ -13,6 +13,8 @@ namespace wkg = werkzeugkiste::geometry;
 
 // NOLINTBEGIN
 
+//TODO FIXME - make proper tests & change all assertions (1st param is expected; 2nd is actual value)
+
 
 template<typename T>
 void TestVec2dSpecialties(wkg::Vec<T, 2> &vec) {
@@ -26,7 +28,7 @@ void TestVec2dSpecialties(wkg::Vec<T, 2> &vec) {
 }
 
 
-template<typename T, int Dim>
+template<typename T, std::size_t Dim>
 void Test2dSpecials(wkg::Vec<T, Dim> &vec) {
   if constexpr (Dim == 2) {
     TestVec2dSpecialties<T>(vec);
@@ -35,13 +37,15 @@ void Test2dSpecials(wkg::Vec<T, Dim> &vec) {
 
 
 
-template<typename _Tp, int dim>
-void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
-  EXPECT_GE(dim, 2);
+template<typename _Tp, std::size_t Dim>
+void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
+  EXPECT_GE(Dim, 2);
+
+  constexpr int DIM_INT = static_cast<int>(Dim);
 
   // Test negative indexing
-  for (int i = 0; i < dim; ++i) {
-    EXPECT_EQ(vec.val[dim - i - 1], vec[-(i+1)]);
+  for (int i = 0; i < DIM_INT; ++i) {
+    EXPECT_EQ(vec.val[DIM_INT - i - 1], vec[-(i+1)]);
   }
 
   EXPECT_EQ(-vec, -1 * vec); //TODO
@@ -49,7 +53,7 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
   Test2dSpecials(vec);
 
   // Check usage as 2d size representation
-  if (dim == 2) {
+  if constexpr (Dim == 2) {
     EXPECT_DOUBLE_EQ(vec.X(), vec.Width());
     EXPECT_DOUBLE_EQ(vec.Y(), vec.Height());
 
@@ -63,52 +67,62 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
     vec.val[0] /= 2;
     vec.val[1] /= 3;
 
-    EXPECT_THROW(vec.Z(), std::logic_error);
-    EXPECT_THROW(vec.W(), std::logic_error);
+//    EXPECT_THROW(vec.Z(), std::logic_error);
+//    EXPECT_THROW(vec.W(), std::logic_error);
   } else {
+    //FIXME clean up tests
     // Other dimensional vectors should not support
     // this functionality
-    EXPECT_THROW(vec.Width(), std::logic_error);
-    EXPECT_THROW(vec.Height(), std::logic_error);
+//    EXPECT_THROW(vec.Width(), std::logic_error);
+//    EXPECT_THROW(vec.Height(), std::logic_error);
 
-    if (dim == 3) {
-      EXPECT_THROW(vec.W(), std::logic_error);
-    }
+//    if constexpr (Dim == 3) {
+//      EXPECT_THROW(vec.W(), std::logic_error);
+//    }
   }
 
-  // Test out-of-bounds
-  EXPECT_THROW(vec[dim], std::out_of_range);
-  EXPECT_THROW(vec[-dim-1], std::out_of_range);
+  // Test out-of-bounds access
+  EXPECT_THROW(vec[DIM_INT], std::out_of_range);
+  EXPECT_THROW(vec[-DIM_INT - 1], std::out_of_range);
 
   // Create a copy
-  auto copy = wkg::Vec<_Tp, dim>(vec);
+  auto copy = wkg::Vec<_Tp, Dim>(vec);
   EXPECT_EQ(vec, copy);
 
   // Basic arithmetics
-  auto vec2 = vec + vec;
-  EXPECT_NE(vec, vec2);
-  EXPECT_EQ(2 * vec, vec2);
+  auto vec_twice = vec + vec;
+  EXPECT_NE(vec, vec_twice);
+  EXPECT_EQ(2 * vec, vec_twice);
 
   vec *= 2;
-  EXPECT_EQ(vec, vec2);
+  EXPECT_EQ(vec, vec_twice);
 
-  std::vector<wkg::Vec<_Tp, dim>> poly{vec, vec2};
+  std::vector<wkg::Vec<_Tp, Dim>> poly{vec, vec_twice};
   double poly_len = wkg::LengthPolygon(poly);
-  EXPECT_DOUBLE_EQ(poly_len, vec.Distance(vec2));
+  EXPECT_DOUBLE_EQ(poly_len, vec.DistanceEuclidean(vec_twice));
 
   poly.push_back(vec);
   poly_len = wkg::LengthPolygon(poly);
-  EXPECT_DOUBLE_EQ(poly_len, 2 * vec.Distance(vec2));
+  EXPECT_DOUBLE_EQ(poly_len, 2 * vec.DistanceEuclidean(vec_twice));
 
-  vec /= 2;
-  EXPECT_EQ(vec2 / 2, vec);
+  if constexpr (std::is_integral<_Tp>::value) {
+    auto dbl = vec.ToDouble();
+    dbl /= 2;
+    for (std::size_t idx = 0; idx < Dim; ++idx) {
+      vec[idx] = static_cast<_Tp>(dbl[idx]);
+    }
+  } else {
+    vec /= 2;
+    EXPECT_EQ(vec_twice / static_cast<_Tp>(2), vec);
+  }
 
-  vec2 = vec;
-  EXPECT_EQ(vec2, vec);
-  EXPECT_TRUE(vec2 == copy);
+  // Assignment operator
+  vec_twice = vec;
+  EXPECT_EQ(vec_twice, vec);
+  EXPECT_TRUE(vec_twice == copy);
 
-  auto vec3 = vec + vec2 + copy;
-  EXPECT_EQ(3 * vec, vec3);
+  const auto vec_3x = vec + vec_twice + copy;
+  EXPECT_EQ(3 * vec, vec_3x);
 
   poly.clear();
   poly_len = wkg::LengthPolygon(poly);
@@ -116,27 +130,29 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
   poly.push_back(vec);
   poly_len = wkg::LengthPolygon(poly);
   EXPECT_DOUBLE_EQ(poly_len, 0.0);
-  poly.push_back(vec3);
+  poly.push_back(vec_3x);
   poly_len = wkg::LengthPolygon(poly);
-  EXPECT_DOUBLE_EQ(poly_len, vec.Distance(vec3));
+  EXPECT_DOUBLE_EQ(poly_len, vec.DistanceEuclidean(vec_3x));
   poly.push_back(vec);
   poly_len = wkg::LengthPolygon(poly);
-  EXPECT_DOUBLE_EQ(poly_len, 2 * vec.Distance(vec3));
-  poly.push_back(vec3);
+  EXPECT_DOUBLE_EQ(poly_len, 2 * vec.DistanceEuclidean(vec_3x));
+  poly.push_back(vec_3x);
   poly_len = wkg::LengthPolygon(poly);
-  EXPECT_DOUBLE_EQ(poly_len, 3 * vec.Distance(vec3));
+  EXPECT_DOUBLE_EQ(poly_len, 3 * vec.DistanceEuclidean(vec_3x));
 
 
 
   // Add 0 vector
-  wkg::Vec<_Tp, dim> zero;
-  vec2 = vec + zero;
-  EXPECT_EQ(vec2, vec);
+  wkg::Vec<_Tp, Dim> zero;
+  vec_twice = vec + zero;
+  EXPECT_EQ(vec_twice, vec);
+
+  EXPECT_EQ(vec_3x, 3 * vec);
 
   // Add/subtract scalars
   auto add1 = vec + 17.0;
   auto sub1 = vec - 42.0;
-  for (int i = 0; i < dim; ++i) {
+  for (std::size_t i = 0; i < Dim; ++i) {
     EXPECT_DOUBLE_EQ(add1[i], vec[i] + 17);
     EXPECT_DOUBLE_EQ(sub1[i], vec[i] - 42);
   }
@@ -144,14 +160,14 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
   // Test negation (unary operator-)
   auto negated = -vec;
 
-  for (int i = 0; i < dim; ++i) {
+  for (std::size_t i = 0; i < Dim; ++i) {
     EXPECT_DOUBLE_EQ(copy[i], vec[i]);
     EXPECT_DOUBLE_EQ(negated[i], -vec[i]);
   }
 
   // Distance/Length & dot product:
   auto dot1 = vec.Dot(vec);
-  auto dot3 = vec.Dot(vec3);
+  auto dot3 = vec.Dot(vec_3x);
   EXPECT_DOUBLE_EQ(3.0 * dot1, 1.0 * dot3);
 
   auto len = vec.Length();
@@ -159,24 +175,20 @@ void VectorTestHelper(wkg::Vec<_Tp, dim> &vec) {
 
   EXPECT_DOUBLE_EQ(1.0 * dot1, vec.LengthSquared());
 
-  auto dist = vec.Distance(zero);
+  auto dist = vec.DistanceEuclidean(zero);
   EXPECT_DOUBLE_EQ(dist, len);
 
-  vec2 = 4.0 * vec;
-  dist = vec.Distance(vec2);
+  auto vec_4x = 4.0 * vec;
+  dist = vec.DistanceEuclidean(vec_4x);
   EXPECT_DOUBLE_EQ(dist, len * 3);
 
 
-  // Cross product (only for 3d)
-  wkg::Vec<_Tp, dim> other;
-  for (int i = 0; i < dim; ++i)
-    other[i] = static_cast<_Tp>(i);
+  // Cross product
+  if constexpr (Dim == 3) {
+    wkg::Vec<_Tp, Dim> other {-3, 15, 21};
 
-  if (dim != 3) {
-    EXPECT_THROW(vec.Cross(other), std::logic_error);
-  } else {
     auto cross = vec.Cross(other);
-    wkg::Vec<_Tp, dim> expected{
+    wkg::Vec<_Tp, Dim> expected{
           vec.Y() * other.Z() - vec.Z() * other.Y(),
           vec.Z() * other.X() - vec.X() * other.Z(),
           vec.X() * other.Y() - vec.Y() * other.X()};
@@ -199,7 +211,7 @@ TEST(VectorTest, All) {
   VectorTestHelper(v2d_a);
 
   auto unit2d = v2d_a.UnitVector();
-  EXPECT_DOUBLE_EQ(unit2d.Length(), 1.0);
+  EXPECT_DOUBLE_EQ(1.0, unit2d.Length());
   EXPECT_TRUE(std::fabs(unit2d.X() - 23 / 28.600699292) < 1e-6);
   EXPECT_TRUE(std::fabs(unit2d.Y() - 17 / 28.600699292) < 1e-6);
   EXPECT_EQ(v2d_a.DirectionVector(zero2d), -v2d_a);

@@ -267,13 +267,16 @@ ProjectToVec(
 // Rotation utilities
 
 /// Returns the 3x3 rotation matrix, rotating around the x-axis.
-template <typename _Tp> inline constexpr
-Matrix<_Tp, 3, 3> RotationX(double angle, bool angle_in_deg) {
-  const double rad = angle_in_deg ? Deg2Rad(angle) : angle;
-  const double ct = std::cos(rad);
-  const double st = std::sin(rad);
+template <typename Tp> inline constexpr
+Matrix<Tp, 3, 3> RotationX(Tp angle, bool angle_in_deg) {
+  static_assert(
+      std::is_floating_point<Tp>::value,
+      "Template type must be floating point!");
+  const Tp rad = angle_in_deg ? Deg2Rad(angle) : angle;
+  const Tp ct = std::cos(rad);
+  const Tp st = std::sin(rad);
 
-  Matrix<_Tp, 3, 3> R;
+  Matrix<Tp, 3, 3> R;
   R << 1.0, 0.0, 0.0,
        0.0,  ct, -st,
        0.0,  st,  ct;
@@ -282,13 +285,16 @@ Matrix<_Tp, 3, 3> RotationX(double angle, bool angle_in_deg) {
 
 
 /// Returns the 3x3 rotation matrix, rotating around the y-axis.
-template <typename _Tp> inline constexpr
-Matrix<_Tp, 3, 3> RotationY(double angle, bool angle_in_deg) {
-  const double rad = angle_in_deg ? Deg2Rad(angle) : angle;
-  const double ct = std::cos(rad);
-  const double st = std::sin(rad);
+template <typename Tp> inline constexpr
+Matrix<Tp, 3, 3> RotationY(Tp angle, bool angle_in_deg) {
+  static_assert(
+      std::is_floating_point<Tp>::value,
+      "Template type must be floating point!");
+  const Tp rad = angle_in_deg ? Deg2Rad(angle) : angle;
+  const Tp ct = std::cos(rad);
+  const Tp st = std::sin(rad);
 
-  Matrix<_Tp, 3, 3> R;
+  Matrix<Tp, 3, 3> R;
   R << ct, 0.0,  st,
       0.0, 1.0, 0.0,
       -st, 0.0,  ct;
@@ -297,13 +303,13 @@ Matrix<_Tp, 3, 3> RotationY(double angle, bool angle_in_deg) {
 
 
 /// Returns the 3x3 rotation matrix, rotating around the z-axis.
-template <typename _Tp> inline constexpr
-Matrix<_Tp, 3, 3> RotationZ(double angle, bool angle_in_deg) {
-  const double rad = angle_in_deg ? Deg2Rad(angle) : angle;
-  const double ct = std::cos(rad);
-  const double st = std::sin(rad);
+template <typename Tp> inline constexpr
+Matrix<Tp, 3, 3> RotationZ(Tp angle, bool angle_in_deg) {
+  const Tp rad = angle_in_deg ? Deg2Rad(angle) : angle;
+  const Tp ct = std::cos(rad);
+  const Tp st = std::sin(rad);
 
-  Matrix<_Tp, 3, 3> R;
+  Matrix<Tp, 3, 3> R;
   R << ct, -st, 0.0,
        st,  ct, 0.0,
       0.0, 0.0, 1.0;
@@ -312,12 +318,15 @@ Matrix<_Tp, 3, 3> RotationZ(double angle, bool angle_in_deg) {
 
 
 /// Returns the 3x3 rotation matrix in ZYX order.
-template <typename _Tp> inline constexpr
-Matrix<_Tp, 3, 3> RotationMatrix(
-    double angle_x, double angle_y, double angle_z, bool angles_in_deg) {
-  auto Rx = RotationX<_Tp>(angle_x, angles_in_deg);
-  auto Ry = RotationY<_Tp>(angle_y, angles_in_deg);
-  auto Rz = RotationZ<_Tp>(angle_z, angles_in_deg);
+template <typename Tp> inline constexpr
+Matrix<Tp, 3, 3> RotationMatrix(
+    Tp angle_x,
+    Tp angle_y,
+    Tp angle_z,
+    bool angles_in_deg) {
+  auto Rx = RotationX<Tp>(angle_x, angles_in_deg);
+  auto Ry = RotationY<Tp>(angle_y, angles_in_deg);
+  auto Rz = RotationZ<Tp>(angle_z, angles_in_deg);
   return Rx * (Ry * Rz);
 }
 
