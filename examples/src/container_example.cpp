@@ -12,12 +12,12 @@
 int main(int /* argc */, char ** /* argv */) {
   namespace wkc = werkzeugkiste::container;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << WERKZEUGKISTE_VERSION << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::VERSION << "\n"
             << "    Container utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;
 
-//  //TODO
+//  //TODO make geometry example
 //  auto v1 = wkg::Vec2d{17, 42};
 //  std::cout << "Vector:      " << v1
 //          << "\n--> Length:  " << v1.Length()

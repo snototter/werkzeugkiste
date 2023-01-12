@@ -21,6 +21,7 @@ function(add_example NAME LIBS)
 endfunction()
 
 add_example(container werkzeugkiste::container)
+add_example(geometry werkzeugkiste::geometry)
 add_example(timing werkzeugkiste::timing)
 
 add_folders(Examples)

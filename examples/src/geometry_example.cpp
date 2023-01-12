@@ -64,7 +64,7 @@ std::string PrettyPrint(
 int main(int /* argc */, char ** /* argv */) {
   namespace wkg = werkzeugkiste::geometry;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << WERKZEUGKISTE_VERSION << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::VERSION << "\n"
             << "    Geometry utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;
@@ -75,7 +75,10 @@ int main(int /* argc */, char ** /* argv */) {
   std::cout << "Vector:      " << v1
           << "\n--> Length:  " << v1.Length()
           << "\nUnit vector: " << v1.UnitVector()
-          << "\n--> Length:  " << v1.UnitVector().Length() << std::endl;
+          << "\n--> Length:  " << v1.UnitVector().Length()
+          << "\n--> Rot90 CW:  " << v1.PerpendicularClockwise()
+          << "\n--> Rot90 CCW: " << v1.PerpendicularCounterClockwise()
+          << std::endl;
 
 //  auto v2 = wkg::Vec2i{3, 9};
 //  std::cout << "Conversion: " << wkg::VecToEigenCol(v1)

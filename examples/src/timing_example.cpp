@@ -22,7 +22,7 @@ int main(int /* argc */, char ** /* argv */) {
   namespace wtu = werkzeugkiste::timing;
   wtu::StopWatch watch;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << WERKZEUGKISTE_VERSION << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::VERSION << "\n"
             << "    Stopwatch demo\n"
             << "--------------------------------------------------\n"
             << "Underlying clock:      " << watch.ClockName()
