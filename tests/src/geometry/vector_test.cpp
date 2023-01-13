@@ -48,7 +48,7 @@ void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
     EXPECT_EQ(vec.val[DIM_INT - i - 1], vec[-(i+1)]);
   }
 
-  EXPECT_EQ(-vec, -1 * vec); //TODO
+  EXPECT_EQ(-vec, static_cast<_Tp>(-1) * vec); //TODO
 
   Test2dSpecials(vec);
 
@@ -92,7 +92,8 @@ void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
   // Basic arithmetics
   auto vec_twice = vec + vec;
   EXPECT_NE(vec, vec_twice);
-  EXPECT_EQ(2 * vec, vec_twice);
+  EXPECT_EQ(vec * static_cast<_Tp>(2), vec_twice);
+  EXPECT_EQ(static_cast<_Tp>(2) * vec, vec_twice);
 
   vec *= 2;
   EXPECT_EQ(vec, vec_twice);
@@ -122,7 +123,7 @@ void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
   EXPECT_TRUE(vec_twice == copy);
 
   const auto vec_3x = vec + vec_twice + copy;
-  EXPECT_EQ(3 * vec, vec_3x);
+  EXPECT_EQ(static_cast<_Tp>(3) * vec, vec_3x);
 
   poly.clear();
   poly_len = wkg::LengthPolygon(poly);
@@ -147,11 +148,11 @@ void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
   vec_twice = vec + zero;
   EXPECT_EQ(vec_twice, vec);
 
-  EXPECT_EQ(vec_3x, 3 * vec);
+  EXPECT_EQ(vec_3x, static_cast<_Tp>(3) * vec);
 
   // Add/subtract scalars
-  auto add1 = vec + 17.0;
-  auto sub1 = vec - 42.0;
+  const auto add1 = vec.ToDouble() + 17.0;
+  const auto sub1 = vec.ToDouble() - 42.0;
   for (std::size_t i = 0; i < Dim; ++i) {
     EXPECT_DOUBLE_EQ(add1[i], vec[i] + 17);
     EXPECT_DOUBLE_EQ(sub1[i], vec[i] - 42);
@@ -178,7 +179,7 @@ void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
   auto dist = vec.DistanceEuclidean(zero);
   EXPECT_DOUBLE_EQ(dist, len);
 
-  auto vec_4x = 4.0 * vec;
+  auto vec_4x = static_cast<_Tp>(4) * vec;
   dist = vec.DistanceEuclidean(vec_4x);
   EXPECT_DOUBLE_EQ(dist, len * 3);
 
@@ -245,10 +246,16 @@ TEST(VectorTest, All) {
   wkg::Vec3d v3d_c{12.3, -0.42, 77.7};
   VectorTestHelper(v3d_c);
 
-
   wkg::Vec2i zero2i;
   EXPECT_DOUBLE_EQ(zero2i.Length(), 0);
   EXPECT_EQ(zero2i.UnitVector(), wkg::Vec2d());
+
+  auto v2d_casted = v2d_c.ToInteger();
+  EXPECT_EQ(typeid(zero2i), typeid(v2d_casted));
+  EXPECT_EQ(static_cast<int>(v2d_c.X()), v2d_casted.X());
+  EXPECT_EQ(static_cast<int>(v2d_c.Y()), v2d_casted.Y());
+  EXPECT_EQ(-735, v2d_casted.X());
+  EXPECT_EQ(0, v2d_casted.Y());
 
   wkg::Vec2i v2i{9, -2};
   VectorTestHelper(v2i);

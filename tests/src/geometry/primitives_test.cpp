@@ -269,7 +269,7 @@ TEST(GeometricPrimitives, Plane) {
   EXPECT_TRUE(plane.IsPointInFrontOfPlane(pt));
   EXPECT_FALSE(plane.IsPointOnPlane(pt));
 
-  pt -= 23 * plane.Normal();
+  pt -= 23.0 * plane.Normal();
   EXPECT_DOUBLE_EQ(plane.DistancePointToPlane(pt), -22.0);
   EXPECT_FALSE(plane.IsPointInFrontOfPlane(pt));
 

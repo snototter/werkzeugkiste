@@ -5,6 +5,11 @@ check exported symbols of shared libs:
 readelf -s libwerkzeugkiste-timing.so
 objdump -T --demangle libwerkzeugkiste-timing.so
 
+inspect compilation units: https://stackoverflow.com/a/59614755/400948
+nm -C
+objdump -S file.o | c++filt
+
+
 TODO fix werkzeugkiste.so - should link/refer to all sub-libs somehow (?)
 
 ldd examples/timing

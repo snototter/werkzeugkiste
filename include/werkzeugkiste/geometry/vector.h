@@ -4,12 +4,15 @@
 #include <stdexcept>
 #include <string>
 #include <ostream>
+#include <iomanip>
 #include <initializer_list>
 #include <cmath>
 #include <vector>
+#include <cstdint>
 #include <type_traits>
 
 #include <werkzeugkiste/geometry/utils.h>
+#include <werkzeugkiste/werkzeugkiste_export.h>
 
 namespace werkzeugkiste::geometry {
 
@@ -29,6 +32,7 @@ namespace werkzeugkiste::geometry {
 /// `width`/`height`, so using them to hold
 /// dimensions/size feels lexically correct.
 template<typename T, std::size_t Dim>
+WERKZEUGKISTE_EXPORT
 class Vec {
  public:
   static_assert(
@@ -151,12 +155,11 @@ class Vec {
   }
 
 
-  /// Allow implicitly casting each vector to its
-  /// double-precision counterpart.
-  explicit operator Vec<double, Dim>() const {
-    Vec<double, Dim> conv;
+  template<typename TargetType>
+  explicit operator Vec<TargetType, Dim>() const {
+    Vec<TargetType, Dim> conv;
     for (index_type i = 0; i < Dim; ++i) {
-      conv.val[i] = static_cast<double>(val[i]);
+      conv.val[i] = static_cast<TargetType>(val[i]);
     }
     return conv;
   }
@@ -165,6 +168,11 @@ class Vec {
   /// Convenience conversion to double precision.
   Vec<double, Dim> ToDouble() const {
     return static_cast<Vec<double, Dim>>(*this);
+  }
+
+
+  Vec<int32_t, Dim> ToInteger() const {
+    return static_cast<Vec<int32_t, Dim>>(*this);
   }
 
 
@@ -457,26 +465,28 @@ class Vec {
   }
 
 
+  /// For floating point vectors, allow implicitly upcasting an integral
+  /// scaling factor to float/double.
+  template<typename TInt = int32_t, typename TVec = T>
+  Vec<typename std::enable_if<
+          std::is_floating_point<TVec>::value, TVec>::type,
+      Dim> &operator*=(typename std::enable_if<
+              std::is_integral<TInt>::value, TInt>::type scale) {
+    (*this) *= static_cast<TVec>(scale);
+    return (*this);
+  }
+
+
   template<typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
-          double>::type, Dim> &operator/=(double scale) {
+          Tp>::type, Dim> &operator/=(double scale) {
 //  Vec<T, Dim> &operator/=(T scale) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] /= scale;
     }
     return *this;
   }
-
-//  template<typename Tp = T>
-//  Vec<typename std::enable_if<
-//          std::is_floating_point<Tp>::value,
-//          double>::type, Dim> &operator/=(double scale) {
-//    for (std::size_t i = 0; i < Dim; ++i) {
-//      val[i] /= scale;
-//    }
-//    return *this;
-//  }
 
 
   /// Returns a vector where each dimension is negated.
@@ -618,7 +628,23 @@ class Vec {
   /// the coordinates within parentheses, e.g. "(13, 77)".
   std::string ToString(
       bool include_type = true,
-      int fixed_precision = 2) const;
+      int fixed_precision = 2) const {
+    std::ostringstream s;
+    if (include_type) {
+      s << Vec<T, Dim>::TypeName();
+    }
+    s << '(' << std::fixed << std::setprecision(fixed_precision);
+
+    for (std::size_t i = 0; i < Dim; ++i) {
+      s << val[i];
+      if (i < (Dim - 1)) {
+        s << ", ";
+      }
+    }
+
+    s << ')';
+    return s.str();
+  }
 
 
   /// Overloaded stream operator.
@@ -650,12 +676,20 @@ class Vec {
 };
 
 //-------------------------------------------------  Available specializations:
+extern template class Vec<double, 2>;
 using Vec2d = Vec<double, 2>;
+
+extern template class Vec<double, 3>;
 using Vec3d = Vec<double, 3>;
+
+extern template class Vec<double, 4>;
 using Vec4d = Vec<double, 4>;
 
-using Vec2i = Vec<int, 2>;
-using Vec3i = Vec<int, 3>;
+extern template class Vec<int32_t, 2>;
+using Vec2i = Vec<int32_t, 2>;
+
+extern template class Vec<int32_t, 3>;
+using Vec3i = Vec<int32_t, 3>;
 
 //FIXME inline all operators, especially needed for the specializations
 
@@ -687,29 +721,64 @@ inline Vec<T, Dim> operator+(Vec<T, Dim> lhs, const Vec<T, Dim>& rhs) {
   return lhs;
 }
 
+/// Add scalar to each dimension.
+template<typename T, std::size_t Dim>
+inline Vec<T, Dim> operator+(Vec<T, Dim> lhs, T rhs) {
+  lhs += rhs;
+  return lhs;
+}
+
 
 /// Vector subtraction.
 template<typename T, std::size_t Dim>
-Vec<T, Dim> operator-(Vec<T, Dim> lhs, const Vec<T, Dim>& rhs);
-
-
-/// Add scalar to each dimension.
-template<typename T, std::size_t Dim>
-Vec<T, Dim> operator+(Vec<T, Dim> lhs, double rhs);
+inline Vec<T, Dim> operator-(Vec<T, Dim> lhs, const Vec<T, Dim>& rhs) {
+  lhs -= rhs;
+  return lhs;
+}
 
 
 /// Subtract scalar from each dimension.
 template<typename T, std::size_t Dim>
-Vec<T, Dim> operator-(Vec<T, Dim> lhs, double rhs);
+inline Vec<T, Dim> operator-(Vec<T, Dim> lhs, T rhs) {
+  lhs -= rhs;
+  return lhs;
+}
 
 
 /// Multiply (rhs) by scalar.
 template<typename T, std::size_t Dim>
-Vec<T, Dim> operator*(Vec<T, Dim> lhs, double rhs);
+inline Vec<T, Dim> operator*(Vec<T, Dim> lhs, T rhs) {
+  lhs *= rhs;
+  return lhs;
+}
+//template<typename TVec, std::size_t Dim, typename TScalar>
+//inline Vec<TVec, Dim> operator*(Vec<TVec, Dim> lhs, TScalar rhs) {
+//  lhs *= static_cast<TVec>(rhs);
+//  return lhs;
+//}
+
 
 /// Multiply (lhs) by scalar.
 template<typename T, std::size_t Dim>
-Vec<T, Dim> operator*(double lhs, Vec<T, Dim> rhs);
+inline Vec<T, Dim> operator*(T lhs, Vec<T, Dim> rhs) {
+  rhs *= lhs;
+  return rhs;
+}
+
+
+//FIXME
+//// scalar * vec
+//template<typename TVec, std::size_t Dim, typename TInt>
+//Vec<typename std::enable_if<
+//        std::is_floating_point<TVec>::value, TVec>::type, Dim>
+//    operator*(
+//        typename std::enable_if<std::is_integral<TInt>::value, TInt>::type lhs,
+//        Vec<TVec, Dim> rhs){
+//  rhs *= static_cast<TVec>(lhs);
+//  return rhs;
+//}
+
+
 
 
 ///// Divide (scale) by scalar.
