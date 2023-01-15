@@ -16,14 +16,16 @@ namespace werkzeugkiste::geometry {
 /// Convert angle from degrees to radians.
 inline constexpr
 double Deg2Rad(double deg) {
-  return deg * M_PI / 180.0; // NOLINT
+  // NOLINTNEXTLINE(*-magic-numbers)
+  return deg * M_PI / 180.0;
 }
 
 
 /// Convert angle from radians to degrees.
 inline constexpr
 double Rad2Deg(double rad) {
-  return rad * 180.0 / M_PI; // NOLINT
+  // NOLINTNEXTLINE(*-magic-numbers)
+  return rad * 180.0 / M_PI;
 }
 
 

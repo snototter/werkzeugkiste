@@ -148,7 +148,7 @@ void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
   vec_twice = vec + zero;
   EXPECT_EQ(vec_twice, vec);
 
-  EXPECT_EQ(vec_3x, static_cast<_Tp>(3) * vec);
+  EXPECT_EQ(vec_3x, 3 * vec);
 
   // Add/subtract scalars
   const auto add1 = vec.ToDouble() + 17.0;

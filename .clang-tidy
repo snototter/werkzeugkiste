@@ -11,6 +11,8 @@ Checks: "*,\
   -llvm-include-order,\
   -llvmlibc-*,\
   -modernize-use-nodiscard,\
+  -modernize-use-auto,\
+  -hicpp-use-auto,\
   -modernize-use-trailing-return-type,\
   -cppcoreguidelines-pro-bounds-constant-array-index,\
   -readability-identifier-length,\

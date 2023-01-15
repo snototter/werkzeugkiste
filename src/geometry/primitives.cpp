@@ -160,67 +160,65 @@ int Circle_<T>::DirectCommonTangents(
   if (center_distance < std::fabs(radius_ - other.radius_)) {
     // C1 is inside C2 (or vice versa) and they don't touch.
     return 0;
-  } else { // NOLINT
-    const Line2d_<T> center_line(center_, other.center_);
+  }
 
-    if (IsEpsEqual(center_distance, std::fabs(radius_ - other.radius_))) {
-      // C1 is inside C2 (or vice versa) and they intersect in exactly one
-      // point.
+  const Line2d_<T> center_line(center_, other.center_);
+  if (IsEpsEqual(center_distance, std::fabs(radius_ - other.radius_))) {
+    // C1 is inside C2 (or vice versa) and they intersect in exactly one point.
+    if (tangent1 != nullptr) {
+      const vec_type unit_dir = center_line.UnitDirection();
+      const vec_type intersection = center_ + (radius_ * unit_dir);
+      const vec_type ref1 = intersection + (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
+      const vec_type ref2 = intersection - (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
+      *tangent1 = Line2d_<T>{ref1, ref2};
+    }
+    return 1;
+  }
+
+  // In all other cases, there exist two direct common tangents.
+  if ((tangent1  != nullptr) || (tangent2  != nullptr)) {
+    if (IsEpsEqual(radius_, other.radius_)) {
+      // Tangents are parallel to the center-connecting line
+      const vec_type dir = radius_ * center_line.UnitDirection();
+      const vec_type orth_dir{dir.Y(), -dir.X()};
+
+      // Intersection points are perpendicular to the center line:
+      const vec_type t11 = center_ + orth_dir;
+      const vec_type t12 = center_ - orth_dir;
+      const vec_type t21 = other.center_ + orth_dir;
+      const vec_type t22 = other.center_ - orth_dir;
+
       if (tangent1 != nullptr) {
-        const vec_type unit_dir = center_line.UnitDirection();
-        const vec_type intersection = center_ + (radius_ * unit_dir);
-        const vec_type ref1 = intersection + (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
-        const vec_type ref2 = intersection - (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
-        *tangent1 = Line2d_<T>{ref1, ref2};
+        *tangent1 = Line2d_<T>{t11, t21};
       }
-      return 1;
-    } else {  // NOLINT
-      // In all other cases, there exist two direct common tangents.
-      if ((tangent1  != nullptr) || (tangent2  != nullptr)) {
-        if (IsEpsEqual(radius_, other.radius_)) {
-          // Tangents are parallel to the center-connecting line
-          const vec_type dir = radius_ * center_line.UnitDirection();
-          const vec_type orth_dir{dir.Y(), -dir.X()};
+      if (tangent2 != nullptr) {
+        *tangent2 = Line2d_<T>{t12, t22};
+      }
+    } else {
+      // Similar triangles:
+      // (distance c1 to intersection) / (distance c2 to intersection) =
+      //   radius1 / radius2
+      const double distance_intersection =
+          center_distance + (center_distance * other.radius_) / (radius_ - other.radius_);
+      const vec_type intersection = center_ + (distance_intersection * center_line.UnitDirection());
 
-          // Intersection points are perpendicular to the center line:
-          const vec_type t11 = center_ + orth_dir;
-          const vec_type t12 = center_ - orth_dir;
-          const vec_type t21 = other.center_ + orth_dir;
-          const vec_type t22 = other.center_ - orth_dir;
+      // Now compute the points of tangency w.r.t. both circles.
+      vec_type t11, t12, t21, t22;  // NOLINT
 
-          if (tangent1 != nullptr) {
-            *tangent1 = Line2d_<T>{t11, t21};
-          }
-          if (tangent2 != nullptr) {
-            *tangent2 = Line2d_<T>{t12, t22};
-          }
-        } else {
-          // Similar triangles:
-          // (distance c1 to intersection) / (distance c2 to intersection) =
-          //   radius1 / radius2
-          const double distance_intersection =
-              center_distance + (center_distance * other.radius_) / (radius_ - other.radius_);
-          const vec_type intersection = center_ + (distance_intersection * center_line.UnitDirection());
-
-          // Now compute the points of tangency w.r.t. both circles.
-          vec_type t11, t12, t21, t22;  // NOLINT
-
-          // TODO warn if we couldn't find POT (would be a numerical issue)
+      // TODO warn if we couldn't find POT (would be a numerical issue)
 //          if (!PointsOfTangency(intersection, &t11, &t12))
-          PointsOfTangency(intersection, &t11, &t12);
-          other.PointsOfTangency(intersection, &t21, &t22);
+      PointsOfTangency(intersection, &t11, &t12);
+      other.PointsOfTangency(intersection, &t21, &t22);
 
-          if (tangent1 != nullptr) {
-            *tangent1 = Line2d_<T>{t11, t21};
-          }
-          if (tangent2 != nullptr) {
-            *tangent2 = Line2d_<T>{t12, t22};
-          }
-        }
-      } // end-if (tangent1 || tangent2)
-      return 2;
+      if (tangent1 != nullptr) {
+        *tangent1 = Line2d_<T>{t11, t21};
+      }
+      if (tangent2 != nullptr) {
+        *tangent2 = Line2d_<T>{t12, t22};
+      }
     }
   }
+  return 2;
 }
 
 
@@ -238,7 +236,7 @@ int Circle_<T>::TransverseCommonTangents(
 
   const Line2d_<T> center_line(center_, other.center_);
   if (IsEpsEqual(distance, sum_radii)) {
-    if (tangent1) {
+    if (tangent1 != nullptr) {
       // Compute the single intersection point
       const vec_type unit_dir = center_line.UnitDirection();
       const vec_type intersection_point = center_ + radius_ * unit_dir;
@@ -250,58 +248,56 @@ int Circle_<T>::TransverseCommonTangents(
 
       *tangent1 = Line2d_<T>{ref1, ref2};
     }
-
     return 1;
-  } else {
-    // Transverse common tangents divide the line between the two centers in
-    // the ratio r1/r2 (similar triangles to the rescue).
-    // Compute distance to intersection point:
-    const double distance_intersection = distance * radius_ / sum_radii;
-    const vec_type intersection = center_ + (distance_intersection * center_line.UnitDirection());
+  }
 
-    // Useful visualizations on line sectioning:
-    // https://doubleroot.in/lessons/coordinate-geometry-basics/section-formula/
+  // Transverse common tangents divide the line between the two centers in
+  // the ratio r1/r2 (so we'll use similar triangles to our rescue).
+  // Compute distance to intersection point:
+  const double distance_intersection = distance * radius_ / sum_radii;
+  const vec_type intersection = center_ + (distance_intersection * center_line.UnitDirection());
 
-    // Pythagoras
-    const double hypotenuse = intersection.DistanceEuclidean(center_);
-    const double radius1_sqr = radius_ * radius_;
-    // Euclid (German "Kathetensatz"):
-    const double q = radius1_sqr / hypotenuse;
-    const double p = hypotenuse - q;
-    // Euclid (German "Hoehensatz"):
-    const double h = std::sqrt(p * q);
-    // Trigonometry: tan(alpha) = h/p = a/b
-    const double alpha = std::atan2(h, p);
+  // Useful visualizations on line sectioning:
+  // https://doubleroot.in/lessons/coordinate-geometry-basics/section-formula/
 
-    // Compute points of tangency
-    // The tangent is also divided by the ratio r1/r2
-    const double tangent_length = std::sqrt(
-          (distance * distance) - (sum_radii * sum_radii));
-    const double tangent_length1 = std::sqrt(
-          (hypotenuse * hypotenuse) - radius1_sqr);
-    const double tangent_length2 = tangent_length - tangent_length1;
+  // Pythagoras
+  const double hypotenuse = intersection.DistanceEuclidean(center_);
+  const double radius1_sqr = radius_ * radius_;
+  // Euclid part 1 (German "Kathetensatz"):
+  const double q = radius1_sqr / hypotenuse;
+  const double p = hypotenuse - q;
+  // Euclid part 2 (German "Hoehensatz"):
+  const double h = std::sqrt(p * q);
+  // Trigonometry: tan(alpha) = h/p = a/b
+  const double alpha = std::atan2(h, p);
 
-    const Line2d_<T> hypo(intersection, center_);
-    const vec_type hypo_dir = hypo.UnitDirection();
+  // Compute points of tangency
+  // The tangent is also divided by the ratio r1/r2
+  const double tangent_length = std::sqrt(
+        (distance * distance) - (sum_radii * sum_radii));
+  const double tangent_length1 = std::sqrt(
+        (hypotenuse * hypotenuse) - radius1_sqr);
+  const double tangent_length2 = tangent_length - tangent_length1;
 
-    if (tangent1 || tangent2) {
-      vec_type dir = RotateVector(hypo_dir, alpha);
-      const vec_type t11 = intersection + (tangent_length1 * dir);
-      const vec_type t12 = intersection - (tangent_length2 * dir);
-      if (tangent1) {
-        *tangent1 = Line2d_<T>{t11, t12};
-      }
+  const Line2d_<T> hypo(intersection, center_);
+  const vec_type hypo_dir = hypo.UnitDirection();
 
-      dir = RotateVector(hypo_dir, -alpha);
-      const vec_type t21 = intersection + (tangent_length1 * dir);
-      const vec_type t22 = intersection - (tangent_length2 * dir);
-      if (tangent2) {
-        *tangent2 = Line2d_<T>{t21, t22};
-      }
+  if ((tangent1 != nullptr) || (tangent2 != nullptr)) {
+    vec_type dir = RotateVector(hypo_dir, alpha);
+    const vec_type t11 = intersection + (tangent_length1 * dir);
+    const vec_type t12 = intersection - (tangent_length2 * dir);
+    if (tangent1) {
+      *tangent1 = Line2d_<T>{t11, t12};
     }
 
-    return 2;
+    dir = RotateVector(hypo_dir, -alpha);
+    const vec_type t21 = intersection + (tangent_length1 * dir);
+    const vec_type t22 = intersection - (tangent_length2 * dir);
+    if (tangent2) {
+      *tangent2 = Line2d_<T>{t21, t22};
+    }
   }
+  return 2;
 }
 
 
@@ -344,18 +340,18 @@ int Circle_<T>::IntersectionCircleCircle(
   const double iy1 = fy + gy;
   const double iy2 = fy - gy;
 
-  if (intersection1) {
+  if (intersection1 != nullptr) {
     *intersection1 = vec_type{ix1, iy1};
   }
 
   if (IsEpsZero(gx) && IsEpsZero(gy)) {
     return 1;
-  } else {
-    if (intersection2) {
-      *intersection2 = vec_type{ix2, iy2};
-    }
-    return 2;
   }
+
+  if (intersection2 != nullptr) {
+    *intersection2 = vec_type{ix2, iy2};
+  }
+  return 2;
 }
 
 
@@ -392,6 +388,8 @@ Line2d_<T> Line2d_<T>::LeftToRight() const {
     return Line2d_<T>{};
   }
 
+  // NOLINTBEGIN(llvm-else-after-return)
+
   if (IsEpsEqual(pt_from_.X(), pt_to_.X())) {
     // A vertical line will be sorted top-to-bottom:
     if (pt_from_.Y() < pt_to_.Y()) {
@@ -407,6 +405,8 @@ Line2d_<T> Line2d_<T>::LeftToRight() const {
       return Line2d_<T>{pt_to_, pt_from_};
     }
   }
+
+  // NOLINTEND(llvm-else-after-return)
 }
 
 
@@ -465,12 +465,13 @@ bool Line2d_<T>::IsPointLeftOfLine(
       *is_on_line = true;
     }
     return true;
-  } else {
-    if (is_on_line != nullptr) {
-      *is_on_line = false;
-    }
-    return Sign(det) > 0;
   }
+
+
+  if (is_on_line != nullptr) {
+    *is_on_line = false;
+  }
+  return Sign(det) > 0;
 }
 
 
@@ -479,60 +480,55 @@ bool Line2d_<T>::IntersectionLineLine(
     const Line2d_ &other, vec_type *intersection_point) const {
   const vec3_type ip = HomogeneousForm().Cross(other.HomogeneousForm());
   if (IsEpsZero(ip[2])) {
-    // Intersection at infinity
+    // Intersection point is at infinity
     return false;
-  } else {
-    if (intersection_point) {
-      intersection_point->SetX(ip[0] / ip[2]);
-      intersection_point->SetY(ip[1] / ip[2]);
-    }
-    return true;
   }
+
+  if (intersection_point != nullptr) {
+    intersection_point->SetX(ip[0] / ip[2]);
+    intersection_point->SetY(ip[1] / ip[2]);
+  }
+  return true;
 }
 
 
 template <typename T>
 bool Line2d_<T>::IntersectionLineLineSegment(
     const Line2d_ &segment, vec_type *intersection_point) const {
-  // Line 1 goes from p to p + r
+  // Line 1 passes through p and (p + r)
   const vec_type p = pt_from_;
   const vec_type r = Direction();
-  // Segment 2 goes from q to q + s
+
+  // Segment 2 goes from q to (q + s)
   const vec_type q = segment.pt_from_;
   const vec_type s = segment.Direction();
 
   const T rxs = Determinant(r, s);
   const T qmpxr = Determinant((q-p), r);
 
-  bool intersects {false};
-
   if (IsEpsZero(rxs) && IsEpsZero(qmpxr)) {
-    // Line and segment are collinear.
-    if (intersection_point) {
+    // Line and segment are collinear, pick any point on the line.
+    if (intersection_point != nullptr) {
       *intersection_point = segment.From();
     }
-    intersects = true;
-  } else {
-    if (IsEpsZero(rxs)) {
-      // Parallel and not intersecting
-      intersects = false;
-    } else {
-      // Otherwise, they intersect if the intersection point lies on the
-      // segment, i.e. u in [0,1].
-      const T u = qmpxr / rxs;
-
-      if ((u >= static_cast<T>(0))
-          && (u <= static_cast<T>(1))) {
-        if (intersection_point) {
-          *intersection_point = q + u * s;
-        }
-        intersects = true;
-      } else {
-        intersects = false;
-      }
-    }
+    return true;
   }
-  return intersects;
+
+  if (IsEpsZero(rxs)) {
+    // Line and segment are parallel and not intersecting.
+    return false;
+  }
+
+  // Otherwise, they intersect if the intersection point lies on the
+  // segment, i.e. u in [0,1].
+  const double u = static_cast<double>(qmpxr) / static_cast<double>(rxs);
+  if ((u >= 0.0) && (u <= 1.0)) {
+    if (intersection_point != nullptr) {
+      *intersection_point = q + u * s;
+    }
+    return true;
+  }
+  return false;
 }
 
 
@@ -550,48 +546,48 @@ bool Line2d_<T>::IntersectionLineSegmentLineSegment(
   const T rxs = Determinant(r, s);
   const T qmpxr = Determinant((q-p), r);
 
-  bool intersects {false};
-
   if (IsEpsZero(rxs) && IsEpsZero(qmpxr)) {
-    // Lines are collinear. They intersect if there is any overlap.
-    const T t0 = (q - p).Dot(r) / r.Dot(r);
-    const double t1 = t0 + s.Dot(r) / r.Dot(r);
-    if ((t0 >= 0) && (t0 <= 1)) {
-      if (intersection_point) {
+    // Segments are collinear. They intersect if there is any overlap.
+    const double rdr = static_cast<double>(r.Dot(r));
+    const double t0 = static_cast<double>((q - p).Dot(r)) / rdr;
+
+    if ((t0 >= 0.0) && (t0 <= 1.0)) {
+      if (intersection_point != nullptr) {
         *intersection_point = p + t0 * r;
       }
-      intersects = true;
-    } else {
-      if ((t1 >= 0) && (t1 <= 1)) {
-        if (intersection_point) {
-          *intersection_point = p + t1 * r;
-        }
-        intersects = true;
-      } else {
-        // Otherwise, the segments don't intersect
-        intersects = false;
-      }
+      return true;
     }
-  } else {
-    if (IsEpsZero(rxs)) {
-      // Segments are parallel and not intersecting
-      intersects = false;
-    } else {
-      // Otherwise, the segments meet if u in [0,1] and t in [0,1].
-      const T u = qmpxr / rxs;
-      const T t = Determinant((q - p), s) / Determinant(r, s);
 
-      if ((u >= 0) && (u <= 1) && (t >= 0) && (t <= 1)) {
-        if (intersection_point) {
-          *intersection_point = p + t * r;
-        }
-        intersects = true;
-      } else {
-        intersects = false;
+    const double t1 = t0 + static_cast<double>(s.Dot(r)) / rdr;
+    if ((t1 >= 0.0) && (t1 <= 1.0)) {
+      if (intersection_point) {
+        *intersection_point = p + t1 * r;
       }
+      return true;
     }
+
+    // Otherwise, these collinear segments don't intersect
+    return false;
   }
-  return intersects;
+
+
+  if (IsEpsZero(rxs)) {
+    // Segments are parallel and not intersecting
+    return false;
+  }
+
+  // Otherwise, the segments meet if u in [0,1] and t in [0,1].
+  const double u = static_cast<double>(qmpxr) / static_cast<double>(rxs);
+  const double t = Determinant((q - p), s) / static_cast<double>(Determinant(r, s));
+
+  if ((u >= 0.0) && (u <= 1.0) && (t >= 0.0) && (t <= 1.0)) {
+    if (intersection_point != nullptr) {
+      *intersection_point = p + t * r;
+    }
+    return true;
+  }
+
+  return false;
 }
 
 
@@ -682,35 +678,38 @@ int Line2d_<T>::IntersectionLineSegmentCircle(
       }
       return 1;
     }
+    // The single intersection point is outside the segment.
     return 0;
-  } else {
-    // We have two line-circle intersection points and need to check both.
-    const double dist2 = DistancePointToSegment(line_intersect2);
-    const bool on_segment2 = IsEpsZero(dist2);
+  }
 
-    int num_intersections = 0;
-    if (on_segment1) {
-      if (intersection1 != nullptr) {
-        *intersection1 = line_intersect1;
+  // We have two line-circle intersection points and need to check both.
+  const double dist2 = DistancePointToSegment(line_intersect2);
+  const bool on_segment2 = IsEpsZero(dist2);
+
+  int num_intersections = 0;
+  if (on_segment1) {
+    if (intersection1 != nullptr) {
+      *intersection1 = line_intersect1;
+    }
+    ++num_intersections;
+
+    if (on_segment2) {
+      if (intersection2 != nullptr) {
+        *intersection2 = line_intersect2;
       }
       ++num_intersections;
-
-      if (on_segment2) {
-        if (intersection2 != nullptr) {
-          *intersection2 = line_intersect2;
-        }
-        ++num_intersections;
-      }
-    } else {
-      if (on_segment2) {
-        if (intersection1 != nullptr) {
-          *intersection1 = line_intersect2;
-        }
-        ++num_intersections;
-      }
     }
-    return num_intersections;
+  } else {
+    if (on_segment2) {
+      // Only the second intersection point lies on the segment. Thus, we need
+      // to assign it to first(!) output parameter.
+      if (intersection1 != nullptr) {
+        *intersection1 = line_intersect2;
+      }
+      ++num_intersections;
+    }
   }
+  return num_intersections;
 }
 
 
@@ -751,19 +750,17 @@ Line2d_<T> Line2d_<T>::ClipLineByRectangle(
 
   if (int_points.size() < 2) {
     return Line2d_<T>{};
-  } else {
-    return Line2d_<T>{int_points[0], int_points[1]};
   }
+
+  return Line2d_<T>{int_points[0], int_points[1]};
 }
 
 
 template <typename T>
 Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(
     const vec_type &top_left, const vec_type &size) const {
-  const bool is_from_inside = IsPointInsideRectangle(
-        pt_from_, top_left, size);
-  const bool is_to_inside = IsPointInsideRectangle(
-        pt_to_, top_left, size);
+  const bool is_from_inside = IsPointInsideRectangle(pt_from_, top_left, size);
+  const bool is_to_inside = IsPointInsideRectangle(pt_to_, top_left, size);
 
   if (is_from_inside && is_to_inside) {
     return *this;
@@ -792,19 +789,21 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(
 
   if (int_points.empty()) {
     return Line2d_<T>{};
-  } else {
-    if (is_from_inside != is_to_inside) {
-      // One in, one out - there should be only 1 intersection point (unless
-      // the intersection falls exactly on a corner, then there may be two).
-      if (is_from_inside) {
-        return Line2d_<T>{pt_from_, int_points[0]};
-      } else {
-        return Line2d_<T>{int_points[0], pt_to_};
-      }
-    } else {
-      return Line2d_<T>{int_points[0], int_points[1]};
-    }
   }
+
+  if (is_from_inside != is_to_inside) {
+    // One in, one out: There should be only 1 intersection point - unless
+    // the intersection falls exactly on a corner, then there may be two (but
+    // here we are only interested in clipping the segment).
+
+    if (is_from_inside) {
+      return Line2d_<T>{pt_from_, int_points[0]};
+    }
+
+    return Line2d_<T>{int_points[0], pt_to_};
+  }
+
+  return Line2d_<T>{int_points[0], int_points[1]};
 }
 
 

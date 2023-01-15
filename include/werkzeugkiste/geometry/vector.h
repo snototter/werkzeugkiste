@@ -19,35 +19,41 @@ namespace werkzeugkiste::geometry {
 //------------------------------------------------- Vectors/Coordinates
 
 //TODO update doc
-//TODO Operator overloading best practices: https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
+// Operator overloading megathread on SO:
+// https://stackoverflow.com/questions/4421706/what-are-the-basic-rules-and-idioms-for-operator-overloading
 
 /// Template class to represent a vector/coordinate.
-/// Provides named access for the first 4 dimensions as
-/// `x`, `y`, `z` and `w`.
 ///
 /// Any dimension can be accessed via random access,
-/// i.e. `operator[]`, or via its `val` array member.
+/// i.e. `operator[]`, or via its publicly exposed `val` array member.
 ///
-/// 2D vectors additionally provide access via
-/// `width`/`height`, so using them to hold
-/// dimensions/size feels lexically correct.
+/// 2D vectors additionally provide access via `Width`/`Height`. Thus, using
+/// them to hold 2D dimensions feels lexically correct.
 template<typename T, std::size_t Dim>
 WERKZEUGKISTE_EXPORT
 class Vec {
  public:
   static_assert(
     std::is_signed<T>::value,
-    "Only signed arithmetic types are supported!"); //TODO or should we disable -= etc.
+    "Only signed arithmetic types are supported!");
+
 
   static_assert(
     Dim > 0,
     "Dimension of Vec type must be > 0!");
 
-  using value_type = T;  // NOLINT(readability-identifier-naming)
 
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  using value_type = T;
+
+
+  // NOLINTNEXTLINE(readability-identifier-naming)
   using index_type = std::size_t;
 
+
+  // NOLINTNEXTLINE(readability-identifier-naming)
   static constexpr std::size_t ndim = Dim;
+
 
   //------------------------------------------------- Initialization
 
@@ -304,33 +310,6 @@ class Vec {
     return val[3];
   }
 
-  //TODO cleanup: remove
-//  /**
-//   * Vectors with 2 dimensions can also define a size.
-//   * For clarity, I want to be able to access 'size' elements
-//   * as width() and height().
-//   *
-//   * ---- This worked as expected, but I opted against ----
-//   * ---- it, because it made the python bindings much ----
-//   * ---- more complex (and I prefer a simple python   ----
-//   * ---- wrapper + some extra methods on 3+ dim Vecs  ----
-//   * ---- over a "clean" template interface)           ----
-//   *
-//   * Note that to perform SFINAE, the dummy template
-//   * argument (_Tp = T) must be specified. Otherwise, this would
-//   * not compile, because at compilation time, T is already
-//   * known (from the class definition). Useful SO thread on SFINAE:
-//   * https://stackoverflow.com/a/13401982/400948
-//   */
-//  template<typename _Tp = T>
-//  const typename std::enable_if<(dim == 2), _Tp>::type& width() const {
-//    return x();
-//  }
-//
-//  template<typename _Tp = T>
-//  const typename std::enable_if<(dim == 2), _Tp>::type& height() const {
-//    return y();
-//  }
 
   inline T &X() noexcept {
     return val[0];
@@ -381,13 +360,15 @@ class Vec {
 
 
   template<typename Tp = T> inline
-  void SetWidth(typename std::enable_if<(Dim == 2), Tp>::type width) noexcept {
+  void SetWidth(
+      typename std::enable_if<(Dim == 2), Tp>::type width) noexcept {
     SetX(width);
   }
 
 
   template<typename Tp = T> inline
-  void SetHeight(typename std::enable_if<(Dim == 2), Tp>::type height) noexcept {
+  void SetHeight(
+      typename std::enable_if<(Dim == 2), Tp>::type height) noexcept {
     SetY(height);
   }
 
@@ -405,6 +386,7 @@ class Vec {
 
 
   /// Holds the values of this vector.
+  // NOLINTNEXTLINE(*-avoid-c-arrays)
   T val[Dim] = {0};
 
 
@@ -412,20 +394,36 @@ class Vec {
   //-------------------------------------------------
   // Comparison
 
+  /// Returns true if all dimensions of both vectors are (approximately)
+  /// equal. Floating point numbers are considered approximately equal if
+  /// they differ by less than 2 units in the last place (ULP, units of
+  /// least precision).
   bool EpsEquals(const Vec<T, Dim> &other) const {
     for (index_type i = 0; i < Dim; ++i) {
-      if (!IsEpsEqual(val[i], other.val[i])) {
+      if (!IsEpsEqual(val[i], other.val[i], 2)) {
         return false;
       }
     }
     return true;
   }
 
+
+  /// Equality checks can be used for floating point specializations.
+  friend bool operator==(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs) {
+    return lhs.EpsEquals(rhs);
+  }
+
+
+  /// Inequality checks can be used for floating point specializations.
+  friend bool operator!=(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs) {
+    return !(lhs == rhs);
+  }
+
   //-------------------------------------------------
   // Arithmetics
-  //FIXME disable division on integral types, or implement explicit clipping?
 
-  Vec<T, Dim> &operator+=(const Vec<T, Dim>& rhs) {
+  /// Performs element-wise addition and returns the modified instance.
+  Vec<T, Dim> &AddVector(const Vec<T, Dim>& rhs) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] += rhs[i];
     }
@@ -433,7 +431,22 @@ class Vec {
   }
 
 
-  Vec<T, Dim> &operator+=(T value) {
+  /// Overloaded for convenience, see `AddVector`.
+  Vec<T, Dim> &operator+=(const Vec<T, Dim>& rhs) {
+    return AddVector(rhs);
+  }
+
+
+  /// Overloaded for convenience. By-value passing of lhs helps optimizing
+  /// chained a+b+c equations.
+  friend Vec<T, Dim> operator+(Vec<T, Dim> lhs, const Vec<T, Dim> &rhs) {
+    lhs += rhs;
+    return lhs;
+  }
+
+
+  /// Adds the scalar to each dimension and returns the modified instance.
+  Vec<T, Dim> &AddScalar(T value) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] += value;
     }
@@ -441,7 +454,21 @@ class Vec {
   }
 
 
-  Vec<T, Dim> &operator-=(const Vec<T, Dim>& rhs) {
+  /// Overloaded for convenience, see `AddScalar`.
+  Vec<T, Dim> &operator+=(T value) {
+    return AddScalar(value);
+  }
+
+
+  /// Overloaded for convenience.
+  friend Vec<T, Dim> operator+(Vec<T, Dim> lhs, T rhs) {
+    lhs += rhs;
+    return lhs;
+  }
+
+
+  /// Performs element-wise subtraction and returns the modified instance.
+  Vec<T, Dim> &SubtractVector(const Vec<T, Dim>& rhs) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] -= rhs[i];
     }
@@ -449,7 +476,21 @@ class Vec {
   }
 
 
-  Vec<T, Dim> &operator-=(T value) {
+  /// Overloaded for convenience, see `SubtractVector`.
+  Vec<T, Dim> &operator-=(const Vec<T, Dim>& rhs) {
+    return SubtractVector(rhs);
+  }
+
+
+  /// Overloaded for convenience.
+  friend Vec<T, Dim> operator-(Vec<T, Dim> lhs, const Vec<T, Dim> &rhs) {
+    lhs -= rhs;
+    return lhs;
+  }
+
+
+  /// Subtracts `value` from each dimension and returns the modified instance.
+  Vec<T, Dim> &SubtractScalar(T value) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] -= value;
     }
@@ -457,7 +498,22 @@ class Vec {
   }
 
 
-  Vec<T, Dim> &operator*=(T scale) {
+  /// Overloaded for convenience, see `SubtractScalar`.
+  Vec<T, Dim> &operator-=(T value) {
+    return SubtractScalar(value);
+  }
+
+
+  /// Overloaded for convenience.
+  friend Vec<T, Dim> operator-(Vec<T, Dim> lhs, T rhs) {
+    lhs -= rhs;
+    return lhs;
+  }
+
+
+  /// Multiplies each dimension by the given scalar and returns the modified
+  /// instance.
+  Vec<T, Dim> &Multiply(T scale) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] *= scale;
     }
@@ -465,23 +521,35 @@ class Vec {
   }
 
 
-  /// For floating point vectors, allow implicitly upcasting an integral
-  /// scaling factor to float/double.
-  template<typename TInt = int32_t, typename TVec = T>
-  Vec<typename std::enable_if<
-          std::is_floating_point<TVec>::value, TVec>::type,
-      Dim> &operator*=(typename std::enable_if<
-              std::is_integral<TInt>::value, TInt>::type scale) {
-    (*this) *= static_cast<TVec>(scale);
-    return (*this);
+  /// Overloaded for convenience, see `Multiply`.
+  Vec<T, Dim> &operator*=(T scale) {
+    return Multiply(scale);
   }
 
 
+  /// Overloaded for convenience.
+  friend Vec<T, Dim> operator*(Vec<T, Dim> lhs, T rhs) {
+    lhs *= rhs;
+    return lhs;
+  }
+
+
+  /// Overloaded for convenience.
+  friend Vec<T, Dim> operator*(T lhs, Vec<T, Dim> rhs) {
+    rhs *= lhs;
+    return rhs;
+  }
+
+
+
+  /// Divides each element by the given scalar and returns the modified
+  /// instance. Note that division is only supported for floating point
+  /// types. Use ToDouble() to obtain a casted copy of this vector before
+  /// division.
   template<typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
-          Tp>::type, Dim> &operator/=(double scale) {
-//  Vec<T, Dim> &operator/=(T scale) {
+          Tp>::type, Dim> &Divide(Tp scale) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] /= scale;
     }
@@ -489,12 +557,40 @@ class Vec {
   }
 
 
-  /// Returns a vector where each dimension is negated.
+  /// Overloaded for convenience, see `Divide`. Only supported for
+  /// floating point-based vector specializations.
+  template<typename Tp = T>
+  Vec<typename std::enable_if<
+          std::is_floating_point<Tp>::value,
+          Tp>::type, Dim> &operator/=(double scale) {
+    return Divide(scale);
+  }
+
+
+  /// Overloaded for convenience. Divides each dimension by the given scalar.
+  template<typename Tp = T>
+  friend Vec<typename std::enable_if<
+          std::is_floating_point<Tp>::value,
+          Tp>::type, Dim> operator/(Vec<T, Dim> lhs, T rhs) {
+    lhs /= rhs;
+    return lhs;
+  }
+
+
+  /// Inverts (i.e. negates) each dimension.
+  Vec<T, Dim> &Negate() {
+    for (index_type i = 0; i < Dim; ++i) {
+      val[i] *= -1;
+    }
+    return *this;
+  }
+
+
+  /// Returns a copy of this vector where each dimension is negated.
+  /// Use `Negate` to explicitly negate this instance.
   Vec<T, Dim> operator-() const {
     Vec<T, Dim> cp(*this);
-    for (index_type i = 0; i < Dim; ++i) {
-      cp[i] *= -1;
-    }
+    cp.Negate();
     return cp;
   }
 
@@ -547,7 +643,7 @@ class Vec {
 
   /// Returns the 3D vector cross product.
   template<typename Tp = T>
-  const Vec<typename std::enable_if<(Dim == 3), Tp>::type, Dim>
+  Vec<typename std::enable_if<(Dim == 3), Tp>::type, Dim>
   Cross(const Vec<T, Dim>& other) const {
     return Vec<T, Dim>{
         Y() * other.Z() - Z() * other.Y(),
@@ -598,22 +694,21 @@ class Vec {
 
     if (IsEpsZero(len)) {
       return Vec<double, Dim>{};
-    } else {
-      return static_cast<Vec<double, Dim>>(*this) / len;
     }
+    return static_cast<Vec<double, Dim>>(*this) / len;
   }
+
 //TODO noexcept
-//  //TODO fix return types (unit/length/normalized, etc --> floating point type)
 //  //TODO Clock-wise if right-handed coordinate system
-  template<typename _Tp = T>
-  const Vec<typename std::enable_if<(Dim == 2), _Tp>::type, Dim>
+  template<typename Tp = T>
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim>
   PerpendicularClockwise() const {
     return Vec<T, Dim>{Y(), -X()};
   }
 
 
-  template<typename _Tp = T>
-  const Vec<typename std::enable_if<(Dim == 2), _Tp>::type, Dim>
+  template<typename Tp = T>
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim>
   PerpendicularCounterClockwise() const {
     return Vec<T, Dim>{-Y(), X()};
   }
@@ -655,15 +750,18 @@ class Vec {
 
 
   template<typename Tp = T,
-           typename std::enable_if<std::is_same<Tp, short>::value, int>::type = 0>
+           typename std::enable_if<
+             std::is_same<Tp, int16_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 's'; }
 
   template<typename Tp = T,
-          typename std::enable_if<std::is_same<Tp, int>::value, int>::type = 0>
+          typename std::enable_if<
+             std::is_same<Tp, int32_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 'i'; }
 
   template<typename Tp = T,
-          typename std::enable_if<std::is_same<Tp, double>::value, int>::type = 0>
+          typename std::enable_if<
+             std::is_same<Tp, double>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 'd'; }
 
   /// Returns the class type name, e.g. "Vec2d".
@@ -675,118 +773,15 @@ class Vec {
 
 };
 
-//-------------------------------------------------  Available specializations:
-extern template class Vec<double, 2>;
+//-------------------------------------------------
+// Aliases
 using Vec2d = Vec<double, 2>;
-
-extern template class Vec<double, 3>;
 using Vec3d = Vec<double, 3>;
-
-extern template class Vec<double, 4>;
 using Vec4d = Vec<double, 4>;
 
-extern template class Vec<int32_t, 2>;
 using Vec2i = Vec<int32_t, 2>;
-
-extern template class Vec<int32_t, 3>;
 using Vec3i = Vec<int32_t, 3>;
-
-//FIXME inline all operators, especially needed for the specializations
-
-//-------------------------------------------------  Comparison operators
-// If you implement another operator, don't forget
-// to add the corresponding explicit vector instantiation
-// in primitives.cpp
-
-template<typename T, std::size_t Dim>
-inline bool operator==(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs) {
-  return lhs.EpsEquals(rhs);
-}
-
-template<typename T, std::size_t Dim>
-inline bool operator!=(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs) {
-  return !(lhs == rhs);
-}
-
-
-//-------------------------------------------------  Arithmetic operators
-// TODO(new-features) If you implement another operator,
-// don't forget to add the corresponding explicit vector
-// instantiation in vector.cpp
-
-/// Vector addition.
-template<typename T, std::size_t Dim>
-inline Vec<T, Dim> operator+(Vec<T, Dim> lhs, const Vec<T, Dim>& rhs) {
-  lhs += rhs;
-  return lhs;
-}
-
-/// Add scalar to each dimension.
-template<typename T, std::size_t Dim>
-inline Vec<T, Dim> operator+(Vec<T, Dim> lhs, T rhs) {
-  lhs += rhs;
-  return lhs;
-}
-
-
-/// Vector subtraction.
-template<typename T, std::size_t Dim>
-inline Vec<T, Dim> operator-(Vec<T, Dim> lhs, const Vec<T, Dim>& rhs) {
-  lhs -= rhs;
-  return lhs;
-}
-
-
-/// Subtract scalar from each dimension.
-template<typename T, std::size_t Dim>
-inline Vec<T, Dim> operator-(Vec<T, Dim> lhs, T rhs) {
-  lhs -= rhs;
-  return lhs;
-}
-
-
-/// Multiply (rhs) by scalar.
-template<typename T, std::size_t Dim>
-inline Vec<T, Dim> operator*(Vec<T, Dim> lhs, T rhs) {
-  lhs *= rhs;
-  return lhs;
-}
-//template<typename TVec, std::size_t Dim, typename TScalar>
-//inline Vec<TVec, Dim> operator*(Vec<TVec, Dim> lhs, TScalar rhs) {
-//  lhs *= static_cast<TVec>(rhs);
-//  return lhs;
-//}
-
-
-/// Multiply (lhs) by scalar.
-template<typename T, std::size_t Dim>
-inline Vec<T, Dim> operator*(T lhs, Vec<T, Dim> rhs) {
-  rhs *= lhs;
-  return rhs;
-}
-
-
-//FIXME
-//// scalar * vec
-//template<typename TVec, std::size_t Dim, typename TInt>
-//Vec<typename std::enable_if<
-//        std::is_floating_point<TVec>::value, TVec>::type, Dim>
-//    operator*(
-//        typename std::enable_if<std::is_integral<TInt>::value, TInt>::type lhs,
-//        Vec<TVec, Dim> rhs){
-//  rhs *= static_cast<TVec>(lhs);
-//  return rhs;
-//}
-
-
-
-
-///// Divide (scale) by scalar.
-template<typename T, std::size_t Dim>
-inline Vec<T, Dim> operator/(Vec<T, Dim> lhs, T rhs) {
-  lhs /= rhs;
-  return lhs;
-}
+using Vec4i = Vec<int32_t, 4>;
 
 
 /// Returns the length of the given polygon.
@@ -803,6 +798,9 @@ double LengthPolygon(const std::vector<Vec<T, Dim>> &points) {
 //---------------------------------------------------- Math/Geometry Helpers
 
 
+//TODO reconsider which helpers should be moved into the vector class
+
+//TODO move inside Vector, enable if dim==2
 /// Computes the determinant of the two 2d vectors.
 template <typename T> inline
 T Determinant(const Vec<T, 2> &a, const Vec<T, 2> &b) {
@@ -810,6 +808,7 @@ T Determinant(const Vec<T, 2> &a, const Vec<T, 2> &b) {
 }
 
 
+//TODO move inside vector
 /// Scalar projection is the length of the vector projection, which is the
 /// vector component of a in the direction of b.
 /// See also: https://en.wikipedia.org/wiki/Vector_projection
@@ -836,6 +835,7 @@ Vec<T, Dim> VectorProjection(const Vec<T, Dim> &a, const Vec<T, Dim> &b) {
 }
 
 
+//TODO move inside vector, enable if dim == 2
 /// Computes the angle (in radians) of a 2d direction vector w.r.t. the
 /// positive X axis.
 template <typename T> inline
@@ -904,15 +904,15 @@ template <typename T, std::size_t Dim,
 void MinMaxCoordinates(
     const Container<Vec<T, Dim>> &values,
     Vec<T, Dim> &min, Vec<T, Dim> &max) {
-  using vec_type = Vec<T, Dim>;
+  using VecType = Vec<T, Dim>;
   if (values.empty()) {
     return;
   }
 
   min = *values.begin();
   max = *values.begin();
-  for (const vec_type &v : values) {
-    for (typename vec_type::index_type i = 0; i < Dim; ++i) {
+  for (const VecType &v : values) {
+    for (typename VecType::index_type i = 0; i < Dim; ++i) {
       if (v[i] < min[i]) {
         min[i] = v[i];
       }
