@@ -73,7 +73,7 @@ typename std::enable_if<
 /// long double floating point numbers. This tolerance is scaled by
 /// the magnitude |x+y|.
 template <typename T> inline constexpr
-bool _eps_equal(T x, T y) {
+bool _eps_equal(T x, T y) {  // NOLINT(readability-identifier-naming)
   if (std::isinf(x) || std::isinf(y)) {
     return false;
   }

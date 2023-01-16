@@ -548,7 +548,6 @@ class Vec {
     return rhs;
   }
 
-//TODO doc
 
   /// Divides each element by the given scalar and returns the modified
   /// instance. Note that division is only supported for floating point
@@ -578,7 +577,7 @@ class Vec {
   /// Overloaded for convenience. Divides each dimension by the given scalar.
   template<typename Tp = T>
   friend Vec<typename std::enable_if<
-            std::numeric_limits<Tp>::is_iec559, Tp>::type,
+            std::is_floating_point<Tp>::value, Tp>::type,
             Dim> operator/(Vec<T, Dim> lhs, T rhs) {
     lhs /= rhs;
     return lhs;
@@ -816,7 +815,7 @@ T Determinant(const Vec<T, 2> &a, const Vec<T, 2> &b) {
 }
 
 
-//TODO move inside vector
+//TODO move inside vector - ScalarProjectionOnto()
 /// Scalar projection is the length of the vector projection, which is the
 /// vector component of a in the direction of b.
 /// See also: https://en.wikipedia.org/wiki/Vector_projection
@@ -829,6 +828,7 @@ T ScalarProjection(const Vec<T, Dim> &a, const Vec<T, Dim> &b) {
 }
 
 
+//TODO move inside vector - VectorProjectionOnto(other)
 /// Returns :math:`\operatorname{proj}_{\mathbf{b}} \mathbf{a}`, *i.e.* the
 /// projection of a onto b
 /// See also: https://en.wikipedia.org/wiki/Vector_projection
