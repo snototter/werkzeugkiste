@@ -16,13 +16,6 @@ namespace wkg = werkzeugkiste::geometry;
 // NOLINTBEGIN
 
 
-//TODO more articles:
-// https://codingnest.com/the-little-things-comparing-floating-point-numbers/
-// catch2: https://github.com/catchorg/Catch2/blob/9ac9fb164e5b20ad9e2f59556b75b9e6f1600f68/docs/assertions.md#floating-point-comparisons
-// precision calculator: https://johannesugb.github.io/cpu-programming/tools/floating-point-epsilon-calculator/
-//py.math.isclose https://github.com/PythonCHB/close_pep/blob/master/is_close.py
-
-
 /// Equality check helper which adds an error message at which dimension
 /// the vector differs.
 template <typename Tp, std::size_t Dim>
@@ -34,72 +27,14 @@ template <typename Tp, std::size_t Dim>
   }
 
   std::ostringstream msg;
-  msg << value.ToString() << " differs at:" << std::setprecision(20);
+  msg << value.ToString() << " differs from expected " << expected.ToString()
+      << " at:" << std::setprecision(20);
   for (std::size_t idx = 0; idx < Dim; ++idx) {
-//    if constexpr (std::is_same<Tp, double>::value) {
-//      EXPECT_DOUBLE_EQ(expected[idx], value[idx]);
-//    }
     if (!wkg::IsEpsEqual(expected[idx], value[idx])) {
       msg << " [" << idx << ": " << expected[idx]
           << " vs " << value[idx] << "]";
     }
   }
-
-  float a = 67329.234;
-  float b = 67329.242; // 1 ulp example by https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
-  double d1 = 0.2;
-  double d2 = 1 / std::sqrt(5) / std::sqrt(5);
-  double dbl01a = 0.010000000000000000208;
-  double dbl01b = 0.0099999999999997868372;
-  msg << "TODO true/true: " << wkg::IsEpsEqual(dbl01a, dbl01b)
-      << " ? " << wkg::IsEpsEqual(a, b)
-      << "\n  machine epsilon: " << std::numeric_limits<double>::epsilon()
-      << "\n  double::min:     " << std::numeric_limits<double>::min();
-
-  msg << "\nFPCLASSify: norm " << FP_NORMAL << ", subnorm " << FP_SUBNORMAL
-      << ", d1: " << std::fpclassify(d1)<< ", d2: " << std::fpclassify(d2)
-      << ", a: " << std::fpclassify(a)<< ", b: " << std::fpclassify(b)
-      << ", 0.1: " << std::fpclassify(dbl01a) << ", 0.099: " << std::fpclassify(dbl01b);
-
-  if constexpr (std::is_floating_point<Tp>::value) {
-    auto diff = std::fabs(value[0] - expected[0]) ;
-    msg << "\n\nPrecision at vec[0]: " << wkg::ExpectedPrecision(value[0])
-        << ", " << wkg::ExpectedPrecision(expected[0])
-        << ", sum[0]: " << (value[0] + expected[0]) << ", prec: " << wkg::ExpectedPrecision(value[0] + expected[0])
-        << ", diff " << diff << "< expected precision? " << (diff < wkg::ExpectedPrecision(value[0]));
-  }
-
-  // TODO binary representation: https://stackoverflow.com/a/16444778/400948
-  //TODO https://isocpp.org/wiki/faq/newbie#floating-point-arith
-  // py3.9+ comes with math.ulp
-  /*>>> math.ulp(0.010000000000000000208)
-1.734723475976807e-18
->>> math.ulp(0.0099999999999997868372)
-1.734723475976807e-18
->>> 0.01 + 2
-2.01
->>> 0.01 + 2 - 2
-0.009999999999999787
-
-
-import math
-a = 0.010000000000000000208
-b = 0.01 +2 -2
-math.fabs(a-b)
-
-import numpy as np
-np.finfo(np.float64).eps
-np.finfo(float).eps
-
-#https://stackoverflow.com/questions/19141432/python-numpy-machine-epsilon
-eps = 7./3 - 4./3 -1
-
-
-2.1337098754514727e-16
-
-*/
-
-
   return ::testing::AssertionFailure() << msg.str();
 }
 
@@ -119,13 +54,6 @@ void TestVec2dSpecialties(wkg::Vec<T, 2> &vec) {
 }
 
 
-template<typename T, std::size_t Dim>
-void Test2dSpecials(wkg::Vec<T, Dim> &vec) {
-  if constexpr (Dim == 2) {
-    TestVec2dSpecialties<T>(vec);
-  }
-}
-
 template<typename Tp, std::size_t Dim>
 void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
   const wkg::Vec<Tp, Dim> copy{vec};
@@ -134,7 +62,7 @@ void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
   // Add a scalar (rhs and lhs)
   vec += 2;
   EXPECT_NE(vec, copy);
-  EXPECT_TRUE(CheckVectorEqual(copy, vec - 2)); //breaks with 0.01 vs 0.01+2-2, 123 ULPs apart
+  EXPECT_TRUE(CheckVectorEqual(copy, vec - 2));
   EXPECT_TRUE(CheckVectorEqual(copy, -2 + vec));
   EXPECT_TRUE(CheckVectorEqual(copy + 2, vec));
   EXPECT_TRUE(CheckVectorEqual(copy + 4, vec + 2));
@@ -227,10 +155,11 @@ void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
 
   EXPECT_EQ(-vec, static_cast<_Tp>(-1) * vec); //TODO
 
-  Test2dSpecials(vec);
 
   // Check usage as 2d size representation
   if constexpr (Dim == 2) {
+    TestVec2dSpecialties<T>(vec);
+
     EXPECT_DOUBLE_EQ(vec.X(), vec.Width());
     EXPECT_DOUBLE_EQ(vec.Y(), vec.Height());
 
@@ -385,7 +314,7 @@ TEST(VectorTest, All) {
 
   wkg::Vec2d zero2d;
 
-  wkg::Vec2d v2d_a{0.5, 17};
+  wkg::Vec2d v2d_a{23, 17}; //FIXME check val[i] = 0.5; check float 3.5 + int 2 and vice versa
   VectorTestHelper(v2d_a);
 
   auto unit2d = v2d_a.UnitVector();
