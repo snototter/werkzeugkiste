@@ -100,12 +100,12 @@ void TestIndexing(wkg::Vec<Tp, Dim> vec) {
   EXPECT_THROW(vec[-DimInt - 2], std::out_of_range);
 
   // Negative indexing with unchecked access:
-  for (int i = 0; i < DimInt; ++i) {
-    EXPECT_EQ(vec.val[DimInt - i - 1], vec[-(i+1)]);
+  for (int idx = 0; idx < DimInt; ++idx) {
+    EXPECT_EQ(vec.val[DimInt - idx - 1], vec[-(idx + 1)]);
   }
 
   // Mutable access:
-  for (auto idx = 0; idx < Dim; ++idx) {
+  for (int idx = 0; idx < DimInt; ++idx) {
     vec[idx] = 42 * idx;
     EXPECT_DOUBLE_EQ(vec.val[idx], 42 * idx);
   }
@@ -224,7 +224,7 @@ void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
   vec += offset;
   EXPECT_EQ(copy, vec);
 
-  for (auto idx = 0; idx < Dim; ++idx) {
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
     offset[idx] = static_cast<Tp>(42 * idx);
   }
 
@@ -448,12 +448,7 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   auto vec_4x = static_cast<Tp>(4) * vec;
   dist = vec.DistanceEuclidean(vec_4x);
   EXPECT_DOUBLE_EQ(dist, len * 3);
-
-
-
 }
-
-
 
 
 template<typename Tp, std::size_t Dim>
@@ -467,7 +462,7 @@ void TestCreation(wkg::Vec<Tp, Dim> vec) {
   auto all2 = V::All(12345);
   auto all3 = V::All(0);
   auto all4 = V::All(static_cast<Tp>(0.001));
-  for (auto idx = 0; idx < Dim; ++idx) {
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
     EXPECT_TRUE(wkg::IsEpsEqual(static_cast<Tp>(-17), all1[idx]));
     EXPECT_TRUE(wkg::IsEpsEqual(static_cast<Tp>(12345), all2[idx]));
     EXPECT_TRUE(wkg::IsEpsZero(all3[idx]));
