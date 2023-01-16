@@ -209,6 +209,7 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
         << " (because of 1e-10 precision threshold).";
   }
 
+
   // Similar to the double-precision loop above, we also
   // conduct additional single-precision checks:
   for (float value : {0.1F, 0.01F, 0.01F, 1.0F, 10.0F, 12.0F, 1000.0F, 1234.56F, 0.001234F}) {
