@@ -39,18 +39,18 @@ double Rad2Deg(double rad) {
 // https://randomascii.wordpress.com/category/floating-point/
 
 
-/// Helper to check if the floating point number x is approximately zero.
-template <typename T>
-inline bool _eps_zero(T x, std::true_type /* is_floating_point */) { // NOLINT
-  return std::fabs(x) < (2 * std::numeric_limits<T>::epsilon());
-}
+///// Helper to check if the floating point number x is approximately zero.
+//template <typename T>
+//inline bool _eps_zero(T x, std::true_type /* is_floating_point */) { // NOLINT
+//  return std::fabs(x) < (2 * std::numeric_limits<T>::epsilon());
+//}
 
 
-/// Helper to check if the integral number x is zero.
-template <typename T>
-inline bool _eps_zero(T x, std::false_type /* is_floating_point */) { // NOLINT
-  return x == static_cast<T>(0);
-}
+///// Helper to check if the integral number x is zero.
+//template <typename T>
+//inline bool _eps_zero(T x, std::false_type /* is_floating_point */) { // NOLINT
+//  return x == static_cast<T>(0);
+//}
 
 
 /// Uses the machine epsilon to check whether the given number is
@@ -62,7 +62,12 @@ bool IsEpsZero(T x) {
   static_assert(
     std::is_arithmetic<T>::value,
     "Non-arithmetic input type provided for IsEpsZero().");
-  return _eps_zero(x, std::is_floating_point<T>());
+//  return _eps_zero(x, std::is_floating_point<T>());
+  if constexpr (std::is_floating_point<T>::value) {
+    return std::fabs(x) <= std::numeric_limits<T>::epsilon();
+  } else {
+    return x == static_cast<T>(0);
+  }
 }
 
 
@@ -91,9 +96,10 @@ typename std::enable_if<
 //  return (
 //        (std::fabs(x-y) <= std::numeric_limits<T>::epsilon() * std::fabs(x+y) * static_cast<T>(ulp))
 //      || (std::fabs(x-y) < std::numeric_limits<T>::min()));
+//FIXME doc - 6 digits single-precision, 10digits double/long precision
 template <typename T> inline constexpr
-bool _eps_equal(T x, T y, //T relative_tolerance, T absolute_tolerance) {
-                unsigned int ulp) {
+bool _eps_equal(T x, T y) {//, //T relative_tolerance, T absolute_tolerance) {
+                //unsigned int ulp) {
   if (std::isinf(x) || std::isinf(y)) {
     return false;
   }
@@ -105,12 +111,13 @@ bool _eps_equal(T x, T y, //T relative_tolerance, T absolute_tolerance) {
   }
 
   const auto sum = std::fabs(x + y);
-  const auto eps = std::max(ExpectedPrecision(x), ExpectedPrecision(y));
-  return (diff <= std::max(
-            std::numeric_limits<T>::epsilon(), static_cast<T>(ulp) * eps * sum));
-//  return ((diff <= std::fabs(ulp * std::numeric_limits<T>::epsilon() * std::fabs(x + y))) // scaled epsilon
-//          || (diff < std::numeric_limits<T>::min())); // diff is a subnormal float
-//          //|| (diff <= absolute_tolerance));
+  if constexpr (std::is_same<float, T>::value) {
+    constexpr float eps = 0.000001F;
+    return diff <= (eps * sum);
+  } else {
+    constexpr T eps = 1e-10;
+    return diff <= (eps * sum);
+  }
 }
 
 
@@ -132,12 +139,12 @@ bool _eps_equal(T x, T y, //T relative_tolerance, T absolute_tolerance) {
 /// Check the `GeometryUtilsTest.FloatingPointEquality` test case for some
 /// caveats when comparing floating point numbers.
 template<typename T> inline constexpr
-bool IsEpsEqual(T x, T y, unsigned int ulp=4) {
+bool IsEpsEqual(T x, T y) {
   static_assert(
     std::is_arithmetic<T>::value,
     "Non-arithmetic input type provided for IsEpsEqual().");
   if constexpr (std::is_floating_point<T>::value) {
-    return _eps_equal(x, y, ulp);
+    return _eps_equal(x, y);
 //          x, y,
 //          std::numeric_limits<T>::epsilon() * 1000,
 //          std::numeric_limits<T>::epsilon());

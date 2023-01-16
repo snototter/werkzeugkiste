@@ -23,63 +23,6 @@ namespace wkg = werkzeugkiste::geometry;
 //py.math.isclose https://github.com/PythonCHB/close_pep/blob/master/is_close.py
 
 
-uint64_t SAM2B(double v) {
-  union fpunion {
-    double dbl;
-    uint64_t uint;
-  };
-
-  const std::size_t num_bits = 8 * sizeof(double);
-  const uint64_t sign_bit_mask = static_cast<uint64_t>(1) << (num_bits - 1);
-
-  fpunion val{ .dbl = v };
-
-  if (val.uint & sign_bit_mask) {
-    return (~val.uint) + 1;
-  } else {
-    return sign_bit_mask | val.uint;
-  }
-}
-
-
-uint32_t SAM2B(float v) {
-  union fpunion {
-    float flt;
-    uint32_t uint;
-  };
-
-  const std::size_t num_bits = 8 * sizeof(float);
-  const uint32_t sign_bit_mask = static_cast<uint32_t>(1) << (num_bits - 1);
-
-  fpunion val{ .flt = v };
-
-  if (val.uint & sign_bit_mask) {
-    return (~val.uint) + 1;
-  } else {
-    return sign_bit_mask | val.uint;
-  }
-}
-
-
-std::size_t DistanceULP (double a, double b) {
-  static_assert(sizeof(double) == 8, "TODO");
-  static_assert(sizeof(uint64_t) == 8, "TODO");
-  uint64_t biased_a = SAM2B(a);
-  uint64_t biased_b = SAM2B(b);
-
-  return (biased_a >= biased_b) ? (biased_a - biased_b) : (biased_b - biased_a);
-}
-
-
-std::size_t DistanceULP (float a, float b) {
-  static_assert(sizeof(float) == 4, "TODO");
-  static_assert(sizeof(uint32_t) == 4, "TODO");
-  uint32_t biased_a = SAM2B(a);
-  uint32_t biased_b = SAM2B(b);
-
-  return (biased_a >= biased_b) ? (biased_a - biased_b) : (biased_b - biased_a);
-}
-
 /// Equality check helper which adds an error message at which dimension
 /// the vector differs.
 template <typename Tp, std::size_t Dim>
@@ -98,8 +41,7 @@ template <typename Tp, std::size_t Dim>
 //    }
     if (!wkg::IsEpsEqual(expected[idx], value[idx])) {
       msg << " [" << idx << ": " << expected[idx]
-          << " vs " << value[idx] << ", ulps: "
-          << DistanceULP((double)expected[idx], value[idx]) << "]";
+          << " vs " << value[idx] << "]";
     }
   }
 
@@ -109,9 +51,8 @@ template <typename Tp, std::size_t Dim>
   double d2 = 1 / std::sqrt(5) / std::sqrt(5);
   double dbl01a = 0.010000000000000000208;
   double dbl01b = 0.0099999999999997868372;
-  msg << "TODO ulp 0.010000000000000000208, 0.0099999999999997868372: " << DistanceULP(dbl01a, dbl01b)
-      << " |||1ulp? " << DistanceULP(a, b)
-      << "\nd1=" << d1 << ", d2=" << d2 << ", ulps: " << DistanceULP(d1, d2)
+  msg << "TODO true/true: " << wkg::IsEpsEqual(dbl01a, dbl01b)
+      << " ? " << wkg::IsEpsEqual(a, b)
       << "\n  machine epsilon: " << std::numeric_limits<double>::epsilon()
       << "\n  double::min:     " << std::numeric_limits<double>::min();
 

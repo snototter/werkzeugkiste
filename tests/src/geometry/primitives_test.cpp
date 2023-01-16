@@ -260,9 +260,9 @@ TEST(GeometricPrimitives, Plane) {
   EXPECT_TRUE(plane.IsPointOnPlane(pt3));
 
   wkg::Vec3d pt = -plane.Offset() * plane.Normal();
-  EXPECT_TRUE(wkg::IsEpsZero(plane.DistancePointToPlane(pt)));
+  EXPECT_TRUE(wkg::IsEpsZero(plane.DistancePointToPlane(pt))) << "Point should be on plane, but distance is " << plane.DistancePointToPlane(pt);
   EXPECT_TRUE(plane.IsPointInFrontOfPlane(pt));
-  EXPECT_TRUE(plane.IsPointOnPlane(pt));
+  EXPECT_TRUE(plane.IsPointOnPlane(pt)) << "Point should be on plane, but distance is " << plane.DistancePointToPlane(pt);
 
   pt += plane.Normal();
   EXPECT_DOUBLE_EQ(plane.DistancePointToPlane(pt), 1.0);
