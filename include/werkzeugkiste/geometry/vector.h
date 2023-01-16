@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <initializer_list>
 #include <cmath>
+#include <limits>
 #include <vector>
 #include <cstdint>
 #include <type_traits>
@@ -396,11 +397,11 @@ class Vec {
 
   /// Returns true if all dimensions of both vectors are (approximately)
   /// equal. Floating point numbers are considered approximately equal if
-  /// they differ by less than 2 units in the last place (ULP, units of
+  /// they differ by less than 4 units in the last place (ULP, units of
   /// least precision).
   bool EpsEquals(const Vec<T, Dim> &other) const {
     for (index_type i = 0; i < Dim; ++i) {
-      if (!IsEpsEqual(val[i], other.val[i], 2)) {
+      if (!IsEpsEqual(val[i], other.val[i])) {
         return false;
       }
     }
@@ -431,13 +432,13 @@ class Vec {
   }
 
 
-  /// Overloaded for convenience, see `AddVector`.
+  /// Overloaded `vec1 + vec2`, see `AddVector`.
   Vec<T, Dim> &operator+=(const Vec<T, Dim>& rhs) {
     return AddVector(rhs);
   }
 
 
-  /// Overloaded for convenience. By-value passing of lhs helps optimizing
+  /// Overloaded `vec1 + vec2`. By-value passing of lhs helps optimizing
   /// chained a+b+c equations.
   friend Vec<T, Dim> operator+(Vec<T, Dim> lhs, const Vec<T, Dim> &rhs) {
     lhs += rhs;
@@ -454,16 +455,23 @@ class Vec {
   }
 
 
-  /// Overloaded for convenience, see `AddScalar`.
+  /// Overloaded `vec += scalar`, see `AddScalar`.
   Vec<T, Dim> &operator+=(T value) {
     return AddScalar(value);
   }
 
 
-  /// Overloaded for convenience.
+  /// Overloaded `vec + scalar`.
   friend Vec<T, Dim> operator+(Vec<T, Dim> lhs, T rhs) {
     lhs += rhs;
     return lhs;
+  }
+
+
+  /// Overloaded `scalar + vec`.
+  friend Vec<T, Dim> operator+(T lhs, Vec<T, Dim> rhs) {
+    rhs += lhs;
+    return rhs;
   }
 
 
@@ -476,13 +484,13 @@ class Vec {
   }
 
 
-  /// Overloaded for convenience, see `SubtractVector`.
+  /// Overloaded `vec1 -= vec2`, see `SubtractVector`.
   Vec<T, Dim> &operator-=(const Vec<T, Dim>& rhs) {
     return SubtractVector(rhs);
   }
 
 
-  /// Overloaded for convenience.
+  /// Overloaded `vec1 -= vec2`.
   friend Vec<T, Dim> operator-(Vec<T, Dim> lhs, const Vec<T, Dim> &rhs) {
     lhs -= rhs;
     return lhs;
@@ -498,13 +506,13 @@ class Vec {
   }
 
 
-  /// Overloaded for convenience, see `SubtractScalar`.
+  /// Overloaded `vec -= scalar`, see `SubtractScalar`.
   Vec<T, Dim> &operator-=(T value) {
     return SubtractScalar(value);
   }
 
 
-  /// Overloaded for convenience.
+  /// Overloaded `vec - scalar`.
   friend Vec<T, Dim> operator-(Vec<T, Dim> lhs, T rhs) {
     lhs -= rhs;
     return lhs;
@@ -521,26 +529,26 @@ class Vec {
   }
 
 
-  /// Overloaded for convenience, see `Multiply`.
+  /// Overloaded `vec *= scalar`, see `Multiply`.
   Vec<T, Dim> &operator*=(T scale) {
     return Multiply(scale);
   }
 
 
-  /// Overloaded for convenience.
+  /// Overloaded `vec * scalar`.
   friend Vec<T, Dim> operator*(Vec<T, Dim> lhs, T rhs) {
     lhs *= rhs;
     return lhs;
   }
 
 
-  /// Overloaded for convenience.
+  /// Overloaded `scalar * vec`.
   friend Vec<T, Dim> operator*(T lhs, Vec<T, Dim> rhs) {
     rhs *= lhs;
     return rhs;
   }
 
-
+//TODO doc
 
   /// Divides each element by the given scalar and returns the modified
   /// instance. Note that division is only supported for floating point
@@ -570,8 +578,8 @@ class Vec {
   /// Overloaded for convenience. Divides each dimension by the given scalar.
   template<typename Tp = T>
   friend Vec<typename std::enable_if<
-          std::is_floating_point<Tp>::value,
-          Tp>::type, Dim> operator/(Vec<T, Dim> lhs, T rhs) {
+            std::numeric_limits<Tp>::is_iec559, Tp>::type,
+            Dim> operator/(Vec<T, Dim> lhs, T rhs) {
     lhs /= rhs;
     return lhs;
   }

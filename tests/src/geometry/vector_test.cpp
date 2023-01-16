@@ -3,6 +3,8 @@
 #include <cmath>
 #include <vector>
 #include <list>
+#include <sstream>
+#include <iomanip>
 
 #include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
@@ -12,6 +14,154 @@
 namespace wkg = werkzeugkiste::geometry;
 
 // NOLINTBEGIN
+
+
+//TODO more articles:
+// https://codingnest.com/the-little-things-comparing-floating-point-numbers/
+// catch2: https://github.com/catchorg/Catch2/blob/9ac9fb164e5b20ad9e2f59556b75b9e6f1600f68/docs/assertions.md#floating-point-comparisons
+// precision calculator: https://johannesugb.github.io/cpu-programming/tools/floating-point-epsilon-calculator/
+//py.math.isclose https://github.com/PythonCHB/close_pep/blob/master/is_close.py
+
+
+uint64_t SAM2B(double v) {
+  union fpunion {
+    double dbl;
+    uint64_t uint;
+  };
+
+  const std::size_t num_bits = 8 * sizeof(double);
+  const uint64_t sign_bit_mask = static_cast<uint64_t>(1) << (num_bits - 1);
+
+  fpunion val{ .dbl = v };
+
+  if (val.uint & sign_bit_mask) {
+    return (~val.uint) + 1;
+  } else {
+    return sign_bit_mask | val.uint;
+  }
+}
+
+
+uint32_t SAM2B(float v) {
+  union fpunion {
+    float flt;
+    uint32_t uint;
+  };
+
+  const std::size_t num_bits = 8 * sizeof(float);
+  const uint32_t sign_bit_mask = static_cast<uint32_t>(1) << (num_bits - 1);
+
+  fpunion val{ .flt = v };
+
+  if (val.uint & sign_bit_mask) {
+    return (~val.uint) + 1;
+  } else {
+    return sign_bit_mask | val.uint;
+  }
+}
+
+
+std::size_t DistanceULP (double a, double b) {
+  static_assert(sizeof(double) == 8, "TODO");
+  static_assert(sizeof(uint64_t) == 8, "TODO");
+  uint64_t biased_a = SAM2B(a);
+  uint64_t biased_b = SAM2B(b);
+
+  return (biased_a >= biased_b) ? (biased_a - biased_b) : (biased_b - biased_a);
+}
+
+
+std::size_t DistanceULP (float a, float b) {
+  static_assert(sizeof(float) == 4, "TODO");
+  static_assert(sizeof(uint32_t) == 4, "TODO");
+  uint32_t biased_a = SAM2B(a);
+  uint32_t biased_b = SAM2B(b);
+
+  return (biased_a >= biased_b) ? (biased_a - biased_b) : (biased_b - biased_a);
+}
+
+/// Equality check helper which adds an error message at which dimension
+/// the vector differs.
+template <typename Tp, std::size_t Dim>
+::testing::AssertionResult CheckVectorEqual(
+    const wkg::Vec<Tp, Dim> &expected,
+    const wkg::Vec<Tp, Dim> &value) {
+  if (value.EpsEquals(expected)) {
+    return ::testing::AssertionSuccess();
+  }
+
+  std::ostringstream msg;
+  msg << value.ToString() << " differs at:" << std::setprecision(20);
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+//    if constexpr (std::is_same<Tp, double>::value) {
+//      EXPECT_DOUBLE_EQ(expected[idx], value[idx]);
+//    }
+    if (!wkg::IsEpsEqual(expected[idx], value[idx])) {
+      msg << " [" << idx << ": " << expected[idx]
+          << " vs " << value[idx] << ", ulps: "
+          << DistanceULP((double)expected[idx], value[idx]) << "]";
+    }
+  }
+
+  float a = 67329.234;
+  float b = 67329.242; // 1 ulp example by https://randomascii.wordpress.com/2012/02/25/comparing-floating-point-numbers-2012-edition/
+  double d1 = 0.2;
+  double d2 = 1 / std::sqrt(5) / std::sqrt(5);
+  double dbl01a = 0.010000000000000000208;
+  double dbl01b = 0.0099999999999997868372;
+  msg << "TODO ulp 0.010000000000000000208, 0.0099999999999997868372: " << DistanceULP(dbl01a, dbl01b)
+      << " |||1ulp? " << DistanceULP(a, b)
+      << "\nd1=" << d1 << ", d2=" << d2 << ", ulps: " << DistanceULP(d1, d2)
+      << "\n  machine epsilon: " << std::numeric_limits<double>::epsilon()
+      << "\n  double::min:     " << std::numeric_limits<double>::min();
+
+  msg << "\nFPCLASSify: norm " << FP_NORMAL << ", subnorm " << FP_SUBNORMAL
+      << ", d1: " << std::fpclassify(d1)<< ", d2: " << std::fpclassify(d2)
+      << ", a: " << std::fpclassify(a)<< ", b: " << std::fpclassify(b)
+      << ", 0.1: " << std::fpclassify(dbl01a) << ", 0.099: " << std::fpclassify(dbl01b);
+
+  if constexpr (std::is_floating_point<Tp>::value) {
+    auto diff = std::fabs(value[0] - expected[0]) ;
+    msg << "\n\nPrecision at vec[0]: " << wkg::ExpectedPrecision(value[0])
+        << ", " << wkg::ExpectedPrecision(expected[0])
+        << ", sum[0]: " << (value[0] + expected[0]) << ", prec: " << wkg::ExpectedPrecision(value[0] + expected[0])
+        << ", diff " << diff << "< expected precision? " << (diff < wkg::ExpectedPrecision(value[0]));
+  }
+
+  // TODO binary representation: https://stackoverflow.com/a/16444778/400948
+  //TODO https://isocpp.org/wiki/faq/newbie#floating-point-arith
+  // py3.9+ comes with math.ulp
+  /*>>> math.ulp(0.010000000000000000208)
+1.734723475976807e-18
+>>> math.ulp(0.0099999999999997868372)
+1.734723475976807e-18
+>>> 0.01 + 2
+2.01
+>>> 0.01 + 2 - 2
+0.009999999999999787
+
+
+import math
+a = 0.010000000000000000208
+b = 0.01 +2 -2
+math.fabs(a-b)
+
+import numpy as np
+np.finfo(np.float64).eps
+np.finfo(float).eps
+
+#https://stackoverflow.com/questions/19141432/python-numpy-machine-epsilon
+eps = 7./3 - 4./3 -1
+
+
+2.1337098754514727e-16
+
+*/
+
+
+  return ::testing::AssertionFailure() << msg.str();
+}
+
 
 //TODO FIXME - make proper tests & change all assertions (1st param is expected; 2nd is actual value)
 
@@ -35,11 +185,97 @@ void Test2dSpecials(wkg::Vec<T, Dim> &vec) {
   }
 }
 
+template<typename Tp, std::size_t Dim>
+void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
+  const wkg::Vec<Tp, Dim> copy{vec};
+  EXPECT_EQ(copy, vec);
+
+  // Add a scalar (rhs and lhs)
+  vec += 2;
+  EXPECT_NE(vec, copy);
+  EXPECT_TRUE(CheckVectorEqual(copy, vec - 2)); //breaks with 0.01 vs 0.01+2-2, 123 ULPs apart
+  EXPECT_TRUE(CheckVectorEqual(copy, -2 + vec));
+  EXPECT_TRUE(CheckVectorEqual(copy + 2, vec));
+  EXPECT_TRUE(CheckVectorEqual(copy + 4, vec + 2));
+
+  // Add a negative scalar
+  vec = copy;
+  EXPECT_EQ(copy, vec);
+  vec += (-21);
+  EXPECT_NE(vec, copy);
+  EXPECT_TRUE(CheckVectorEqual(copy, vec + 21));
+  EXPECT_TRUE(CheckVectorEqual(copy, 21 + vec));
+  EXPECT_TRUE(CheckVectorEqual(copy - 21, vec));
+
+  // Subtract positive scalar
+  vec = copy;
+  EXPECT_EQ(copy, vec);
+  vec -= 23;
+  EXPECT_NE(vec, copy);
+  EXPECT_TRUE(CheckVectorEqual(copy, vec + 23));
+  EXPECT_TRUE(CheckVectorEqual(copy, 23 + vec));
+  EXPECT_TRUE(CheckVectorEqual(copy - 23, vec));
+
+
+  // Subtract negative scalar
+  vec = copy;
+  EXPECT_EQ(copy, vec);
+  vec -= (-4200);
+  EXPECT_NE(vec, copy);
+  EXPECT_TRUE(CheckVectorEqual(copy, vec - 4200));
+  EXPECT_TRUE(CheckVectorEqual(copy + 4200, vec));
+  EXPECT_TRUE(CheckVectorEqual(4200 + copy, vec));
+}
+
+
+template<typename Tp, std::size_t Dim>
+void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
+  const wkg::Vec<Tp, Dim> copy{vec};
+  EXPECT_EQ(copy, vec);
+
+  wkg::Vec<Tp, Dim> offset{};
+  const auto zero = wkg::Vec<Tp, Dim>::All(0);
+  EXPECT_EQ(offset, zero);
+
+  vec += offset;
+  EXPECT_EQ(copy, vec);
+
+  vec += (-21);
+  EXPECT_NE(vec, copy);
+  EXPECT_EQ(copy, vec + 19);
+  EXPECT_EQ(copy - 19, vec);
+
+  //TODO extend
+}
+
+
+template<typename Tp, std::size_t Dim>
+void TestConversion(wkg::Vec<Tp, Dim> vec) {
+  wkg::Vec<double, Dim> offset;
+
+  if constexpr (std::numeric_limits<Tp>::is_integer) {
+    auto result = vec.ToDouble() + offset;
+    EXPECT_EQ(result.ToInteger(), vec);
+  } else {
+//    auto result = vec.ToInteger() + offset;
+//    EXPECT_EQ(result, vec);
+  }
+}
 
 
 template<typename _Tp, std::size_t Dim>
 void VectorTestHelper(wkg::Vec<_Tp, Dim> &vec) {
-  EXPECT_GE(Dim, 2);
+//TODO check https://bitbashing.io/comparing-floats.html
+  //
+//  EXPECT_DOUBLE_EQ(0.010000000000000000208, 0.0099999999999997868372);
+  // Indexing
+  //TODO
+
+  // Integral/floating point conversion
+  TestConversion(vec);
+
+  // Arithmetics
+  TestScalarAddSub(vec);
 
   constexpr int DIM_INT = static_cast<int>(Dim);
 
@@ -208,7 +444,7 @@ TEST(VectorTest, All) {
 
   wkg::Vec2d zero2d;
 
-  wkg::Vec2d v2d_a{23, 17};
+  wkg::Vec2d v2d_a{0.5, 17};
   VectorTestHelper(v2d_a);
 
   auto unit2d = v2d_a.UnitVector();

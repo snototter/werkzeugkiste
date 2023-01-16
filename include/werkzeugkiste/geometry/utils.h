@@ -66,28 +66,61 @@ bool IsEpsZero(T x) {
 }
 
 
+/// Computes the floating point precision at the given value via
+/// the next/previous representable number. This can be used as
+/// a flexible epsilon in comparisons.
+template <typename T> inline constexpr
+typename std::enable_if<
+    std::is_floating_point<T>::value, T>::type ExpectedPrecision(T x) {
+  T next = std::nextafter(x, std::numeric_limits<T>::infinity());
+  T prev = std::nextafter(x, -std::numeric_limits<T>::infinity());
+  return std::max(next - x, x - prev);
+}
+
 /// Epsilon equality check for floating point numbers.
+//template <typename T> inline constexpr
+//bool _eps_equal(  // NOLINT
+//    T x, T y, unsigned int ulp, std::true_type /* is_floating_point */) {
+//      T x, T y, T eps, std::true_type /* is_floating_point */) {
+//  // Adapted (using fabs) from the STL reference:
+//  // https://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
+//  // Returns (A) || (B), where:
+//  // (A) The machine epsilon has to be scaled to the magnitude of the values used
+//  //     and multiplied by the desired precision in ULPs (units in the last place),
+//  // (B) unless the result is subnormal.
+//  return (
+//        (std::fabs(x-y) <= std::numeric_limits<T>::epsilon() * std::fabs(x+y) * static_cast<T>(ulp))
+//      || (std::fabs(x-y) < std::numeric_limits<T>::min()));
 template <typename T> inline constexpr
-bool _eps_equal(  // NOLINT
-    T x, T y, unsigned int ulp, std::true_type /* is_floating_point*/) {
-  // Adapted (using fabs) from the STL reference:
-  // https://en.cppreference.com/w/cpp/types/numeric_limits/epsilon
-  // Returns (A) || (B), where:
-  // (A) The machine epsilon has to be scaled to the magnitude of the values used
-  //     and multiplied by the desired precision in ULPs (units in the last place),
-  // (B) unless the result is subnormal.
-  return (
-        (std::fabs(x-y) <= std::numeric_limits<T>::epsilon() * std::fabs(x+y) * static_cast<T>(ulp))
-      || (std::fabs(x-y) < std::numeric_limits<T>::min()));
+bool _eps_equal(T x, T y, //T relative_tolerance, T absolute_tolerance) {
+                unsigned int ulp) {
+  if (std::isinf(x) || std::isinf(y)) {
+    return false;
+  }
+
+  const auto diff = std::fabs(x - y);
+  if (diff < std::numeric_limits<T>::min()) {
+    // Difference is subnormal
+    return true;
+  }
+
+  const auto sum = std::fabs(x + y);
+  const auto eps = std::max(ExpectedPrecision(x), ExpectedPrecision(y));
+  return (diff <= std::max(
+            std::numeric_limits<T>::epsilon(), static_cast<T>(ulp) * eps * sum));
+//  return ((diff <= std::fabs(ulp * std::numeric_limits<T>::epsilon() * std::fabs(x + y))) // scaled epsilon
+//          || (diff < std::numeric_limits<T>::min())); // diff is a subnormal float
+//          //|| (diff <= absolute_tolerance));
 }
 
 
-/// Epsilon equality check for non-floating point numbers.
-template <typename T> inline constexpr
-bool _eps_equal(  // NOLINT
-    T x, T y, unsigned int /* ulp */, std::false_type /* is_floating_point*/) {
-  return x == y;
-}
+///// Epsilon equality check for non-floating point numbers.
+//template <typename T> inline constexpr
+//bool _eps_equal(  // NOLINT
+//    T x, T y, unsigned int /* ulp */, std::false_type /* is_floating_point*/) {
+////  T x, T y, T /* eps */, std::false_type /* is_floating_point */) {
+//  return x == y;
+//}
 
 
 /// Uses the machine epsilon to check for equality based on the desired
@@ -99,12 +132,22 @@ bool _eps_equal(  // NOLINT
 /// Check the `GeometryUtilsTest.FloatingPointEquality` test case for some
 /// caveats when comparing floating point numbers.
 template<typename T> inline constexpr
-bool IsEpsEqual(T x, T y, unsigned int ulp=2) {
+bool IsEpsEqual(T x, T y, unsigned int ulp=4) {
   static_assert(
     std::is_arithmetic<T>::value,
     "Non-arithmetic input type provided for IsEpsEqual().");
-  return _eps_equal(x, y, ulp, std::is_floating_point<T>());
+  if constexpr (std::is_floating_point<T>::value) {
+    return _eps_equal(x, y, ulp);
+//          x, y,
+//          std::numeric_limits<T>::epsilon() * 1000,
+//          std::numeric_limits<T>::epsilon());
+  } else {
+    return x == y;
+  }
+//  return _eps_equal(x, y, ulp, std::is_floating_point<T>());
+//  return _eps_equal(x, y, , std::is_floating_point<T>());
 }
+
 
 
 //-----------------------------------------------------------------------------
