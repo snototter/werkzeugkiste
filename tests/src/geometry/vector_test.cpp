@@ -244,11 +244,13 @@ void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(copy - offset, vec));
 
 
-  for (auto idx = 0; idx < Dim; ++idx) {
-    offset[idx] = static_cast<Tp>(4200 * idx);
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    offset[idx] = static_cast<Tp>(4200 * (idx + 1));
   }
 
   // Add negated vector
+  vec = copy;
+  EXPECT_TRUE(CheckVectorEqual(copy, vec));
   vec += (-offset);
   EXPECT_NE(vec, copy);
   EXPECT_TRUE(CheckVectorEqual(copy, vec + offset));
@@ -272,11 +274,61 @@ void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec) {
   // TODO left-multiply
   // TODO right-multiply
 
-  if constexpr (std::is_floating_point<Tp>::value) {
-    // TODO division
-//    auto x = vec / 3;
+
+  auto vec_dbl = vec.ToDouble();
+
+  // 0.5 * V = V / 2
+  EXPECT_TRUE(CheckVectorEqual(vec_dbl * 0.5, vec_dbl / 2.0));
+  EXPECT_TRUE(CheckVectorEqual(0.5 * vec_dbl, vec_dbl / 2.0));
+//TODO division
+}
+
+
+template<typename Tp, std::size_t Dim>
+void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
+  const wkg::Vec<Tp, Dim> copy{vec};
+  EXPECT_EQ(copy, vec);
+
+  // Element-wise multiplication
+  auto mul = vec * copy;
+  EXPECT_EQ(copy, vec);
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    EXPECT_DOUBLE_EQ(copy[idx] * copy[idx], mul[idx]);
   }
 
+  mul *= vec;
+  EXPECT_EQ(copy, vec);
+  EXPECT_TRUE(CheckVectorEqual(copy * copy * copy, mul));
+
+  vec *= vec;
+  EXPECT_NE(copy, vec);
+  EXPECT_TRUE(CheckVectorEqual(copy * copy, vec));
+
+  // Element-wise division
+  // V / V = 1
+  auto vec_dbl = vec.ToDouble();
+  auto ones = wkg::Vec<double, Dim>::All(1.0);
+
+  auto result = vec_dbl / vec_dbl;
+  //FIXME isnan
+  EXPECT_TRUE(CheckVectorEqual(ones, result));
+
+  auto another_copy {vec_dbl};
+  EXPECT_EQ(vec_dbl, another_copy); //FIXME must break with 0 vector!
+  another_copy /= another_copy;
+  EXPECT_TRUE(CheckVectorEqual(ones, another_copy));
+
+
+  // V * (1 / V) = 1
+  auto vec_inv_mul = 1.0 / vec_dbl;
+  EXPECT_TRUE(CheckVectorEqual(ones, vec_dbl * vec_inv_mul));
+  // (1 / V) * V = 1
+  EXPECT_TRUE(CheckVectorEqual(ones, vec_inv_mul * vec_dbl));
+
+  // (1 / (V / 2)) * V = 1 / 2
+  vec_inv_mul /= 2;
+  EXPECT_TRUE(CheckVectorEqual(ones / 2, vec_inv_mul * vec_dbl));
+  EXPECT_TRUE(CheckVectorEqual(ones * 0.5, vec_inv_mul * vec_dbl));
 }
 
 
@@ -310,6 +362,18 @@ void TestVec3dGeometry(wkg::Vec<Tp, 3> vec) {
 
 
 template<typename Tp, std::size_t Dim>
+void TestHomogeneous(wkg::Vec<Tp, Dim> vec) {
+    auto vh = vec.Homogeneous();
+    EXPECT_EQ(Dim + 1, vh.ndim);
+
+    for (std::size_t idx = 0; idx < Dim; ++idx) {
+      EXPECT_TRUE(wkg::IsEpsEqual(vec[idx], vh[idx]));
+    }
+    EXPECT_TRUE(wkg::IsEpsEqual(static_cast<Tp>(1), vh[Dim]));
+}
+
+
+template<typename Tp, std::size_t Dim>
 void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   // Indexing
   TestIndexing(vec);
@@ -319,7 +383,11 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
 
   // Arithmetics
   TestScalarAddSub(vec);
+  TestVectorAddSub(vec);
   TestScalarMulDiv(vec);
+  TestVectorMulDiv(vec);
+
+  TestHomogeneous(vec);
 
   // Special features of 2d vectors:
   if constexpr (Dim == 2) {
@@ -334,8 +402,6 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
 
 
   // TODO to test:
-  // All
-  // Homogeneoues
   // EpsEquals (non-eps-eq cases are interesting)
   // MaxIndex / MinIndex
   // Max/Min Value
@@ -550,6 +616,13 @@ TEST(VectorTest, All) {
 
   wkg::Vec3d v3d_c{12.3, -0.42, 77.7};
   VectorTestHelper(v3d_c);
+
+  wkg::Vec3d v3d_d{1, 0, -0.0001};
+  EXPECT_DOUBLE_EQ(v3d_d.MaxValue(), 1);
+  EXPECT_DOUBLE_EQ(v3d_d.MinValue(), -0.0001);
+  EXPECT_EQ(v3d_d.MaxIndex(), 0);
+  EXPECT_EQ(v3d_d.MinIndex(), 2);
+  VectorTestHelper(v3d_d);
 
   wkg::Vec2i zero2i;
   EXPECT_DOUBLE_EQ(zero2i.Length(), 0);

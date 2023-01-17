@@ -521,7 +521,7 @@ class Vec {
 
   /// Multiplies each dimension by the given scalar and returns the modified
   /// instance.
-  Vec<T, Dim> &Multiply(T scale) {
+  Vec<T, Dim> &MultiplyScalar(T scale) {
     for (index_type i = 0; i < Dim; ++i) {
       val[i] *= scale;
     }
@@ -529,9 +529,9 @@ class Vec {
   }
 
 
-  /// Overloaded `vec *= scalar`, see `Multiply`.
+  /// Overloaded `vec *= scalar`, see `MultiplyScalar`.
   Vec<T, Dim> &operator*=(T scale) {
-    return Multiply(scale);
+    return MultiplyScalar(scale);
   }
 
 
@@ -549,6 +549,29 @@ class Vec {
   }
 
 
+  /// Performs element-wise multiplication and returns the
+  /// modified instance.
+  Vec<T, Dim> &MultiplyVector(const Vec<T, Dim> &other) {
+    for (index_type i = 0; i < Dim; ++i) {
+      val[i] *= other[i];
+    }
+    return *this;
+  }
+
+
+  /// Overloaded `vec1 *= vec2`, see `MultiplyVector`.
+  Vec<T, Dim> &operator*=(const Vec<T, Dim> &other) {
+    return MultiplyVector(other);
+  }
+
+
+  /// Overloaded `vec1 * vec2`.
+  friend Vec<T, Dim> operator*(Vec<T, Dim> lhs, const Vec<T, Dim> &rhs) {
+    lhs *= rhs;
+    return lhs;
+  }
+
+
   /// Divides each element by the given scalar and returns the modified
   /// instance. Note that division is only supported for floating point
   /// types. Use ToDouble() to obtain a casted copy of this vector before
@@ -556,31 +579,82 @@ class Vec {
   template<typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
-          Tp>::type, Dim> &Divide(Tp scale) {
+          Tp>::type, Dim> &DivideScalar(Tp divisor) {
     for (index_type i = 0; i < Dim; ++i) {
-      val[i] /= scale;
+      val[i] /= divisor;
     }
     return *this;
   }
 
 
-  /// Overloaded for convenience, see `Divide`. Only supported for
+  /// Overloaded for convenience, see `DivideScalar`. Only supported
+  /// for floating point-based vector specializations. Use ToDouble() to
+  /// convert integral vectors before division.
+  template<typename Tp = T>
+  Vec<typename std::enable_if<
+          std::is_floating_point<Tp>::value,
+          Tp>::type, Dim> &operator/=(double divisor) {
+    return DivideScalar(divisor);
+  }
+
+  /// Overloaded for convenience. Divides each dimension by the given scalar.
+  /// Only supported for floating point-based vector specializations.
+  template<typename Tp = T>
+  friend Vec<typename std::enable_if<
+            std::is_floating_point<Tp>::value, Tp>::type,
+            Dim> operator/(Vec<T, Dim> lhs, double divisor) {
+    lhs /= divisor;
+    return lhs;
+  }
+
+
+  /// Performs element-wise division and returns the modified
+  /// instance. Only supported for floating point-based vector
+  /// specializations. Use ToDouble() to convert integral vectors
+  /// before division.
+  template<typename Tp = T>
+  Vec<typename std::enable_if<
+          std::is_floating_point<Tp>::value,
+          Tp>::type, Dim> &DivideVector(const Vec<Tp, Dim> &divisor) {
+    for (index_type i = 0; i < Dim; ++i) {
+      val[i] /= divisor[i];
+    }
+    return *this;
+  }
+
+
+  /// Overloaded element-wise division, see `DivideVector`. Only supported for
   /// floating point-based vector specializations.
   template<typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
-          Tp>::type, Dim> &operator/=(double scale) {
-    return Divide(scale);
+          Tp>::type, Dim> &operator/=(const Vec<Tp, Dim> &divisor) {
+    return DivideVector(divisor);
   }
 
 
-  /// Overloaded for convenience. Divides each dimension by the given scalar.
+  /// Overloaded element-wise division, see `DivideVector`. Only supported for
+  /// floating point-based vector specializations.
   template<typename Tp = T>
   friend Vec<typename std::enable_if<
             std::is_floating_point<Tp>::value, Tp>::type,
-            Dim> operator/(Vec<T, Dim> lhs, T rhs) {
-    lhs /= rhs;
+            Dim> operator/(Vec<T, Dim> lhs, const Vec<Tp, Dim> &divisor) {
+    lhs /= divisor;
     return lhs;
+  }
+
+
+  /// Returns a vector where each dimension is the result of the element-wise
+  /// division `scalar / divisor[dimension]. Only supported for
+  /// floating point-based vector specializations.
+  template<typename Tp = T>
+  friend Vec<typename std::enable_if<
+            std::is_floating_point<Tp>::value, Tp>::type,
+            Dim> operator/(Tp scalar, Vec<T, Dim> vec) {
+    for (index_type idx = 0; idx < Dim; ++idx) {
+      vec.val[idx] = scalar / vec.val[idx];
+    }
+    return vec;
   }
 
 
