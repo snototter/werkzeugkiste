@@ -3,7 +3,6 @@
 #include <cmath>
 #include <vector>
 #include <list>
-#include <sstream>
 #include <iomanip>
 
 #include <werkzeugkiste/geometry/utils.h>
@@ -14,29 +13,6 @@
 namespace wkg = werkzeugkiste::geometry;
 
 // NOLINTBEGIN
-
-
-/// Equality check helper which adds an error message at which dimension
-/// the vector differs.
-template <typename Tp, std::size_t Dim>
-::testing::AssertionResult CheckVectorEqual(
-    const wkg::Vec<Tp, Dim> &expected,
-    const wkg::Vec<Tp, Dim> &value) {
-  if (value.EpsEquals(expected)) {
-    return ::testing::AssertionSuccess();
-  }
-
-  std::ostringstream msg;
-  msg << value.ToString() << " differs from expected " << expected.ToString()
-      << " at:" << std::setprecision(20);
-  for (std::size_t idx = 0; idx < Dim; ++idx) {
-    if (!wkg::IsEpsEqual(expected[idx], value[idx])) {
-      msg << " [" << idx << ": " << expected[idx]
-          << " vs " << value[idx] << "]";
-    }
-  }
-  return ::testing::AssertionFailure() << msg.str();
-}
 
 
 template<typename Tp, std::size_t Dim>
@@ -204,11 +180,11 @@ void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
   // Subtract negative scalar
   vec = copy;
   EXPECT_EQ(copy, vec);
-  vec -= (-4200);
+  vec -= (-512);
   EXPECT_NE(vec, copy);
-  EXPECT_TRUE(CheckVectorEqual(copy, vec - 4200));
-  EXPECT_TRUE(CheckVectorEqual(copy + 4200, vec));
-  EXPECT_TRUE(CheckVectorEqual(4200 + copy, vec));
+  EXPECT_TRUE(CheckVectorEqual(copy, vec - 512));
+  EXPECT_TRUE(CheckVectorEqual(copy + 512, vec));
+  EXPECT_TRUE(CheckVectorEqual(512 + copy, vec));
 }
 
 
@@ -245,7 +221,7 @@ void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
 
 
   for (std::size_t idx = 0; idx < Dim; ++idx) {
-    offset[idx] = static_cast<Tp>(4200 * (idx + 1));
+    offset[idx] = static_cast<Tp>(420 * (idx + 1));
   }
 
   // Add negated vector
@@ -253,17 +229,63 @@ void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(copy, vec));
   vec += (-offset);
   EXPECT_NE(vec, copy);
-  EXPECT_TRUE(CheckVectorEqual(copy, vec + offset));
   EXPECT_TRUE(CheckVectorEqual(copy - offset, vec));
+  EXPECT_TRUE(CheckVectorEqual(copy, vec + offset));
 
   // Subtract negated vector
   vec = copy;
   EXPECT_EQ(vec, copy);
   vec -= (-offset);
   EXPECT_NE(vec, copy);
-  EXPECT_TRUE(CheckVectorEqual(copy, vec - offset));
   EXPECT_TRUE(CheckVectorEqual(copy + offset, vec));
+  EXPECT_TRUE(CheckVectorEqual(copy, vec - offset));
 }
+
+
+template <typename Tp, std::size_t Dim>
+::testing::AssertionResult CheckDivisionResult(
+    const wkg::Vec<Tp, Dim> &dividend,
+    const wkg::Vec<Tp, Dim> &divisor,
+    const wkg::Vec<Tp, Dim> &expected_non_special,
+    const wkg::Vec<Tp, Dim> &value) {
+
+  std::ostringstream msg;
+  msg << "Division error: "
+      << dividend.ToString() << " / " << divisor.ToString() << " = "
+      << value << ", which is wrong at:" << std::setprecision(20);
+
+  bool success {true};
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    if (wkg::IsEpsZero(divisor[idx])) {
+      if (wkg::IsEpsZero(dividend[idx])) {
+        // "0/0" = +inf or -inf
+        if (!std::isinf(value[idx])) {
+          msg << "\n  dim[" << idx << "]: should be +/-inf but is "
+              << value[idx];
+        }
+      } else {
+        // "v/0" = +nan or -nan
+        if (!std::isnan(value[idx])) {
+          msg << "\n  dim[" << idx << "]: should be +/-nan but is "
+              << value[idx];
+        }
+      }
+    } else {
+      if (!wkg::IsEpsEqual(expected_non_special[idx], value[idx])) {
+        success = false;
+        msg << "\n  dim[" << idx << "]: " << expected_non_special[idx]
+            << " vs " << value[idx];
+      }
+    }
+  }
+
+  if (success) {
+    return ::testing::AssertionSuccess();
+  }
+
+  return ::testing::AssertionFailure() << msg.str();
+}
+
 
 
 template<typename Tp, std::size_t Dim>
@@ -271,16 +293,39 @@ void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec) {
   const wkg::Vec<Tp, Dim> copy{vec};
   EXPECT_EQ(copy, vec);
 
-  // TODO left-multiply
-  // TODO right-multiply
+  // Multiplication is supported for any vector type.
+  vec *= 1;
+  EXPECT_EQ(copy, vec);
+
+  vec *= 2;
+  EXPECT_NE(copy, vec);
+  EXPECT_TRUE(CheckVectorEqual(copy + copy, vec));
+
+  vec = copy;
+  vec = vec * 3;
+  EXPECT_TRUE(CheckVectorEqual(copy + copy + copy, vec));
+  EXPECT_TRUE(CheckVectorEqual(copy + copy, vec - (1 * copy)));
+  EXPECT_TRUE(CheckVectorEqual(copy, vec - (2 * copy)));
+
+  vec = copy;
+  vec = 4 * copy;
+  EXPECT_TRUE(CheckVectorEqual(copy + (2 * copy) + copy, vec));
+
+  vec *= 0;
+  const wkg::Vec<Tp, Dim> zero{};
+  EXPECT_TRUE(CheckVectorEqual(zero, vec));
+  EXPECT_TRUE(CheckVectorEqual(0 * copy, vec));
 
 
+  // Division is only supported for floating point vectors.
   auto vec_dbl = vec.ToDouble();
 
-  // 0.5 * V = V / 2
+  // (1/x) * V = V / x
   EXPECT_TRUE(CheckVectorEqual(vec_dbl * 0.5, vec_dbl / 2.0));
   EXPECT_TRUE(CheckVectorEqual(0.5 * vec_dbl, vec_dbl / 2.0));
-//TODO division
+
+  EXPECT_TRUE(CheckVectorEqual(vec_dbl * 0.1, vec_dbl / 10.0));
+  EXPECT_TRUE(CheckVectorEqual(0.1 * vec_dbl, vec_dbl / 10.0));
 }
 
 
@@ -310,25 +355,28 @@ void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
   auto ones = wkg::Vec<double, Dim>::All(1.0);
 
   auto result = vec_dbl / vec_dbl;
-  //FIXME isnan
-  EXPECT_TRUE(CheckVectorEqual(ones, result));
+  EXPECT_TRUE(CheckDivisionResult(vec_dbl, vec_dbl, ones, result));
 
   auto another_copy {vec_dbl};
-  EXPECT_EQ(vec_dbl, another_copy); //FIXME must break with 0 vector!
+  EXPECT_EQ(vec_dbl, another_copy);
   another_copy /= another_copy;
-  EXPECT_TRUE(CheckVectorEqual(ones, another_copy));
+  EXPECT_TRUE(CheckDivisionResult(vec_dbl, vec_dbl, ones, result));
 
 
   // V * (1 / V) = 1
   auto vec_inv_mul = 1.0 / vec_dbl;
-  EXPECT_TRUE(CheckVectorEqual(ones, vec_dbl * vec_inv_mul));
+  auto expected = vec_dbl * vec_inv_mul;
+  EXPECT_TRUE(CheckDivisionResult(ones, vec_dbl, expected, result));
   // (1 / V) * V = 1
-  EXPECT_TRUE(CheckVectorEqual(ones, vec_inv_mul * vec_dbl));
+  expected = vec_inv_mul * vec_dbl;
+  EXPECT_TRUE(CheckDivisionResult(ones, vec_dbl, expected, result));
 
   // (1 / (V / 2)) * V = 1 / 2
+  wkg::Vec<double, Dim> dividend {vec_inv_mul};
   vec_inv_mul /= 2;
-  EXPECT_TRUE(CheckVectorEqual(ones / 2, vec_inv_mul * vec_dbl));
-  EXPECT_TRUE(CheckVectorEqual(ones * 0.5, vec_inv_mul * vec_dbl));
+  result = vec_inv_mul * vec_dbl;
+  EXPECT_TRUE(CheckDivisionResult(ones, vec_dbl / 2, ones / 2, result));
+  EXPECT_TRUE(CheckDivisionResult(ones, vec_dbl / 2, ones * 0.5, result));
 }
 
 
@@ -579,7 +627,7 @@ TEST(VectorTest, All) {
 
   wkg::Vec2d zero2d;
 
-  wkg::Vec2d v2d_a{23, 17}; //FIXME check val[i] = 0.5; check float 3.5 + int 2 and vice versa
+  wkg::Vec2d v2d_a{23, 17};
   VectorTestHelper(v2d_a);
 
   auto unit2d = v2d_a.UnitVector();

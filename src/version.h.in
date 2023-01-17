@@ -3,13 +3,15 @@
 
 #include<string>
 
+/// Werkzeugkiste is yet another C++ utility library: a collection
+/// of commonly used, reusable C++ snippets.
 namespace werkzeugkiste {
 
-inline constexpr unsigned VERSION_MAJOR = @PROJECT_VERSION_MAJOR@;
-inline constexpr unsigned VERSION_MINOR = @PROJECT_VERSION_MINOR@;
-inline constexpr unsigned VERSION_PATCH = @PROJECT_VERSION_PATCH@;
+inline constexpr unsigned version_major = @PROJECT_VERSION_MAJOR@;
+inline constexpr unsigned version_minor = @PROJECT_VERSION_MINOR@;
+inline constexpr unsigned version_patch = @PROJECT_VERSION_PATCH@;
 
-inline const std::string VERSION = "@PROJECT_VERSION@";
+inline const std::string version = "@PROJECT_VERSION@";
 
 }  // namespace werkzeugkiste
 

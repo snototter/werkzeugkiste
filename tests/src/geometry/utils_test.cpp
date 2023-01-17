@@ -101,7 +101,7 @@ TEST(GeometryUtilsTest, FloatingPointZero) {
   EXPECT_TRUE(wkg::IsEpsZero(std::nextafter(std::numeric_limits<float>::epsilon(), -1.0F)));
   EXPECT_TRUE(wkg::IsEpsZero(std::numeric_limits<float>::epsilon() / 2.0F));
 
-  EXPECT_FALSE(wkg::IsEpsZero(-2.0 * std::numeric_limits<float>::epsilon()));
+  EXPECT_FALSE(wkg::IsEpsZero(-2.0F * std::numeric_limits<float>::epsilon()));
   EXPECT_TRUE(wkg::IsEpsZero(-std::numeric_limits<float>::epsilon()));
   EXPECT_TRUE(wkg::IsEpsZero(-std::numeric_limits<float>::epsilon() / 2.0F));
 
@@ -131,14 +131,17 @@ TEST(GeometryUtilsTest, FloatingPointEquality1) {
 
 
   // IsEpsEqual uses a practical relative
-  // tolerance of 1e-10 (in my opinion).
+  // tolerance of 1e-9 (in my opinion).
   // This is a single test case - for more, refer
   // to the `FloatingPointEquality2` test.
+  EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.1));
+  EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.01));
+  EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.001));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.0001));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.000001));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.0000001));
-  EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.00000001));
-  EXPECT_FALSE( wkg::IsEpsEqual(5.0, 5.000000001));
+
+  EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.00000001));
   EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.0000000001));
 
   // Never test for eqs_equal with 0!
@@ -162,12 +165,18 @@ TEST(GeometryUtilsTest, FloatingPointEquality1) {
   EXPECT_FALSE(wkg::IsEpsEqual(-inf, inf));
 
   // Single-precision floats
-  EXPECT_TRUE(wkg::IsEpsEqual(5.0F, 5.0F));
+
   EXPECT_TRUE(wkg::IsEpsEqual(3.0000001F, 3.0000002F));
   EXPECT_TRUE(wkg::IsEpsEqual(3.0000001F, 3.000002F));
   EXPECT_FALSE(wkg::IsEpsEqual(3.0000001F, 3.0002F));
+
+  EXPECT_TRUE( wkg::IsEpsEqual(5.0F, 5.0F));
+  EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.1F));
+  EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.01F));
+  EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.001F));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.0001F));
-  EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.00001F));
+
+  EXPECT_TRUE( wkg::IsEpsEqual(5.0F, 5.00001F));
   EXPECT_TRUE( wkg::IsEpsEqual(5.0F, 5.000001F));
 }
 
@@ -199,14 +208,14 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
 
     // Scale the current value close to the precision
     // threshold.
-    auto scaled = value + (value * 1e-11);
+    auto scaled = value + (value * 1e-10);
     EXPECT_TRUE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should equal " << scaled
-        << " (because of 1e-10 precision threshold).";
-    scaled = value + (value * 1e-9);
+        << " (because of 1e-9 precision threshold).";
+    scaled = value + (value * 1e-8);
     EXPECT_FALSE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should NOT equal " << scaled
-        << " (because of 1e-10 precision threshold).";
+        << " (because of 1e-9 precision threshold).";
   }
 
 
@@ -224,14 +233,14 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
     // threshold.
     // Skip values > 1e3 as these would cause false alerts due to
     // the limited float precision.
-    auto scaled = value + (value * 0.0000009F);
+    auto scaled = value + (value * 0.000009F);
     EXPECT_TRUE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should equal " << scaled
-        << " (because of 1e-6 precision threshold).";
-    scaled = value + (value * 0.00002F);
+        << " (because of 1e-5 precision threshold).";
+    scaled = value + (value * 0.0002F);
     EXPECT_FALSE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should NOT equal " << scaled
-        << " (because of 1e-6 precision threshold).";
+        << " (because of 1e-5 precision threshold).";
   }
 }
 

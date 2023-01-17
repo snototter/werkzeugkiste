@@ -21,11 +21,30 @@ double Deg2Rad(double deg) {
 }
 
 
+inline constexpr
+float Deg2Rad(float deg) {
+  // NOLINTNEXTLINE(*-magic-numbers)
+  return deg * 3.1415926535F / 180.0F;
+}
+
+
+inline constexpr double Deg2Rad(int deg) {
+  return Deg2Rad(static_cast<double>(deg));
+}
+
+
 /// Convert angle from radians to degrees.
 inline constexpr
 double Rad2Deg(double rad) {
   // NOLINTNEXTLINE(*-magic-numbers)
   return rad * 180.0 / M_PI;
+}
+
+
+inline constexpr
+float Rad2Deg(float rad) {
+  // NOLINTNEXTLINE(*-magic-numbers)
+  return rad * 180.0F / 3.1415926535F;
 }
 
 
@@ -68,12 +87,13 @@ typename std::enable_if<
   return std::max(next - x, x - prev);
 }
 
+
 /// Epsilon equality check for floating point numbers.
 /// Uses a relative tolerance of 1e-6 for floats and 1e-10 for double or
 /// long double floating point numbers. This tolerance is scaled by
 /// the magnitude |x+y|.
 template <typename T> inline constexpr
-bool _eps_equal(T x, T y) {  // NOLINT(readability-identifier-naming)
+bool _util_eps_equal(T x, T y, std::true_type /* is_floating_point */) {  // NOLINT
   if (std::isinf(x) || std::isinf(y)) {
     return false;
   }
@@ -86,12 +106,19 @@ bool _eps_equal(T x, T y) {  // NOLINT(readability-identifier-naming)
 
   const auto sum = std::fabs(x + y);
   if constexpr (std::is_same<float, T>::value) {
-    constexpr float eps {0.000001F};
+    constexpr float eps {0.00001F};
     return diff <= (eps * sum);
   } else {
-    constexpr T eps {1e-10};
+    constexpr T eps {1e-9};
     return diff <= (eps * sum);
   }
+}
+
+
+/// Overloaded template for integral number types.
+template <typename T> inline constexpr
+bool _util_eps_equal(T x, T y, std::false_type /* is_floating_point */) {  // NOLINT
+  return x == y;
 }
 
 
@@ -103,8 +130,8 @@ bool _eps_equal(T x, T y) {  // NOLINT(readability-identifier-naming)
 /// they are either exactly equal or not.
 ///
 /// Floating point numbers are compared using a relative tolerance, scaled
-/// by their magnitude. The relative tolerance (epsilon) is 1e-6 for floats
-/// and 1e-10 for double/long double floating point numbers.
+/// by their magnitude. The relative tolerance (epsilon) is 1e-5 for floats
+/// and 1e-9 for double/long double floating point numbers.
 /// This check will then return the result of
 ///   `|x-y| <= epsilon * |x+y|`
 template<typename T> inline constexpr
@@ -112,11 +139,7 @@ bool IsEpsEqual(T x, T y) {
   static_assert(
     std::is_arithmetic<T>::value,
     "Non-arithmetic input type provided for IsEpsEqual().");
-  if constexpr (std::is_floating_point<T>::value) {
-    return _eps_equal(x, y);
-  } else {
-    return x == y;
-  }
+  return _util_eps_equal(x, y, std::is_floating_point<T>());
 }
 
 
@@ -126,7 +149,7 @@ bool IsEpsEqual(T x, T y) {
 
 /// Signum helper for unsigned types (to avoid compiler warnings).
 template <typename T> inline constexpr
-int _sgn(T x, std::false_type /*is_signed*/) {  // NOLINT
+int _util_sign(T x, std::false_type /*is_signed*/) {  // NOLINT
   return static_cast<T>(0) < x;
 }
 
@@ -134,7 +157,7 @@ int _sgn(T x, std::false_type /*is_signed*/) {  // NOLINT
 /// Signum helper for signed types (to avoid compiler warnings when using
 /// unsigned types).
 template <typename T> inline constexpr
-int _sgn(T x, std::true_type /*is_signed*/) {  // NOLINT
+int _util_sign(T x, std::true_type /*is_signed*/) {  // NOLINT
    return (static_cast<T>(0) < x) - (x < static_cast<T>(0));
 }
 
@@ -148,7 +171,7 @@ int Sign(T x) {
   static_assert(
     std::is_arithmetic<T>::value,
     "Non-arithmetic input type provided for Sign().");
-  return _sgn(x, std::is_signed<T>());
+  return _util_sign(x, std::is_signed<T>());
 }
 
 } // namespace werkzeugkiste::geometry

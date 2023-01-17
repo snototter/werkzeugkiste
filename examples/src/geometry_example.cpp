@@ -28,16 +28,16 @@
 //}
 
 
-template <typename _V>
+template <typename Vector>
 std::string PrettyPrint(
-    std::initializer_list<_V> vecs,
+    std::initializer_list<Vector> vecs,
     std::size_t indent_first_row = 0,
     std::size_t indent_others = 0) {
   std::ostringstream s;
   s << "[ ";
 
   const auto lst_it = vecs.begin();
-  for (int dim = 0; dim < _V::ndim; ++dim) {
+  for (int dim = 0; dim < Vector::ndim; ++dim) {
     if (dim > 0) {
       s << "\n";
       for (std::size_t idx = 0; idx < indent_others + 2; ++idx) {
@@ -64,7 +64,7 @@ std::string PrettyPrint(
 int main(int /* argc */, char ** /* argv */) {
   namespace wkg = werkzeugkiste::geometry;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << werkzeugkiste::VERSION << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::version << "\n"
             << "    Geometry utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;
