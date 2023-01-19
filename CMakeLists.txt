@@ -105,6 +105,7 @@ set(wkzggeometry_PUBLIC_HEADER_FILES
 # Source files
 set(wkzggeometry_SOURCE_FILES
     src/geometry/primitives.cpp
+    src/geometry/vector.cpp
 )
 # Library
 add_library(werkzeugkiste-geometry

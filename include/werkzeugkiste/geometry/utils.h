@@ -76,70 +76,110 @@ bool IsEpsZero(T x) {
 }
 
 
-/// Computes the floating point precision at the given value via
-/// the next/previous representable number. This can be used as
-/// a flexible epsilon in comparisons.
-template <typename T> inline constexpr
-typename std::enable_if<
-    std::is_floating_point<T>::value, T>::type ExpectedPrecision(T x) {
-  T next = std::nextafter(x, std::numeric_limits<T>::infinity());
-  T prev = std::nextafter(x, -std::numeric_limits<T>::infinity());
-  return std::max(next - x, x - prev);
-}
+///// Computes the floating point precision at the given value via
+///// the next/previous representable number. This can be used as
+///// a flexible epsilon in comparisons.
+//template <typename T> inline constexpr
+//typename std::enable_if<
+//    std::is_floating_point<T>::value, T>::type ExpectedPrecision(T x) {
+//  T next = std::nextafter(x, std::numeric_limits<T>::infinity());
+//  T prev = std::nextafter(x, -std::numeric_limits<T>::infinity());
+//  return std::max(next - x, x - prev);
+//}
 
 
-/// Epsilon equality check for floating point numbers.
-/// Uses a relative tolerance of 1e-6 for floats and 1e-10 for double or
-/// long double floating point numbers. This tolerance is scaled by
-/// the magnitude |x+y|.
-template <typename T> inline constexpr
-bool _util_eps_equal(T x, T y, std::true_type /* is_floating_point */) {  // NOLINT
+///// Epsilon equality check for floating point numbers.
+///// Uses a relative tolerance of 1e-6 for floats and 1e-10 for double or
+///// long double floating point numbers. This tolerance is scaled by
+///// the magnitude |x+y|.
+//template <typename T> inline constexpr
+//bool _util_eps_equal(T x, T y, std::true_type /* is_floating_point */) {  // NOLINT
+//  if (std::isinf(x) || std::isinf(y)) {
+//    return false;
+//  }
+
+//  const auto diff = std::fabs(x - y);
+//  if (diff < std::numeric_limits<T>::min()) {
+//    // Difference is subnormal
+//    return true;
+//  }
+
+//  const auto scale = std::max(
+//        std::max(std::fabs(x), std::fabs(y)), std::fabs(x + y));
+//  if constexpr (std::is_same<float, T>::value) {
+//    constexpr float eps {0.00001F};
+//    return diff <= (eps * scale);
+//  } else {
+//    constexpr T eps {1e-9};
+//    return diff <= (eps * scale);
+////    abs(a-b) <= max( rel_tol * max(abs(a), abs(b)), abs_tol ) FIXME https://peps.python.org/pep-0485/
+//  }
+//}
+
+
+///// Overloaded template for integral number types.
+//template <typename T> inline constexpr
+//bool _util_eps_equal(T x, T y, std::false_type /* is_floating_point */) {  // NOLINT
+//  return x == y;
+//}
+
+
+///// Returns true if the two numbers are approximately the same, i.e. if
+///// they are "close enough". This check should NOT be used to compare a
+///// non-zero number against 0!
+/////
+///// Integral numbers are compared via the default equality comparison, i.e.
+///// they are either exactly equal or not.
+/////
+///// Floating point numbers are compared using a relative tolerance, scaled
+///// by their magnitude. The relative tolerance (epsilon) is 1e-5 for floats
+///// and 1e-9 for double/long double floating point numbers.
+///// This check will then return the result of
+/////   `|x-y| <= epsilon * |x+y|`
+//template<typename T> inline constexpr
+//bool IsEpsEqual(T x, T y) {
+//  static_assert(
+//    std::is_arithmetic<T>::value,
+//    "Non-arithmetic input type provided for IsEpsEqual().");
+//  return _util_eps_equal(x, y, std::is_floating_point<T>());
+//}
+
+
+/// Epsilon equality check for floating point numbers, similar
+/// to Python's math.isclose(), see PEP 485, https://peps.python.org/pep-0485/
+template <typename TVal, typename TTol = double> inline constexpr
+bool IsClose(TVal x, TVal y, TTol relative_tolerance = 1e-9, TTol absolute_tolerance = 0.0) {  // NOLINT
+  static_assert(
+    std::is_floating_point<TVal>(),
+    "Approximately equal check requires floating point types!");
+
   if (std::isinf(x) || std::isinf(y)) {
     return false;
   }
 
   const auto diff = std::fabs(x - y);
-  if (diff < std::numeric_limits<T>::min()) {
+  if (diff < std::numeric_limits<TVal>::min()) {
     // Difference is subnormal
     return true;
   }
 
-  const auto sum = std::fabs(x + y);
-  if constexpr (std::is_same<float, T>::value) {
-    constexpr float eps {0.00001F};
-    return diff <= (eps * sum);
-  } else {
-    constexpr T eps {1e-9};
-    return diff <= (eps * sum);
-  }
+  return (diff <= std::max(
+            relative_tolerance * std::max(std::fabs(x), std::fabs(y)),
+            absolute_tolerance));
 }
 
 
-/// Overloaded template for integral number types.
 template <typename T> inline constexpr
-bool _util_eps_equal(T x, T y, std::false_type /* is_floating_point */) {  // NOLINT
-  return x == y;
-}
-
-
-/// Returns true if the two numbers are approximately the same, i.e. if
-/// they are "close enough". This check should NOT be used to compare a
-/// non-zero number against 0!
-///
-/// Integral numbers are compared via the default equality comparison, i.e.
-/// they are either exactly equal or not.
-///
-/// Floating point numbers are compared using a relative tolerance, scaled
-/// by their magnitude. The relative tolerance (epsilon) is 1e-5 for floats
-/// and 1e-9 for double/long double floating point numbers.
-/// This check will then return the result of
-///   `|x-y| <= epsilon * |x+y|`
-template<typename T> inline constexpr
 bool IsEpsEqual(T x, T y) {
-  static_assert(
-    std::is_arithmetic<T>::value,
-    "Non-arithmetic input type provided for IsEpsEqual().");
-  return _util_eps_equal(x, y, std::is_floating_point<T>());
+  if constexpr(std::is_integral<T>::value) {
+    return x == y;
+  } else {
+    if constexpr(std::is_same<float, T>::value) {
+      return IsClose<float, float>(x, y, 0.00001F, 0.0F);
+    } else {
+      return IsClose(x, y, 1e-9, 0.0);
+    }
+  }
 }
 
 

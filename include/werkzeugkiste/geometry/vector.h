@@ -31,7 +31,6 @@ namespace werkzeugkiste::geometry {
 /// 2D vectors additionally provide access via `Width`/`Height`. Thus, using
 /// them to hold 2D dimensions feels lexically correct.
 template<typename T, std::size_t Dim>
-WERKZEUGKISTE_EXPORT
 class Vec {
  public:
   static_assert(
@@ -395,13 +394,18 @@ class Vec {
   //-------------------------------------------------
   // Comparison
 
-  /// Returns true if all dimensions of both vectors are (approximately)
-  /// equal. Floating point numbers are considered approximately equal if
-  /// they differ by less than 4 units in the last place (ULP, units of
-  /// least precision).
-  bool EpsEquals(const Vec<T, Dim> &other) const {
+  /// "Almost equal" check for vectors with floating point value type.
+  /// Returns true if all dimensions of both vectors are approximately
+  /// equal, depending on both relative and absolute tolerance thresholds,
+  /// see `werkzeugkiste::geometry::IsClose`.
+  template <typename Tp = T>
+  bool IsClose(
+      const Vec<typename std::enable_if<
+          std::is_floating_point<Tp>::value, Tp>::type, Dim> &other,
+      Tp relative_tolerance, Tp absolute_tolerance) const {
     for (index_type i = 0; i < Dim; ++i) {
-      if (!IsEpsEqual(val[i], other.val[i])) {
+      if (!werkzeugkiste::geometry::IsClose(
+            val[i], other.val[i], relative_tolerance, absolute_tolerance)) {
         return false;
       }
     }
@@ -409,9 +413,35 @@ class Vec {
   }
 
 
-  /// Equality checks can be used for floating point specializations.
+  /// Vectors with integral value type can be compared for equality.
+  template <typename Tp = T>
+  bool IsEqual(
+      const Vec<typename std::enable_if<
+          std::is_integral<Tp>::value, Tp>::type, Dim> &other) const {
+    for (index_type i = 0; i < Dim; ++i) {
+      if (val[i] != other.val[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+
+  /// Equality checks can be used for all vector specializations.
+  /// Floating point value types use the `IsClose` check with:
+  /// * relative tolerance of 1e-5 (float) and 1e-9 (double), and
+  /// * absolute tolerance of 1e-8 (float) and 1e-12 (double).
   friend bool operator==(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs) {
-    return lhs.EpsEquals(rhs);
+    if constexpr (std::is_integral<T>::value) {
+      return lhs.IsEqual(rhs);
+    } else {
+      // Float can store 6-9 significant digits
+      if constexpr (std::is_same<float, T>::value) {
+        return lhs.IsClose(rhs, 0.00001F, 0.00000001F);
+      }
+      // Double typically 15-18, so 1e-9
+      return lhs.IsClose(rhs, 1e-9, 1e-12);
+    }
   }
 
 
@@ -769,6 +799,16 @@ class Vec {
   }
 
 
+  /// Returns the sum over all dimensions.
+  T Sum() const {
+    T sum {0};
+    for (index_type i = 0; i < Dim; ++i) {
+      sum += val[i];
+    }
+    return sum;
+  }
+
+
   /// Returns the unit vector.
   Vec<double, Dim> UnitVector() const {
     const double len = Length();
@@ -835,15 +875,23 @@ class Vec {
              std::is_same<Tp, int16_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 's'; }
 
+
   template<typename Tp = T,
           typename std::enable_if<
              std::is_same<Tp, int32_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 'i'; }
 
+
   template<typename Tp = T,
           typename std::enable_if<
              std::is_same<Tp, double>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 'd'; }
+
+
+  template<typename Tp = T,
+          typename std::enable_if<
+             std::is_same<Tp, float>::value, int>::type = 0>
+  inline static char TypeAbbreviation() { return 'f'; }
 
   /// Returns the class type name, e.g. "Vec2d".
   static std::string TypeName() {
@@ -856,18 +904,52 @@ class Vec {
 
 //-------------------------------------------------
 // Aliases
+
+/// Single-precision, 2-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<float, 2>;
+using Vec2f = Vec<float, 2>;
+
+/// Single-precision, 3-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<float, 3>;
+using Vec3f = Vec<float, 3>;
+
+/// Single-precision, 4-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<float, 4>;
+using Vec4f = Vec<float, 4>;
+
+
+/// Double-precision, 2-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<double, 2>;
 using Vec2d = Vec<double, 2>;
+
+/// Double-precision, 3-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<double, 3>;
 using Vec3d = Vec<double, 3>;
+
+/// Double-precision, 4-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<double, 4>;
 using Vec4d = Vec<double, 4>;
 
+
+/// Integral, 2-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<int32_t, 2>;
 using Vec2i = Vec<int32_t, 2>;
+
+/// Integral, 3-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<int32_t, 3>;
 using Vec3i = Vec<int32_t, 3>;
+
+/// Integral, 4-dimensional vector.
+extern WERKZEUGKISTE_EXPORT template class Vec<int32_t, 4>;
 using Vec4i = Vec<int32_t, 4>;
 
 
+//-------------------------------------------------
+// Additional utility functions for vectors/points.
+
 /// Returns the length of the given polygon.
 template<typename T, std::size_t Dim>
-double LengthPolygon(const std::vector<Vec<T, Dim>> &points) {
+inline double LengthPolygon(const std::vector<Vec<T, Dim>> &points) {
   double length {0};
   for (std::size_t idx = 1; idx < points.size(); ++idx) {
     length += points[idx-1].DistanceEuclidean(points[idx]);

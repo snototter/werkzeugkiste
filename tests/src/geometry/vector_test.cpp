@@ -380,6 +380,53 @@ void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
 }
 
 
+template<typename Tp, std::size_t Dim>
+void TestVectorBasics(wkg::Vec<Tp, Dim> vec) {
+  using V = wkg::Vec<Tp, Dim>;
+  double length_squared {0.0};
+
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    length_squared += static_cast<double>(vec[idx] * vec[idx]);
+  }
+
+  EXPECT_TRUE(
+        IsApproximatelyEqual(
+          length_squared, static_cast<double>(vec.Dot(vec))))
+      << "  Dot product <v, v> = " << vec.Dot(vec)
+      << " does not equal " << length_squared << "!";
+
+  EXPECT_TRUE(IsApproximatelyEqual(length_squared, vec.LengthSquared()))
+      << "  Squared length " << vec.LengthSquared()
+      << " does not equal " << length_squared << "!";
+
+  const double length = std::sqrt(length_squared);
+  EXPECT_TRUE(IsApproximatelyEqual(length, vec.Length()))
+      << "  Length " << vec.Length()
+      << " does not equal " << length_squared << "!";
+
+  // <v, 1> = <1, v>
+  // and <v, 0> = <0, v>
+  V ones = V::All(1);
+  V zeros{};
+  Tp zero{0};
+  if constexpr (std::is_integral<Tp>::value) {
+    EXPECT_EQ(zero, vec.Dot(zeros));
+    EXPECT_EQ(zero, zeros.Dot(vec));
+
+    EXPECT_EQ(vec.Sum(), vec.Dot(ones));
+    EXPECT_EQ(vec.Sum(), ones.Dot(vec));
+  } else {
+    EXPECT_TRUE(IsApproximatelyEqual(zero, vec.Dot(zeros)));
+    EXPECT_TRUE(IsApproximatelyEqual(zero, zeros.Dot(vec)));
+
+    EXPECT_TRUE(IsApproximatelyEqual(vec.Sum(), vec.Dot(ones)));
+    EXPECT_TRUE(IsApproximatelyEqual(vec.Sum(), ones.Dot(vec)));
+  }
+
+
+}
+
+
 template <typename Tp>
 void TestVec3dGeometry(wkg::Vec<Tp, 3> vec) {
   // Cross product ------------------------------------------------------------
@@ -435,6 +482,8 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   TestScalarMulDiv(vec);
   TestVectorMulDiv(vec);
 
+  TestVectorBasics(vec);
+
   TestHomogeneous(vec);
 
   // Special features of 2d vectors:
@@ -450,9 +499,6 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
 
 
   // TODO to test:
-  // EpsEquals (non-eps-eq cases are interesting)
-  // MaxIndex / MinIndex
-  // Max/Min Value
   // Dot
   // Length / LengthSq
   // DirectionVector
@@ -692,6 +738,48 @@ TEST(VectorTest, All) {
   EXPECT_TRUE(std::fabs(unit2i.Y() + 2.0 / 9.219544457) < 1e-6);
   EXPECT_EQ(v2i.DirectionVector(zero2i), -v2i);
   EXPECT_EQ(v2i.DirectionVector(v2i), zero2i);
+}
+
+
+TEST(VectorTest, EpsEqual) {
+  std::vector<wkg::Vec2d> data {
+    {1, 0}, {10, -3}, {-15, 1}, {17, 42},
+    {0.1, 17.0}, {0.001, -0.005}, {1e-5, -(1e-7)}
+  };
+
+  for (const auto &vec : data) {
+    EXPECT_EQ(vec, vec);
+
+    // The largest values for these tests are in the tens, i.e. 10 <= x <= 100.
+    // Thus, 1e-7 is the smallest offset we can add to all vectors such that
+    // the IsClose/ApproximatelyEqual tests will succeed (because of the
+    // default relative tolerance of 1e-9).
+    for (auto offset : {0.1, 1e-2, 1e-3, 1e-4,
+            1e-5, 1e-6, 1e-7, 0.5, 1.5, 100.0}) {
+      auto copy = vec.ToDouble();
+      EXPECT_TRUE(CheckVectorEqual(vec, copy));
+
+      copy[0] += offset;
+      auto diff = std::fabs(copy[0] - vec[0]);
+      EXPECT_FALSE(CheckVectorEqual(vec, copy))
+          << "  Adding " << offset << " to x-dimension of " << vec
+          << " did not result in a sufficiently different vector!"
+             "\n  Difference is " << diff;
+
+      copy[0] -= offset;
+      EXPECT_TRUE(CheckVectorEqual(vec, copy));
+
+      copy[1] -= offset;
+      diff = std::fabs(copy[1] - vec[1]);
+      EXPECT_FALSE(CheckVectorEqual(vec, copy))
+          << "  Subtracting " << offset << " from y-dimension of " << vec
+          << " did not result in a sufficiently different vector!"
+             "\n  Difference is " << diff;
+
+      copy[1] += offset;
+      EXPECT_TRUE(CheckVectorEqual(vec, copy));
+    }
+  }
 }
 
 

@@ -140,9 +140,11 @@ TEST(GeometryUtilsTest, FloatingPointEquality1) {
   EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.0001));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.000001));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0, 5.0000001));
+  EXPECT_FALSE( wkg::IsEpsEqual(5.0, 5.00000001));
 
-  EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.00000001));
   EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.0000000001));
+  EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.00000000001));
+  EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.000000000001));
 
   // Never test for eqs_equal with 0!
   EXPECT_FALSE(wkg::IsEpsZero(1e-7));
