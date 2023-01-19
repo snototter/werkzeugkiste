@@ -29,15 +29,15 @@ std::vector<typename M::key_type> GetMapKeys(const M &map) {
 
 
 /// A sort comparator for ascending order, which uses `operator<`.
-template <typename _T>
-bool CmpAsc(const _T &a, const _T &b) {
+template <typename Tp>
+bool CmpAsc(const Tp &a, const Tp &b) {
   return a < b;
 }
 
 
 /// A sort comparator for descending order, which uses `operator<`.
-template <typename _T>
-bool CmpDesc(const _T &a, const _T &b) {
+template <typename Tp>
+bool CmpDesc(const Tp &a, const Tp &b) {
   return b < a;
 }
 
@@ -51,8 +51,9 @@ public:
 
   Ordering(
       const Container &data,
-      bool (*cmp)(const typename Container::value_type &,
-                  const typename Container::value_type &))
+      bool (*cmp)(
+        const typename Container::value_type &,
+        const typename Container::value_type &))
     : data_(data), cmp_(cmp)
   {}
 
@@ -73,8 +74,9 @@ public:
 private:
   const Container &data_;
   std::vector<std::size_t> indices_;
-  bool (*cmp_)(const typename Container::value_type &,
-               const typename Container::value_type &);
+  bool (*cmp_)(
+      const typename Container::value_type &,
+      const typename Container::value_type &);
 
   void InitIndices() {
     indices_.clear();
@@ -89,9 +91,11 @@ private:
 /// Returns the indices which correspond to a sorted `data` vector.
 template <class Container>
 std::vector<std::size_t> GetSortedIndices(
-    const Container &data,
-    bool (*cmp)(const typename Container::value_type &,
-                const typename Container::value_type &) = CmpAsc<typename Container::value_type>) {
+      const Container &data,
+      bool (*cmp)(
+          const typename Container::value_type &,
+          const typename Container::value_type &
+      ) = CmpAsc<typename Container::value_type>) {
   Ordering<Container> ordering(data, cmp);
   return ordering.GetSortedIndices();
 }
@@ -119,42 +123,42 @@ Container ApplyIndexLookup(
 
 
 /// Returns the data vector sorted by the given external keys.
-template <typename _Td, typename _Tk>
-std::vector<_Td> SortByExternalKeys(
-    const std::vector<_Td> &data,
-    const std::vector<_Tk> &keys,
-    bool (*cmp)(const _Tk &, const _Tk &) = CmpAsc<_Tk>) {
+template <typename TData, typename TKey>
+std::vector<TData> SortByExternalKeys(
+    const std::vector<TData> &data,
+    const std::vector<TKey> &keys,
+    bool (*cmp)(const TData &, const TKey &) = CmpAsc<TKey>) {
   if (data.empty()) {
-    return std::vector<_Td>();
+    return std::vector<TData>{};
   }
 
   if (keys.size() != data.size()) {
     std::ostringstream s;
-    s << "Vector size mismatch, " << data.size()
-      << " vs " << keys.size() << "!";
+    s << "Number of keys (" << keys.size()
+      << ") must equal the number of data items (" << data.size() << ")!";
     throw std::invalid_argument(s.str());
   }
 
   // Sort the indices
-  const std::vector<std::size_t> indices = GetSortedIndices<_Tk>(keys, cmp);
+  const std::vector<std::size_t> indices = GetSortedIndices<TKey>(keys, cmp);
 
   // Remap the input vector
-  return ApplyIndexLookup<_Td>(data, indices);
+  return ApplyIndexLookup<TData>(data, indices);
 }
 
 
 /// Returns a map containing all duplicate entries in 'data' along
 /// with their their frequencies.
-template<typename C,
-    typename T = std::decay_t<
-        decltype(*begin(std::declval<C>()))>>
-std::map<T, std::size_t> FindDuplicates(const C &container) {
-  std::map<T, std::size_t> item_count;
-  std::map<T, std::size_t> item_count_tmp;
+template<typename Container,
+    typename Tp = std::decay_t<
+        decltype(*begin(std::declval<Container>()))>>
+std::map<Tp, std::size_t> FindDuplicates(const Container &container) {
+  std::map<Tp, std::size_t> item_count;
+  std::map<Tp, std::size_t> item_count_tmp;
 
   // Compute frequency for each item
   for (const auto &item : container) {
-    auto itmp = item_count_tmp.insert(std::pair<T, std::size_t>(item, 1));
+    auto itmp = item_count_tmp.insert(std::pair<Tp, std::size_t>(item, 1));
     // If insertion fails, the key existed already
     if (itmp.second == false) {
       itmp.first->second++;
@@ -162,8 +166,7 @@ std::map<T, std::size_t> FindDuplicates(const C &container) {
   }
 
   // We need to return only duplicates:
-  for (auto it = item_count_tmp.begin();
-       it != item_count_tmp.end(); it++) {
+  for (auto it = item_count_tmp.begin(); it != item_count_tmp.end(); it++) {
     if (it->second > 1) {
       item_count.insert(*it);
     }
@@ -174,28 +177,29 @@ std::map<T, std::size_t> FindDuplicates(const C &container) {
 
 /// Returns true if there are no duplicates in the given
 /// sequence container.
-template<typename _C,
-    typename _T = std::decay_t<
-        decltype(*begin(std::declval<_C>()))>>
-bool HasUniqueItems(const _C &container) {
+template<typename Container,
+    typename Tp = std::decay_t<
+        decltype(*begin(std::declval<Container>()))>>
+bool HasUniqueItems(const Container &container) {
   auto duplicates = FindDuplicates(container);
   return duplicates.empty();
 }
 
 
 /// Returns true if the given key exists within the map.
-template <typename _Tv, typename... _Ts> inline
-bool ContainsKey(const std::map<_Ts...> &container, const _Tv &key) {
+template <typename Tv, typename... Ts> inline
+bool ContainsKey(const std::map<Ts...> &container, const Tv &key) {
   return container.find(key) != std::end(container);
 }
 
 
 /// Returns true if the given element exists within the container.
-template<typename _C,
-    typename _T = std::decay_t<
-        decltype(*begin(std::declval<_C>()))>>
-bool ContainsValue(const _C &container, const _T &value) {
-  return std::find(container.begin(), container.end(), value) != container.end();
+template<typename Container,
+    typename Tp = std::decay_t<
+        decltype(*begin(std::declval<Container>()))>>
+bool ContainsValue(const Container &container, const Tp &value) {
+  return std::find(
+        container.begin(), container.end(), value) != container.end();
 }
 
 
