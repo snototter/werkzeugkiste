@@ -90,7 +90,8 @@ VecsToEigenMat(const V &vec0, const Vs &... others) {
     "Fixed size matrices should not be used for operations "
     "with more than (roughly) 32 vectors.");
 
-  const std::array<V, num_vecs> vecs{vec0, static_cast<const V &>(others)...};
+  const std::array<V, static_cast<std::size_t>(num_vecs)>
+      vecs{vec0, static_cast<const V &>(others)...};
   //TODO clean up
 //  const V vecs[num_vecs] {
 //    vec0, static_cast<const V &>(others)...};
@@ -98,7 +99,7 @@ VecsToEigenMat(const V &vec0, const Vs &... others) {
   Matrix<typename V::value_type, Dim, num_vecs> m;
   for (int row = 0; row < v_dim_int; ++row) {
     for (int col = 0; col < num_vecs; ++col) {
-      m(row, col) = vecs[col][row];
+      m(row, col) = vecs[static_cast<std::size_t>(col)][row];
     }
   }
 
