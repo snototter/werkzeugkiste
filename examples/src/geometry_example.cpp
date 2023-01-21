@@ -106,7 +106,7 @@ void VectorDemo(V vec1, V vec2) {
 int main(int /* argc */, char ** /* argv */) {
   namespace wkg = werkzeugkiste::geometry;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << werkzeugkiste::version << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    Geometry utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;

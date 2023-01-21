@@ -11,10 +11,10 @@
 
 #include <werkzeugkiste/timing/stopwatch.h>
 
-// If you #define NO_TICTOC before including tictoc.h, all
-// TIC/TOC(...) calls will be disabled.
+// Define "WITH_TICTOC" to enable timing via the provided macros.
+// Without it, the macros will become no-ops.
 // This should be prefered over werkzeug::timing::mute()/unmute()
-//#define NO_TICTOC
+#define WITH_TICTOC
 #include <werkzeugkiste/timing/tictoc.h>
 
 
@@ -22,7 +22,7 @@ int main(int /* argc */, char ** /* argv */) {
   namespace wtu = werkzeugkiste::timing;
   wtu::StopWatch watch;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << werkzeugkiste::version << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    Stopwatch demo\n"
             << "--------------------------------------------------\n"
             << "Underlying clock:      " << watch.ClockName()

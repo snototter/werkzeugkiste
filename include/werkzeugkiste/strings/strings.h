@@ -7,6 +7,8 @@
 #include <string_view>
 #include <vector>
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 
 /// Common string manipulation & checks. The kind you've
 /// already re-implemented/copied at least a dozen times.
@@ -67,7 +69,8 @@ bool StartsWith(
 
 
 /// Converts the string to lower case (in-place).
-void ToLower(std::string &s);  // NOLINT
+WERKZEUGKISTE_EXPORT
+  void ToLower(std::string &s);  // NOLINT
 
 
 /// Returns a copy, converted to lower case.
@@ -79,7 +82,8 @@ inline std::string Lower(std::string_view s) {
 
 
 /// Converts the string to upper case (in-place).
-void ToUpper(std::string &s);  // NOLINT
+WERKZEUGKISTE_EXPORT
+  void ToUpper(std::string &s);  // NOLINT
 
 
 /// Returns a copy, converted to upper case.
@@ -92,74 +96,82 @@ inline std::string Upper(const std::string &s) {
 
 /// Returns a copy with leading & trailing
 /// white space removed.
-std::string Trim(std::string_view s);
+WERKZEUGKISTE_EXPORT
+  std::string Trim(std::string_view s);
 
 
 /// Returns a copy with leading white space removed.
-std::string LTrim(std::string_view totrim);
+WERKZEUGKISTE_EXPORT
+  std::string LTrim(std::string_view totrim);
 
 
 /// Returns a copy with trailing white space removed.
-std::string RTrim(std::string_view totrim);
+WERKZEUGKISTE_EXPORT
+  std::string RTrim(std::string_view totrim);
 
 
 /// Returns true if the string can be safely cast into
 /// eiter an `int64_t` or a `double` type.
-bool IsNumeric(const std::string &s);
+WERKZEUGKISTE_EXPORT
+  bool IsNumeric(const std::string &s);
 
 
 /// Tokenizes the string by the given delimiter.
-std::vector<std::string> Split(
-    std::string_view s,
-    char delim);
+WERKZEUGKISTE_EXPORT
+  std::vector<std::string> Split(std::string_view s, char delim);
 
 
 /// Replaces all occurences of the given search
 /// string `needle` within the `haystack`.
-std::string Replace(
-    std::string_view haystack,
-    std::string_view needle,
-    std::string_view replacement);
+WERKZEUGKISTE_EXPORT
+  std::string Replace(
+      std::string_view haystack,
+      std::string_view needle,
+      std::string_view replacement);
 
 
 /// Replaces all occurences of the given character.
-std::string Replace(
-    std::string_view haystack,
-    char needle,
-    char replacement);
+WERKZEUGKISTE_EXPORT
+  std::string Replace(
+      std::string_view haystack,
+      char needle,
+      char replacement);
 
 
 /// Clips the given URL string to include only the
 /// protocol and domain, *i.e.* server paths & parameters
 /// will be excluded.
-std::string ClipUrl(const std::string &url);
+WERKZEUGKISTE_EXPORT
+  std::string ClipUrl(const std::string &url);
 
 
 /// Sets `protocol` to the URL's protocol, e.g.
 /// `https://`, `rtp://`, ...
 /// Returns true if the `url` string contained a
 /// protocol part.
-bool GetUrlProtocol(
-    const std::string &url,
-    std::string &protocol,   // NOLINT
-    std::string &remainder); // NOLINT
+WERKZEUGKISTE_EXPORT
+  bool GetUrlProtocol(
+      const std::string &url,
+      std::string &protocol,   // NOLINT
+      std::string &remainder); // NOLINT
 
 
 /// Returns the URL after replacing any plaintext
 /// authentication data by the text `<auth>`.
-std::string ObscureUrlAuthentication(const std::string &url);
+WERKZEUGKISTE_EXPORT
+  std::string ObscureUrlAuthentication(const std::string &url);
 
 
 /// Returns a copy where all given characters have been removed.
-std::string Remove(
-    std::string_view s,
-    std::initializer_list<char> chars);
+WERKZEUGKISTE_EXPORT
+  std::string Remove(
+      std::string_view s,
+      std::initializer_list<char> chars);
 
 
 /// Returns a copy where the given character has been removed.
-std::string Remove(
-    std::string_view s,
-    char c);
+WERKZEUGKISTE_EXPORT
+  std::string Remove(std::string_view s, char c);
 
 
 /// Returns a slug representation of the string.
@@ -171,9 +183,10 @@ std::string Remove(
 /// If `strip_dashes` is true, the remaining dashes will
 /// then also be stripped: e.g. ` img_dir` would
 /// become `imgdir`.
-std::string Slug(
-    std::string_view s,
-    bool strip_dashes = false);
+WERKZEUGKISTE_EXPORT
+  std::string Slug(
+      std::string_view s,
+      bool strip_dashes = false);
 
 
 /// Returns a string with length <= `desired_length`,
@@ -185,18 +198,20 @@ std::string Slug(
 /// * `< 0`: Left
 /// * `0`: Centered
 /// * `> 0`: Right
-std::string Shorten(
-    std::string_view s,
-    std::size_t desired_length,
-    int ellipsis_position = -1,
-    std::string_view ellipsis = "...");
+WERKZEUGKISTE_EXPORT
+  std::string Shorten(
+      std::string_view s,
+      std::size_t desired_length,
+      int ellipsis_position = -1,
+      std::string_view ellipsis = "...");
 
 
 /// Returns the string indented by n-times the given character.
-std::string Indent(
-    std::string_view s,
-    std::size_t n,
-    char character=' ');
+WERKZEUGKISTE_EXPORT
+  std::string Indent(
+      std::string_view s,
+      std::size_t n,
+      char character=' ');
 
 } // namespace werkzeugkiste::strings
 

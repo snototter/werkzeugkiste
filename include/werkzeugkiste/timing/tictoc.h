@@ -7,6 +7,7 @@
 #include <werkzeugkiste/werkzeugkiste_export.h>
 
 namespace werkzeugkiste::timing {
+
 /// @brief Set output format for the toc_xxx() functions.
 ///
 /// @param print_labels_aligned If true, all timer labels
@@ -111,20 +112,13 @@ double TTocNanoseconds(const std::string &label = std::string());
 //NOLINTBEGIN(*-macro-usage)
 
 /// Preprocessor macros to:
-///   a) easily use TIC/TOC and
+///   a) easily use TIC/TOC by simply defining 'WITH_TICTOC' before including
+///      this header:
+///      #define WITH_TICTOC
+///      #include <werkzeugkiste/timing/tictoc.h>
 ///   b) easily disable all call overheads (by simply defining
 ///      NO_TICTOC before including tictoc.h)
-#ifdef NO_TICTOC
-#  define TIC(...)
-#  define TOC_SEC(...)
-#  define TTOC_SEC(...) -1
-#  define TOC_MS(...)
-#  define TTOC_MS(...) -1
-#  define TOC_US(...)
-#  define TTOC_US(...) -1
-#  define TOC_NS(...)
-#  define TTOC_NS(...) -1
-#else  // NO_TICTOC
+#ifdef WITH_TICTOC
 #  define TIC(...) werkzeugkiste::timing::Tic(__VA_ARGS__)
 #  define TOC_SEC(...)  werkzeugkiste::timing::TocSeconds(__VA_ARGS__)
 #  define TTOC_SEC(...) werkzeugkiste::timing::TTocSeconds(__VA_ARGS__)
@@ -134,7 +128,17 @@ double TTocNanoseconds(const std::string &label = std::string());
 #  define TTOC_US(...)  werkzeugkiste::timing::TTocMicroseconds(__VA_ARGS__)
 #  define TOC_NS(...)   werkzeugkiste::timing::TocNanoseconds(__VA_ARGS__)
 #  define TTOC_NS(...)  werkzeugkiste::timing::TTocNanoseconds(__VA_ARGS__)
-#endif  // NO_TICTOC
+#else  // WITH_TICTOC
+#  define TIC(...)
+#  define TOC_SEC(...)
+#  define TTOC_SEC(...) -1
+#  define TOC_MS(...)
+#  define TTOC_MS(...) -1
+#  define TOC_US(...)
+#  define TTOC_US(...) -1
+#  define TOC_NS(...)
+#  define TTOC_NS(...) -1
+#endif  // WITH_TICTOC
 
 //NOLINTEND(*-macro-usage)
 

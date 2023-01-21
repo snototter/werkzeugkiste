@@ -12,7 +12,7 @@
 int main(int /* argc */, char ** /* argv */) {
   namespace wkc = werkzeugkiste::container;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << werkzeugkiste::version << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    Container utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;

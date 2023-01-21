@@ -9,6 +9,7 @@
 
 #include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/geometry/utils.h>
+#include <werkzeugkiste/werkzeugkiste_export.h>
 
 namespace werkzeugkiste::geometry {
 
@@ -153,6 +154,7 @@ private:
 
 
 /// Available specialization:
+extern template class WERKZEUGKISTE_EXPORT Circle_<double>;
 using Circle = Circle_<double>;
 
 
@@ -373,13 +375,14 @@ private:
 
 
 /// A 2-dimensional line using double precision.
+extern template class WERKZEUGKISTE_EXPORT Line2d_<double>;
 using Line2d = Line2d_<double>;
 
 
 //----------------------------------------------------
 // Line in 3D
 
-// Forward declaration needed by Circle_.
+// Forward declaration needed by Line3d_.
 template <typename T> class Plane_;
 
 
@@ -544,6 +547,7 @@ private:
 
 
 /// A 3-dimensional line using double precision.
+extern template class WERKZEUGKISTE_EXPORT Line3d_<double>;
 using Line3d = Line3d_<double>;
 
 
@@ -676,6 +680,7 @@ private:
 
 
 /// The default plane type which uses double precision.
+extern template class WERKZEUGKISTE_EXPORT Plane_<double>;
 using Plane = Plane_<double>;
 
 } // namespace werkzeugkiste::geometry

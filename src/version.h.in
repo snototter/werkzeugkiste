@@ -11,7 +11,11 @@ inline constexpr unsigned version_major = @PROJECT_VERSION_MAJOR@;
 inline constexpr unsigned version_minor = @PROJECT_VERSION_MINOR@;
 inline constexpr unsigned version_patch = @PROJECT_VERSION_PATCH@;
 
-inline const std::string version = "@PROJECT_VERSION@";
+inline constexpr auto Version() {
+  using namespace std::literals;
+  auto version = "@PROJECT_VERSION@"sv;
+  return version;
+}
 
 }  // namespace werkzeugkiste
 

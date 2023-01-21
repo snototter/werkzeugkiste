@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <sstream>
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
 
 /// Stop watch & additional helpers on top of `std::chrono` (to hide
 /// some of its template boilerplate).
@@ -15,6 +16,7 @@ namespace werkzeugkiste::timing {
 
 /// Returns the abbreviation for the given
 /// duration type, e.g. std::chrono::hours --> "hrs".
+//TODO change all these checks to constexpr!
 template <typename Duration>
 std::string DurationAbbreviation() {
   if (std::is_same<Duration, std::chrono::nanoseconds>::value) {
@@ -167,7 +169,8 @@ double ToNanoseconds(const Duration &duration) {
 /// Returns a human readable string approximating the given time.
 ///
 /// For example, SecondsToString(3700 * 24 + 50) = '1 day 40 minutes'
-std::string SecondsToString(unsigned int seconds);
+WERKZEUGKISTE_EXPORT
+  std::string SecondsToString(unsigned int seconds);
 
 
 
@@ -288,6 +291,7 @@ class stop_watch {  // NOLINT
   typename clock_type::time_point t_start_{};
 };
 
+extern template class WERKZEUGKISTE_EXPORT stop_watch<std::chrono::steady_clock>;
 using StopWatch = stop_watch<std::chrono::steady_clock>;
 
 }  // namespace werkzeugkiste::timing

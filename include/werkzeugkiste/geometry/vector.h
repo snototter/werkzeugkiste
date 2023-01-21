@@ -947,41 +947,41 @@ class Vec {
 // Aliases
 
 /// Single-precision, 2-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<float, 2>;
+extern template class WERKZEUGKISTE_EXPORT Vec<float, 2>;
 using Vec2f = Vec<float, 2>;
 
 /// Single-precision, 3-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<float, 3>;
+extern template class WERKZEUGKISTE_EXPORT Vec<float, 3>;
 using Vec3f = Vec<float, 3>;
 
 /// Single-precision, 4-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<float, 4>;
+extern template class WERKZEUGKISTE_EXPORT Vec<float, 4>;
 using Vec4f = Vec<float, 4>;
 
 
 /// Double-precision, 2-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<double, 2>;
+extern template class WERKZEUGKISTE_EXPORT Vec<double, 2>;
 using Vec2d = Vec<double, 2>;
 
 /// Double-precision, 3-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<double, 3>;
+extern template class WERKZEUGKISTE_EXPORT Vec<double, 3>;
 using Vec3d = Vec<double, 3>;
 
 /// Double-precision, 4-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<double, 4>;
+extern template class WERKZEUGKISTE_EXPORT Vec<double, 4>;
 using Vec4d = Vec<double, 4>;
 
 
 /// Integral, 2-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<int32_t, 2>;
+extern template class WERKZEUGKISTE_EXPORT Vec<int32_t, 2>;
 using Vec2i = Vec<int32_t, 2>;
 
 /// Integral, 3-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<int32_t, 3>;
+extern template class WERKZEUGKISTE_EXPORT Vec<int32_t, 3>;
 using Vec3i = Vec<int32_t, 3>;
 
 /// Integral, 4-dimensional vector.
-extern WERKZEUGKISTE_EXPORT template class Vec<int32_t, 4>;
+extern template class WERKZEUGKISTE_EXPORT Vec<int32_t, 4>;
 using Vec4i = Vec<int32_t, 4>;
 
 
