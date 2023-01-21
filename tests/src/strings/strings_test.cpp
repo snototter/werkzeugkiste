@@ -214,7 +214,7 @@ TEST(StringUtilsTest, Slug) {
 
   EXPECT_EQ(
         wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
-        "replace-some-spaces-and-underscores-");
+        "replace-some-spaces-and-underscores");
 
   EXPECT_EQ(wks::Slug(" \r\n\t\v\f"), "");
   EXPECT_EQ(wks::Slug("a \r\n\t\v\f"), "a");
@@ -226,7 +226,7 @@ TEST(StringUtilsTest, Slug) {
   EXPECT_TRUE(wks::Slug("").empty());
 
   EXPECT_EQ(wks::Slug("Österreich!"), "oesterreich");
-  EXPECT_EQ(wks::Slug("€ $ µ "), "euro-dollar-mu");
+  EXPECT_EQ(wks::Slug("€   $ \t \n µ   \t"), "euro-dollar-mu");
   EXPECT_EQ(wks::Slug("ÄäÖöÜü"), "aeaeoeoeueue");
 
   //TODO test all replacement characters!
