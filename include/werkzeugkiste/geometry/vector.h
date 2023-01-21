@@ -30,7 +30,7 @@ namespace werkzeugkiste::geometry {
 ///
 /// 2D vectors additionally provide access via `Width`/`Height`. Thus, using
 /// them to hold 2D dimensions feels lexically correct.
-template<typename T, std::size_t Dim>
+template <typename T, std::size_t Dim>
 class Vec {
  public:
   static_assert(
@@ -66,7 +66,7 @@ class Vec {
 
 
   /// Convenience (x, y) constructor for 2D vector.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec(typename std::enable_if<(Dim == 2), Tp>::type x,
       Tp y) noexcept {
     val[0] = x;
@@ -75,7 +75,7 @@ class Vec {
 
 
   /// Convenience (x, y, z) constructor for 3D vector.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec(typename std::enable_if<(Dim == 3), Tp>::type x,
       Tp y, Tp z) noexcept {
     val[0] = x;
@@ -85,7 +85,7 @@ class Vec {
 
 
   /// Convenience (x, y, z, w) constructor for 4D vector.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec(typename std::enable_if<(Dim == 4), Tp>::type x,
       Tp y, Tp z, Tp w) noexcept {
     val[0] = x;
@@ -161,7 +161,7 @@ class Vec {
   }
 
 
-  template<typename TargetType>
+  template <typename TargetType>
   explicit operator Vec<TargetType, Dim>() const {
     Vec<TargetType, Dim> conv;
     for (index_type i = 0; i < Dim; ++i) {
@@ -279,33 +279,33 @@ class Vec {
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   const typename std::enable_if<(Dim > 1), Tp>::type &Y() const noexcept {
     return val[1];
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   const typename std::enable_if<
       (Dim == 2), Tp>::type &Width() const noexcept {
     return X();
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   const typename std::enable_if<
       (Dim == 2), Tp>::type &Height() const noexcept {
     return Y();
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   const typename std::enable_if<(Dim > 2), Tp>::type &Z() const noexcept {
     return val[2];
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   const typename std::enable_if<(Dim > 3), Tp>::type &W() const noexcept {
     return val[3];
   }
@@ -316,33 +316,33 @@ class Vec {
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   typename std::enable_if<(Dim > 1), Tp>::type &Y() noexcept {
     return val[1];
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   typename std::enable_if<
       (Dim == 2), Tp>::type &Width() noexcept {
     return X();
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   typename std::enable_if<
       (Dim == 2), Tp>::type &Height() noexcept {
     return Y();
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   typename std::enable_if<(Dim > 2), Tp>::type &Z() noexcept {
     return val[2];
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   typename std::enable_if<(Dim > 3), Tp>::type &W() noexcept {
     return val[3];
   }
@@ -353,33 +353,33 @@ class Vec {
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   void SetY(typename std::enable_if<(Dim > 1), Tp>::type y) noexcept {
     val[1] = y;
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   void SetWidth(
       typename std::enable_if<(Dim == 2), Tp>::type width) noexcept {
     SetX(width);
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   void SetHeight(
       typename std::enable_if<(Dim == 2), Tp>::type height) noexcept {
     SetY(height);
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   void SetZ(typename std::enable_if<(Dim > 2), Tp>::type z) noexcept {
     val[2] = z;
   }
 
 
-  template<typename Tp = T> inline
+  template <typename Tp = T> inline
   void SetW(typename std::enable_if<(Dim > 3), Tp>::type w) noexcept {
     val[3] = w;
   }
@@ -606,7 +606,7 @@ class Vec {
   /// instance. Note that division is only supported for floating point
   /// types. Use ToDouble() to obtain a casted copy of this vector before
   /// division.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
           Tp>::type, Dim> &DivideScalar(Tp divisor) {
@@ -620,7 +620,7 @@ class Vec {
   /// Overloaded for convenience, see `DivideScalar`. Only supported
   /// for floating point-based vector specializations. Use ToDouble() to
   /// convert integral vectors before division.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
           Tp>::type, Dim> &operator/=(double divisor) {
@@ -629,7 +629,7 @@ class Vec {
 
   /// Overloaded for convenience. Divides each dimension by the given scalar.
   /// Only supported for floating point-based vector specializations.
-  template<typename Tp = T>
+  template <typename Tp = T>
   friend Vec<typename std::enable_if<
             std::is_floating_point<Tp>::value, Tp>::type,
             Dim> operator/(Vec<T, Dim> lhs, double divisor) {
@@ -642,7 +642,7 @@ class Vec {
   /// instance. Only supported for floating point-based vector
   /// specializations. Use ToDouble() to convert integral vectors
   /// before division.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
           Tp>::type, Dim> &DivideVector(const Vec<Tp, Dim> &divisor) {
@@ -655,7 +655,7 @@ class Vec {
 
   /// Overloaded element-wise division, see `DivideVector`. Only supported for
   /// floating point-based vector specializations.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec<typename std::enable_if<
           std::is_floating_point<Tp>::value,
           Tp>::type, Dim> &operator/=(const Vec<Tp, Dim> &divisor) {
@@ -665,7 +665,7 @@ class Vec {
 
   /// Overloaded element-wise division, see `DivideVector`. Only supported for
   /// floating point-based vector specializations.
-  template<typename Tp = T>
+  template <typename Tp = T>
   friend Vec<typename std::enable_if<
             std::is_floating_point<Tp>::value, Tp>::type,
             Dim> operator/(Vec<T, Dim> lhs, const Vec<Tp, Dim> &divisor) {
@@ -677,7 +677,7 @@ class Vec {
   /// Returns a vector where each dimension is the result of the element-wise
   /// division `scalar / divisor[dimension]. Only supported for
   /// floating point-based vector specializations.
-  template<typename Tp = T>
+  template <typename Tp = T>
   friend Vec<typename std::enable_if<
             std::is_floating_point<Tp>::value, Tp>::type,
             Dim> operator/(Tp scalar, Vec<T, Dim> vec) {
@@ -753,7 +753,7 @@ class Vec {
 
 
   /// Returns the 3D vector cross product.
-  template<typename Tp = T>
+  template <typename Tp = T>
   Vec<typename std::enable_if<(Dim == 3), Tp>::type, Dim>
   Cross(const Vec<T, Dim>& other) const {
     return Vec<T, Dim>{
@@ -793,7 +793,7 @@ class Vec {
     auto diff = DirectionVector(other);
     double abs_sum {0};
     for (index_type i = 0; i < Dim; ++i) {
-      abs_sum += std::abs(diff[i]);
+      abs_sum += static_cast<double>(std::abs(diff[i]));
     }
     return abs_sum;
   }
@@ -819,21 +819,62 @@ class Vec {
     return static_cast<Vec<double, Dim>>(*this) / len;
   }
 
-//TODO noexcept
-//  //TODO Clock-wise if right-handed coordinate system
-  template<typename Tp = T>
+
+  //-------------------------------------------------
+  // Rotations
+
+//TODO add noexcept where it can be guaranteed
+
+  /// Returns the 90° clock-wise rotated vector. This method assumes
+  /// that the coordinate system is right-handed and is only
+  /// supported for 2D vectors.
+  template <typename Tp = T>
   Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim>
   PerpendicularClockwise() const {
     return Vec<T, Dim>{Y(), -X()};
   }
 
 
-  template<typename Tp = T>
+  /// Returns the 90° counter-clock-wise rotated vector. This method assumes
+  /// that the coordinate system is right-handed and is only
+  /// supported for 2D vectors.
+  template <typename Tp = T>
   Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim>
   PerpendicularCounterClockwise() const {
     return Vec<T, Dim>{-Y(), X()};
   }
 
+
+//TODO doc & test
+  /// Returns a copy of this vector rotated by the given radians.
+  /// This method assumes that the coordinate system is right-handed and
+  /// is only supported for 2D vector specialization with floating point
+  /// value type.
+  template <typename Tp = double>
+  Vec<typename std::enable_if<
+      (Dim == 2), Tp>::type, Dim>
+  RotateRadians(double theta) const {
+    const double ct = std::cos(theta);
+    const double st = std::sin(theta);
+    const double x = static_cast<double>(val[0]);
+    const double y = static_cast<double>(val[1]);
+    return Vec<Tp, 2>{
+      (ct * x) - (st * y),
+      (st * x) + (ct * y)
+    };
+  }
+
+
+//TODO doc & test
+  /// Returns a double precision vector which is the result of
+  /// rotating this vector by the given angle in degrees.
+  /// This method assumes that the coordinate system is right-handed
+  /// and is only supported for 2D vectors.
+  template <typename Tp = double>
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim>
+  RotateDegrees(double theta) const {
+    return RotateRadians(Deg2Rad(theta));
+  }
 
 
   //-------------------------------------------------
@@ -870,25 +911,25 @@ class Vec {
   }
 
 
-  template<typename Tp = T,
+  template <typename Tp = T,
            typename std::enable_if<
              std::is_same<Tp, int16_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 's'; }
 
 
-  template<typename Tp = T,
+  template <typename Tp = T,
           typename std::enable_if<
              std::is_same<Tp, int32_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 'i'; }
 
 
-  template<typename Tp = T,
+  template <typename Tp = T,
           typename std::enable_if<
              std::is_same<Tp, double>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 'd'; }
 
 
-  template<typename Tp = T,
+  template <typename Tp = T,
           typename std::enable_if<
              std::is_same<Tp, float>::value, int>::type = 0>
   inline static char TypeAbbreviation() { return 'f'; }
@@ -948,7 +989,7 @@ using Vec4i = Vec<int32_t, 4>;
 // Additional utility functions for vectors/points.
 
 /// Returns the length of the given polygon.
-template<typename T, std::size_t Dim>
+template <typename T, std::size_t Dim>
 inline double LengthPolygon(const std::vector<Vec<T, Dim>> &points) {
   double length {0};
   for (std::size_t idx = 1; idx < points.size(); ++idx) {
@@ -1035,27 +1076,27 @@ inline Vec2d DirectionVecFromAngleDeg(double deg) {
 }
 
 
-//TODO change to RotateVecDeg, RotateVecRad
-//TODO take any vec, cast to double precision
-/// Rotates the vector by the given radians, assuming a right-handed(!)
-/// coordinate system.
-inline Vec2d RotateVector(const Vec2d &vec, double theta) {
-  // 2D rotation matrix R = [[ct, -st], [st, ct]]
-  const double ct = std::cos(theta);
-  const double st = std::sin(theta);
-  return Vec2d{
-    (ct * vec.val[0]) - (st * vec.val[1]),
-    (st * vec.val[0]) + (ct * vec.val[1])
-  };
-}
+////TODO change to RotateVecDeg, RotateVecRad
+////TODO take any vec, cast to double precision
+///// Rotates the vector by the given radians, assuming a right-handed(!)
+///// coordinate system.
+//inline Vec2d RotateVector(const Vec2d &vec, double theta) {
+//  // 2D rotation matrix R = [[ct, -st], [st, ct]]
+//  const double ct = std::cos(theta);
+//  const double st = std::sin(theta);
+//  return Vec2d{
+//    (ct * vec.val[0]) - (st * vec.val[1]),
+//    (st * vec.val[0]) + (ct * vec.val[1])
+//  };
+//}
 
 
-/// Rotates the vector by the given radians about the given rotation
-/// center, assuming a right-handed(!) coordinate system.
-inline Vec2d RotateVector(
-    const Vec2d &vec, const Vec2d &rotation_center, double theta) {
-  return RotateVector(vec - rotation_center, theta) + rotation_center;
-}
+///// Rotates the vector by the given radians about the given rotation
+///// center, assuming a right-handed(!) coordinate system.
+//inline Vec2d RotateVector(
+//    const Vec2d &vec, const Vec2d &rotation_center, double theta) {
+//  return RotateVector(vec - rotation_center, theta) + rotation_center;
+//}
 
 
 
@@ -1064,7 +1105,7 @@ inline Vec2d RotateVector(
 /// Useful to get axis-aligned bounding boxes, a starting
 /// point for hull computations, etc.
 template <typename T, std::size_t Dim,
-          template<typename...> class Container = std::vector>
+          template <typename...> class Container = std::vector>
 void MinMaxCoordinates(
     const Container<Vec<T, Dim>> &values,
     Vec<T, Dim> &min, Vec<T, Dim> &max) {

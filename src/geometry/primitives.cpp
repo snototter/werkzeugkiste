@@ -123,11 +123,12 @@ int Circle_<T>::PointsOfTangency(
     const Line2d hypo(pt, center_);
     const Vec2d to_rotate = distance * hypo.UnitDirection();
 
-    Vec2d dir = RotateVector(to_rotate, alpha);
+    Vec2d dir = to_rotate.RotateRadians(alpha);
     if (pot1) {
       *pot1 = pt + dir;
     }
-    dir = RotateVector(to_rotate, -alpha);
+
+    dir = to_rotate.RotateRadians(-alpha);
     if (pot2) {
       *pot2 = pt + dir;
     }
@@ -283,14 +284,14 @@ int Circle_<T>::TransverseCommonTangents(
   const vec_type hypo_dir = hypo.UnitDirection();
 
   if ((tangent1 != nullptr) || (tangent2 != nullptr)) {
-    vec_type dir = RotateVector(hypo_dir, alpha);
+    vec_type dir = hypo_dir.RotateRadians(alpha);
     const vec_type t11 = intersection + (tangent_length1 * dir);
     const vec_type t12 = intersection - (tangent_length2 * dir);
     if (tangent1) {
       *tangent1 = Line2d_<T>{t11, t12};
     }
 
-    dir = RotateVector(hypo_dir, -alpha);
+    dir = hypo_dir.RotateRadians(-alpha);
     const vec_type t21 = intersection + (tangent_length1 * dir);
     const vec_type t22 = intersection - (tangent_length2 * dir);
     if (tangent2) {

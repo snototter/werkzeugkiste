@@ -14,19 +14,7 @@
 #include <werkzeugkiste/geometry/camera.h>
 #include <werkzeugkiste/geometry/primitives.h>
 
-
-//template <typename _V>
-//std::string PrettyPrint(const _V &vec) {
-//  std::ostringstream s;
-//  for (int i = 0; i < _V::ndim; ++i) {
-//    if (i > 0) {
-//      s << "\n";
-//    }
-//    s << vec[i];
-//  }
-//  return s.str();
-//}
-
+// NOLINTBEGIN(*magic-numbers)
 
 template <typename Vector>
 std::string PrettyPrint(
@@ -36,8 +24,8 @@ std::string PrettyPrint(
   std::ostringstream s;
   s << "[ ";
 
-  const auto lst_it = vecs.begin();
-  for (int dim = 0; dim < Vector::ndim; ++dim) {
+  const auto *const lst_it = vecs.begin();
+  for (std::size_t dim = 0; dim < Vector::ndim; ++dim) {
     if (dim > 0) {
       s << "\n";
       for (std::size_t idx = 0; idx < indent_others + 2; ++idx) {
@@ -61,6 +49,60 @@ std::string PrettyPrint(
 }
 
 
+template <class V>
+void VectorDemo(V vec1, V vec2) {
+  V ones = V::All(1);
+  V zeros{};
+
+  std::cout << "--------------------------------------------------\n"
+               "Vectors\n    v1 = " << vec1 << "\n    v2 = " << vec2
+      << "\n* Lengths:\n    l1 = " << vec1.Length()
+      << "\n    l2 = " << vec2.Length()
+      << "\n* Unit vectors:\n    u1 = " << vec1.UnitVector()
+      << "\n    u2 = " << vec2.UnitVector()
+      << "\n* Homogeneous:\n    h1 = " << vec1.Homogeneous()
+      << "\n    h2 = " << vec2.Homogeneous();
+
+  std::cout << "\n* Element-wise multiplication:"
+               "\n    v1 * v1 = " << (vec1 * vec1)
+            << "\n    v1 * v2 = " << (vec1 * vec2);
+
+  std::cout << "\n* Scalar product:"
+               "\n    <v1, v2> = " << vec1.Dot(vec2)
+            << "\n    <v1, v1> = " << vec1.Dot(vec1)
+            << "\n    <v1, 1> = " << vec1.Dot(ones)
+            << "\n    <v1, 0> = " << vec1.Dot(zeros);
+
+  constexpr bool is_floating_point = std::is_floating_point<typename V::value_type>::value;
+  if constexpr (is_floating_point) {
+    std::cout << "\n* Element-wise division:"
+                 "\n    v1 / v1 = " << (vec1 / vec1)
+              << "\n    v1 / v2 = " << (vec1 / vec2);
+  } else {
+    std::cout << "\n Division not supported for integral types.";
+  }
+
+  if constexpr (V::ndim == 2) {
+    std::cout << "\n* Rotation 90°:"
+                 "\n    CW v1 =  " << vec1.PerpendicularClockwise()
+              << "\n    CCW v1 = " << vec2.PerpendicularCounterClockwise();
+
+    if constexpr (is_floating_point) {
+      std::cout << "\n* Arbitrary rotations:"
+                   "\n    v1 10° =  " << vec1.RotateDegrees(10)
+                << "\n    v1 60° =  " << vec1.RotateDegrees(60)
+                << "\n    v1 -10° = " << vec1.RotateDegrees(-10);
+    }
+  }
+
+  if constexpr (V::ndim == 3) {
+    //TODO if dim==3: Cross
+  }
+
+
+  std::cout << std::endl << std::endl;
+}
+
 int main(int /* argc */, char ** /* argv */) {
   namespace wkg = werkzeugkiste::geometry;
   std::cout << "--------------------------------------------------\n"
@@ -69,18 +111,15 @@ int main(int /* argc */, char ** /* argv */) {
             << "--------------------------------------------------\n"
             << std::endl;
 
-  //TODO
-  wkg::Vec2d v1{17, 42}, v2{9, -3}, v3{0, 0.01};
+  wkg::Vec2d v1{-17, 42}, v2{0, 0.01};
+  VectorDemo(v1, v2);
 
-  std::cout << "Vector:      " << v1
-          << "\n--> Length:  " << v1.Length()
-          << "\nUnit vector: " << v1.UnitVector()
-          << "\n--> Length:  " << v1.UnitVector().Length()
-          << "\n--> Rot90 CW:  " << v1.PerpendicularClockwise()
-          << "\n--> Rot90 CCW: " << v1.PerpendicularCounterClockwise()
-          << std::endl;
+  VectorDemo(wkg::Vec2f{-17, 42}, wkg::Vec2f{0, 0.01});
 
-//  auto v2 = wkg::Vec2i{3, 9};
+  VectorDemo(wkg::Vec2i{-17, 42}, wkg::Vec2i{0, 23});
+
+  // TODO refactor
+
 //  std::cout << "Conversion: " << wkg::VecToEigenCol(v1)
 //            << "\nHomogeneous: " << wkg::VecToEigenHomogeneous(v1)
 //            << "\nMat(3 vecs): " << wkg::VecsToEigenMat(v1, v1, v1)
@@ -102,6 +141,7 @@ int main(int /* argc */, char ** /* argv */) {
 //  std::cout << "Transformation v1:\n" << M << " * " << PrettyPrint({v1, v2, v3}, 0, 6)
 //            << " =\n" << PrettyPrint({a, b, c}) << std::endl;
 
+  wkg::Vec2d v3{9, -3};
   std::tie(a, b, c) = wkg::TransformToVecs(M, v1, v2, v3);
   std::cout << "Transformation v2:\n" << M << " * " << PrettyPrint({v1, v2, v3}, 0, 6)
             << " =\n" << PrettyPrint({a, b, c}) << std::endl;
@@ -180,3 +220,5 @@ int main(int /* argc */, char ** /* argv */) {
 
   return 0;
 }
+
+// NOLINTEND(*magic-numbers)

@@ -15,7 +15,7 @@ namespace wkg = werkzeugkiste::geometry;
 // NOLINTBEGIN
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestConversion(wkg::Vec<Tp, Dim> vec) {
   wkg::Vec<double, Dim> offset_dbl;
   wkg::Vec<int32_t, Dim> offset_int;
@@ -55,7 +55,7 @@ void TestConversion(wkg::Vec<Tp, Dim> vec) {
 }
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestIndexing(wkg::Vec<Tp, Dim> vec) {
   // Negative indexing with range-checked access:
   int neg_idx = -1;
@@ -88,7 +88,7 @@ void TestIndexing(wkg::Vec<Tp, Dim> vec) {
 }
 
 
-template<typename Tp>
+template <typename Tp>
 void TestVec2dSizeAccess(wkg::Vec<Tp, 2> vec) {
   // A 2d vector can be used to represent a size/dimension:
   EXPECT_DOUBLE_EQ(vec.X(), vec.Width());
@@ -109,7 +109,7 @@ void TestVec2dSizeAccess(wkg::Vec<Tp, 2> vec) {
 }
 
 
-template<typename Tp>
+template <typename Tp>
 void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
   // In 2d, we can easily rotate a vector by +/- 90 degrees:
   auto perpendicular = vec.PerpendicularClockwise();
@@ -146,7 +146,7 @@ void TestNegation(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(wkg::IsEpsEqual(2 * vec.Length(), vec.DistanceEuclidean(negated)));
 }
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
   const wkg::Vec<Tp, Dim> copy{vec};
   EXPECT_EQ(copy, vec);
@@ -188,7 +188,7 @@ void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
 }
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
   const wkg::Vec<Tp, Dim> copy{vec};
   EXPECT_EQ(copy, vec);
@@ -288,7 +288,7 @@ template <typename Tp, std::size_t Dim>
 
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec) {
   const wkg::Vec<Tp, Dim> copy{vec};
   EXPECT_EQ(copy, vec);
@@ -329,7 +329,7 @@ void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec) {
 }
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
   const wkg::Vec<Tp, Dim> copy{vec};
   EXPECT_EQ(copy, vec);
@@ -380,7 +380,7 @@ void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
 }
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestVectorBasics(wkg::Vec<Tp, Dim> vec) {
   using V = wkg::Vec<Tp, Dim>;
   double length_squared {0.0};
@@ -456,7 +456,7 @@ void TestVec3dGeometry(wkg::Vec<Tp, 3> vec) {
 }
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestHomogeneous(wkg::Vec<Tp, Dim> vec) {
     auto vh = vec.Homogeneous();
     EXPECT_EQ(Dim + 1, vh.ndim);
@@ -468,7 +468,7 @@ void TestHomogeneous(wkg::Vec<Tp, Dim> vec) {
 }
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   // Indexing
   TestIndexing(vec);
@@ -611,7 +611,7 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
 }
 
 
-template<typename Tp, std::size_t Dim>
+template <typename Tp, std::size_t Dim>
 void TestCreation(wkg::Vec<Tp, Dim> vec) {
   using V = wkg::Vec<Tp, Dim>;
 
