@@ -45,7 +45,7 @@ static int number_precision = 0;
 
 
 /// Template to retrieve the elapsed time for a given precision.
-template<typename Period>
+template <typename Period>
 double TToc(const std::string &label) {
   auto it = active_watches.find(label);
   if (it == active_watches.end()) {
@@ -59,7 +59,7 @@ double TToc(const std::string &label) {
 
 
 /// Template to print the elapsed time for a given precision.
-template<typename P>
+template <typename P>
 void TocTemplate(const std::string &label) {
   const auto elapsed = TToc<typename P::period>(label);
 

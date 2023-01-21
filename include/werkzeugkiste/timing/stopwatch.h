@@ -127,7 +127,7 @@ std::string PrecisionTypeName() {
 
 /// Returns the number of ticks for the given
 /// std::chrono::duration with a different precision.
-template<typename DurationFrom, typename DurationTo> inline constexpr
+template <typename DurationFrom, typename DurationTo> inline constexpr
 double CastToTicks(const DurationFrom &duration) {
   // Floating-point duration requires no explicit duration_cast
   // https://en.cppreference.com/w/cpp/chrono/duration/duration_cast
@@ -137,28 +137,28 @@ double CastToTicks(const DurationFrom &duration) {
 
 
 /// Returns the number of seconds for the given std::chrono::duration.
-template<typename Duration> inline constexpr
+template <typename Duration> inline constexpr
 double ToSeconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::seconds>(duration);
 }
 
 
 /// Returns the number of milliseconds for the given std::chrono::duration.
-template<typename Duration> inline constexpr
+template <typename Duration> inline constexpr
 double ToMilliseconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::milliseconds>(duration);
 }
 
 
 /// Returns the number of microseconds for the given std::chrono::duration.
-template<typename Duration> inline constexpr
+template <typename Duration> inline constexpr
 double ToMicroseconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::microseconds>(duration);
 }
 
 
 /// Returns the number of nanoseconds for the given std::chrono::duration.
-template<typename Duration> inline constexpr
+template <typename Duration> inline constexpr
 double ToNanoseconds(const Duration &duration) {
   return CastToTicks<Duration, std::chrono::nanoseconds>(duration);
 }
@@ -225,7 +225,7 @@ class stop_watch {  // NOLINT
   /// is a rational fraction - std::ratio - representing the
   /// time in seconds from one tick to the next, i.e. similar
   /// to the Period template parameter in ``std::chrono::duration``).
-  template<typename Ratio>
+  template <typename Ratio>
   double ElapsedAs() const {
     const auto t_end = clock_type::now();
     // Floating-point duration requires no explicit duration_cast

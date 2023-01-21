@@ -149,7 +149,7 @@ std::vector<TData> SortByExternalKeys(
 
 /// Returns a map containing all duplicate entries in 'data' along
 /// with their their frequencies.
-template<typename Container,
+template <typename Container,
     typename Tp = std::decay_t<
         decltype(*begin(std::declval<Container>()))>>
 std::map<Tp, std::size_t> FindDuplicates(const Container &container) {
@@ -177,7 +177,7 @@ std::map<Tp, std::size_t> FindDuplicates(const Container &container) {
 
 /// Returns true if there are no duplicates in the given
 /// sequence container.
-template<typename Container,
+template <typename Container,
     typename Tp = std::decay_t<
         decltype(*begin(std::declval<Container>()))>>
 bool HasUniqueItems(const Container &container) {
@@ -194,7 +194,7 @@ bool ContainsKey(const std::map<Ts...> &container, const Tv &key) {
 
 
 /// Returns true if the given element exists within the container.
-template<typename Container,
+template <typename Container,
     typename Tp = std::decay_t<
         decltype(*begin(std::declval<Container>()))>>
 bool ContainsValue(const Container &container, const Tp &value) {
