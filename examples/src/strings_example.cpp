@@ -20,7 +20,7 @@ inline std::string b2s(bool val) {
 int main(int /* argc */, char ** /* argv */) {
   namespace wks = werkzeugkiste::strings;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << WERKZEUGKISTE_VERSION << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    String utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;
@@ -51,7 +51,9 @@ int main(int /* argc */, char ** /* argv */) {
   //TODO trim
   //TODO replace
   //TODO tokenize
-  //TODO
-
- return 0;
+  //TODO slug
+  std::cout << "Concatenation: " << wks::Concatenate(examples)
+            << "\nSlug:         " << wks::Slug(wks::Concatenate(examples))
+            << std::endl;
+  return 0;
 }

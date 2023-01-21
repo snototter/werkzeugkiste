@@ -121,6 +121,27 @@ WERKZEUGKISTE_EXPORT
   std::vector<std::string> Split(std::string_view s, char delim);
 
 
+template <typename Container,
+    typename Tp = std::decay_t<
+        decltype(*begin(std::declval<Container>()))>>
+inline std::string
+    Concatenate(
+        const Container &container,
+        std::string_view delimitier = "") {
+  std::ostringstream concat;
+  bool preprend_delimiter = false;
+  for (const auto &str : container) {
+    if (preprend_delimiter) {
+      concat << delimitier;
+    } else {
+      preprend_delimiter = true;
+    }
+    concat << str;
+  }
+  return concat.str();
+}
+
+
 /// Replaces all occurences of the given search
 /// string `needle` within the `haystack`.
 WERKZEUGKISTE_EXPORT

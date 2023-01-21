@@ -15,7 +15,7 @@
 int main(int /* argc */, char ** /* argv */) {
   namespace wkf = werkzeugkiste::files;
   std::cout << "--------------------------------------------------\n"
-            << "    Werkzeugkiste v" << WERKZEUGKISTE_VERSION << "\n"
+            << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    File utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;
