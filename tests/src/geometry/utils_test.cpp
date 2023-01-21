@@ -146,8 +146,16 @@ TEST(GeometryUtilsTest, FloatingPointEquality1) {
   EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.00000000001));
   EXPECT_TRUE( wkg::IsEpsEqual(5.0, 5.000000000001));
 
+  EXPECT_FALSE(wkg::IsEpsEqual(5e12, 5e-12));
+  EXPECT_TRUE(wkg::IsEpsEqual(5e12, 5e12 + 0.001));
+  EXPECT_FALSE(wkg::IsEpsEqual(5e111, 5e-111));
+
+
   // Never test for eqs_equal with 0!
   EXPECT_FALSE(wkg::IsEpsZero(1e-7));
+  EXPECT_FALSE(wkg::IsEpsZero(1e-12));
+  EXPECT_FALSE(wkg::IsEpsZero(1e-14));
+  EXPECT_TRUE(wkg::IsEpsZero(std::numeric_limits<double>::epsilon()));
   EXPECT_FALSE(wkg::IsEpsEqual(0.0, 1e-7));
   EXPECT_FALSE(wkg::IsEpsEqual(0.0, 1e-50));
   EXPECT_FALSE(wkg::IsEpsEqual(0.0, -(1e-50)));
@@ -177,9 +185,11 @@ TEST(GeometryUtilsTest, FloatingPointEquality1) {
   EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.01F));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.001F));
   EXPECT_FALSE(wkg::IsEpsEqual(5.0F, 5.0001F));
+  EXPECT_FALSE( wkg::IsEpsEqual(5.0F, 5.00001F));
 
-  EXPECT_TRUE( wkg::IsEpsEqual(5.0F, 5.00001F));
   EXPECT_TRUE( wkg::IsEpsEqual(5.0F, 5.000001F));
+  EXPECT_TRUE( wkg::IsEpsEqual(5.0F, 5.0000001F));
+  EXPECT_TRUE( wkg::IsEpsEqual(5.0F, 5.00000001F));
 }
 
 
@@ -192,6 +202,7 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
     EXPECT_TRUE(wkg::IsEpsEqual(value, next))
         << "    " << value << " should equal " << next
         << " (which is the next representable number).";
+
     EXPECT_FALSE(wkg::IsEpsEqual(-value, next))
         << "    " << (-value) << " should NOT equal " << next << '.';
 
@@ -213,11 +224,14 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
     auto scaled = value + (value * 1e-10);
     EXPECT_TRUE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should equal " << scaled
-        << " (because of 1e-9 precision threshold).";
+        << " (because of 1e-9 precision threshold), difference: "
+        << (value - scaled);
+
     scaled = value + (value * 1e-8);
     EXPECT_FALSE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should NOT equal " << scaled
-        << " (because of 1e-9 precision threshold).";
+        << " (because of 1e-9 precision threshold), difference: "
+        << (value - scaled);
   }
 
 
@@ -228,6 +242,7 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
     EXPECT_TRUE(wkg::IsEpsEqual(value, next))
         << "    Value " << value << " should equal " << next
         << " (which is the next representable number).";
+
     EXPECT_FALSE(wkg::IsEpsEqual(-value, next))
         << "    Value " << (-value) << " should NOT equal " << next << '.';
 
@@ -235,17 +250,53 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
     // threshold.
     // Skip values > 1e3 as these would cause false alerts due to
     // the limited float precision.
-    auto scaled = value + (value * 0.000009F);
+    auto scaled = value + (value * 0.0000009F);
     EXPECT_TRUE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should equal " << scaled
-        << " (because of 1e-5 precision threshold).";
-    scaled = value + (value * 0.0002F);
+        << " (because of 1e-6 precision threshold), difference: "
+        << (value - scaled);
+
+    scaled = value + (value * 0.00002F);
     EXPECT_FALSE(wkg::IsEpsEqual(value, scaled))
         << "    Value " << value << " should NOT equal " << scaled
-        << " (because of 1e-5 precision threshold).";
+        << " (because of 1e-6 precision threshold), difference: "
+        << (value - scaled);
   }
 }
 
+
+TEST(GeometryUtilsTest, Constants) {
+  // Pi, double precision
+  constexpr double pi_dbl {3.14159265358979323};
+  EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::pi_d, pi_dbl));
+  EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::pi_d + 1e-10, pi_dbl));
+  EXPECT_FALSE(wkg::IsEpsEqual(wkg::constants::pi_d + 1e-8, pi_dbl));
+  EXPECT_FALSE(wkg::IsEpsEqual(wkg::constants::pi_d + 1e-7, pi_dbl));
+
+  EXPECT_TRUE(wkg::IsEpsEqual(1.0 / pi_dbl, wkg::constants::inv_pi_d));
+  EXPECT_TRUE(wkg::IsEpsEqual(
+                1.0 / wkg::constants::pi_d, wkg::constants::inv_pi_d));
+
+  // Pi, single precision
+  constexpr float pi_flt {3.14159265358979323F};
+  EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::pi_f,  pi_flt));
+  EXPECT_FALSE(wkg::IsEpsEqual(wkg::constants::pi_f + 1e-5F,  pi_flt));
+  EXPECT_FALSE(wkg::IsEpsEqual(wkg::constants::pi_f + 1e-4F,  pi_flt));
+
+  EXPECT_TRUE(wkg::IsEpsEqual(1.0F / pi_flt, wkg::constants::inv_pi_f));
+  EXPECT_TRUE(wkg::IsEpsEqual(
+                1.0F / wkg::constants::pi_f, wkg::constants::inv_pi_f));
+
+  // Square root of 2
+  EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::sqrt2_d, 1.41421356237309504));
+  EXPECT_TRUE(wkg::IsEpsEqual(
+                wkg::constants::sqrt2_d * wkg::constants::sqrt2_d, 2.0));
+
+  EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::sqrt2_f, 1.41421356237309504F));
+  EXPECT_TRUE(wkg::IsEpsEqual(
+                wkg::constants::sqrt2_f * wkg::constants::sqrt2_f, 2.0F));
+
+}
 
 TEST(GeometryUtilsTest, Signum) {
   EXPECT_EQ(wkg::Sign(0), 0);
