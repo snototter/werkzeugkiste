@@ -700,7 +700,7 @@ class Vec {
   /// Returns a copy of this vector where each dimension is negated.
   /// Use `Negate` to explicitly negate this instance.
   Vec<T, Dim> operator-() const {
-    Vec<T, Dim> cp(*this);
+    Vec<T, Dim> cp{*this};
     cp.Negate();
     return cp;
   }
@@ -780,6 +780,21 @@ class Vec {
   Vec<T, Dim> DirectionVector(const Vec<T, Dim>& to) const {
     return to - *this;
   }
+
+
+  /// Returns a vector holding the absolute values of this vector.
+  Vec<T, Dim> Absolute() const {
+    Vec<T, Dim> abs{};
+    for (index_type idx = 0; idx < Dim; ++idx) {
+      if constexpr (std::is_floating_point_v<T>) {
+        abs.val[idx] = std::fabs(val[idx]);
+      } else {
+        abs.val[idx] = std::abs(val[idx]);
+      }
+    }
+    return abs;
+  }
+
 
   /// Computes the L2 distance between this and the other.
   double DistanceEuclidean(const Vec<T, Dim>& other) const {

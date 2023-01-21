@@ -144,6 +144,15 @@ void TestNegation(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(wkg::IsEpsEqual(vec.Length(), negated.Length()));
   EXPECT_TRUE(wkg::IsEpsEqual(vec.LengthSquared(), negated.LengthSquared()));
   EXPECT_TRUE(wkg::IsEpsEqual(2 * vec.Length(), vec.DistanceEuclidean(negated)));
+
+
+  auto abs1 = negated.Absolute();
+  auto abs2 = vec.Absolute();
+  EXPECT_TRUE(CheckVectorEqual(abs1, abs2));
+
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    EXPECT_TRUE(abs1[idx] >= static_cast<Tp>(0));
+  }
 }
 
 template <typename Tp, std::size_t Dim>
