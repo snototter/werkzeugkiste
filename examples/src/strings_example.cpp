@@ -38,7 +38,7 @@ int main(int /* argc */, char ** /* argv */) {
             << "\nShorten 5 custom ellipsis: " << wks::Shorten("0123456789", 5, 0, "*!*")
             << std::endl << std::endl;
 
-  std::vector<std::string> examples {"This", "is", "a", "LiSt", "oF", "\"ExAmPlEs\"", "-_1,2;3:'#!"};
+  std::vector<std::string> examples {"This", "is", "a", "LiSt", "oF", "\"ExAmPlE\"", " Strings ", "-_1,2;3:'#!"};
   for (const auto &s : examples) {
     std::cout << "Input: " << s << "\n"
               << "+ Upper: " << wks::Upper(s)
@@ -51,9 +51,11 @@ int main(int /* argc */, char ** /* argv */) {
   //TODO trim
   //TODO replace
   //TODO tokenize
+
   //TODO slug
-  std::cout << "Concatenation: " << wks::Concatenate(examples)
-            << "\nSlug:         " << wks::Slug(wks::Concatenate(examples))
+  std::string concat = wks::Concatenate(examples, " ");
+  std::cout << "Concatenation: " << concat
+            << "\nSlug:         " << wks::Slug(concat)
             << std::endl;
   return 0;
 }
