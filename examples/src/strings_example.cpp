@@ -38,7 +38,10 @@ int main(int /* argc */, char ** /* argv */) {
             << "\nShorten 5 custom ellipsis: " << wks::Shorten("0123456789", 5, 0, "*!*")
             << std::endl << std::endl;
 
-  std::vector<std::string> examples {"This", "is", "a", "LiSt", "oF", "\"ExAmPlE\"", " Strings ", "-_1,2;3:'#!"};
+  std::vector<std::string> examples{
+    "This", "is", "a", "LiSt", "oF", "\"ExAmPlE\"", " Strings ",
+    "with_some_", "special characters", ", e.g.", "-_1,2;3:'#!",
+    "öÖ#Üß\\-_\t\\"};
   for (const auto &s : examples) {
     std::cout << "Input: " << s << "\n"
               << "+ Upper: " << wks::Upper(s)
@@ -54,8 +57,17 @@ int main(int /* argc */, char ** /* argv */) {
 
   //TODO slug
   std::string concat = wks::Concatenate(examples, " ");
+  std::string slug = wks::Slug(concat);
+  constexpr std::size_t desired_length = 42;
+  using namespace std::literals;
+  std::string_view ellipsis{"\u2026"sv};
   std::cout << "Concatenation: " << concat
-            << "\nSlug:          " << wks::Slug(concat)
+            << "\nSlug:          " << slug
+            << "\nShortened:     " << wks::Shorten(slug, desired_length)
+            << "\n               " << wks::Shorten(slug, desired_length, 0)
+            << "\n               " << wks::Shorten(slug, desired_length, 1)
+            << "\nEllipsis char: " << wks::Shorten(slug, desired_length, 1, ellipsis)
+            << " (Length ellipsis unicode char: " << ellipsis.length() << ")"
             << std::endl;
   return 0;
 }

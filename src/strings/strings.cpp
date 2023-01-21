@@ -26,7 +26,7 @@ const std::unordered_map<std::string, std::string> &Replacements() {
     {"?", ""}, {"@", "at"},
     {"\\", "-"}, {"^", ""},
     {"_", "-"}, {"`", ""}, // Grave accent
-    //TODO tilde?
+    {"~", ""},
 
     // Latin 1 supplement
     {"´", ""}, // Acute accent
@@ -55,7 +55,11 @@ const std::unordered_map<std::string, std::string> &Replacements() {
     {"\u00f6", "oe"}, // Small o with diaeresis
     {"\u00dc", "Ue"}, // Capital U with diaeresis
     {"\u00fc", "Ue"}, // Small u with diaeresis
+    {"\u00df", "sz"}, // Small sharp s
+    {"\u1e9e", "Sz"}, // Capital sharp s
     //TODO continue
+
+    {"\u2026", "..."}, // Ellipsis
   };
   return replacements;
 }
@@ -258,18 +262,21 @@ std::string Remove(
 }
 
 
-std::string Slug(
-    std::string_view s,
-    bool strip_dashes) {
-  std::string replaced = Trim(s);
-
-  //TODO a) inefficient
-  //TODO b) update documentation
-
+std::string ReplaceSpecialCharacters(std::string_view s) {
+  std::string replaced(s);
   for (const auto &replacement : slug_utils::Replacements()) {
     replaced = Replace(replaced, replacement.first, replacement.second);
   }
-  replaced = Lower(replaced);
+  return replaced;
+}
+
+
+std::string Slug(
+    std::string_view s,
+    bool strip_dashes) {
+  //TODO a) inefficient
+  //TODO b) update documentation
+  std::string replaced = Lower(ReplaceSpecialCharacters(Trim(s)));
 
   std::ostringstream out;
   // Start with flag set to true, to return "-" if the string
@@ -279,9 +286,22 @@ std::string Slug(
     if (std::isalnum(c) != 0) {
       out << c;
       prev_alphanum = true;
-    } else if (prev_alphanum && !strip_dashes) {
-      out << '-';
-      prev_alphanum = false;
+    } else {
+      if (prev_alphanum && (!strip_dashes)) {
+        out << '-';
+        prev_alphanum = false;
+      }
+    }
+  }
+
+  std::string slug = out.str();
+  if (EndsWith(slug, '-')) {
+    // Replace the stream with a default constructed:
+    std::ostringstream().swap(out);
+
+    const std::size_t last_alnum = slug.find_last_not_of('-');
+    for (std::size_t idx = 0; idx <= last_alnum; ++idx) {
+      out << slug[idx];
     }
   }
   return out.str();
