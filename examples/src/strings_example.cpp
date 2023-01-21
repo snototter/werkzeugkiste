@@ -55,7 +55,7 @@ int main(int /* argc */, char ** /* argv */) {
   //TODO slug
   std::string concat = wks::Concatenate(examples, " ");
   std::cout << "Concatenation: " << concat
-            << "\nSlug:         " << wks::Slug(concat)
+            << "\nSlug:          " << wks::Slug(concat)
             << std::endl;
   return 0;
 }
