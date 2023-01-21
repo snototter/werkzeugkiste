@@ -107,7 +107,7 @@ std::string Trim(std::string_view s) {
 
 
 bool IsNumeric(const std::string &s) {
-  //TODO replace by std::stoll
+  //TODO replace by `std::stoll`
   bool is_numeric{false};
   if (s.length() > 0) {
     // Check long long

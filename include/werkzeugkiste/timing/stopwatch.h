@@ -224,7 +224,7 @@ class stop_watch {  // NOLINT
 
 
   /// Returns the elapsed time as ticks of the
-  /// given time interval (specifed as tick interval, which
+  /// given time interval (specified as tick interval, which
   /// is a rational fraction - std::ratio - representing the
   /// time in seconds from one tick to the next, i.e. similar
   /// to the Period template parameter in ``std::chrono::duration``).

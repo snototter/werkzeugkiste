@@ -111,7 +111,7 @@ WERKZEUGKISTE_EXPORT
 
 
 /// Returns true if the string can be safely cast into
-/// eiter an `int64_t` or a `double` type.
+/// either an `int64_t` or a `double` type.
 WERKZEUGKISTE_EXPORT
   bool IsNumeric(const std::string &s);
 
@@ -127,12 +127,12 @@ template <typename Container,
 inline std::string
     Concatenate(
         const Container &container,
-        std::string_view delimitier = "") {
+        std::string_view delimiter = "") {
   std::ostringstream concat;
   bool preprend_delimiter = false;
   for (const auto &str : container) {
     if (preprend_delimiter) {
-      concat << delimitier;
+      concat << delimiter;
     } else {
       preprend_delimiter = true;
     }
@@ -142,7 +142,7 @@ inline std::string
 }
 
 
-/// Replaces all occurences of the given search
+/// Replaces all occurrences of the given search
 /// string `needle` within the `haystack`.
 WERKZEUGKISTE_EXPORT
   std::string Replace(
@@ -151,7 +151,7 @@ WERKZEUGKISTE_EXPORT
       std::string_view replacement);
 
 
-/// Replaces all occurences of the given character.
+/// Replaces all occurrences of the given character.
 WERKZEUGKISTE_EXPORT
   std::string Replace(
       std::string_view haystack,

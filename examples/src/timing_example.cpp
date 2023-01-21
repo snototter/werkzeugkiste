@@ -13,7 +13,7 @@
 
 // Define "WITH_TICTOC" to enable timing via the provided macros.
 // Without it, the macros will become no-ops.
-// This should be prefered over werkzeug::timing::mute()/unmute()
+// This should be preferred over werkzeug::timing::mute()/unmute()
 #define WITH_TICTOC
 #include <werkzeugkiste/timing/tictoc.h>
 

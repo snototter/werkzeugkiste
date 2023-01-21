@@ -366,13 +366,13 @@ private:
   }
 
   // Bound index into data capacity.
-  inline size_type normalise(size_type n) const {
+  inline size_type normalize(size_type n) const {
     return n % capacity_;
   }
 
   // Converts external index to an array subscript
   size_type index_to_subscript(size_type index) const {
-    return normalise(index + tail_);
+    return normalize(index + tail_);
   }
 
   size_type next_position(size_type index) {

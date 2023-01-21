@@ -451,7 +451,7 @@ class Vec {
   }
 
   //-------------------------------------------------
-  // Arithmetics
+  // Arithmetic
 
   /// Performs element-wise addition and returns the modified instance.
   Vec<T, Dim> &AddVector(const Vec<T, Dim>& rhs) {

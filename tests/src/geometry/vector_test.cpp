@@ -493,7 +493,7 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   // Integral/floating point conversion
   TestConversion(vec);
 
-  // Arithmetics
+  // Arithmetic
   TestScalarAddSub(vec);
   TestVectorAddSub(vec);
   TestScalarMulDiv(vec);
@@ -539,7 +539,7 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   auto copy = wkg::Vec<Tp, Dim>(vec);
   EXPECT_EQ(vec, copy);
 
-  // Basic arithmetics
+  // Basic arithmetic
   auto vec_twice = vec + vec;
   EXPECT_NE(vec, vec_twice);
   EXPECT_EQ(vec * static_cast<Tp>(2), vec_twice);
