@@ -157,7 +157,8 @@ void TestNegation(wkg::Vec<Tp, Dim> vec) {
 
 template <typename Tp, std::size_t Dim>
 void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
-  const wkg::Vec<Tp, Dim> copy{vec};
+  using V = wkg::Vec<Tp, Dim>;
+  const V copy{vec};
   EXPECT_EQ(copy, vec);
 
   // Add a scalar (rhs and lhs)
@@ -194,6 +195,13 @@ void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(copy, vec - 512));
   EXPECT_TRUE(CheckVectorEqual(copy + 512, vec));
   EXPECT_TRUE(CheckVectorEqual(512 + copy, vec));
+
+  // Subtract vector from a scalar
+  vec = copy;
+  EXPECT_EQ(copy, vec);
+  V subtracted = 2 - vec;
+  EXPECT_TRUE(CheckVectorEqual(V::All(2) - vec, subtracted));
+  EXPECT_TRUE(CheckVectorEqual(vec.Negate() + 2, subtracted));
 }
 
 

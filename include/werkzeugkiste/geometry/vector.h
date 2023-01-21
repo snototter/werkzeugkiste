@@ -549,6 +549,14 @@ class Vec {
   }
 
 
+  /// Overloaded `scalar - vec`, which is `All(scalar) - vec`.
+  friend Vec<T, Dim> operator-(T lhs, const Vec<T, Dim> &rhs) {
+    auto all = All(lhs);
+    all -= rhs;
+    return all;
+  }
+
+
   /// Multiplies each dimension by the given scalar and returns the modified
   /// instance.
   Vec<T, Dim> &MultiplyScalar(T scale) {
