@@ -1,29 +1,43 @@
 # Werkzeugkiste - Yet Another C++ Utility Library
-This library is a collection of frequently used C++ snippets copy-pasted across way too many of my projects.
-Since there's tons of so-called utilities, utils, tools & toolboxes out there, I prefer to call this one **`werkzeugkiste`** (the German word for toolbox).
+![CI Status](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml/badge.svg)
+
+This library is a collection of frequently used C++ snippets copy-pasted across
+way too many of my projects. Since there's tons of so-called utilities, utils,
+tools & toolboxes out there, I prefer to call this one **`werkzeugkiste`** (the
+German word for toolbox).
 
 
 ## Functionality
 
-This toolbox will only receive sporadic updates, basically whenever I have to reuse (and modernize) some of my older code.
-Currently, it provides the following functionality. Note that the namespace name is equal to the corresponding CMake target:
-* `werkzeugkiste::container`: Sorting utilities and a custom (`stl`-like) circular buffer.
+This toolbox will only receive sporadic updates, basically whenever I have to
+reuse (and modernize) some of my older code.
+Currently, it provides the following functionality. Note that the namespace
+name also equals the corresponding CMake target to be linked against:
+* `werkzeugkiste::container`: Sorting/lookup utilities and a custom
+  circular buffer.
 * `werkzeugkiste::files`: Basic file I/O and filesystem utilities.  
-  _Caveat:_ These utilities are only tested on GNU/Linux and will be replaced by wrappers to C++17's `std::filesystem`.
+  _Caveat:_ These utilities are only tested on GNU/Linux and will be replaced
+  by wrappers to C++17's `std::filesystem`.
 * `werkzeugkiste::geometry`: Math utilities, focused on basic 2D & 3D geometry.
-  * Type-safe number comparisons (`IsEpsEqual`, `IsEpsZero`) and basic math utils (such as `Sign`).
+  * Type-safe number comparisons (`IsEpsEqual`, `IsEpsZero`) and basic math
+    utils (such as `Sign`).
   * 2D geometry: Circles & lines.
   * 3D geometry: Planes & lines.
 * `werkzeugkiste::strings`: Common string manipulation.
-* `werkzeugkiste::timing`: Provides a stop watch & additional helpers on top of `std::chrono` (hiding some of its template boilerplate).
+* `werkzeugkiste::timing`: Provides a stop watch & additional helpers on top
+  of `std::chrono` (to hide some of its template boilerplate).
 
 
 ## Requirements
+
 * A C++ compiler supporting at least C++17
-* [CMake][1] >= 3.14 and a [compatible build tool][2], like [Make][3], [Ninja][4], etc.
+* [CMake][1] >= 3.14 and a [compatible build tool][2], like [Make][3],
+  [Ninja][4], etc.
 * The linear algebra library [Eigen3](https://eigen.tuxfamily.org/)
 
+
 ## Usage
+
 If you need to **manually build and install** `werkzeugkiste`, refer to the
 separate [BUILDING](BUILDING.md) document.
 
