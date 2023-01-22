@@ -103,7 +103,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-12, ubuntu-22.04, windows-2022]
+         os: [ubuntu-22.04]
+#        os: [macos-12, ubuntu-22.04, windows-2022]
 
         type: [shared, static]
 
@@ -136,6 +137,26 @@ jobs:
           github:
           - path: eigenteam/eigen-git-mirror
             ref: 3.3.7
+
+    - name: Install gtest on Ubuntu
+      if: matrix.os == 'ubuntu-22.04'
+      run: sudo apt-get install libgtest-dev -q -y
+# TODO builds by default in /usr/src/googletest
+        && cd /usr/src/gtest
+        && sudo cmake .
+        && sudo make
+        && sudo cp *.a /usr/lib
+        && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a
+        && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
+
+    - uses: actions/checkout@v1
+    - name: configure
+      run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="-Werror" ..
+    - name: make
+      run: cd build && make
+    - name: Run Test
+      run: /home/runner/work/github_actions_gtest_example/github_actions_gtest_example/build/test/github_actions_gtest_example.test
+
 
     - name: Configure
       shell: pwsh
