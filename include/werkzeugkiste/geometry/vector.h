@@ -437,9 +437,9 @@ class Vec {
     } else {
       // Float can store 6-9 significant digits
       if constexpr (std::is_same<float, T>::value) {
-        return lhs.IsClose(rhs, 0.00001F, 0.00000001F);
+        return lhs.IsClose(rhs, 1e-6F, 1e-9F);
       }
-      // Double typically 15-18, so 1e-9
+      // Double can typically store 15-18 significant digits
       return lhs.IsClose(rhs, 1e-9, 1e-12);
     }
   }
