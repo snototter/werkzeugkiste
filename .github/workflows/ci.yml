@@ -38,6 +38,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    
+    - name: Install GoogleTest libraries
+      uses: MarkusJx/googletest-installer@v1.1.1
 
     - name: Install werkzeugkiste requirements
       run: sudo apt-get install libeigen3-dev -q -y
