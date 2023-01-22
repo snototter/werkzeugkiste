@@ -105,11 +105,10 @@ jobs:
         os: [ubuntu-22.04]
 #        os: [macos-12, ubuntu-22.04, windows-2022]
 
-#        type: [shared, static]
-        type: [static]
+        type: [shared, static]
 
         include:
-        - { type: shared, shared: YES }
+#        - { type: shared, shared: YES }
         - { type: static, shared: NO }
 
     runs-on: ${{ matrix.os }}
