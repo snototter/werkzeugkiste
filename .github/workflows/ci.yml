@@ -141,7 +141,6 @@ jobs:
     - name: Install gtest on Ubuntu
       if: matrix.os == 'ubuntu-22.04'
       run: sudo apt-get install libgtest-dev -q -y
-# TODO builds by default in /usr/src/googletest
         && cd /usr/src/gtest
         && sudo cmake .
         && sudo make
