@@ -98,19 +98,34 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
 <details>
 <summary>Task list overview / TODOs:</summary>
 
-* [ ] Disable shared or, preferably, make it a real shared library.
+* [ ] Shared library
+  * [x] Export symbols
+  * [x] Check if shared library works "locally" (e.g. tests and examples,
+    which are separate targets that link against the werkzeugkiste library)
+  * [ ] Check if the export header is correctly distributed in a consuming project
 * [ ] Change to newer gcc and add `-Wextra-semi` to dev presets
-* [ ] Check coverage target and set up codecov.io on push/release
+* [ ] Coverage
+  * [ ] Check coverage target
+  * [ ] Document coverage command
+  * [ ] Set up codecov.io or coveralls on push/release
 * [ ] Utils:
   * [x] Enumeration utils (iterator + flags)
   * [x] strings
-  * [x] circular buffer
-  * [ ] port file stuff to C++17
+  * [ ] circular buffer
+    * [ ] Refactor properly
+    * [ ] Test with complex objects (memory management)
+  * [ ] Refactor vcp file utils to leverage C++17
   * [x] sort utils
   * [x] vec/basicmath
   * [x] geo2d
   * [ ] geo3d (WIP)
-  * [ ] pinhole camera projection (WIP: basic transformations done; want to extend it s.t. we can project an arbitrary number of points - i.e. matrices on the heap vs stack)
+  * [ ] tracking-by-detection
+    * [ ] Refactor Kalman filter to use Eigen
+    * [ ] Implement common Bounding Box, Detection & Target class
+  * [ ] pinhole camera projection
+    * [x] Basic transformations
+    * [ ] Extend it s.t. we can project an arbitrary number of points, i.e.
+      matrices allocated on the heap vs stack
   * [ ] pinhole camera class which takes care of storing intrinsics/extrinsics, projects points, etc.
   * [ ] Trajectory smoothing
     * [x] Moving average, similar to MATLAB's `smooth`
@@ -118,7 +133,6 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
       or [as in matplotlib](https://github.com/JohannesBuchner/matplotlib-xkcdify), although the latter would be
       a major effort due to spline fitting (*e.g.* via [ALGLIB](http://www.alglib.net/interpolation/spline3.php#header7)
       or [NCAR/EOL bspline](https://github.com/NCAR/bspline)).
-* [ ] Future: after upgrading to C++17, add support for `string_view` manipulation and change `::files` to use `std::filesystem` instead
 </details>
 
 
