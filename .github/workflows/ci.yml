@@ -44,6 +44,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Install werkzeugkiste requirements
+      run: sudo apt-get install libeigen3-dev -q -y
+
     - name: Install LCov
       run: sudo apt-get update -q
         && sudo apt-get install lcov -q -y
@@ -73,6 +76,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Install werkzeugkiste requirements
+      run: sudo apt-get install libeigen3-dev -q -y
 
     - name: Configure
       env: { CXX: clang++-14 }
@@ -118,6 +124,18 @@ jobs:
         sudo update-alternatives --install
         /usr/bin/clang-tidy clang-tidy
         /usr/bin/clang-tidy-14 140
+
+    - name: Install werkzeugkiste requirements
+      uses: jrl-umi3218/github-actions/install-dependencies@master
+      with:
+        ubuntu: |
+          apt: libeigen3-dev
+        macos: |
+          brew: eigen
+        windows: |
+          github:
+          - path: eigenteam/eigen-git-mirror
+            ref: 3.3.7
 
     - name: Configure
       shell: pwsh

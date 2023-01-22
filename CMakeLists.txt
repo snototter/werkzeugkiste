@@ -91,9 +91,10 @@ target_compile_features(werkzeugkiste-container PUBLIC cxx_std_17)
 #########################################################################################
 # ---- Math/Geometry Utils: werkzeugkiste::geometry ----
 # We need Eigen3
-include(cmake/werkzeugkiste_dependencies.cmake)
-setup_dependency_eigen()
-#find_package(Eigen3 REQUIRED NO_MODULE)
+#TODO clean up - we use system-wide install/requirement instead
+# include(cmake/werkzeugkiste_dependencies.cmake)
+#setup_dependency_eigen()
+find_package(Eigen3 REQUIRED NO_MODULE)
 # Header files
 set(wkzggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/geometry/geometry.h
@@ -199,7 +200,6 @@ target_compile_features(werkzeugkiste-strings PUBLIC cxx_std_17)
 #########################################################################################
 # ---- File Utils: werkzeugkiste::files ----
 # ---- Note: Library must be declared after ::strings ----
-#FIXME replace code by c++17 filesystem
 # Header files
 set(wkzgfiles_PUBLIC_HEADER_FILES
     include/werkzeugkiste/files/fileio.h
@@ -303,12 +303,6 @@ target_compile_features(werkzeugkiste-timing PUBLIC cxx_std_17)
 
 #########################################################################################
 # ---- The "all-in-one" target ----
-# FIXME check if this works as intended!
-# [ ] TODO automate these build checks!
-# [x] worked for static build & fetch content example
-# [ ] to test: shared build, fetch content
-# [ ] to test: static build, local install
-# [ ] to test: shared build, local install
 
 # TODO does the all-in-one target need the other headers explicitly? they should be implicitly
 # deployed by the corresponding sub-utilitiy target (?)
