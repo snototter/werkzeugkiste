@@ -72,7 +72,7 @@ class Circle_ {  // NOLINT(readability-identifier-naming)
   T Radius() const { return radius_; }
 
   /// Returns the area.
-  T Area() const { return M_PI * radius_ * radius_; }
+  T Area() const { return constants::pi_tpl<T> * (radius_ * radius_); }
 
   /// Returns true if the point is inside the circle. If you need to
   /// distinguish inside and exactly on the circle, pass a valid
@@ -125,7 +125,7 @@ class Circle_ {  // NOLINT(readability-identifier-naming)
   T radius_{0};
 };
 
-/// Available specialization:
+/// Available double-precision specialization for Circle_.
 extern template class WERKZEUGKISTE_EXPORT Circle_<double>;
 using Circle = Circle_<double>;
 

@@ -17,6 +17,8 @@ Testing/*
 *.xml
 **/output*/
 venv/*
+CMakeCache.txt
+CMakeFiles/*
 
 
 # Prerequisites
