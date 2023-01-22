@@ -62,13 +62,8 @@ jobs:
     - name: Process coverage info
       run: cmake --build build/coverage -t coverage
 
-#    - name: Submit to codecov.io
-#      uses: codecov/codecov-action@v3
-#      with:
-#        file: build/coverage/coverage.info
-
-    - name: Publish to coveralls.io
-      uses: coverallsapp/github-action@v1.1.2
+    - name: Update coveralls.io
+      uses: coverallsapp/github-action@1.1.3
       with:
         github-token: ${{ github.token }}
         path-to-lcov: build/coverage/coverage.info

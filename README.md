@@ -1,5 +1,6 @@
 # Werkzeugkiste - Yet Another C++ Utility Library
 ![CI Status](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/snototter/werkzeugkiste/badge.svg?branch=main)](https://coveralls.io/github/snototter/werkzeugkiste?branch=main)
 
 This library is a collection of frequently used C++ snippets copy-pasted across
 way too many of my projects. Since there's tons of so-called utilities, utils,

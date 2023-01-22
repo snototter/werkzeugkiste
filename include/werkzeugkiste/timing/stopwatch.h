@@ -160,19 +160,19 @@ inline constexpr double ToNanoseconds(const Duration& duration) {
 
 /// Returns a human readable string approximating the given time.
 ///
-/// For example, SecondsToString(3700 * 24 + 50) = '1 day 40 minutes'
+/// For example, `SecondsToString(3700 * 24 + 50) = '1 day 40 minutes'`.
 WERKZEUGKISTE_EXPORT
 std::string SecondsToString(unsigned int seconds);
 
 /// A stop watch with configurable clock.
 ///
-/// A stop watch measures the time since you last called @see Start(),
+/// A stop watch measures the time since you last called `Start()`,
 /// or since its construction.
-/// Use its ``ElapsedXXX()`` methods to get the elapsed time in the
-/// corresponding time interval (i.e. precision), e.g. ElapsedSeconds().
+/// Use its `ElapsedXXX()` methods to get the elapsed time in the
+/// corresponding time interval (i.e. precision), e.g. `ElapsedSeconds()`.
 ///
 /// Duration measurements should use a monotonic clock. Thus, we
-/// explicitly default to ``steady_clock`` (since ``high_resolution_clock`` is
+/// explicitly default to `steady_clock` (since `high_resolution_clock` is
 /// not guaranteed to be steady).
 template <typename Clock = std::chrono::steady_clock>
 class StopWatch_ {  // NOLINT
@@ -189,7 +189,7 @@ class StopWatch_ {  // NOLINT
   // TODO future extension: similar to a scoped guard, add an
   // "disarm" method. Otherwise, the destructor could print
   // the elapsed time.
-  // Requires a 2nd tpl parameter (default to millisec) that
+  // Requires a 2nd template parameter (default to millisec) that
   // specifies the unit to print the elapsed time...
   // Then, the move ctor/assignments should be implemented
   // properly (and disarm the moved instance)

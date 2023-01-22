@@ -28,6 +28,9 @@ cmake -P cmake/spell.cmake
 
 format:
 cmake -D FORMAT_COMMAND=clang-format-14 -D FIX=YES -P cmake/lint.cmake
+
+build docs:
+cmake "-DPROJECT_SOURCE_DIR=$PWD" "-DPROJECT_BINARY_DIR=$PWD/build" -P cmake/docs-ci.cmake
 -->
 
 Here is some wisdom to help you build and test this project as a developer and
