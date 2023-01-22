@@ -17,9 +17,9 @@ namespace werkzeugkiste::geometry
 // Camera projection matrix
 
 /// Returns the pinhole projection matrix `P = K * [R | t] = K * Rt`.
-template<typename _Tp>
-inline Matrix<_Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<_Tp, 3, 3>& K,
-                                                 const Matrix<_Tp, 3, 4>& Rt)
+template<typename Tp>
+inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
+                                                const Matrix<Tp, 3, 4>& Rt)
 {
   return K * Rt;
 }

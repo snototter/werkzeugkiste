@@ -38,7 +38,7 @@ configure_file(
     ${werkzeugkiste_VERSION_HEADER}
 )
 
-#FIXME use the export header s.t. it can be used as a shared library!!!
+
 
 
 #########################################################################################
@@ -90,7 +90,9 @@ target_compile_features(werkzeugkiste-container PUBLIC cxx_std_17)
 
 #########################################################################################
 # ---- Math/Geometry Utils: werkzeugkiste::geometry ----
-# Adds a dependency to Eigen3::Eigen
+# We need Eigen3
+include(cmake/werkzeugkiste_dependencies.cmake)
+setup_dependency_eigen()
 find_package(Eigen3 REQUIRED NO_MODULE)
 # Header files
 set(wkzggeometry_PUBLIC_HEADER_FILES
