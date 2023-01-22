@@ -162,6 +162,9 @@ jobs:
     needs: [sanitize, test]
 
     runs-on: ubuntu-22.04
+    
+    permissions:
+      contents: write
 
     # To enable, first you have to create an orphaned gh-pages branch:
     #
