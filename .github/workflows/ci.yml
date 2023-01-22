@@ -120,9 +120,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - uses: snototter/ci-utils/setup-googletest@main
-      with:
-        os: ${{ runner.os }}
+    - uses: MarkusJx/googletest-installer@v1.1.1
 
     - name: Install static analyzers
       if: matrix.os == 'ubuntu-22.04'
