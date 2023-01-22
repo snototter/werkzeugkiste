@@ -93,7 +93,7 @@ target_compile_features(werkzeugkiste-container PUBLIC cxx_std_17)
 # We need Eigen3
 include(cmake/werkzeugkiste_dependencies.cmake)
 setup_dependency_eigen()
-find_package(Eigen3 REQUIRED NO_MODULE)
+#find_package(Eigen3 REQUIRED NO_MODULE)
 # Header files
 set(wkzggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/geometry/geometry.h
