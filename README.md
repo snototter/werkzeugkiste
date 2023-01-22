@@ -103,6 +103,7 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
   * [x] Check if shared library works "locally" (e.g. tests and examples,
     which are separate targets that link against the werkzeugkiste library)
   * [ ] Check if the export header is correctly distributed in a consuming project
+* [ ] Properly set up Github Actions
 * [ ] Change to newer gcc and add `-Wextra-semi` to dev presets
 * [ ] Change the default clang-format rules
 * [ ] Coverage

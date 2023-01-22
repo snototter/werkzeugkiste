@@ -18,6 +18,10 @@ TODO rename examples and tests
 executables should be:
 example-timing
 tests, e.g. test-timing (or are they derived from the filename - thus, underscore is a must)
+
+
+TODO validate yaml file:
+python -c 'import yaml, sys; print(yaml.safe_load(sys.stdin))' < .github/workflows/ci.yml
 -->
 
 Here is some wisdom to help you build and test this project as a developer and
