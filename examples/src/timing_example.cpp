@@ -1,15 +1,14 @@
-#include <iostream>
-#include <iomanip>
-#include <thread>
 #include <chrono>
+#include <iomanip>
+#include <iostream>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <vector>
 
 // Only needed to query the library version:
-#include <werkzeugkiste/version.h>
-
 #include <werkzeugkiste/timing/stopwatch.h>
+#include <werkzeugkiste/version.h>
 
 // Define "WITH_TICTOC" to enable timing via the provided macros.
 // Without it, the macros will become no-ops.
@@ -17,8 +16,8 @@
 #define WITH_TICTOC
 #include <werkzeugkiste/timing/tictoc.h>
 
-
-int main(int /* argc */, char ** /* argv */) {
+int main(int /* argc */, char** /* argv */)
+{
   namespace wtu = werkzeugkiste::timing;
   wtu::StopWatch watch;
   std::cout << "--------------------------------------------------\n"
@@ -26,10 +25,12 @@ int main(int /* argc */, char ** /* argv */) {
             << "    Stopwatch demo\n"
             << "--------------------------------------------------\n"
             << "Underlying clock:      " << watch.ClockName()
-            << "\nYears before overflow: " << std::fixed
-            << std::setprecision(1) << watch.YearsUntilOverflow()
+            << "\nYears before overflow: " << std::fixed << std::setprecision(1)
+            << watch.YearsUntilOverflow()
             << "\n--------------------------------------------------"
             << std::endl;
+
+  // NOLINTBEGIN(*-magic-numbers)
 
   // We want a nicely aligned TOC output:
   wtu::SetTocFormat(true, 9, 3);
@@ -50,7 +51,7 @@ int main(int /* argc */, char ** /* argv */) {
 
     // Display the elapsed time for all active
     // stop watches:
-    for (const auto &prev_label : prev_labels)
+    for (const auto& prev_label : prev_labels)
       TOC_MS(prev_label);
     TOC_MS(label);
     // Alternatively, you could have simply queried the
@@ -63,5 +64,7 @@ int main(int /* argc */, char ** /* argv */) {
 
     std::cout << "--------------------------------------------------\n";
   }
+
+  // NOLINTEND(*-magic-numbers)
   return 0;
 }

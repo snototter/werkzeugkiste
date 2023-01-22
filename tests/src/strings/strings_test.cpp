@@ -1,16 +1,17 @@
 #include <chrono>
-#include <thread>
 #include <string>
-
-#include "../test_utils.h"
+#include <thread>
 
 #include <werkzeugkiste/strings/strings.h>
+
+#include "../test_utils.h"
 
 namespace wks = werkzeugkiste::strings;
 
 // NOLINTBEGIN
 
-TEST(StringUtilsTest, Suffix) {
+TEST(StringUtilsTest, Suffix)
+{
   EXPECT_TRUE(wks::EndsWith("Some string", "string"));
   EXPECT_FALSE(wks::EndsWith("Some string", "String"));  // case mismatch
   EXPECT_TRUE(wks::EndsWith("Some string", "ing"));
@@ -22,12 +23,14 @@ TEST(StringUtilsTest, Suffix) {
   EXPECT_FALSE(wks::EndsWith("", "st"));
 }
 
-
-TEST(StringUtilsTest, Prefix) {
+TEST(StringUtilsTest, Prefix)
+{
   EXPECT_TRUE(wks::StartsWith("Another test string", "Another "));
-  EXPECT_FALSE(wks::StartsWith("Another test string", "another "));  // case mismatch
+  EXPECT_FALSE(
+      wks::StartsWith("Another test string", "another "));  // case mismatch
   EXPECT_TRUE(wks::StartsWith("Another test string", "An"));
-  EXPECT_TRUE(wks::StartsWith("Another test string", "A"));  // single character string
+  EXPECT_TRUE(
+      wks::StartsWith("Another test string", "A"));  // single character string
   EXPECT_TRUE(wks::StartsWith("Another test string", 'A'));  // character
   EXPECT_FALSE(wks::StartsWith("Another test string", 'a'));  // character
   EXPECT_FALSE(wks::StartsWith("Another test string", ""));  // empty string
@@ -35,8 +38,8 @@ TEST(StringUtilsTest, Prefix) {
   EXPECT_FALSE(wks::StartsWith("", "A"));
 }
 
-
-TEST(StringUtilsTest, CaseConversion) {
+TEST(StringUtilsTest, CaseConversion)
+{
   EXPECT_EQ(wks::Upper("abcdefghijklmnopqrstuvwxyz"),
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   EXPECT_EQ(wks::Upper("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
@@ -52,8 +55,8 @@ TEST(StringUtilsTest, CaseConversion) {
             "1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>");
 }
 
-
-TEST(StringUtilsTest, Trimming) {
+TEST(StringUtilsTest, Trimming)
+{
   // Tab \t, Line feed \n, vertical tab \v, form feed \f, space, ...
   EXPECT_EQ(wks::Trim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"),
             "abc \t\r\n\v\f123");
@@ -65,8 +68,8 @@ TEST(StringUtilsTest, Trimming) {
             " \t\r\n\v\fabc \t\r\n\v\f123");
 }
 
-
-TEST(StringUtilsTest, IsNumeric) {
+TEST(StringUtilsTest, IsNumeric)
+{
   EXPECT_TRUE(wks::IsNumeric("0"));
   EXPECT_TRUE(wks::IsNumeric("+0"));
   EXPECT_TRUE(wks::IsNumeric("-0"));
@@ -93,8 +96,8 @@ TEST(StringUtilsTest, IsNumeric) {
   EXPECT_TRUE(wks::IsNumeric("1e-7"));
 }
 
-
-TEST(StringUtilsTest, Tokenize) {
+TEST(StringUtilsTest, Tokenize)
+{
   auto tokens = wks::Split("A;Line ;\tto;be;split ;;", ';');
   EXPECT_EQ(tokens.size(), 6);
   EXPECT_EQ(tokens[0], "A");
@@ -110,55 +113,47 @@ TEST(StringUtilsTest, Tokenize) {
   EXPECT_EQ(tokens[0], s);
 }
 
-
-TEST(StringUtilsTest, Replace) {
+TEST(StringUtilsTest, Replace)
+{
   EXPECT_TRUE(wks::Replace("", "", "").empty());
   EXPECT_TRUE(wks::Replace("", "abc", "def").empty());
   EXPECT_TRUE(wks::Replace("", "", "def").empty());
 
   // Nothing changes if search string is empty
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "", "!!!!!"),
-            "ABC123abc;:_");
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", "", "!!!!!"), "ABC123abc;:_");
 
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "a", "!!"),
-            "ABC123!!bc;:_");
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", "a", "!!"), "ABC123!!bc;:_");
 
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "abcdef", "!!"),
-            "ABC123abc;:_");
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", "abcdef", "!!"), "ABC123abc;:_");
 
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "BC", ""),
-            "A123abc;:_");
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", "BC", ""), "A123abc;:_");
 
   // All occurrences should be replaced
   EXPECT_EQ(wks::Replace("ABC123abc123ABC123abc123", "BC", ".."),
             "A..123abc123A..123abc123");
 
   // Use 'Replace' to 'Remove' a substring
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "bc", ""),
-            "ABC123a;:_");
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", "bc", ""), "ABC123a;:_");
 
   // Also, the character-only version should be tested
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", 'a', '0'),
-            "ABC1230bc;:_");
+  EXPECT_EQ(wks::Replace("ABC123abc;:_", 'a', '0'), "ABC1230bc;:_");
 
-  EXPECT_EQ(wks::Replace("ABC1A3abc;:_", 'A', '!'),
-            "!BC1!3abc;:_");
+  EXPECT_EQ(wks::Replace("ABC1A3abc;:_", 'A', '!'), "!BC1!3abc;:_");
 }
 
-
-TEST(StringUtilsTest, Remove) {
+TEST(StringUtilsTest, Remove)
+{
   EXPECT_EQ(wks::Remove("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>", '\\'),
             "1234567890+*~#'-_.:,;´`?}=])[({/&%$§3!^°@<|>");
 
-  EXPECT_EQ(wks::Remove("abcDEFghiABCdefGHIabc", 'a'),
-            "bcDEFghiABCdefGHIbc");
+  EXPECT_EQ(wks::Remove("abcDEFghiABCdefGHIabc", 'a'), "bcDEFghiABCdefGHIbc");
 
   EXPECT_EQ(wks::Remove("abcDEFghiABCdefGHIabc", {'a', 'b', 'C'}),
             "cDEFghiABdefGHIc");
 }
 
-
-TEST(StringUtilsTest, URL) {
+TEST(StringUtilsTest, URL)
+{
   // Simplistic URL parsing (downstream I need to be able
   // to distinguish web URLs from file paths, e.g. to properly
   // load a camera's SDP description)
@@ -167,8 +162,8 @@ TEST(StringUtilsTest, URL) {
   EXPECT_EQ(protocol, "file://");
   EXPECT_EQ(remainder, "foo.txt");
 
-  EXPECT_TRUE(wks::GetUrlProtocol("UnChecked://SomeU.R.I:?asdf=foo",
-                                  protocol, remainder));
+  EXPECT_TRUE(wks::GetUrlProtocol(
+      "UnChecked://SomeU.R.I:?asdf=foo", protocol, remainder));
   EXPECT_EQ(protocol, "UnChecked://");
   EXPECT_EQ(remainder, "SomeU.R.I:?asdf=foo");
 
@@ -179,8 +174,7 @@ TEST(StringUtilsTest, URL) {
   // When logging connection strings, I want to hide
   // any potential authentication information (but still
   // know that it was actually provided in the URL string):
-  EXPECT_EQ(wks::ObscureUrlAuthentication("file://foobar"),
-            "file://foobar");
+  EXPECT_EQ(wks::ObscureUrlAuthentication("file://foobar"), "file://foobar");
 
   EXPECT_EQ(wks::ObscureUrlAuthentication("http://user:pass@foo.bar"),
             "http://<auth>@foo.bar");
@@ -188,12 +182,12 @@ TEST(StringUtilsTest, URL) {
   EXPECT_EQ(wks::ObscureUrlAuthentication("rtsp://user:pass@foo.bar:12345"),
             "rtsp://<auth>@foo.bar:12345");
 
-  EXPECT_EQ(wks::ObscureUrlAuthentication("https://user@192.168.0.1:8080/cam.cgi"),
-            "https://<auth>@192.168.0.1:8080/cam.cgi");
+  EXPECT_EQ(
+      wks::ObscureUrlAuthentication("https://user@192.168.0.1:8080/cam.cgi"),
+      "https://<auth>@192.168.0.1:8080/cam.cgi");
 
   EXPECT_EQ(wks::ObscureUrlAuthentication("user:pass@some.thing:12345"),
             "<auth>@some.thing:12345");
-
 
   // If we want to strip the subpaths and parameters of a URL:
   EXPECT_EQ(wks::ClipUrl("https://root@192.168.0.1:8080/cam.cgi"),
@@ -206,15 +200,12 @@ TEST(StringUtilsTest, URL) {
             "file:///a/file/needs/special/handling.txt");
 }
 
+TEST(StringUtilsTest, Slug)
+{
+  EXPECT_EQ(wks::Slug("nothing-to-be-slugged"), "nothing-to-be-slugged");
 
-TEST(StringUtilsTest, Slug) {
-  EXPECT_EQ(
-        wks::Slug("nothing-to-be-slugged"),
-        "nothing-to-be-slugged");
-
-  EXPECT_EQ(
-        wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
-        "replace-some-spaces-and-underscores");
+  EXPECT_EQ(wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
+            "replace-some-spaces-and-underscores");
 
   EXPECT_EQ(wks::Slug(" \r\n\t\v\f"), "");
   EXPECT_EQ(wks::Slug("a \r\n\t\v\f"), "a");
@@ -229,11 +220,11 @@ TEST(StringUtilsTest, Slug) {
   EXPECT_EQ(wks::Slug("€   $ \t \n µ   \t"), "euro-dollar-mu");
   EXPECT_EQ(wks::Slug("ÄäÖöÜü"), "aeaeoeoeueue");
 
-  //TODO test all replacement characters!
+  // TODO test all replacement characters!
 }
 
-
-TEST(StringUtilsTest, Shorten) {
+TEST(StringUtilsTest, Shorten)
+{
   // Edge cases: empty & desired length 0 or longer than string
   EXPECT_EQ(wks::Shorten("", 4), "");
   EXPECT_EQ(wks::Shorten("abc", 0), "");
@@ -242,7 +233,8 @@ TEST(StringUtilsTest, Shorten) {
 
   // Desired length shorter than (custom) ellipsis
   EXPECT_THROW(wks::Shorten("abc", 2), std::invalid_argument);
-  EXPECT_THROW(wks::Shorten("0123456789", 3, -1, "abcd"), std::invalid_argument);
+  EXPECT_THROW(wks::Shorten("0123456789", 3, -1, "abcd"),
+               std::invalid_argument);
 
   // Ellipsis left
   EXPECT_EQ(wks::Shorten("0123456789", 3, -1), "...");

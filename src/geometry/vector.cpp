@@ -2,7 +2,8 @@
 
 #include <werkzeugkiste/geometry/vector.h>
 
-namespace werkzeugkiste::geometry {
+namespace werkzeugkiste::geometry
+{
 
 // Explicit instantiation:
 template class Vec<float, 2>;
@@ -17,4 +18,4 @@ template class Vec<int32_t, 2>;
 template class Vec<int32_t, 3>;
 template class Vec<int32_t, 4>;
 
-} // namespace werkzeugkiste::geometry
+}  // namespace werkzeugkiste::geometry

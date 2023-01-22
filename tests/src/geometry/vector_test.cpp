@@ -1,9 +1,9 @@
+#include <cmath>
 #include <exception>
 #include <initializer_list>
-#include <cmath>
-#include <vector>
-#include <list>
 #include <iomanip>
+#include <list>
+#include <vector>
 
 #include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
@@ -14,9 +14,9 @@ namespace wkg = werkzeugkiste::geometry;
 
 // NOLINTBEGIN
 
-
-template <typename Tp, std::size_t Dim>
-void TestConversion(wkg::Vec<Tp, Dim> vec) {
+template<typename Tp, std::size_t Dim>
+void TestConversion(wkg::Vec<Tp, Dim> vec)
+{
   wkg::Vec<double, Dim> offset_dbl;
   wkg::Vec<int32_t, Dim> offset_int;
 
@@ -54,14 +54,12 @@ void TestConversion(wkg::Vec<Tp, Dim> vec) {
   }
 }
 
-
-template <typename Tp, std::size_t Dim>
-void TestIndexing(wkg::Vec<Tp, Dim> vec) {
+template<typename Tp, std::size_t Dim>
+void TestIndexing(wkg::Vec<Tp, Dim> vec)
+{
   // Negative indexing with range-checked access:
   int neg_idx = -1;
-  for (std::size_t pos_idx = 0;
-       pos_idx < Dim - 1;
-       ++pos_idx, --neg_idx) {
+  for (std::size_t pos_idx = 0; pos_idx < Dim - 1; ++pos_idx, --neg_idx) {
     EXPECT_DOUBLE_EQ(vec[neg_idx], vec[Dim - pos_idx - 1]);
   }
 
@@ -87,9 +85,9 @@ void TestIndexing(wkg::Vec<Tp, Dim> vec) {
   }
 }
 
-
-template <typename Tp>
-void TestVec2dSizeAccess(wkg::Vec<Tp, 2> vec) {
+template<typename Tp>
+void TestVec2dSizeAccess(wkg::Vec<Tp, 2> vec)
+{
   // A 2d vector can be used to represent a size/dimension:
   EXPECT_DOUBLE_EQ(vec.X(), vec.Width());
   EXPECT_TRUE(wkg::IsEpsEqual(vec.X(), vec.Width()));
@@ -108,9 +106,9 @@ void TestVec2dSizeAccess(wkg::Vec<Tp, 2> vec) {
   EXPECT_TRUE(wkg::IsEpsEqual(vec.Y(), vec.Height()));
 }
 
-
-template <typename Tp>
-void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
+template<typename Tp>
+void TestVec2dGeometry(wkg::Vec<Tp, 2> vec)
+{
   // In 2d, we can easily rotate a vector by +/- 90 degrees:
   auto perpendicular = vec.PerpendicularClockwise();
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), vec.Y()));
@@ -120,13 +118,13 @@ void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), -vec.Y()));
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.Y(), vec.X()));
 
-  //TODO extend (determinant, arbitrary rotation...)
+  // TODO extend (determinant, arbitrary rotation...)
 }
 
-
-template <typename Tp, std::size_t Dim>
-void TestNegation(wkg::Vec<Tp, Dim> vec) {
-  const wkg::Vec<Tp, Dim> copy{vec};
+template<typename Tp, std::size_t Dim>
+void TestNegation(wkg::Vec<Tp, Dim> vec)
+{
+  const wkg::Vec<Tp, Dim> copy {vec};
   EXPECT_EQ(copy, vec);
 
   auto negated = -vec;
@@ -136,15 +134,13 @@ void TestNegation(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(-copy, -vec));
   EXPECT_TRUE(CheckVectorEqual(-copy, negated));
   EXPECT_TRUE(CheckVectorEqual(copy, -negated));
-  EXPECT_TRUE(CheckVectorEqual(
-          static_cast<Tp>(-1) * copy, -vec));
-  EXPECT_TRUE(CheckVectorEqual(
-          -copy, static_cast<Tp>(-1) * vec));
+  EXPECT_TRUE(CheckVectorEqual(static_cast<Tp>(-1) * copy, -vec));
+  EXPECT_TRUE(CheckVectorEqual(-copy, static_cast<Tp>(-1) * vec));
 
   EXPECT_TRUE(wkg::IsEpsEqual(vec.Length(), negated.Length()));
   EXPECT_TRUE(wkg::IsEpsEqual(vec.LengthSquared(), negated.LengthSquared()));
-  EXPECT_TRUE(wkg::IsEpsEqual(2 * vec.Length(), vec.DistanceEuclidean(negated)));
-
+  EXPECT_TRUE(
+      wkg::IsEpsEqual(2 * vec.Length(), vec.DistanceEuclidean(negated)));
 
   auto abs1 = negated.Absolute();
   auto abs2 = vec.Absolute();
@@ -155,10 +151,11 @@ void TestNegation(wkg::Vec<Tp, Dim> vec) {
   }
 }
 
-template <typename Tp, std::size_t Dim>
-void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
+template<typename Tp, std::size_t Dim>
+void TestScalarAddSub(wkg::Vec<Tp, Dim> vec)
+{
   using V = wkg::Vec<Tp, Dim>;
-  const V copy{vec};
+  const V copy {vec};
   EXPECT_EQ(copy, vec);
 
   // Add a scalar (rhs and lhs)
@@ -204,13 +201,13 @@ void TestScalarAddSub(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(vec.Negate() + 2, subtracted));
 }
 
-
-template <typename Tp, std::size_t Dim>
-void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
-  const wkg::Vec<Tp, Dim> copy{vec};
+template<typename Tp, std::size_t Dim>
+void TestVectorAddSub(wkg::Vec<Tp, Dim> vec)
+{
+  const wkg::Vec<Tp, Dim> copy {vec};
   EXPECT_EQ(copy, vec);
 
-  wkg::Vec<Tp, Dim> offset{};
+  wkg::Vec<Tp, Dim> offset {};
   const auto zero = wkg::Vec<Tp, Dim>::All(0);
   EXPECT_EQ(offset, zero);
 
@@ -236,7 +233,6 @@ void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(copy, vec + offset));
   EXPECT_TRUE(CheckVectorEqual(copy - offset, vec));
 
-
   for (std::size_t idx = 0; idx < Dim; ++idx) {
     offset[idx] = static_cast<Tp>(420 * (idx + 1));
   }
@@ -258,18 +254,17 @@ void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(copy, vec - offset));
 }
 
-
-template <typename Tp, std::size_t Dim>
+template<typename Tp, std::size_t Dim>
 ::testing::AssertionResult CheckDivisionResult(
-    const wkg::Vec<Tp, Dim> &dividend,
-    const wkg::Vec<Tp, Dim> &divisor,
-    const wkg::Vec<Tp, Dim> &expected_non_special,
-    const wkg::Vec<Tp, Dim> &value) {
-
+    const wkg::Vec<Tp, Dim>& dividend,
+    const wkg::Vec<Tp, Dim>& divisor,
+    const wkg::Vec<Tp, Dim>& expected_non_special,
+    const wkg::Vec<Tp, Dim>& value)
+{
   std::ostringstream msg;
-  msg << "Division error: "
-      << dividend.ToString() << " / " << divisor.ToString() << " = "
-      << value << ", which is wrong at:" << std::setprecision(20);
+  msg << "Division error: " << dividend.ToString() << " / "
+      << divisor.ToString() << " = " << value
+      << ", which is wrong at:" << std::setprecision(20);
 
   bool success {true};
   for (std::size_t idx = 0; idx < Dim; ++idx) {
@@ -290,8 +285,8 @@ template <typename Tp, std::size_t Dim>
     } else {
       if (!wkg::IsEpsEqual(expected_non_special[idx], value[idx])) {
         success = false;
-        msg << "\n  dim[" << idx << "]: " << expected_non_special[idx]
-            << " vs " << value[idx];
+        msg << "\n  dim[" << idx << "]: " << expected_non_special[idx] << " vs "
+            << value[idx];
       }
     }
   }
@@ -303,11 +298,10 @@ template <typename Tp, std::size_t Dim>
   return ::testing::AssertionFailure() << msg.str();
 }
 
-
-
-template <typename Tp, std::size_t Dim>
-void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec) {
-  const wkg::Vec<Tp, Dim> copy{vec};
+template<typename Tp, std::size_t Dim>
+void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec)
+{
+  const wkg::Vec<Tp, Dim> copy {vec};
   EXPECT_EQ(copy, vec);
 
   // Multiplication is supported for any vector type.
@@ -329,10 +323,9 @@ void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(copy + (2 * copy) + copy, vec));
 
   vec *= 0;
-  const wkg::Vec<Tp, Dim> zero{};
+  const wkg::Vec<Tp, Dim> zero {};
   EXPECT_TRUE(CheckVectorEqual(zero, vec));
   EXPECT_TRUE(CheckVectorEqual(0 * copy, vec));
-
 
   // Division is only supported for floating point vectors.
   auto vec_dbl = vec.ToDouble();
@@ -345,10 +338,10 @@ void TestScalarMulDiv(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckVectorEqual(0.1 * vec_dbl, vec_dbl / 10.0));
 }
 
-
-template <typename Tp, std::size_t Dim>
-void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
-  const wkg::Vec<Tp, Dim> copy{vec};
+template<typename Tp, std::size_t Dim>
+void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec)
+{
+  const wkg::Vec<Tp, Dim> copy {vec};
   EXPECT_EQ(copy, vec);
 
   // Element-wise multiplication
@@ -379,7 +372,6 @@ void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
   another_copy /= another_copy;
   EXPECT_TRUE(CheckDivisionResult(vec_dbl, vec_dbl, ones, result));
 
-
   // V * (1 / V) = 1
   auto vec_inv_mul = 1.0 / vec_dbl;
   auto expected = vec_dbl * vec_inv_mul;
@@ -396,9 +388,9 @@ void TestVectorMulDiv(wkg::Vec<Tp, Dim> vec) {
   EXPECT_TRUE(CheckDivisionResult(ones, vec_dbl / 2, ones * 0.5, result));
 }
 
-
-template <typename Tp, std::size_t Dim>
-void TestVectorBasics(wkg::Vec<Tp, Dim> vec) {
+template<typename Tp, std::size_t Dim>
+void TestVectorBasics(wkg::Vec<Tp, Dim> vec)
+{
   using V = wkg::Vec<Tp, Dim>;
   double length_squared {0.0};
 
@@ -407,25 +399,24 @@ void TestVectorBasics(wkg::Vec<Tp, Dim> vec) {
   }
 
   EXPECT_TRUE(
-        IsApproximatelyEqual(
-          length_squared, static_cast<double>(vec.Dot(vec))))
-      << "  Dot product <v, v> = " << vec.Dot(vec)
-      << " does not equal " << length_squared << "!";
+      IsApproximatelyEqual(length_squared, static_cast<double>(vec.Dot(vec))))
+      << "  Dot product <v, v> = " << vec.Dot(vec) << " does not equal "
+      << length_squared << "!";
 
   EXPECT_TRUE(IsApproximatelyEqual(length_squared, vec.LengthSquared()))
-      << "  Squared length " << vec.LengthSquared()
-      << " does not equal " << length_squared << "!";
+      << "  Squared length " << vec.LengthSquared() << " does not equal "
+      << length_squared << "!";
 
   const double length = std::sqrt(length_squared);
   EXPECT_TRUE(IsApproximatelyEqual(length, vec.Length()))
-      << "  Length " << vec.Length()
-      << " does not equal " << length_squared << "!";
+      << "  Length " << vec.Length() << " does not equal " << length_squared
+      << "!";
 
   // <v, 1> = <1, v>
   // and <v, 0> = <0, v>
   V ones = V::All(1);
-  V zeros{};
-  Tp zero{0};
+  V zeros {};
+  Tp zero {0};
   if constexpr (std::is_integral<Tp>::value) {
     EXPECT_EQ(zero, vec.Dot(zeros));
     EXPECT_EQ(zero, zeros.Dot(vec));
@@ -439,26 +430,23 @@ void TestVectorBasics(wkg::Vec<Tp, Dim> vec) {
     EXPECT_TRUE(IsApproximatelyEqual(vec.Sum(), vec.Dot(ones)));
     EXPECT_TRUE(IsApproximatelyEqual(vec.Sum(), ones.Dot(vec)));
   }
-
-
 }
 
-
-template <typename Tp>
-void TestVec3dGeometry(wkg::Vec<Tp, 3> vec) {
+template<typename Tp>
+void TestVec3dGeometry(wkg::Vec<Tp, 3> vec)
+{
   // Cross product ------------------------------------------------------------
   wkg::Vec<Tp, 3> other {-3, 15, 21};
 
   // Sanity check
-  wkg::Vec<Tp, 3> zeros{};
+  wkg::Vec<Tp, 3> zeros {};
   EXPECT_TRUE(CheckVectorEqual(zeros, vec.Cross(zeros)));
 
   // Actual cross product
   auto cross = vec.Cross(other);
-  wkg::Vec<Tp, 3> expected{
-        vec.Y() * other.Z() - vec.Z() * other.Y(),
-        vec.Z() * other.X() - vec.X() * other.Z(),
-        vec.X() * other.Y() - vec.Y() * other.X()};
+  wkg::Vec<Tp, 3> expected {vec.Y() * other.Z() - vec.Z() * other.Y(),
+                            vec.Z() * other.X() - vec.X() * other.Z(),
+                            vec.X() * other.Y() - vec.Y() * other.X()};
 
   EXPECT_TRUE(CheckVectorEqual(expected, cross));
 
@@ -467,26 +455,25 @@ void TestVec3dGeometry(wkg::Vec<Tp, 3> vec) {
 
   // (A + B) x C = A x C + B x C
   wkg::Vec<Tp, 3> another {47, -23, -1023};
-  EXPECT_TRUE(CheckVectorEqual(
-                (vec + other).Cross(another),
-                vec.Cross(another) + other.Cross(another)));
+  EXPECT_TRUE(CheckVectorEqual((vec + other).Cross(another),
+                               vec.Cross(another) + other.Cross(another)));
 }
 
+template<typename Tp, std::size_t Dim>
+void TestHomogeneous(wkg::Vec<Tp, Dim> vec)
+{
+  auto vh = vec.Homogeneous();
+  EXPECT_EQ(Dim + 1, vh.ndim);
 
-template <typename Tp, std::size_t Dim>
-void TestHomogeneous(wkg::Vec<Tp, Dim> vec) {
-    auto vh = vec.Homogeneous();
-    EXPECT_EQ(Dim + 1, vh.ndim);
-
-    for (std::size_t idx = 0; idx < Dim; ++idx) {
-      EXPECT_TRUE(wkg::IsEpsEqual(vec[idx], vh[idx]));
-    }
-    EXPECT_TRUE(wkg::IsEpsEqual(static_cast<Tp>(1), vh[Dim]));
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    EXPECT_TRUE(wkg::IsEpsEqual(vec[idx], vh[idx]));
+  }
+  EXPECT_TRUE(wkg::IsEpsEqual(static_cast<Tp>(1), vh[Dim]));
 }
 
-
-template <typename Tp, std::size_t Dim>
-void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
+template<typename Tp, std::size_t Dim>
+void VectorTestHelper(wkg::Vec<Tp, Dim> vec)
+{
   // Indexing
   TestIndexing(vec);
 
@@ -514,7 +501,6 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
     TestVec3dGeometry(vec);
   }
 
-
   // TODO to test:
   // Dot
   // Length / LengthSq
@@ -532,8 +518,7 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   // RotateVector
   // MinMaxCoordinates
 
-
-  //TODO refactor below!
+  // TODO refactor below!
 
   // Create a copy
   auto copy = wkg::Vec<Tp, Dim>(vec);
@@ -548,7 +533,7 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   vec *= 2;
   EXPECT_EQ(vec, vec_twice);
 
-  std::vector<wkg::Vec<Tp, Dim>> poly{vec, vec_twice};
+  std::vector<wkg::Vec<Tp, Dim>> poly {vec, vec_twice};
   double poly_len = wkg::LengthPolygon(poly);
   EXPECT_DOUBLE_EQ(poly_len, vec.DistanceEuclidean(vec_twice));
 
@@ -591,8 +576,6 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   poly_len = wkg::LengthPolygon(poly);
   EXPECT_DOUBLE_EQ(poly_len, 3 * vec.DistanceEuclidean(vec_3x));
 
-
-
   // Add 0 vector
   wkg::Vec<Tp, Dim> zero;
   vec_twice = vec + zero;
@@ -607,7 +590,6 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
     EXPECT_DOUBLE_EQ(add1[i], vec[i] + 17);
     EXPECT_DOUBLE_EQ(sub1[i], vec[i] - 42);
   }
-
 
   // Distance/Length & dot product:
   auto dot1 = vec.Dot(vec);
@@ -627,9 +609,9 @@ void VectorTestHelper(wkg::Vec<Tp, Dim> vec) {
   EXPECT_DOUBLE_EQ(dist, len * 3);
 }
 
-
-template <typename Tp, std::size_t Dim>
-void TestCreation(wkg::Vec<Tp, Dim> vec) {
+template<typename Tp, std::size_t Dim>
+void TestCreation(wkg::Vec<Tp, Dim> vec)
+{
   using V = wkg::Vec<Tp, Dim>;
 
   V copy {vec};
@@ -658,12 +640,12 @@ void TestCreation(wkg::Vec<Tp, Dim> vec) {
   EXPECT_EQ(vec, copy);
 }
 
-
-TEST(VectorTest, Initialization) {
-  EXPECT_THROW((wkg::Vec2d{1, 2, 3}), std::invalid_argument);
-  EXPECT_THROW((wkg::Vec3d{2, 17}), std::invalid_argument);
-  EXPECT_THROW((wkg::Vec4d{2, 17}), std::invalid_argument);
-  EXPECT_THROW((wkg::Vec4d{2, 17, 3}), std::invalid_argument);
+TEST(VectorTest, Initialization)
+{
+  EXPECT_THROW((wkg::Vec2d {1, 2, 3}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec3d {2, 17}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec4d {2, 17}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec4d {2, 17, 3}), std::invalid_argument);
 
   wkg::Vec2d v2d {-0.1, 23.4};
   TestCreation(v2d);
@@ -681,16 +663,16 @@ TEST(VectorTest, Initialization) {
   TestCreation(v3i);
 }
 
-
-TEST(VectorTest, All) {
-  EXPECT_THROW((wkg::Vec2d{1, 2, 3}), std::invalid_argument);
-  EXPECT_THROW((wkg::Vec3d{2, 17}), std::invalid_argument);
-  EXPECT_THROW((wkg::Vec4d{2, 17}), std::invalid_argument);
-  EXPECT_THROW((wkg::Vec4d{2, 17, 3}), std::invalid_argument);
+TEST(VectorTest, All)
+{
+  EXPECT_THROW((wkg::Vec2d {1, 2, 3}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec3d {2, 17}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec4d {2, 17}), std::invalid_argument);
+  EXPECT_THROW((wkg::Vec4d {2, 17, 3}), std::invalid_argument);
 
   wkg::Vec2d zero2d;
 
-  wkg::Vec2d v2d_a{23, 17};
+  wkg::Vec2d v2d_a {23, 17};
   VectorTestHelper(v2d_a);
 
   auto unit2d = v2d_a.UnitVector();
@@ -700,35 +682,34 @@ TEST(VectorTest, All) {
   EXPECT_EQ(v2d_a.DirectionVector(zero2d), -v2d_a);
   EXPECT_EQ(v2d_a.DirectionVector(v2d_a), zero2d);
 
-  wkg::Vec2d v2d_b{0.01, -9.001};
+  wkg::Vec2d v2d_b {0.01, -9.001};
   EXPECT_DOUBLE_EQ(v2d_b.MaxValue(), 0.01);
   EXPECT_DOUBLE_EQ(v2d_b.MinValue(), -9.001);
   EXPECT_EQ(v2d_b.MaxIndex(), 0);
   EXPECT_EQ(v2d_b.MinIndex(), 1);
   VectorTestHelper(v2d_b);
 
-  wkg::Vec2d v2d_c{-735.008, -0.99};
+  wkg::Vec2d v2d_c {-735.008, -0.99};
   EXPECT_DOUBLE_EQ(v2d_c.MaxValue(), -0.99);
   EXPECT_DOUBLE_EQ(v2d_c.MinValue(), -735.008);
   EXPECT_EQ(v2d_c.MaxIndex(), 1);
   EXPECT_EQ(v2d_c.MinIndex(), 0);
   VectorTestHelper(v2d_c);
 
-
-  wkg::Vec3d v3d_a{1, 2, 3};
+  wkg::Vec3d v3d_a {1, 2, 3};
   EXPECT_DOUBLE_EQ(v3d_a.MaxValue(), 3);
   EXPECT_DOUBLE_EQ(v3d_a.MinValue(), 1);
   EXPECT_EQ(v3d_a.MaxIndex(), 2);
   EXPECT_EQ(v3d_a.MinIndex(), 0);
   VectorTestHelper(v3d_a);
 
-  wkg::Vec3d v3d_b{-0.1, 99, -15.3};
+  wkg::Vec3d v3d_b {-0.1, 99, -15.3};
   VectorTestHelper(v3d_b);
 
-  wkg::Vec3d v3d_c{12.3, -0.42, 77.7};
+  wkg::Vec3d v3d_c {12.3, -0.42, 77.7};
   VectorTestHelper(v3d_c);
 
-  wkg::Vec3d v3d_d{1, 0, -0.0001};
+  wkg::Vec3d v3d_d {1, 0, -0.0001};
   EXPECT_DOUBLE_EQ(v3d_d.MaxValue(), 1);
   EXPECT_DOUBLE_EQ(v3d_d.MinValue(), -0.0001);
   EXPECT_EQ(v3d_d.MaxIndex(), 0);
@@ -746,7 +727,7 @@ TEST(VectorTest, All) {
   EXPECT_EQ(-735, v2d_casted.X());
   EXPECT_EQ(0, v2d_casted.Y());
 
-  wkg::Vec2i v2i{9, -2};
+  wkg::Vec2i v2i {9, -2};
   VectorTestHelper(v2i);
 
   auto unit2i = v2i.UnitVector();
@@ -757,22 +738,25 @@ TEST(VectorTest, All) {
   EXPECT_EQ(v2i.DirectionVector(v2i), zero2i);
 }
 
+TEST(VectorTest, EpsEqual)
+{
+  std::vector<wkg::Vec2d> data {{1, 0},
+                                {10, -3},
+                                {-15, 1},
+                                {17, 42},
+                                {0.1, 17.0},
+                                {0.001, -0.005},
+                                {1e-5, -(1e-7)}};
 
-TEST(VectorTest, EpsEqual) {
-  std::vector<wkg::Vec2d> data {
-    {1, 0}, {10, -3}, {-15, 1}, {17, 42},
-    {0.1, 17.0}, {0.001, -0.005}, {1e-5, -(1e-7)}
-  };
-
-  for (const auto &vec : data) {
+  for (const auto& vec : data) {
     EXPECT_EQ(vec, vec);
 
     // The largest values for these tests are in the tens, i.e. 10 <= x <= 100.
     // Thus, 1e-7 is the smallest offset we can add to all vectors such that
     // the IsClose/ApproximatelyEqual tests will succeed (because of the
     // default relative tolerance of 1e-9).
-    for (auto offset : {0.1, 1e-2, 1e-3, 1e-4,
-            1e-5, 1e-6, 1e-7, 0.5, 1.5, 100.0}) {
+    for (auto offset :
+         {0.1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 0.5, 1.5, 100.0}) {
       auto copy = vec.ToDouble();
       EXPECT_TRUE(CheckVectorEqual(vec, copy));
 
@@ -781,7 +765,8 @@ TEST(VectorTest, EpsEqual) {
       EXPECT_FALSE(CheckVectorEqual(vec, copy))
           << "  Adding " << offset << " to x-dimension of " << vec
           << " did not result in a sufficiently different vector!"
-             "\n  Difference is " << diff;
+             "\n  Difference is "
+          << diff;
 
       copy[0] -= offset;
       EXPECT_TRUE(CheckVectorEqual(vec, copy));
@@ -791,7 +776,8 @@ TEST(VectorTest, EpsEqual) {
       EXPECT_FALSE(CheckVectorEqual(vec, copy))
           << "  Subtracting " << offset << " from y-dimension of " << vec
           << " did not result in a sufficiently different vector!"
-             "\n  Difference is " << diff;
+             "\n  Difference is "
+          << diff;
 
       copy[1] += offset;
       EXPECT_TRUE(CheckVectorEqual(vec, copy));
@@ -799,11 +785,10 @@ TEST(VectorTest, EpsEqual) {
   }
 }
 
-
-TEST(VectorTest, MinMaxCoordinates) {
+TEST(VectorTest, MinMaxCoordinates)
+{
   // Find the minimum/maximum entries in a std::vector of Vec:
-  std::vector<wkg::Vec2i> data2i {
-    {1, 0}, {10, -3}, {-15, 1}, {17, 42}};
+  std::vector<wkg::Vec2i> data2i {{1, 0}, {10, -3}, {-15, 1}, {17, 42}};
   wkg::Vec2i min, max;
   wkg::MinMaxCoordinates(data2i, min, max);
 
@@ -813,10 +798,8 @@ TEST(VectorTest, MinMaxCoordinates) {
   EXPECT_EQ(max.X(), 17);
   EXPECT_EQ(max.Y(), 42);
 
-
   // Similarly, find min/max entries for double-precision Vec's:
-  std::list<wkg::Vec3d> data3d {
-    {10, 0, 1}, {100, -3, 17}, {1, 0, -1}};
+  std::list<wkg::Vec3d> data3d {{10, 0, 1}, {100, -3, 17}, {1, 0, -1}};
   wkg::Vec3d min3, max3;
   wkg::MinMaxCoordinates(data3d, min3, max3);
 

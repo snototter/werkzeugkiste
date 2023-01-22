@@ -1,13 +1,15 @@
 #include <sstream>
+
 #include <werkzeugkiste/timing/stopwatch.h>
 
-namespace werkzeugkiste::timing {
+namespace werkzeugkiste::timing
+{
 
 // Explicit template instantiation
 template class stop_watch<std::chrono::steady_clock>;
 
-
-std::string SecondsToString(unsigned int seconds) {
+std::string SecondsToString(unsigned int seconds)
+{
   std::ostringstream str;
 
   constexpr unsigned int sec_per_day = 86400;
@@ -17,8 +19,7 @@ std::string SecondsToString(unsigned int seconds) {
 
   bool needs_space = false;
   if (days > 0) {
-    str << days
-        << ((days > 1) ? " days" : " day");
+    str << days << ((days > 1) ? " days" : " day");
     needs_space = true;
     seconds -= (sec_per_day * days);
   }
@@ -29,8 +30,7 @@ std::string SecondsToString(unsigned int seconds) {
     if (needs_space) {
       str << " ";
     }
-    str << hours
-        << ((hours > 1) ? " hours" : " hour");
+    str << hours << ((hours > 1) ? " hours" : " hour");
     needs_space = true;
     seconds -= (hours * sec_per_hour);
   }
@@ -40,21 +40,18 @@ std::string SecondsToString(unsigned int seconds) {
     if (needs_space) {
       str << " ";
     }
-    str << mins
-        << ((mins > 1) ? " minutes" : " minute");
+    str << mins << ((mins > 1) ? " minutes" : " minute");
     needs_space = true;
     seconds -= (mins * sec_per_min);
   }
 
   // Skip seconds if we already reported a larger unit
-  if ((hours == 0) && (days == 0)
-      && ((seconds > 0) || (mins == 0))) {
+  if ((hours == 0) && (days == 0) && ((seconds > 0) || (mins == 0))) {
     if (needs_space) {
       str << " ";
     }
 
-    str << seconds
-        << ((seconds == 1) ? " second" : " seconds");
+    str << seconds << ((seconds == 1) ? " second" : " seconds");
   }
   return str.str();
 }

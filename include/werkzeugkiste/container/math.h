@@ -1,15 +1,16 @@
 #ifndef WERKZEUGKISTE_CONTAINER_MATH_H
 #define WERKZEUGKISTE_CONTAINER_MATH_H
 
-#include <cstddef>
 #include <algorithm>
-#include <stdexcept>
+#include <cstddef>
 #include <numeric>
+#include <stdexcept>
 
-
-namespace werkzeugkiste {
+namespace werkzeugkiste
+{
 /// Utility functions for standard containers.
-namespace container {
+namespace container
+{
 
 /// Smoothes the given data points.
 ///
@@ -31,16 +32,15 @@ namespace container {
 ///    output[1] = (data[0] + data[1] + data[2]) / 3
 ///    output[2] = (data[0] + ... + data[4]) / 5
 ///    output[3] = (data[1] + ... + data[5]) / 5
-template <class Container>
-Container SmoothMovingAverage(
-    const Container &data, int window_size) {
+template<class Container>
+Container SmoothMovingAverage(const Container& data, int window_size)
+{
   if (window_size <= 0) {
     return data;
   }
 
   if ((window_size < 3) || ((window_size % 2) == 0)) {
-    throw std::invalid_argument(
-          "Window size must be `>= 3` and odd!");
+    throw std::invalid_argument("Window size must be `>= 3` and odd!");
   }
 
   Container smoothed_data;
@@ -48,9 +48,7 @@ Container SmoothMovingAverage(
   for (std::size_t ti = 0; ti < data.size(); ++ti) {
     const int idx_int = static_cast<int>(ti);
     int from = std::max(0, idx_int - neighbors);
-    int to = std::min(
-          static_cast<int>(data.size()-1),
-          idx_int + neighbors);
+    int to = std::min(static_cast<int>(data.size() - 1), idx_int + neighbors);
 
     // Reduce window size at the beginning/end (where there
     // are less neighbors).
@@ -69,30 +67,30 @@ Container SmoothMovingAverage(
   return smoothed_data;
 }
 
-
-template <class Container>
-double Mean(const Container &values) {
+template<class Container>
+double Mean(const Container& values)
+{
   if (values.size() == 0) {
     return 0.0;
   }
-  typename Container::value_type sum = std::accumulate(
-        values.begin(), values.end(),
-        static_cast<typename Container::value_type>(0));
+  typename Container::value_type sum =
+      std::accumulate(values.begin(),
+                      values.end(),
+                      static_cast<typename Container::value_type>(0));
   return static_cast<double>(sum) / values.size();
 }
-
 
 /// Computes the minimum & maximum of the given
 /// STL-like sequence container.
 /// The underlying `value_type` must support
 /// comparisons via `operator<`.
-template <class Container>
-void MinMax(
-    const Container &values,
-    typename Container::value_type *min = nullptr,
-    typename Container::value_type *max = nullptr,
-    std::size_t *idx_min = nullptr,
-    std::size_t *idx_max = nullptr) {
+template<class Container>
+void MinMax(const Container& values,
+            typename Container::value_type* min = nullptr,
+            typename Container::value_type* max = nullptr,
+            std::size_t* idx_min = nullptr,
+            std::size_t* idx_max = nullptr)
+{
   if (values.empty()) {
     return;
   }

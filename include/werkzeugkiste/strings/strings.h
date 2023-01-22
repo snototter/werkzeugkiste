@@ -1,136 +1,117 @@
 #ifndef WERKZEUGKISTE_STRINGS_STRINGS_H
 #define WERKZEUGKISTE_STRINGS_STRINGS_H
 
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include <werkzeugkiste/werkzeugkiste_export.h>
 
-
 /// Common string manipulation & checks. The kind you've
 /// already re-implemented/copied at least a dozen times.
-namespace werkzeugkiste::strings {
+namespace werkzeugkiste::strings
+{
 
 /// Returns true if the string ends with the given suffix.
-inline constexpr
-bool EndsWith(
-    std::string_view s,
-    std::string_view suffix) noexcept {
+inline constexpr bool EndsWith(std::string_view s,
+                               std::string_view suffix) noexcept
+{
   bool result {false};
-  if ((s.length() > 0)
-      && (suffix.length() > 0)
-      && (s.length() >= suffix.length())) {
-    result = (s.compare(
-                s.length() - suffix.length(), suffix.length(),
-                suffix) == 0);
+  if ((s.length() > 0) && (suffix.length() > 0)
+      && (s.length() >= suffix.length()))
+  {
+    result =
+        (s.compare(s.length() - suffix.length(), suffix.length(), suffix) == 0);
   }
   return result;
 }
-
 
 /// Returns true if the string ends with the given character.
-inline constexpr
-bool EndsWith(
-    std::string_view s,
-    char end) noexcept {
+inline constexpr bool EndsWith(std::string_view s, char end) noexcept
+{
   bool result {false};
   if (s.length() > 0) {
-    result = (s.at(s.length()-1) == end);
+    result = (s.at(s.length() - 1) == end);
   }
   return result;
 }
 
-
 /// Returns true if the given string starts with the prefix.
-inline constexpr
-bool StartsWith(
-    std::string_view s,
-    std::string_view prefix) noexcept {
+inline constexpr bool StartsWith(std::string_view s,
+                                 std::string_view prefix) noexcept
+{
   bool result {false};
-  if ((s.length() > 0)
-      && (prefix.length() > 0)
-      && (s.length() >= prefix.length())) {
+  if ((s.length() > 0) && (prefix.length() > 0)
+      && (s.length() >= prefix.length()))
+  {
     result = s.compare(0, prefix.length(), prefix) == 0;
   }
   return result;
 }
 
-
 /// Returns true if the string starts with the given character.
-inline constexpr
-bool StartsWith(
-    std::string_view s,
-    char first) noexcept {
+inline constexpr bool StartsWith(std::string_view s, char first) noexcept
+{
   return (s.length() > 0) ? (s[0] == first) : false;
 }
 
-
 /// Converts the string to lower case (in-place).
 WERKZEUGKISTE_EXPORT
-  void ToLower(std::string &s);  // NOLINT
-
+void ToLower(std::string& s);  // NOLINT
 
 /// Returns a copy, converted to lower case.
-inline std::string Lower(std::string_view s) {
+inline std::string Lower(std::string_view s)
+{
   std::string tmp(s);
   ToLower(tmp);
   return tmp;
 }
 
-
 /// Converts the string to upper case (in-place).
 WERKZEUGKISTE_EXPORT
-  void ToUpper(std::string &s);  // NOLINT
-
+void ToUpper(std::string& s);  // NOLINT
 
 /// Returns a copy, converted to upper case.
-inline std::string Upper(const std::string &s) {
+inline std::string Upper(const std::string& s)
+{
   std::string tmp(s);
   ToUpper(tmp);
   return tmp;
 }
 
-
 /// Returns a copy with leading & trailing
 /// white space removed.
 WERKZEUGKISTE_EXPORT
-  std::string Trim(std::string_view s);
-
+std::string Trim(std::string_view s);
 
 /// Returns a copy with leading white space removed.
 WERKZEUGKISTE_EXPORT
-  std::string LTrim(std::string_view totrim);
-
+std::string LTrim(std::string_view totrim);
 
 /// Returns a copy with trailing white space removed.
 WERKZEUGKISTE_EXPORT
-  std::string RTrim(std::string_view totrim);
-
+std::string RTrim(std::string_view totrim);
 
 /// Returns true if the string can be safely cast into
 /// either an `int64_t` or a `double` type.
 WERKZEUGKISTE_EXPORT
-  bool IsNumeric(const std::string &s);
-
+bool IsNumeric(const std::string& s);
 
 /// Tokenizes the string by the given delimiter.
 WERKZEUGKISTE_EXPORT
-  std::vector<std::string> Split(std::string_view s, char delim);
+std::vector<std::string> Split(std::string_view s, char delim);
 
-
-template <typename Container,
-    typename Tp = std::decay_t<
-        decltype(*begin(std::declval<Container>()))>>
-inline std::string
-    Concatenate(
-        const Container &container,
-        std::string_view delimiter = "") {
+template<
+    typename Container,
+    typename Tp = std::decay_t<decltype(*begin(std::declval<Container>()))>>
+inline std::string Concatenate(const Container& container,
+                               std::string_view delimiter = "")
+{
   std::ostringstream concat;
   bool preprend_delimiter = false;
-  for (const auto &str : container) {
+  for (const auto& str : container) {
     if (preprend_delimiter) {
       concat << delimiter;
     } else {
@@ -141,59 +122,44 @@ inline std::string
   return concat.str();
 }
 
-
 /// Replaces all occurrences of the given search
 /// string `needle` within the `haystack`.
 WERKZEUGKISTE_EXPORT
-  std::string Replace(
-      std::string_view haystack,
-      std::string_view needle,
-      std::string_view replacement);
-
+std::string Replace(std::string_view haystack,
+                    std::string_view needle,
+                    std::string_view replacement);
 
 /// Replaces all occurrences of the given character.
 WERKZEUGKISTE_EXPORT
-  std::string Replace(
-      std::string_view haystack,
-      char needle,
-      char replacement);
-
+std::string Replace(std::string_view haystack, char needle, char replacement);
 
 /// Clips the given URL string to include only the
 /// protocol and domain, *i.e.* server paths & parameters
 /// will be excluded.
 WERKZEUGKISTE_EXPORT
-  std::string ClipUrl(const std::string &url);
-
+std::string ClipUrl(const std::string& url);
 
 /// Sets `protocol` to the URL's protocol, e.g.
 /// `https://`, `rtp://`, ...
 /// Returns true if the `url` string contained a
 /// protocol part.
 WERKZEUGKISTE_EXPORT
-  bool GetUrlProtocol(
-      const std::string &url,
-      std::string &protocol,   // NOLINT
-      std::string &remainder); // NOLINT
-
+bool GetUrlProtocol(const std::string& url,
+                    std::string& protocol,  // NOLINT
+                    std::string& remainder);  // NOLINT
 
 /// Returns the URL after replacing any plaintext
 /// authentication data by the text `<auth>`.
 WERKZEUGKISTE_EXPORT
-  std::string ObscureUrlAuthentication(const std::string &url);
-
+std::string ObscureUrlAuthentication(const std::string& url);
 
 /// Returns a copy where all given characters have been removed.
 WERKZEUGKISTE_EXPORT
-  std::string Remove(
-      std::string_view s,
-      std::initializer_list<char> chars);
-
+std::string Remove(std::string_view s, std::initializer_list<char> chars);
 
 /// Returns a copy where the given character has been removed.
 WERKZEUGKISTE_EXPORT
-  std::string Remove(std::string_view s, char c);
-
+std::string Remove(std::string_view s, char c);
 
 /// Returns a slug representation of the string.
 ///
@@ -205,10 +171,7 @@ WERKZEUGKISTE_EXPORT
 /// then also be stripped: e.g. ` img_dir` would
 /// become `imgdir`.
 WERKZEUGKISTE_EXPORT
-  std::string Slug(
-      std::string_view s,
-      bool strip_dashes = false);
-
+std::string Slug(std::string_view s, bool strip_dashes = false);
 
 /// Returns a string with length <= `desired_length`,
 /// where the customizable `ellipsis` has been inserted
@@ -220,20 +183,15 @@ WERKZEUGKISTE_EXPORT
 /// * `0`: Centered
 /// * `> 0`: Right
 WERKZEUGKISTE_EXPORT
-  std::string Shorten(
-      std::string_view s,
-      std::size_t desired_length,
-      int ellipsis_position = -1,
-      std::string_view ellipsis = "...");
-
+std::string Shorten(std::string_view s,
+                    std::size_t desired_length,
+                    int ellipsis_position = -1,
+                    std::string_view ellipsis = "...");
 
 /// Returns the string indented by n-times the given character.
 WERKZEUGKISTE_EXPORT
-  std::string Indent(
-      std::string_view s,
-      std::size_t n,
-      char character=' ');
+std::string Indent(std::string_view s, std::size_t n, char character = ' ');
 
-} // namespace werkzeugkiste::strings
+}  // namespace werkzeugkiste::strings
 
 #endif  // WERKZEUGKISTE_STRINGS_STRINGS_H

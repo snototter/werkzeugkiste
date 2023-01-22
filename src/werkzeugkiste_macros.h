@@ -6,4 +6,3 @@
 #define WERKZEUGKISTE_UNUSED_VAR(var) (void)(var)
 
 #endif  // WERKZEUGKISTE_MACROS_H
-

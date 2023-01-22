@@ -1,8 +1,8 @@
-#include <string>
-#include <map>
-#include <vector>
 #include <array>
 #include <list>
+#include <map>
+#include <string>
+#include <vector>
 
 #include <werkzeugkiste/container/circular_buffer.h>
 #include <werkzeugkiste/container/math.h>
@@ -13,7 +13,8 @@ namespace wkc = werkzeugkiste::container;
 
 // NOLINTBEGIN
 
-TEST(ContainerUtilsTest, Smooth) {
+TEST(ContainerUtilsTest, Smooth)
+{
   using cb = wkc::circular_buffer<int>;
   cb buffer(7);
 
@@ -36,8 +37,7 @@ TEST(ContainerUtilsTest, Smooth) {
   EXPECT_EQ(smooth[0], buffer[0]);
   EXPECT_EQ(smooth[6], buffer[6]);
   for (std::size_t i = 1; i < 6; ++i) {
-    EXPECT_EQ(smooth[i],
-              (buffer[i-1] + buffer[i] + buffer[i+1]) / 3.0);
+    EXPECT_EQ(smooth[i], (buffer[i - 1] + buffer[i] + buffer[i + 1]) / 3.0);
   }
 
   smooth = wkc::SmoothMovingAverage(buffer, 5);
@@ -46,19 +46,19 @@ TEST(ContainerUtilsTest, Smooth) {
   EXPECT_EQ(smooth[0], buffer[0]);
   EXPECT_EQ(smooth[6], buffer[6]);
   // Window size should increase at the head/tail:
-  EXPECT_EQ(smooth[1],
-            (buffer[0] + buffer[1] + buffer[2]) / 3.0);
-  EXPECT_EQ(smooth[5],
-            (buffer[4] + buffer[5] + buffer[6]) / 3.0);
+  EXPECT_EQ(smooth[1], (buffer[0] + buffer[1] + buffer[2]) / 3.0);
+  EXPECT_EQ(smooth[5], (buffer[4] + buffer[5] + buffer[6]) / 3.0);
 
   for (std::size_t i = 2; i < 5; ++i) {
     EXPECT_EQ(smooth[i],
-              (buffer[i-2] + buffer[i-1] + buffer[i] + buffer[i+1] + + buffer[i+2]) / 5.0);
+              (buffer[i - 2] + buffer[i - 1] + buffer[i] + buffer[i + 1]
+               + +buffer[i + 2])
+                  / 5.0);
   }
 }
 
-
-TEST(ContainerUtilsTest, Mean) {
+TEST(ContainerUtilsTest, Mean)
+{
   using cb = wkc::circular_buffer<int>;
   cb buffer(7);
 
@@ -89,8 +89,8 @@ TEST(ContainerUtilsTest, Mean) {
   EXPECT_DOUBLE_EQ(wkc::Mean(buffer), 5.0);
 }
 
-
-TEST(ContainerUtilsTest, MinMax) {
+TEST(ContainerUtilsTest, MinMax)
+{
   using cb = wkc::circular_buffer<int>;
   cb buffer(3);
   int min = 17;
@@ -118,7 +118,7 @@ TEST(ContainerUtilsTest, MinMax) {
   EXPECT_EQ(min, 0);
   EXPECT_EQ(max, 3);
 
-  buffer.push_back(10); // The first 1 dropped out
+  buffer.push_back(10);  // The first 1 dropped out
   wkc::MinMax(buffer, &min, &max);
   EXPECT_EQ(min, 0);
   EXPECT_EQ(max, 10);
