@@ -187,17 +187,17 @@ std::string SecondsToString(unsigned int seconds);
 /// explicitly default to ``steady_clock`` (since ``high_resolution_clock`` is
 /// not guaranteed to be steady).
 template<typename Clock = std::chrono::steady_clock>
-class stop_watch
+class StopWatch_
 {  // NOLINT
 public:
   /// Clock type used by this stop watch.
   using clock_type = Clock;  // NOLINT
 
   /// Constructor starts the stop watch.
-  stop_watch() { Start(); }
+  StopWatch_() { Start(); }
 
   /// Copy-constructor copies the other's start time point.
-  stop_watch(const stop_watch& other)
+  StopWatch_(const StopWatch_& other)
       : t_start_ {other.t_start_}
   {
   }
@@ -209,11 +209,11 @@ public:
   // specifies the unit to print the elapsed time...
   // Then, the move ctor/assignments should be implemented
   // properly (and disarm the moved instance)
-  ~stop_watch() = default;
+  ~StopWatch_() = default;
 
-  stop_watch(stop_watch&& other) noexcept = default;
-  stop_watch& operator=(const stop_watch& other) = default;
-  stop_watch& operator=(stop_watch&& other) noexcept = default;
+  StopWatch_(StopWatch_&& other) noexcept = default;
+  StopWatch_& operator=(const StopWatch_& other) = default;
+  StopWatch_& operator=(StopWatch_&& other) noexcept = default;
 
   /// Starts or restarts the stop watch.
   void Start() { t_start_ = clock_type::now(); }
@@ -268,8 +268,8 @@ private:
 };
 
 extern template class WERKZEUGKISTE_EXPORT
-    stop_watch<std::chrono::steady_clock>;
-using StopWatch = stop_watch<std::chrono::steady_clock>;
+    StopWatch_<std::chrono::steady_clock>;
+using StopWatch = StopWatch_<std::chrono::steady_clock>;
 
 }  // namespace werkzeugkiste::timing
 

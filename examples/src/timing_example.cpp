@@ -16,6 +16,8 @@
 #define WITH_TICTOC
 #include <werkzeugkiste/timing/tictoc.h>
 
+// NOLINTBEGIN(*-magic-numbers)
+
 int main(int /* argc */, char** /* argv */)
 {
   namespace wtu = werkzeugkiste::timing;
@@ -29,8 +31,6 @@ int main(int /* argc */, char** /* argv */)
             << watch.YearsUntilOverflow()
             << "\n--------------------------------------------------"
             << std::endl;
-
-  // NOLINTBEGIN(*-magic-numbers)
 
   // We want a nicely aligned TOC output:
   wtu::SetTocFormat(true, 9, 3);
@@ -51,8 +51,9 @@ int main(int /* argc */, char** /* argv */)
 
     // Display the elapsed time for all active
     // stop watches:
-    for (const auto& prev_label : prev_labels)
+    for (const auto& prev_label : prev_labels) {
       TOC_MS(prev_label);
+    }
     TOC_MS(label);
     // Alternatively, you could have simply queried the
     // elapsed time, e.g. via
@@ -64,7 +65,7 @@ int main(int /* argc */, char** /* argv */)
 
     std::cout << "--------------------------------------------------\n";
   }
-
-  // NOLINTEND(*-magic-numbers)
   return 0;
 }
+
+// NOLINTEND(*-magic-numbers)

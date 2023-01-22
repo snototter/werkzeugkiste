@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <type_traits>
 
+//NOLINTBEGIN(*-magic-numbers)
+
 /// Math utils for 2D/3D geometry.
 namespace werkzeugkiste::geometry
 {
@@ -185,5 +187,7 @@ inline constexpr int Sign(T x)
 }
 
 }  // namespace werkzeugkiste::geometry
+
+//NOLINTEND(*-magic-numbers)
 
 #endif  // WERKZEUGKISTE_GEOMETRY_UTILS_H

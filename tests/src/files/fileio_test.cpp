@@ -1,12 +1,14 @@
 #include <string>
 
+// NOLINTBEGIN
+//TODO select which warnings to silence
+
 #include <werkzeugkiste/files/fileio.h>
 
 #include "../test_utils.h"
 
 namespace wkf = werkzeugkiste::files;
 
-// NOLINTBEGIN
 
 TEST(FileIOTest, TODO)
 {

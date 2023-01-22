@@ -13,7 +13,7 @@
 #include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/version.h>
 
-// NOLINTBEGIN(*magic-numbers)
+// NOLINTBEGIN(*magic-numbers, readability-identifier-naming, readability-isolate-declaration)
 
 template<typename Vector>
 std::string PrettyPrint(std::initializer_list<Vector> vecs,
@@ -77,9 +77,11 @@ void VectorDemo(V vec1, V vec2)
   constexpr bool is_floating_point =
       std::is_floating_point<typename V::value_type>::value;
   if constexpr (is_floating_point) {
+    // NOLINTBEGIN(misc-redundant-expression)
     std::cout << "\n* Element-wise division:"
                  "\n    v1 / v1 = "
               << (vec1 / vec1) << "\n    v1 / v2 = " << (vec1 / vec2);
+    // NOLINTEND(misc-redundant-expression)
   } else {
     std::cout << "\n Division not supported for integral types.";
   }
@@ -118,7 +120,7 @@ int main(int /* argc */, char** /* argv */)
   wkg::Vec2d v1 {-17, 42}, v2 {0, 0.01};
   VectorDemo(v1, v2);
 
-  VectorDemo(wkg::Vec2f {-17, 42}, wkg::Vec2f {0, 0.01});
+  VectorDemo(wkg::Vec2f {-17, 42}, wkg::Vec2f {0.0F, 0.01F});
 
   VectorDemo(wkg::Vec2i {-17, 42}, wkg::Vec2i {0, 23});
 
@@ -235,4 +237,4 @@ int main(int /* argc */, char** /* argv */)
   return 0;
 }
 
-// NOLINTEND(*magic-numbers)
+// NOLINTEND(*magic-numbers, readability-identifier-naming, readability-isolate-declaration)

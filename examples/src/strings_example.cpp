@@ -7,6 +7,8 @@
 #include <werkzeugkiste/strings/strings.h>
 #include <werkzeugkiste/version.h>
 
+// NOLINTBEGIN(*-magic-numbers)
+
 int main(int /* argc */, char** /* argv */)
 {
   namespace wks = werkzeugkiste::strings;
@@ -76,3 +78,5 @@ int main(int /* argc */, char** /* argv */)
             << std::endl;
   return 0;
 }
+
+// NOLINTEND(*-magic-numbers)

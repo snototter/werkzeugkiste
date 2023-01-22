@@ -2,13 +2,15 @@
 #include <string>
 #include <thread>
 
+// NOLINTBEGIN
+//TODO select which warnings to silence
+
 #include <werkzeugkiste/timing/stopwatch.h>
 
 #include "../test_utils.h"
 
 namespace wkt = werkzeugkiste::timing;
 
-// NOLINTBEGIN
 
 TEST(StopWatchTest, Watches)
 {
@@ -17,7 +19,7 @@ TEST(StopWatchTest, Watches)
   EXPECT_TRUE(w1.IsSteady());
   EXPECT_GT(w1.YearsUntilOverflow(), 292);
 
-  auto w2 = wkt::stop_watch<std::chrono::system_clock>();
+  auto w2 = wkt::StopWatch_<std::chrono::system_clock>();
   EXPECT_EQ(w2.ClockName(), "std::chrono::system_clock");
   EXPECT_FALSE(w2.IsSteady());
 }

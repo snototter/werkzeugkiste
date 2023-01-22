@@ -4,13 +4,16 @@
 #include <list>
 #include <vector>
 
+// NOLINTBEGIN
+//TODO select which warnings to silence
+
 #include <werkzeugkiste/geometry/primitives.h>
 
 #include "../test_utils.h"
 
 namespace wkg = werkzeugkiste::geometry;
 
-// NOLINTBEGIN
+
 TEST(GeometricPrimitives, Circle)
 {
   // Collinear points

@@ -19,13 +19,13 @@ namespace werkzeugkiste::geometry
 //-----------------------------------------------------------------------------
 // Matrix definitions
 
-template<typename _Tp, int Rows, int Columns>
+template<typename Tp, int Rows, int Columns>
 using Matrix =
-    Eigen::Matrix<_Tp, Rows, Columns, (Columns > 1) ? Eigen::RowMajor : 0>;
+    Eigen::Matrix<Tp, Rows, Columns, (Columns > 1) ? Eigen::RowMajor : 0>;
 
-template<typename _Tp, int Rows>
+template<typename Tp, int Rows>
 using MatrixDynWidth =
-    Eigen::Matrix<_Tp, Rows, Eigen::Dynamic, Eigen::RowMajor>;
+    Eigen::Matrix<Tp, Rows, Eigen::Dynamic, Eigen::RowMajor>;
 
 // using Mat2x2d = Matrix<double, 2, 2>;
 using Mat3x3d = Matrix<double, 3, 3>;

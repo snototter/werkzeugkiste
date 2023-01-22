@@ -6,7 +6,7 @@ namespace werkzeugkiste::timing
 {
 
 // Explicit template instantiation
-template class stop_watch<std::chrono::steady_clock>;
+template class StopWatch_<std::chrono::steady_clock>;
 
 std::string SecondsToString(unsigned int seconds)
 {

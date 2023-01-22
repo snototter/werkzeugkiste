@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace werkzeugkiste
-{
-namespace files
+namespace werkzeugkiste::files
 {
 
 // TODO Need to clarify 2 issues:
@@ -31,7 +29,6 @@ std::string Parent(const std::string& path);
 /// TODO doc
 std::string DirName(const std::string& path);
 
-}  // namespace files
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::files
 
 #endif  // WERKZEUGKISTE_FILES_FILEIO_H

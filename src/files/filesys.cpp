@@ -7,9 +7,7 @@
 #include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/strings/strings.h>
 
-namespace werkzeugkiste
-{
-namespace files
+namespace werkzeugkiste::files
 {
 
 // TODO add:
@@ -21,9 +19,9 @@ namespace files
 // getextension
 
 #if defined(WIN32) || defined(_WIN32) || defined(__CYGWIN__)
-const char kFileSeparator = '\\';
+const char k_file_separator = '\\';
 #else
-const char kFileSeparator = '/';
+const char k_file_separator = '/';
 #endif
 
 bool Exists(const std::string& name)
@@ -38,21 +36,23 @@ bool Exists(const std::string& name)
 // http://stackoverflow.com/questions/18100097/portable-way-to-check-if-directory-exists-windows-linux-c
 bool IsDir(const std::string& path)
 {
-  struct stat info;
+  struct stat info{};
   if (stat(path.c_str(), &info) != 0) {
     return false;
-  } else if (info.st_mode & S_IFDIR) {
-    return true;
-  } else {
-    return false;
   }
+
+  if (info.st_mode & S_IFDIR) {
+    return true;
+  }
+
+  return false;
 }
 
 std::string FullFile(const std::string& p1, const std::string& p2)
 {
   std::string path(p1);
-  if (!strings::EndsWith(p1, kFileSeparator)) {
-    path += kFileSeparator;
+  if (!strings::EndsWith(p1, k_file_separator)) {
+    path += k_file_separator;
   }
   path += p2;
   return path;
@@ -64,10 +64,10 @@ std::string FullFile(const std::vector<std::string>& path_tokens)
   bool prepend_delim = false;
   for (const auto& token : path_tokens) {
     if (prepend_delim) {
-      path += kFileSeparator;
+      path += k_file_separator;
     }
     path += token;
-    prepend_delim = !strings::EndsWith(token, kFileSeparator);
+    prepend_delim = !strings::EndsWith(token, k_file_separator);
   }
   return path;
 }
@@ -78,20 +78,20 @@ std::string FullFile(std::initializer_list<std::string> path_tokens)
   bool prepend_delim = false;
   for (const auto& token : path_tokens) {
     if (prepend_delim) {
-      path += kFileSeparator;
+      path += k_file_separator;
     }
     path += token;
-    prepend_delim = !strings::EndsWith(token, kFileSeparator);
+    prepend_delim = !strings::EndsWith(token, k_file_separator);
   }
   return path;
 }
 
 std::string Parent(const std::string& path)
 {
-  std::vector<std::string> components = strings::Split(path, kFileSeparator);
+  std::vector<std::string> components = strings::Split(path, k_file_separator);
   if (components.size() < 2) {
     std::string res;
-    res += kFileSeparator;
+    res += k_file_separator;
     return res;
   }
 
@@ -108,5 +108,4 @@ std::string DirName(const std::string& path)
   }
 }
 
-}  // namespace files
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::files

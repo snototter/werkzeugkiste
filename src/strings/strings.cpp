@@ -98,7 +98,7 @@ std::string LTrim(std::string_view totrim)
   s.erase(
       s.begin(),
       std::find_if(
-          s.begin(), s.end(), [](int c) { return !std::isspace(c); }));
+          s.begin(), s.end(), [](int c) { return std::isspace(c) == 0; }));
   return s;
 }
 
@@ -107,7 +107,7 @@ std::string RTrim(std::string_view totrim)
   std::string s(totrim);
   s.erase(
       std::find_if(
-          s.rbegin(), s.rend(), [](int c) { return !std::isspace(c); })
+          s.rbegin(), s.rend(), [](int c) { return std::isspace(c) == 0; })
           .base(),
       s.end());
   return s;

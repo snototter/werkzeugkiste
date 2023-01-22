@@ -9,10 +9,8 @@
 #include <utility>
 #include <vector>
 
-namespace werkzeugkiste
-{
 /// Utility functions for standard containers.
-namespace container
+namespace werkzeugkiste::container
 {
 
 /// Returns the keys from a map container (i.e. any
@@ -58,7 +56,7 @@ public:
   {
   }
 
-  Ordering(const Container& data)
+  explicit Ordering(const Container& data)
       : Ordering(data, CmpAsc<typename Container::value_type>)
   {
   }
@@ -204,7 +202,6 @@ bool ContainsValue(const Container& container, const Tp& value)
       != container.end();
 }
 
-}  // namespace container
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::container
 
 #endif  // WERKZEUGKISTE_CONTAINER_SORT_H

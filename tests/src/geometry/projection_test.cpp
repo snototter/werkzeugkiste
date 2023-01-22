@@ -4,6 +4,9 @@
 #include <list>
 #include <vector>
 
+// NOLINTBEGIN
+//TODO select which warnings to silence
+
 #include <werkzeugkiste/geometry/camera.h>
 #include <werkzeugkiste/geometry/projection.h>
 
@@ -11,7 +14,6 @@
 
 namespace wkg = werkzeugkiste::geometry;
 
-// NOLINTBEGIN
 
 TEST(ProjectionTest, Transformations)
 {

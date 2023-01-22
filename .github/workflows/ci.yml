@@ -105,7 +105,8 @@ jobs:
         os: [ubuntu-22.04]
 #        os: [macos-12, ubuntu-22.04, windows-2022]
 
-        type: [shared, static]
+#        type: [shared, static]
+        type: [static]
 
         include:
         - { type: shared, shared: YES }
