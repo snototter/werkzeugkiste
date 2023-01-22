@@ -99,7 +99,7 @@ jobs:
       run: ctest --output-on-failure -j 2
 
   test:
-    needs: [lint]
+#TODO reenable    needs: [lint]
 
     strategy:
       matrix:
