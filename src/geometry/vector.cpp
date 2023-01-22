@@ -1,9 +1,8 @@
-#include <cmath>
-
 #include <werkzeugkiste/geometry/vector.h>
 
-namespace werkzeugkiste::geometry
-{
+#include <cmath>
+
+namespace werkzeugkiste::geometry {
 
 // Explicit instantiation:
 template class Vec<float, 2>;

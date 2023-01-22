@@ -1,13 +1,12 @@
 #ifndef WERKZEUGKISTE_TIMING_TICTOC_H
 #define WERKZEUGKISTE_TIMING_TICTOC_H
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 #include <chrono>  // NOLINT [build/c++11]
 #include <string>
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
-
-namespace werkzeugkiste::timing
-{
+namespace werkzeugkiste::timing {
 
 /// @brief Set output format for the toc_xxx() functions.
 ///
@@ -21,8 +20,7 @@ namespace werkzeugkiste::timing
 /// @param number_precision If > 0, defines the decimal
 ///            precision for displaying time measurements.
 WERKZEUGKISTE_EXPORT
-void SetTocFormat(bool print_labels_aligned = false,
-                  int fixed_number_width = 0,
+void SetTocFormat(bool print_labels_aligned = false, int fixed_number_width = 0,
                   int number_precision = 0);
 
 /// @brief Mute future toc_xxx calls, i.e. no output will be displayed.
@@ -108,25 +106,25 @@ double TTocNanoseconds(const std::string& label = std::string());
 ///   b) easily disable all call overheads (by simply defining
 ///      NO_TICTOC before including tictoc.h)
 #ifdef WITH_TICTOC
-#  define TIC(...) werkzeugkiste::timing::Tic(__VA_ARGS__)
-#  define TOC_SEC(...) werkzeugkiste::timing::TocSeconds(__VA_ARGS__)
-#  define TTOC_SEC(...) werkzeugkiste::timing::TTocSeconds(__VA_ARGS__)
-#  define TOC_MS(...) werkzeugkiste::timing::TocMilliseconds(__VA_ARGS__)
-#  define TTOC_MS(...) werkzeugkiste::timing::TTocMilliseconds(__VA_ARGS__)
-#  define TOC_US(...) werkzeugkiste::timing::TocMicroseconds(__VA_ARGS__)
-#  define TTOC_US(...) werkzeugkiste::timing::TTocMicroseconds(__VA_ARGS__)
-#  define TOC_NS(...) werkzeugkiste::timing::TocNanoseconds(__VA_ARGS__)
-#  define TTOC_NS(...) werkzeugkiste::timing::TTocNanoseconds(__VA_ARGS__)
+#define TIC(...) werkzeugkiste::timing::Tic(__VA_ARGS__)
+#define TOC_SEC(...) werkzeugkiste::timing::TocSeconds(__VA_ARGS__)
+#define TTOC_SEC(...) werkzeugkiste::timing::TTocSeconds(__VA_ARGS__)
+#define TOC_MS(...) werkzeugkiste::timing::TocMilliseconds(__VA_ARGS__)
+#define TTOC_MS(...) werkzeugkiste::timing::TTocMilliseconds(__VA_ARGS__)
+#define TOC_US(...) werkzeugkiste::timing::TocMicroseconds(__VA_ARGS__)
+#define TTOC_US(...) werkzeugkiste::timing::TTocMicroseconds(__VA_ARGS__)
+#define TOC_NS(...) werkzeugkiste::timing::TocNanoseconds(__VA_ARGS__)
+#define TTOC_NS(...) werkzeugkiste::timing::TTocNanoseconds(__VA_ARGS__)
 #else  // WITH_TICTOC
-#  define TIC(...)
-#  define TOC_SEC(...)
-#  define TTOC_SEC(...) (-1)
-#  define TOC_MS(...)
-#  define TTOC_MS(...) (-1)
-#  define TOC_US(...)
-#  define TTOC_US(...) (-1)
-#  define TOC_NS(...)
-#  define TTOC_NS(...) (-1)
+#define TIC(...)
+#define TOC_SEC(...)
+#define TTOC_SEC(...) (-1)
+#define TOC_MS(...)
+#define TTOC_MS(...) (-1)
+#define TOC_US(...)
+#define TTOC_US(...) (-1)
+#define TOC_NS(...)
+#define TTOC_NS(...) (-1)
 #endif  // WITH_TICTOC
 
 // NOLINTEND(*-macro-usage)

@@ -1,16 +1,13 @@
+#include <werkzeugkiste/files/fileio.h>
+
 #include <exception>
 #include <fstream>
 #include <sstream>
 
-#include <werkzeugkiste/files/fileio.h>
+namespace werkzeugkiste {
+namespace files {
 
-namespace werkzeugkiste
-{
-namespace files
-{
-
-std::vector<std::string> ReadAsciiFile(const char* filename)
-{
+std::vector<std::string> ReadAsciiFile(const char* filename) {
   std::ifstream ifs(filename, std::ios::in);
   if (!ifs.is_open()) {
     std::string s("Cannot open file - check path: ");
@@ -27,8 +24,7 @@ std::vector<std::string> ReadAsciiFile(const char* filename)
   return lines;
 }
 
-std::string CatAsciiFile(const char* filename)
-{
+std::string CatAsciiFile(const char* filename) {
   std::ifstream ifs(filename, std::ios::in);
   if (!ifs.is_open()) {
     std::string s("Cannot open file - check path: ");

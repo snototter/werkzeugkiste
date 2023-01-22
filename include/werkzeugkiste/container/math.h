@@ -6,11 +6,9 @@
 #include <numeric>
 #include <stdexcept>
 
-namespace werkzeugkiste
-{
+namespace werkzeugkiste {
 /// Utility functions for standard containers.
-namespace container
-{
+namespace container {
 
 /// Smoothes the given data points.
 ///
@@ -32,9 +30,8 @@ namespace container
 ///    output[1] = (data[0] + data[1] + data[2]) / 3
 ///    output[2] = (data[0] + ... + data[4]) / 5
 ///    output[3] = (data[1] + ... + data[5]) / 5
-template<class Container>
-Container SmoothMovingAverage(const Container& data, int window_size)
-{
+template <class Container>
+Container SmoothMovingAverage(const Container& data, int window_size) {
   if (window_size <= 0) {
     return data;
   }
@@ -67,15 +64,13 @@ Container SmoothMovingAverage(const Container& data, int window_size)
   return smoothed_data;
 }
 
-template<class Container>
-double Mean(const Container& values)
-{
+template <class Container>
+double Mean(const Container& values) {
   if (values.size() == 0) {
     return 0.0;
   }
   typename Container::value_type sum =
-      std::accumulate(values.begin(),
-                      values.end(),
+      std::accumulate(values.begin(), values.end(),
                       static_cast<typename Container::value_type>(0));
   return static_cast<double>(sum) / values.size();
 }
@@ -84,13 +79,11 @@ double Mean(const Container& values)
 /// STL-like sequence container.
 /// The underlying `value_type` must support
 /// comparisons via `operator<`.
-template<class Container>
+template <class Container>
 void MinMax(const Container& values,
             typename Container::value_type* min = nullptr,
             typename Container::value_type* max = nullptr,
-            std::size_t* idx_min = nullptr,
-            std::size_t* idx_max = nullptr)
-{
+            std::size_t* idx_min = nullptr, std::size_t* idx_max = nullptr) {
   if (values.empty()) {
     return;
   }

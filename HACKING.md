@@ -22,6 +22,12 @@ tests, e.g. test-timing (or are they derived from the filename - thus, underscor
 
 TODO validate yaml file:
 python -c 'import yaml, sys; print(yaml.safe_load(sys.stdin))' < .github/workflows/ci.yml
+
+spellcheck:
+cmake -P cmake/spell.cmake
+
+format:
+cmake -D FORMAT_COMMAND=clang-format-14 -D FIX=YES -P cmake/lint.cmake
 -->
 
 Here is some wisdom to help you build and test this project as a developer and

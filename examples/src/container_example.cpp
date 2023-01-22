@@ -8,9 +8,8 @@
 #include <werkzeugkiste/version.h>
 
 // FIXME implement or remove
-int main(int /* argc */, char** /* argv */)
-{
-//  namespace wkc = werkzeugkiste::container;
+int main(int /* argc */, char** /* argv */) {
+  //  namespace wkc = werkzeugkiste::container;
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    Container utilities demo\n"

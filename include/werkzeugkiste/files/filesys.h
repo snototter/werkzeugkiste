@@ -4,8 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace werkzeugkiste::files
-{
+namespace werkzeugkiste::files {
 
 // TODO Need to clarify 2 issues:
 //  * Switching to C++17 (std::filesystem) will require major refactoring

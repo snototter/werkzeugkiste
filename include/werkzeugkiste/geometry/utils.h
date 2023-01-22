@@ -7,18 +7,16 @@
 #include <stdexcept>
 #include <type_traits>
 
-//NOLINTBEGIN(*-magic-numbers)
+// NOLINTBEGIN(*-magic-numbers)
 
 /// Math utils for 2D/3D geometry.
-namespace werkzeugkiste::geometry
-{
+namespace werkzeugkiste::geometry {
 
 /// Mathematical constants.
-namespace constants
-{
+namespace constants {
 
 // Pi
-template<typename Tp>
+template <typename Tp>
 inline constexpr Tp pi_tpl =
     static_cast<std::enable_if_t<std::is_floating_point_v<Tp>, Tp>>(
         3.141592653589793238462643383279502884L);
@@ -27,7 +25,7 @@ inline constexpr double pi_d = pi_tpl<double>;
 inline constexpr float pi_f = pi_tpl<float>;
 
 // 1 / Pi
-template<typename Tp>
+template <typename Tp>
 inline constexpr Tp inv_pi_tpl =
     static_cast<std::enable_if_t<std::is_floating_point_v<Tp>, Tp>>(
         0.318309886183790671537767526745028724L);
@@ -36,7 +34,7 @@ inline constexpr double inv_pi_d = inv_pi_tpl<double>;
 inline constexpr float inv_pi_f = inv_pi_tpl<float>;
 
 // sqrt(2)
-template<typename Tp>
+template <typename Tp>
 inline constexpr Tp sqrt2_tpl =
     static_cast<std::enable_if_t<std::is_floating_point_v<Tp>, Tp>>(
         1.414213562373095048801688724209698079L);
@@ -50,29 +48,24 @@ inline constexpr float sqrt2_f = sqrt2_tpl<float>;
 // Angle conversions.
 
 /// Convert angle from degrees to radians.
-inline constexpr double Deg2Rad(double deg)
-{
+inline constexpr double Deg2Rad(double deg) {
   return (constants::pi_d / 180.0) * deg;
 }
 
-inline constexpr float Deg2Rad(float deg)
-{
+inline constexpr float Deg2Rad(float deg) {
   return (constants::pi_f / 180.0F) * deg;
 }
 
-inline constexpr double Deg2Rad(int deg)
-{
+inline constexpr double Deg2Rad(int deg) {
   return Deg2Rad(static_cast<double>(deg));
 }
 
 /// Convert angle from radians to degrees.
-inline constexpr double Rad2Deg(double rad)
-{
+inline constexpr double Rad2Deg(double rad) {
   return rad * 180.0 * constants::inv_pi_d;
 }
 
-inline constexpr float Rad2Deg(float rad)
-{
+inline constexpr float Rad2Deg(float rad) {
   return rad * 180.0F * constants::inv_pi_f;
 }
 
@@ -90,9 +83,8 @@ inline constexpr float Rad2Deg(float rad)
 /// approximately zero, i.e. computes `|x| <= eps` for floating
 /// point numbers. Integral types will be compared to zero using the
 /// default equality check.
-template<typename T>
-inline constexpr bool IsEpsZero(T x)
-{
+template <typename T>
+inline constexpr bool IsEpsZero(T x) {
   static_assert(std::is_arithmetic_v<T>,
                 "Non-arithmetic input type provided for IsEpsZero().");
   if constexpr (std::is_floating_point_v<T>) {
@@ -109,12 +101,9 @@ inline constexpr bool IsEpsZero(T x)
 ///   (|x-y| <= rel_tol * |x|)
 ///   or (|x-y| <= rel_tol * |y|)
 ///   or (|x-y| <= abs_tol)
-template<typename TVal, typename TTol = double>
-inline constexpr bool IsClose(TVal x,
-                              TVal y,
-                              TTol relative_tolerance = 1e-9,
-                              TTol absolute_tolerance = 0.0)
-{
+template <typename TVal, typename TTol = double>
+inline constexpr bool IsClose(TVal x, TVal y, TTol relative_tolerance = 1e-9,
+                              TTol absolute_tolerance = 0.0) {
   static_assert(std::is_floating_point_v<TVal>,
                 "Approximately equal check requires floating point types!");
 
@@ -128,9 +117,9 @@ inline constexpr bool IsClose(TVal x,
     return true;
   }
 
-  return (diff
-          <= std::max(relative_tolerance * std::max(std::fabs(x), std::fabs(y)),
-                      absolute_tolerance));
+  return (diff <=
+          std::max(relative_tolerance * std::max(std::fabs(x), std::fabs(y)),
+                   absolute_tolerance));
 }
 
 /// Checks if two floating point numbers are "approximately" equal,
@@ -138,9 +127,8 @@ inline constexpr bool IsClose(TVal x,
 /// 1e-6 for single precision types), see `IsClose`.
 /// As there is no sane default value for the absolute tolerance,
 /// only the relative tolerance is checked.
-template<typename T>
-inline constexpr bool IsEpsEqual(T x, T y)
-{
+template <typename T>
+inline constexpr bool IsEpsEqual(T x, T y) {
   if constexpr (std::is_integral_v<T>) {
     return x == y;
   } else {
@@ -158,17 +146,15 @@ inline constexpr bool IsEpsEqual(T x, T y)
 // NOLINTBEGIN(readability-identifier-naming)
 
 /// Signum helper for unsigned types (to avoid compiler warnings).
-template<typename T>
-inline constexpr int _util_sign(T x, std::false_type /*is_signed*/)
-{
+template <typename T>
+inline constexpr int _util_sign(T x, std::false_type /*is_signed*/) {
   return static_cast<T>(0) < x;
 }
 
 /// Signum helper for signed types (to avoid compiler warnings when using
 /// unsigned types).
-template<typename T>
-inline constexpr int _util_sign(T x, std::true_type /*is_signed*/)
-{
+template <typename T>
+inline constexpr int _util_sign(T x, std::true_type /*is_signed*/) {
   return (static_cast<T>(0) < x) - (x < static_cast<T>(0));
 }
 
@@ -178,9 +164,8 @@ inline constexpr int _util_sign(T x, std::true_type /*is_signed*/)
 /// or -1 (if x is negative).
 /// This type-safe implementation is based on
 /// https://stackoverflow.com/a/4609795 by `user79758` (CC BY-SA 4.0).
-template<typename T>
-inline constexpr int Sign(T x)
-{
+template <typename T>
+inline constexpr int Sign(T x) {
   static_assert(std::is_arithmetic_v<T>,
                 "Non-arithmetic input type provided for Sign().");
   return _util_sign(x, std::is_signed<T>());
@@ -188,6 +173,6 @@ inline constexpr int Sign(T x)
 
 }  // namespace werkzeugkiste::geometry
 
-//NOLINTEND(*-magic-numbers)
+// NOLINTEND(*-magic-numbers)
 
 #endif  // WERKZEUGKISTE_GEOMETRY_UTILS_H

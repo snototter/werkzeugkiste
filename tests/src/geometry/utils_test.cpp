@@ -1,3 +1,5 @@
+#include <werkzeugkiste/geometry/utils.h>
+
 #include <cmath>
 #include <exception>
 #include <initializer_list>
@@ -5,16 +7,13 @@
 #include <list>
 #include <vector>
 
-#include <werkzeugkiste/geometry/utils.h>
-
 #include "../test_utils.h"
 
 namespace wkg = werkzeugkiste::geometry;
 
 // NOLINTBEGIN
 
-TEST(GeometryUtilsTest, AngleConversion)
-{
+TEST(GeometryUtilsTest, AngleConversion) {
   EXPECT_DOUBLE_EQ(0.0, wkg::Deg2Rad(0));
   EXPECT_DOUBLE_EQ(M_PI_4, wkg::Deg2Rad(45));
   EXPECT_DOUBLE_EQ(M_PI_2, wkg::Deg2Rad(90));
@@ -32,8 +31,7 @@ TEST(GeometryUtilsTest, AngleConversion)
   EXPECT_DOUBLE_EQ(480, wkg::Rad2Deg(wkg::Deg2Rad(480)));
 }
 
-TEST(GeometryUtilsTest, FloatingPointZero)
-{
+TEST(GeometryUtilsTest, FloatingPointZero) {
   // Check template specialization for integral types
   EXPECT_TRUE(wkg::IsEpsZero(0));
   EXPECT_FALSE(wkg::IsEpsZero(1));
@@ -125,8 +123,7 @@ TEST(GeometryUtilsTest, FloatingPointZero)
   EXPECT_FALSE(wkg::IsEpsZero(-inf_f));
 }
 
-TEST(GeometryUtilsTest, FloatingPointEquality1)
-{
+TEST(GeometryUtilsTest, FloatingPointEquality1) {
   // Check template specialization for integral types
   EXPECT_TRUE(wkg::IsEpsEqual(1, 1));
   EXPECT_TRUE(wkg::IsEpsEqual(-1, -1));
@@ -194,14 +191,12 @@ TEST(GeometryUtilsTest, FloatingPointEquality1)
   EXPECT_TRUE(wkg::IsEpsEqual(5.0F, 5.00000001F));
 }
 
-TEST(GeometryUtilsTest, FloatingPointEquality2)
-{
+TEST(GeometryUtilsTest, FloatingPointEquality2) {
   // Test eps equality with the next representable number (do *not*
   // compare against 0, as the next representable would be really small,
   // e.g. 1e-324!)
   for (double value :
-       {0.1, 0.01, 0.01, 1.0, 10.0, 12.0, 1e3, 1.17e16, 1.23e45, 4.5e98})
-  {
+       {0.1, 0.01, 0.01, 1.0, 10.0, 12.0, 1e3, 1.17e16, 1.23e45, 4.5e98}) {
     auto next = std::nextafter(value, value + 1);
     EXPECT_TRUE(wkg::IsEpsEqual(value, next))
         << "    " << value << " should equal " << next
@@ -241,8 +236,7 @@ TEST(GeometryUtilsTest, FloatingPointEquality2)
   // Similar to the double-precision loop above, we also
   // conduct additional single-precision checks:
   for (float value :
-       {0.1F, 0.01F, 0.01F, 1.0F, 10.0F, 12.0F, 1000.0F, 1234.56F, 0.001234F})
-  {
+       {0.1F, 0.01F, 0.01F, 1.0F, 10.0F, 12.0F, 1000.0F, 1234.56F, 0.001234F}) {
     auto next = std::nextafter(value, value + 1);
     EXPECT_TRUE(wkg::IsEpsEqual(value, next))
         << "    Value " << value << " should equal " << next
@@ -269,10 +263,9 @@ TEST(GeometryUtilsTest, FloatingPointEquality2)
   }
 }
 
-TEST(GeometryUtilsTest, Constants)
-{
+TEST(GeometryUtilsTest, Constants) {
   // Pi, double precision
-  constexpr double pi_dbl {3.14159265358979323};
+  constexpr double pi_dbl{3.14159265358979323};
   EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::pi_d, pi_dbl));
   EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::pi_d + 1e-10, pi_dbl));
   EXPECT_FALSE(wkg::IsEpsEqual(wkg::constants::pi_d + 1e-8, pi_dbl));
@@ -283,7 +276,7 @@ TEST(GeometryUtilsTest, Constants)
       wkg::IsEpsEqual(1.0 / wkg::constants::pi_d, wkg::constants::inv_pi_d));
 
   // Pi, single precision
-  constexpr float pi_flt {3.14159265358979323F};
+  constexpr float pi_flt{3.14159265358979323F};
   EXPECT_TRUE(wkg::IsEpsEqual(wkg::constants::pi_f, pi_flt));
   EXPECT_FALSE(wkg::IsEpsEqual(wkg::constants::pi_f + 1e-5F, pi_flt));
   EXPECT_FALSE(wkg::IsEpsEqual(wkg::constants::pi_f + 1e-4F, pi_flt));
@@ -302,8 +295,7 @@ TEST(GeometryUtilsTest, Constants)
       wkg::IsEpsEqual(wkg::constants::sqrt2_f * wkg::constants::sqrt2_f, 2.0F));
 }
 
-TEST(GeometryUtilsTest, Signum)
-{
+TEST(GeometryUtilsTest, Signum) {
   EXPECT_EQ(wkg::Sign(0), 0);
   EXPECT_EQ(wkg::Sign(-0), 0);
 

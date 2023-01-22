@@ -1,26 +1,24 @@
 #ifndef WERKZEUGKISTE_TIMING_STOPWATCH_H
 #define WERKZEUGKISTE_TIMING_STOPWATCH_H
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 #include <chrono>  // NOLINT
 #include <sstream>
 #include <stdexcept>
 #include <string>
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
-
 /// Stop watch & additional helpers on top of `std::chrono` (to hide
 /// some of its template boilerplate).
-namespace werkzeugkiste::timing
-{
+namespace werkzeugkiste::timing {
 
 // NOLINTBEGIN(*-else-after-return)
 
 /// Returns the abbreviation for the given
 /// duration type, e.g. std::chrono::hours --> "hrs".
 // TODO change all these checks to constexpr!
-template<typename Duration>
-std::string DurationAbbreviation()
-{
+template <typename Duration>
+std::string DurationAbbreviation() {
   if (std::is_same<Duration, std::chrono::nanoseconds>::value) {
     return "ns";
   } else if (std::is_same<Duration, std::chrono::microseconds>::value) {
@@ -39,8 +37,7 @@ std::string DurationAbbreviation()
   // early 2018. Since it is 2022, we don't need to add support
   // for outdated MSVC versions.
   // https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus
-  else if (std::is_same<Duration, std::chrono::days>::value)
-  {
+  else if (std::is_same<Duration, std::chrono::days>::value) {
     return "days";
   } else if (std::is_same<Duration, std::chrono::weeks>::value) {
     return "wks";
@@ -58,9 +55,8 @@ std::string DurationAbbreviation()
 
 /// Returns the fully-qualified name of the
 /// given clock type, e.g. "std::chrono::system_clock".
-template<typename Clock>
-std::string ClockTypeName()
-{
+template <typename Clock>
+std::string ClockTypeName() {
   if (std::is_same<Clock, std::chrono::steady_clock>::value) {
     return "std::chrono::steady_clock";
   } else if (std::is_same<Clock, std::chrono::system_clock>::value) {
@@ -71,8 +67,7 @@ std::string ClockTypeName()
     return "std::chrono::high_resolution_clock";
   }
 #if __cplusplus >= 202002L  // C++20
-  else if (std::is_same<Clock, std::chrono::utc_clock>::value)
-  {
+  else if (std::is_same<Clock, std::chrono::utc_clock>::value) {
     return "std::chrono::utc_clock";
   } else if (std::is_same<Clock, std::chrono::tai_clock>::value) {
     return "std::chrono::tai_clock";
@@ -93,9 +88,8 @@ std::string ClockTypeName()
 
 /// Returns the fully-qualified name of the given
 /// duration type, e.g. "std::chrono::nanoseconds".
-template<typename Duration>
-std::string PrecisionTypeName()
-{
+template <typename Duration>
+std::string PrecisionTypeName() {
   if (std::is_same<Duration, std::chrono::nanoseconds>::value) {
     return "std::chrono::nanoseconds";
   } else if (std::is_same<Duration, std::chrono::microseconds>::value) {
@@ -110,8 +104,7 @@ std::string PrecisionTypeName()
     return "std::chrono::hours";
   }
 #if __cplusplus >= 202002L  // C++20
-  else if (std::is_same<Duration, std::chrono::days>::value)
-  {
+  else if (std::is_same<Duration, std::chrono::days>::value) {
     return "std::chrono::days";
   } else if (std::is_same<Duration, std::chrono::weeks>::value) {
     return "std::chrono::weeks";
@@ -132,9 +125,8 @@ std::string PrecisionTypeName()
 
 /// Returns the number of ticks for the given
 /// std::chrono::duration with a different precision.
-template<typename DurationFrom, typename DurationTo>
-inline constexpr double CastToTicks(const DurationFrom& duration)
-{
+template <typename DurationFrom, typename DurationTo>
+inline constexpr double CastToTicks(const DurationFrom& duration) {
   // Floating-point duration requires no explicit duration_cast
   // https://en.cppreference.com/w/cpp/chrono/duration/duration_cast
   const std::chrono::duration<double, typename DurationTo::period> target(
@@ -143,30 +135,26 @@ inline constexpr double CastToTicks(const DurationFrom& duration)
 }
 
 /// Returns the number of seconds for the given std::chrono::duration.
-template<typename Duration>
-inline constexpr double ToSeconds(const Duration& duration)
-{
+template <typename Duration>
+inline constexpr double ToSeconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::seconds>(duration);
 }
 
 /// Returns the number of milliseconds for the given std::chrono::duration.
-template<typename Duration>
-inline constexpr double ToMilliseconds(const Duration& duration)
-{
+template <typename Duration>
+inline constexpr double ToMilliseconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::milliseconds>(duration);
 }
 
 /// Returns the number of microseconds for the given std::chrono::duration.
-template<typename Duration>
-inline constexpr double ToMicroseconds(const Duration& duration)
-{
+template <typename Duration>
+inline constexpr double ToMicroseconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::microseconds>(duration);
 }
 
 /// Returns the number of nanoseconds for the given std::chrono::duration.
-template<typename Duration>
-inline constexpr double ToNanoseconds(const Duration& duration)
-{
+template <typename Duration>
+inline constexpr double ToNanoseconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::nanoseconds>(duration);
 }
 
@@ -186,10 +174,9 @@ std::string SecondsToString(unsigned int seconds);
 /// Duration measurements should use a monotonic clock. Thus, we
 /// explicitly default to ``steady_clock`` (since ``high_resolution_clock`` is
 /// not guaranteed to be steady).
-template<typename Clock = std::chrono::steady_clock>
-class StopWatch_
-{  // NOLINT
-public:
+template <typename Clock = std::chrono::steady_clock>
+class StopWatch_ {  // NOLINT
+ public:
   /// Clock type used by this stop watch.
   using clock_type = Clock;  // NOLINT
 
@@ -197,10 +184,7 @@ public:
   StopWatch_() { Start(); }
 
   /// Copy-constructor copies the other's start time point.
-  StopWatch_(const StopWatch_& other)
-      : t_start_ {other.t_start_}
-  {
-  }
+  StopWatch_(const StopWatch_& other) : t_start_{other.t_start_} {}
 
   // TODO future extension: similar to a scoped guard, add an
   // "disarm" method. Otherwise, the destructor could print
@@ -223,9 +207,8 @@ public:
   /// is a rational fraction - std::ratio - representing the
   /// time in seconds from one tick to the next, i.e. similar
   /// to the Period template parameter in ``std::chrono::duration``).
-  template<typename Ratio>
-  double ElapsedAs() const
-  {
+  template <typename Ratio>
+  double ElapsedAs() const {
     const auto t_end = clock_type::now();
     // Floating-point duration requires no explicit duration_cast
     const std::chrono::duration<double, Ratio> duration = t_end - t_start_;
@@ -246,8 +229,7 @@ public:
 
   /// Returns the number of years before this stop watch
   /// will overflow.
-  double YearsUntilOverflow() const
-  {
+  double YearsUntilOverflow() const {
     const auto duration_hrs = std::chrono::duration_cast<std::chrono::hours>(
         clock_type::time_point::max() - clock_type::now());
     // Convert to years, similar to C++20's std::chrono::years definition
@@ -262,9 +244,9 @@ public:
   /// example "std::chrono::steady_clock".
   std::string ClockName() const { return ClockTypeName<Clock>(); }
 
-private:
+ private:
   /// Time point from which we measure the elapsed time.
-  typename clock_type::time_point t_start_ {};
+  typename clock_type::time_point t_start_{};
 };
 
 extern template class WERKZEUGKISTE_EXPORT

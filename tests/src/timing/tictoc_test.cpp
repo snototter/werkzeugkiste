@@ -1,10 +1,10 @@
+#include <werkzeugkiste/strings/strings.h>
+#include <werkzeugkiste/timing/tictoc.h>
+
 #include <chrono>
 #include <exception>
 #include <string>
 #include <thread>
-
-#include <werkzeugkiste/strings/strings.h>
-#include <werkzeugkiste/timing/tictoc.h>
 
 #include "../test_utils.h"
 
@@ -13,8 +13,7 @@ namespace wks = werkzeugkiste::strings;
 
 // NOLINTBEGIN
 
-TEST(TicTocTest, ElapsedTimes)
-{
+TEST(TicTocTest, ElapsedTimes) {
   wkt::Tic();
   std::this_thread::sleep_for(std::chrono::milliseconds(120));
   double elapsed = wkt::TTocSeconds();
@@ -36,8 +35,7 @@ TEST(TicTocTest, ElapsedTimes)
   EXPECT_TRUE(CheckElapsedTime(elapsed, 50000000, 2000000));
 }
 
-TEST(TicTocTest, TocOutput)
-{
+TEST(TicTocTest, TocOutput) {
   wkt::Tic();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -72,8 +70,7 @@ TEST(TicTocTest, TocOutput)
   EXPECT_TRUE(wks::EndsWith(output, " ns"));
 }
 
-TEST(TicTocTest, TocMuted)
-{
+TEST(TicTocTest, TocMuted) {
   wkt::Tic();
   // By default, we should see some output
   testing::internal::CaptureStdout();
@@ -96,8 +93,7 @@ TEST(TicTocTest, TocMuted)
   EXPECT_TRUE(wks::EndsWith(output, " sec"));
 }
 
-TEST(TicTocTest, TocFormat)
-{
+TEST(TicTocTest, TocFormat) {
   // Default output
   testing::internal::CaptureStdout();
   wkt::Tic();

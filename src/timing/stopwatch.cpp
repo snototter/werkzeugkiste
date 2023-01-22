@@ -1,15 +1,13 @@
-#include <sstream>
-
 #include <werkzeugkiste/timing/stopwatch.h>
 
-namespace werkzeugkiste::timing
-{
+#include <sstream>
+
+namespace werkzeugkiste::timing {
 
 // Explicit template instantiation
 template class StopWatch_<std::chrono::steady_clock>;
 
-std::string SecondsToString(unsigned int seconds)
-{
+std::string SecondsToString(unsigned int seconds) {
   std::ostringstream str;
 
   constexpr unsigned int sec_per_day = 86400;

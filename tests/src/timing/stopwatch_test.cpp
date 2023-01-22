@@ -3,7 +3,7 @@
 #include <thread>
 
 // NOLINTBEGIN
-//TODO select which warnings to silence
+// TODO select which warnings to silence
 
 #include <werkzeugkiste/timing/stopwatch.h>
 
@@ -11,9 +11,7 @@
 
 namespace wkt = werkzeugkiste::timing;
 
-
-TEST(StopWatchTest, Watches)
-{
+TEST(StopWatchTest, Watches) {
   auto w1 = wkt::StopWatch();
   EXPECT_EQ(w1.ClockName(), "std::chrono::steady_clock");
   EXPECT_TRUE(w1.IsSteady());
@@ -24,8 +22,7 @@ TEST(StopWatchTest, Watches)
   EXPECT_FALSE(w2.IsSteady());
 }
 
-TEST(StopWatchTest, Timings)
-{
+TEST(StopWatchTest, Timings) {
   auto w1 = wkt::StopWatch();
 
   // The watch is started upon construction
@@ -49,8 +46,7 @@ TEST(StopWatchTest, Timings)
   EXPECT_TRUE(CheckElapsedTime(elapsed, 40000000, 2000000));
 }
 
-TEST(StopWatchTest, DurationAbbreviation)
-{
+TEST(StopWatchTest, DurationAbbreviation) {
   EXPECT_EQ(wkt::DurationAbbreviation<std::chrono::nanoseconds>(), "ns");
   EXPECT_EQ(wkt::DurationAbbreviation<std::chrono::microseconds>(), "us");
   EXPECT_EQ(wkt::DurationAbbreviation<std::chrono::milliseconds>(), "ms");
@@ -65,8 +61,7 @@ TEST(StopWatchTest, DurationAbbreviation)
 #endif  // C++20
 }
 
-TEST(StopWatchTest, PrecisionTypeName)
-{
+TEST(StopWatchTest, PrecisionTypeName) {
   EXPECT_EQ(wkt::PrecisionTypeName<std::chrono::nanoseconds>(),
             "std::chrono::nanoseconds");
   EXPECT_EQ(wkt::PrecisionTypeName<std::chrono::microseconds>(),
@@ -87,8 +82,7 @@ TEST(StopWatchTest, PrecisionTypeName)
 #endif  // C++20
 }
 
-TEST(StopWatchTest, ClockTypeName)
-{
+TEST(StopWatchTest, ClockTypeName) {
   EXPECT_EQ(wkt::ClockTypeName<std::chrono::system_clock>(),
             "std::chrono::system_clock");
   EXPECT_EQ(wkt::ClockTypeName<std::chrono::steady_clock>(),
@@ -96,13 +90,10 @@ TEST(StopWatchTest, ClockTypeName)
   // High resolution clock should just be an alias to system or steady clock:
   EXPECT_NE(wkt::ClockTypeName<std::chrono::high_resolution_clock>(),
             "std::chrono::high_resolution_clock");
-  EXPECT_TRUE(
-      (wkt::ClockTypeName<std::chrono::high_resolution_clock>().compare(
-           "std::chrono::steady_clock")
-       == 0)
-      || (wkt::ClockTypeName<std::chrono::high_resolution_clock>().compare(
-              "std::chrono::system_clock")
-          == 0));
+  EXPECT_TRUE((wkt::ClockTypeName<std::chrono::high_resolution_clock>().compare(
+                   "std::chrono::steady_clock") == 0) ||
+              (wkt::ClockTypeName<std::chrono::high_resolution_clock>().compare(
+                   "std::chrono::system_clock") == 0));
 
 #if __cplusplus >= 202002L
   EXPECT_EQ(wkt::ClockTypeName<std::chrono::utc_clock>(),
@@ -117,8 +108,7 @@ TEST(StopWatchTest, ClockTypeName)
 #endif  // C++20
 }
 
-TEST(StopWatchTest, CastToTicks)
-{
+TEST(StopWatchTest, CastToTicks) {
   EXPECT_DOUBLE_EQ(wkt::ToSeconds(std::chrono::hours(21)), 75600.0);
   EXPECT_DOUBLE_EQ(wkt::ToSeconds(std::chrono::minutes(59)), 3540.0);
   EXPECT_DOUBLE_EQ(wkt::ToSeconds(std::chrono::seconds(50)), 50.0);
@@ -146,8 +136,7 @@ TEST(StopWatchTest, CastToTicks)
   EXPECT_DOUBLE_EQ(wkt::ToNanoseconds(std::chrono::nanoseconds(951)), 951.0);
 }
 
-TEST(StopWatchTest, StringRepresentation)
-{
+TEST(StopWatchTest, StringRepresentation) {
   EXPECT_EQ(wkt::SecondsToString(0), "0 seconds");
   EXPECT_EQ(wkt::SecondsToString(1), "1 second");
   EXPECT_EQ(wkt::SecondsToString(59), "59 seconds");

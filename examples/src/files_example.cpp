@@ -10,8 +10,7 @@
 #include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/version.h>
 
-int main(int /* argc */, char** /* argv */)
-{
+int main(int /* argc */, char** /* argv */) {
   namespace wkf = werkzeugkiste::files;
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"

@@ -1,3 +1,6 @@
+#include <werkzeugkiste/strings/strings.h>
+#include <werkzeugkiste_macros.h>
+
 #include <algorithm>
 #include <cctype>
 #include <fstream>
@@ -5,19 +8,13 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <werkzeugkiste/strings/strings.h>
-#include <werkzeugkiste_macros.h>
+namespace werkzeugkiste::strings {
 
-namespace werkzeugkiste::strings
-{
-
-namespace slug_utils
-{
+namespace slug_utils {
 // TODO should we use char32_t instead?
 // TODO # -- nr
-const std::unordered_map<std::string, std::string>& Replacements()
-{
-  static const std::unordered_map<std::string, std::string> replacements {
+const std::unordered_map<std::string, std::string>& Replacements() {
+  static const std::unordered_map<std::string, std::string> replacements{
       // TODO expand list:
       // https://unicode-table.com/en/blocks/latin-1-supplement/
 
@@ -48,12 +45,12 @@ const std::unordered_map<std::string, std::string>& Replacements()
       // Latin 1 supplement
       {"´", ""},  // Acute accent
 
-      {"\u00a9", "(c)"},  // Copyright sign
-      {"\u00ae", "(r)"},  // Registered sign
-      {"\u00b1", "pm"},  // Plus-minus sign
-      {"\u2213", "mp"},  // Minus-plus sign
-      {"\u00b0", "deg"},  // Degree sign
-      {"\u00b5", "mu"},  // Mu/micro sign
+      {"\u00a9", "(c)"},   // Copyright sign
+      {"\u00ae", "(r)"},   // Registered sign
+      {"\u00b1", "pm"},    // Plus-minus sign
+      {"\u2213", "mp"},    // Minus-plus sign
+      {"\u00b0", "deg"},   // Degree sign
+      {"\u00b5", "mu"},    // Mu/micro sign
       {"\u00b7", "cdot"},  // Middle dot
 
       {"\u00a3", "pound"},
@@ -64,10 +61,10 @@ const std::unordered_map<std::string, std::string>& Replacements()
       {"\u00d7", "x"},  // times
 
       {"\u00c4", "Ae"},  // Capital A with diaeresis
-      {"\u00c5", "A"},  // Capital A with ring
+      {"\u00c5", "A"},   // Capital A with ring
       {"\u00e4", "ae"},  // Small a with diaeresis
-      {"\u00cb", "E"},  // Capital E with diaeresis
-      {"\u00eb", "e"},  // Small e with diaeresis
+      {"\u00cb", "E"},   // Capital E with diaeresis
+      {"\u00eb", "e"},   // Small e with diaeresis
       {"\u00d6", "Oe"},  // Capital O with diaeresis
       {"\u00f6", "oe"},  // Small o with diaeresis
       {"\u00dc", "Ue"},  // Capital U with diaeresis
@@ -82,55 +79,44 @@ const std::unordered_map<std::string, std::string>& Replacements()
 }
 }  // namespace slug_utils
 
-void ToLower(std::string& s)
-{
+void ToLower(std::string& s) {
   std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
 
-void ToUpper(std::string& s)
-{
+void ToUpper(std::string& s) {
   std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 }
 
-std::string LTrim(std::string_view totrim)
-{
+std::string LTrim(std::string_view totrim) {
   std::string s(totrim);
-  s.erase(
-      s.begin(),
-      std::find_if(
-          s.begin(), s.end(), [](int c) { return std::isspace(c) == 0; }));
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(),
+                                  [](int c) { return std::isspace(c) == 0; }));
   return s;
 }
 
-std::string RTrim(std::string_view totrim)
-{
+std::string RTrim(std::string_view totrim) {
   std::string s(totrim);
-  s.erase(
-      std::find_if(
-          s.rbegin(), s.rend(), [](int c) { return std::isspace(c) == 0; })
-          .base(),
-      s.end());
+  s.erase(std::find_if(s.rbegin(), s.rend(),
+                       [](int c) { return std::isspace(c) == 0; })
+              .base(),
+          s.end());
   return s;
 }
 
-std::string Trim(std::string_view s)
-{
-  return LTrim(RTrim(s));
-}
+std::string Trim(std::string_view s) { return LTrim(RTrim(s)); }
 
-bool IsNumeric(const std::string& s)
-{
+bool IsNumeric(const std::string& s) {
   // TODO replace by `std::stoll`
-  bool is_numeric {false};
+  bool is_numeric{false};
   if (s.length() > 0) {
     // Check long long
-    char* pl_end {};
+    char* pl_end{};
     // NOLINTNEXTLINE(*-magic-numbers)
     int64_t dummyl = strtoll(s.c_str(), &pl_end, 10);
     WERKZEUGKISTE_UNUSED_VAR(dummyl);
 
     // Check double
-    char* pd_end {};
+    char* pd_end{};
     double dummyd = strtod(s.c_str(), &pd_end);
     WERKZEUGKISTE_UNUSED_VAR(dummyd);
 
@@ -139,8 +125,7 @@ bool IsNumeric(const std::string& s)
   return is_numeric;
 }
 
-std::vector<std::string> Split(std::string_view s, char delim)
-{
+std::vector<std::string> Split(std::string_view s, char delim) {
   std::vector<std::string> elems;
   std::istringstream ss(std::string(s), std::ios_base::in);
   std::string item;
@@ -150,11 +135,9 @@ std::vector<std::string> Split(std::string_view s, char delim)
   return elems;
 }
 
-std::string Replace(std::string_view haystack,
-                    std::string_view needle,
-                    std::string_view replacement)
-{
-  std::string result {haystack};
+std::string Replace(std::string_view haystack, std::string_view needle,
+                    std::string_view replacement) {
+  std::string result{haystack};
   if ((haystack.length() == 0) || (needle.length() == 0)) {
     return result;
   }
@@ -168,18 +151,15 @@ std::string Replace(std::string_view haystack,
   return result;
 }
 
-std::string Replace(std::string_view haystack, char needle, char replacement)
-{
+std::string Replace(std::string_view haystack, char needle, char replacement) {
   std::string cp(haystack);
   std::replace(cp.begin(), cp.end(), needle, replacement);
   return cp;
 }
 
 // TODO continue string_view replacements below
-bool GetUrlProtocol(const std::string& url,
-                    std::string& protocol,
-                    std::string& remainder)
-{
+bool GetUrlProtocol(const std::string& url, std::string& protocol,
+                    std::string& remainder) {
   const std::size_t protocol_pos = url.find("://");
   if (protocol_pos == std::string::npos) {
     protocol = "";
@@ -196,8 +176,7 @@ bool GetUrlProtocol(const std::string& url,
 //   extract protocol/schema, userinfo, host, port,
 //   path, query, and fragment of a URL/URI
 
-std::string ObscureUrlAuthentication(const std::string& url)
-{
+std::string ObscureUrlAuthentication(const std::string& url) {
   std::string protocol;
   std::string clipped;
   const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
@@ -214,8 +193,7 @@ std::string ObscureUrlAuthentication(const std::string& url)
   return obscured;
 }
 
-std::string ClipUrl(const std::string& url)
-{
+std::string ClipUrl(const std::string& url) {
   std::string protocol;
   std::string clipped;
   const bool has_protocol = GetUrlProtocol(url, protocol, clipped);
@@ -246,15 +224,13 @@ std::string ClipUrl(const std::string& url)
   }
 }
 
-std::string Remove(std::string_view s, char c)
-{
+std::string Remove(std::string_view s, char c) {
   std::string removed;
   std::remove_copy(s.begin(), s.end(), std::back_inserter(removed), c);
   return removed;
 }
 
-std::string Remove(std::string_view s, std::initializer_list<char> chars)
-{
+std::string Remove(std::string_view s, std::initializer_list<char> chars) {
   std::string copy(s);
   for (const auto c : chars) {
     copy = Remove(copy, c);
@@ -262,8 +238,7 @@ std::string Remove(std::string_view s, std::initializer_list<char> chars)
   return copy;
 }
 
-std::string ReplaceSpecialCharacters(std::string_view s)
-{
+std::string ReplaceSpecialCharacters(std::string_view s) {
   std::string replaced(s);
   for (const auto& replacement : slug_utils::Replacements()) {
     replaced = Replace(replaced, replacement.first, replacement.second);
@@ -271,8 +246,7 @@ std::string ReplaceSpecialCharacters(std::string_view s)
   return replaced;
 }
 
-std::string Slug(std::string_view s, bool strip_dashes)
-{
+std::string Slug(std::string_view s, bool strip_dashes) {
   // TODO a) inefficient
   // TODO b) update documentation
   std::string replaced = Lower(ReplaceSpecialCharacters(Trim(s)));
@@ -306,11 +280,8 @@ std::string Slug(std::string_view s, bool strip_dashes)
   return out.str();
 }
 
-std::string Shorten(std::string_view s,
-                    std::size_t desired_length,
-                    int ellipsis_position,
-                    std::string_view ellipsis)
-{
+std::string Shorten(std::string_view s, std::size_t desired_length,
+                    int ellipsis_position, std::string_view ellipsis) {
   if (s.empty() || (desired_length >= s.length())) {
     return std::string(s);
   }
@@ -346,8 +317,7 @@ std::string Shorten(std::string_view s,
   return shortened.str();
 }
 
-std::string Indent(std::string_view s, std::size_t n, char character)
-{
+std::string Indent(std::string_view s, std::size_t n, char character) {
   std::string out;
   out.reserve(s.length() + n);
   for (std::size_t idx = 0; idx < n; ++idx) {

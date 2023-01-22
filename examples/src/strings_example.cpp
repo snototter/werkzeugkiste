@@ -9,8 +9,7 @@
 
 // NOLINTBEGIN(*-magic-numbers)
 
-int main(int /* argc */, char** /* argv */)
-{
+int main(int /* argc */, char** /* argv */) {
   namespace wks = werkzeugkiste::strings;
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
@@ -37,18 +36,11 @@ int main(int /* argc */, char** /* argv */)
             << wks::Shorten("0123456789", 5, 0, "*!*") << std::endl
             << std::endl;
 
-  std::vector<std::string> examples {"This",
-                                     "is",
-                                     "a",
-                                     "LiSt",
-                                     "oF",
-                                     "\"ExAmPlE\"",
-                                     " Strings ",
-                                     "with_some_",
-                                     "special characters",
-                                     ", e.g.",
-                                     "-_1,2;3:'#!",
-                                     "öÖ#Üß\\-_\t\\"};
+  std::vector<std::string> examples{
+      "This",      "is",          "a",
+      "LiSt",      "oF",          "\"ExAmPlE\"",
+      " Strings ", "with_some_",  "special characters",
+      ", e.g.",    "-_1,2;3:'#!", "öÖ#Üß\\-_\t\\"};
   for (const auto& s : examples) {
     std::cout << "Input: " << s << "\n"
               << "+ Upper: " << wks::Upper(s) << "\n+ Lower: " << wks::Lower(s)
@@ -67,7 +59,7 @@ int main(int /* argc */, char** /* argv */)
   std::string slug = wks::Slug(concat);
   constexpr std::size_t desired_length = 42;
   using namespace std::literals;
-  std::string_view ellipsis {"\u2026"sv};
+  std::string_view ellipsis{"\u2026"sv};
   std::cout << "Concatenation: " << concat << "\nSlug:          " << slug
             << "\nShortened:     " << wks::Shorten(slug, desired_length)
             << "\n               " << wks::Shorten(slug, desired_length, 0)

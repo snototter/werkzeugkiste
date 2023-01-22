@@ -5,7 +5,7 @@
 #include <vector>
 
 // NOLINTBEGIN
-//TODO select which warnings to silence
+// TODO select which warnings to silence
 
 #include <werkzeugkiste/geometry/primitives.h>
 
@@ -13,9 +13,7 @@
 
 namespace wkg = werkzeugkiste::geometry;
 
-
-TEST(GeometricPrimitives, Circle)
-{
+TEST(GeometricPrimitives, Circle) {
   // Collinear points
   wkg::Circle c1({0, 0}, {0, 0}, {10, 20});
   EXPECT_FALSE(c1.IsValid());
@@ -35,58 +33,57 @@ TEST(GeometricPrimitives, Circle)
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), -1);
 
   // c2 contained in c1:
-  c1 = wkg::Circle {{0, 0}, 20};
+  c1 = wkg::Circle{{0, 0}, 20};
   EXPECT_TRUE(c1.IsValid());
   EXPECT_EQ(c1.IntersectionCircleCircle(c2), 0);
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), 0);
 
   // Not touching:
-  c1 = wkg::Circle {{-6, -10}, 2};
+  c1 = wkg::Circle{{-6, -10}, 2};
   EXPECT_EQ(c1.IntersectionCircleCircle(c2), 0);
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), 0);
 
   // Touching:
-  c1 = wkg::Circle {{0, 0}, 2};
-  c2 = wkg::Circle {{3, 0}, 1};
+  c1 = wkg::Circle{{0, 0}, 2};
+  c2 = wkg::Circle{{3, 0}, 1};
   EXPECT_EQ(c1.IntersectionCircleCircle(c2), 1);
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), 1);
 
   // Intersecting
-  c2 = wkg::Circle {{0, 3}, 1.5};
+  c2 = wkg::Circle{{0, 3}, 1.5};
   EXPECT_EQ(c1.IntersectionCircleCircle(c2), 2);
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), 2);
 
   // Line intersection:
-  wkg::Circle circle {{2.5, 0.5}, 1.0};
-  wkg::Line2d l1 {{1.0, 1.5}, {2.0, 1.7}};
+  wkg::Circle circle{{2.5, 0.5}, 1.0};
+  wkg::Line2d l1{{1.0, 1.5}, {2.0, 1.7}};
   EXPECT_EQ(circle.IntersectionCircleLine(l1), 0);
   EXPECT_EQ(l1.IntersectionLineCircle(circle), 0);
 
   // Tangent to the circle
-  wkg::Line2d l2 {{1.0, 1.5}, {2.0, 1.5}};
+  wkg::Line2d l2{{1.0, 1.5}, {2.0, 1.5}};
   EXPECT_EQ(circle.IntersectionCircleLine(l2), 1);
   EXPECT_EQ(l2.IntersectionLineCircle(circle), 1);
 
   // Finally, two intersection points
-  wkg::Line2d l3 {{1.0, 1.3}, {7.0, 0.5}};
+  wkg::Line2d l3{{1.0, 1.3}, {7.0, 0.5}};
   EXPECT_EQ(circle.IntersectionCircleLine(l3), 2);
   EXPECT_EQ(l3.IntersectionLineCircle(circle), 2);
 
   // TODO test line segment intersection
 }
 
-TEST(GeometricPrimitives, Line2d)
-{
-  wkg::Line2d line1 {{0.0, 0.0}, {3.0, 0.0}};
-  wkg::Line2d line2 {{1.0, -0.6}, {-17.0, -0.6}};
-  wkg::Line2d line3 {{-100.0, -0.6}, {-170.0, -0.6}};
+TEST(GeometricPrimitives, Line2d) {
+  wkg::Line2d line1{{0.0, 0.0}, {3.0, 0.0}};
+  wkg::Line2d line2{{1.0, -0.6}, {-17.0, -0.6}};
+  wkg::Line2d line3{{-100.0, -0.6}, {-170.0, -0.6}};
 
   EXPECT_FALSE(line1.IsCollinear(line2));
   EXPECT_FALSE(line2.IsCollinear(line1));
   EXPECT_TRUE(line2.IsCollinear(line3));
   EXPECT_TRUE(line3.IsCollinear(line2));
 
-  wkg::Vec2d expected {3.0, -0.6};
+  wkg::Vec2d expected{3.0, -0.6};
   EXPECT_EQ(line2.ClosestPointOnLine(line1.To()), expected);
   EXPECT_EQ(line2.ClosestPointOnSegment(line1.To()), line2.From());
 
@@ -143,8 +140,7 @@ TEST(GeometricPrimitives, Line2d)
   // TODO extend test suite
 }
 
-TEST(GeometricPrimitives, Line3d)
-{
+TEST(GeometricPrimitives, Line3d) {
   wkg::Line3d line1({0.0, 0.0, 0.0}, {3.0, 0.0, 0.0});
   EXPECT_TRUE(line1.IsValid());
 
@@ -224,19 +220,18 @@ TEST(GeometricPrimitives, Line3d)
   // TODO extend test suite
 }
 
-TEST(GeometricPrimitives, Plane)
-{
+TEST(GeometricPrimitives, Plane) {
   wkg::Plane plane_inv({-7, 3, 0}, {3, 3, 10}, {5, 3, 12});
   EXPECT_FALSE(plane_inv.IsValid());
 
   wkg::Plane plane({-1, -2, 2}, {-1, 2, 2}, {1, 0, 1});
   EXPECT_TRUE(plane.IsValid());
 
-  wkg::Vec3d pt1 {0, 15, 2};
+  wkg::Vec3d pt1{0, 15, 2};
   // ~3.14 away from the plane's z-intercept
-  wkg::Vec3d pt2 {1.40425069, 0.0, 4.30850138};
+  wkg::Vec3d pt2{1.40425069, 0.0, 4.30850138};
   // Point on the plane
-  wkg::Vec3d pt3 {3, 0, 0};
+  wkg::Vec3d pt3{3, 0, 0};
 
   EXPECT_DOUBLE_EQ(plane.DistancePointToPlane(pt1), plane.Normal().X());
   EXPECT_EQ(static_cast<int>(100 * plane.DistancePointToPlane(pt2)), -314);

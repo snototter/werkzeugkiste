@@ -5,7 +5,7 @@
 #include <vector>
 
 // NOLINTBEGIN
-//TODO select which warnings to silence
+// TODO select which warnings to silence
 
 #include <werkzeugkiste/geometry/camera.h>
 #include <werkzeugkiste/geometry/projection.h>
@@ -14,17 +14,15 @@
 
 namespace wkg = werkzeugkiste::geometry;
 
-
-TEST(ProjectionTest, Transformations)
-{
-  wkg::Vec2d v1 {17, 42};
-  wkg::Vec2d v2 {-3, 0.5};
+TEST(ProjectionTest, Transformations) {
+  wkg::Vec2d v1{17, 42};
+  wkg::Vec2d v2{-3, 0.5};
   wkg::Matrix<double, 4, 2> M;
   M << 1, 2, 3, 4, 5, 6, 7, 8;
 
-  const wkg::Vec4d exp1 {
-      (17 + 84), (3 * 17 + 4 * 42), (5 * 17 + 6 * 42), (7 * 17 + 8 * 42)};
-  const wkg::Vec4d exp2 {(-3 + 1), (-3 * 3 + 2), (-5 * 3 + 3), (-7 * 3 + 4)};
+  const wkg::Vec4d exp1{(17 + 84), (3 * 17 + 4 * 42), (5 * 17 + 6 * 42),
+                        (7 * 17 + 8 * 42)};
+  const wkg::Vec4d exp2{(-3 + 1), (-3 * 3 + 2), (-5 * 3 + 3), (-7 * 3 + 4)};
 
   wkg::Vec4d a, b;
   // Test the convenience util which directly outputs the tuple  wkg::Vec4d c,
@@ -43,21 +41,18 @@ TEST(ProjectionTest, Transformations)
   wkg::Matrix<double, 4, 3> N;
   N << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
   std::tie(a, b) = wkg::TransformToVecs(N, v1, v2);
-  const wkg::Vec4d exp3 {(17 + 84 + 3),
-                         (4 * 17 + 5 * 42 + 6),
-                         (7 * 17 + 8 * 42 + 9),
-                         (10 * 17 + 11 * 42 + 12)};
-  const wkg::Vec4d exp4 {
-      (-3 + 1 + 3), (-3 * 4 + 2.5 + 6), (-7 * 3 + 4 + 9), (-10 * 3 + 5.5 + 12)};
+  const wkg::Vec4d exp3{(17 + 84 + 3), (4 * 17 + 5 * 42 + 6),
+                        (7 * 17 + 8 * 42 + 9), (10 * 17 + 11 * 42 + 12)};
+  const wkg::Vec4d exp4{(-3 + 1 + 3), (-3 * 4 + 2.5 + 6), (-7 * 3 + 4 + 9),
+                        (-10 * 3 + 5.5 + 12)};
   EXPECT_EQ(a, exp3);
   EXPECT_EQ(b, exp4);
 }  // NOLINT
 
-TEST(ProjectionTest, Projections)
-{
-  wkg::Vec2d v1 {17, 42};
-  wkg::Vec2d v2 {-3, 0.5};
-  wkg::Vec2d v3 {1, -50};
+TEST(ProjectionTest, Projections) {
+  wkg::Vec2d v1{17, 42};
+  wkg::Vec2d v2{-3, 0.5};
+  wkg::Vec2d v3{1, -50};
 
   wkg::Matrix<double, 3, 3> P;
   P << 1, 2, 3, 4, 5, 6, 7, 8, 9;
@@ -66,15 +61,15 @@ TEST(ProjectionTest, Projections)
   wkg::Vec2d p1, p2, p3;
   std::tie(p1, p2) = wkg::ProjectToVecs(P, v1, v2);
 
-  wkg::Vec2d exp1 {0.22413793, 0.61206897};
-  wkg::Vec2d exp2 {-0.125, 0.4375};
+  wkg::Vec2d exp1{0.22413793, 0.61206897};
+  wkg::Vec2d exp2{-0.125, 0.4375};
   EXPECT_TRUE(std::abs(p1[0] - exp1[0]) < 1e-6);
   EXPECT_TRUE(std::abs(p1[1] - exp1[1]) < 1e-6);
   EXPECT_EQ(p2, exp2);
 
   // Test projection with only a single vector
   std::tie(p3) = wkg::ProjectToVecs(P, v3);
-  wkg::Vec2d exp3 {0.25, 0.625};
+  wkg::Vec2d exp3{0.25, 0.625};
   EXPECT_EQ(p3, exp3);
 
   // Test the same, but this time already provide homogeneous coordinates
@@ -89,17 +84,16 @@ TEST(ProjectionTest, Projections)
   EXPECT_EQ(p1, exp3);
 }  // NOLINT
 
-TEST(ProjectionTest, PinholeCamera)
-{
+TEST(ProjectionTest, PinholeCamera) {
   // Within field of view:
-  EXPECT_TRUE(wkg::IsPointInsideImage(wkg::Vec2d {0, 0}, {3, 7}));
-  EXPECT_FALSE(wkg::IsPointInsideImage(wkg::Vec2d {-1, 0}, {3, 7}));
-  EXPECT_TRUE(wkg::IsPointInsideImage(wkg::Vec2d {2.9, 0}, {3, 7}));
-  EXPECT_FALSE(wkg::IsPointInsideImage(wkg::Vec2d {3, 0}, {3, 7}));
+  EXPECT_TRUE(wkg::IsPointInsideImage(wkg::Vec2d{0, 0}, {3, 7}));
+  EXPECT_FALSE(wkg::IsPointInsideImage(wkg::Vec2d{-1, 0}, {3, 7}));
+  EXPECT_TRUE(wkg::IsPointInsideImage(wkg::Vec2d{2.9, 0}, {3, 7}));
+  EXPECT_FALSE(wkg::IsPointInsideImage(wkg::Vec2d{3, 0}, {3, 7}));
 
   //  FIXME test camera-related utils
   wkg::Mat3x3d K, R;
-  wkg::Vec3d t {0.5, 0.3, 0.1};
+  wkg::Vec3d t{0.5, 0.3, 0.1};
 
   K << 400, 0, 300, 0, 400, 300, 0, 0, 1;
   R << 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -110,7 +104,7 @@ TEST(ProjectionTest, PinholeCamera)
   //  wkg::Mat3x4d cam_prj = wkg::ProjectionMatrixFromKRt(K, R, t);
 
   wkg::Plane img_plane = wkg::ImagePlaneInWorldCoordinateSystem(R, {0, 0, 0});
-  wkg::Vec3d zaxis {0, 0, 1};
+  wkg::Vec3d zaxis{0, 0, 1};
   EXPECT_TRUE(img_plane.Normal() == zaxis);
   EXPECT_DOUBLE_EQ(img_plane.Offset(), -1.0);
 

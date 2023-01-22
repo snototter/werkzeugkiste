@@ -1,17 +1,15 @@
-#include <cmath>
-
 #include <werkzeugkiste/geometry/primitives.h>
 #include <werkzeugkiste/geometry/utils.h>
 
-namespace werkzeugkiste::geometry
-{
+#include <cmath>
+
+namespace werkzeugkiste::geometry {
 
 //----------------------------------------------------
 // Circle
-template<typename T>
+template <typename T>
 Circle_<T>::Circle_(const vec_type& p, const vec_type& q, const vec_type& r)
-    : Circle_<T>()
-{
+    : Circle_<T>() {
   // Check if the points are collinear
   const Line2d_<T> segment1(p, q);
   const Line2d_<T> segment2(q, r);
@@ -21,13 +19,13 @@ Circle_<T>::Circle_(const vec_type& p, const vec_type& q, const vec_type& r)
     // First, we need the bisecting lines
     const vec_type mid1 = segment1.MidPoint();
     const vec_type dir1 = segment1.Direction();
-    const vec_type orth1 {dir1.val[1], -dir1.val[0]};
-    const Line2d_<T> bisect1 {mid1, mid1 + orth1};
+    const vec_type orth1{dir1.val[1], -dir1.val[0]};
+    const Line2d_<T> bisect1{mid1, mid1 + orth1};
     // ... same for the second one
     const vec_type mid2 = segment2.MidPoint();
     const vec_type dir2 = segment2.Direction();
-    const vec_type orth2 {dir2.Y(), -dir2.X()};
-    const Line2d_<T> bisect2 {mid2, mid2 + orth2};
+    const vec_type orth2{dir2.Y(), -dir2.X()};
+    const Line2d_<T> bisect2{mid2, mid2 + orth2};
     // Intersect them
     const bool exists = bisect1.IntersectionLineLine(bisect2, &center_);
     if (exists) {
@@ -39,12 +37,11 @@ Circle_<T>::Circle_(const vec_type& p, const vec_type& q, const vec_type& r)
   }
 }
 
-template<typename T>
-bool Circle_<T>::IsPointInCircle(const vec_type& pt, bool* is_on_circle) const
-{
+template <typename T>
+bool Circle_<T>::IsPointInCircle(const vec_type& pt, bool* is_on_circle) const {
   const double distance = pt.DistanceEuclidean(center_);
 
-  bool in_circle {false};
+  bool in_circle{false};
 
   if (IsEpsEqual(distance, radius_)) {
     if (is_on_circle != nullptr) {
@@ -62,12 +59,10 @@ bool Circle_<T>::IsPointInCircle(const vec_type& pt, bool* is_on_circle) const
   return in_circle;
 }
 
-template<typename T>
-int Circle_<T>::PointsOfTangency(const vec_type& pt,
-                                 vec_type* pot1,
-                                 vec_type* pot2) const
-{
-  bool is_on_circle {false};
+template <typename T>
+int Circle_<T>::PointsOfTangency(const vec_type& pt, vec_type* pot1,
+                                 vec_type* pot2) const {
+  bool is_on_circle{false};
   if (IsPointInCircle(pt, &is_on_circle)) {
     return 0;
   }
@@ -136,11 +131,10 @@ int Circle_<T>::PointsOfTangency(const vec_type& pt,
   return 2;
 }
 
-template<typename T>
+template <typename T>
 int Circle_<T>::DirectCommonTangents(const Circle_<T>& other,
                                      Line2d_<T>* tangent1,
-                                     Line2d_<T>* tangent2) const
-{
+                                     Line2d_<T>* tangent2) const {
   // Tangents (transverse and/or direct) depending on distance between
   // the circles:
   // * r1 + r2 < center_dist:  4 tangents (2 direct, 2 transverse)
@@ -167,10 +161,10 @@ int Circle_<T>::DirectCommonTangents(const Circle_<T>& other,
       const vec_type unit_dir = center_line.UnitDirection();
       const vec_type intersection = center_ + (radius_ * unit_dir);
       const vec_type ref1 =
-          intersection + (radius_ * vec_type {unit_dir.Y(), -unit_dir.X()});
+          intersection + (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
       const vec_type ref2 =
-          intersection - (radius_ * vec_type {unit_dir.Y(), -unit_dir.X()});
-      *tangent1 = Line2d_<T> {ref1, ref2};
+          intersection - (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
+      *tangent1 = Line2d_<T>{ref1, ref2};
     }
     return 1;
   }
@@ -180,7 +174,7 @@ int Circle_<T>::DirectCommonTangents(const Circle_<T>& other,
     if (IsEpsEqual(radius_, other.radius_)) {
       // Tangents are parallel to the center-connecting line
       const vec_type dir = radius_ * center_line.UnitDirection();
-      const vec_type orth_dir {dir.Y(), -dir.X()};
+      const vec_type orth_dir{dir.Y(), -dir.X()};
 
       // Intersection points are perpendicular to the center line:
       const vec_type t11 = center_ + orth_dir;
@@ -189,17 +183,18 @@ int Circle_<T>::DirectCommonTangents(const Circle_<T>& other,
       const vec_type t22 = other.center_ - orth_dir;
 
       if (tangent1 != nullptr) {
-        *tangent1 = Line2d_<T> {t11, t21};
+        *tangent1 = Line2d_<T>{t11, t21};
       }
       if (tangent2 != nullptr) {
-        *tangent2 = Line2d_<T> {t12, t22};
+        *tangent2 = Line2d_<T>{t12, t22};
       }
     } else {
       // Similar triangles:
       // (distance c1 to intersection) / (distance c2 to intersection) =
       //   radius1 / radius2
-      const double distance_intersection = center_distance
-          + (center_distance * other.radius_) / (radius_ - other.radius_);
+      const double distance_intersection =
+          center_distance +
+          (center_distance * other.radius_) / (radius_ - other.radius_);
       const vec_type intersection =
           center_ + (distance_intersection * center_line.UnitDirection());
 
@@ -212,21 +207,20 @@ int Circle_<T>::DirectCommonTangents(const Circle_<T>& other,
       other.PointsOfTangency(intersection, &t21, &t22);
 
       if (tangent1 != nullptr) {
-        *tangent1 = Line2d_<T> {t11, t21};
+        *tangent1 = Line2d_<T>{t11, t21};
       }
       if (tangent2 != nullptr) {
-        *tangent2 = Line2d_<T> {t12, t22};
+        *tangent2 = Line2d_<T>{t12, t22};
       }
     }
   }
   return 2;
 }
 
-template<typename T>
+template <typename T>
 int Circle_<T>::TransverseCommonTangents(const Circle_<T>& other,
                                          Line2d_<T>* tangent1,
-                                         Line2d_<T>* tangent2) const
-{
+                                         Line2d_<T>* tangent2) const {
   const double distance = center_.DistanceEuclidean(other.center_);
   const double sum_radii = radius_ + other.radius_;
 
@@ -244,12 +238,12 @@ int Circle_<T>::TransverseCommonTangents(const Circle_<T>& other,
 
       // Choose any reference point perpendicular to the center line (to create
       // the tangent line):
-      const vec_type ref1 = intersection_point
-          + (radius_ * vec_type {unit_dir.Y(), -unit_dir.X()});
-      const vec_type ref2 = intersection_point
-          - (radius_ * vec_type {unit_dir.Y(), -unit_dir.X()});
+      const vec_type ref1 = intersection_point +
+                            (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
+      const vec_type ref2 = intersection_point -
+                            (radius_ * vec_type{unit_dir.Y(), -unit_dir.X()});
 
-      *tangent1 = Line2d_<T> {ref1, ref2};
+      *tangent1 = Line2d_<T>{ref1, ref2};
     }
     return 1;
   }
@@ -291,24 +285,23 @@ int Circle_<T>::TransverseCommonTangents(const Circle_<T>& other,
     const vec_type t11 = intersection + (tangent_length1 * dir);
     const vec_type t12 = intersection - (tangent_length2 * dir);
     if (tangent1) {
-      *tangent1 = Line2d_<T> {t11, t12};
+      *tangent1 = Line2d_<T>{t11, t12};
     }
 
     dir = hypo_dir.RotateRadians(-alpha);
     const vec_type t21 = intersection + (tangent_length1 * dir);
     const vec_type t22 = intersection - (tangent_length2 * dir);
     if (tangent2) {
-      *tangent2 = Line2d_<T> {t21, t22};
+      *tangent2 = Line2d_<T>{t21, t22};
     }
   }
   return 2;
 }
 
-template<typename T>
+template <typename T>
 int Circle_<T>::IntersectionCircleCircle(const Circle_<T>& other,
                                          vec_type* intersection1,
-                                         vec_type* intersection2) const
-{
+                                         vec_type* intersection2) const {
   const double distance = center_.DistanceEuclidean(other.center_);
 
   // Are the circles the same?
@@ -331,24 +324,23 @@ int Circle_<T>::IntersectionCircleCircle(const Circle_<T>& other,
   const double r2_sqr = other.radius_ * other.radius_;
   const double r1smr2s = r1_sqr - r2_sqr;
   const double a = r1smr2s / (2.0 * dist_sqr);
-  const double c =
-      std::sqrt(2.0 * (r1_sqr + r2_sqr) / dist_sqr
-                - (r1smr2s * r1smr2s) / (dist_sqr * dist_sqr) - 1.0);
+  const double c = std::sqrt(2.0 * (r1_sqr + r2_sqr) / dist_sqr -
+                             (r1smr2s * r1smr2s) / (dist_sqr * dist_sqr) - 1.0);
 
-  const double fx = (center_.X() + other.center_.X()) / 2.0
-      + a * (other.center_.X() - center_.X());
+  const double fx = (center_.X() + other.center_.X()) / 2.0 +
+                    a * (other.center_.X() - center_.X());
   const double gx = c * (other.center_.Y() - center_.Y()) / 2.0;
   const double ix1 = fx + gx;
   const double ix2 = fx - gx;
 
-  const double fy = (center_.Y() + other.center_.Y()) / 2.0
-      + a * (other.center_.Y() - center_.Y());
+  const double fy = (center_.Y() + other.center_.Y()) / 2.0 +
+                    a * (other.center_.Y() - center_.Y());
   const double gy = c * (center_.X() - other.center_.X()) / 2.0;
   const double iy1 = fy + gy;
   const double iy2 = fy - gy;
 
   if (intersection1 != nullptr) {
-    *intersection1 = vec_type {ix1, iy1};
+    *intersection1 = vec_type{ix1, iy1};
   }
 
   if (IsEpsZero(gx) && IsEpsZero(gy)) {
@@ -356,26 +348,24 @@ int Circle_<T>::IntersectionCircleCircle(const Circle_<T>& other,
   }
 
   if (intersection2 != nullptr) {
-    *intersection2 = vec_type {ix2, iy2};
+    *intersection2 = vec_type{ix2, iy2};
   }
   return 2;
 }
 
-template<typename T>
+template <typename T>
 int Circle_<T>::IntersectionCircleLine(const Line2d_<T>& line,
                                        vec_type* intersection1,
-                                       vec_type* intersection2) const
-{
+                                       vec_type* intersection2) const {
   return line.IntersectionLineCircle(*this, intersection1, intersection2);
 }
 
-template<typename T>
+template <typename T>
 int Circle_<T>::IntersectionCircleLineSegment(const Line2d_<T>& segment,
                                               vec_type* intersection1,
-                                              vec_type* intersection2) const
-{
-  return segment.IntersectionLineSegmentCircle(
-      *this, intersection1, intersection2);
+                                              vec_type* intersection2) const {
+  return segment.IntersectionLineSegmentCircle(*this, intersection1,
+                                               intersection2);
 }
 
 // Explicit instantiation:
@@ -384,11 +374,10 @@ template class Circle_<double>;
 //----------------------------------------------------
 // Line2d
 
-template<typename T>
-Line2d_<T> Line2d_<T>::LeftToRight() const
-{
+template <typename T>
+Line2d_<T> Line2d_<T>::LeftToRight() const {
   if (!IsValid()) {
-    return Line2d_<T> {};
+    return Line2d_<T>{};
   }
 
   // NOLINTBEGIN(llvm-else-after-return)
@@ -396,26 +385,25 @@ Line2d_<T> Line2d_<T>::LeftToRight() const
   if (IsEpsEqual(pt_from_.X(), pt_to_.X())) {
     // A vertical line will be sorted top-to-bottom:
     if (pt_from_.Y() < pt_to_.Y()) {
-      return Line2d_<T> {pt_from_, pt_to_};
+      return Line2d_<T>{pt_from_, pt_to_};
     } else {
-      return Line2d_<T> {pt_to_, pt_from_};
+      return Line2d_<T>{pt_to_, pt_from_};
     }
   } else {
     // A horizontal line will be sorted left-to-right:
     if (pt_from_.X() < pt_to_.X()) {
-      return Line2d_<T> {pt_from_, pt_to_};
+      return Line2d_<T>{pt_from_, pt_to_};
     } else {
-      return Line2d_<T> {pt_to_, pt_from_};
+      return Line2d_<T>{pt_to_, pt_from_};
     }
   }
 
   // NOLINTEND(llvm-else-after-return)
 }
 
-template<typename T>
+template <typename T>
 typename Line2d_<T>::vec_type Line2d_<T>::ClosestPointOnLine(
-    const vec_type& point) const
-{
+    const vec_type& point) const {
   // Vector from line start to point:
   const vec_type v = pt_from_.DirectionVector(point);
   // Project onto line and get closest point on line:
@@ -424,10 +412,9 @@ typename Line2d_<T>::vec_type Line2d_<T>::ClosestPointOnLine(
   return pt_from_ + lambda * unit_dir;
 }
 
-template<typename T>
+template <typename T>
 typename Line2d_<T>::vec_type Line2d_<T>::ClosestPointOnSegment(
-    const vec_type& point) const
-{
+    const vec_type& point) const {
   // Vector from segment start to point:
   const vec_type v = pt_from_.DirectionVector(point);
   // Project v onto segment:
@@ -439,9 +426,8 @@ typename Line2d_<T>::vec_type Line2d_<T>::ClosestPointOnSegment(
   return pt_from_ + lambda * unit_direction;
 }
 
-template<typename T>
-bool Line2d_<T>::IsCollinear(const Line2d_& other) const
-{
+template <typename T>
+bool Line2d_<T>::IsCollinear(const Line2d_& other) const {
   // Line 1 goes from p to p + r
   const vec_type p = pt_from_;
   const vec_type r = Direction();
@@ -449,17 +435,16 @@ bool Line2d_<T>::IsCollinear(const Line2d_& other) const
   const vec_type q = other.pt_from_;
   const vec_type s = other.Direction();
 
-  const T rxs = Determinant(r, s);
-  const T qmpxr = Determinant((q - p), r);
+  const T rxs = r.Determinant(s);
+  const T qmpxr = (q - p).Determinant(r);
 
   return (IsEpsZero(rxs) && IsEpsZero(qmpxr));
 }
 
-template<typename T>
+template <typename T>
 bool Line2d_<T>::IsPointLeftOfLine(const vec_type& point,
-                                   bool* is_on_line) const
-{
-  const T det = Determinant(Direction(), point - pt_to_);
+                                   bool* is_on_line) const {
+  const T det = Direction().Determinant(point - pt_to_);
 
   // If the "2d cross product" (i.e. determinant) is 0, the points are
   // collinear, and thus, would be on the line.
@@ -476,10 +461,9 @@ bool Line2d_<T>::IsPointLeftOfLine(const vec_type& point,
   return Sign(det) > 0;
 }
 
-template<typename T>
+template <typename T>
 bool Line2d_<T>::IntersectionLineLine(const Line2d_& other,
-                                      vec_type* intersection_point) const
-{
+                                      vec_type* intersection_point) const {
   const vec3_type ip = HomogeneousForm().Cross(other.HomogeneousForm());
   if (IsEpsZero(ip[2])) {
     // Intersection point is at infinity
@@ -493,10 +477,9 @@ bool Line2d_<T>::IntersectionLineLine(const Line2d_& other,
   return true;
 }
 
-template<typename T>
-bool Line2d_<T>::IntersectionLineLineSegment(const Line2d_& segment,
-                                             vec_type* intersection_point) const
-{
+template <typename T>
+bool Line2d_<T>::IntersectionLineLineSegment(
+    const Line2d_& segment, vec_type* intersection_point) const {
   // Line 1 passes through p and (p + r)
   const vec_type p = pt_from_;
   const vec_type r = Direction();
@@ -505,8 +488,8 @@ bool Line2d_<T>::IntersectionLineLineSegment(const Line2d_& segment,
   const vec_type q = segment.pt_from_;
   const vec_type s = segment.Direction();
 
-  const T rxs = Determinant(r, s);
-  const T qmpxr = Determinant((q - p), r);
+  const T rxs = r.Determinant(s);
+  const T qmpxr = (q - p).Determinant(r);
 
   if (IsEpsZero(rxs) && IsEpsZero(qmpxr)) {
     // Line and segment are collinear, pick any point on the line.
@@ -533,10 +516,9 @@ bool Line2d_<T>::IntersectionLineLineSegment(const Line2d_& segment,
   return false;
 }
 
-template<typename T>
+template <typename T>
 bool Line2d_<T>::IntersectionLineSegmentLineSegment(
-    const Line2d_& segment, vec_type* intersection_point) const
-{
+    const Line2d_& segment, vec_type* intersection_point) const {
   // Based on https://stackoverflow.com/a/565282/400948
   // Line 1 goes from p to p + r
   const vec_type p = pt_from_;
@@ -545,8 +527,8 @@ bool Line2d_<T>::IntersectionLineSegmentLineSegment(
   const vec_type q = segment.pt_from_;
   const vec_type s = segment.Direction();
 
-  const T rxs = Determinant(r, s);
-  const T qmpxr = Determinant((q - p), r);
+  const T rxs = r.Determinant(s);
+  const T qmpxr = (q - p).Determinant(r);
 
   if (IsEpsZero(rxs) && IsEpsZero(qmpxr)) {
     // Segments are collinear. They intersect if there is any overlap.
@@ -579,8 +561,7 @@ bool Line2d_<T>::IntersectionLineSegmentLineSegment(
 
   // Otherwise, the segments meet if u in [0,1] and t in [0,1].
   const double u = static_cast<double>(qmpxr) / static_cast<double>(rxs);
-  const double t =
-      Determinant((q - p), s) / static_cast<double>(Determinant(r, s));
+  const double t = (q - p).Determinant(s) / static_cast<double>(rxs);
 
   if ((u >= 0.0) && (u <= 1.0) && (t >= 0.0) && (t <= 1.0)) {
     if (intersection_point != nullptr) {
@@ -592,11 +573,10 @@ bool Line2d_<T>::IntersectionLineSegmentLineSegment(
   return false;
 }
 
-template<typename T>
+template <typename T>
 int Line2d_<T>::IntersectionLineCircle(const Circle_<T>& circle,
                                        vec_type* intersection1,
-                                       vec_type* intersection2) const
-{
+                                       vec_type* intersection2) const {
   // Interesting further read on collision detection via projections:
   // https://stackoverflow.com/a/1084899/400948
   // This implementation is based on:
@@ -618,34 +598,36 @@ int Line2d_<T>::IntersectionLineCircle(const Circle_<T>& circle,
   const double discriminant_sqrt = std::sqrt(discriminant);
   const double sgn = (dy < 0.0) ? -1.0 : 1.0;
 
-  int num_poi {0};
+  int num_poi{0};
 
   if (IsEpsZero(discriminant)) {
     // discriminant == 0: line is a tangent
     if (intersection1 != nullptr) {
-      intersection1->SetX(((D * dy) + (sgn * dx * discriminant_sqrt)) / dr_sqr
-                          + circle.CenterX());
-      intersection1->SetY(((-D * dx) + (std::fabs(dy) * discriminant_sqrt))
-                              / dr_sqr
-                          + circle.CenterY());
+      intersection1->SetX(((D * dy) + (sgn * dx * discriminant_sqrt)) / dr_sqr +
+                          circle.CenterX());
+      intersection1->SetY(((-D * dx) + (std::fabs(dy) * discriminant_sqrt)) /
+                              dr_sqr +
+                          circle.CenterY());
     }
     num_poi = 1;
   } else {
     if (Sign(discriminant) > 0) {
       // 2 intersection points
       if (intersection1 != nullptr) {
-        intersection1->SetX(((D * dy) + (sgn * dx * discriminant_sqrt)) / dr_sqr
-                            + circle.CenterX());
-        intersection1->SetY(((-D * dx) + (std::fabs(dy) * discriminant_sqrt))
-                                / dr_sqr
-                            + circle.CenterY());
+        intersection1->SetX(((D * dy) + (sgn * dx * discriminant_sqrt)) /
+                                dr_sqr +
+                            circle.CenterX());
+        intersection1->SetY(((-D * dx) + (std::fabs(dy) * discriminant_sqrt)) /
+                                dr_sqr +
+                            circle.CenterY());
       }
       if (intersection2 != nullptr) {
-        intersection2->SetX(((D * dy) - (sgn * dx * discriminant_sqrt)) / dr_sqr
-                            + circle.CenterX());
-        intersection2->SetY(((-D * dx) - (std::fabs(dy) * discriminant_sqrt))
-                                / dr_sqr
-                            + circle.CenterY());
+        intersection2->SetX(((D * dy) - (sgn * dx * discriminant_sqrt)) /
+                                dr_sqr +
+                            circle.CenterX());
+        intersection2->SetY(((-D * dx) - (std::fabs(dy) * discriminant_sqrt)) /
+                                dr_sqr +
+                            circle.CenterY());
       }
       num_poi = 2;
     } else {
@@ -656,11 +638,10 @@ int Line2d_<T>::IntersectionLineCircle(const Circle_<T>& circle,
   return num_poi;
 }
 
-template<typename T>
+template <typename T>
 int Line2d_<T>::IntersectionLineSegmentCircle(const Circle_<T>& circle,
                                               vec_type* intersection1,
-                                              vec_type* intersection2) const
-{
+                                              vec_type* intersection2) const {
   // Compute intersection points with the line(!) and then check if they're
   // on the segment.
   vec_type line_intersect1;
@@ -718,18 +699,16 @@ int Line2d_<T>::IntersectionLineSegmentCircle(const Circle_<T>& circle,
   return num_intersections;
 }
 
-template<typename T>
+template <typename T>
 Line2d_<T> Line2d_<T>::ClipLineByRectangle(const vec_type& top_left,
-                                           const vec_type& size) const
-{
-  const vec_type top_right {top_left.X() + size.Width(), top_left.Y()};
-  const vec_type bottom_right {top_right.X(), top_left.Y() + size.Height()};
-  const vec_type bottom_left {top_left.X(), bottom_right.Y()};
+                                           const vec_type& size) const {
+  const vec_type top_right{top_left.X() + size.Width(), top_left.Y()};
+  const vec_type bottom_right{top_right.X(), top_left.Y() + size.Height()};
+  const vec_type bottom_left{top_left.X(), bottom_right.Y()};
 
-  const std::vector<Line2d_> edges {Line2d_<T> {top_left, top_right},
-                                    Line2d_<T> {top_right, bottom_right},
-                                    Line2d_<T> {bottom_right, bottom_left},
-                                    Line2d_<T> {bottom_left, top_left}};
+  const std::vector<Line2d_> edges{
+      Line2d_<T>{top_left, top_right}, Line2d_<T>{top_right, bottom_right},
+      Line2d_<T>{bottom_right, bottom_left}, Line2d_<T>{bottom_left, top_left}};
 
   std::vector<vec_type> int_points;
   for (std::size_t i = 0; i < 4; ++i) {
@@ -753,16 +732,15 @@ Line2d_<T> Line2d_<T>::ClipLineByRectangle(const vec_type& top_left,
   }
 
   if (int_points.size() < 2) {
-    return Line2d_<T> {};
+    return Line2d_<T>{};
   }
 
-  return Line2d_<T> {int_points[0], int_points[1]};
+  return Line2d_<T>{int_points[0], int_points[1]};
 }
 
-template<typename T>
+template <typename T>
 Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
-                                                  const vec_type& size) const
-{
+                                                  const vec_type& size) const {
   const bool is_from_inside = IsPointInsideRectangle(pt_from_, top_left, size);
   const bool is_to_inside = IsPointInsideRectangle(pt_to_, top_left, size);
 
@@ -770,14 +748,13 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
     return *this;
   }
 
-  const vec_type top_right {top_left.X() + size.Width(), top_left.Y()};
-  const vec_type bottom_right {top_right.X(), top_left.Y() + size.Height()};
-  const vec_type bottom_left {top_left.X(), bottom_right.Y()};
+  const vec_type top_right{top_left.X() + size.Width(), top_left.Y()};
+  const vec_type bottom_right{top_right.X(), top_left.Y() + size.Height()};
+  const vec_type bottom_left{top_left.X(), bottom_right.Y()};
 
-  const std::vector<Line2d_> edges {Line2d_<T> {top_left, top_right},
-                                    Line2d_<T> {top_right, bottom_right},
-                                    Line2d_<T> {bottom_right, bottom_left},
-                                    Line2d_<T> {bottom_left, top_left}};
+  const std::vector<Line2d_> edges{
+      Line2d_<T>{top_left, top_right}, Line2d_<T>{top_right, bottom_right},
+      Line2d_<T>{bottom_right, bottom_left}, Line2d_<T>{bottom_left, top_left}};
 
   std::vector<vec_type> int_points;
   for (std::size_t i = 0; i < 4; ++i) {
@@ -790,7 +767,7 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
   }
 
   if (int_points.empty()) {
-    return Line2d_<T> {};
+    return Line2d_<T>{};
   }
 
   if (is_from_inside != is_to_inside) {
@@ -799,13 +776,13 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
     // here we are only interested in clipping the segment).
 
     if (is_from_inside) {
-      return Line2d_<T> {pt_from_, int_points[0]};
+      return Line2d_<T>{pt_from_, int_points[0]};
     }
 
-    return Line2d_<T> {int_points[0], pt_to_};
+    return Line2d_<T>{int_points[0], pt_to_};
   }
 
-  return Line2d_<T> {int_points[0], int_points[1]};
+  return Line2d_<T>{int_points[0], int_points[1]};
 }
 
 // Explicit instantiation:
@@ -814,10 +791,9 @@ template class Line2d_<double>;
 //----------------------------------------------------
 // Line3d
 
-template<typename T>
+template <typename T>
 typename Line3d_<T>::vec_type Line3d_<T>::ClosestPointOnLine(
-    const vec_type& point) const
-{
+    const vec_type& point) const {
   // Vector from line start to point:
   const vec_type v = pt_from_.DirectionVector(point);
   // Project onto line and get closest point on line:
@@ -826,10 +802,9 @@ typename Line3d_<T>::vec_type Line3d_<T>::ClosestPointOnLine(
   return pt_from_ + lambda * unit_dir;
 }
 
-template<typename T>
+template <typename T>
 typename Line3d_<T>::vec_type Line3d_<T>::ClosestPointOnSegment(
-    const vec_type& point) const
-{
+    const vec_type& point) const {
   // Vector from segment start to point:
   const vec_type v = pt_from_.DirectionVector(point);
   // Project v onto segment:
@@ -846,10 +821,9 @@ template class Line3d_<double>;
 
 //----------------------------------------------------
 // Plane
-template<typename T>
+template <typename T>
 Plane_<T>::Plane_(const vec_type& p, const vec_type& q, const vec_type& r)
-    : Plane_()
-{
+    : Plane_() {
   const vec_type pq = p.DirectionVector(q);
   const vec_type pr = q.DirectionVector(r);
   const vec_type cross = pq.Cross(pr);

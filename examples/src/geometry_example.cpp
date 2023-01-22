@@ -13,13 +13,13 @@
 #include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/version.h>
 
-// NOLINTBEGIN(*magic-numbers, readability-identifier-naming, readability-isolate-declaration)
+// NOLINTBEGIN(*magic-numbers, readability-identifier-naming,
+// readability-isolate-declaration)
 
-template<typename Vector>
+template <typename Vector>
 std::string PrettyPrint(std::initializer_list<Vector> vecs,
                         std::size_t indent_first_row = 0,
-                        std::size_t indent_others = 0)
-{
+                        std::size_t indent_others = 0) {
   std::ostringstream s;
   s << "[ ";
 
@@ -48,11 +48,10 @@ std::string PrettyPrint(std::initializer_list<Vector> vecs,
   return s.str();
 }
 
-template<class V>
-void VectorDemo(V vec1, V vec2)
-{
+template <class V>
+void VectorDemo(V vec1, V vec2) {
   V ones = V::All(1);
-  V zeros {};
+  V zeros{};
 
   std::cout << "--------------------------------------------------\n"
                "Vectors\n    v1 = "
@@ -108,8 +107,7 @@ void VectorDemo(V vec1, V vec2)
   std::cout << std::endl << std::endl;
 }
 
-int main(int /* argc */, char** /* argv */)
-{
+int main(int /* argc */, char** /* argv */) {
   namespace wkg = werkzeugkiste::geometry;
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
@@ -117,12 +115,12 @@ int main(int /* argc */, char** /* argv */)
             << "--------------------------------------------------\n"
             << std::endl;
 
-  wkg::Vec2d v1 {-17, 42}, v2 {0, 0.01};
+  wkg::Vec2d v1{-17, 42}, v2{0, 0.01};
   VectorDemo(v1, v2);
 
-  VectorDemo(wkg::Vec2f {-17, 42}, wkg::Vec2f {0.0F, 0.01F});
+  VectorDemo(wkg::Vec2f{-17, 42}, wkg::Vec2f{0.0F, 0.01F});
 
-  VectorDemo(wkg::Vec2i {-17, 42}, wkg::Vec2i {0, 23});
+  VectorDemo(wkg::Vec2i{-17, 42}, wkg::Vec2i{0, 23});
 
   // TODO refactor
 
@@ -148,7 +146,7 @@ int main(int /* argc */, char** /* argv */)
   //  << " * " << PrettyPrint({v1, v2, v3}, 0, 6)
   //            << " =\n" << PrettyPrint({a, b, c}) << std::endl;
 
-  wkg::Vec2d v3 {9, -3};
+  wkg::Vec2d v3{9, -3};
   std::tie(a, b, c) = wkg::TransformToVecs(M, v1, v2, v3);
   std::cout << "Transformation v2:\n"
             << M << " * " << PrettyPrint({v1, v2, v3}, 0, 6) << " =\n"
@@ -187,7 +185,7 @@ int main(int /* argc */, char** /* argv */)
 
   // TODO refactor demo
   wkg::Mat3x3d K, R;
-  wkg::Vec3d t {0.5, 0.3, 0.1};
+  wkg::Vec3d t{0.5, 0.3, 0.1};
 
   K << 400, 0, 300, 0, 400, 300, 0, 0, 1;
   R << 1, 0, 0, 0, 1, 0, 0, 0, 1;
@@ -237,4 +235,5 @@ int main(int /* argc */, char** /* argv */)
   return 0;
 }
 
-// NOLINTEND(*magic-numbers, readability-identifier-naming, readability-isolate-declaration)
+// NOLINTEND(*magic-numbers, readability-identifier-naming,
+// readability-isolate-declaration)

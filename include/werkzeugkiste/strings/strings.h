@@ -1,27 +1,24 @@
 #ifndef WERKZEUGKISTE_STRINGS_STRINGS_H
 #define WERKZEUGKISTE_STRINGS_STRINGS_H
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
-
 /// Common string manipulation & checks. The kind you've
 /// already re-implemented/copied at least a dozen times.
-namespace werkzeugkiste::strings
-{
+namespace werkzeugkiste::strings {
 
 /// Returns true if the string ends with the given suffix.
 inline constexpr bool EndsWith(std::string_view s,
-                               std::string_view suffix) noexcept
-{
-  bool result {false};
-  if ((s.length() > 0) && (suffix.length() > 0)
-      && (s.length() >= suffix.length()))
-  {
+                               std::string_view suffix) noexcept {
+  bool result{false};
+  if ((s.length() > 0) && (suffix.length() > 0) &&
+      (s.length() >= suffix.length())) {
     result =
         (s.compare(s.length() - suffix.length(), suffix.length(), suffix) == 0);
   }
@@ -29,9 +26,8 @@ inline constexpr bool EndsWith(std::string_view s,
 }
 
 /// Returns true if the string ends with the given character.
-inline constexpr bool EndsWith(std::string_view s, char end) noexcept
-{
-  bool result {false};
+inline constexpr bool EndsWith(std::string_view s, char end) noexcept {
+  bool result{false};
   if (s.length() > 0) {
     result = (s.at(s.length() - 1) == end);
   }
@@ -40,20 +36,17 @@ inline constexpr bool EndsWith(std::string_view s, char end) noexcept
 
 /// Returns true if the given string starts with the prefix.
 inline constexpr bool StartsWith(std::string_view s,
-                                 std::string_view prefix) noexcept
-{
-  bool result {false};
-  if ((s.length() > 0) && (prefix.length() > 0)
-      && (s.length() >= prefix.length()))
-  {
+                                 std::string_view prefix) noexcept {
+  bool result{false};
+  if ((s.length() > 0) && (prefix.length() > 0) &&
+      (s.length() >= prefix.length())) {
     result = s.compare(0, prefix.length(), prefix) == 0;
   }
   return result;
 }
 
 /// Returns true if the string starts with the given character.
-inline constexpr bool StartsWith(std::string_view s, char first) noexcept
-{
+inline constexpr bool StartsWith(std::string_view s, char first) noexcept {
   return (s.length() > 0) ? (s[0] == first) : false;
 }
 
@@ -62,8 +55,7 @@ WERKZEUGKISTE_EXPORT
 void ToLower(std::string& s);  // NOLINT
 
 /// Returns a copy, converted to lower case.
-inline std::string Lower(std::string_view s)
-{
+inline std::string Lower(std::string_view s) {
   std::string tmp(s);
   ToLower(tmp);
   return tmp;
@@ -74,8 +66,7 @@ WERKZEUGKISTE_EXPORT
 void ToUpper(std::string& s);  // NOLINT
 
 /// Returns a copy, converted to upper case.
-inline std::string Upper(const std::string& s)
-{
+inline std::string Upper(const std::string& s) {
   std::string tmp(s);
   ToUpper(tmp);
   return tmp;
@@ -103,12 +94,10 @@ bool IsNumeric(const std::string& s);
 WERKZEUGKISTE_EXPORT
 std::vector<std::string> Split(std::string_view s, char delim);
 
-template<
-    typename Container,
-    typename Tp = std::decay_t<decltype(*begin(std::declval<Container>()))>>
+template <typename Container, typename Tp = std::decay_t<
+                                  decltype(*begin(std::declval<Container>()))>>
 inline std::string Concatenate(const Container& container,
-                               std::string_view delimiter = "")
-{
+                               std::string_view delimiter = "") {
   std::ostringstream concat;
   bool preprend_delimiter = false;
   for (const auto& str : container) {
@@ -125,8 +114,7 @@ inline std::string Concatenate(const Container& container,
 /// Replaces all occurrences of the given search
 /// string `needle` within the `haystack`.
 WERKZEUGKISTE_EXPORT
-std::string Replace(std::string_view haystack,
-                    std::string_view needle,
+std::string Replace(std::string_view haystack, std::string_view needle,
                     std::string_view replacement);
 
 /// Replaces all occurrences of the given character.
@@ -145,7 +133,7 @@ std::string ClipUrl(const std::string& url);
 /// protocol part.
 WERKZEUGKISTE_EXPORT
 bool GetUrlProtocol(const std::string& url,
-                    std::string& protocol,  // NOLINT
+                    std::string& protocol,    // NOLINT
                     std::string& remainder);  // NOLINT
 
 /// Returns the URL after replacing any plaintext
@@ -183,8 +171,7 @@ std::string Slug(std::string_view s, bool strip_dashes = false);
 /// * `0`: Centered
 /// * `> 0`: Right
 WERKZEUGKISTE_EXPORT
-std::string Shorten(std::string_view s,
-                    std::size_t desired_length,
+std::string Shorten(std::string_view s, std::size_t desired_length,
                     int ellipsis_position = -1,
                     std::string_view ellipsis = "...");
 

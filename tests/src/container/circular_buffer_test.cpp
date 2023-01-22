@@ -1,3 +1,7 @@
+#include <werkzeugkiste/container/circular_buffer.h>
+#include <werkzeugkiste/container/math.h>
+#include <werkzeugkiste/container/sort.h>
+
 #include <array>
 #include <chrono>
 #include <list>
@@ -6,18 +10,13 @@
 #include <thread>
 #include <vector>
 
-#include <werkzeugkiste/container/circular_buffer.h>
-#include <werkzeugkiste/container/math.h>
-#include <werkzeugkiste/container/sort.h>
-
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::container;
 
 // NOLINTBEGIN
 
-TEST(ContainerUtilsTest, CircularBuffer)
-{
+TEST(ContainerUtilsTest, CircularBuffer) {
   // You can either use:
   // circular_buffer<int> buffer(3);
   wkc::circular_buffer<int, 3> buffer;
@@ -163,8 +162,7 @@ TEST(ContainerUtilsTest, CircularBuffer)
 //}
 //#endif
 
-TEST(ContainerUtilsTest, Iterators)
-{
+TEST(ContainerUtilsTest, Iterators) {
   using cb = wkc::circular_buffer<int>;
   cb buffer(3);
 
@@ -216,8 +214,7 @@ TEST(ContainerUtilsTest, Iterators)
   }
   // foreach syntax.
   val = 1;
-  for (const auto& elem : buffer)
-    EXPECT_EQ(elem, val++);
+  for (const auto& elem : buffer) EXPECT_EQ(elem, val++);
 
   // Replace oldest element.
   buffer.push_back(3);
@@ -250,8 +247,7 @@ TEST(ContainerUtilsTest, Iterators)
   }
 }
 
-TEST(ContainerUtilsTest, PopIterators)
-{
+TEST(ContainerUtilsTest, PopIterators) {
   using cb = wkc::circular_buffer<int>;
   cb buffer(5);
   buffer.push_back(1);
@@ -330,8 +326,7 @@ TEST(ContainerUtilsTest, PopIterators)
   EXPECT_EQ(*it, 23);
 }
 
-TEST(ContainerUtilsTest, CircularBufferSort)
-{
+TEST(ContainerUtilsTest, CircularBufferSort) {
   using cb = wkc::circular_buffer<int>;
   cb buffer(5);
 

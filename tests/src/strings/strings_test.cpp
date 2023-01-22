@@ -1,8 +1,8 @@
+#include <werkzeugkiste/strings/strings.h>
+
 #include <chrono>
 #include <string>
 #include <thread>
-
-#include <werkzeugkiste/strings/strings.h>
 
 #include "../test_utils.h"
 
@@ -10,36 +10,33 @@ namespace wks = werkzeugkiste::strings;
 
 // NOLINTBEGIN
 
-TEST(StringUtilsTest, Suffix)
-{
+TEST(StringUtilsTest, Suffix) {
   EXPECT_TRUE(wks::EndsWith("Some string", "string"));
   EXPECT_FALSE(wks::EndsWith("Some string", "String"));  // case mismatch
   EXPECT_TRUE(wks::EndsWith("Some string", "ing"));
-  EXPECT_TRUE(wks::EndsWith("Some string", "g"));  // single character string
-  EXPECT_TRUE(wks::EndsWith("Some string", 'g'));  // character
+  EXPECT_TRUE(wks::EndsWith("Some string", "g"));   // single character string
+  EXPECT_TRUE(wks::EndsWith("Some string", 'g'));   // character
   EXPECT_FALSE(wks::EndsWith("Some string", 'G'));  // character
-  EXPECT_FALSE(wks::EndsWith("Some string", ""));  // empty string
+  EXPECT_FALSE(wks::EndsWith("Some string", ""));   // empty string
   EXPECT_FALSE(wks::EndsWith("", ""));
   EXPECT_FALSE(wks::EndsWith("", "st"));
 }
 
-TEST(StringUtilsTest, Prefix)
-{
+TEST(StringUtilsTest, Prefix) {
   EXPECT_TRUE(wks::StartsWith("Another test string", "Another "));
   EXPECT_FALSE(
       wks::StartsWith("Another test string", "another "));  // case mismatch
   EXPECT_TRUE(wks::StartsWith("Another test string", "An"));
   EXPECT_TRUE(
       wks::StartsWith("Another test string", "A"));  // single character string
-  EXPECT_TRUE(wks::StartsWith("Another test string", 'A'));  // character
+  EXPECT_TRUE(wks::StartsWith("Another test string", 'A'));   // character
   EXPECT_FALSE(wks::StartsWith("Another test string", 'a'));  // character
-  EXPECT_FALSE(wks::StartsWith("Another test string", ""));  // empty string
+  EXPECT_FALSE(wks::StartsWith("Another test string", ""));   // empty string
   EXPECT_FALSE(wks::StartsWith("", ""));
   EXPECT_FALSE(wks::StartsWith("", "A"));
 }
 
-TEST(StringUtilsTest, CaseConversion)
-{
+TEST(StringUtilsTest, CaseConversion) {
   EXPECT_EQ(wks::Upper("abcdefghijklmnopqrstuvwxyz"),
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
   EXPECT_EQ(wks::Upper("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
@@ -55,8 +52,7 @@ TEST(StringUtilsTest, CaseConversion)
             "1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>");
 }
 
-TEST(StringUtilsTest, Trimming)
-{
+TEST(StringUtilsTest, Trimming) {
   // Tab \t, Line feed \n, vertical tab \v, form feed \f, space, ...
   EXPECT_EQ(wks::Trim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"),
             "abc \t\r\n\v\f123");
@@ -68,8 +64,7 @@ TEST(StringUtilsTest, Trimming)
             " \t\r\n\v\fabc \t\r\n\v\f123");
 }
 
-TEST(StringUtilsTest, IsNumeric)
-{
+TEST(StringUtilsTest, IsNumeric) {
   EXPECT_TRUE(wks::IsNumeric("0"));
   EXPECT_TRUE(wks::IsNumeric("+0"));
   EXPECT_TRUE(wks::IsNumeric("-0"));
@@ -96,8 +91,7 @@ TEST(StringUtilsTest, IsNumeric)
   EXPECT_TRUE(wks::IsNumeric("1e-7"));
 }
 
-TEST(StringUtilsTest, Tokenize)
-{
+TEST(StringUtilsTest, Tokenize) {
   auto tokens = wks::Split("A;Line ;\tto;be;split ;;", ';');
   EXPECT_EQ(tokens.size(), 6);
   EXPECT_EQ(tokens[0], "A");
@@ -113,8 +107,7 @@ TEST(StringUtilsTest, Tokenize)
   EXPECT_EQ(tokens[0], s);
 }
 
-TEST(StringUtilsTest, Replace)
-{
+TEST(StringUtilsTest, Replace) {
   EXPECT_TRUE(wks::Replace("", "", "").empty());
   EXPECT_TRUE(wks::Replace("", "abc", "def").empty());
   EXPECT_TRUE(wks::Replace("", "", "def").empty());
@@ -141,8 +134,7 @@ TEST(StringUtilsTest, Replace)
   EXPECT_EQ(wks::Replace("ABC1A3abc;:_", 'A', '!'), "!BC1!3abc;:_");
 }
 
-TEST(StringUtilsTest, Remove)
-{
+TEST(StringUtilsTest, Remove) {
   EXPECT_EQ(wks::Remove("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>", '\\'),
             "1234567890+*~#'-_.:,;´`?}=])[({/&%$§3!^°@<|>");
 
@@ -152,8 +144,7 @@ TEST(StringUtilsTest, Remove)
             "cDEFghiABdefGHIc");
 }
 
-TEST(StringUtilsTest, URL)
-{
+TEST(StringUtilsTest, URL) {
   // Simplistic URL parsing (downstream I need to be able
   // to distinguish web URLs from file paths, e.g. to properly
   // load a camera's SDP description)
@@ -162,8 +153,8 @@ TEST(StringUtilsTest, URL)
   EXPECT_EQ(protocol, "file://");
   EXPECT_EQ(remainder, "foo.txt");
 
-  EXPECT_TRUE(wks::GetUrlProtocol(
-      "UnChecked://SomeU.R.I:?asdf=foo", protocol, remainder));
+  EXPECT_TRUE(wks::GetUrlProtocol("UnChecked://SomeU.R.I:?asdf=foo", protocol,
+                                  remainder));
   EXPECT_EQ(protocol, "UnChecked://");
   EXPECT_EQ(remainder, "SomeU.R.I:?asdf=foo");
 
@@ -200,8 +191,7 @@ TEST(StringUtilsTest, URL)
             "file:///a/file/needs/special/handling.txt");
 }
 
-TEST(StringUtilsTest, Slug)
-{
+TEST(StringUtilsTest, Slug) {
   EXPECT_EQ(wks::Slug("nothing-to-be-slugged"), "nothing-to-be-slugged");
 
   EXPECT_EQ(wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
@@ -223,8 +213,7 @@ TEST(StringUtilsTest, Slug)
   // TODO test all replacement characters!
 }
 
-TEST(StringUtilsTest, Shorten)
-{
+TEST(StringUtilsTest, Shorten) {
   // Edge cases: empty & desired length 0 or longer than string
   EXPECT_EQ(wks::Shorten("", 4), "");
   EXPECT_EQ(wks::Shorten("abc", 0), "");

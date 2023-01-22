@@ -18,8 +18,7 @@
 
 // NOLINTBEGIN(*-magic-numbers)
 
-int main(int /* argc */, char** /* argv */)
-{
+int main(int /* argc */, char** /* argv */) {
   namespace wtu = werkzeugkiste::timing;
   wtu::StopWatch watch;
   std::cout << "--------------------------------------------------\n"
@@ -33,7 +32,7 @@ int main(int /* argc */, char** /* argv */)
             << std::endl;
 
   // We want a nicely aligned TOC output:
-  wtu::SetTocFormat(/*print_labels_aligned=*/ true, 9, 3);
+  wtu::SetTocFormat(/*print_labels_aligned=*/true, 9, 3);
 
   // For the demo, we show a "growing label", so you can see the
   // effect of "nicely aligning the TOC output":

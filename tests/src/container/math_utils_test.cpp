@@ -1,11 +1,11 @@
+#include <werkzeugkiste/container/circular_buffer.h>
+#include <werkzeugkiste/container/math.h>
+
 #include <array>
 #include <list>
 #include <map>
 #include <string>
 #include <vector>
-
-#include <werkzeugkiste/container/circular_buffer.h>
-#include <werkzeugkiste/container/math.h>
 
 #include "../test_utils.h"
 
@@ -13,8 +13,7 @@ namespace wkc = werkzeugkiste::container;
 
 // NOLINTBEGIN
 
-TEST(ContainerUtilsTest, Smooth)
-{
+TEST(ContainerUtilsTest, Smooth) {
   using cb = wkc::circular_buffer<int>;
   cb buffer(7);
 
@@ -50,15 +49,13 @@ TEST(ContainerUtilsTest, Smooth)
   EXPECT_EQ(smooth[5], (buffer[4] + buffer[5] + buffer[6]) / 3.0);
 
   for (std::size_t i = 2; i < 5; ++i) {
-    EXPECT_EQ(smooth[i],
-              (buffer[i - 2] + buffer[i - 1] + buffer[i] + buffer[i + 1]
-               + +buffer[i + 2])
-                  / 5.0);
+    EXPECT_EQ(smooth[i], (buffer[i - 2] + buffer[i - 1] + buffer[i] +
+                          buffer[i + 1] + +buffer[i + 2]) /
+                             5.0);
   }
 }
 
-TEST(ContainerUtilsTest, Mean)
-{
+TEST(ContainerUtilsTest, Mean) {
   using cb = wkc::circular_buffer<int>;
   cb buffer(7);
 
@@ -89,8 +86,7 @@ TEST(ContainerUtilsTest, Mean)
   EXPECT_DOUBLE_EQ(wkc::Mean(buffer), 5.0);
 }
 
-TEST(ContainerUtilsTest, MinMax)
-{
+TEST(ContainerUtilsTest, MinMax) {
   using cb = wkc::circular_buffer<int>;
   cb buffer(3);
   int min = 17;

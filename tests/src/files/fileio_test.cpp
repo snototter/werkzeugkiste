@@ -1,7 +1,7 @@
 #include <string>
 
 // NOLINTBEGIN
-//TODO select which warnings to silence
+// TODO select which warnings to silence
 
 #include <werkzeugkiste/files/fileio.h>
 
@@ -9,9 +9,7 @@
 
 namespace wkf = werkzeugkiste::files;
 
-
-TEST(FileIOTest, TODO)
-{
+TEST(FileIOTest, TODO) {
   //  EXPECT_TRUE(wks::EndsWith("Some string", "string"));
   //  EXPECT_FALSE(wks::EndsWith("Some string", "String"));  // case mismatch
   //  EXPECT_TRUE(wks::EndsWith("Some string", "ing"));

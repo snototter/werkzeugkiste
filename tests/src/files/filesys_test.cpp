@@ -1,6 +1,6 @@
-#include <string>
-
 #include <werkzeugkiste/files/filesys.h>
+
+#include <string>
 
 #include "../test_utils.h"
 
@@ -8,8 +8,7 @@ namespace wkf = werkzeugkiste::files;
 
 // NOLINTBEGIN
 
-TEST(FileSystemTest, TODO)
-{
+TEST(FileSystemTest, TODO) {
   //  EXPECT_TRUE(wks::EndsWith("Some string", "string"));
   //  EXPECT_FALSE(wks::EndsWith("Some string", "String"));  // case mismatch
   //  EXPECT_TRUE(wks::EndsWith("Some string", "ing"));

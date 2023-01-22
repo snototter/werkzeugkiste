@@ -5,8 +5,7 @@
 #include <vector>
 
 /// TODO doc
-namespace werkzeugkiste::files
-{
+namespace werkzeugkiste::files {
 /// Reads the plain text file into a string.
 std::vector<std::string> ReadAsciiFile(const char* filename);
 std::string CatAsciiFile(const char* filename);

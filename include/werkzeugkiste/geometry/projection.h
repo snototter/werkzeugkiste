@@ -1,31 +1,28 @@
 #ifndef WERKZEUGKISTE_GEOMETRY_PROJECTION_H
 #define WERKZEUGKISTE_GEOMETRY_PROJECTION_H
 
-#include <cmath>
-#include <tuple>
-#include <type_traits>
-#include <utility>
-
 #include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
 
 #include <Eigen/Core>
 #include <Eigen/Eigen>
 #include <Eigen/Geometry>
+#include <cmath>
+#include <tuple>
+#include <type_traits>
+#include <utility>
 
-namespace werkzeugkiste::geometry
-{
+namespace werkzeugkiste::geometry {
 
 //-----------------------------------------------------------------------------
 // Matrix definitions
 
-template<typename Tp, int Rows, int Columns>
+template <typename Tp, int Rows, int Columns>
 using Matrix =
     Eigen::Matrix<Tp, Rows, Columns, (Columns > 1) ? Eigen::RowMajor : 0>;
 
-template<typename Tp, int Rows>
-using MatrixDynWidth =
-    Eigen::Matrix<Tp, Rows, Eigen::Dynamic, Eigen::RowMajor>;
+template <typename Tp, int Rows>
+using MatrixDynWidth = Eigen::Matrix<Tp, Rows, Eigen::Dynamic, Eigen::RowMajor>;
 
 // using Mat2x2d = Matrix<double, 2, 2>;
 using Mat3x3d = Matrix<double, 3, 3>;
@@ -35,9 +32,8 @@ using Mat3x4d = Matrix<double, 3, 4>;
 // Conversion between werkzeugkiste and Eigen
 
 /// Converts a werkzeugkiste vector to an Eigen vector (single-column matrix).
-template<int Rows, typename V>
-inline Matrix<typename V::value_type, Rows, 1> VecToEigenMat(const V& vec)
-{
+template <int Rows, typename V>
+inline Matrix<typename V::value_type, Rows, 1> VecToEigenMat(const V& vec) {
   constexpr int v_dim_int = static_cast<int>(V::ndim);
   static_assert(
       (Rows == v_dim_int) || (Rows == (v_dim_int + 1)),
@@ -57,10 +53,9 @@ inline Matrix<typename V::value_type, Rows, 1> VecToEigenMat(const V& vec)
 }
 
 /// Returns a vector for the given matrix column.
-template<typename Tp, int Rows, int Columns>
+template <typename Tp, int Rows, int Columns>
 Vec<Tp, static_cast<std::size_t>(Rows)> EigenColToVec(
-    const Matrix<Tp, Rows, Columns>& eig, int col)
-{
+    const Matrix<Tp, Rows, Columns>& eig, int col) {
   Vec<Tp, static_cast<std::size_t>(Rows)> v;
   for (int i = 0; i < Rows; ++i) {
     v[i] = eig(i, col);
@@ -73,10 +68,9 @@ Vec<Tp, static_cast<std::size_t>(Rows)> EigenColToVec(
 /// created on the stack. This function should only be used for a maximum
 /// of up to 32 vectors. Refer to the Eigen3 docs for details:
 /// https://eigen.tuxfamily.org/dox/group__TutorialMatrixClass.html
-template<int Dim, typename V, typename... Vs>
+template <int Dim, typename V, typename... Vs>
 inline Matrix<typename V::value_type, Dim, static_cast<int>(1 + sizeof...(Vs))>
-VecsToEigenMat(const V& vec0, const Vs&... others)
-{
+VecsToEigenMat(const V& vec0, const Vs&... others) {
   constexpr int v_dim_int = static_cast<int>(V::ndim);
   static_assert(
       (Dim == v_dim_int) || (Dim == (v_dim_int + 1)),
@@ -89,7 +83,7 @@ VecsToEigenMat(const V& vec0, const Vs&... others)
                 "Fixed size matrices should not be used for operations "
                 "with more than (roughly) 32 vectors.");
 
-  const std::array<V, static_cast<std::size_t>(num_vecs)> vecs {
+  const std::array<V, static_cast<std::size_t>(num_vecs)> vecs{
       vec0, static_cast<const V&>(others)...};
   // TODO clean up
   //  const V vecs[num_vecs] {
@@ -127,17 +121,15 @@ VecsToEigenMat(const V& vec0, const Vs&... others)
 //         VecsToTuple<_V1, _Vs...>(std::move(v1), std::move(others)...));
 // }
 
-template<typename Array, std::size_t... Idx>
+template <typename Array, std::size_t... Idx>
 inline auto ArrayToTuple(const Array& arr,
-                         std::index_sequence<Idx...> /* indices */)
-{
+                         std::index_sequence<Idx...> /* indices */) {
   return std::make_tuple(arr[Idx]...);
 }
 
 /// Returns a tuple of vectors (one vector per matrix column).
-template<typename Tp, int Rows, int Columns>
-inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat)
-{
+template <typename Tp, int Rows, int Columns>
+inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat) {
   static_assert((Rows > 0) && (Columns > 0),
                 "Template parameters Rows and Columns must be > 0!");
   using Vector = Vec<Tp, static_cast<std::size_t>(Rows)>;
@@ -146,7 +138,7 @@ inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat)
   for (std::size_t c = 0; c < array_size; ++c) {
     arr[c] = EigenColToVec<Tp, Rows, Columns>(vec_mat, static_cast<int>(c));
   }
-  return ArrayToTuple(arr, std::make_index_sequence<array_size> {});
+  return ArrayToTuple(arr, std::make_index_sequence<array_size>{});
 }
 
 //-----------------------------------------------------------------------------
@@ -172,14 +164,12 @@ inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat)
 ///   >>> wkg::Vec4d a, b, c;
 ///   >>> std::tie(out1, out2, out3) = TransformToVecs(
 ///   >>>   T_matrix, in1, in2, in3);
-template<typename V, typename... Vs, int Rows, int Columns>
+template <typename V, typename... Vs, int Rows, int Columns>
 inline std::tuple<
     Vec<typename V::value_type, static_cast<std::size_t>(Rows)>,
     Vec<typename Vs::value_type, static_cast<std::size_t>(Rows)>...>
 TransformToVecs(const Matrix<typename V::value_type, Rows, Columns>& mat,
-                const V& vec0,
-                const Vs&... others)
-{
+                const V& vec0, const Vs&... others) {
   static_assert(
       (Columns == V::ndim) || (Columns == (V::ndim + 1)),
       "Invalid dimensions: vector dimensionality must be equal or 1 less than"
@@ -195,11 +185,10 @@ TransformToVecs(const Matrix<typename V::value_type, Rows, Columns>& mat,
 
 /// Convenience utility to avoid using std::tie() for a single vector.
 /// See `TransformToVecs`.
-template<typename V, typename... Vs, int Rows, int Columns>
+template <typename V, typename... Vs, int Rows, int Columns>
 inline Vec<typename V::value_type, static_cast<typename V::index_type>(Rows)>
 TransformToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
-               const V& vec)
-{
+               const V& vec) {
   constexpr int v_dim_int = static_cast<int>(V::ndim);
   static_assert(
       (Columns == v_dim_int) || (Columns == (v_dim_int + 1)),
@@ -226,15 +215,13 @@ TransformToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
 ///   >>>      7, 8, 9;
 ///   >>> wkg::Vec2d out1, out2;
 ///   >>> std::tie(out1, out2) = ProjectToVecs(H, v1, v2);
-template<typename V, typename... Vs, int Rows, int Columns>
+template <typename V, typename... Vs, int Rows, int Columns>
 inline std::tuple<
     Vec<typename V::value_type, static_cast<typename V::index_type>(Rows - 1)>,
     Vec<typename Vs::value_type,
         static_cast<typename Vs::index_type>(Rows - 1)>...>
 ProjectToVecs(const Matrix<typename V::value_type, Rows, Columns>& mat,
-              const V& vec0,
-              const Vs&... others)
-{
+              const V& vec0, const Vs&... others) {
   static_assert((Rows > 0) && (Columns > 0),
                 "Template parameters Rows and Columns must be > 0!");
 
@@ -256,11 +243,10 @@ ProjectToVecs(const Matrix<typename V::value_type, Rows, Columns>& mat,
 
 /// Convenience utility to avoid using std::tie() for a single vector.
 /// See `ProjectToVecs`.
-template<typename V, typename... Vs, int Rows, int Columns>
+template <typename V, typename... Vs, int Rows, int Columns>
 inline Vec<typename V::value_type, static_cast<std::size_t>(Rows - 1)>
 ProjectToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
-             const V& vec)
-{
+             const V& vec) {
   static_assert((Rows > 0) && (Columns > 0),
                 "Template parameters Rows and Columns must be > 0!");
 
@@ -281,9 +267,8 @@ ProjectToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
 // Rotation utilities
 
 /// Returns the 3x3 rotation matrix, rotating around the x-axis.
-template<typename Tp>
-inline constexpr Matrix<Tp, 3, 3> RotationX(Tp angle, bool angle_in_deg)
-{
+template <typename Tp>
+inline constexpr Matrix<Tp, 3, 3> RotationX(Tp angle, bool angle_in_deg) {
   static_assert(std::is_floating_point<Tp>::value,
                 "Template type must be floating point!");
 
@@ -297,9 +282,8 @@ inline constexpr Matrix<Tp, 3, 3> RotationX(Tp angle, bool angle_in_deg)
 }
 
 /// Returns the 3x3 rotation matrix, rotating around the y-axis.
-template<typename Tp>
-inline constexpr Matrix<Tp, 3, 3> RotationY(Tp angle, bool angle_in_deg)
-{
+template <typename Tp>
+inline constexpr Matrix<Tp, 3, 3> RotationY(Tp angle, bool angle_in_deg) {
   static_assert(std::is_floating_point<Tp>::value,
                 "Template type must be floating point!");
 
@@ -313,9 +297,8 @@ inline constexpr Matrix<Tp, 3, 3> RotationY(Tp angle, bool angle_in_deg)
 }
 
 /// Returns the 3x3 rotation matrix, rotating around the z-axis.
-template<typename Tp>
-inline constexpr Matrix<Tp, 3, 3> RotationZ(Tp angle, bool angle_in_deg)
-{
+template <typename Tp>
+inline constexpr Matrix<Tp, 3, 3> RotationZ(Tp angle, bool angle_in_deg) {
   static_assert(std::is_floating_point<Tp>::value,
                 "Template type must be floating point!");
 
@@ -329,12 +312,10 @@ inline constexpr Matrix<Tp, 3, 3> RotationZ(Tp angle, bool angle_in_deg)
 }
 
 /// Returns the 3x3 rotation matrix in ZYX order.
-template<typename Tp>
-inline constexpr Matrix<Tp, 3, 3> RotationMatrix(Tp angle_x,
-                                                 Tp angle_y,
+template <typename Tp>
+inline constexpr Matrix<Tp, 3, 3> RotationMatrix(Tp angle_x, Tp angle_y,
                                                  Tp angle_z,
-                                                 bool angles_in_deg)
-{
+                                                 bool angles_in_deg) {
   static_assert(std::is_floating_point<Tp>::value,
                 "Template type must be floating point!");
 
