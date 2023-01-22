@@ -79,6 +79,10 @@ jobs:
 
     - name: Install werkzeugkiste requirements
       run: sudo apt-get install libeigen3-dev -q -y
+      
+    - uses: snototter/ci-utils/setup-googletest@main
+      with:
+        os: ${{ runner.os }}
 
     - name: Configure
       env: { CXX: clang++-14 }
@@ -99,7 +103,7 @@ jobs:
       run: ctest --output-on-failure -j 2
 
   test:
-#   needs: [lint]
+    needs: [lint]
     strategy:
       matrix:
         os: [ubuntu-22.04]
@@ -108,13 +112,17 @@ jobs:
         type: [shared, static]
 
         include:
-#        - { type: shared, shared: YES }
+        - { type: shared, shared: YES }
         - { type: static, shared: NO }
 
     runs-on: ${{ matrix.os }}
 
     steps:
     - uses: actions/checkout@v3
+
+    - uses: snototter/ci-utils/setup-googletest@main
+      with:
+        os: ${{ runner.os }}
 
     - name: Install static analyzers
       if: matrix.os == 'ubuntu-22.04'
@@ -136,16 +144,6 @@ jobs:
           github:
           - path: eigenteam/eigen-git-mirror
             ref: 3.3.7
-
-    - name: Install gtest on Ubuntu
-      if: matrix.os == 'ubuntu-22.04'
-      run: sudo apt-get install libgtest-dev -q -y
-        && cd /usr/src/gtest
-        && sudo cmake .
-        && sudo make
-        && sudo cp lib/libgtest*.a /usr/lib
-        && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a
-        && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
 
     - name: Configure
       shell: pwsh
