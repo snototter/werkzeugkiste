@@ -1,10 +1,23 @@
-#ifndef __WERKZEUGKISTE_VERSION_H__
-#define __WERKZEUGKISTE_VERSION_H__
+#ifndef WERKZEUGKISTE_VERSION_H
+#define WERKZEUGKISTE_VERSION_H
 
-#define WERKZEUGKISTE_VERSION  "@PROJECT_VERSION@"
-#define WERKZEUGKISTE_VERSION_MAJOR "@PROJECT_VERSION_MAJOR@"
-#define WERKZEUGKISTE_VERSION_MINOR "@PROJECT_VERSION_MINOR@"
-#define WERKZEUGKISTE_VERSION_PATCH "@PROJECT_VERSION_PATCH@"
+#include<string>
 
-#endif  // __WERKZEUGKISTE_VERSION_H__
+/// Werkzeugkiste is yet another C++ utility library: a collection
+/// of commonly used, reusable C++ snippets.
+namespace werkzeugkiste {
+
+inline constexpr unsigned version_major = @PROJECT_VERSION_MAJOR@;
+inline constexpr unsigned version_minor = @PROJECT_VERSION_MINOR@;
+inline constexpr unsigned version_patch = @PROJECT_VERSION_PATCH@;
+
+inline constexpr auto Version() {
+  using namespace std::literals;
+  auto version = "@PROJECT_VERSION@"sv;
+  return version;
+}
+
+}  // namespace werkzeugkiste
+
+#endif  // WERKZEUGKISTE_VERSION_H
 

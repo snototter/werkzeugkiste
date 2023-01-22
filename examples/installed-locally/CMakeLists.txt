@@ -9,7 +9,6 @@ project(werkzeugkiste-examples-installed)
 # (3) Link the appropriate werkzeugkiste::<target> to your executable/library (no need
 #     to fiddle around with INCLUDE_DIRS, xxx_LIB, or the like)
 
-
 # This demo assumes that you installed werkzeugkiste using the default CMAKE_INSTALL_PREFIX.
 # Thus, we don't need to set the CMAKE_PREFIX_PATH manually and CMake will easily
 # locate the library via

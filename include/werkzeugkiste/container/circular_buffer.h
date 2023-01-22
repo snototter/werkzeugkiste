@@ -1,21 +1,19 @@
-#ifndef __WERKZEUGKISTE_CONTAINER_CIRCULAR_BUFFER_H__
-#define __WERKZEUGKISTE_CONTAINER_CIRCULAR_BUFFER_H__
+#ifndef WERKZEUGKISTE_CONTAINER_CIRCULAR_BUFFER_H
+#define WERKZEUGKISTE_CONTAINER_CIRCULAR_BUFFER_H
 
-
+#include <cstddef>
 #include <iterator>
 #include <memory>
-#include <vector>
-#include <stdexcept>
-#include <cstddef>
 #include <sstream>
+#include <stdexcept>
+#include <vector>
 
 namespace werkzeugkiste {
 namespace container {
 
 /// Templated STL compatible iterator for the circular_buffer.
-template <
-    typename T, typename T_nonconst,
-    typename elem_type = typename T::value_type>
+template <typename T, typename T_nonconst,
+          typename elem_type = typename T::value_type>
 class circular_buffer_iterator {
  public:
   // STL requested typedefs
@@ -31,41 +29,34 @@ class circular_buffer_iterator {
   typedef typename cbuf_type::difference_type difference_type;
 
   // Constructor.
-  circular_buffer_iterator(cbuf_type *buf, size_type pos)
-    : buf_(buf), pos_(pos)
-  {}
+  circular_buffer_iterator(cbuf_type* buf, size_type pos)
+      : buf_(buf), pos_(pos) {}
 
   // Use auto-generated copy constructor, copy/move assignment operator.
-  circular_buffer_iterator(circular_buffer_iterator &&) = default;
-  self_type &operator=(const self_type &) = default;
-  self_type &operator=(self_type &&) = default;
+  circular_buffer_iterator(circular_buffer_iterator&&) = default;
+  self_type& operator=(const self_type&) = default;
+  self_type& operator=(self_type&&) = default;
 
   // Provides an explicit cast from iterator to const_iterator to
   // enable `const_iterator = buffer.begin();`
   circular_buffer_iterator(
       const circular_buffer_iterator<T_nonconst, T_nonconst,
-      typename T_nonconst::value_type> &other)
-    : buf_(other.buf_), pos_(other.pos_)
-  {}
+                                     typename T_nonconst::value_type>& other)
+      : buf_(other.buf_), pos_(other.pos_) {}
 
   friend class circular_buffer_iterator<const T, T, const elem_type>;
 
   // Element access.
-  elem_type &operator*() {
-    return (*buf_)[pos_];
-  }
+  elem_type& operator*() { return (*buf_)[pos_]; }
 
   // Element access.
-  elem_type *operator->() {
-    return &(operator*());
-  }
-
+  elem_type* operator->() { return &(operator*()); }
 
   //--------------------------------------------------------------------------------
   // Increment/Decrement
 
   // Prefix ++it operator.
-  self_type &operator++() {
+  self_type& operator++() {
     pos_++;
     return *this;
   }
@@ -78,7 +69,7 @@ class circular_buffer_iterator {
   }
 
   // Prefix --it operator.
-  self_type &operator--() {
+  self_type& operator--() {
     pos_--;
     return *this;
   }
@@ -98,7 +89,7 @@ class circular_buffer_iterator {
   }
 
   // Overloaded += operator.
-  self_type &operator+=(difference_type n) {
+  self_type& operator+=(difference_type n) {
     pos_ += n;
     return *this;
   }
@@ -111,67 +102,57 @@ class circular_buffer_iterator {
   }
 
   // Overloaded -= operator.
-  self_type &operator-=(difference_type n) {
+  self_type& operator-=(difference_type n) {
     pos_ -= n;
     return *this;
   }
 
   // Overloaded - operator.
-  difference_type operator-(const self_type &c) const {
-    return pos_ - c.pos_;
-  }
+  difference_type operator-(const self_type& c) const { return pos_ - c.pos_; }
 
   //--------------------------------------------------------------------------------
   // Comparisons
 
-  bool operator==(const self_type &other) const {
+  bool operator==(const self_type& other) const {
     return pos_ == other.pos_ && buf_ == other.buf_;
   }
 
-  bool operator!=(const self_type &other) const {
+  bool operator!=(const self_type& other) const {
     return pos_ != other.pos_ && buf_ == other.buf_;
   }
 
-  bool operator>(const self_type &other) const {
-    return pos_ > other.pos_;
-  }
+  bool operator>(const self_type& other) const { return pos_ > other.pos_; }
 
-  bool operator>=(const self_type &other) const {
-    return pos_ >= other.pos_;
-  }
+  bool operator>=(const self_type& other) const { return pos_ >= other.pos_; }
 
-  bool operator<(const self_type &other) const {
-    return pos_ < other.pos_;
-  }
+  bool operator<(const self_type& other) const { return pos_ < other.pos_; }
 
-  bool operator<=(const self_type &other) const {
-    return pos_ <= other.pos_;
-  }
-
+  bool operator<=(const self_type& other) const { return pos_ <= other.pos_; }
 
  private:
-  cbuf_type *buf_;
+  cbuf_type* buf_;
   size_type pos_;
 };
 
-
 template <typename circular_buffer_iterator_t>
-circular_buffer_iterator_t operator+(const typename circular_buffer_iterator_t::difference_type &a,
-                                     const circular_buffer_iterator_t &b) {
+circular_buffer_iterator_t operator+(
+    const typename circular_buffer_iterator_t::difference_type& a,
+    const circular_buffer_iterator_t& b) {
   return circular_buffer_iterator_t(a) + b;
 }
 
 template <typename circular_buffer_iterator_t>
-circular_buffer_iterator_t operator-(const typename circular_buffer_iterator_t::difference_type &a,
-                                     const circular_buffer_iterator_t &b) {
+circular_buffer_iterator_t operator-(
+    const typename circular_buffer_iterator_t::difference_type& a,
+    const circular_buffer_iterator_t& b) {
   return circular_buffer_iterator_t(a) - b;
 }
-
 
 //--------------------------------------------------------------------------------
 
 /// STL-like circular buffer
-template <typename T, int DefaultCapacity = 100, typename Alloc = std::allocator<T> >
+template <typename T, int DefaultCapacity = 100,
+          typename Alloc = std::allocator<T> >
 class circular_buffer {
  public:
   // STL requested typedefs.
@@ -185,22 +166,27 @@ class circular_buffer {
   typedef typename Alloc::size_type size_type;
   typedef typename Alloc::difference_type difference_type;
   typedef circular_buffer_iterator<self_type, self_type> iterator;
-  typedef circular_buffer_iterator<const self_type, self_type, const value_type> const_iterator;
+  typedef circular_buffer_iterator<const self_type, self_type, const value_type>
+      const_iterator;
 
   //---------------------------------------------------------------------------
   // Construction/Destruction/Assignment
-  explicit circular_buffer(
-      size_type capacity = DefaultCapacity)
-    : data_(alloc_.allocate(capacity)), capacity_(capacity),
-      head_(0), tail_(0), size_(0)
-  {}
+  explicit circular_buffer(size_type capacity = DefaultCapacity)
+      : data_(alloc_.allocate(capacity)),
+        capacity_(capacity),
+        head_(0),
+        tail_(0),
+        size_(0) {}
 
-  circular_buffer(const circular_buffer &other)
-    : data_(alloc_.allocate(other.capacity_)), capacity_(other.capacity_),
-      head_(other.head_), tail_(other.tail_), size_(other.size_) {
+  circular_buffer(const circular_buffer& other)
+      : data_(alloc_.allocate(other.capacity_)),
+        capacity_(other.capacity_),
+        head_(other.head_),
+        tail_(other.tail_),
+        size_(other.size_) {
     try {
       assign_into(other.begin(), other.end());
-    } catch(...) {
+    } catch (...) {
       destroy_all_elements();
       alloc_.deallocate(data_, capacity_);
       throw;
@@ -209,8 +195,7 @@ class circular_buffer {
 
   template <class InputIterator>
   circular_buffer(InputIterator from, InputIterator to)
-    : data_(alloc_.allocate(1)), capacity_(1),
-      head_(0), tail_(0), size_(0) {
+      : data_(alloc_.allocate(1)), capacity_(1), head_(0), tail_(0), size_(0) {
     circular_buffer tmp;
     tmp.assign_into_reserving(from, to);
     swap(tmp);
@@ -221,13 +206,13 @@ class circular_buffer {
     alloc_.deallocate(data_, capacity_);
   }
 
-  circular_buffer &operator=(const self_type &other) {
+  circular_buffer& operator=(const self_type& other) {
     circular_buffer tmp(other);
     swap(tmp);
     return *this;
   }
 
-  void swap(circular_buffer &other) {
+  void swap(circular_buffer& other) {
     std::swap(data_, other.data_);
     std::swap(capacity_, other.capacity_);
     std::swap(head_, other.head_);
@@ -235,41 +220,30 @@ class circular_buffer {
     std::swap(size_, other.size_);
   }
 
-  allocator_type get_allocator() const {
-    return alloc_;
-  }
+  allocator_type get_allocator() const { return alloc_; }
 
   //---------------------------------------------------------------------------
   // Iterators
 
   iterator begin() { return iterator(this, 0); }
-  iterator end()   { return iterator(this, size()); }
+  iterator end() { return iterator(this, size()); }
 
-  const_iterator begin() const  { return const_iterator(this, 0); }
+  const_iterator begin() const { return const_iterator(this, 0); }
   const_iterator cbegin() const { return begin(); }
 
-  const_iterator end() const  { return const_iterator(this, size()); }
+  const_iterator end() const { return const_iterator(this, size()); }
   const_iterator cend() const { return end(); }
-
 
   //---------------------------------------------------------------------------
   // Buffer size.
 
-  size_type size() const {
-    return size_;
-  }
+  size_type size() const { return size_; }
 
-  size_type capacity() const {
-    return capacity_;
-  }
+  size_type capacity() const { return capacity_; }
 
-  bool empty() const {
-    return size_ == 0;
-  }
+  bool empty() const { return size_ == 0; }
 
-  size_type max_size() const {
-    return alloc_.max_size();
-  }
+  size_type max_size() const { return alloc_.max_size(); }
 
   void reserve(size_type new_size) {
     if (capacity() < new_size) {
@@ -283,11 +257,11 @@ class circular_buffer {
   // Element access
 
   reference front() { return data_[tail_]; }
-  reference back()  { return data_[head_]; }
+  reference back() { return data_[head_]; }
   const_reference front() const { return data_[tail_]; }
-  const_reference back() const  { return data_[head_]; }
+  const_reference back() const { return data_[head_]; }
 
-  void push_back(const value_type &item) {
+  void push_back(const value_type& item) {
     // If empty, start at the first (0-based) index to insert:
     head_ = !size_ ? 0 : next_position(head_);
 
@@ -340,25 +314,22 @@ class circular_buffer {
   reference at(size_type n) { return at_checked(n); }
   const_reference at(size_type n) const { return at_checked(n); }
 
-private:
+ private:
   allocator_type alloc_;
-  value_type *data_;
+  value_type* data_;
   size_type capacity_;
   size_type head_;
   size_type tail_;
   size_type size_;
 
-
   reference at_unchecked(size_type index) const {
     return data_[index_to_subscript(index)];
   }
 
-
   reference at_checked(size_type index) const {
     if (index >= size_) {
       std::ostringstream s;
-      s << "Index " << index
-        << " out of range for circular_buffer of size "
+      s << "Index " << index << " out of range for circular_buffer of size "
         << size_ << "!";
       throw std::out_of_range(s.str());
     }
@@ -366,17 +337,15 @@ private:
   }
 
   // Bound index into data capacity.
-  inline size_type normalise(size_type n) const {
-    return n % capacity_;
-  }
+  inline size_type normalize(size_type n) const { return n % capacity_; }
 
   // Converts external index to an array subscript
   size_type index_to_subscript(size_type index) const {
-    return normalise(index + tail_);
+    return normalize(index + tail_);
   }
 
   size_type next_position(size_type index) {
-    return (index+1 == capacity_) ? 0 : index + 1;
+    return (index + 1 == capacity_) ? 0 : index + 1;
   }
 
   template <typename iter>
@@ -413,4 +382,4 @@ private:
 }  // namespace container
 }  // namespace werkzeugkiste
 
-#endif  // __WERKZEUGKISTE_CONTAINER_CIRCULAR_BUFFER_H__
+#endif  // WERKZEUGKISTE_CONTAINER_CIRCULAR_BUFFER_H

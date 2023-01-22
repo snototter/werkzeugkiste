@@ -41,5 +41,7 @@ function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
     #TODO add future (sub-)library demos here!
 
     ## TODO werkzeugkiste::geometry
+
+    ##TODO add an example which uses the all-in-one target werkzeugkiste::werkzeugkiste
 endfunction()
 
