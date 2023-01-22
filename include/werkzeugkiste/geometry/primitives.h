@@ -40,8 +40,7 @@ template<typename T>
 class Line2d_;
 
 template<typename T>
-class Circle_
-{  // NOLINT(readability-identifier-naming)
+class Circle_ {  // NOLINT(readability-identifier-naming)
 public:
   static_assert(std::is_floating_point<T>::value,
                 "Circle type must be float or double!");

@@ -52,13 +52,11 @@ inline constexpr float sqrt2_f = sqrt2_tpl<float>;
 /// Convert angle from degrees to radians.
 inline constexpr double Deg2Rad(double deg)
 {
-  // NOLINTNEXTLINE(*-magic-numbers)
   return (constants::pi_d / 180.0) * deg;
 }
 
 inline constexpr float Deg2Rad(float deg)
 {
-  // NOLINTNEXTLINE(*-magic-numbers)
   return (constants::pi_f / 180.0F) * deg;
 }
 
@@ -70,13 +68,11 @@ inline constexpr double Deg2Rad(int deg)
 /// Convert angle from radians to degrees.
 inline constexpr double Rad2Deg(double rad)
 {
-  // NOLINTNEXTLINE(*-magic-numbers)
   return rad * 180.0 * constants::inv_pi_d;
 }
 
 inline constexpr float Rad2Deg(float rad)
 {
-  // NOLINTNEXTLINE(*-magic-numbers)
   return rad * 180.0F * constants::inv_pi_f;
 }
 
@@ -118,7 +114,7 @@ inline constexpr bool IsClose(TVal x,
                               TVal y,
                               TTol relative_tolerance = 1e-9,
                               TTol absolute_tolerance = 0.0)
-{  // NOLINT
+{
   static_assert(std::is_floating_point_v<TVal>,
                 "Approximately equal check requires floating point types!");
 
@@ -159,10 +155,12 @@ inline constexpr bool IsEpsEqual(T x, T y)
 //-----------------------------------------------------------------------------
 // Templated sign/signum function
 
+// NOLINTBEGIN(readability-identifier-naming)
+
 /// Signum helper for unsigned types (to avoid compiler warnings).
 template<typename T>
 inline constexpr int _util_sign(T x, std::false_type /*is_signed*/)
-{  // NOLINT
+{
   return static_cast<T>(0) < x;
 }
 
@@ -170,9 +168,11 @@ inline constexpr int _util_sign(T x, std::false_type /*is_signed*/)
 /// unsigned types).
 template<typename T>
 inline constexpr int _util_sign(T x, std::true_type /*is_signed*/)
-{  // NOLINT
+{
   return (static_cast<T>(0) < x) - (x < static_cast<T>(0));
 }
+
+// NOLINTEND(readability-identifier-naming)
 
 /// Signum function which returns +1 (if x is positive), 0 (if x equals 0),
 /// or -1 (if x is negative).

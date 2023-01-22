@@ -104,6 +104,10 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
     which are separate targets that link against the werkzeugkiste library)
   * [ ] Check if the export header is correctly distributed in a consuming project
 * [ ] Properly set up Github Actions
+  * Test only on linux, but more versions
+  * Only build on windows & macos
+  * Sanitize on linux
+  * Lint on linux
 * [ ] Change to newer gcc and add `-Wextra-semi` to dev presets
 * [ ] Change the default clang-format rules
 * [ ] Coverage

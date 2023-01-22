@@ -412,18 +412,23 @@ public:
 
   /// Equality checks can be used for all vector specializations.
   /// Floating point value types use the `IsClose` check with:
-  /// * relative tolerance of 1e-5 (float) and 1e-9 (double), and
-  /// * absolute tolerance of 1e-8 (float) and 1e-12 (double).
+  /// * relative tolerance of 1e-6 (float) and 1e-9 (double), and
+  /// * absolute tolerance of 1e-9 (float) and 1e-12 (double).
+  ///
+  /// Float can store 6-9 significant digits, whereas double can
+  /// typically store 15-18 significant digits. Given the usage
+  /// scenarios of this template class, the above tolerances
+  /// are sufficiently tight.
   friend bool operator==(const Vec<T, Dim>& lhs, const Vec<T, Dim>& rhs)
   {
     if constexpr (std::is_integral<T>::value) {
       return lhs.IsEqual(rhs);
     } else {
-      // Float can store 6-9 significant digits
       if constexpr (std::is_same<float, T>::value) {
+        // NOLINTNEXTLINE(*-magic-numbers)
         return lhs.IsClose(rhs, 1e-6F, 1e-9F);
       }
-      // Double can typically store 15-18 significant digits
+      // NOLINTNEXTLINE(*-magic-numbers)
       return lhs.IsClose(rhs, 1e-9, 1e-12);
     }
   }

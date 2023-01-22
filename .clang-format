@@ -1,6 +1,8 @@
 ---
 Language: Cpp
 # BasedOnStyle: Chromium
+#TODO https://github.com/google/googletest/blob/main/.clang-format
+#https://google.github.io/styleguide/cppguide.html
 AccessModifierOffset: -2
 AlignAfterOpenBracket: Align
 AlignConsecutiveMacros: false
