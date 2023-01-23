@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>werkzeugkiste::timing namespace | werkzeugkiste</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">werkzeugkiste</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="about.html">About</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>timing <span class="m-thin">namespace</span>
+        </h1>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#typedef-members">Typedefs</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<p>Stop watch &amp; additional helpers on top of <code>std::chrono</code> (to hide some of its template boilerplate).</p>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename Clock = std::chrono::steady_clock&gt;</div>
+              class <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_</a>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="typedef-members">
+          <h2><a href="#typedef-members">Typedefs</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a href="#a29d46c7748459b955311dff13ad67ac2" class="m-doc">StopWatch</a> = <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&lt;std::chrono::steady_clock&gt;
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename Duration&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e600a44d046afebc72b78fa1fdadd89" class="m-doc">DurationAbbreviation</a>(</span><span class="m-doc-wrap">) -&gt; std::string</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Clock&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1194794c81579cfdbd964db6b9ab0b7a" class="m-doc">ClockTypeName</a>(</span><span class="m-doc-wrap">) -&gt; std::string</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Duration&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6eea807d632b8d64ccf64980aad280a2" class="m-doc">PrecisionTypeName</a>(</span><span class="m-doc-wrap">) -&gt; std::string</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename DurationFrom, typename DurationTo&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a51349e426cc0a9cf95fbd80ec4beeb16" class="m-doc">CastToTicks</a>(</span><span class="m-doc-wrap">const DurationFrom&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Duration&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a17562c2ddb3accb8308c3a5a7daadd2c" class="m-doc">ToSeconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the number of seconds for the given std::chrono::duration.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Duration&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa6e73b31a4b776e2448ab38a077e374a" class="m-doc">ToMilliseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the number of milliseconds for the given std::chrono::duration.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Duration&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a290915e287515a01e4818678d030ca44" class="m-doc">ToMicroseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the number of microseconds for the given std::chrono::duration.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Duration&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#acd9d5af644a6fff2de8417446ec4c0b7" class="m-doc">ToNanoseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Returns the number of nanoseconds for the given std::chrono::duration.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3ed8bdf8ebce5a1d85d28f333519bf51" class="m-doc">SecondsToString</a>(</span><span class="m-doc-wrap">unsigned int seconds) -&gt; WERKZEUGKISTE_EXPORT std::string</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a48b51ef3e632dee161be9df286d36876" class="m-doc">SetTocFormat</a>(</span><span class="m-doc-wrap">bool print_labels_aligned = false,
+              int fixed_number_width = 0,
+              int number_precision = 0) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Set output format for the toc_xxx() functions.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adfac8400d15e15d426a485e4bddd2620" class="m-doc">MuteToc</a>(</span><span class="m-doc-wrap">) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Mute future toc_xxx calls, i.e. no output will be displayed.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3962c85549826deea8e1988af2c1a4c5" class="m-doc">UnmuteToc</a>(</span><span class="m-doc-wrap">) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Unmute, i.e. future toc_xxx calls will display the elapsed time again.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a18897321918b7b44bad09bd3905ee9f4" class="m-doc">Tic</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Starts (or restarts) a.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aca81aa7eba59fef8f20200dc6f6e147c" class="m-doc">TocSeconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Displays the elapsed time in seconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aabf7c94e7730a68d2691abbed0075be5" class="m-doc">TocMilliseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Displays the elapsed time in milliseconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2168d04eaff6b9e2f98fb7e4ee3b235c" class="m-doc">TocMicroseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Displays the elapsed time in microseconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1b28519fa0231aff692d0ae9d0054ea3" class="m-doc">TocNanoseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT void</span>
+            </dt>
+            <dd>Displays the elapsed time in nanoseconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a22980216e1683aa612f90d390734de0b" class="m-doc">TTocSeconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT double</span>
+            </dt>
+            <dd>Returns the elapsed time in seconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ce7c9028e794948af8627402dd35aa1" class="m-doc">TTocMilliseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT double</span>
+            </dt>
+            <dd>Returns the elapsed time in milliseconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1c4c3e0a90d68ff60a88a98669d4ddba" class="m-doc">TTocMicroseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT double</span>
+            </dt>
+            <dd>Returns the elapsed time in microseconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a23e9754a4478b760dc3a8ddbc704386e" class="m-doc">TTocNanoseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string()) -&gt; WERKZEUGKISTE_EXPORT double</span>
+            </dt>
+            <dd>Returns the elapsed time in nanoseconds.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a29d46c7748459b955311dff13ad67ac2"><div>
+            <h3>
+              using werkzeugkiste::<wbr />timing::<wbr /><a href="#a29d46c7748459b955311dff13ad67ac2" class="m-doc-self">StopWatch</a> = <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&lt;std::chrono::steady_clock&gt;
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4e600a44d046afebc72b78fa1fdadd89"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Duration&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e600a44d046afebc72b78fa1fdadd89" class="m-doc-self">DurationAbbreviation</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+<p>Returns the abbreviation for the given duration type, e.g. std::chrono::hours --&gt; &quot;hrs&quot;.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1194794c81579cfdbd964db6b9ab0b7a"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Clock&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1194794c81579cfdbd964db6b9ab0b7a" class="m-doc-self">ClockTypeName</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+<p>Returns the fully-qualified name of the given clock type, e.g. &quot;std::chrono::system_clock&quot;.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6eea807d632b8d64ccf64980aad280a2"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Duration&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6eea807d632b8d64ccf64980aad280a2" class="m-doc-self">PrecisionTypeName</a>(</span><span class="m-doc-wrap">)</span></span>
+            </h3>
+<p>Returns the fully-qualified name of the given duration type, e.g. &quot;std::chrono::nanoseconds&quot;.</p>
+          </div></section>
+          <section class="m-doc-details" id="a51349e426cc0a9cf95fbd80ec4beeb16"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename DurationFrom, typename DurationTo&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51349e426cc0a9cf95fbd80ec4beeb16" class="m-doc-self">CastToTicks</a>(</span><span class="m-doc-wrap">const DurationFrom&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+<p>Returns the number of ticks for the given std::chrono::duration with a different precision.</p>
+          </div></section>
+          <section class="m-doc-details" id="a17562c2ddb3accb8308c3a5a7daadd2c"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Duration&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17562c2ddb3accb8308c3a5a7daadd2c" class="m-doc-self">ToSeconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the number of seconds for the given std::chrono::duration.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa6e73b31a4b776e2448ab38a077e374a"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Duration&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6e73b31a4b776e2448ab38a077e374a" class="m-doc-self">ToMilliseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the number of milliseconds for the given std::chrono::duration.</p>
+          </div></section>
+          <section class="m-doc-details" id="a290915e287515a01e4818678d030ca44"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Duration&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a290915e287515a01e4818678d030ca44" class="m-doc-self">ToMicroseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the number of microseconds for the given std::chrono::duration.</p>
+          </div></section>
+          <section class="m-doc-details" id="acd9d5af644a6fff2de8417446ec4c0b7"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Duration&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd9d5af644a6fff2de8417446ec4c0b7" class="m-doc-self">ToNanoseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Returns the number of nanoseconds for the given std::chrono::duration.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3ed8bdf8ebce5a1d85d28f333519bf51"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3ed8bdf8ebce5a1d85d28f333519bf51" class="m-doc-self">SecondsToString</a>(</span><span class="m-doc-wrap">unsigned int seconds)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
+            </h3>
+<p>Returns a human readable string approximating the given time.</p><p>For example, &lsquo;SecondsToString(3700 * 24 + 50) = &#x27;1 day 40 minutes&rsquo;`.</p>
+          </div></section>
+          <section class="m-doc-details" id="a48b51ef3e632dee161be9df286d36876"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a48b51ef3e632dee161be9df286d36876" class="m-doc-self">SetTocFormat</a>(</span><span class="m-doc-wrap">bool print_labels_aligned = false,
+              int fixed_number_width = 0,
+              int number_precision = 0)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Set output format for the toc_xxx() functions.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">print_labels_aligned</td>
+                  <td>If true, all timer labels will be displayed at a fixed width (which is determined by the longest label).</td>
+                </tr>
+                <tr>
+                  <td>fixed_number_width</td>
+                  <td>If &gt; 0, numbers are displayed using this fixed width.</td>
+                </tr>
+                <tr>
+                  <td>number_precision</td>
+                  <td>If &gt; 0, defines the decimal precision for displaying time measurements.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="adfac8400d15e15d426a485e4bddd2620"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adfac8400d15e15d426a485e4bddd2620" class="m-doc-self">MuteToc</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Mute future toc_xxx calls, i.e. no output will be displayed.</p>
+<p>Users of the C++ library should usually prefer the TIC/TOC macros and #define NO_TICTOC instead. The mute/unmute calls are intended for a (future) Python interface where it&#x27;s less convenient to rebuild the library. With mute() you still &quot;suffer&quot; from unnecessary function call overheads, whereas with NO_TICTOC all function calls would be eliminated.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3962c85549826deea8e1988af2c1a4c5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3962c85549826deea8e1988af2c1a4c5" class="m-doc-self">UnmuteToc</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Unmute, i.e. future toc_xxx calls will display the elapsed time again.</p>
+          </div></section>
+          <section class="m-doc-details" id="a18897321918b7b44bad09bd3905ee9f4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a18897321918b7b44bad09bd3905ee9f4" class="m-doc-self">Tic</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Starts (or restarts) a.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>You can specify a label to differentiate multiple StopWatches.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p><a href="namespacewerkzeugkiste_1_1timing.html#a29d46c7748459b955311dff13ad67ac2" class="m-doc">StopWatch</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aca81aa7eba59fef8f20200dc6f6e147c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aca81aa7eba59fef8f20200dc6f6e147c" class="m-doc-self">TocSeconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Displays the elapsed time in seconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aabf7c94e7730a68d2691abbed0075be5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabf7c94e7730a68d2691abbed0075be5" class="m-doc-self">TocMilliseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Displays the elapsed time in milliseconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2168d04eaff6b9e2f98fb7e4ee3b235c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2168d04eaff6b9e2f98fb7e4ee3b235c" class="m-doc-self">TocMicroseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Displays the elapsed time in microseconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1b28519fa0231aff692d0ae9d0054ea3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT void werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1b28519fa0231aff692d0ae9d0054ea3" class="m-doc-self">TocNanoseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Displays the elapsed time in nanoseconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a22980216e1683aa612f90d390734de0b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a22980216e1683aa612f90d390734de0b" class="m-doc-self">TTocSeconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Returns the elapsed time in seconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a9ce7c9028e794948af8627402dd35aa1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ce7c9028e794948af8627402dd35aa1" class="m-doc-self">TTocMilliseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Returns the elapsed time in milliseconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a1c4c3e0a90d68ff60a88a98669d4ddba"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1c4c3e0a90d68ff60a88a98669d4ddba" class="m-doc-self">TTocMicroseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Returns the elapsed time in microseconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a23e9754a4478b760dc3a8ddbc704386e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_EXPORT double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23e9754a4478b760dc3a8ddbc704386e" class="m-doc-self">TTocNanoseconds</a>(</span><span class="m-doc-wrap">const std::string&amp; label = std::string())</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="tictoc_8h.html">&lt;werkzeugkiste/timing/tictoc.h&gt;</a></div>
+            </h3>
+            <p>Returns the elapsed time in nanoseconds.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">label</td>
+                  <td>Label of the corresponding</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-note m-default"><h4>See also</h4><p>tic() call.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>werkzeugkiste. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

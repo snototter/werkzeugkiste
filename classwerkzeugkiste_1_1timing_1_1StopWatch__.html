@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>werkzeugkiste::timing::StopWatch_ class | werkzeugkiste</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">werkzeugkiste</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="about.html">About</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;stopwatch.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;typename Clock = std::chrono::steady_clock&gt;</div>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1timing.html">timing</a>::<wbr/></span>StopWatch_ <span class="m-thin">class</span>
+        </h1>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<p>A stop watch with configurable clock.</p><p>A stop watch measures the time since you last called <code><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html#a20efe7cdbab68f73921c6986df92106e" class="m-doc">Start()</a></code>, or since its construction. Use its <code>ElapsedXXX()</code> methods to get the elapsed time in the corresponding time interval (i.e. precision), e.g. <code><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html#a5d7d06da8378b8ee9b15b1a08f0d5565" class="m-doc">ElapsedSeconds()</a></code>.</p><p>Duration measurements should use a monotonic clock. Thus, we explicitly default to <code>steady_clock</code> (since <code>high_resolution_clock</code> is not guaranteed to be steady).</p>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a8226b06d91f8a47bf3eb23d5aa118369">
+              using <a href="#a8226b06d91f8a47bf3eb23d5aa118369" class="m-doc-self">clock_type</a> = Clock
+            </dt>
+            <dd>Clock type used by this stop watch.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a1263ec1149837751ce78de82361024c8">
+              <span class="m-doc-wrap-bumper"><a href="#a1263ec1149837751ce78de82361024c8" class="m-doc-self">StopWatch_</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Constructor starts the stop watch.</dd>
+            <dt id="a8d346e493d5f095b354dd35e2848480a">
+              <span class="m-doc-wrap-bumper"><a href="#a8d346e493d5f095b354dd35e2848480a" class="m-doc-self">StopWatch_</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&amp; other)</span>
+            </dt>
+            <dd>Copy-constructor copies the other&#x27;s start time point.</dd>
+            <dt id="a9d6f75e0e5e0fabc39e7cc0abee584d3">
+              <span class="m-doc-wrap-bumper"><a href="#a9d6f75e0e5e0fabc39e7cc0abee584d3" class="m-doc-self">~StopWatch_</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a1dfee7c0332bfd3f8337d416badf0ff1">
+              <span class="m-doc-wrap-bumper"><a href="#a1dfee7c0332bfd3f8337d416badf0ff1" class="m-doc-self">StopWatch_</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&amp;&amp; other) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a412037d1116af6250d06e1e1edf515e5">
+              <span class="m-doc-wrap-bumper">auto <a href="#a412037d1116af6250d06e1e1edf515e5" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&amp; other) -&gt; <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a3f3f20c5e3bc6b240d9746ca2ebc7e04">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f3f20c5e3bc6b240d9746ca2ebc7e04" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&amp;&amp; other) -&gt; <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a20efe7cdbab68f73921c6986df92106e">
+              <span class="m-doc-wrap-bumper">void <a href="#a20efe7cdbab68f73921c6986df92106e" class="m-doc-self">Start</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Starts or restarts the stop watch.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Ratio&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6abe882b7cebb9d7f4dc9cb124f3111c" class="m-doc">ElapsedAs</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt id="a5d7d06da8378b8ee9b15b1a08f0d5565">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5d7d06da8378b8ee9b15b1a08f0d5565" class="m-doc-self">ElapsedSeconds</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            </dt>
+            <dd>Returns the elapsed time in seconds.</dd>
+            <dt id="aaf2a4d25b23e7ddfb12e7333d738694e">
+              <span class="m-doc-wrap-bumper">auto <a href="#aaf2a4d25b23e7ddfb12e7333d738694e" class="m-doc-self">ElapsedMilliseconds</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            </dt>
+            <dd>Returns the elapsed time in milliseconds.</dd>
+            <dt id="afc4b4598156fc231d2d144d9f1c66a6d">
+              <span class="m-doc-wrap-bumper">auto <a href="#afc4b4598156fc231d2d144d9f1c66a6d" class="m-doc-self">ElapsedMicroseconds</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            </dt>
+            <dd>Returns the elapsed time in microseconds.</dd>
+            <dt id="af41170d6e0479895f84718c7b44bd68c">
+              <span class="m-doc-wrap-bumper">auto <a href="#af41170d6e0479895f84718c7b44bd68c" class="m-doc-self">ElapsedNanoseconds</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            </dt>
+            <dd>Returns the elapsed time in nanoseconds.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a089012b2945bbf28d300039b38308c55" class="m-doc">YearsUntilOverflow</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt id="a8072fba54d7101c0572558aaa7416580">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8072fba54d7101c0572558aaa7416580" class="m-doc-self">IsSteady</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns true if the used clock is steady (monotonic).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5cb1f2ffe6d2ab4328bc0ca2738259e9" class="m-doc">ClockName</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a6abe882b7cebb9d7f4dc9cb124f3111c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Clock&gt;
+                template&lt;typename Ratio&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr />StopWatch_&lt;Clock&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6abe882b7cebb9d7f4dc9cb124f3111c" class="m-doc-self">ElapsedAs</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>Returns the elapsed time as ticks of the given time interval (specified as tick interval, which is a rational fraction - std::ratio - representing the time in seconds from one tick to the next, i.e. similar to the Period template parameter in <code>std::chrono::duration</code>).</p>
+          </div></section>
+          <section class="m-doc-details" id="a089012b2945bbf28d300039b38308c55"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Clock&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr />StopWatch_&lt;Clock&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a089012b2945bbf28d300039b38308c55" class="m-doc-self">YearsUntilOverflow</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>Returns the number of years before this stop watch will overflow.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5cb1f2ffe6d2ab4328bc0ca2738259e9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Clock&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr />StopWatch_&lt;Clock&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5cb1f2ffe6d2ab4328bc0ca2738259e9" class="m-doc-self">ClockName</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>Returns a readable clock typeid, for example &quot;std::chrono::steady_clock&quot;.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>werkzeugkiste. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

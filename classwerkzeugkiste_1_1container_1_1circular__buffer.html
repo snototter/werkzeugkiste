@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>werkzeugkiste::container::circular_buffer class | werkzeugkiste</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">werkzeugkiste</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="about.html">About</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="circular__buffer_8h.html">&lt;circular_buffer.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;typename T, int DefaultCapacity = 100, typename Alloc = std::allocator&lt;T&gt;&gt;</div>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1container.html">container</a>::<wbr/></span>circular_buffer <span class="m-thin">class</span>
+        </h1>
+        <p>STL-like circular buffer.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="af099591f529013da01a3e2045c0abd5a">
+              using <a href="#af099591f529013da01a3e2045c0abd5a" class="m-doc-self">self_type</a> = <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html" class="m-doc">circular_<wbr />buffer</a>&lt;T, DefaultCapacity, Alloc&gt;
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a6baee5ebfadd1b44d85ac4109327121c">
+              using <a href="#a6baee5ebfadd1b44d85ac4109327121c" class="m-doc-self">allocator_type</a> = Alloc
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aa91d2034d6da217f88a3b5a97e18a2ee">
+              using <a href="#aa91d2034d6da217f88a3b5a97e18a2ee" class="m-doc-self">value_type</a> = Alloc::value_type
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aaa1450a9bdddb9ab366bbb3fb6b1311c">
+              using <a href="#aaa1450a9bdddb9ab366bbb3fb6b1311c" class="m-doc-self">pointer</a> = Alloc::pointer
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a1f8c9e30ecb29cb9f9b2c2f42ef56139">
+              using <a href="#a1f8c9e30ecb29cb9f9b2c2f42ef56139" class="m-doc-self">const_pointer</a> = Alloc::const_pointer
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a622a76dc9fb6160e745730f8eb108364">
+              using <a href="#a622a76dc9fb6160e745730f8eb108364" class="m-doc-self">reference</a> = Alloc::reference
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aac5a3a2560254ab02071308a2d729c5d">
+              using <a href="#aac5a3a2560254ab02071308a2d729c5d" class="m-doc-self">const_reference</a> = Alloc::const_reference
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a7104ebb49585ba50cd703e51370bd460">
+              using <a href="#a7104ebb49585ba50cd703e51370bd460" class="m-doc-self">size_type</a> = Alloc::size_type
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ad024f6f4fa14320778434d508447fc95">
+              using <a href="#ad024f6f4fa14320778434d508447fc95" class="m-doc-self">difference_type</a> = Alloc::difference_type
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aa195ed6d8cc281bfd5c11cba1a3911f4">
+              using <a href="#aa195ed6d8cc281bfd5c11cba1a3911f4" class="m-doc-self">iterator</a> = <a href="classwerkzeugkiste_1_1container_1_1circular__buffer__iterator.html" class="m-doc">circular_<wbr />buffer_<wbr />iterator</a>&lt;<a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#af099591f529013da01a3e2045c0abd5a" class="m-doc">self_<wbr />type</a>, <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#af099591f529013da01a3e2045c0abd5a" class="m-doc">self_<wbr />type</a>&gt;
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a85764c03ffea2482c3301acdebc17925">
+              using <a href="#a85764c03ffea2482c3301acdebc17925" class="m-doc-self">const_iterator</a> = <a href="classwerkzeugkiste_1_1container_1_1circular__buffer__iterator.html" class="m-doc">circular_<wbr />buffer_<wbr />iterator</a>&lt;const <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#af099591f529013da01a3e2045c0abd5a" class="m-doc">self_<wbr />type</a>, <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#af099591f529013da01a3e2045c0abd5a" class="m-doc">self_<wbr />type</a>, const <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aa91d2034d6da217f88a3b5a97e18a2ee" class="m-doc">value_<wbr />type</a>&gt;
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="aa114fb88ea5d61c28950d1542d08424d">
+              <span class="m-doc-wrap-bumper"><a href="#aa114fb88ea5d61c28950d1542d08424d" class="m-doc-self">circular_buffer</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a> capacity = DefaultCapacity) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ac0a971c73f51199163fc202b018d087d">
+              <span class="m-doc-wrap-bumper"><a href="#ac0a971c73f51199163fc202b018d087d" class="m-doc-self">circular_buffer</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html" class="m-doc">circular_<wbr />buffer</a>&amp; other)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="af5dd74bc11c3aedece89a883b578b1d0">
+              <div class="m-doc-template">template&lt;class InputIterator&gt;</div>
+              <span class="m-doc-wrap-bumper"><a href="#af5dd74bc11c3aedece89a883b578b1d0" class="m-doc-self">circular_buffer</a>(</span><span class="m-doc-wrap">InputIterator from,
+              InputIterator to)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="af858470c2cde6271809941fac1fae587">
+              <span class="m-doc-wrap-bumper"><a href="#af858470c2cde6271809941fac1fae587" class="m-doc-self">~circular_buffer</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a7fccd45c9bce89620682a968bc46d968">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7fccd45c9bce89620682a968bc46d968" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#af099591f529013da01a3e2045c0abd5a" class="m-doc">self_<wbr />type</a>&amp; other) -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html" class="m-doc">circular_<wbr />buffer</a>&amp;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a10175c5bd1f427108591ffe44e8b2f61">
+              <span class="m-doc-wrap-bumper">void <a href="#a10175c5bd1f427108591ffe44e8b2f61" class="m-doc-self">swap</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html" class="m-doc">circular_<wbr />buffer</a>&amp; other)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aaa1590bcd10f399fdba5128eb3b117f2">
+              <span class="m-doc-wrap-bumper">auto <a href="#aaa1590bcd10f399fdba5128eb3b117f2" class="m-doc-self">get_allocator</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a6baee5ebfadd1b44d85ac4109327121c" class="m-doc">allocator_<wbr />type</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a01390d82303dccc12ac3156191ffa4a8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a01390d82303dccc12ac3156191ffa4a8" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aa195ed6d8cc281bfd5c11cba1a3911f4" class="m-doc">iterator</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ae7bd4a69df487b8804ddb7b67660f1d3">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7bd4a69df487b8804ddb7b67660f1d3" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aa195ed6d8cc281bfd5c11cba1a3911f4" class="m-doc">iterator</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a40d1e56b63dfdf8a00209f436eae8069">
+              <span class="m-doc-wrap-bumper">auto <a href="#a40d1e56b63dfdf8a00209f436eae8069" class="m-doc-self">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a85764c03ffea2482c3301acdebc17925" class="m-doc">const_<wbr />iterator</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a1ebd3d9c9f023ad50d9205e4c8a75f02">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1ebd3d9c9f023ad50d9205e4c8a75f02" class="m-doc-self">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a85764c03ffea2482c3301acdebc17925" class="m-doc">const_<wbr />iterator</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ad5d850fb02581789389acb98af3d6314">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad5d850fb02581789389acb98af3d6314" class="m-doc-self">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a85764c03ffea2482c3301acdebc17925" class="m-doc">const_<wbr />iterator</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="af85da5ce547f94596189bb569e7d7340">
+              <span class="m-doc-wrap-bumper">auto <a href="#af85da5ce547f94596189bb569e7d7340" class="m-doc-self">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a85764c03ffea2482c3301acdebc17925" class="m-doc">const_<wbr />iterator</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ad27bfc54e4647bb5700bd82a1adf5eb3">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad27bfc54e4647bb5700bd82a1adf5eb3" class="m-doc-self">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a8bdfcc6f81a743b5c408ff34f8272c1b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8bdfcc6f81a743b5c408ff34f8272c1b" class="m-doc-self">capacity</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a784c9a3f1accd8d26614497ea64160b8">
+              <span class="m-doc-wrap-bumper">auto <a href="#a784c9a3f1accd8d26614497ea64160b8" class="m-doc-self">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a5d91419b613088ac8575a655b492bbc3">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5d91419b613088ac8575a655b492bbc3" class="m-doc-self">max_size</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ae9468825320867b56e789d38c3960a57">
+              <span class="m-doc-wrap-bumper">void <a href="#ae9468825320867b56e789d38c3960a57" class="m-doc-self">reserve</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a> new_size)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ad2500dabcd562c7be8ca03d4e02819ab">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad2500dabcd562c7be8ca03d4e02819ab" class="m-doc-self">front</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a622a76dc9fb6160e745730f8eb108364" class="m-doc">reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aaf65a4c89bd58dd163cc25bc1159480a">
+              <span class="m-doc-wrap-bumper">auto <a href="#aaf65a4c89bd58dd163cc25bc1159480a" class="m-doc-self">back</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a622a76dc9fb6160e745730f8eb108364" class="m-doc">reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a0beb194b1446da5b2cade4c7571220e2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0beb194b1446da5b2cade4c7571220e2" class="m-doc-self">front</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aac5a3a2560254ab02071308a2d729c5d" class="m-doc">const_<wbr />reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ac8d587085e469613954f27314d325804">
+              <span class="m-doc-wrap-bumper">auto <a href="#ac8d587085e469613954f27314d325804" class="m-doc-self">back</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aac5a3a2560254ab02071308a2d729c5d" class="m-doc">const_<wbr />reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="adc31ff626ba59f0094bc7bbf4035ab78">
+              <span class="m-doc-wrap-bumper">void <a href="#adc31ff626ba59f0094bc7bbf4035ab78" class="m-doc-self">push_back</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aa91d2034d6da217f88a3b5a97e18a2ee" class="m-doc">value_<wbr />type</a>&amp; item)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a62d3141d6b73bf843a017865f125f5a2">
+              <span class="m-doc-wrap-bumper">void <a href="#a62d3141d6b73bf843a017865f125f5a2" class="m-doc-self">pop_front</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a25178a12c5737ac3c8904cbbfdd5d41e">
+              <span class="m-doc-wrap-bumper">void <a href="#a25178a12c5737ac3c8904cbbfdd5d41e" class="m-doc-self">pop_back</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a40aa077d2a136447e6940f01a7514fed">
+              <span class="m-doc-wrap-bumper">void <a href="#a40aa077d2a136447e6940f01a7514fed" class="m-doc-self">clear</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aa0d22494e906a7238887eab8c4182a54">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa0d22494e906a7238887eab8c4182a54" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a> n) -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a622a76dc9fb6160e745730f8eb108364" class="m-doc">reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a62de68eb26fd49bf6b7b70b81164b96d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a62de68eb26fd49bf6b7b70b81164b96d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a> n) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aac5a3a2560254ab02071308a2d729c5d" class="m-doc">const_<wbr />reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="affad0cb507bde13071f2a28b57cc8124">
+              <span class="m-doc-wrap-bumper">auto <a href="#affad0cb507bde13071f2a28b57cc8124" class="m-doc-self">at</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a> n) -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a622a76dc9fb6160e745730f8eb108364" class="m-doc">reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a2be7c49f8745f1d0ca98c8a20d1f81a0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2be7c49f8745f1d0ca98c8a20d1f81a0" class="m-doc-self">at</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#a7104ebb49585ba50cd703e51370bd460" class="m-doc">size_<wbr />type</a> n) const -&gt; <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html#aac5a3a2560254ab02071308a2d729c5d" class="m-doc">const_<wbr />reference</a></span>
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>werkzeugkiste. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

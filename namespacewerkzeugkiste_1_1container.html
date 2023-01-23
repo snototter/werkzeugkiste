@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>werkzeugkiste::container namespace | werkzeugkiste</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">werkzeugkiste</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="about.html">About</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>container <span class="m-thin">namespace</span>
+        </h1>
+        <p>Utility functions for standard containers.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, typename T_nonconst, typename elem_type = typename T::value_type&gt;</div>
+              class <a href="classwerkzeugkiste_1_1container_1_1circular__buffer__iterator.html" class="m-doc">circular_buffer_iterator</a>
+            </dt>
+            <dd>Templated STL compatible iterator for the <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html" class="m-doc">circular_<wbr />buffer</a>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, int DefaultCapacity = 100, typename Alloc = std::allocator&lt;T&gt;&gt;</div>
+              class <a href="classwerkzeugkiste_1_1container_1_1circular__buffer.html" class="m-doc">circular_buffer</a>
+            </dt>
+            <dd>STL-like circular buffer.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Container&gt;</div>
+              class <a href="classwerkzeugkiste_1_1container_1_1Ordering.html" class="m-doc">Ordering</a>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename circular_buffer_iterator_t&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a534404282f32898f58f51e24cba7c094" class="m-doc">operator+</a>(</span><span class="m-doc-wrap">const typename circular_buffer_iterator_t::difference_type&amp; a,
+              const circular_buffer_iterator_t&amp; b) -&gt; circular_buffer_iterator_t</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename circular_buffer_iterator_t&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5eacbd06fc5fdc3ff4b997026d8016c5" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">const typename circular_buffer_iterator_t::difference_type&amp; a,
+              const circular_buffer_iterator_t&amp; b) -&gt; circular_buffer_iterator_t</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Container&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a55ee2943864920bfa836c87a471f7d4f" class="m-doc">SmoothMovingAverage</a>(</span><span class="m-doc-wrap">const Container&amp; data,
+              int window_size) -&gt; Container</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Container&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c95cb4cccfb41bab4dd5961f9d3d90d" class="m-doc">Mean</a>(</span><span class="m-doc-wrap">const Container&amp; values) -&gt; double</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Container&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#a343a3a1912d536933ea475f9fed9d0be" class="m-doc">MinMax</a>(</span><span class="m-doc-wrap">const Container&amp; values,
+              typename Container::value_type* min = nullptr,
+              typename Container::value_type* max = nullptr,
+              std::size_t* idx_min = nullptr,
+              std::size_t* idx_max = nullptr)</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename M&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed7051e5f97e7b72bad565114345eaad" class="m-doc">GetMapKeys</a>(</span><span class="m-doc-wrap">const M&amp; map) -&gt; std::vector&lt;typename M::key_type&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Tp&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aabe4e803b8c53271f263947dc466aa5d" class="m-doc">CmpAsc</a>(</span><span class="m-doc-wrap">const Tp&amp; a,
+              const Tp&amp; b) -&gt; bool</span>
+            </dt>
+            <dd>A sort comparator for ascending order, which uses <code>operator&lt;</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Tp&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a37949a13cb08f7b2927d2de60deb702a" class="m-doc">CmpDesc</a>(</span><span class="m-doc-wrap">const Tp&amp; a,
+              const Tp&amp; b) -&gt; bool</span>
+            </dt>
+            <dd>A sort comparator for descending order, which uses <code>operator&lt;</code>.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Container&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae878a9ad3fe60dfe90f8f0be00537daa" class="m-doc">GetSortedIndices</a>(</span><span class="m-doc-wrap">const Container&amp; data,
+              bool(*)(const typename Container::value_type&amp;, const typename Container::value_type&amp;) cmp = <a href="namespacewerkzeugkiste_1_1container.html#aabe4e803b8c53271f263947dc466aa5d" class="m-doc">CmpAsc</a>&lt;typename Container::value_type&gt;) -&gt; std::vector&lt;std::size_t&gt;</span>
+            </dt>
+            <dd>Returns the indices which correspond to a sorted <code>data</code> vector.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Container&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af66b1e12b0a7e2184d58c9955dfd982d" class="m-doc">ApplyIndexLookup</a>(</span><span class="m-doc-wrap">const Container&amp; data,
+              const std::vector&lt;std::size_t&gt;&amp; indices) -&gt; Container</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename TData, typename TKey&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a74ded9d6852362cfc40275db8d0daf54" class="m-doc">SortByExternalKeys</a>(</span><span class="m-doc-wrap">const std::vector&lt;TData&gt;&amp; data,
+              const std::vector&lt;TKey&gt;&amp; keys,
+              bool(*)(const TData&amp;, const TKey&amp;) cmp = <a href="namespacewerkzeugkiste_1_1container.html#aabe4e803b8c53271f263947dc466aa5d" class="m-doc">CmpAsc</a>&lt;TKey&gt;) -&gt; std::vector&lt;TData&gt;</span>
+            </dt>
+            <dd>Returns the data vector sorted by the given external keys.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Container, typename Tp = std::decay_t&lt;                                 decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a33387a0433932ee4be4417e7575077dc" class="m-doc">FindDuplicates</a>(</span><span class="m-doc-wrap">const Container&amp; container) -&gt; std::map&lt;Tp, std::size_t&gt;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Container, typename Tp = std::decay_t&lt;                                 decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a74f303f33d2f8159e7dcfc1cf96d8d9e" class="m-doc">HasUniqueItems</a>(</span><span class="m-doc-wrap">const Container&amp; container) -&gt; bool</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Tv, typename... Ts&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a10a3b2564789947a58a814d5cc86014e" class="m-doc">ContainsKey</a>(</span><span class="m-doc-wrap">const std::map&lt;Ts...&gt;&amp; container,
+              const Tv&amp; key) -&gt; bool</span>
+            </dt>
+            <dd>Returns true if the given key exists within the map.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Container, typename Tp = std::decay_t&lt;                                 decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a168a39b1ea71c229943a94e183791e20" class="m-doc">ContainsValue</a>(</span><span class="m-doc-wrap">const Container&amp; container,
+              const Tp&amp; value) -&gt; bool</span>
+            </dt>
+            <dd>Returns true if the given element exists within the container.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a534404282f32898f58f51e24cba7c094"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="circular__buffer_8h.html">&lt;werkzeugkiste/container/circular_buffer.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename circular_buffer_iterator_t&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">circular_buffer_iterator_t werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a534404282f32898f58f51e24cba7c094" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap">const typename circular_buffer_iterator_t::difference_type&amp; a,
+              const circular_buffer_iterator_t&amp; b)</span></span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a5eacbd06fc5fdc3ff4b997026d8016c5"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="circular__buffer_8h.html">&lt;werkzeugkiste/container/circular_buffer.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename circular_buffer_iterator_t&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">circular_buffer_iterator_t werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5eacbd06fc5fdc3ff4b997026d8016c5" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">const typename circular_buffer_iterator_t::difference_type&amp; a,
+              const circular_buffer_iterator_t&amp; b)</span></span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a55ee2943864920bfa836c87a471f7d4f"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="math_8h.html">&lt;werkzeugkiste/container/math.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Container&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Container werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a55ee2943864920bfa836c87a471f7d4f" class="m-doc-self">SmoothMovingAverage</a>(</span><span class="m-doc-wrap">const Container&amp; data,
+              int window_size)</span></span>
+            </h3>
+<p>Smoothes the given data points.</p><p>Smoothes the points such that each point is the average over a window of &quot;span&quot; values centered on the processed point. The first and last points won&#x27;t be smoothed, <em>i.e.</em> the behavior is similar to MATLAB&#x27;s <code>smooth</code>.</p><p>Args: data: Any sequence container which can be accessed sequentially. Must provide <code>size()</code>, <code>push_back()</code> and a <code>value_type</code>. window_size: Length of the smoothing window. Must be <strong>odd</strong> and <code>&gt;=3</code> or <code>&lt;=0</code> (no smoothing). For span 1 and 2, an invalid_argument will be thrown.</p><p>Example for span = 5: output[0] = data[0] output[1] = (data[0] + data[1] + data[2]) / 3 output[2] = (data[0] + ... + data[4]) / 5 output[3] = (data[1] + ... + data[5]) / 5</p>
+          </div></section>
+          <section class="m-doc-details" id="a5c95cb4cccfb41bab4dd5961f9d3d90d"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="math_8h.html">&lt;werkzeugkiste/container/math.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Container&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c95cb4cccfb41bab4dd5961f9d3d90d" class="m-doc-self">Mean</a>(</span><span class="m-doc-wrap">const Container&amp; values)</span></span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a343a3a1912d536933ea475f9fed9d0be"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="math_8h.html">&lt;werkzeugkiste/container/math.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Container&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a343a3a1912d536933ea475f9fed9d0be" class="m-doc-self">MinMax</a>(</span><span class="m-doc-wrap">const Container&amp; values,
+              typename Container::value_type* min = nullptr,
+              typename Container::value_type* max = nullptr,
+              std::size_t* idx_min = nullptr,
+              std::size_t* idx_max = nullptr)</span></span>
+            </h3>
+<p>Computes the minimum &amp; maximum of the given STL-like sequence container. The underlying <code>value_type</code> must support comparisons via <code>operator&lt;</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="aed7051e5f97e7b72bad565114345eaad"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename M&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::vector&lt;typename M::key_type&gt; werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed7051e5f97e7b72bad565114345eaad" class="m-doc-self">GetMapKeys</a>(</span><span class="m-doc-wrap">const M&amp; map)</span></span>
+            </h3>
+<p>Returns the keys from a map container (i.e. any associative container).</p>
+          </div></section>
+          <section class="m-doc-details" id="aabe4e803b8c53271f263947dc466aa5d"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Tp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aabe4e803b8c53271f263947dc466aa5d" class="m-doc-self">CmpAsc</a>(</span><span class="m-doc-wrap">const Tp&amp; a,
+              const Tp&amp; b)</span></span>
+            </h3>
+            <p>A sort comparator for ascending order, which uses <code>operator&lt;</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a37949a13cb08f7b2927d2de60deb702a"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Tp&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a37949a13cb08f7b2927d2de60deb702a" class="m-doc-self">CmpDesc</a>(</span><span class="m-doc-wrap">const Tp&amp; a,
+              const Tp&amp; b)</span></span>
+            </h3>
+            <p>A sort comparator for descending order, which uses <code>operator&lt;</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae878a9ad3fe60dfe90f8f0be00537daa"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Container&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::size_t&gt; werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae878a9ad3fe60dfe90f8f0be00537daa" class="m-doc-self">GetSortedIndices</a>(</span><span class="m-doc-wrap">const Container&amp; data,
+              bool(*)(const typename Container::value_type&amp;, const typename Container::value_type&amp;) cmp = <a href="namespacewerkzeugkiste_1_1container.html#aabe4e803b8c53271f263947dc466aa5d" class="m-doc">CmpAsc</a>&lt;typename Container::value_type&gt;)</span></span>
+            </h3>
+            <p>Returns the indices which correspond to a sorted <code>data</code> vector.</p>
+          </div></section>
+          <section class="m-doc-details" id="af66b1e12b0a7e2184d58c9955dfd982d"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Container&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">Container werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af66b1e12b0a7e2184d58c9955dfd982d" class="m-doc-self">ApplyIndexLookup</a>(</span><span class="m-doc-wrap">const Container&amp; data,
+              const std::vector&lt;std::size_t&gt;&amp; indices)</span></span>
+            </h3>
+<p>Returns a container obtained by remapping the given <code>data</code> according to the <code>indices</code>.</p><p>Requires the input to be a sequence container, i.e. it must provide <code>push_back</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="a74ded9d6852362cfc40275db8d0daf54"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename TData, typename TKey&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::vector&lt;TData&gt; werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74ded9d6852362cfc40275db8d0daf54" class="m-doc-self">SortByExternalKeys</a>(</span><span class="m-doc-wrap">const std::vector&lt;TData&gt;&amp; data,
+              const std::vector&lt;TKey&gt;&amp; keys,
+              bool(*)(const TData&amp;, const TKey&amp;) cmp = <a href="namespacewerkzeugkiste_1_1container.html#aabe4e803b8c53271f263947dc466aa5d" class="m-doc">CmpAsc</a>&lt;TKey&gt;)</span></span>
+            </h3>
+            <p>Returns the data vector sorted by the given external keys.</p>
+          </div></section>
+          <section class="m-doc-details" id="a33387a0433932ee4be4417e7575077dc"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Container, typename Tp = std::decay_t&lt;                                 decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::map&lt;Tp, std::size_t&gt; werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a33387a0433932ee4be4417e7575077dc" class="m-doc-self">FindDuplicates</a>(</span><span class="m-doc-wrap">const Container&amp; container)</span></span>
+            </h3>
+<p>Returns a map containing all duplicate entries in &#x27;data&#x27; along with their their frequencies.</p>
+          </div></section>
+          <section class="m-doc-details" id="a74f303f33d2f8159e7dcfc1cf96d8d9e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Container, typename Tp = std::decay_t&lt;                                 decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74f303f33d2f8159e7dcfc1cf96d8d9e" class="m-doc-self">HasUniqueItems</a>(</span><span class="m-doc-wrap">const Container&amp; container)</span></span>
+            </h3>
+<p>Returns true if there are no duplicates in the given sequence container.</p>
+          </div></section>
+          <section class="m-doc-details" id="a10a3b2564789947a58a814d5cc86014e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Tv, typename... Ts&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10a3b2564789947a58a814d5cc86014e" class="m-doc-self">ContainsKey</a>(</span><span class="m-doc-wrap">const std::map&lt;Ts...&gt;&amp; container,
+              const Tv&amp; key)</span></span>
+            </h3>
+            <p>Returns true if the given key exists within the map.</p>
+          </div></section>
+          <section class="m-doc-details" id="a168a39b1ea71c229943a94e183791e20"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="sort_8h.html">&lt;werkzeugkiste/container/sort.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename Container, typename Tp = std::decay_t&lt;                                 decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a168a39b1ea71c229943a94e183791e20" class="m-doc-self">ContainsValue</a>(</span><span class="m-doc-wrap">const Container&amp; container,
+              const Tp&amp; value)</span></span>
+            </h3>
+            <p>Returns true if the given element exists within the container.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>werkzeugkiste. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>

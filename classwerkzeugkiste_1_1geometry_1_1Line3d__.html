@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>werkzeugkiste::geometry::Line3d_ class | werkzeugkiste</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
+  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
+  <link rel="icon" href="favicon-dark.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#22272e" />
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a href="index.html" id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">werkzeugkiste</a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        </svg></a>
+        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
+        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+      </div>
+      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li>
+              <a href="pages.html">Pages</a>
+              <ol>
+                <li><a href="about.html">About</a></li>
+              </ol>
+            </li>
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="files.html">Files</a></li>
+            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path" />
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="primitives_8h.html">&lt;primitives.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;typename T&gt;</div>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1geometry.html">geometry</a>::<wbr/></span>Line3d_ <span class="m-thin">class</span>
+        </h1>
+        <p>Represents a line/segment in 3d Euclidean space.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#friends">Friends</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a7f9d9a69d1acd51460e335bee61486de">
+              using <a href="#a7f9d9a69d1acd51460e335bee61486de" class="m-doc-self">vec_type</a> = <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, 3&gt;
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a0b8908f5f55c1c5920dc4cd98b4a51e5">
+              <span class="m-doc-wrap-bumper"><a href="#a0b8908f5f55c1c5920dc4cd98b4a51e5" class="m-doc-self">Line3d_</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Default constructor yields an invalid line/segment.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a9866c2461f6641bc37d231f16a94e7d0" class="m-doc">Line3d_</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> from,
+              <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> to)</span>
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ad689d7df5424c72b1c8b3ccdd2cdd901">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad689d7df5424c72b1c8b3ccdd2cdd901" class="m-doc-self">Reversed</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a></span>
+            </dt>
+            <dd>Returns a line with flipped direction vector.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c9584c1c6a8588f06f103bfc1275aaf" class="m-doc">From</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a0acf9c198047d697d1b9602ebce9066b" class="m-doc">SetFrom</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; from)</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c28e98ae742375948068dd8439b0059" class="m-doc">To</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a5bf3ee33e640efee38235eaa0c556171" class="m-doc">SetTo</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; to)</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e923d10732c37903ca35fa49410e0cb" class="m-doc">Length</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a105fbc4312df315733ddcb499d50172b" class="m-doc">Direction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a></span>
+            </dt>
+            <dd></dd>
+            <dt id="a5fd55c9eda6d489680534ac66aa88162">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5fd55c9eda6d489680534ac66aa88162" class="m-doc-self">UnitDirection</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a></span>
+            </dt>
+            <dd>Returns the unit direction vector from the start point to the end point.</dd>
+            <dt id="abe257939722353f12d97c6ecd9281378">
+              <span class="m-doc-wrap-bumper">auto <a href="#abe257939722353f12d97c6ecd9281378" class="m-doc-self">MidPoint</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a></span>
+            </dt>
+            <dd>Returns the point halfway between from and to.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0d42d5237f5df4794cfa7d637bb0e134" class="m-doc">IsValid</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a31ba28d2db9a74b706b60e6700b84c" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; v) const -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adae5b3871f937730dac9b164c800ec34" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; v) const -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a84a66b48c32906d050d6c4cf1f55bd82" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&lt;T&gt;&amp; plane) const -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a92f6bc3aae84bed789dd4faf4d4c13eb" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&lt;T&gt;&amp; plane) const -&gt; double</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#accbdce99b75b0d7601a6aa275f6c6ca8" class="m-doc">PointAtOffset</a>(</span><span class="m-doc-wrap">double offset_factor) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a47e55de8746a301fc44d091d0dc64745" class="m-doc">ClosestPointOnLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a940a1c5263f0b6fd29e6f5ff0e94df07" class="m-doc">ClosestPointOnSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a></span>
+            </dt>
+            <dd></dd>
+            <dt id="a31e322b51738965db2f28402c1297ffe">
+              <span class="m-doc-wrap-bumper">auto <a href="#a31e322b51738965db2f28402c1297ffe" class="m-doc-self">DistancePointToLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; double</span>
+            </dt>
+            <dd>Returns the minimum distance between the point and this line.</dd>
+            <dt id="a871f1aa407d8f771320b02e19ea5842b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a871f1aa407d8f771320b02e19ea5842b" class="m-doc-self">DistancePointToSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; double</span>
+            </dt>
+            <dd>Returns the minimum distance between the point and this segment.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt id="ae797c51131f71e7c1459911d12bfa1cd">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae797c51131f71e7c1459911d12bfa1cd" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; stream,
+              const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a>&amp; line) -&gt; std::ostream&amp;</span>
+            </dt>
+            <dd>Overloaded output stream operator.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a9866c2461f6641bc37d231f16a94e7d0"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9866c2461f6641bc37d231f16a94e7d0" class="m-doc-self">Line3d_</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> from,
+              <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> to)</span></span>
+            </h3>
+<p>Construct a line from 2 real valued points. In case of a segment, these denote the start and end points.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0c9584c1c6a8588f06f103bfc1275aaf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0c9584c1c6a8588f06f103bfc1275aaf" class="m-doc-self">From</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>For a segment, this returns the start point. For a line, it&#x27;s simply one of the given points to construct the line in the first place.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0acf9c198047d697d1b9602ebce9066b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0acf9c198047d697d1b9602ebce9066b" class="m-doc-self">SetFrom</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; from)</span></span>
+            </h3>
+<p>Sets the first reference point (starting point of a line segment; or any point on a line).</p>
+          </div></section>
+          <section class="m-doc-details" id="a7c28e98ae742375948068dd8439b0059"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7c28e98ae742375948068dd8439b0059" class="m-doc-self">To</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>For a segment, this returns the end point. For a line, it&#x27;s simply one of the given points to construct the line in the first place.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5bf3ee33e640efee38235eaa0c556171"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bf3ee33e640efee38235eaa0c556171" class="m-doc-self">SetTo</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; to)</span></span>
+            </h3>
+<p>Sets the second reference point (end point of a line segment; or any point on a line).</p>
+          </div></section>
+          <section class="m-doc-details" id="a7e923d10732c37903ca35fa49410e0cb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e923d10732c37903ca35fa49410e0cb" class="m-doc-self">Length</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>Returns the length from the start to the end point. As such, it&#x27;s only meaningful for a line segment.</p>
+          </div></section>
+          <section class="m-doc-details" id="a105fbc4312df315733ddcb499d50172b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a105fbc4312df315733ddcb499d50172b" class="m-doc-self">Direction</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>Returns the non-normalized direction vector from the start point to the end point.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0d42d5237f5df4794cfa7d637bb0e134"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0d42d5237f5df4794cfa7d637bb0e134" class="m-doc-self">IsValid</a>(</span><span class="m-doc-wrap">) const</span></span>
+            </h3>
+<p>Returns true if the line object is valid, <em>i.e.</em> start and end points are not the same.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1a31ba28d2db9a74b706b60e6700b84c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a31ba28d2db9a74b706b60e6700b84c" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; v) const</span></span>
+            </h3>
+<p>Returns the angle between the line and the given directional vector. The angle will be between 0 and Pi.</p>
+          </div></section>
+          <section class="m-doc-details" id="adae5b3871f937730dac9b164c800ec34"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adae5b3871f937730dac9b164c800ec34" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; v) const</span></span>
+            </h3>
+<p>Returns the angle between the line and the given directional vector. The angle will be between 0 and 180 degrees.</p>
+          </div></section>
+          <section class="m-doc-details" id="a84a66b48c32906d050d6c4cf1f55bd82"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84a66b48c32906d050d6c4cf1f55bd82" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&lt;T&gt;&amp; plane) const</span></span>
+            </h3>
+<p>Returns the angle between the line and the plane. The angle will be between -Pi/2 and Pi/2.</p>
+          </div></section>
+          <section class="m-doc-details" id="a92f6bc3aae84bed789dd4faf4d4c13eb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a92f6bc3aae84bed789dd4faf4d4c13eb" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&lt;T&gt;&amp; plane) const</span></span>
+            </h3>
+<p>Returns the angle between the line and the plane. The angle will be between -90 and +90 degrees.</p>
+          </div></section>
+          <section class="m-doc-details" id="accbdce99b75b0d7601a6aa275f6c6ca8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#accbdce99b75b0d7601a6aa275f6c6ca8" class="m-doc-self">PointAtOffset</a>(</span><span class="m-doc-wrap">double offset_factor) const</span></span>
+            </h3>
+<p>Returns the point which is offset * <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a105fbc4312df315733ddcb499d50172b" class="m-doc">Direction()</a> away from the line&#x27;s starting point, i.e. offset == 0 is the starting point, offset == 1 is the end point.</p>
+          </div></section>
+          <section class="m-doc-details" id="a47e55de8746a301fc44d091d0dc64745"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a47e55de8746a301fc44d091d0dc64745" class="m-doc-self">ClosestPointOnLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; point) const</span></span>
+            </h3>
+<p>Returns the closest point on the line, i.e. the projection of the given point onto this line.</p>
+          </div></section>
+          <section class="m-doc-details" id="a940a1c5263f0b6fd29e6f5ff0e94df07"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line3d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a940a1c5263f0b6fd29e6f5ff0e94df07" class="m-doc-self">ClosestPointOnSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html#a7f9d9a69d1acd51460e335bee61486de" class="m-doc">vec_<wbr />type</a>&amp; point) const</span></span>
+            </h3>
+<p>Returns the point on this line segment(!) which is closest to the given point.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">&hellip;</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div id="search-help" class="m-text m-dim m-text-center">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
+            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script src="searchdata-v1.js" async="async"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <p>werkzeugkiste. Created with <a href="https://doxygen.org/">Doxygen</a> 1.9.1 and <a href="https://mcss.mosra.cz/">m.css</a>.</p>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+</body>
+</html>
