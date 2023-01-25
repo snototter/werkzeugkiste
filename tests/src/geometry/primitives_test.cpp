@@ -29,24 +29,28 @@ TEST(GeometricPrimitives, Circle) {
 
   // Circle-circle intersection:
   c1 = c2;
-  EXPECT_EQ(c1.IntersectionCircleCircle(c2), -1);
-  EXPECT_EQ(c2.IntersectionCircleCircle(c1), -1);
+  wkg::Vec2d ip1{};
+  wkg::Vec2d ip2{};
+  EXPECT_EQ(c1.IntersectionCircleCircle(c2, &ip1, &ip2), -1);
+  EXPECT_EQ(c2.IntersectionCircleCircle(c1, &ip1, &ip2), -1);
 
   // c2 contained in c1:
   c1 = wkg::Circle{{0, 0}, 20};
   EXPECT_TRUE(c1.IsValid());
-  EXPECT_EQ(c1.IntersectionCircleCircle(c2), 0);
+  EXPECT_EQ(c1.IntersectionCircleCircle(c2, &ip1, &ip2), 0);
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), 0);
 
   // Not touching:
   c1 = wkg::Circle{{-6, -10}, 2};
-  EXPECT_EQ(c1.IntersectionCircleCircle(c2), 0);
+  EXPECT_EQ(c1.IntersectionCircleCircle(c2, &ip1, &ip2), 0);
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), 0);
 
   // Touching:
   c1 = wkg::Circle{{0, 0}, 2};
   c2 = wkg::Circle{{3, 0}, 1};
-  EXPECT_EQ(c1.IntersectionCircleCircle(c2), 1);
+  EXPECT_EQ(c1.IntersectionCircleCircle(c2, &ip1, &ip2), 1);
+  wkg::Vec2d expected{2, 0};
+  EXPECT_TRUE(CheckVectorEqual(expected, ip1));
   EXPECT_EQ(c2.IntersectionCircleCircle(c1), 1);
 
   // Intersecting
@@ -70,7 +74,13 @@ TEST(GeometricPrimitives, Circle) {
   EXPECT_EQ(circle.IntersectionCircleLine(l3), 2);
   EXPECT_EQ(l3.IntersectionLineCircle(circle), 2);
 
-  // TODO test line segment intersection
+  // TODO test more complex intersections!
+  c1 = wkg::Circle{{0, 0}, 2};
+  l1 = wkg::Line2d{{-3, 2}, {1, -0.5}};
+  EXPECT_EQ(c1.IntersectionCircleLine(l1), 2);
+  EXPECT_EQ(l1.IntersectionLineCircle(c1), 2);
+  EXPECT_EQ(c1.IntersectionCircleLineSegment(l1), 1);
+  EXPECT_EQ(l1.IntersectionLineSegmentCircle(c1), 1);
 }
 
 TEST(GeometricPrimitives, Line2d) {

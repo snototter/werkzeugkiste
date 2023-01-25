@@ -1,6 +1,9 @@
 # Werkzeugkiste - Yet Another C++ Utility Library
-![CI Status](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml/badge.svg)
+[![Releases](https://img.shields.io/github/v/release/snototter/werkzeugkiste)](https://github.com/snototter/werkzeugkiste/releases)
+[![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue.svg?style=flat&logo=c%2B%2B)](https://en.cppreference.com/w/cpp/compiler_support)
+[![CI Status](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml/badge.svg)](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml)
 [![Coverage Status](https://coveralls.io/repos/github/snototter/werkzeugkiste/badge.svg?branch=main)](https://coveralls.io/github/snototter/werkzeugkiste?branch=main)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snototter/werkzeugkiste/blob/master/LICENSE?raw=true)
 
 This library is a collection of frequently used C++ snippets copy-pasted across
 way too many of my projects. Since there's tons of so-called utilities, utils,
@@ -123,6 +126,7 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
   * Build on windows & macos (without testing)
   * Sanitize on linux
   * Lint on linux
+* [ ] Split CI into different workflows, [run them consecutively](https://stackoverflow.com/questions/58457140/dependencies-between-workflows-on-github-actions) --> would allow quick overview with separate lint/build/test badges
 * [ ] Deploy docs
   * [ ] Check gh-pages action
   * [ ] Clean up README (messes up the doxygen front page)
