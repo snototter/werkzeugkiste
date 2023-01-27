@@ -1,16 +1,17 @@
 #ifndef WERKZEUGKISTE_FILES_FILEIO_H
 #define WERKZEUGKISTE_FILES_FILEIO_H
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 #include <fstream>
 #include <string>
 #include <string_view>
 #include <vector>
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
-
 namespace werkzeugkiste::files {
 /// Reads all lines of the plain text file.
-std::vector<std::string> WERKZEUGKISTE_EXPORT ReadAsciiFile(std::string_view filename);
+std::vector<std::string> WERKZEUGKISTE_EXPORT
+ReadAsciiFile(std::string_view filename);
 
 /// Reads the plain text file into a single string.
 std::string WERKZEUGKISTE_EXPORT CatAsciiFile(std::string_view filename);
