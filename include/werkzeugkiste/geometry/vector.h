@@ -825,7 +825,6 @@ class Vec {
         s << std::setprecision(std::numeric_limits<T>::max_digits10);
       }
     }
-    
 
     for (std::size_t i = 0; i < Dim; ++i) {
       s << val[i];

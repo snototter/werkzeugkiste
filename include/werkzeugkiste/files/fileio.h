@@ -1,10 +1,10 @@
 #ifndef WERKZEUGKISTE_FILES_FILEIO_H
 #define WERKZEUGKISTE_FILES_FILEIO_H
 
-#include <string>
-#include <vector>
-#include <string_view>
 #include <fstream>
+#include <string>
+#include <string_view>
+#include <vector>
 
 /// TODO doc
 namespace werkzeugkiste::files {
@@ -13,7 +13,7 @@ std::vector<std::string> ReadAsciiFile(const char* filename);
 std::string CatAsciiFile(const char* filename);
 
 class AsciiFileIterator {
-public:
+ public:
   using iterator_category = std::forward_iterator_tag;
   using value_type = std::string;
   using difference_type = std::ptrdiff_t;
@@ -27,17 +27,17 @@ public:
   explicit AsciiFileIterator(std::string_view filename);
 
   bool HasLine() const { return !done_; }
-//  explicit operator bool() const { return HasLine(); }
+  //  explicit operator bool() const { return HasLine(); }
 
   reference operator*() const { return line_; }
   pointer operator->() const { return &line_; }
 
   reference Next();
-  AsciiFileIterator &operator++();
+  AsciiFileIterator& operator++();
 
   std::size_t LineNumber() const { return line_number_; }
 
-private:
+ private:
   std::ifstream ifs_{};
   bool done_{true};
   std::string line_{};

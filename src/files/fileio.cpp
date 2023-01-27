@@ -38,25 +38,22 @@ std::string CatAsciiFile(const char* filename) {
   return sstr.str();
 }
 
-
 AsciiFileIterator::AsciiFileIterator(std::string_view filename) {
   ifs_.open(std::string(filename), std::ios::in);
   if (!ifs_.is_open()) {
     done_ = true;
-    //TODO error if file not found
+    // TODO error if file not found
   } else {
     done_ = false;
     Next();
   }
 }
 
-
 AsciiFileIterator::~AsciiFileIterator() {
   if (ifs_.is_open()) {
     ifs_.close();
   }
 }
-
 
 AsciiFileIterator::reference AsciiFileIterator::Next() {
   if (std::getline(ifs_, line_)) {
@@ -67,7 +64,7 @@ AsciiFileIterator::reference AsciiFileIterator::Next() {
   return line_;
 }
 
-AsciiFileIterator &AsciiFileIterator::operator++() {
+AsciiFileIterator& AsciiFileIterator::operator++() {
   Next();
   return *this;
 }

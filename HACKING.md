@@ -27,6 +27,7 @@ spellcheck:
 cmake -P cmake/spell.cmake
 
 format:
+cmake -D FORMAT_COMMAND=clang-format-14 -P cmake/lint.cmake
 cmake -D FORMAT_COMMAND=clang-format-14 -D FIX=YES -P cmake/lint.cmake
 
 build docs:
