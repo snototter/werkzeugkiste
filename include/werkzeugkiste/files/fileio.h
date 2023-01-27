@@ -6,16 +6,18 @@
 #include <string_view>
 #include <vector>
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 namespace werkzeugkiste::files {
 /// Reads all lines of the plain text file.
-std::vector<std::string> ReadAsciiFile(std::string_view filename);
+std::vector<std::string> WERKZEUGKISTE_EXPORT ReadAsciiFile(std::string_view filename);
 
 /// Reads the plain text file into a single string.
-std::string CatAsciiFile(std::string_view filename);
+std::string WERKZEUGKISTE_EXPORT CatAsciiFile(std::string_view filename);
 
 // TODO doc
 // TODO test
-class AsciiFileIterator {
+class WERKZEUGKISTE_EXPORT AsciiFileIterator {
  public:
   // NOLINTBEGIN(readability-identifier-naming)
   using iterator_category = std::forward_iterator_tag;
