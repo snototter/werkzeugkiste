@@ -805,8 +805,10 @@ class Vec {
   /// If `include_type` is true, the class name will be included, e.g.
   /// "Vec2i(1, 2)". Otherwise, it will only return
   /// the coordinates within parentheses, e.g. "(13, 77)".
-  /// If fixed_precision > 0, then the output format for floating point
-  /// types will be set to the corresponding fixed precision.
+  ///
+  /// For floating point types, the output precision will be set to the
+  /// maximum precision if fixed_precision <= 0. If a positive fixed_precision
+  /// is provided, the output format will be adjusted.
   std::string ToString(bool include_type = true,
                        int fixed_precision = 0) const {
     std::ostringstream s;
@@ -815,9 +817,14 @@ class Vec {
     }
     s << '(';
 
-    if (fixed_precision > 0) {
-      s << std::fixed << std::setprecision(fixed_precision);
+    if constexpr (std::is_floating_point_v<T>) {
+      if (fixed_precision > 0) {
+        s << std::fixed << std::setprecision(fixed_precision);
+      } else {
+        s << std::setprecision(std::numeric_limits<double>::max_digits10);
+      }
     }
+    
 
     for (std::size_t i = 0; i < Dim; ++i) {
       s << val[i];
