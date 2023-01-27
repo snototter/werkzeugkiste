@@ -52,14 +52,15 @@ set(wkzgcontainer_PUBLIC_HEADER_FILES
     ${werkzeugkiste_VERSION_HEADER}
 )
 # Library
-add_library(werkzeugkiste-container
-    ${wkzgcontainer_PUBLIC_HEADER_FILES}
-)
+add_library(werkzeugkiste-container INTERFACE)
+#add_library(werkzeugkiste-container
+#    ${wkzgcontainer_PUBLIC_HEADER_FILES}
+#)
 # Namespace'd alias
 add_library(werkzeugkiste::container ALIAS werkzeugkiste-container)
 
 if(NOT BUILD_SHARED_LIBS)
-    target_compile_definitions(werkzeugkiste-container PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+    target_compile_definitions(werkzeugkiste-container INTERFACE WERKZEUGKISTE_STATIC_DEFINE)
 endif()
 
 set_target_properties(
@@ -75,17 +76,17 @@ set_target_properties(
 
 target_include_directories(
     werkzeugkiste-container ${warning_guard}
-    PUBLIC
+    INTERFACE
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
 )
 
 target_include_directories(
     werkzeugkiste-container SYSTEM
-    PUBLIC
+    INTERFACE
     "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
 )
 
-target_compile_features(werkzeugkiste-container PUBLIC cxx_std_17)
+target_compile_features(werkzeugkiste-container INTERFACE cxx_std_17)
 
 
 #########################################################################################
@@ -300,24 +301,25 @@ target_compile_features(werkzeugkiste-timing PUBLIC cxx_std_17)
 
 #########################################################################################
 # ---- The "all-in-one" target ----
-
-# TODO does the all-in-one target need the other headers explicitly? they should be implicitly
-# deployed by the corresponding sub-utilitiy target (?)
-add_library(werkzeugkiste-werkzeugkiste
-    ${wkzgcontainer_PUBLIC_HEADER_FILES}
-    ${wkzggeometry_PUBLIC_HEADER_FILES}
-    ${wkzgstrings_PUBLIC_HEADER_FILES}
-    ${wkzgfiles_PUBLIC_HEADER_FILES}
-    ${wkzgtiming_PUBLIC_HEADER_FILES}
-    ${werkzeugkiste_VERSION_HEADER}
-)
+#
+## TODO does the all-in-one target need the other headers explicitly? they should be implicitly
+## deployed by the corresponding sub-utilitiy target (?)
+add_library(werkzeugkiste-werkzeugkiste INTERFACE)
+#add_library(werkzeugkiste-werkzeugkiste
+#    ${wkzgcontainer_PUBLIC_HEADER_FILES}
+#    ${wkzggeometry_PUBLIC_HEADER_FILES}
+#    ${wkzgstrings_PUBLIC_HEADER_FILES}
+#    ${wkzgfiles_PUBLIC_HEADER_FILES}
+#    ${wkzgtiming_PUBLIC_HEADER_FILES}
+#    ${werkzeugkiste_VERSION_HEADER}
+#)
 # ---- Namespace'd alias ----
 add_library(werkzeugkiste::werkzeugkiste ALIAS werkzeugkiste-werkzeugkiste)
 
 # ---- Generate the shared export header to be used by all targets ----
 include(GenerateExportHeader)
 generate_export_header(
-    werkzeugkiste-werkzeugkiste
+    werkzeugkiste-geometry
     BASE_NAME werkzeugkiste
     EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.h
     CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
@@ -325,7 +327,7 @@ generate_export_header(
 
 if(NOT BUILD_SHARED_LIBS)
     target_compile_definitions(
-        werkzeugkiste-werkzeugkiste PUBLIC WERKZEUGKISTE_STATIC_DEFINE
+        werkzeugkiste-werkzeugkiste INTERFACE WERKZEUGKISTE_STATIC_DEFINE
     )
 endif()
 
@@ -342,21 +344,21 @@ set_target_properties(
 
 target_include_directories(
     werkzeugkiste-werkzeugkiste ${warning_guard}
-    PUBLIC
+    INTERFACE
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
 )
 
 target_include_directories(
     werkzeugkiste-werkzeugkiste SYSTEM
-    PUBLIC
+    INTERFACE
     "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
 )
 
-target_compile_features(werkzeugkiste-werkzeugkiste PUBLIC cxx_std_17)
+target_compile_features(werkzeugkiste-werkzeugkiste INTERFACE cxx_std_17)
 
 target_link_libraries(
     werkzeugkiste-werkzeugkiste
-    PUBLIC
+    INTERFACE
     werkzeugkiste::container
     werkzeugkiste::files
     werkzeugkiste::geometry
@@ -364,49 +366,6 @@ target_link_libraries(
     werkzeugkiste::timing
 )
 
-
-
-#
-#add_library(
-#    werkzeugkiste_werkzeugkiste
-#    source/werkzeugkiste.cpp
-#)
-#add_library(werkzeugkiste::werkzeugkiste ALIAS werkzeugkiste_werkzeugkiste)
-#
-#generate_export_header(
-#    werkzeugkiste_werkzeugkiste
-#    BASE_NAME werkzeugkiste
-#    EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.h
-#    CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
-#)
-#
-#if(NOT BUILD_SHARED_LIBS)
-#  target_compile_definitions(werkzeugkiste_werkzeugkiste PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
-#endif()
-#
-#set_target_properties(
-#    werkzeugkiste_werkzeugkiste PROPERTIES
-#    CXX_VISIBILITY_PRESET hidden
-#    VISIBILITY_INLINES_HIDDEN YES
-#    VERSION "${PROJECT_VERSION}"
-#    SOVERSION "${PROJECT_VERSION_MAJOR}"
-#    EXPORT_NAME werkzeugkiste
-#    OUTPUT_NAME werkzeugkiste
-#)
-#
-#target_include_directories(
-#    werkzeugkiste_werkzeugkiste ${warning_guard}
-#    PUBLIC
-#    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-#)
-#
-#target_include_directories(
-#    werkzeugkiste_werkzeugkiste SYSTEM
-#    PUBLIC
-#    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
-#)
-#
-#target_compile_features(werkzeugkiste_werkzeugkiste PUBLIC cxx_std_17)
 
 
 #########################################################################################
