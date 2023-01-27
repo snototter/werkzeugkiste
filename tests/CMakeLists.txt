@@ -62,6 +62,21 @@ target_compile_features(werkzeugkiste-test PRIVATE cxx_std_17)
 add_test(NAME werkzeugkiste-test COMMAND werkzeugkiste-test)
 windows_set_path(werkzeugkiste-test werkzeugkiste::container werkzeugkiste::geometry werkzeugkiste::strings werkzeugkiste::files werkzeugkiste::timing)
 
+# CI uses https://github.com/MarkusJx/googletest-installer to
+# set up gtest. For Windows and macOS, we need to adjust the paths:
+if (DEFINED ENV{GITHUB_ACTIONS})
+  if (WIN32)
+    link_directories("D:/gtest/lib")
+    include_directories("D:/gtest/include")
+
+    set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+    set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
+  elseif (APPLE)
+    link_directories("/usr/local/lib")
+    include_directories("/usr/local/include")
+  endif ()
+endif ()
+
 include(GoogleTest)
 gtest_discover_tests(werkzeugkiste-test)
 
@@ -87,7 +102,3 @@ add_folders(Tests)
 #        tests/timing/stopwatch_test.cpp
 #        tests/timing/tictoc_test.cpp)
 
-    #TODO(new-library-extensions) If we need to add private
-    # headers just for testing):
-#    target_include_directories(werkzeugkiste-tests
-#        PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
