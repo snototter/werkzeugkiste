@@ -821,7 +821,7 @@ class Vec {
       if (fixed_precision > 0) {
         s << std::fixed << std::setprecision(fixed_precision);
       } else {
-        s << std::setprecision(std::numeric_limits<double>::max_digits10);
+        s << std::setprecision(std::numeric_limits<T>::max_digits10);
       }
     }
     
