@@ -4,8 +4,10 @@
 #include <werkzeugkiste/strings/strings.h>
 
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
+// FIXME linking to std::filesystem will be a chore
 
 namespace werkzeugkiste::files {
 
@@ -24,10 +26,13 @@ const char k_file_separator = '/';
 #endif
 
 bool Exists(const std::string& name) {
-  std::ifstream f(name.c_str());
-  const bool status = f.good();
-  f.close();
-  return status;
+  std::filesystem::path pth{name};
+  return std::filesystem::exists(pth);
+
+  //  std::ifstream f(name.c_str());
+  //  const bool status = f.good();
+  //  f.close();
+  //  return status;
 }
 
 // taken from

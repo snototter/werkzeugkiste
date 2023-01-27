@@ -307,8 +307,9 @@ target_link_libraries(
     PRIVATE
     werkzeugkiste::strings
     werkzeugkiste::logging
-    std::filesystem
+    PRIVATE std::filesystem
 )
+
 
 target_compile_features(werkzeugkiste-files PUBLIC cxx_std_17)
 

@@ -2,7 +2,6 @@
 #include <werkzeugkiste/logging.h>
 
 #include <exception>
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 

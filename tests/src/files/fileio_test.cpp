@@ -1,7 +1,6 @@
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/strings/strings.h>
 
-#include <filesystem>
 #include <string>
 
 #include "../test_utils.h"
@@ -20,6 +19,7 @@ TEST(FileIOTest, ReadFile) {
   EXPECT_EQ(content, concatenated);
 
   // This is a dummy comment to ensure the file ends at 42 lines.
+  // This makes for a nice magic number...
   EXPECT_EQ(42, lines.size());
 }
 
