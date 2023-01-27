@@ -802,15 +802,22 @@ class Vec {
   // String representation
 
   /// Returns a human-readable string representation.
-  /// If `include_type` is false, it will only return
+  /// If `include_type` is true, the class name will be included, e.g.
+  /// "Vec2i(1, 2)". Otherwise, it will only return
   /// the coordinates within parentheses, e.g. "(13, 77)".
+  /// If fixed_precision > 0, then the output format for floating point
+  /// types will be set to the corresponding fixed precision.
   std::string ToString(bool include_type = true,
-                       int fixed_precision = 2) const {
+                       int fixed_precision = 0) const {
     std::ostringstream s;
     if (include_type) {
       s << Vec<T, Dim>::TypeName();
     }
-    s << '(' << std::fixed << std::setprecision(fixed_precision);
+    s << '(';
+
+    if (fixed_precision > 0) {
+      s << std::fixed << std::setprecision(fixed_precision);
+    }
 
     for (std::size_t i = 0; i < Dim; ++i) {
       s << val[i];
