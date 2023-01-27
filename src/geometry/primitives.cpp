@@ -1,5 +1,6 @@
 #include <werkzeugkiste/geometry/primitives.h>
 #include <werkzeugkiste/geometry/utils.h>
+#include <werkzeugkiste/logging.h>
 
 #include <cmath>
 
@@ -831,8 +832,11 @@ Plane_<T>::Plane_(const vec_type& p, const vec_type& q, const vec_type& r)
   if (!IsEpsZero(cross.LengthSquared())) {
     normal_ = cross.UnitVector();
     offset_ = -normal_.Dot(p);
+  } else {
+    // TODO: implement logging and warn about 3 collinear points.
+    WKZLOG_WARN(
+          "Cannot create a valid plane from 3 collinear points! Inputs were p={:s}, q={:s}, r={:s}.", p, q, r);
   }
-  // TODO: implement logging and warn about 3 collinear points.
 }
 
 // Explicit instantiation:

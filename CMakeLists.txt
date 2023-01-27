@@ -98,6 +98,7 @@ set(wkzggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/geometry/projection.h
     include/werkzeugkiste/geometry/camera.h
     include/werkzeugkiste/geometry/primitives.h
+    include/werkzeugkiste/logging.h
     ${werkzeugkiste_VERSION_HEADER}
 )
 # Source files
