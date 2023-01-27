@@ -21,12 +21,14 @@ function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
         PRIVATE werkzeugkiste::geometry)
 
     ## werkzeugkiste::files
+    find_package(Filesystem REQUIRED)
     add_executable(example-files
         ${EXAMPLE_SRC_DIR}/files_example.cpp)
     target_link_libraries(example-files
         PRIVATE
         werkzeugkiste::files
-        werkzeugkiste::strings)
+        werkzeugkiste::strings
+        std::filesystem)
 
     ## werkzeugkiste::strings
     add_executable(example-strings
