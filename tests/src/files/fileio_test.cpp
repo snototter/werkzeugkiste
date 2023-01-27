@@ -4,11 +4,12 @@
 #include <filesystem>
 #include <string>
 
-#include "../test_utils.h"
-
 namespace wkf = werkzeugkiste::files;
 namespace wks = werkzeugkiste::strings;
 
+// These are dummy comments.
+// Simply to ensure that this file has 42 lines.
+// So the test uses a proper magic number ;)
 TEST(FileIOTest, ReadFile) {
   EXPECT_THROW(wkf::CatAsciiFile("no-such-file"), std::invalid_argument);
   EXPECT_THROW(wkf::ReadAsciiFile("no-such-file"), std::invalid_argument);

@@ -53,11 +53,12 @@ AsciiFileIterator::AsciiFileIterator(std::string_view filename) {
     msg += "\".";
     WKZLOG_ERROR(msg);
     throw std::invalid_argument(msg);
-  } else {
-    done_ = false;
-    Next();
-    line_number_ = 0;
   }
+
+  // Load first line
+  done_ = false;
+  Next();
+  line_number_ = 0;
 }
 
 AsciiFileIterator::~AsciiFileIterator() {

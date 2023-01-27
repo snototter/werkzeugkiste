@@ -292,11 +292,22 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
 )
 
+
+# There is no easily-portable way to link against std::filesystem
+# Thankfully, the CMake Community Modules provide a workaround.
+# Watch https://gitlab.kitware.com/cmake/cmake/-/issues/17834 for
+# potential solution in the future.
+#list(PREPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+find_package(Filesystem REQUIRED)
+
 target_link_libraries(
     werkzeugkiste-files
     PRIVATE
     werkzeugkiste::strings
     werkzeugkiste::logging
+    std::filesystem
 )
 
 target_compile_features(werkzeugkiste-files PUBLIC cxx_std_17)
