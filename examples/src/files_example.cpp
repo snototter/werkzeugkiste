@@ -25,11 +25,11 @@ int main(int /* argc */, char** /* argv */) {
   std::cout << "Processing file \"" << file << "\" line-by-line:\n";
   wkf::AsciiFileIterator line_reader{file};
   while (line_reader.HasLine()) {
-    std::cout << "Line #" << std::setw(2) << std::setfill('0')
-              << line_reader.LineNumber() << ": \"" << (*line_reader) << "\""
+    std::cout << '#' << std::setw(2) << std::setfill('0')
+              << line_reader.LineNumber() << ": " << (*line_reader)
               << std::endl;
-    ++line_reader;       // equivalent
-    line_reader.Next();  // increment again (i.e. now we skip a line)
+    //    ++line_reader;       // equivalent to:
+    line_reader.Next();
   }
 
   return 0;

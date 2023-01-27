@@ -39,6 +39,56 @@ configure_file(
 )
 
 
+#########################################################################################
+# ---- Internal logging utils: werkzeugkiste::logging ----
+# Library
+add_library(werkzeugkiste-logging INTERFACE)
+add_library(werkzeugkiste::logging ALIAS werkzeugkiste-logging)
+
+if(NOT BUILD_SHARED_LIBS)
+    target_compile_definitions(werkzeugkiste-logging INTERFACE WERKZEUGKISTE_STATIC_DEFINE)
+endif()
+
+set_target_properties(
+    werkzeugkiste-logging PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+    VERSION "${PROJECT_VERSION}"
+    SOVERSION "${PROJECT_VERSION_MAJOR}"
+    EXPORT_NAME logging
+    OUTPUT_NAME werkzeugkiste-logging
+    LINKER_LANGUAGE CXX
+)
+
+target_include_directories(
+    werkzeugkiste-logging ${warning_guard}
+    INTERFACE
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+)
+
+target_include_directories(
+    werkzeugkiste-logging SYSTEM
+    INTERFACE
+    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
+)
+
+target_compile_features(werkzeugkiste-logging INTERFACE cxx_std_17)
+
+find_package(spdlog QUIET)
+if(spdlog_FOUND)
+    message(STATUS "[werkzeugkiste] Logging enabled via spdlog.")
+    if(TARGET spdlog::spdlog_header_only)
+        set(werkzeugkiste_SPDLOG_TARGET spdlog::spdlog_header_only)
+    endif()
+    # Then, replace the target, if the compiled spdlog version is available
+    if(TARGET spdlog::spdlog)
+        set(werkzeugkiste_SPDLOG_TARGET spdlog::spdlog)
+    endif()
+    target_link_libraries(werkzeugkiste-logging INTERFACE ${werkzeugkiste_SPDLOG_TARGET})
+    target_compile_definitions(werkzeugkiste-logging INTERFACE werkzeugkiste_WITH_SPDLOG)
+else(spdlog_FOUND)
+    message(STATUS "[werkzeugkiste] Logging disabled, spdlog not found.")
+endif(spdlog_FOUND)
 
 
 #########################################################################################
@@ -117,6 +167,7 @@ add_library(werkzeugkiste::geometry ALIAS werkzeugkiste-geometry)
 
 find_package(Eigen3 REQUIRED NO_MODULE)
 target_link_libraries(werkzeugkiste-geometry PUBLIC Eigen3::Eigen)
+target_link_libraries(werkzeugkiste-geometry PRIVATE werkzeugkiste::logging)
 
 set_target_properties(
     werkzeugkiste-geometry PROPERTIES
@@ -202,6 +253,7 @@ target_compile_features(werkzeugkiste-strings PUBLIC cxx_std_17)
 set(wkzgfiles_PUBLIC_HEADER_FILES
     include/werkzeugkiste/files/fileio.h
     include/werkzeugkiste/files/filesys.h
+    include/werkzeugkiste/logging.h
     ${werkzeugkiste_VERSION_HEADER}
 )
 # Source files
@@ -242,7 +294,9 @@ target_include_directories(
 
 target_link_libraries(
     werkzeugkiste-files
-    PRIVATE werkzeugkiste::strings
+    PRIVATE
+    werkzeugkiste::strings
+    werkzeugkiste::logging
 )
 
 target_compile_features(werkzeugkiste-files PUBLIC cxx_std_17)
@@ -364,6 +418,7 @@ target_link_libraries(
     werkzeugkiste::geometry
     werkzeugkiste::strings
     werkzeugkiste::timing
+    werkzeugkiste::logging
 )
 
 

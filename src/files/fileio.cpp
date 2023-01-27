@@ -1,18 +1,22 @@
 #include <werkzeugkiste/files/fileio.h>
+#include <werkzeugkiste/logging.h>
 
 #include <exception>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 
 namespace werkzeugkiste {
 namespace files {
 
-std::vector<std::string> ReadAsciiFile(const char* filename) {
-  std::ifstream ifs(filename, std::ios::in);
+std::vector<std::string> ReadAsciiFile(std::string_view filename) {
+  std::ifstream ifs(std::string(filename), std::ios::in);
   if (!ifs.is_open()) {
-    std::string s("Cannot open file - check path: ");
-    s += filename;
-    throw std::logic_error(s);
+    std::string msg{"Cannot open file. Check path: \""};
+    msg += filename;
+    msg += "\".";
+    WKZLOG_ERROR(msg);
+    throw std::invalid_argument(msg);
   }
 
   std::vector<std::string> lines;
@@ -24,12 +28,14 @@ std::vector<std::string> ReadAsciiFile(const char* filename) {
   return lines;
 }
 
-std::string CatAsciiFile(const char* filename) {
-  std::ifstream ifs(filename, std::ios::in);
+std::string CatAsciiFile(std::string_view filename) {
+  std::ifstream ifs(std::string(filename), std::ios::in);
   if (!ifs.is_open()) {
-    std::string s("Cannot open file - check path: ");
-    s += filename;
-    throw std::logic_error(s);
+    std::string msg{"Cannot open file. Check path: \""};
+    msg += filename;
+    msg += "\".";
+    WKZLOG_ERROR(msg);
+    throw std::invalid_argument(msg);
   }
 
   std::stringstream sstr;
@@ -42,10 +48,15 @@ AsciiFileIterator::AsciiFileIterator(std::string_view filename) {
   ifs_.open(std::string(filename), std::ios::in);
   if (!ifs_.is_open()) {
     done_ = true;
-    // TODO error if file not found
+    std::string msg{"Cannot open file. Check path: \""};
+    msg += filename;
+    msg += "\".";
+    WKZLOG_ERROR(msg);
+    throw std::invalid_argument(msg);
   } else {
     done_ = false;
     Next();
+    line_number_ = 0;
   }
 }
 

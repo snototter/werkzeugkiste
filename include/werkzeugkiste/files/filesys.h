@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+/// File system utilities.
 namespace werkzeugkiste::files {
 
 // TODO Need to clarify 2 issues:

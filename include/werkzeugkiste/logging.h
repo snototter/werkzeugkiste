@@ -3,7 +3,7 @@
 
 // NOLINTBEGIN(*macro-usage)
 
-#if __has_include(<spdlog/spdlog.h>)
+#if __has_include(<spdlog/spdlog.h>) && defined(werkzeugkiste_WITH_SPDLOG)
 #include <spdlog/fmt/ostr.h>
 #include <spdlog/spdlog.h>
 #define WKZLOG_TRACE SPDLOG_TRACE

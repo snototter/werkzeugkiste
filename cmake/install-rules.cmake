@@ -26,6 +26,7 @@ install(
       werkzeugkiste-strings
       werkzeugkiste-files
       werkzeugkiste-timing
+      werkzeugkiste-logging
     EXPORT werkzeugkisteTargets
     RUNTIME #
     COMPONENT werkzeugkiste_Runtime
