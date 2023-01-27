@@ -394,9 +394,10 @@ class Vec {
       if constexpr (std::is_same<float, T>::value) {
         // NOLINTNEXTLINE(*-magic-numbers)
         return lhs.IsClose(rhs, 1e-6F, 1e-9F);
+      } else {
+        // NOLINTNEXTLINE(*-magic-numbers)
+        return lhs.IsClose(rhs, 1e-9, 1e-12);
       }
-      // NOLINTNEXTLINE(*-magic-numbers)
-      return lhs.IsClose(rhs, 1e-9, 1e-12);
     }
   }
 
