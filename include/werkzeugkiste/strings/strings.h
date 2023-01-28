@@ -95,7 +95,8 @@ WERKZEUGKISTE_EXPORT
 std::vector<std::string> Split(std::string_view s, char delim);
 
 WERKZEUGKISTE_EXPORT
-std::vector<std::string_view> Tokenize(std::string_view s, std::string_view delim);
+std::vector<std::string_view> Tokenize(std::string_view s,
+                                       std::string_view delim);
 
 template <typename Container, typename Tp = std::decay_t<
                                   decltype(*begin(std::declval<Container>()))>>

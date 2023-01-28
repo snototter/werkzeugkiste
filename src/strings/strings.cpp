@@ -135,25 +135,27 @@ std::vector<std::string> Split(std::string_view s, char delim) {
   return elems;
 }
 
-std::vector<std::string_view> Tokenize(std::string_view s, std::string_view delim) {
+std::vector<std::string_view> Tokenize(std::string_view s,
+                                       std::string_view delim) {
   std::vector<std::string_view> tokens;
-	auto first = s.begin();
+  auto first = s.begin();
 
-	while (first != s.end()) {
-		const auto second = std::find_first_of(first, std::cend(s),
-			std::cbegin(delim), std::cend(delim));
-		if (first != second) {
-			tokens.emplace_back(s.substr(std::distance(s.begin(), first), std::distance(first, second)));
-		}
-
-		if (second == s.end()) {
-			break;
+  while (first != s.end()) {
+    const auto second = std::find_first_of(
+        first, std::cend(s), std::cbegin(delim), std::cend(delim));
+    if (first != second) {
+      tokens.emplace_back(s.substr(std::distance(s.begin(), first),
+                                   std::distance(first, second)));
     }
 
-		first = std::next(second);
-	}
+    if (second == s.end()) {
+      break;
+    }
 
-	return tokens;
+    first = std::next(second);
+  }
+
+  return tokens;
 }
 
 std::string Replace(std::string_view haystack, std::string_view needle,

@@ -22,7 +22,6 @@ int main(int /* argc */, char** /* argv */) {
   config->RegisterPathParameter("frobnicate.frobmorten");
   config->MakePathsAbsolute("todo");
 
-
   config = wkc::Configuration::LoadTOML("no-such-file.toml");
 
   return 0;
