@@ -300,15 +300,25 @@ target_include_directories(
 #list(PREPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
-find_package(Filesystem REQUIRED COMPONENTS Final Experimental)
+find_package(Filesystem QUIET)
 
 target_link_libraries(
     werkzeugkiste-files
     PRIVATE
     werkzeugkiste::strings
     werkzeugkiste::logging
-    PRIVATE std::filesystem
 )
+
+if(TARGET std::filesystem)
+    target_link_libraries(
+        werkzeugkiste-files
+        PRIVATE
+        std::filesystem
+    )
+    target_compile_definitions(
+        werkzeugkiste-files PRIVATE WZK_HAS_FILESYSTEM
+    )
+endif()
 
 
 target_compile_features(werkzeugkiste-files PUBLIC cxx_std_17)
