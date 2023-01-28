@@ -7,10 +7,10 @@
 #include <fstream>
 #include <sstream>
 #ifdef WZK_HAS_FILESYSTEM
-#  include <filesystem>
+#include <filesystem>
 // FIXME linking to std::filesystem will be a chore
 //#else // WZK_HAS_FILESYSTEM
-#endif // WZK_HAS_FILESYSTEM
+#endif  // WZK_HAS_FILESYSTEM
 
 namespace werkzeugkiste::files {
 
@@ -22,23 +22,22 @@ namespace werkzeugkiste::files {
 // listdircontents
 // getextension
 
-#  if defined(WIN32) || defined(_WIN32) || defined(__CYGWIN__)
+#if defined(WIN32) || defined(_WIN32) || defined(__CYGWIN__)
 const char k_file_separator = '\\';
-#  else // WIN32
+#else   // WIN32
 const char k_file_separator = '/';
-#  endif // WIN32
-
+#endif  // WIN32
 
 bool Exists(const std::string& name) {
 #ifdef WKZ_HAS_FILESYSTEM
   std::filesystem::path pth{name};
   return std::filesystem::exists(pth);
 #else
-   std::ifstream f(name.c_str());
-   const bool status = f.good();
-   f.close();
-   return status;
-#endif // WKZ_HAS_FILESYSTEM
+  std::ifstream f(name.c_str());
+  const bool status = f.good();
+  f.close();
+  return status;
+#endif  // WKZ_HAS_FILESYSTEM
 }
 
 // taken from
