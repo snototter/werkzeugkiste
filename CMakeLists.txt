@@ -376,6 +376,71 @@ target_compile_features(werkzeugkiste-timing PUBLIC cxx_std_17)
 
 
 #########################################################################################
+# ---- Configuration Utils: werkzeugkiste::config ----
+# Requires toml++ for TOML support
+include(FetchContent)
+FetchContent_Declare(
+    tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG        v3.2.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
+
+# Header files
+set(wkzgconfig_HEADER_FILES
+    include/werkzeugkiste/config/configuration.h
+    include/werkzeugkiste/logging.h
+    ${tomlplusplus_SOURCE_DIR}/include/toml++/toml.h
+    ${werkzeugkiste_VERSION_HEADER}
+)
+# Source files
+set(wkzgconfig_SOURCE_FILES
+    src/config/configuration.cpp
+)
+# Library
+add_library(werkzeugkiste-config
+    ${wkzgconfig_HEADER_FILES}
+    ${wkzgconfig_SOURCE_FILES}
+)
+# Namespace'd alias
+add_library(werkzeugkiste::config ALIAS werkzeugkiste-config)
+
+#find_package(Eigen3 REQUIRED NO_MODULE)
+#TODO make optional (load matrix) target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
+target_link_libraries(
+    werkzeugkiste-config
+    PRIVATE
+    werkzeugkiste::logging
+    werkzeugkiste::strings
+)
+
+set_target_properties(
+    werkzeugkiste-config PROPERTIES
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN YES
+    VERSION "${PROJECT_VERSION}"
+    SOVERSION "${PROJECT_VERSION_MAJOR}"
+    EXPORT_NAME config
+    OUTPUT_NAME werkzeugkiste-config
+    LINKER_LANGUAGE CXX
+)
+
+target_include_directories(
+    werkzeugkiste-config ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+    "$<BUILD_INTERFACE:${tomlplusplus_SOURCE_DIR}/include>"
+)
+
+target_include_directories(
+    werkzeugkiste-config SYSTEM
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/export>"
+)
+
+target_compile_features(werkzeugkiste-config PUBLIC cxx_std_17)
+
+#########################################################################################
 # ---- The "all-in-one" target ----
 #
 ## TODO does the all-in-one target need the other headers explicitly? they should be implicitly
@@ -395,7 +460,7 @@ add_library(werkzeugkiste::werkzeugkiste ALIAS werkzeugkiste-werkzeugkiste)
 # ---- Generate the shared export header to be used by all targets ----
 include(GenerateExportHeader)
 generate_export_header(
-    werkzeugkiste-geometry
+    werkzeugkiste-geometry  # Requires a "full" library target (doesn't work with INTERFACE)
     BASE_NAME werkzeugkiste
     EXPORT_FILE_NAME export/werkzeugkiste/werkzeugkiste_export.h
     CUSTOM_CONTENT_FROM_VARIABLE pragma_suppress_c4251
@@ -435,6 +500,7 @@ target_compile_features(werkzeugkiste-werkzeugkiste INTERFACE cxx_std_17)
 target_link_libraries(
     werkzeugkiste-werkzeugkiste
     INTERFACE
+    werkzeugkiste::config
     werkzeugkiste::container
     werkzeugkiste::files
     werkzeugkiste::geometry

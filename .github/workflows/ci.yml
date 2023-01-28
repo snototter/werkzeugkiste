@@ -215,7 +215,7 @@ jobs:
 
   docs:
     # Deploy docs only when builds succeed
-    needs: [sanitize, build]
+    needs: [sanitize, build, coverage]
 
     runs-on: ubuntu-22.04
     

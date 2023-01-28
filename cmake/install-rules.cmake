@@ -21,6 +21,7 @@ install(
 
 install(
     TARGETS
+      werkzeugkiste-config
       werkzeugkiste-container
       werkzeugkiste-geometry
       werkzeugkiste-strings

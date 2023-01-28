@@ -20,6 +20,7 @@ function(add_example NAME LIBS)
   add_dependencies(run-examples "run_${NAME}")
 endfunction()
 
+add_example(config werkzeugkiste::config)
 add_example(container werkzeugkiste::container)
 add_example(files werkzeugkiste::files)
 add_example(geometry werkzeugkiste::geometry)
