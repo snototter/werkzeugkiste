@@ -15,7 +15,8 @@ namespace werkzeugkiste::config {
 
 class Configuration {
 public:
-  static std::unique_ptr<Configuration> LoadTOML(std::string_view filename);
+  static std::unique_ptr<Configuration> LoadTomlFile(std::string_view filename);
+  static std::unique_ptr<Configuration> LoadTomlString(std::string_view toml_string);
 //   static std::unique_ptr<Configuration> LoadJSON(std::string_view filename);
 
   virtual ~Configuration() = default;

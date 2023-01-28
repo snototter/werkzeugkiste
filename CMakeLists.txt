@@ -412,6 +412,7 @@ target_link_libraries(
     PRIVATE
     werkzeugkiste::logging
     werkzeugkiste::strings
+    werkzeugkiste::files
 )
 
 set_target_properties(

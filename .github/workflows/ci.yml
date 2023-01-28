@@ -179,14 +179,14 @@ jobs:
 #    - name: Install GoogleTest libraries
 #      uses: MarkusJx/googletest-installer@v1.1.1
 
-#    - name: Install static analyzers
-#      if: matrix.os == 'ubuntu-22.04'
-#      run: >-
-#        sudo apt-get install clang-tidy-14 cppcheck -y -q
-#
-#        sudo update-alternatives --install
-#        /usr/bin/clang-tidy clang-tidy
-#        /usr/bin/clang-tidy-14 140
+    - name: Install static analyzers
+      if: matrix.os == 'ubuntu-22.04'
+      run: >-
+        sudo apt-get install clang-tidy-14 cppcheck -y -q
+
+        sudo update-alternatives --install
+        /usr/bin/clang-tidy clang-tidy
+        /usr/bin/clang-tidy-14 140
 
     - name: Install werkzeugkiste requirements
       uses: jrl-umi3218/github-actions/install-dependencies@master

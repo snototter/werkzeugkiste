@@ -3,6 +3,7 @@
 #include <vector>
 #include <toml++/toml.h>
 #include <werkzeugkiste/strings/strings.h>
+#include <werkzeugkiste/files/fileio.h>
 
 namespace werkzeugkiste::config {
 
@@ -11,8 +12,8 @@ namespace werkzeugkiste::config {
 class ConfigurationImpl : public Configuration {
 public:
   ~ConfigurationImpl() {}
-  ConfigurationImpl(toml::table &&config)
-    : config_(std::move(config))
+  explicit ConfigurationImpl(toml::table &&config)
+    : Configuration(), config_(std::move(config))
     {
         const std::string_view key {"visualization.*.save"};
         auto tokens = werkzeugkiste::strings::Tokenize(key, ".");
@@ -46,14 +47,21 @@ private:
   std::vector<std::string> path_parameters_{};
 };
 
-std::unique_ptr<Configuration> Configuration::LoadTOML(std::string_view filename) {
-    try
+
+
+std::unique_ptr<Configuration> Configuration::LoadTomlFile(std::string_view filename) {
+  const std::string toml = werkzeugkiste::files::CatAsciiFile(filename);
+  return Configuration::LoadTomlString(toml);
+}
+
+std::unique_ptr<Configuration> Configuration::LoadTomlString(std::string_view toml_string) {
+  try
     {
-        toml::table tbl = toml::parse_file(filename);
+        toml::table tbl = toml::parse(toml_string);
         WKZLOG_INFO("Loaded toml: {:s}", tbl);
         return std::make_unique<ConfigurationImpl>(ConfigurationImpl(std::move(tbl)));
     } catch (const toml::parse_error &err) {
-        WKZLOG_ERROR("Error parsing TOML file '{:s}': {:s} ({:s})", *err.source().path, err.description(), err.source().begin);
+        WKZLOG_ERROR("Error parsing TOML: {:s} ({:s})", err.description(), err.source().begin);
         return nullptr;
     }
 }
