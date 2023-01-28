@@ -123,7 +123,7 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
   * [ ] Check if the export header is correctly distributed in a consuming project
 * [ ] Properly set up Github Actions
   * Test only on linux, but more versions
-  * Build on windows & macos (without testing)
+  * Build library and examples on windows & macos (without testing)
   * Sanitize on linux
   * Lint on linux
 * [ ] Split CI into different workflows, [run them consecutively](https://stackoverflow.com/questions/58457140/dependencies-between-workflows-on-github-actions) --> would allow quick overview with separate lint/build/test badges

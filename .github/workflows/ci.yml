@@ -104,8 +104,8 @@ jobs:
     needs: [sanitize]
     strategy:
       matrix:
-#        os: [ubuntu-22.04]
-        os: [macos-12, ubuntu-22.04, windows-2022]
+        os: [ubuntu-22.04]
+#        os: [macos-12, ubuntu-22.04, windows-2022]
 
         type: [shared, static]
 
@@ -145,7 +145,7 @@ jobs:
     - name: Configure
       shell: pwsh
       run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
-        -D BUILD_SHARED_LIBS=${{ matrix.shared }}
+        -D BUILD_SHARED_LIBS=${{ matrix.shared }} -D BUILD_TESTING=NO -D BUILD_EXAMPLES=YES
 
     - name: Build
       run: cmake --build build --config Release -j 2
@@ -153,9 +153,10 @@ jobs:
     - name: Install
       run: cmake --install build --config Release --prefix prefix
 
-    - name: Test
-      working-directory: build
-      run: ctest --output-on-failure -C Release -j 2
+#    - name: Test
+#      working-directory: build
+#      if: matrix.os == 'ubuntu-22.04'
+#      run: ctest --output-on-failure -C Release -j 2
 
   docs:
     # Deploy docs only when builds succeed
