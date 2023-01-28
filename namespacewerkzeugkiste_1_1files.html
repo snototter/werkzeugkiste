@@ -51,29 +51,39 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>files <span class="m-thin">namespace</span>
         </h1>
-        <p>TODO doc.</p>
+        <p>File system utilities.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
+                <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#func-members">Functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
+        <section id="nested-classes">
+          <h2><a href="#nested-classes">Classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a href="classwerkzeugkiste_1_1files_1_1AsciiFileIterator.html" class="m-doc">AsciiFileIterator</a>
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#add46c19a680dd35c9e9c4e657730e5a5" class="m-doc">ReadAsciiFile</a>(</span><span class="m-doc-wrap">const char* filename) -&gt; std::vector&lt;std::string&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed888288f8d2b0be73989eb04343a995" class="m-doc">ReadAsciiFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; std::vector&lt;std::string&gt; WERKZEUGKISTE_EXPORT</span>
             </dt>
-            <dd>Reads the plain text file into a string.</dd>
+            <dd>Reads all lines of the plain text file.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aba0b8623d25029a6e03d874d2c0feb3e" class="m-doc">CatAsciiFile</a>(</span><span class="m-doc-wrap">const char* filename) -&gt; std::string</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a84f9d329447fdb17f015d5430e2a4749" class="m-doc">CatAsciiFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; std::string WERKZEUGKISTE_EXPORT</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Reads the plain text file into a single string.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#aa1ee45e9871f8e5a89d52e0804655ed1" class="m-doc">Exists</a>(</span><span class="m-doc-wrap">const std::string&amp; name) -&gt; bool</span>
             </dt>
@@ -107,19 +117,19 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="add46c19a680dd35c9e9c4e657730e5a5"><div>
+          <section class="m-doc-details" id="aed888288f8d2b0be73989eb04343a995"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />files::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#add46c19a680dd35c9e9c4e657730e5a5" class="m-doc-self">ReadAsciiFile</a>(</span><span class="m-doc-wrap">const char* filename)</span></span>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; WERKZEUGKISTE_EXPORT werkzeugkiste::<wbr />files::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed888288f8d2b0be73989eb04343a995" class="m-doc-self">ReadAsciiFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="fileio_8h.html">&lt;werkzeugkiste/files/fileio.h&gt;</a></div>
             </h3>
-            <p>Reads the plain text file into a string.</p>
+            <p>Reads all lines of the plain text file.</p>
           </div></section>
-          <section class="m-doc-details" id="aba0b8623d25029a6e03d874d2c0feb3e"><div>
+          <section class="m-doc-details" id="a84f9d329447fdb17f015d5430e2a4749"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />files::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aba0b8623d25029a6e03d874d2c0feb3e" class="m-doc-self">CatAsciiFile</a>(</span><span class="m-doc-wrap">const char* filename)</span></span>
+              <span class="m-doc-wrap-bumper">std::string WERKZEUGKISTE_EXPORT werkzeugkiste::<wbr />files::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84f9d329447fdb17f015d5430e2a4749" class="m-doc-self">CatAsciiFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="fileio_8h.html">&lt;werkzeugkiste/files/fileio.h&gt;</a></div>
             </h3>
-            <p><span></span></p>
+            <p>Reads the plain text file into a single string.</p>
           </div></section>
           <section class="m-doc-details" id="aa1ee45e9871f8e5a89d52e0804655ed1"><div>
             <h3>

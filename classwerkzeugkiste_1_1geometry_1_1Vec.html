@@ -474,8 +474,8 @@
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3fe7ef3d33d8d27ac30f866dbe8e4d92" class="m-doc">ToString</a>(</span><span class="m-doc-wrap">bool include_type = true,
-              int fixed_precision = 2) const -&gt; std::string</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a708ac240ea4d9025f8a8895d26a1d1c0" class="m-doc">ToString</a>(</span><span class="m-doc-wrap">bool include_type = true,
+              int fixed_precision = 0) const -&gt; std::string</span>
             </dt>
             <dd></dd>
           </dl>
@@ -739,15 +739,15 @@
             </h3>
 <p>Returns a double precision vector which is the result of rotating this vector by the given angle in degrees. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</p>
           </div></section>
-          <section class="m-doc-details" id="a3fe7ef3d33d8d27ac30f866dbe8e4d92"><div>
+          <section class="m-doc-details" id="a708ac240ea4d9025f8a8895d26a1d1c0"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T, std::size_t Dim&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3fe7ef3d33d8d27ac30f866dbe8e4d92" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">bool include_type = true,
-              int fixed_precision = 2) const</span></span>
+              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a708ac240ea4d9025f8a8895d26a1d1c0" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">bool include_type = true,
+              int fixed_precision = 0) const</span></span>
             </h3>
-<p>Returns a human-readable string representation. If <code>include_type</code> is false, it will only return the coordinates within parentheses, e.g. &quot;(13, 77)&quot;.</p>
+<p>Returns a human-readable string representation. If <code>include_type</code> is true, the class name will be included, e.g. &quot;Vec2i(1, 2)&quot;. Otherwise, it will only return the coordinates within parentheses, e.g. &quot;(13, 77)&quot;.</p><p>For floating point types, the output precision will be set to the maximum precision if fixed_precision &lt;= 0. If a positive fixed_precision is provided, the output format will be adjusted.</p>
           </div></section>
           <section class="m-doc-details" id="a5fc531fa7e22593e610b7fa49b9080f9"><div>
             <h3>
