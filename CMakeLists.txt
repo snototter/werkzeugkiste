@@ -300,7 +300,7 @@ target_include_directories(
 #list(PREPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 #set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
-find_package(Filesystem REQUIRED)
+find_package(Filesystem REQUIRED COMPONENTS Final Experimental)
 
 target_link_libraries(
     werkzeugkiste-files

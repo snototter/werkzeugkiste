@@ -215,6 +215,9 @@ if(CXX_FILESYSTEM_HAVE_FS)
     set(can_link ${CXX_FILESYSTEM_NO_LINK_NEEDED})
 
     if(NOT CXX_FILESYSTEM_NO_LINK_NEEDED)
+        if(NOT CMAKE_REQUIRED_LIBRARIES)
+            set(CMAKE_REQUIRED_LIBRARIES "")
+        endif()
         set(prev_libraries ${CMAKE_REQUIRED_LIBRARIES})
         # Add the libstdc++ flag
         set(CMAKE_REQUIRED_LIBRARIES ${prev_libraries} -lstdc++fs)
