@@ -14,13 +14,13 @@ public:
   ConfigurationImpl(toml::table &&config)
     : config_(std::move(config))
     {
-        const std::string_view key {"visualization.save"};
+        const std::string_view key {"visualization.*.save"};
         auto tokens = werkzeugkiste::strings::Tokenize(key, ".");
         for (const auto &token : tokens) {
             WKZLOG_WARN("TODO check key-token '{:s}'", token);
         }
-        auto test = config_[tokens[0]];
-        WKZLOG_WARN("key: {:s}", test[tokens[1]]);
+        // auto test = config_[tokens[0]];
+        // WKZLOG_WARN("key: {:s}", test[tokens[1]]);
     }
   
   void RegisterPathParameter(std::string_view param_name) override {
