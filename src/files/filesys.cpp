@@ -9,12 +9,7 @@
 #ifdef WZK_HAS_FILESYSTEM
 #  include <filesystem>
 // FIXME linking to std::filesystem will be a chore
-#else // WZK_HAS_FILESYSTEM
-#  if defined(WIN32) || defined(_WIN32) || defined(__CYGWIN__)
-const char k_file_separator = '\\';
-#  else // WIN32
-const char k_file_separator = '/';
-#  endif // WIN32
+//#else // WZK_HAS_FILESYSTEM
 #endif // WZK_HAS_FILESYSTEM
 
 namespace werkzeugkiste::files {
@@ -26,6 +21,13 @@ namespace werkzeugkiste::files {
 // isdir, isabsolute
 // listdircontents
 // getextension
+
+#  if defined(WIN32) || defined(_WIN32) || defined(__CYGWIN__)
+const char k_file_separator = '\\';
+#  else // WIN32
+const char k_file_separator = '/';
+#  endif // WIN32
+
 
 bool Exists(const std::string& name) {
 #ifdef WKZ_HAS_FILESYSTEM
