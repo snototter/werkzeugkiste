@@ -69,7 +69,7 @@ jobs:
         path-to-lcov: build/coverage/coverage.info
 
   sanitize:
-    needs: [lint]
+#    needs: [lint]
 
     runs-on: ubuntu-22.04
 
