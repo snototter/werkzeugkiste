@@ -1,6 +1,8 @@
 #ifndef WERKZEUGKISTE_CONFIG_CONFIGURATION_H
 #define WERKZEUGKISTE_CONFIG_CONFIGURATION_H
 
+#include <werkzeugkiste/werkzeugkiste_export.h>
+
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -14,12 +16,14 @@
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
 
-class Configuration {
+class WERKZEUGKISTE_EXPORT Configuration {
  public:
   /// Loads the configuration from the given file.
   ///
   /// TODO runtime_error if file doesn't exits or toml is malformed
+
   static std::unique_ptr<Configuration> LoadTomlFile(std::string_view filename);
+
   static std::unique_ptr<Configuration> LoadTomlString(
       std::string_view toml_string);
   //   static std::unique_ptr<Configuration> LoadJSON(std::string_view
