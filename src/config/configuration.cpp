@@ -5,13 +5,115 @@
 #include <werkzeugkiste/strings/strings.h>
 
 #include <sstream>
+#include <string>
 #include <vector>
 
 namespace werkzeugkiste::config {
 
+// std::vector<std::string> ListKeys(const toml::array &array, std::string_view
+// path) {
+
+inline std::string FullyQualifiedPath(const toml::key &key,
+                                      std::string_view parent_path) {
+  if (parent_path.length() > 0) {
+    std::string fqn{parent_path};
+    fqn += '.';
+    fqn += key.str();
+    return fqn;
+  }
+  return std::string(key.str());
+}
+
+inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
+                                                  std::string_view path) {
+  std::string fqn{path};
+  // std::string fqn {FullyQualifiedPath(key, parent_path)};
+  fqn += '[';
+  fqn += std::to_string(array_index);
+  fqn += ']';
+  return fqn;
+}
+
+// Forward declaration
+std::vector<std::string> ListKeys(const toml::table &tbl,
+                                  std::string_view path);
+
+std::vector<std::string> ListArrayKeys(const toml::array &arr,
+                                       std::string_view path) {
+  std::vector<std::string> keys;
+  std::size_t array_index = 0;
+  for (auto &&value : arr) {
+    WKZLOG_INFO("Iterating array path '{:s}'",
+                FullyQualifiedArrayElementPath(array_index, path));
+    if (value.is_table()) {
+      const toml::table &tbl = *value.as_table();
+      const auto subkeys =
+          ListKeys(tbl, FullyQualifiedArrayElementPath(array_index, path));
+      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+    }
+    if (value.is_array()) {
+      WKZLOG_WARN("TODO --> this is a nested array!");
+      // TODO ListKeys, then append
+    }
+    ++array_index;
+  }
+  return keys;
+}
+
+std::vector<std::string> ListKeys(const toml::table &tbl,
+                                  std::string_view path) {
+  // auto fq_path = [path](const toml::key &key) -> std::string {
+  //   if (path.length() > 0) {
+  //     std::string fqn{path};
+  //     fqn += '.';
+  //     fqn += key.str();
+  //     return fqn;
+  //   }
+  //   return std::string(key.str());
+  // };
+
+  // // TODO group.name.array[idx]
+  // auto fq_array_element = [fq_path](const toml::key &key, std::size_t idx) ->
+  // std::string {
+  //   std::string fqn = fq_path(key);
+  //   fqn += '[';
+  //   fqn += std::to_string(idx);
+  //   fqn += ']';
+  //   return fqn;
+  // };
+
+  std::vector<std::string> keys;
+  for (auto &&[key, value] : tbl) {
+    keys.emplace_back(FullyQualifiedPath(key, path));
+    if (value.is_array()) {
+      // TODO separate function as we need to recurse!!
+      const auto subkeys =
+          ListArrayKeys(*value.as_array(), FullyQualifiedPath(key, path));
+      // std::size_t array_index = 0;
+      // const toml::array &array = *value.as_array();
+      // for (auto &&array_value : array) {
+      //   WKZLOG_INFO("Iterating array path '{:s}'",
+      //   FullyQualifiedArrayElementPath(key, array_index, parent_path)); if
+      //   (array_value.is_table()) {
+      //     WKZLOG_WARN("--> this is a table!");
+      //   }
+      //   ++array_index;
+      // }
+      // TODO iterate (path is [0]...) and recurse into tables
+      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+    }
+    if (value.is_table()) {
+      const auto subkeys =
+          ListKeys(*value.as_table(), FullyQualifiedPath(key, path));
+      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+    }
+  }
+  return keys;
+}
+
 class ConfigurationImpl : public Configuration {
  public:
-  ~ConfigurationImpl() = default;
+  ~ConfigurationImpl() override = default;
 
   explicit ConfigurationImpl(toml::table &&config)
       : Configuration(), config_(std::move(config)) {
@@ -24,8 +126,9 @@ class ConfigurationImpl : public Configuration {
     // WKZLOG_WARN("key: {:s}", test[tokens[1]]);
   }
 
-  bool EnsureAbsolutePaths(std::string_view base_path,
-                           const std::vector<std::string_view> &parameters) {
+  bool EnsureAbsolutePaths(
+      std::string_view base_path,
+      const std::vector<std::string_view> &parameters) override {
     bool replaced = false;
     for (const auto &param : parameters) {
       const bool result = EnsureAbsolutePathHelper(
@@ -46,26 +149,29 @@ class ConfigurationImpl : public Configuration {
   // }
 
   std::vector<std::string> ParameterNames() const override {
-    std::vector<std::string> names;
+    return ListKeys(config_, "");
+    // std::vector<std::string> names;
 
-    for (auto &&[key, value] : config_) {
-      WKZLOG_WARN(
-          "TODO visiting '{:s}' = is_string({}), is_number({}), is_table({}),  "
-          "(value type: {:s})",
-          key, value.is_string(), value.is_number(), value.is_table(),
-          typeid(decltype(value)).name());
-    }
-    config_.for_each([names](auto &&el) {
-      WKZLOG_WARN("TODO visiting {:s} (decltype: {:s})", el,
-                  typeid(decltype(el)).name());
-      // WKZLOG_WARN("TODO visiting '{:s}' = '{:s}' (value type: {:s})", key,
-      //             value, typeid(decltype(value)).name());
-      // if constexpr (toml::is_number<decltype(el)>)
-      //     (*el)++;
-      // else if constexpr (toml::is_string<decltype(el)>)
-      //     el = "five"sv;
-    });
-    return names;
+    // // for (auto &&[key, value] : config_) {
+    // //   WKZLOG_WARN(
+    // //       "TODO visiting '{:s}' = is_string({}), is_number({}),
+    // is_table({}),  "
+    // //       "(value type: {:s})",
+    // //       key, value.is_string(), value.is_number(), value.is_table(),
+    // //       typeid(decltype(value)).name());
+    // // }
+    // // config_.for_each([names](auto &&el) {
+    // //   WKZLOG_WARN("TODO visiting {:s} (decltype: {:s})", el,
+    // //               typeid(decltype(el)).name());      // WKZLOG_WARN("TODO
+    // visiting '{:s}' = '{:s}' (value type: {:s})", key,
+    // //   //             value, typeid(decltype(value)).name());
+    // //   // if constexpr (toml::is_number<decltype(el)>)
+    // //   //     (*el)++;
+    // //   // else if constexpr (toml::is_string<decltype(el)>)
+    // //   //     el = "five"sv;
+    // // });
+    // names = ListKeys(config_, "");
+    // return names;
   }
 
   std::string ToTOML() const override { return "TODO"; }

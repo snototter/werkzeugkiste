@@ -1,14 +1,15 @@
+#include <werkzeugkiste/config/configuration.h>
+#include <werkzeugkiste/files/filesys.h>
+#include <werkzeugkiste/version.h>
+
 #include <iostream>
 #include <ostream>
 #include <string>
 #include <vector>
 
-// Only needed to query the library version:
-#include <werkzeugkiste/config/configuration.h>
-#include <werkzeugkiste/version.h>
-
 int main(int /* argc */, char** /* argv */) {
   namespace wkc = werkzeugkiste::config;
+  namespace wkf = werkzeugkiste::files;
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    Configuration utilities demo\n"
@@ -41,6 +42,14 @@ int main(int /* argc */, char** /* argv */) {
     config = wkc::Configuration::LoadTomlFile("no-such-file.toml");
   } catch (const std::runtime_error&) {
     // TODO
+  }
+
+  config = wkc::Configuration::LoadTomlFile(
+      wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
+  const auto params = config->ParameterNames();
+  std::cout << "Parameter names:\n";
+  for (const auto& name : params) {
+    std::cout << "  " << name << std::endl;
   }
 
   return 0;
