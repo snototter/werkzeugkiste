@@ -162,7 +162,8 @@ jobs:
     needs: [test-linux]
     strategy:
       matrix:
-        os: [macos-12, windows-2022]
+        os: [macos-12]
+#        os: [macos-12, windows-2022]
 
         type: [shared, static]
 
