@@ -19,7 +19,7 @@ Currently, it provides the following functionality. Note that the namespace
 name also equals the corresponding CMake target to be linked against:
 * `werkzeugkiste::container`: Sorting/lookup utilities and a custom
   circular buffer.
-* `werkzeugkiste::files`: Basic file I/O and filesystem utilities.  
+* `werkzeugkiste::files`: Basic file I/O and filesystem utilities.
   _Caveat:_ These utilities are only tested on GNU/Linux and will be replaced
   by wrappers to C++17's `std::filesystem`.
 * `werkzeugkiste::geometry`: Math utilities, focused on basic 2D & 3D geometry.
@@ -89,24 +89,24 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
   [cmake-init][10], **Windows users** should check the [cmake-init README][11]
   for required changes or suggested toolchain alternatives.
 
-* A recent [clang-tidy][5] version >= 14.  
+* A recent [clang-tidy][5] version >= 14.
 
   CI will always run clang-tidy, so it is optional to install and use it
   locally, but it is highly recommended.
 
-* Additional static analysis is run by [cppcheck][6].  
+* Additional static analysis is run by [cppcheck][6].
 
   CI will always run cppcheck, so it is optional to install and use it
   locally, but it is highly recommended.
 
 * Testing requires [googletest][7].
 
-* Test coverage is generated via GCC's `gcov` and summarized using [LCOV][8]. 
+* Test coverage is generated via GCC's `gcov` and summarized using [LCOV][8].
 
   The project has a `coverage` target in developer mode if the
   `ENABLE_COVERAGE` variable is enabled. The reason why a separate target is used
   instead of CTest's built-in `coverage` step is because it lacks necessary
-  customization.  
+  customization.
   This target should be run after the tests and will generate a report at
   `<binary-dir>/coverage.info` and an HTML report at the
   `<binary-dir>/coverage_html` directory.
@@ -122,10 +122,14 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
     which are separate targets that link against the werkzeugkiste library)
   * [ ] Check if the export header is correctly distributed in a consuming project
 * [ ] Properly set up Github Actions
-  * Test only on linux, but more versions
-  * Build library and examples on windows & macos (without testing)
-  * Sanitize on linux
-  * Lint on linux
+  * [x] Test only on linux, but more versions
+  * [x] Build library and examples on windows & macos (without testing)
+  * [x] Sanitize on linux
+  * [x] Lint on linux
+  * [ ] Clean up ci workflow, maybe split into separate (dependent?) workflows
+* [ ] Adjust pre-commit hooks, e.g. https://pypi.org/project/cmake-pre-commit-hooks/
+  * Use errors instead auf autofix?
+
 * [ ] Split CI into different workflows, [run them consecutively](https://stackoverflow.com/questions/58457140/dependencies-between-workflows-on-github-actions) --> would allow quick overview with separate lint/build/test badges
 * [ ] Deploy docs
   * [ ] Check gh-pages action
@@ -175,5 +179,3 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
 [9]: https://cmake.org/cmake/help/latest/module/FetchContent.html
 [10]: https://pypi.org/project/cmake-init/
 [11]: https://github.com/friendlyanon/cmake-init#clang-tidy
-
-

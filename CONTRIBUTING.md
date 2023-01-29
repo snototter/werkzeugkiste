@@ -9,7 +9,7 @@
 TODO merge code of conduct into here
 -->
 
-* For each library, there should be a demo binary within `examples/`  
+* For each library, there should be a demo binary within `examples/`
   Note, however, that demos are the lowest priority features on my list for
   this toolbox. Most importantly, this library should keep a high code
   coverage!

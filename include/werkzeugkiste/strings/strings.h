@@ -1,7 +1,7 @@
 #ifndef WERKZEUGKISTE_STRINGS_STRINGS_H
 #define WERKZEUGKISTE_STRINGS_STRINGS_H
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
+#include <werkzeugkiste/strings/strings_export.h>
 
 #include <iomanip>
 #include <sstream>
@@ -51,7 +51,7 @@ inline constexpr bool StartsWith(std::string_view s, char first) noexcept {
 }
 
 /// Converts the string to lower case (in-place).
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 void ToLower(std::string& s);  // NOLINT
 
 /// Returns a copy, converted to lower case.
@@ -62,7 +62,7 @@ inline std::string Lower(std::string_view s) {
 }
 
 /// Converts the string to upper case (in-place).
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 void ToUpper(std::string& s);  // NOLINT
 
 /// Returns a copy, converted to upper case.
@@ -74,25 +74,29 @@ inline std::string Upper(const std::string& s) {
 
 /// Returns a copy with leading & trailing
 /// white space removed.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Trim(std::string_view s);
 
 /// Returns a copy with leading white space removed.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string LTrim(std::string_view totrim);
 
 /// Returns a copy with trailing white space removed.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string RTrim(std::string_view totrim);
 
 /// Returns true if the string can be safely cast into
 /// either an `int64_t` or a `double` type.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 bool IsNumeric(const std::string& s);
 
 /// Tokenizes the string by the given delimiter.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::vector<std::string> Split(std::string_view s, char delim);
+
+WERKZEUGKISTE_STRINGS_EXPORT
+std::vector<std::string_view> Tokenize(std::string_view s,
+                                       std::string_view delim);
 
 template <typename Container, typename Tp = std::decay_t<
                                   decltype(*begin(std::declval<Container>()))>>
@@ -113,40 +117,40 @@ inline std::string Concatenate(const Container& container,
 
 /// Replaces all occurrences of the given search
 /// string `needle` within the `haystack`.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Replace(std::string_view haystack, std::string_view needle,
                     std::string_view replacement);
 
 /// Replaces all occurrences of the given character.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Replace(std::string_view haystack, char needle, char replacement);
 
 /// Clips the given URL string to include only the
 /// protocol and domain, *i.e.* server paths & parameters
 /// will be excluded.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string ClipUrl(const std::string& url);
 
 /// Sets `protocol` to the URL's protocol, e.g.
 /// `https://`, `rtp://`, ...
 /// Returns true if the `url` string contained a
 /// protocol part.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 bool GetUrlProtocol(const std::string& url,
                     std::string& protocol,    // NOLINT
                     std::string& remainder);  // NOLINT
 
 /// Returns the URL after replacing any plaintext
 /// authentication data by the text `<auth>`.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string ObscureUrlAuthentication(const std::string& url);
 
 /// Returns a copy where all given characters have been removed.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Remove(std::string_view s, std::initializer_list<char> chars);
 
 /// Returns a copy where the given character has been removed.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Remove(std::string_view s, char c);
 
 /// Returns a slug representation of the string.
@@ -158,7 +162,7 @@ std::string Remove(std::string_view s, char c);
 /// If `strip_dashes` is true, the remaining dashes will
 /// then also be stripped: e.g. ` img_dir` would
 /// become `imgdir`.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Slug(std::string_view s, bool strip_dashes = false);
 
 /// Returns a string with length <= `desired_length`,
@@ -170,13 +174,13 @@ std::string Slug(std::string_view s, bool strip_dashes = false);
 /// * `< 0`: Left
 /// * `0`: Centered
 /// * `> 0`: Right
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Shorten(std::string_view s, std::size_t desired_length,
                     int ellipsis_position = -1,
                     std::string_view ellipsis = "...");
 
 /// Returns the string indented by n-times the given character.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_STRINGS_EXPORT
 std::string Indent(std::string_view s, std::size_t n, char character = ' ');
 
 }  // namespace werkzeugkiste::strings

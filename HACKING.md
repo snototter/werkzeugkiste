@@ -1,6 +1,11 @@
 # Hacking
 
 <!-- TODO update document
+
+
+cmake --preset=ci-coverage -DCMAKE_VERBOSE_MAKEFILE=1
+
+
 check exported symbols of shared libs:
 readelf -s libwerkzeugkiste-timing.so
 objdump -T --demangle libwerkzeugkiste-timing.so

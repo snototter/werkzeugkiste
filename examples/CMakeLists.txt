@@ -15,11 +15,15 @@ function(add_example NAME LIBS)
   add_executable("${NAME}" "src/${NAME}_example.cpp")
   target_link_libraries("${NAME}" PRIVATE "${LIBS}")
   target_compile_features("${NAME}" PRIVATE cxx_std_17)
-  add_custom_target("run_${NAME}" COMMAND "${NAME}" VERBATIM)
+  add_custom_target(
+    "run_${NAME}"
+    COMMAND "${NAME}"
+    VERBATIM)
   add_dependencies("run_${NAME}" "${NAME}")
   add_dependencies(run-examples "run_${NAME}")
 endfunction()
 
+add_example(config werkzeugkiste::werkzeugkiste)
 add_example(container werkzeugkiste::container)
 add_example(files werkzeugkiste::files)
 add_example(geometry werkzeugkiste::geometry)

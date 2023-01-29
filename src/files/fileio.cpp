@@ -15,7 +15,7 @@ std::vector<std::string> ReadAsciiFile(std::string_view filename) {
     msg += filename;
     msg += "\".";
     WKZLOG_ERROR(msg);
-    throw std::invalid_argument(msg);
+    throw std::runtime_error(msg);
   }
 
   std::vector<std::string> lines;
@@ -34,7 +34,7 @@ std::string CatAsciiFile(std::string_view filename) {
     msg += filename;
     msg += "\".";
     WKZLOG_ERROR(msg);
-    throw std::invalid_argument(msg);
+    throw std::runtime_error(msg);
   }
 
   std::stringstream sstr;
@@ -51,7 +51,7 @@ AsciiFileIterator::AsciiFileIterator(std::string_view filename) {
     msg += filename;
     msg += "\".";
     WKZLOG_ERROR(msg);
-    throw std::invalid_argument(msg);
+    throw std::runtime_error(msg);
   }
 
   // Load first line

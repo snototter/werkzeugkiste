@@ -1,7 +1,7 @@
 #ifndef WERKZEUGKISTE_FILES_FILEIO_H
 #define WERKZEUGKISTE_FILES_FILEIO_H
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
+#include <werkzeugkiste/files/files_export.h>
 
 #include <fstream>
 #include <string>
@@ -10,15 +10,15 @@
 
 namespace werkzeugkiste::files {
 /// Reads all lines of the plain text file.
-std::vector<std::string> WERKZEUGKISTE_EXPORT
+std::vector<std::string> WERKZEUGKISTE_FILES_EXPORT
 ReadAsciiFile(std::string_view filename);
 
 /// Reads the plain text file into a single string.
-std::string WERKZEUGKISTE_EXPORT CatAsciiFile(std::string_view filename);
+std::string WERKZEUGKISTE_FILES_EXPORT CatAsciiFile(std::string_view filename);
 
 // TODO doc
 // TODO test
-class WERKZEUGKISTE_EXPORT AsciiFileIterator {
+class WERKZEUGKISTE_FILES_EXPORT AsciiFileIterator {
  public:
   // NOLINTBEGIN(readability-identifier-naming)
   using iterator_category = std::forward_iterator_tag;
