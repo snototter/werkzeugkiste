@@ -56,7 +56,7 @@ int main(int /* argc */, char** /* argv */) {
 
   config->EnsureAbsolutePaths("CUSTOM/BASE/PATH",
                               {"*name"sv, "*.regex*"sv, "strings.str5"sv,
-                               "strings.str[1|7]?"sv, "products[2].color"sv});
+                               "strings.str[1-3|7]?"sv, "products[2].color"sv});
 
   return 0;
 }

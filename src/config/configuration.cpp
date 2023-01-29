@@ -108,6 +108,8 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
 
 void Traverse(toml::node &node, std::string_view path,
               const std::function<void(toml::node &, std::string_view)> &func) {
+  // Iterate container nodes (i.e. table and array) and call the given functor
+  // for each node.
   if (node.is_table()) {
     toml::table &tbl = *node.as_table();
     for (auto &&[key, value] : tbl) {
@@ -141,47 +143,74 @@ void Traverse(toml::node &node, std::string_view path,
   }
 }
 
-inline bool ConfigPathMatchesPattern(std::string_view path,
-                                     std::string_view pattern) {
-  if (path.compare(pattern) == 0) {
-    return true;
-  }
+class KeyMatcher {
+ public:
+  KeyMatcher(std::string &&pattern) : pattern_(std::move(pattern)) {
+    // TODO https://toml.io/en/v1.0.0
+    // dotted is allowed (and needed to support paths!)
+    // doc that quoted keys are not supported! - maybe add a check and raise an
+    // exception if needed?
+    auto it = std::find_if(pattern_.begin(), pattern_.end(), [](char c) {
+      return !(isalnum(c) || (c == '.') || (c == '_') || (c == '-'));
+    });
 
-  // if (pattern.find('*') != pattern.npos) {
-  // TODO if there are any special characters in the pattern...
-  std::string re{"^"};
-  for (char c : pattern) {
-    if (c == '*') {
-      re += ".*";
-    } else if (c == '.') {
-      re += "\\.";
-    } else {
-      re += c;
+    is_regex_ = (it != pattern_.end());
+
+    if (is_regex_) {
+      BuildRegex();
     }
   }
-  re += '$';
-  WKZLOG_ERROR("Converted pattern `{:s}` to regex str `{:s}`", pattern, re);
-  std::regex regex{re};
-  const auto flags = std::regex_constants::match_default;
-  if (std::regex_match(path.begin(), path.end(), regex, flags)) {
-    return true;
-  }
-  // }
-  // TODO asterisk replacements!
 
-  return false;
-}
-
-inline bool ConfigPathMatchesAnyPattern(
-    std::string_view path, const std::vector<std::string_view> &patterns) {
-  for (const auto &ptn : patterns) {
-    // WKZLOG_CRITICAL("TODO check {:s} vs pattern: {:s}", path, ptn);
-    if (ConfigPathMatchesPattern(path, ptn)) {
+  bool Matches(std::string_view key) const {
+    constexpr auto flags = std::regex_constants::match_default;
+    if (std::regex_match(key.begin(), key.end(), regex_, flags)) {
       return true;
     }
   }
-  return false;
-}
+
+ private:
+  std::string pattern_{};
+  bool is_regex_{false};
+  std::regex regex_{};
+
+  inline void BuildRegex() {
+    std::string re{"^"};
+    for (char c : pattern_) {
+      if (c == '*') {
+        re += ".*";
+      } else if (c == '.') {
+        re += "\\.";
+      } else {  // TODO test backslash handling!
+        re += c;
+      }
+    }
+    re += '$';
+    WKZLOG_ERROR("Converted pattern `{:s}` to regex str `{:s}`", pattern_,
+                 re);  // TODO remove
+    regex_ = std::regex{re};
+  }
+};
+
+class MultiKeyMatcher {
+ public:
+  MultiKeyMatcher(const std::vector<std::string_view> &patterns) {
+    for (const auto &pattern : patterns) {
+      matchers_.emplace_back(KeyMatcher(std::string(pattern)));
+    }
+  }
+
+  bool MatchesAny(std::string_view key) const {
+    for (const auto &m : matchers_) {
+      if (m.Matches(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+ private:
+  std::vector<KeyMatcher> matchers_{};
+};
 
 class ConfigurationImpl : public Configuration {
  public:
@@ -189,7 +218,7 @@ class ConfigurationImpl : public Configuration {
 
   explicit ConfigurationImpl(toml::table &&config)
       : Configuration(), config_(std::move(config)) {
-    const std::string_view key{"visualization.*.save"};
+    // const std::string_view key{"visualization.*.save"};
     // auto tokens = werkzeugkiste::strings::Tokenize(key, ".");
     // for (const auto &token : tokens) {
     //   WKZLOG_WARN("TODO check key-token '{:s}'", token);
@@ -202,21 +231,14 @@ class ConfigurationImpl : public Configuration {
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) override {
     using namespace std::string_view_literals;
-    auto to_replace = [parameters](std::string_view fqn) -> bool {
-      return ConfigPathMatchesAnyPattern(fqn, parameters);
+    MultiKeyMatcher matcher{parameters};
+    auto to_replace = [matcher](std::string_view fqn) -> bool {
+      return matcher.MatchesAny(fqn);
     };
 
     bool replaced{false};
     auto func = [replaced, to_replace, base_path](
                     toml::node &node, std::string_view fqn) mutable -> void {
-      // WKZLOG_INFO("----Traverse {:s}", fqn);
-      // if (node.is_string()) {
-      //   auto &str = *node.as_string();
-      //   WKZLOG_ERROR("------is a string {:s}", str);
-      //   str = "replaced?"sv;
-      //   WKZLOG_ERROR("is it replaced?: '{:s}'", str);
-      //   replaced = true;
-      // }
       if (node.is_string() && to_replace(fqn)) {
         auto &str = *node.as_string();
         WKZLOG_ERROR("Will replace param {:s}, was previously {:s}", fqn, str);
@@ -224,7 +246,7 @@ class ConfigurationImpl : public Configuration {
         replaced = true;
       }
     };
-    Traverse(config_, "", func);
+    Traverse(config_, ""sv, func);
     WKZLOG_ERROR("After replacements:\n{:s}\nreplaced?{}", config_, replaced);
     return replaced;
   }
@@ -249,19 +271,8 @@ class ConfigurationImpl : public Configuration {
  private:
   toml::table config_{};
 
-  bool EnsureAbsolutePathHelper(std::string_view base_path,
-                                std::string_view key) {
-    // TODO tokenize
-    //  auto tokens = werkzeugkiste::strings::Tokenize(key, ".");
-    //  for (const auto &token : tokens) {
-    //    WKZLOG_WARN("TODO check key-token '{:s}'", token);
-    //  }
-    // TODO iterate names
-    bool replaced = false;
-
-    return replaced;
-  }
-  // std::vector<std::string> path_parameters_{};
+  // TODO registered_string_replacements_{};
+  //  std::vector<std::string> path_parameters_{};
 };
 
 std::unique_ptr<Configuration> Configuration::LoadTomlFile(
@@ -274,7 +285,7 @@ std::unique_ptr<Configuration> Configuration::LoadTomlString(
     std::string_view toml_string) {
   try {
     toml::table tbl = toml::parse(toml_string);
-    WKZLOG_INFO("Loaded toml: {:s}", tbl);
+    WKZLOG_INFO("Loaded toml: {:s}", tbl);  // TODO remove
     return std::make_unique<ConfigurationImpl>(std::move(tbl));
   } catch (const toml::parse_error &err) {
     std::ostringstream msg;
