@@ -54,10 +54,13 @@ add_executable(
   src/timing/tictoc_test.cpp)
 target_link_libraries(
   werkzeugkiste-test
-  PRIVATE gtest_main gtest pthread werkzeugkiste::werkzeugkiste
-  # werkzeugkiste::config werkzeugkiste::container werkzeugkiste::geometry
-  # werkzeugkiste::files werkzeugkiste::strings werkzeugkiste::timing)
-  # std::filesystem)
+  PRIVATE gtest_main
+          gtest
+          pthread
+          werkzeugkiste::werkzeugkiste
+          # werkzeugkiste::config werkzeugkiste::container
+          # werkzeugkiste::geometry werkzeugkiste::files werkzeugkiste::strings
+          # werkzeugkiste::timing) std::filesystem)
 )
 
 target_compile_features(werkzeugkiste-test PRIVATE cxx_std_17)
