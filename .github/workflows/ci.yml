@@ -159,7 +159,7 @@ jobs:
       run: ctest --output-on-failure -C Release -j 2
 
   build-others:
-    needs: [test]
+    needs: [test-linux]
     strategy:
       matrix:
         os: [macos-12, windows-2022]
