@@ -15,14 +15,28 @@ int main(int /* argc */, char** /* argv */) {
             << "--------------------------------------------------\n"
             << std::endl;
 
-  auto config = wkc::Configuration::LoadTOML("test.toml");
+  auto config = wkc::Configuration::LoadTomlString(R"toml(
+    [relative_paths]
+    path = "p1"
+    another_path = "p2"
 
-  config->RegisterPathParameter("foo");
-  config->RegisterPathParameter("bar");
-  config->RegisterPathParameter("frobnicate.frobmorten");
-  config->MakePathsAbsolute("todo");
+    folder = "p3"
 
-  config = wkc::Configuration::LoadTOML("no-such-file.toml");
+    [some.folders.folders]
+    folder = "nested-path"
+    
+    [absolute_paths]
+    )toml");
+
+  config->EnsureAbsolutePaths("TODO", {"path", "*.folder"});
+
+  config->ParameterNames();  // TODO
+
+  try {
+    config = wkc::Configuration::LoadTomlFile("no-such-file.toml");
+  } catch (const std::runtime_error&) {
+    // TODO
+  }
 
   return 0;
 }

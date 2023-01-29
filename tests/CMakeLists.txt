@@ -33,6 +33,7 @@ endif()
 add_executable(werkzeugkiste-test
   src/test_utils.h
   src/test_utils.cpp
+  src/config/config_test.cpp
   src/geometry/utils_test.cpp    
   src/geometry/projection_test.cpp
   src/geometry/primitives_test.cpp
@@ -51,11 +52,7 @@ target_link_libraries(werkzeugkiste-test
   gtest_main
   gtest
   pthread
-  werkzeugkiste::container
-  werkzeugkiste::geometry
-  werkzeugkiste::strings
-  werkzeugkiste::files
-  werkzeugkiste::timing)
+  werkzeugkiste::werkzeugkiste)
 
 target_compile_features(werkzeugkiste-test PRIVATE cxx_std_17)
 
