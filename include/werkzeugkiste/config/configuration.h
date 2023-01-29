@@ -22,6 +22,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// TODO runtime_error if file doesn't exits or toml is malformed
 
+  // TODO remove ptr, implement copy/move ctor/assignments!
   static std::unique_ptr<Configuration> LoadTomlFile(std::string_view filename);
 
   static std::unique_ptr<Configuration> LoadTomlString(
@@ -53,6 +54,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Returns a list of all (fully-qualified) parameter names, e.g.
   /// "some_table.param_x".
   virtual std::vector<std::string> ParameterNames() const = 0;
+
+  // TODO should return a copy!
+  //    virtual Configuration &GetGroup(std::string_view group_name) const = 0;
 
   // TODO LoadNestedTOMLConfiguration(param_name)
   // TODO LoadNestedJSONConfiguration(param_name)

@@ -10,6 +10,8 @@
 int main(int /* argc */, char** /* argv */) {
   namespace wkc = werkzeugkiste::config;
   namespace wkf = werkzeugkiste::files;
+  using namespace std::string_view_literals;
+
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
             << "    Configuration utilities demo\n"
@@ -34,9 +36,9 @@ int main(int /* argc */, char** /* argv */) {
     [absolute_paths]
     )toml");
 
-  config->EnsureAbsolutePaths("TODO", {"path", "*.folder"});
+  // config->EnsureAbsolutePaths("TODO", {"path", "*.folder"});
 
-  config->ParameterNames();  // TODO
+  // config->ParameterNames();  // TODO
 
   try {
     config = wkc::Configuration::LoadTomlFile("no-such-file.toml");
@@ -51,6 +53,10 @@ int main(int /* argc */, char** /* argv */) {
   for (const auto& name : params) {
     std::cout << "  " << name << std::endl;
   }
+
+  config->EnsureAbsolutePaths("CUSTOM/BASE/PATH",
+                              {"*name"sv, "*.regex*"sv, "strings.str5"sv,
+                               "strings.str[1|7]?"sv, "products[2].color"sv});
 
   return 0;
 }
