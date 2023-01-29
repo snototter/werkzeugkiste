@@ -1,7 +1,7 @@
 #ifndef WERKZEUGKISTE_TIMING_STOPWATCH_H
 #define WERKZEUGKISTE_TIMING_STOPWATCH_H
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
+#include <werkzeugkiste/timing/timing_export.h>
 
 #include <chrono>  // NOLINT
 #include <sstream>
@@ -161,7 +161,7 @@ inline constexpr double ToNanoseconds(const Duration& duration) {
 /// Returns a human readable string approximating the given time.
 ///
 /// For example, `SecondsToString(3700 * 24 + 50) = '1 day 40 minutes'`.
-WERKZEUGKISTE_EXPORT
+WERKZEUGKISTE_TIMING_EXPORT
 std::string SecondsToString(unsigned int seconds);
 
 /// A stop watch with configurable clock.
@@ -249,7 +249,7 @@ class StopWatch_ {  // NOLINT
   typename clock_type::time_point t_start_{};
 };
 
-extern template class WERKZEUGKISTE_EXPORT
+extern template class WERKZEUGKISTE_TIMING_EXPORT
     StopWatch_<std::chrono::steady_clock>;
 using StopWatch = StopWatch_<std::chrono::steady_clock>;
 

@@ -46,6 +46,8 @@ if(NOT BUILD_SHARED_LIBS)
                              INTERFACE WERKZEUGKISTE_STATIC_DEFINE)
 endif()
 
+# No export header for this INTERFACE (header-only) target
+
 set_target_properties(
   werkzeugkiste-logging
   PROPERTIES CXX_VISIBILITY_PRESET hidden
@@ -103,6 +105,8 @@ if(NOT BUILD_SHARED_LIBS)
                              INTERFACE WERKZEUGKISTE_STATIC_DEFINE)
 endif()
 
+# No export header for this INTERFACE (header-only) target
+
 set_target_properties(
   werkzeugkiste-container
   PROPERTIES CXX_VISIBILITY_PRESET hidden
@@ -144,6 +148,22 @@ add_library(werkzeugkiste-geometry ${wkzggeometry_PUBLIC_HEADER_FILES}
 # Namespace'd alias
 add_library(werkzeugkiste::geometry ALIAS werkzeugkiste-geometry)
 
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(werkzeugkiste-geometry
+                             PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+endif()
+
+# ---- Generate the shared export header ----
+include(GenerateExportHeader)
+generate_export_header(
+  werkzeugkiste-geometry
+  BASE_NAME
+  werkzeugkiste_geometry
+  EXPORT_FILE_NAME
+  export/werkzeugkiste/geometry/geometry_export.h
+  CUSTOM_CONTENT_FROM_VARIABLE
+  pragma_suppress_c4251)
+
 find_package(Eigen3 REQUIRED NO_MODULE)
 target_link_libraries(werkzeugkiste-geometry PUBLIC Eigen3::Eigen)
 target_link_libraries(werkzeugkiste-geometry PRIVATE werkzeugkiste::logging)
@@ -179,6 +199,20 @@ add_library(werkzeugkiste-strings ${wkzgstrings_PUBLIC_HEADER_FILES}
                                   ${wkzgstrings_SOURCE_FILES})
 # Namespace'd alias
 add_library(werkzeugkiste::strings ALIAS werkzeugkiste-strings)
+
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(werkzeugkiste-strings
+                             PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+endif()
+
+generate_export_header(
+  werkzeugkiste-strings
+  BASE_NAME
+  werkzeugkiste_strings
+  EXPORT_FILE_NAME
+  export/werkzeugkiste/strings/strings_export.h
+  CUSTOM_CONTENT_FROM_VARIABLE
+  pragma_suppress_c4251)
 
 set_target_properties(
   werkzeugkiste-strings
@@ -217,6 +251,20 @@ add_library(werkzeugkiste-files ${wkzgfiles_PUBLIC_HEADER_FILES}
                                 ${wkzgfiles_SOURCE_FILES})
 # Namespace'd alias
 add_library(werkzeugkiste::files ALIAS werkzeugkiste-files)
+
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(werkzeugkiste-files
+                             PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+endif()
+
+generate_export_header(
+  werkzeugkiste-files
+  BASE_NAME
+  werkzeugkiste_files
+  EXPORT_FILE_NAME
+  export/werkzeugkiste/files/files_export.h
+  CUSTOM_CONTENT_FROM_VARIABLE
+  pragma_suppress_c4251)
 
 set_target_properties(
   werkzeugkiste-files
@@ -279,6 +327,15 @@ if(NOT BUILD_SHARED_LIBS)
                              PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
 endif()
 
+generate_export_header(
+  werkzeugkiste-timing
+  BASE_NAME
+  werkzeugkiste_timing
+  EXPORT_FILE_NAME
+  export/werkzeugkiste/timing/timing_export.h
+  CUSTOM_CONTENT_FROM_VARIABLE
+  pragma_suppress_c4251)
+
 set_target_properties(
   werkzeugkiste-timing
   PROPERTIES CXX_VISIBILITY_PRESET hidden
@@ -323,6 +380,20 @@ add_library(werkzeugkiste-config ${wkzgconfig_HEADER_FILES}
 # Namespace'd alias
 add_library(werkzeugkiste::config ALIAS werkzeugkiste-config)
 
+if(NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(werkzeugkiste-config
+                             PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+endif()
+
+generate_export_header(
+  werkzeugkiste-config
+  BASE_NAME
+  werkzeugkiste_config
+  EXPORT_FILE_NAME
+  export/werkzeugkiste/config/config_export.h
+  CUSTOM_CONTENT_FROM_VARIABLE
+  pragma_suppress_c4251)
+
 # find_package(Eigen3 REQUIRED NO_MODULE) TODO make optional (load matrix)
 # target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
 target_link_libraries(
@@ -362,18 +433,6 @@ add_library(werkzeugkiste-werkzeugkiste INTERFACE)
 # ${werkzeugkiste_VERSION_HEADER} )
 # ---- Namespace'd alias ----
 add_library(werkzeugkiste::werkzeugkiste ALIAS werkzeugkiste-werkzeugkiste)
-
-# ---- Generate the shared export header to be used by all targets ----
-include(GenerateExportHeader)
-generate_export_header(
-  werkzeugkiste-geometry # Requires a "full" library target (doesn't work with
-                         # INTERFACE)
-  BASE_NAME
-  werkzeugkiste
-  EXPORT_FILE_NAME
-  export/werkzeugkiste/werkzeugkiste_export.h
-  CUSTOM_CONTENT_FROM_VARIABLE
-  pragma_suppress_c4251)
 
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(werkzeugkiste-werkzeugkiste

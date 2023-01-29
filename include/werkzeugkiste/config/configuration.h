@@ -1,7 +1,7 @@
 #ifndef WERKZEUGKISTE_CONFIG_CONFIGURATION_H
 #define WERKZEUGKISTE_CONFIG_CONFIGURATION_H
 
-#include <werkzeugkiste/werkzeugkiste_export.h>
+#include <werkzeugkiste/config/config_export.h>
 
 #include <cmath>
 #include <limits>
@@ -16,7 +16,7 @@
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
 
-class WERKZEUGKISTE_EXPORT Configuration {
+class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// Loads the configuration from the given file.
   ///

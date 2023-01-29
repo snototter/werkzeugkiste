@@ -122,10 +122,14 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
     which are separate targets that link against the werkzeugkiste library)
   * [ ] Check if the export header is correctly distributed in a consuming project
 * [ ] Properly set up Github Actions
-  * Test only on linux, but more versions
-  * Build library and examples on windows & macos (without testing)
-  * Sanitize on linux
-  * Lint on linux
+  * [x] Test only on linux, but more versions
+  * [x] Build library and examples on windows & macos (without testing)
+  * [x] Sanitize on linux
+  * [x] Lint on linux
+  * [ ] Clean up ci workflow, maybe split into separate (dependent?) workflows
+* [ ] Adjust pre-commit hooks, e.g. https://pypi.org/project/cmake-pre-commit-hooks/
+  * Use errors instead auf autofix?
+
 * [ ] Split CI into different workflows, [run them consecutively](https://stackoverflow.com/questions/58457140/dependencies-between-workflows-on-github-actions) --> would allow quick overview with separate lint/build/test badges
 * [ ] Deploy docs
   * [ ] Check gh-pages action

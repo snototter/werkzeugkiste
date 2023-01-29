@@ -1,9 +1,9 @@
 #ifndef WERKZEUGKISTE_GEOMETRY_PRIMITIVES_H
 #define WERKZEUGKISTE_GEOMETRY_PRIMITIVES_H
 
+#include <werkzeugkiste/geometry/geometry_export.h>
 #include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
-#include <werkzeugkiste/werkzeugkiste_export.h>
 
 #include <cmath>
 #include <limits>
@@ -126,7 +126,7 @@ class Circle_ {  // NOLINT(readability-identifier-naming)
 };
 
 /// Available double-precision specialization for Circle_.
-extern template class WERKZEUGKISTE_EXPORT Circle_<double>;
+extern template class WERKZEUGKISTE_GEOMETRY_EXPORT Circle_<double>;
 using Circle = Circle_<double>;
 
 //----------------------------------------------------
@@ -317,7 +317,7 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
 };
 
 /// A 2-dimensional line using double precision.
-extern template class WERKZEUGKISTE_EXPORT Line2d_<double>;
+extern template class WERKZEUGKISTE_GEOMETRY_EXPORT Line2d_<double>;
 using Line2d = Line2d_<double>;
 
 //----------------------------------------------------
@@ -469,7 +469,7 @@ class Line3d_ {  // NOLINT(readability-identifier-naming)
 };
 
 /// A 3-dimensional line using double precision.
-extern template class WERKZEUGKISTE_EXPORT Line3d_<double>;
+extern template class WERKZEUGKISTE_GEOMETRY_EXPORT Line3d_<double>;
 using Line3d = Line3d_<double>;
 
 //----------------------------------------------------
@@ -578,7 +578,7 @@ class Plane_ {  // NOLINT(readability-identifier-naming)
 };
 
 /// The default plane type which uses double precision.
-extern template class WERKZEUGKISTE_EXPORT Plane_<double>;
+extern template class WERKZEUGKISTE_GEOMETRY_EXPORT Plane_<double>;
 using Plane = Plane_<double>;
 
 }  // namespace werkzeugkiste::geometry

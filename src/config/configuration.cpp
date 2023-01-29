@@ -1,4 +1,4 @@
-#include <toml++/toml.h>
+#include <toml++/toml.h>  // NOLINT [build/c++11]
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/logging.h>
