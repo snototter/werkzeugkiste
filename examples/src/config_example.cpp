@@ -20,7 +20,7 @@ int main(int /* argc */, char** /* argv */) {
     a_str = 'foo'
     a_float = 1.234
     another_float = 1.05e-17
-    
+
     [relative_paths]
     path = "p1"
     another_path = "p2"
@@ -29,7 +29,7 @@ int main(int /* argc */, char** /* argv */) {
 
     [some.folders.folders]
     folder = "nested-path"
-    
+
     [absolute_paths]
     )toml");
 
