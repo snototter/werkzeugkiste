@@ -101,70 +101,11 @@ jobs:
         UBSAN_OPTIONS: print_stacktrace=1
       run: ctest --output-on-failure -j 2
 
-#   test:
-#     needs: [sanitize]
-#     strategy:
-#       matrix:
-#         os: [ubuntu-22.04]
-# #        os: [macos-12, ubuntu-22.04, windows-2022]
-
-#         type: [shared, static]
-
-#         include:
-#         - { type: shared, shared: YES }
-#         - { type: static, shared: NO }
-
-#     runs-on: ${{ matrix.os }}
-
-#     steps:
-#     - uses: actions/checkout@v3
-
-#     - name: Install GoogleTest libraries
-#       uses: MarkusJx/googletest-installer@v1.1.1
-
-#     - name: Install static analyzers
-#       if: matrix.os == 'ubuntu-22.04'
-#       run: >-
-#         sudo apt-get install clang-tidy-14 cppcheck -y -q
-
-#         sudo update-alternatives --install
-#         /usr/bin/clang-tidy clang-tidy
-#         /usr/bin/clang-tidy-14 140
-
-#     - name: Install werkzeugkiste requirements
-#       uses: jrl-umi3218/github-actions/install-dependencies@master
-#       with:
-#         ubuntu: |
-#           apt: libeigen3-dev
-#         macos: |
-#           brew: eigen
-#         windows: |
-#           github:
-#           - path: eigenteam/eigen-git-mirror
-#             ref: 3.3.7
-
-#     - name: Configure
-#       shell: pwsh
-#       run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
-#         -D BUILD_SHARED_LIBS=${{ matrix.shared }} -D BUILD_TESTING=NO -D BUILD_EXAMPLES=YES
-
-#     - name: Build
-#       run: cmake --build build --config Release -j 2
-
-#     - name: Install
-#       run: cmake --install build --config Release --prefix prefix
-
-#    - name: Test
-#      working-directory: build
-#      if: matrix.os == 'ubuntu-22.04'
-#      run: ctest --output-on-failure -C Release -j 2
-
-  build:
+  test:
     needs: [sanitize]
     strategy:
       matrix:
-#        os: [ubuntu-22.04]
-        os: [macos-12, ubuntu-22.04, windows-2022]
+        os: [ubuntu-22.04]
 
         type: [shared, static]
 
@@ -177,8 +118,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-#    - name: Install GoogleTest libraries
-#      uses: MarkusJx/googletest-installer@v1.1.1
+    - name: Install GoogleTest libraries
+      uses: MarkusJx/googletest-installer@v1.1.1
 
     - name: Install static analyzers
       if: matrix.os == 'ubuntu-22.04'
@@ -188,6 +129,60 @@ jobs:
         sudo update-alternatives --install
         /usr/bin/clang-tidy clang-tidy
         /usr/bin/clang-tidy-14 140
+
+    - name: Install werkzeugkiste requirements
+      uses: jrl-umi3218/github-actions/install-dependencies@master
+      with:
+        ubuntu: |
+          apt: libeigen3-dev
+        macos: |
+          brew: eigen
+        windows: |
+          github:
+          - path: eigenteam/eigen-git-mirror
+            ref: 3.3.7
+
+    - name: Configure
+      shell: pwsh
+      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+        -D BUILD_SHARED_LIBS=${{ matrix.shared }} -D BUILD_TESTING=NO -D BUILD_EXAMPLES=YES
+
+    - name: Build
+      run: cmake --build build --config Release -j 2
+
+    - name: Install
+      run: cmake --install build --config Release --prefix prefix
+
+   - name: Test
+     working-directory: build
+     if: matrix.os == 'ubuntu-22.04'
+     run: ctest --output-on-failure -C Release -j 2
+
+  build-others:
+    needs: [test]
+    strategy:
+      matrix:
+        os: [macos-12, windows-2022]
+
+        type: [shared, static]
+
+        include:
+        - { type: shared, shared: YES }
+        - { type: static, shared: NO }
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    # - name: Install static analyzers
+    #   if: matrix.os == 'ubuntu-22.04'
+    #   run: >-
+    #     sudo apt-get install clang-tidy-14 cppcheck -y -q
+
+    #     sudo update-alternatives --install
+    #     /usr/bin/clang-tidy clang-tidy
+    #     /usr/bin/clang-tidy-14 140
 
     - name: Install werkzeugkiste requirements
       uses: jrl-umi3218/github-actions/install-dependencies@master
@@ -215,8 +210,7 @@ jobs:
       run: cmake --install build --config Release --prefix prefix
 
   docs:
-    # Deploy docs only when builds succeed
-    needs: [sanitize, build, coverage]
+    needs: [sanitize, test]
 
     runs-on: ubuntu-22.04
     
