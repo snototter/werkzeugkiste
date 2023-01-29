@@ -144,8 +144,10 @@ std::vector<std::string_view> Tokenize(std::string_view s,
     const auto second = std::find_first_of(
         first, std::cend(s), std::cbegin(delim), std::cend(delim));
     if (first != second) {
-      const auto start = static_cast<std::size_t>(std::distance(s.begin(), first));
-      const auto length = static_cast<std::size_t>(std::distance(first, second));
+      const auto start =
+          static_cast<std::size_t>(std::distance(s.begin(), first));
+      const auto length =
+          static_cast<std::size_t>(std::distance(first, second));
       tokens.emplace_back(s.substr(start, length));
     }
 
