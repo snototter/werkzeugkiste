@@ -150,8 +150,8 @@ class KeyMatcher {
     // dotted is allowed (and needed to support paths!)
     // doc that quoted keys are not supported! - maybe add a check and raise an
     // exception if needed?
-    auto it = std::find_if(pattern_.begin(), pattern_.end(), [](char c) {
-      return !(isalnum(c) || (c == '.') || (c == '_') || (c == '-'));
+    auto it = std::find_if_not(pattern_.begin(), pattern_.end(), [](char c) {
+      return (isalnum(c) || (c == '.') || (c == '_') || (c == '-'));
     });
 
     is_regex_ = (it != pattern_.end());
