@@ -16,6 +16,11 @@ int main(int /* argc */, char** /* argv */) {
             << std::endl;
 
   auto config = wkc::Configuration::LoadTomlString(R"toml(
+    an_int = 3
+    a_str = 'foo'
+    a_float = 1.234
+    another_float = 1.05e-17
+    
     [relative_paths]
     path = "p1"
     another_path = "p2"
