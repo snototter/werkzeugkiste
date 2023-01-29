@@ -52,7 +52,15 @@ target_link_libraries(werkzeugkiste-test
   gtest_main
   gtest
   pthread
-  werkzeugkiste::werkzeugkiste)
+  werkzeugkiste::werkzeugkiste
+#  werkzeugkiste::config
+#  werkzeugkiste::container
+#  werkzeugkiste::geometry
+#  werkzeugkiste::files
+#  werkzeugkiste::strings
+#  werkzeugkiste::timing)
+  #std::filesystem)
+)
 
 target_compile_features(werkzeugkiste-test PRIVATE cxx_std_17)
 
@@ -61,25 +69,25 @@ windows_set_path(werkzeugkiste-test werkzeugkiste::container werkzeugkiste::geom
 
 # CI uses https://github.com/MarkusJx/googletest-installer to
 # set up gtest. For Windows and macOS, we need to adjust the paths:
-if (DEFINED ENV{GITHUB_ACTIONS})
-  if (WIN32)
-    link_directories("D:/gtest/lib")
-    include_directories("D:/gtest/include")
+# if (DEFINED ENV{GITHUB_ACTIONS})
+#   if (WIN32)
+#     link_directories("D:/gtest/lib")
+#     include_directories("D:/gtest/include")
 
-    set(CMAKE_CXX_FLAGS_RELEASE "/MT")
-    set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
-  elseif (APPLE)
-    link_directories("/usr/local/lib")
-    include_directories("/usr/local/include")
-  endif ()
-endif ()
+#     set(CMAKE_CXX_FLAGS_RELEASE "/MT")
+#     set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
+#   elseif (APPLE)
+#     link_directories("/usr/local/lib")
+#     include_directories("/usr/local/include")
+#   endif ()
+# endif ()
 
 include(GoogleTest)
 gtest_discover_tests(werkzeugkiste-test)
 
 # ---- End-of-file commands ----
 
-add_folders(Tests)
+add_folders(tests) #TODO Tests or tests?
 
 
 

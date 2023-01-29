@@ -293,14 +293,19 @@ target_include_directories(
 )
 
 
-# There is no easily-portable way to link against std::filesystem
-# Thankfully, the CMake Community Modules provide a workaround.
-# Watch https://gitlab.kitware.com/cmake/cmake/-/issues/17834 for
-# potential solution in the future.
-#list(PREPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
-list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
-#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
-find_package(Filesystem QUIET)
+#TODO 01/23 switched back to pre-17 solution
+# with the CMake Community FindFilesystem module, library and examples
+# could be build, but the test suite not. Simply adding -lstdc++fs to the 
+# test suite linkage didn't solve this issue - need to investigate deeper
+# and thus, I prefer to use the fallback
+## There is no easily-portable way to link against std::filesystem
+## Thankfully, the CMake Community Modules provide a workaround.
+## Watch https://gitlab.kitware.com/cmake/cmake/-/issues/17834 for
+## potential solution in the future.
+##list(PREPEND CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
+#list(PREPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+##set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+## find_package(Filesystem QUIET)
 
 target_link_libraries(
     werkzeugkiste-files
@@ -309,16 +314,19 @@ target_link_libraries(
     werkzeugkiste::logging
 )
 
-if(TARGET std::filesystem)
-    target_link_libraries(
-        werkzeugkiste-files
-        PRIVATE
-        std::filesystem
-    )
-    target_compile_definitions(
-        werkzeugkiste-files PRIVATE WZK_HAS_FILESYSTEM
-    )
-endif()
+## if(Filesystem_FOUND)
+##     message(STATUS "TODO stdc++fs supported, linking against unofficial std::filesystem target")
+##     target_link_libraries(
+##         werkzeugkiste-files
+##         PRIVATE
+##         std::filesystem
+##     )
+##     target_compile_definitions(
+##         werkzeugkiste-files PRIVATE WZK_HAS_FILESYSTEM
+##     )
+## else()
+##   message(STATUS "TODO stdc++fs support not found - might need to link to experimental/other extensions/... - using fallback solution (for linux only)")
+## endif()
 
 
 target_compile_features(werkzeugkiste-files PUBLIC cxx_std_17)

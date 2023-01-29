@@ -9,11 +9,6 @@
 /// File system utilities.
 namespace werkzeugkiste::files {
 
-// TODO Need to clarify 2 issues:
-//  * Switching to C++17 (std::filesystem) will require major refactoring
-//  * ::files relies on ::strings - need to verify it's properly
-//  installed/linked
-
 WERKZEUGKISTE_EXPORT
 bool Exists(const std::string& name);
 

@@ -34,8 +34,7 @@ function(register_werkzeugkiste_examples EXAMPLE_SRC_DIR)
     target_link_libraries(example-files
         PRIVATE
         werkzeugkiste::files
-        werkzeugkiste::strings
-        std::filesystem)
+        werkzeugkiste::strings)
 
     ## werkzeugkiste::strings
     add_executable(example-strings
