@@ -2,9 +2,9 @@
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/logging.h>
-#include <werkzeugkiste/strings/strings.h>
 
 #include <functional>
+#include <limits>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -106,18 +106,28 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
   return keys;
 }
 
-void Traverse(toml::node &node, std::string_view path,
-              const std::function<void(toml::node &, std::string_view)> &func) {
+/// @brief Visits all child nodes of the given TOML configuration in a
+/// depth-first search style and invokes the function handle for each node.
+/// @param node Container node from which to start the traversal. The initial
+/// node (usually the configuration/document root) will **not** be passed to the
+/// function handle
+/// @param path Path identifier/key of the given node. Must be empty for the
+/// root node.
+/// @param visit_func Function handle to be invoked for each node (except for
+/// the initial `node`).
+void Traverse(
+    toml::node &node, std::string_view path,
+    const std::function<void(toml::node &, std::string_view)> &visit_func) {
   // Iterate container nodes (i.e. table and array) and call the given functor
   // for each node.
   if (node.is_table()) {
     toml::table &tbl = *node.as_table();
     for (auto &&[key, value] : tbl) {
       const std::string fqn = FullyQualifiedPath(key, path);
-      func(value, fqn);
+      visit_func(value, fqn);
 
       if (value.is_array() || value.is_table()) {
-        Traverse(value, fqn, func);
+        Traverse(value, fqn, visit_func);
       }
     }
   } else if (node.is_array()) {
@@ -125,33 +135,34 @@ void Traverse(toml::node &node, std::string_view path,
     std::size_t index = 0;
     for (auto &value : arr) {
       const std::string fqn = FullyQualifiedArrayElementPath(index, path);
-      func(value, fqn);
+      visit_func(value, fqn);
 
       if (value.is_array() || value.is_table()) {
-        Traverse(value, fqn, func);
+        Traverse(value, fqn, visit_func);
       }
       ++index;
     }
   } else {
     std::string msg{
         "Traverse() can only be invoked with either `table` or "
-        "`array` nodes. Check setting `"};
+        "`array` nodes, but `"};
     msg += path;
-    msg += "`!";
+    msg += "` is neither!";
     WKZLOG_ERROR(msg);
     throw std::logic_error(msg);
   }
 }
 
-class KeyMatcher {
+class SingleKeyMatcherImpl : public SingleKeyMatcher {
  public:
-  KeyMatcher(std::string &&pattern) : pattern_(std::move(pattern)) {
+  explicit SingleKeyMatcherImpl(std::string &&pattern)
+      : SingleKeyMatcher(), pattern_(std::move(pattern)) {
     // TODO https://toml.io/en/v1.0.0
     // dotted is allowed (and needed to support paths!)
-    // doc that quoted keys are not supported! - maybe add a check and raise an
-    // exception if needed?
+    // add documentation that quoted keys are not supported! - maybe add a check
+    // and raise an exception if needed?
     auto it = std::find_if_not(pattern_.begin(), pattern_.end(), [](char c) {
-      return (isalnum(c) || (c == '.') || (c == '_') || (c == '-'));
+      return ((isalnum(c) != 0) || (c == '.') || (c == '_') || (c == '-'));
     });
 
     is_regex_ = (it != pattern_.end());
@@ -161,7 +172,9 @@ class KeyMatcher {
     }
   }
 
-  bool Matches(std::string_view key) const {
+  ~SingleKeyMatcherImpl() override = default;
+
+  bool Match(std::string_view key) const override {
     constexpr auto flags = std::regex_constants::match_default;
     if (std::regex_match(key.begin(), key.end(), regex_, flags)) {
       return true;
@@ -191,17 +204,25 @@ class KeyMatcher {
   }
 };
 
-class MultiKeyMatcher {
+std::unique_ptr<SingleKeyMatcher> SingleKeyMatcher::Create(
+    std::string_view pattern) {
+  return std::make_unique<SingleKeyMatcherImpl>(std::string(pattern));
+}
+
+class MultiKeyMatcherImpl : public MultiKeyMatcher {
  public:
-  MultiKeyMatcher(const std::vector<std::string_view> &patterns) {
+  explicit MultiKeyMatcherImpl(const std::vector<std::string_view> &patterns)
+      : MultiKeyMatcher() {
     for (const auto &pattern : patterns) {
-      matchers_.emplace_back(KeyMatcher(std::string(pattern)));
+      matchers_.emplace_back(SingleKeyMatcherImpl(std::string(pattern)));
     }
   }
 
-  bool MatchesAny(std::string_view key) const {
+  ~MultiKeyMatcherImpl() override = default;
+
+  bool MatchAny(std::string_view key) const override {
     for (const auto &m : matchers_) {
-      if (m.Matches(key)) {
+      if (m.Match(key)) {
         return true;
       }
     }
@@ -209,31 +230,158 @@ class MultiKeyMatcher {
   }
 
  private:
-  std::vector<KeyMatcher> matchers_{};
+  std::vector<SingleKeyMatcherImpl> matchers_{};
 };
+
+std::unique_ptr<MultiKeyMatcher> MultiKeyMatcher::Create(
+    const std::vector<std::string_view> &patterns) {
+  return std::make_unique<MultiKeyMatcherImpl>(patterns);
+}
+
+template <typename T>
+inline std::string BuiltinTypeName() {
+  if constexpr (std::is_same_v<T, double>) {
+    return "double";
+  }
+
+  if constexpr (std::is_integral_v<T>) {
+    if constexpr (std::is_same_v<T, int32_t>) {
+      return "int32";
+    }
+
+    if constexpr (std::is_same_v<T, int64_t>) {
+      return "int64";
+    }
+  }
+
+  if constexpr (std::is_same_v<T, std::string>) {
+    return "string";
+  }
+
+  throw std::logic_error("Type not supported!");
+}
+
+template <typename NodeView>
+inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
+  if (node.is_table()) {
+    return "table";
+  }
+
+  if (node.is_array()) {
+    return "array";
+  }
+
+  if (node.is_integer()) {
+    return "int";
+  }
+
+  if (node.is_floating_point()) {
+    return "double";
+  }
+
+  if (node.is_string()) {
+    return "string";
+  }
+
+  if (node.is_boolean()) {
+    return "bool";
+  }
+
+  if (node.is_date()) {
+    return "toml::date";
+  }
+
+  if (node.is_time()) {
+    return "toml::time";
+  }
+
+  if (node.is_date_time()) {
+    return "toml::date_time";
+  }
+
+  std::string msg{"TOML node type for key `"};
+  msg += key;
+  msg +=
+      "` is not handled in `TomlTypeName`. This is a werkzeugkiste "
+      "implementation error. Please open an issue.";
+  throw std::logic_error(msg);
+}
+
+/// Returns true if the TOML table contains a valid node at the given,
+/// fully-qualified path/key.
+inline bool ConfigContains(const toml::table &tbl, std::string_view key) {
+  // Needed, because `tbl.contains()` only checks the direct children.
+  const auto node = tbl.at_path(key);
+  return node.is_value() || node.is_table() || node.is_array();
+}
+
+template <typename T>
+T ConfigLookup(const toml::table &tbl, std::string_view key,
+               bool allow_default = false, T default_val = T{}) {
+  if (!ConfigContains(tbl, key)) {
+    if (allow_default) {
+      return default_val;
+    }
+
+    std::string msg{"Key `"};
+    msg += key;
+    msg += "` does not exist!";
+    throw std::runtime_error(msg);
+  }
+
+  const auto node = tbl.at_path(key);
+  // if (!node.is_value()) {
+  //   throw std::runtime_error("TODO parameter must be a value, not a
+  //   container!");   //TODO
+  // }
+  if (node.is<T>()) {
+    return T(*node.as<T>());
+  }
+
+  std::string msg{"Invalid type `"};
+  msg += BuiltinTypeName<T>();
+  msg += "` used to query key `";
+  msg += key;
+  msg += "`, which is of type `";
+  msg += TomlTypeName(node, key);
+  msg += "`!";
+  throw std::runtime_error(msg);
+}
+
+inline int32_t ConfigLookupInt32(const toml::table &tbl, std::string_view key,
+                                 bool allow_default = false,
+                                 int32_t default_val = 0) {
+  // TOML stores integers as int64_t
+  int64_t value = ConfigLookup<int64_t>(tbl, key, allow_default,
+                                        static_cast<int64_t>(default_val));
+  constexpr auto min32 =
+      static_cast<int64_t>(std::numeric_limits<int32_t>::min());
+  constexpr auto max32 =
+      static_cast<int64_t>(std::numeric_limits<int32_t>::max());
+  if ((value > max32) || (value < min32)) {
+    std::string msg{"Integer value ("};
+    msg += std::to_string(value);
+    msg += ") is out of range for 32-bit integer!";
+    throw std::runtime_error(msg);
+  }
+
+  return static_cast<int32_t>(value);
+}
 
 class ConfigurationImpl : public Configuration {
  public:
   ~ConfigurationImpl() override = default;
 
   explicit ConfigurationImpl(toml::table &&config)
-      : Configuration(), config_(std::move(config)) {
-    // const std::string_view key{"visualization.*.save"};
-    // auto tokens = werkzeugkiste::strings::Tokenize(key, ".");
-    // for (const auto &token : tokens) {
-    //   WKZLOG_WARN("TODO check key-token '{:s}'", token);
-    // }
-    // auto test = config_[tokens[0]];
-    // WKZLOG_WARN("key: {:s}", test[tokens[1]]);
-  }
+      : Configuration(), config_(std::move(config)) {}
 
   bool EnsureAbsolutePaths(
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) override {
     using namespace std::string_view_literals;
-    MultiKeyMatcher matcher{parameters};
+    MultiKeyMatcherImpl matcher{parameters};
     auto to_replace = [matcher](std::string_view fqn) -> bool {
-      return matcher.MatchesAny(fqn);
+      return matcher.MatchAny(fqn);
     };
 
     bool replaced{false};
@@ -253,6 +401,33 @@ class ConfigurationImpl : public Configuration {
 
   std::vector<std::string> ParameterNames() const override {
     return ListTableKeys(config_, "");
+  }
+
+  double GetDouble(std::string_view key) const override {
+    return ConfigLookup<double>(config_, key, false);
+  }
+
+  double GetDoubleOrDefault(std::string_view key,
+                            double default_val) const override {
+    return ConfigLookup<double>(config_, key, true, default_val);
+  }
+
+  int32_t GetInteger32(std::string_view key) const override {
+    return ConfigLookupInt32(config_, key, false);
+  }
+
+  int32_t GetInteger32OrDefault(std::string_view key,
+                                int32_t default_val) const override {
+    return ConfigLookupInt32(config_, key, true, default_val);
+  }
+
+  int64_t GetInteger64(std::string_view key) const override {
+    return ConfigLookup<int64_t>(config_, key, false);
+  }
+
+  int64_t GetInteger64OrDefault(std::string_view key,
+                                int64_t default_val) const override {
+    return ConfigLookup<int64_t>(config_, key, true, default_val);
   }
 
   // Configuration &GetGroup(std::string_view group_name) override {

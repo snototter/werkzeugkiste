@@ -16,13 +16,30 @@
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
 
+class WERKZEUGKISTE_CONFIG_EXPORT SingleKeyMatcher {
+ public:
+  static std::unique_ptr<SingleKeyMatcher> Create(std::string_view pattern);
+  virtual ~SingleKeyMatcher() = default;
+
+  virtual bool Match(std::string_view key) const = 0;
+};
+
+class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
+ public:
+  static std::unique_ptr<MultiKeyMatcher> Create(
+      const std::vector<std::string_view> &patterns);
+  virtual ~MultiKeyMatcher() = default;
+
+  virtual bool MatchAny(std::string_view key) const = 0;
+};
+
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// Loads the configuration from the given file.
   ///
   /// TODO runtime_error if file doesn't exits or toml is malformed
 
-  // TODO remove ptr, implement copy/move ctor/assignments!
+  // TODO must be a unique_ptr, implement copy/move ctor/assignments!
   static std::unique_ptr<Configuration> LoadTomlFile(std::string_view filename);
 
   static std::unique_ptr<Configuration> LoadTomlString(
@@ -54,6 +71,21 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Returns a list of all (fully-qualified) parameter names, e.g.
   /// "some_table.param_x".
   virtual std::vector<std::string> ParameterNames() const = 0;
+
+  virtual double GetDouble(std::string_view key) const = 0;
+  virtual double GetDoubleOrDefault(std::string_view key,
+                                    double default_val) const = 0;
+
+  virtual int32_t GetInteger32(std::string_view key) const = 0;
+  virtual int32_t GetInteger32OrDefault(std::string_view key,
+                                        int32_t default_val) const = 0;
+
+  virtual int64_t GetInteger64(std::string_view key) const = 0;
+  virtual int64_t GetInteger64OrDefault(std::string_view key,
+                                        int64_t default_val) const = 0;
+  // TODO GetDoubleOrDefault()
+  //-> return default if key does not exist
+  //-> throw if type is not double!
 
   // TODO should return a copy!
   //    virtual Configuration &GetGroup(std::string_view group_name) const = 0;

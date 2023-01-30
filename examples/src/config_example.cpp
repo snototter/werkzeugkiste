@@ -37,6 +37,21 @@ int main(int /* argc */, char** /* argv */) {
     )toml");
 
   // config->EnsureAbsolutePaths("TODO", {"path", "*.folder"});
+  std::cout << "Query a double: " << config->GetDouble("a_float") << std::endl;
+  try {
+    config->GetDouble("a_str");
+  } catch (const std::runtime_error& e) {
+    std::cout << "Can't convert a string to double: " << e.what() << std::endl;
+  }
+
+  // config->GetDouble("an_int"); //TODO this also throws
+  try {
+    config->GetDouble("no.such.key");
+  } catch (const std::runtime_error& e) {
+    std::cout << "Can't look up a non-existing key: " << e.what() << std::endl;
+  }
+  std::cout << "But it can be replaced with a default value: "
+            << config->GetDoubleOrDefault("no.such.key", 42) << std::endl;
 
   // config->ParameterNames();  // TODO
 
@@ -58,5 +73,30 @@ int main(int /* argc */, char** /* argv */) {
                               {"*name"sv, "*.regex*"sv, "strings.str5"sv,
                                "strings.str[1-3|7]?"sv, "products[2].color"sv});
 
+  // config->GetDouble("an_int"); //TODO this also throws
+  try {
+    // TODO header lookup returns contains() -> false! ??
+    //  config->GetDouble("date-time-params.local-date");
+    config->GetDouble("date-time-params.local-date.ld1");
+  } catch (const std::runtime_error& e) {
+    std::cout << "Tried wrong type: " << e.what() << std::endl;
+  }
+  try {
+    config->GetDouble("date-time-params.local-date");
+  } catch (const std::runtime_error& e) {
+    std::cout << "Tried wrong type: " << e.what() << std::endl;
+  }
+
+  try {
+    std::cout << "Query int32_max: "
+              << config->GetInteger32("integral-numbers.int32_max")
+              << std::endl;
+    std::cout << "Query int64 as int32 (should throw exception): "
+              << config->GetInteger32("integral-numbers.int64") << std::endl;
+  } catch (const std::runtime_error& e) {
+    std::cout << "Caught exception: " << e.what() << std::endl;
+    std::cout << "Query int64 correctly: "
+              << config->GetInteger64("integral-numbers.int64") << std::endl;
+  }
   return 0;
 }

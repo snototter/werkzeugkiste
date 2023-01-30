@@ -70,6 +70,9 @@ int5 = 1_000
 int6 = 5_349_221
 int7 = 53_49_221  # Indian number system grouping
 
+int32_max = 2147483647
+int64 = 21474836470
+
 # hexadecimal with prefix `0x`
 hex1 = 0xDEADBEEF
 hex2 = 0xdeadbeef
