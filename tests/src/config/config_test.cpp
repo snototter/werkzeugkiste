@@ -84,7 +84,7 @@ TEST(ConfigTest, Types) {
     bool = true
     int = 42
     flt = 1.0
-    str = "A string" #TODO others, too!
+    str = "A string" #TODO others (date, time, date_time)
     )toml";
   const auto config = wkc::Configuration::LoadTomlString(toml_str);
 
@@ -246,17 +246,53 @@ TEST(ConfigTest, KeyMatching) {
   EXPECT_FALSE(single->Match("table1.sub.param"));
   EXPECT_FALSE(single->Match("table.sub.param1"));
 
-  // TODO
+  // We explicitly use only a basic substitution.
+  // Yes, this invalid keys matches. No, this is not a problem
+  // because the matching is only used internally to select
+  // existing nodes (and an invalid key could not have been created
+  // to begin with...)
+  single = wkc::SingleKeyMatcher::Create("arr[*].*");
+  EXPECT_FALSE(single->Match("arr*"));
+  EXPECT_FALSE(single->Match("arr.name"));
+  EXPECT_FALSE(single->Match("arr[]name"));
+  EXPECT_TRUE(single->Match("arr[0].name"));
+  EXPECT_TRUE(single->Match("arr[1].name"));
+  EXPECT_TRUE(single->Match("arr[-10].name"));
+  EXPECT_TRUE(single->Match("arr[123].name"));
+  EXPECT_TRUE(single->Match("arr[123].*"));
 }
 
-template <typename Vec, typename Tpl>
-inline std::vector<Vec> ToGeoVec(const std::vector<Tpl> &tuples) {
-  std::vector<Vec> vecs;
+template <typename VecType, typename Tuples>
+inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
+  static_assert(VecType::ndim == 2 || VecType::ndim == 3,
+                "This test util is only supported for 2D or 3D vectors.");
+
+  std::vector<VecType> poly;
   for (const auto &tpl : tuples) {
-    vecs.emplace_back(std::make_from_tuple<Vec>(tpl));
+    typename VecType::value_type x =
+        static_cast<typename VecType::value_type>(std::get<0>(tpl));
+    typename VecType::value_type y =
+        static_cast<typename VecType::value_type>(std::get<1>(tpl));
+    if constexpr (VecType::ndim == 2) {
+      poly.emplace_back(VecType{x, y});
+    } else {
+      typename VecType::value_type z =
+          static_cast<typename VecType::value_type>(std::get<2>(tpl));
+      poly.emplace_back(VecType{x, y, z});
+    }
   }
-  return vecs;
+  return poly;
 }
+// template <typename VecType, typename... TupleTypes>
+// inline std::vector<typename std::enable_if<VecType::ndim ==
+// sizeof...(TupleTypes), VecType>::type> TuplesToVecs(const
+// std::vector<std::tuple<TupleTypes...>> &tuples) {
+//   std::vector<VecType> poly;
+//   for (const auto &tpl : tuples) {
+//     poly.emplace_back(std::make_from_tuple<VecType>(tpl));
+//   }
+//   return poly;
+// }
 
 TEST(ConfigTest, Polygon) {
   const auto config = wkc::Configuration::LoadTomlString(R"toml(
@@ -264,7 +300,7 @@ TEST(ConfigTest, Polygon) {
 
     poly2 = [{y = 20, x = 10}, {x = 30, y = 40}, {y = 60, x = 50}]
 
-    poly3 = [[1, 2, 3], [4, 5, 6]]
+    poly3 = [[1, 2, 3], [4, 5, 6], {x = -9, y = 0, z = -3}]
 
     [[poly4]]
     x = 100
@@ -277,45 +313,61 @@ TEST(ConfigTest, Polygon) {
     z = -5
 
     [invalid]
+    # Missing y dimension (2nd point):
     p1 = [{x = 1, y = 2}, {x = 1, name = 2, param = 3}]
-    #p1 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}] # Dimensionality mix - TODO should be supported
-    p2 = [{x = 1, y = 2}, {x = 1.5, y = 2}]      # Type mix
+
+    # Type mix (2nd point)
+    p2 = [{x = 1, y = 2}, {x = 1.5, y = 2}]
+
+    # Type mix
+    p3 = [[1, 2], [3, 4], 5]
+
+    # 2D & 3D point (Can be converted to 2D polygon)
+    p4 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}]
     )toml");
 
   const auto poly1 = config->GetPolygon2D("poly1");
-  EXPECT_EQ(4, poly1.size());
+  ASSERT_EQ(4, poly1.size());
 
-  std::vector<wkg::Vec2i> vec = ToGeoVec<wkg::Vec2i>(poly1);
+  auto vec = TuplesToVecs<wkg::Vec2i>(poly1);
   EXPECT_EQ(wkg::Vec2i(1, 2), vec[0]);
   EXPECT_EQ(wkg::Vec2i(3, 4), vec[1]);
   EXPECT_EQ(wkg::Vec2i(5, 6), vec[2]);
   EXPECT_EQ(wkg::Vec2i(-7, -8), vec[3]);
 
   const auto poly2 = config->GetPolygon2D("poly2");
-  EXPECT_EQ(3, poly2.size());
+  ASSERT_EQ(3, poly2.size());
 
-  vec = ToGeoVec<wkg::Vec2i>(poly2);
+  vec = TuplesToVecs<wkg::Vec2i>(poly2);
   EXPECT_EQ(wkg::Vec2i(10, 20), vec[0]);
   EXPECT_EQ(wkg::Vec2i(30, 40), vec[1]);
   EXPECT_EQ(wkg::Vec2i(50, 60), vec[2]);
 
-  // const auto poly3 = config->GetPolygon2D("poly3");
-  EXPECT_THROW(config->GetPolygon2D("poly3"), std::runtime_error);
-  // EXPECT_THROW(config->GetPolygon2D("poly4"), std::runtime_error); TODO
+  // An N-dimensional polygon can be looked up from any list of at
+  // least N-dimensional points:
+  EXPECT_NO_THROW(config->GetPolygon2D("poly3"));
+  EXPECT_NO_THROW(config->GetPolygon3D("poly3"));
+  EXPECT_NO_THROW(config->GetPolygon2D("poly4"));
+  EXPECT_NO_THROW(config->GetPolygon3D("poly4"));
 
+  EXPECT_THROW(config->GetPolygon2D("no-such-key"), std::runtime_error);
   EXPECT_THROW(config->GetPolygon2D("invalid.p1"), std::runtime_error);
   EXPECT_THROW(config->GetPolygon2D("invalid.p2"), std::runtime_error);
-  EXPECT_THROW(config->GetPolygon2D("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetPolygon2D("invalid.p3"), std::runtime_error);
+
+  EXPECT_NO_THROW(config->GetPolygon2D("invalid.p4"));
+  EXPECT_THROW(config->GetPolygon3D("invalid.p4"), std::runtime_error);
 
   // 3D polygons
   EXPECT_THROW(config->GetPolygon3D("poly1"), std::runtime_error);
   EXPECT_THROW(config->GetPolygon3D("poly2"), std::runtime_error);
 
   const auto poly3 = config->GetPolygon3D("poly3");
-  EXPECT_EQ(2, poly3.size());
-  std::vector<wkg::Vec3i> vec3 = ToGeoVec<wkg::Vec3i>(poly3);
+  ASSERT_EQ(3, poly3.size());
+  std::vector<wkg::Vec3i> vec3 = TuplesToVecs<wkg::Vec3i>(poly3);
   EXPECT_EQ(wkg::Vec3i(1, 2, 3), vec3[0]);
   EXPECT_EQ(wkg::Vec3i(4, 5, 6), vec3[1]);
+  EXPECT_EQ(wkg::Vec3i(-9, 0, -3), vec3[2]);
 }
 
 TEST(ConfigTest, LoadingToml) {

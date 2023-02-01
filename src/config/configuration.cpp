@@ -3,11 +3,13 @@
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/logging.h>
 
+#include <array>
 #include <functional>
 #include <limits>
 #include <regex>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace werkzeugkiste::config {
@@ -200,8 +202,9 @@ class SingleKeyMatcherImpl : public SingleKeyMatcher {
     for (char c : pattern_) {
       if (c == '*') {
         re += ".*";
-      } else if (c == '.') {
-        re += "\\.";
+      } else if ((c == '.') || (c == '[') || (c == ']')) {
+        re += '\\';
+        re += c;
       } else {  // TODO test backslash handling!
         re += c;
       }
@@ -383,71 +386,77 @@ inline int32_t ConfigLookupInt32(const toml::table &tbl, std::string_view key,
   return static_cast<int32_t>(value64);
 }
 
-template <typename Type, int Dim, typename NodeView>
-inline auto ExtractPoint(const NodeView &node, std::string_view key) {
-  static_assert((Dim == 2) || (Dim == 3),
-                "Only 2D and 3D points are supported!");
+// template <typename ArrType, typename... TplTypes, std::size_t Num,
+// std::size_t... Indices> std::tuple<TplTypes...> ToTuple(const
+// std::array<ArrType, Num> &arr,
+//                                 std::index_sequence<Indices...>) {
+//   return std::make_tuple(TplTypes{arr[Indices]}...);
+// }
 
-  Type x{};
-  Type y{};
-  Type z{};
+// template <typename ArrType, typename... TplTypes, std::size_t Num,
+//           typename = std::enable_if_t<(Num == sizeof...(TplTypes))>>
+// std::tuple<TplTypes...> ToTuple(const std::array<ArrType, Num> &arr) {
+//   return ToTuple<ArrType, TplTypes...>(arr, std::make_index_sequence<Num>{});
+// }
 
-  if (node.is_array()) {
-    const toml::array &arr = *node.as_array();
-    if (arr.size() != Dim) {
+template <typename Array, std::size_t... Idx>
+inline auto ArrayToTuple(const Array &arr,
+                         std::index_sequence<Idx...> /* indices */) {
+  return std::make_tuple(arr[Idx]...);
+}
+
+template <typename Type, std::size_t Dim>
+inline auto ExtractPoint(const toml::array &arr, std::string_view key) {
+  if (arr.size() < Dim) {
+    std::ostringstream msg;
+    msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
+        << "D point from a " << arr.size() << "-element array!";
+    throw std::runtime_error(msg.str());
+  }
+
+  std::array<Type, Dim> values{};
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    if (!arr[idx].is<Type>()) {
       std::ostringstream msg;
-      msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
-          << "D point from a " << arr.size() << "-element array entry!";
+      msg << "Invalid parameter `" << key << "`. Dimension [" << idx << "] is `"
+          << TomlTypeName(arr, key) << "` instead of `"
+          << BuiltinTypeName<Type>() << "`!";
       throw std::runtime_error(msg.str());
     }
-    if (!arr.is_homogeneous()) {
-      throw std::runtime_error("TODO not homogeneous!");
-    }
-    if (!arr[0].is<Type>()) {
-      throw std::runtime_error("TODO wrong type");
-    }
-    x = Type(*arr[0].as<Type>());  // TODO
-    y = Type(*arr[1].as<Type>());  // TODO
-    if constexpr (Dim == 3) {
-      z = Type(*arr[2].as<Type>());  // TODO
-    }
-  } else if (node.is_table()) {
-    const toml::table &tbl = *node.as_table();
-    if constexpr (Dim == 2) {
-      if (!tbl.contains("x") || !tbl.contains("y")) {
-        std::ostringstream msg;
-        msg << "Invalid parameter `" << key
-            << "`. Table entry does not contain x, y!";
-        throw std::runtime_error(msg.str());
-      }
-    } else {
-      if (!tbl.contains("x") || !tbl.contains("y") || !tbl.contains("z")) {
-        std::ostringstream msg;
-        msg << "Invalid parameter `" << key
-            << "`. Table entry does not contain x, y, z!";
-        throw std::runtime_error(msg.str());
-      }
-    }
-
-    // TODO type checks!
-    if (!tbl["x"].is<Type>()) {
-      throw std::runtime_error("TODO wrong type");
-    }
-
-    x = Type(*tbl["x"].as<Type>());
-    y = Type(*tbl["y"].as<Type>());
-    if constexpr (Dim == 3) {
-      z = Type(*tbl["z"].as<Type>());
-    }
-  } else {
-    throw std::runtime_error("TODO! poly must be table or array");
+    values[idx] = Type(*arr[idx].as<Type>());
   }
 
-  if constexpr (Dim == 2) {
-    return std::make_tuple(x, y);
-  } else {
-    return std::make_tuple(x, y, z);
+  return ArrayToTuple(values, std::make_index_sequence<Dim>{});
+}
+
+template <typename Type, std::size_t Dim>
+inline auto ExtractPoint(const toml::table &tbl, std::string_view key) {
+  using namespace std::string_view_literals;
+  constexpr std::array<std::string_view, 3> point_keys{"x"sv, "y"sv, "z"sv};
+  static_assert(
+      Dim <= point_keys.size(),
+      "Table keys for higher-dimensional points have not yet been defined!");
+
+  std::array<Type, Dim> values{};
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    if (!tbl.contains(point_keys[idx])) {
+      std::ostringstream msg;
+      msg << "Invalid parameter `" << key << "`. Table entry does not contain `"
+          << point_keys[idx] << "`!";
+      throw std::runtime_error(msg.str());
+    }
+
+    if (!tbl[point_keys[idx]].is<Type>()) {
+      std::ostringstream msg;
+      msg << "Invalid parameter `" << key << "`. Dimension `" << point_keys[idx]
+          << "` is `" << TomlTypeName(tbl[point_keys[idx]], key)
+          << "` instead of `" << BuiltinTypeName<Type>() << "`!";
+      throw std::runtime_error(msg.str());
+    }
+    values[idx] = Type(*tbl[point_keys[idx]].as<Type>());
   }
+
+  return ArrayToTuple(values, std::make_index_sequence<Dim>{});
 }
 
 class ConfigurationImpl : public Configuration {
@@ -582,22 +591,36 @@ class ConfigurationImpl : public Configuration {
     return true;
   }
 
-  template <typename Tuple, typename Type, int Dim>
+  template <typename Tuple, typename Type, std::size_t Dim>
   std::vector<Tuple> GetPolygonImpl(std::string_view key) const {
     const auto node = config_.at_path(key);
     if (!node.is_array()) {
-      std::string msg{"Invalid polygon - parameter `"};
+      std::string msg{"Invalid polygon. Parameter `"};
       msg += key;
       msg += "` must be an array!";
       throw std::runtime_error(msg);
     }
 
     const toml::array &arr = *node.as_array();
-    std::size_t array_index = 0;
+    std::size_t arr_index = 0;
     std::vector<Tuple> poly;
     for (auto &&value : arr) {
-      poly.emplace_back(ExtractPoint<Type, Dim>(value, key));
-      ++array_index;
+      const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
+      if (value.is_array()) {
+        const auto &pt = *value.as_array();
+        poly.emplace_back(ExtractPoint<Type, Dim>(pt, fqn));
+      } else if (value.is_table()) {
+        const auto &pt = *value.as_table();
+        poly.emplace_back(ExtractPoint<Type, Dim>(pt, fqn));
+      } else {
+        std::string msg{
+            "Invalid polygon. All parameter entries must be either arrays or "
+            "tables, but `"};
+        msg += fqn;
+        msg += "` is not!";
+        throw std::runtime_error(msg);
+      }
+      ++arr_index;
     }
     return poly;
   }
