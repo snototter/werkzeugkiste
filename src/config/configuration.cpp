@@ -175,10 +175,19 @@ class SingleKeyMatcherImpl : public SingleKeyMatcher {
   ~SingleKeyMatcherImpl() override = default;
 
   bool Match(std::string_view key) const override {
-    constexpr auto flags = std::regex_constants::match_default;
-    if (std::regex_match(key.begin(), key.end(), regex_, flags)) {
+    // Always check for equality
+    if (pattern_.compare(key) == 0) {
       return true;
     }
+
+    if (is_regex_) {
+      constexpr auto flags = std::regex_constants::match_default;
+      if (std::regex_match(key.begin(), key.end(), regex_, flags)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
  private:
@@ -252,6 +261,10 @@ inline std::string BuiltinTypeName() {
     if constexpr (std::is_same_v<T, int64_t>) {
       return "int64";
     }
+  }
+
+  if constexpr (std::is_same_v<T, bool>) {
+    return "bool";
   }
 
   if constexpr (std::is_same_v<T, std::string>) {
@@ -370,6 +383,73 @@ inline int32_t ConfigLookupInt32(const toml::table &tbl, std::string_view key,
   return static_cast<int32_t>(value64);
 }
 
+template <typename Type, int Dim, typename NodeView>
+inline auto ExtractPoint(const NodeView &node, std::string_view key) {
+  static_assert((Dim == 2) || (Dim == 3),
+                "Only 2D and 3D points are supported!");
+
+  Type x{};
+  Type y{};
+  Type z{};
+
+  if (node.is_array()) {
+    const toml::array &arr = *node.as_array();
+    if (arr.size() != Dim) {
+      std::ostringstream msg;
+      msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
+          << "D point from a " << arr.size() << "-element array entry!";
+      throw std::runtime_error(msg.str());
+    }
+    if (!arr.is_homogeneous()) {
+      throw std::runtime_error("TODO not homogeneous!");
+    }
+    if (!arr[0].is<Type>()) {
+      throw std::runtime_error("TODO wrong type");
+    }
+    x = Type(*arr[0].as<Type>());  // TODO
+    y = Type(*arr[1].as<Type>());  // TODO
+    if constexpr (Dim == 3) {
+      z = Type(*arr[2].as<Type>());  // TODO
+    }
+  } else if (node.is_table()) {
+    const toml::table &tbl = *node.as_table();
+    if constexpr (Dim == 2) {
+      if (!tbl.contains("x") || !tbl.contains("y")) {
+        std::ostringstream msg;
+        msg << "Invalid parameter `" << key
+            << "`. Table entry does not contain x, y!";
+        throw std::runtime_error(msg.str());
+      }
+    } else {
+      if (!tbl.contains("x") || !tbl.contains("y") || !tbl.contains("z")) {
+        std::ostringstream msg;
+        msg << "Invalid parameter `" << key
+            << "`. Table entry does not contain x, y, z!";
+        throw std::runtime_error(msg.str());
+      }
+    }
+
+    // TODO type checks!
+    if (!tbl["x"].is<Type>()) {
+      throw std::runtime_error("TODO wrong type");
+    }
+
+    x = Type(*tbl["x"].as<Type>());
+    y = Type(*tbl["y"].as<Type>());
+    if constexpr (Dim == 3) {
+      z = Type(*tbl["z"].as<Type>());
+    }
+  } else {
+    throw std::runtime_error("TODO! poly must be table or array");
+  }
+
+  if constexpr (Dim == 2) {
+    return std::make_tuple(x, y);
+  } else {
+    return std::make_tuple(x, y, z);
+  }
+}
+
 class ConfigurationImpl : public Configuration {
  public:
   ~ConfigurationImpl() override = default;
@@ -419,6 +499,15 @@ class ConfigurationImpl : public Configuration {
     return ListTableKeys(config_, "");
   }
 
+  bool GetBoolean(std::string_view key) const override {
+    return ConfigLookup<bool>(config_, key, false);
+  }
+
+  bool GetBooleanOrDefault(std::string_view key,
+                           bool default_val) const override {
+    return ConfigLookup<bool>(config_, key, true, default_val);
+  }
+
   double GetDouble(std::string_view key) const override {
     return ConfigLookup<double>(config_, key, false);
   }
@@ -444,6 +533,17 @@ class ConfigurationImpl : public Configuration {
   int64_t GetInteger64OrDefault(std::string_view key,
                                 int64_t default_val) const override {
     return ConfigLookup<int64_t>(config_, key, true, default_val);
+  }
+
+  std::vector<std::tuple<int64_t, int64_t>> GetPolygon2D(
+      std::string_view key) const override {
+    return GetPolygonImpl<std::tuple<int64_t, int64_t>, int64_t, 2>(key);
+  }
+
+  std::vector<std::tuple<int64_t, int64_t, int64_t>> GetPolygon3D(
+      std::string_view key) const override {
+    return GetPolygonImpl<std::tuple<int64_t, int64_t, int64_t>, int64_t, 3>(
+        key);
   }
 
   // Configuration &GetGroup(std::string_view group_name) override {
@@ -480,25 +580,26 @@ class ConfigurationImpl : public Configuration {
     }
 
     return true;
+  }
 
-    // using namespace std::string_view_literals;
-    // bool all_nodes_match{true};
-    // auto check_node_equality = [all_nodes_match, config_, other](const
-    // toml::node &this_node, std::string_view fqn) mutable -> void {
-    //   const auto this_node_view = config_.at_path(fqn);
-    //   const auto other_node_view = other->config_.at_path(fqn);
-    //   if (this_node_view != other_node_view) {
-    //     all_nodes_match = false;
-    //   }
-    //   // if (other_node_view.node() && (this_node !=
-    //   *other_node_view.node())) {
-    //   //   all_nodes_match = false;
-    //   // }
-    // };
-    // Traverse(config_, ""sv, check_node_equality);
+  template <typename Tuple, typename Type, int Dim>
+  std::vector<Tuple> GetPolygonImpl(std::string_view key) const {
+    const auto node = config_.at_path(key);
+    if (!node.is_array()) {
+      std::string msg{"Invalid polygon - parameter `"};
+      msg += key;
+      msg += "` must be an array!";
+      throw std::runtime_error(msg);
+    }
 
-    // //FIXME check that keys are the same
-    // return all_nodes_match;
+    const toml::array &arr = *node.as_array();
+    std::size_t array_index = 0;
+    std::vector<Tuple> poly;
+    for (auto &&value : arr) {
+      poly.emplace_back(ExtractPoint<Type, Dim>(value, key));
+      ++array_index;
+    }
+    return poly;
   }
 
   // TODO registered_string_replacements_{};

@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <vector>
 
@@ -82,6 +83,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// "some_table.param_x".
   virtual std::vector<std::string> ParameterNames() const = 0;
 
+  virtual bool GetBoolean(std::string_view key) const = 0;
+  virtual bool GetBooleanOrDefault(std::string_view key,
+                                   bool default_val) const = 0;
+
   virtual double GetDouble(std::string_view key) const = 0;
   virtual double GetDoubleOrDefault(std::string_view key,
                                     double default_val) const = 0;
@@ -93,9 +98,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   virtual int64_t GetInteger64(std::string_view key) const = 0;
   virtual int64_t GetInteger64OrDefault(std::string_view key,
                                         int64_t default_val) const = 0;
-  // TODO GetDoubleOrDefault()
-  //-> return default if key does not exist
-  //-> throw if type is not double!
+
+  virtual std::vector<std::tuple<int64_t, int64_t>> GetPolygon2D(
+      std::string_view key) const = 0;
+  virtual std::vector<std::tuple<int64_t, int64_t, int64_t>> GetPolygon3D(
+      std::string_view key) const = 0;
 
   // TODO should return a copy!
   //    virtual Configuration &GetGroup(std::string_view group_name) const = 0;
