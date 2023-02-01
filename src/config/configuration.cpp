@@ -352,20 +352,22 @@ inline int32_t ConfigLookupInt32(const toml::table &tbl, std::string_view key,
                                  bool allow_default = false,
                                  int32_t default_val = 0) {
   // TOML stores integers as int64_t
-  int64_t value = ConfigLookup<int64_t>(tbl, key, allow_default,
-                                        static_cast<int64_t>(default_val));
+  int64_t value64 = ConfigLookup<int64_t>(tbl, key, allow_default,
+                                          static_cast<int64_t>(default_val));
   constexpr auto min32 =
       static_cast<int64_t>(std::numeric_limits<int32_t>::min());
   constexpr auto max32 =
       static_cast<int64_t>(std::numeric_limits<int32_t>::max());
-  if ((value > max32) || (value < min32)) {
-    std::string msg{"Integer value ("};
-    msg += std::to_string(value);
-    msg += ") is out of range for 32-bit integer!";
-    throw std::runtime_error(msg);
+  if ((value64 > max32) || (value64 < min32)) {
+    std::string msg{"Parameter value `"};
+    msg += key;
+    msg += " = ";
+    msg += std::to_string(value64);
+    msg += "` exceeds 32-bit integer range!";
+    throw std::range_error(msg);
   }
 
-  return static_cast<int32_t>(value);
+  return static_cast<int32_t>(value64);
 }
 
 class ConfigurationImpl : public Configuration {
@@ -398,13 +400,18 @@ class ConfigurationImpl : public Configuration {
                     toml::node &node, std::string_view fqn) mutable -> void {
       if (node.is_string() && to_replace(fqn)) {
         auto &str = *node.as_string();
-        WKZLOG_ERROR("Will replace param {:s}, was previously {:s}", fqn, str);
-        str = "*******"sv;  // TODO fullfile basepath! must link to file utils
+        // WKZLOG_ERROR("Will replace param {:s}, was previously {:s}", fqn,
+        // str);
+        str = "*******"sv;
+        // TODO 1) fullfile basepath! must link to file utils
+        // TODO 2) check special character handling (backslash, umlauts,
+        // whitespace)
         replaced = true;
       }
     };
     Traverse(config_, ""sv, func);
-    WKZLOG_ERROR("After replacements:\n{:s}\nreplaced?{}", config_, replaced);
+    // WKZLOG_ERROR("After replacements:\n{:s}\nreplaced?{}", config_,
+    // replaced);
     return replaced;
   }
 
@@ -440,7 +447,8 @@ class ConfigurationImpl : public Configuration {
   }
 
   // Configuration &GetGroup(std::string_view group_name) override {
-  //   //TODO create a copy & return it
+  //   //TODO create a copy & return it as unique_ptr (can't use ref to pure
+  //   // virtual class)
   //   return *this;
   // }
 

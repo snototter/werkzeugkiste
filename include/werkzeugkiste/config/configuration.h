@@ -19,9 +19,16 @@ namespace werkzeugkiste::config {
 class WERKZEUGKISTE_CONFIG_EXPORT SingleKeyMatcher {
  public:
   static std::unique_ptr<SingleKeyMatcher> Create(std::string_view pattern);
-  virtual ~SingleKeyMatcher() = default;
-
   virtual bool Match(std::string_view key) const = 0;
+
+  virtual ~SingleKeyMatcher() = default;
+  SingleKeyMatcher(const SingleKeyMatcher & /* other */) = default;
+  SingleKeyMatcher &operator=(const SingleKeyMatcher & /* other */) = default;
+  SingleKeyMatcher(SingleKeyMatcher && /* other */) = default;
+  SingleKeyMatcher &operator=(SingleKeyMatcher && /* other */) = default;
+
+ protected:
+  SingleKeyMatcher() = default;
 };
 
 class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
