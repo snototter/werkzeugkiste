@@ -277,7 +277,8 @@ TEST(ConfigTest, Polygon) {
     z = -5
 
     [invalid]
-    p1 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}] # Dimensionality mix
+    p1 = [{x = 1, y = 2}, {x = 1, name = 2, param = 3}]
+    #p1 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}] # Dimensionality mix - TODO should be supported
     p2 = [{x = 1, y = 2}, {x = 1.5, y = 2}]      # Type mix
     )toml");
 
