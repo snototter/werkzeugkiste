@@ -68,6 +68,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) = 0;
 
+  // keys and values match exactly
+  virtual bool Equals(const Configuration *other) const = 0;
+
   /// Returns a list of all (fully-qualified) parameter names, e.g.
   /// "some_table.param_x".
   virtual std::vector<std::string> ParameterNames() const = 0;

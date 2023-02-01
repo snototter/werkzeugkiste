@@ -375,6 +375,15 @@ class ConfigurationImpl : public Configuration {
   explicit ConfigurationImpl(toml::table &&config)
       : Configuration(), config_(std::move(config)) {}
 
+  bool Equals(const Configuration *other) const override {
+    const ConfigurationImpl *other_impl =
+        dynamic_cast<const ConfigurationImpl *>(other);
+    if (other_impl == nullptr) {
+      return false;
+    }
+    return EqualsImpl(other_impl);
+  }
+
   bool EnsureAbsolutePaths(
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) override {
@@ -445,6 +454,44 @@ class ConfigurationImpl : public Configuration {
 
  private:
   toml::table config_{};
+
+  bool EqualsImpl(const ConfigurationImpl *other) const {
+    using namespace std::string_view_literals;
+    const auto keys_this = ListTableKeys(config_, ""sv);
+    const auto keys_other = ListTableKeys(other->config_, ""sv);
+    if (keys_this.size() != keys_other.size()) {
+      return false;
+    }
+
+    for (const auto &key : keys_this) {
+      const auto nv_this = config_.at_path(key);
+      const auto nv_other = other->config_.at_path(key);
+      if (nv_this != nv_other) {
+        return false;
+      }
+    }
+
+    return true;
+
+    // using namespace std::string_view_literals;
+    // bool all_nodes_match{true};
+    // auto check_node_equality = [all_nodes_match, config_, other](const
+    // toml::node &this_node, std::string_view fqn) mutable -> void {
+    //   const auto this_node_view = config_.at_path(fqn);
+    //   const auto other_node_view = other->config_.at_path(fqn);
+    //   if (this_node_view != other_node_view) {
+    //     all_nodes_match = false;
+    //   }
+    //   // if (other_node_view.node() && (this_node !=
+    //   *other_node_view.node())) {
+    //   //   all_nodes_match = false;
+    //   // }
+    // };
+    // Traverse(config_, ""sv, check_node_equality);
+
+    // //FIXME check that keys are the same
+    // return all_nodes_match;
+  }
 
   // TODO registered_string_replacements_{};
   //  std::vector<std::string> path_parameters_{};
