@@ -98,12 +98,6 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
   for (auto &&[key, value] : tbl) {
     keys.emplace_back(FullyQualifiedPath(key, path));
     if (value.is_array()) {
-      // TODO remove
-      if (value.is_array_of_tables()) {
-        WKZLOG_CRITICAL("TODO array is also array of tables: {:s}",
-                        FullyQualifiedPath(key, path));
-      }
-      // TODO separate function as we need to recurse!!
       const auto subkeys =
           ListArrayKeys(*value.as_array(), FullyQualifiedPath(key, path));
       keys.insert(keys.end(), subkeys.begin(), subkeys.end());
@@ -160,7 +154,7 @@ void Traverse(
         "`array` nodes, but `"};
     msg += path;
     msg += "` is neither!";
-    WKZLOG_ERROR(msg);
+    WZKLOG_ERROR(msg);
     throw std::logic_error(msg);
   }
 }
@@ -394,7 +388,7 @@ inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
       cast[idx] = SafeInteger32Cast(point[idx], key);
     }
     return ArrayToTuple(cast);
-  } else {  // NO L I NT
+  } else {  // NOLINT(*else-after-return)
     return ArrayToTuple(point);
   }
 }
@@ -499,7 +493,7 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
 }
 
 /// Extracts a list of built-in scalar types (integer, double, bool).
-/// TODO
+/// TODO not suitable for TOML++-specific types (date, time, ...)
 template <typename T>
 std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
@@ -596,11 +590,12 @@ class SingleKeyMatcherImpl : public SingleKeyMatcher {
       } else if ((c == '.') || (c == '[') || (c == ']')) {
         re += '\\';
         re += c;
-      } else {  // TODO test backslash handling!
+      } else {
         re += c;
       }
     }
     re += '$';
+    WZKLOG_CRITICAL("Built regex for SingleKeyMatcher: {:s}", re);
     regex_ = std::regex{re};
   }
 };
@@ -673,7 +668,7 @@ class ConfigurationImpl : public Configuration {
                     toml::node &node, std::string_view fqn) mutable -> void {
       if (node.is_string() && to_replace(fqn)) {
         auto &str = *node.as_string();
-        // WKZLOG_ERROR("Will replace param {:s}, was previously {:s}", fqn,
+        // WZKLOG_ERROR("Will replace param {:s}, was previously {:s}", fqn,
         // str);
         str = "*******"sv;
         // TODO 1) fullfile basepath! must link to file utils
@@ -753,18 +748,9 @@ class ConfigurationImpl : public Configuration {
     return utils::GetScalarList<int32_t>(config_, key);
   }
 
-  // std::vector<std::vector<int32_t>> GetNestedInteger32List(std::string_view
-  // key) const override {
-  // TODO
-  // }
-
   std::vector<int64_t> GetInteger64List(std::string_view key) const override {
     return utils::GetScalarList<int64_t>(config_, key);
   }
-  // std::vector<std::vector<int64_t>> GetNestedInteger64List(std::string_view
-  // key) const override {
-  // TODO
-  // }
 
   std::vector<std::string> GetStringList(std::string_view key) const override {
     return utils::GetScalarList<std::string>(config_, key);
@@ -781,19 +767,15 @@ class ConfigurationImpl : public Configuration {
                                                                    key);
   }
 
-  // Configuration &GetGroup(std::string_view group_name) override {
-  //   //TODO create a copy & return it as unique_ptr (can't use ref to pure
-  //   // virtual class)
-  //   return *this;
-  // }
-
   std::string ToTOML() const override {
     std::ostringstream repr;
     repr << config_;
     return repr.str();
   }
 
-  std::string ToJSON() const override { return "TODO"; }
+  std::string ToJSON() const override {
+    throw std::logic_error("JSON serialization is not yet supported!");
+  }
 
  private:
   toml::table config_{};
@@ -821,25 +803,24 @@ class ConfigurationImpl : public Configuration {
   //  std::vector<std::string> path_parameters_{};
 };
 
-std::unique_ptr<Configuration> Configuration::LoadTomlFile(
-    std::string_view filename) {
-  const std::string toml = werkzeugkiste::files::CatAsciiFile(filename);
-  return Configuration::LoadTomlString(toml);
-}
-
 std::unique_ptr<Configuration> Configuration::LoadTomlString(
     std::string_view toml_string) {
   try {
     toml::table tbl = toml::parse(toml_string);
-    WKZLOG_INFO("Loaded toml: {:s}", tbl);  // TODO remove
     return std::make_unique<ConfigurationImpl>(std::move(tbl));
   } catch (const toml::parse_error &err) {
     std::ostringstream msg;
     msg << "Error parsing TOML: " << err.description() << " ("
         << err.source().begin << ")!";
-    WKZLOG_ERROR(msg.str());
+    WZKLOG_ERROR(msg.str());
     throw std::runtime_error(msg.str());
   }
+}
+
+std::unique_ptr<Configuration> Configuration::LoadTomlFile(
+    std::string_view filename) {
+  const std::string toml = werkzeugkiste::files::CatAsciiFile(filename);
+  return Configuration::LoadTomlString(toml);
 }
 
 // std::unique_ptr<Configuration> Configuration::LoadJSON(std::string_view

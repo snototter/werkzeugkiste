@@ -18,6 +18,7 @@ Checks: "*,\
   -cppcoreguidelines-pro-bounds-constant-array-index,\
   -readability-identifier-length,\
   -readability-else-after-return,\
+  -readability-use-anyofallof,\
   -bugprone-easily-swappable-parameters,\
   -misc-non-private-member-variables-in-classes"
 WarningsAsErrors: ''

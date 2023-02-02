@@ -104,46 +104,38 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
       std::string_view key, std::string_view default_val) const = 0;
 
   virtual std::vector<double> GetDoubleList(std::string_view key) const = 0;
-  // TODO nested list
 
   virtual std::vector<int32_t> GetInteger32List(std::string_view key) const = 0;
-  //   virtual std::vector<std::vector<int32_t>>
-  //   GetNestedInteger32List(std::string_view key) const = 0;
 
   virtual std::vector<int64_t> GetInteger64List(std::string_view key) const = 0;
-  //   virtual std::vector<std::vector<int32_t>>
-  //   GetNestedInteger32List(std::string_view key) const = 0;
 
   virtual std::vector<std::string> GetStringList(
       std::string_view key) const = 0;
-  // TODO do we need a nested list?
 
   virtual std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
       std::string_view key) const = 0;
-  // TODO do we need a nested list?
 
   virtual std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
       std::string_view key) const = 0;
-  // TODO do we need a nested list?
 
   // TODO do we need double-precision points ?
-
-  // TODO nested string list?
+  // TODO do we need nested lists ?
 
   // TODO should return a copy!
-  //    virtual Configuration &GetGroup(std::string_view group_name) const = 0;
+  //    virtual std::unique_ptr<Configuration> GetGroup(std::string_view
+  //    group_name) const = 0;
 
   // TODO LoadNestedTOMLConfiguration(param_name)
   // TODO LoadNestedJSONConfiguration(param_name)
   // TODO LoadNestedLibconfigConfiguration
-  // TODO MakePathsAbsolute(base, list of params)
+
+  // TODO GetIntegerPair (e.g. for a size2d)
+  // TODO GetDoublePair
+  // TODO do we need std::map<std::string, std::variant<int64_t, double,
+  // std::string>> GetDictionary / GetTable
 
   // TODO
   // https://github.com/snototter/vitocpp/blob/master/src/cpp/vcp_config/config_params.h
-
-  // TODO register params which link to nested config files (would need to be
-  // loaded afterwards)
-  // TODO template T GetCompulsory/GetOptional(param "x.y")
 
   /// Returns a TOML-formatted string of this configuration.
   virtual std::string ToTOML() const = 0;

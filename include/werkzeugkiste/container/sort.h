@@ -141,7 +141,7 @@ std::map<Tp, std::size_t> FindDuplicates(const Container& container) {
   for (const auto& item : container) {
     auto itmp = item_count_tmp.insert(std::pair<Tp, std::size_t>(item, 1));
     // If insertion fails, the key existed already
-    if (itmp.second == false) {
+    if (!static_cast<bool>(itmp.second)) {
       itmp.first->second++;
     }
   }

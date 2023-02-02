@@ -91,6 +91,7 @@ TEST(ConfigTest, Types) {
     day = 2023-01-01
     time1 = 12:34:56
     time2 = 00:01:02.123456
+    date_time = 1912-07-23T08:37:00-08:00
 
     )toml";
   const auto config = wkc::Configuration::LoadTomlString(toml_str);
@@ -152,6 +153,17 @@ TEST(ConfigTest, Types) {
   EXPECT_THROW(config->GetDouble("tbl"), std::runtime_error);
   EXPECT_THROW(config->GetString("int_list"), std::runtime_error);
   EXPECT_THROW(config->GetString("tbl"), std::runtime_error);
+
+  EXPECT_THROW(config->GetDouble("dates"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("dates.day"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("dates.time1"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("dates.time2"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("dates.date_time"), std::runtime_error);
+  EXPECT_THROW(config->GetString("dates"), std::runtime_error);
+  EXPECT_THROW(config->GetString("dates.day"), std::runtime_error);
+  EXPECT_THROW(config->GetString("dates.time1"), std::runtime_error);
+  EXPECT_THROW(config->GetString("dates.time2"), std::runtime_error);
+  EXPECT_THROW(config->GetString("dates.date_time"), std::runtime_error);
 }
 
 TEST(ConfigTest, Keys1) {
@@ -300,6 +312,7 @@ TEST(ConfigTest, KeyMatching) {
   // existing nodes (and an invalid key could not have been created
   // to begin with...)
   single = wkc::SingleKeyMatcher::Create("arr[*].*");
+  EXPECT_TRUE(single->Match("arr[*].*"));
   EXPECT_FALSE(single->Match("arr*"));
   EXPECT_FALSE(single->Match("arr.name"));
   EXPECT_FALSE(single->Match("arr[]name"));
@@ -344,6 +357,8 @@ inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
 
 TEST(ConfigTest, PointLists) {
   const auto config = wkc::Configuration::LoadTomlString(R"toml(
+    str = "not a point list"
+
     poly1 = [[1, 2], [3, 4], [5, 6], [-7, -8]]
 
     poly2 = [{y = 20, x = 10}, {x = 30, y = 40}, {y = 60, x = 50}]
@@ -370,10 +385,11 @@ TEST(ConfigTest, PointLists) {
 
     # Mix "points" (nested arrays) and scalars
     p4 = [[1, 2], [3, 4], 5]
+    p5 = [[1, 2], [3, 4], [5]]
 
     # 2D & 3D point (Can be converted to 2D polygon)
-    p5 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}]
-    p6 = [[1, 2], [3, 4, 5], [6, 7]]
+    p6 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}]
+    p7 = [[1, 2], [3, 4, 5], [6, 7]]
 
     )toml");
 
@@ -413,16 +429,18 @@ TEST(ConfigTest, PointLists) {
   EXPECT_NO_THROW(config->GetPoints3D("poly4"));
 
   EXPECT_THROW(config->GetPoints2D("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("str"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p1"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p2"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p3"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p4"), std::runtime_error);
-
-  EXPECT_NO_THROW(config->GetPoints2D("invalid.p5"));
-  EXPECT_THROW(config->GetPoints3D("invalid.p5"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("invalid.p5"), std::runtime_error);
 
   EXPECT_NO_THROW(config->GetPoints2D("invalid.p6"));
   EXPECT_THROW(config->GetPoints3D("invalid.p6"), std::runtime_error);
+
+  EXPECT_NO_THROW(config->GetPoints2D("invalid.p7"));
+  EXPECT_THROW(config->GetPoints3D("invalid.p7"), std::runtime_error);
 
   // 3D polygons
   EXPECT_THROW(config->GetPoints3D("poly1"), std::runtime_error);
@@ -448,7 +466,21 @@ TEST(ConfigTest, ScalarLists) {
 
     # Type mix
     invalid_int_flt = [1, 2, 3, 4.5, 5]
+
+    invalid_types = [1, 2, "framboozle"]
+
+    [not-a-list]
+    name = "test"
     )toml");
+
+  EXPECT_THROW(config->GetInteger32List("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("no-such-key"), std::runtime_error);
+
+  EXPECT_THROW(config->GetInteger32List("not-a-list"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("not-a-list.test"), std::runtime_error);
+
+  EXPECT_THROW(config->GetInteger32List("invalid_types"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("invalid_types"), std::runtime_error);
 
   auto list32 = config->GetInteger32List("ints32");
   EXPECT_EQ(8, list32.size());
@@ -505,7 +537,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_TRUE(config2->Equals(config2.get()));
 
   // White space mustn't affect the equality check
-  const auto config3 = wkc::Configuration::LoadTomlString(R"toml(
+  auto config3 = wkc::Configuration::LoadTomlString(R"toml(
 
     param1 =     "value"
 
@@ -519,6 +551,28 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_FALSE(config1->Equals(config3.get()));
   EXPECT_TRUE(config2->Equals(config3.get()));
   EXPECT_TRUE(config3->Equals(config2.get()));
+
+  // Change the first string parameter
+  config3 = wkc::Configuration::LoadTomlString(R"toml(
+    param1 = "value!"
+    param2 = "value"
+
+    param3 = true
+    )toml");
+  EXPECT_FALSE(config1->Equals(config3.get()));
+  EXPECT_FALSE(config2->Equals(config3.get()));
+  EXPECT_FALSE(config3->Equals(config2.get()));
+
+  // Change the 3rd parameter type
+  config3 = wkc::Configuration::LoadTomlString(R"toml(
+    param1 = "value"
+    param2 = "value"
+
+    param3 = [1, 2]
+    )toml");
+  EXPECT_FALSE(config1->Equals(config3.get()));
+  EXPECT_FALSE(config2->Equals(config3.get()));
+  EXPECT_FALSE(config3->Equals(config2.get()));
 
   // Edge cases for equality comparison:
   EXPECT_FALSE(config1->Equals(nullptr));
@@ -535,6 +589,13 @@ TEST(ConfigTest, LoadingToml) {
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml");
   EXPECT_THROW(wkc::Configuration::LoadTomlFile(fname_invalid),
                std::runtime_error);
+}
+
+TEST(ConfigTest, LoadingJson) {
+  const auto config = wkc::Configuration::LoadTomlString(R"toml(
+    param1 = "value"
+    )toml");
+  EXPECT_THROW(config->ToJSON(), std::logic_error);  // Not yet implemented
 }
 
 // NOLINTEND

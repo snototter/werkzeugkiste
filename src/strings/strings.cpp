@@ -138,10 +138,10 @@ std::vector<std::string> Split(std::string_view s, char delim) {
 std::vector<std::string_view> Tokenize(std::string_view s,
                                        std::string_view delim) {
   std::vector<std::string_view> tokens;
-  auto first = s.begin();
+  const auto* first = s.begin();
 
   while (first != s.end()) {
-    const auto second = std::find_first_of(
+    const auto* second = std::find_first_of(
         first, std::cend(s), std::cbegin(delim), std::cend(delim));
     if (first != second) {
       const auto start =
