@@ -99,10 +99,32 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   virtual int64_t GetInteger64OrDefault(std::string_view key,
                                         int64_t default_val) const = 0;
 
-  virtual std::vector<std::tuple<int64_t, int64_t>> GetPolygon2D(
+  virtual std::string GetString(std::string_view key) const = 0;
+  virtual std::string GetStringOrDefault(
+      std::string_view key, std::string_view default_val) const = 0;
+
+  virtual std::vector<double> GetDoubleList(std::string_view key) const = 0;
+  // TODO nested list
+
+  virtual std::vector<int32_t> GetInteger32List(std::string_view key) const = 0;
+  //   virtual std::vector<std::vector<int32_t>>
+  //   GetNestedInteger32List(std::string_view key) const = 0;
+
+  virtual std::vector<int64_t> GetInteger64List(std::string_view key) const = 0;
+  //   virtual std::vector<std::vector<int32_t>>
+  //   GetNestedInteger32List(std::string_view key) const = 0;
+
+  virtual std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
       std::string_view key) const = 0;
-  virtual std::vector<std::tuple<int64_t, int64_t, int64_t>> GetPolygon3D(
+  // TODO nested list
+  virtual std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
       std::string_view key) const = 0;
+  // TODO nested list
+
+  // TODO do we need double-precision points ?
+
+  // TODO string list !
+  // TODO nested string list?
 
   // TODO should return a copy!
   //    virtual Configuration &GetGroup(std::string_view group_name) const = 0;

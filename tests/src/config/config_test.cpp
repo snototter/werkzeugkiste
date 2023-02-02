@@ -100,6 +100,8 @@ TEST(ConfigTest, Types) {
   EXPECT_THROW(config->GetInteger64OrDefault("bool", 2), std::runtime_error);
   EXPECT_THROW(config->GetDouble("bool"), std::runtime_error);
   EXPECT_THROW(config->GetDoubleOrDefault("bool", 1.0), std::runtime_error);
+  EXPECT_THROW(config->GetString("bool"), std::runtime_error);
+  EXPECT_THROW(config->GetStringOrDefault("bool", "..."), std::runtime_error);
 
   // Integer parameter
   EXPECT_EQ(42, config->GetInteger32("int"));
@@ -108,6 +110,8 @@ TEST(ConfigTest, Types) {
   EXPECT_THROW(config->GetBoolean("int"), std::runtime_error);
   EXPECT_THROW(config->GetBooleanOrDefault("int", true), std::runtime_error);
   EXPECT_THROW(config->GetDouble("int"), std::runtime_error);
+  EXPECT_THROW(config->GetString("int"), std::runtime_error);
+  EXPECT_THROW(config->GetStringOrDefault("int", "..."), std::runtime_error);
 
   // Double parameter
   EXPECT_DOUBLE_EQ(1.0, config->GetDouble("flt"));
@@ -115,9 +119,16 @@ TEST(ConfigTest, Types) {
   EXPECT_THROW(config->GetBoolean("flt"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32("flt"), std::runtime_error);
   EXPECT_THROW(config->GetInteger64("flt"), std::runtime_error);
+  EXPECT_THROW(config->GetString("flt"), std::runtime_error);
+  EXPECT_THROW(config->GetStringOrDefault("flt", "..."), std::runtime_error);
 
   // String parameter
-  // TODO
+  const std::string expected{"A string"};
+  EXPECT_EQ(expected, config->GetString("str"));
+
+  EXPECT_THROW(config->GetString("no-such-key"), std::runtime_error);
+
+  EXPECT_EQ("...", config->GetStringOrDefault("no-such-key", "..."));
 
   EXPECT_THROW(config->GetBoolean("str"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32("str"), std::runtime_error);
@@ -294,7 +305,7 @@ inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
 //   return poly;
 // }
 
-TEST(ConfigTest, Polygon) {
+TEST(ConfigTest, PointLists) {
   const auto config = wkc::Configuration::LoadTomlString(R"toml(
     poly1 = [[1, 2], [3, 4], [5, 6], [-7, -8]]
 
@@ -326,48 +337,100 @@ TEST(ConfigTest, Polygon) {
     p4 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}]
     )toml");
 
-  const auto poly1 = config->GetPolygon2D("poly1");
-  ASSERT_EQ(4, poly1.size());
+  auto poly = config->GetPoints2D("poly1");
+  EXPECT_EQ(4, poly.size());
 
-  auto vec = TuplesToVecs<wkg::Vec2i>(poly1);
+  auto list = config->GetInteger32List("poly1[0]");
+  EXPECT_EQ(2, list.size());
+  EXPECT_EQ(1, list[0]);
+  EXPECT_EQ(2, list[1]);
+  list = config->GetInteger32List("poly1[2]");
+  EXPECT_EQ(2, list.size());
+  EXPECT_EQ(5, list[0]);
+  EXPECT_EQ(6, list[1]);
+
+  auto vec = TuplesToVecs<wkg::Vec2i>(poly);
   EXPECT_EQ(wkg::Vec2i(1, 2), vec[0]);
   EXPECT_EQ(wkg::Vec2i(3, 4), vec[1]);
   EXPECT_EQ(wkg::Vec2i(5, 6), vec[2]);
   EXPECT_EQ(wkg::Vec2i(-7, -8), vec[3]);
 
-  const auto poly2 = config->GetPolygon2D("poly2");
-  ASSERT_EQ(3, poly2.size());
+  poly = config->GetPoints2D("poly2");
+  EXPECT_EQ(3, poly.size());
 
-  vec = TuplesToVecs<wkg::Vec2i>(poly2);
+  vec = TuplesToVecs<wkg::Vec2i>(poly);
   EXPECT_EQ(wkg::Vec2i(10, 20), vec[0]);
   EXPECT_EQ(wkg::Vec2i(30, 40), vec[1]);
   EXPECT_EQ(wkg::Vec2i(50, 60), vec[2]);
 
+  EXPECT_THROW(config->GetInteger32List("poly2"), std::runtime_error);
+
   // An N-dimensional polygon can be looked up from any list of at
   // least N-dimensional points:
-  EXPECT_NO_THROW(config->GetPolygon2D("poly3"));
-  EXPECT_NO_THROW(config->GetPolygon3D("poly3"));
-  EXPECT_NO_THROW(config->GetPolygon2D("poly4"));
-  EXPECT_NO_THROW(config->GetPolygon3D("poly4"));
+  EXPECT_NO_THROW(config->GetPoints2D("poly3"));
+  EXPECT_NO_THROW(config->GetPoints3D("poly3"));
+  EXPECT_NO_THROW(config->GetPoints2D("poly4"));
+  EXPECT_NO_THROW(config->GetPoints3D("poly4"));
 
-  EXPECT_THROW(config->GetPolygon2D("no-such-key"), std::runtime_error);
-  EXPECT_THROW(config->GetPolygon2D("invalid.p1"), std::runtime_error);
-  EXPECT_THROW(config->GetPolygon2D("invalid.p2"), std::runtime_error);
-  EXPECT_THROW(config->GetPolygon2D("invalid.p3"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("invalid.p1"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("invalid.p2"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("invalid.p3"), std::runtime_error);
 
-  EXPECT_NO_THROW(config->GetPolygon2D("invalid.p4"));
-  EXPECT_THROW(config->GetPolygon3D("invalid.p4"), std::runtime_error);
+  EXPECT_NO_THROW(config->GetPoints2D("invalid.p4"));
+  EXPECT_THROW(config->GetPoints3D("invalid.p4"), std::runtime_error);
 
   // 3D polygons
-  EXPECT_THROW(config->GetPolygon3D("poly1"), std::runtime_error);
-  EXPECT_THROW(config->GetPolygon3D("poly2"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints3D("poly1"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints3D("poly2"), std::runtime_error);
 
-  const auto poly3 = config->GetPolygon3D("poly3");
-  ASSERT_EQ(3, poly3.size());
-  std::vector<wkg::Vec3i> vec3 = TuplesToVecs<wkg::Vec3i>(poly3);
-  EXPECT_EQ(wkg::Vec3i(1, 2, 3), vec3[0]);
-  EXPECT_EQ(wkg::Vec3i(4, 5, 6), vec3[1]);
-  EXPECT_EQ(wkg::Vec3i(-9, 0, -3), vec3[2]);
+  auto poly3d = config->GetPoints3D("poly3");
+  EXPECT_EQ(3, poly3d.size());
+  std::vector<wkg::Vec3i> vec3d = TuplesToVecs<wkg::Vec3i>(poly3d);
+  EXPECT_EQ(wkg::Vec3i(1, 2, 3), vec3d[0]);
+  EXPECT_EQ(wkg::Vec3i(4, 5, 6), vec3d[1]);
+  EXPECT_EQ(wkg::Vec3i(-9, 0, -3), vec3d[2]);
+}
+
+TEST(ConfigTest, ScalarLists) {
+  const auto config = wkc::Configuration::LoadTomlString(R"toml(
+    ints32 = [1, 2, 3, 4, 5, 6, -7, -8]
+
+    ints64 = [0, 2147483647, 2147483648, -2147483648, -2147483649]
+
+    floats = [0.5, 1.0, 1.0e23]
+
+    strings = ["abc", "Foo", "Frobmorten", "Test String"]
+
+    # Type mix
+    invalid_int_flt = [1, 2, 3, 4.5, 5]
+    )toml");
+
+  auto list32 = config->GetInteger32List("ints32");
+  EXPECT_EQ(8, list32.size());
+  auto list64 = config->GetInteger64List("ints32");
+  EXPECT_EQ(8, list64.size());
+  EXPECT_THROW(config->GetDoubleList("ints32"), std::runtime_error);
+
+  EXPECT_EQ(1, list32[0]);
+  EXPECT_EQ(6, list32[5]);
+  EXPECT_EQ(-8, list32[7]);
+
+  EXPECT_THROW(config->GetInteger32List("no-such-key"), std::runtime_error);
+
+  EXPECT_THROW(config->GetInteger32List("ints64"), std::runtime_error);
+  list64 = config->GetInteger64List("ints64");
+  EXPECT_EQ(5, list64.size());
+
+  auto list_dbl = config->GetDoubleList("floats");
+  EXPECT_EQ(3, list_dbl.size());
+  EXPECT_DOUBLE_EQ(0.5, list_dbl[0]);
+  EXPECT_DOUBLE_EQ(1.0, list_dbl[1]);
+  EXPECT_DOUBLE_EQ(1e23, list_dbl[2]);
+
+  EXPECT_THROW(config->GetInteger32List("invalid_int_flt"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64List("invalid_int_flt"), std::runtime_error);
+  EXPECT_THROW(config->GetDoubleList("invalid_int_flt"), std::runtime_error);
 }
 
 TEST(ConfigTest, LoadingToml) {

@@ -250,31 +250,52 @@ std::unique_ptr<MultiKeyMatcher> MultiKeyMatcher::Create(
   return std::make_unique<MultiKeyMatcherImpl>(patterns);
 }
 
+inline int32_t SafeIntegerCast(int64_t value64, std::string_view param_name) {
+  constexpr auto min32 =
+      static_cast<int64_t>(std::numeric_limits<int32_t>::min());
+  constexpr auto max32 =
+      static_cast<int64_t>(std::numeric_limits<int32_t>::max());
+  if ((value64 > max32) || (value64 < min32)) {
+    std::string msg{"Parameter value `"};
+    msg += param_name;
+    msg += " = ";
+    msg += std::to_string(value64);
+    msg += "` exceeds 32-bit integer range!";
+    throw std::range_error(msg);
+  }
+
+  return static_cast<int32_t>(value64);
+}
+
 template <typename T>
 inline std::string BuiltinTypeName() {
-  if constexpr (std::is_same_v<T, double>) {
-    return "double";
-  }
+  std::ostringstream msg;
+  msg << "Built-in type `" << typeid(T).name()
+      << "` not handled in `BuiltinTypeName(). This is a werkzeugkiste "
+         "implementation error. Please report at "
+         "https://github.com/snototter/werkzeugkiste/issues";
+  throw std::logic_error(msg.str());
+}
 
-  if constexpr (std::is_integral_v<T>) {
-    if constexpr (std::is_same_v<T, int32_t>) {
-      return "int32";
-    }
-
-    if constexpr (std::is_same_v<T, int64_t>) {
-      return "int64";
-    }
-  }
-
-  if constexpr (std::is_same_v<T, bool>) {
-    return "bool";
-  }
-
-  if constexpr (std::is_same_v<T, std::string>) {
-    return "string";
-  }
-
-  throw std::logic_error("Type not supported!");
+template <>
+inline std::string BuiltinTypeName<bool>() {
+  return "bool";
+}
+template <>
+inline std::string BuiltinTypeName<double>() {
+  return "double";
+}
+template <>
+inline std::string BuiltinTypeName<int32_t>() {
+  return "int32_t";
+}
+template <>
+inline std::string BuiltinTypeName<int64_t>() {
+  return "int64_t";
+}
+template <>
+inline std::string BuiltinTypeName<std::string>() {
+  return "string";
 }
 
 template <typename NodeView>
@@ -319,41 +340,13 @@ inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
   msg += key;
   msg +=
       "` is not handled in `TomlTypeName`. This is a werkzeugkiste "
-      "implementation error. Please open an issue.";
+      "implementation error. Please report at "
+      "https://github.com/snototter/werkzeugkiste/issues";
   throw std::logic_error(msg);
 }
 
-/// Returns true if the TOML table contains a valid node at the given,
-/// fully-qualified path/key.
-inline bool ConfigContains(const toml::table &tbl, std::string_view key) {
-  // Needed, because `tbl.contains()` only checks the direct children.
-  const auto node = tbl.at_path(key);
-  return node.is_value() || node.is_table() || node.is_array();
-}
-
-template <typename T>
-T ConfigLookup(const toml::table &tbl, std::string_view key,
-               bool allow_default = false, T default_val = T{}) {
-  if (!ConfigContains(tbl, key)) {
-    if (allow_default) {
-      return default_val;
-    }
-
-    std::string msg{"Key `"};
-    msg += key;
-    msg += "` does not exist!";
-    throw std::runtime_error(msg);
-  }
-
-  const auto node = tbl.at_path(key);
-  // if (!node.is_value()) {
-  //   throw std::runtime_error("TODO parameter must be a value, not a
-  //   container!");   //TODO
-  // }
-  if (node.is<T>()) {
-    return T(*node.as<T>());
-  }
-
+template <typename T, typename Node>
+inline void RaiseLookupTypeError(const Node &node, std::string_view key) {
   std::string msg{"Invalid type `"};
   msg += BuiltinTypeName<T>();
   msg += "` used to query key `";
@@ -364,40 +357,84 @@ T ConfigLookup(const toml::table &tbl, std::string_view key,
   throw std::runtime_error(msg);
 }
 
-inline int32_t ConfigLookupInt32(const toml::table &tbl, std::string_view key,
-                                 bool allow_default = false,
-                                 int32_t default_val = 0) {
-  // TOML stores integers as int64_t
-  int64_t value64 = ConfigLookup<int64_t>(tbl, key, allow_default,
-                                          static_cast<int64_t>(default_val));
-  constexpr auto min32 =
-      static_cast<int64_t>(std::numeric_limits<int32_t>::min());
-  constexpr auto max32 =
-      static_cast<int64_t>(std::numeric_limits<int32_t>::max());
-  if ((value64 > max32) || (value64 < min32)) {
-    std::string msg{"Parameter value `"};
-    msg += key;
-    msg += " = ";
-    msg += std::to_string(value64);
-    msg += "` exceeds 32-bit integer range!";
-    throw std::range_error(msg);
-  }
-
-  return static_cast<int32_t>(value64);
+inline void RaiseKeyError(std::string_view key) {
+  std::string msg{"Key `"};
+  msg += key;
+  msg += "` does not exist!";
+  throw std::runtime_error(msg);
 }
 
-// template <typename ArrType, typename... TplTypes, std::size_t Num,
-// std::size_t... Indices> std::tuple<TplTypes...> ToTuple(const
-// std::array<ArrType, Num> &arr,
-//                                 std::index_sequence<Indices...>) {
-//   return std::make_tuple(TplTypes{arr[Indices]}...);
-// }
+/// Returns true if the TOML table contains a valid node at the given,
+/// fully-qualified path/key.
+inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
+  // Needed, because `tbl.contains()` only checks the direct children.
+  const auto node = tbl.at_path(key);
+  return node.is_value() || node.is_table() || node.is_array();
+}
 
-// template <typename ArrType, typename... TplTypes, std::size_t Num,
-//           typename = std::enable_if_t<(Num == sizeof...(TplTypes))>>
-// std::tuple<TplTypes...> ToTuple(const std::array<ArrType, Num> &arr) {
-//   return ToTuple<ArrType, TplTypes...>(arr, std::make_index_sequence<Num>{});
-// }
+template <typename T>
+T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
+                     bool allow_default = false, T default_val = T{}) {
+  if (!ConfigContainsKey(tbl, key)) {
+    if (allow_default) {
+      return default_val;
+    }
+
+    RaiseKeyError(key);
+  }
+
+  const auto node = tbl.at_path(key);
+  if (node.is<T>()) {
+    return T(*node.as<T>());
+  }
+
+  RaiseLookupTypeError<T>(node, key);
+}
+
+/// Specialization needed for 32-bit integers, because TOML works with
+/// 64-bit integers.
+template <>
+int32_t ConfigLookupScalar<int32_t>(const toml::table &tbl,
+                                    std::string_view key, bool allow_default,
+                                    int32_t default_val) {
+  const int64_t value64 = ConfigLookupScalar<int64_t>(
+      tbl, key, allow_default, static_cast<int64_t>(default_val));
+  return SafeIntegerCast(value64, key);
+}
+
+std::string ConfigLookupString(const toml::table &tbl, std::string_view key,
+                               bool allow_default = false,
+                               std::string_view default_val = {}) {
+  if (!ConfigContainsKey(tbl, key)) {
+    if (allow_default) {
+      return std::string(default_val);
+    }
+
+    RaiseKeyError(key);
+  }
+
+  const auto node = tbl.at_path(key);
+  if (node.is_string()) {
+    return std::string(*node.as_string());
+  }
+
+  RaiseLookupTypeError<std::string>(node, key);
+}
+
+template <typename T>
+T CastScalar(const toml::node &node, std::string_view key) {
+  if (node.is<T>()) {
+    return T(*node.as<T>());
+  }
+
+  RaiseLookupTypeError<T>(node, key);
+}
+
+template <>
+int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
+  const int64_t value64 = CastScalar<int64_t>(node, key);
+  return SafeIntegerCast(value64, key);
+}
 
 template <typename Array, std::size_t... Idx>
 inline auto ArrayToTuple(const Array &arr,
@@ -405,43 +442,75 @@ inline auto ArrayToTuple(const Array &arr,
   return std::make_tuple(arr[Idx]...);
 }
 
+template <typename Type, std::size_t Num>
+inline auto ArrayToTuple(const std::array<Type, Num> &arr) {
+  return ArrayToTuple(arr, std::make_index_sequence<Num>{});
+}
+
+// template <typename Tuple>
+// inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
 template <typename Type, std::size_t Dim>
-inline auto ExtractPoint(const toml::array &arr, std::string_view key) {
+inline void ExtractPointTOML(const toml::array &arr, std::string_view key,
+                             std::array<Type, Dim> &point) {
   if (arr.size() < Dim) {
     std::ostringstream msg;
     msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
         << "D point from a " << arr.size() << "-element array!";
     throw std::runtime_error(msg.str());
   }
-
-  std::array<Type, Dim> values{};
   for (std::size_t idx = 0; idx < Dim; ++idx) {
-    if (!arr[idx].is<Type>()) {
-      std::ostringstream msg;
-      msg << "Invalid parameter `" << key << "`. Dimension [" << idx << "] is `"
-          << TomlTypeName(arr, key) << "` instead of `"
-          << BuiltinTypeName<Type>() << "`!";
-      throw std::runtime_error(msg.str());
+    if (arr[idx].is_number()) {
+      if (!arr[idx].is<Type>()) {
+        std::ostringstream msg;
+        msg << "Invalid parameter `" << key << "`. Dimension [" << idx
+            << "] is `" << TomlTypeName(arr, key) << "` instead of `"
+            << BuiltinTypeName<Type>() << "`!";
+        throw std::runtime_error(msg.str());
+      }
+      point[idx] = Type(*arr[idx].as<Type>());
     }
-    values[idx] = Type(*arr[idx].as<Type>());
   }
+}
 
-  return ArrayToTuple(values, std::make_index_sequence<Dim>{});
+template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
+inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
+  using CoordType = std::tuple_element_t<0, Tuple>;
+  static_assert(std::is_same_v<CoordType, int32_t> ||
+                    std::is_same_v<CoordType, int64_t> ||
+                    std::is_same_v<CoordType, double>,
+                "Only integer (32- and 64-bit) and double-precision floating "
+                "point types are supported!");
+
+  using LookupType = std::conditional_t<std::is_same_v<CoordType, int32_t>,
+                                        int64_t, CoordType>;
+
+  std::array<LookupType, Dim> point{};
+  ExtractPointTOML(arr, key, point);
+
+  if constexpr (std::is_same_v<CoordType, int32_t>) {
+    std::array<CoordType, Dim> cast{};
+    for (std::size_t idx = 0; idx < Dim; ++idx) {
+      cast[idx] = SafeIntegerCast(point[idx], key);
+    }
+    return ArrayToTuple(cast);
+  } else {  // NOLINT
+    return ArrayToTuple(point);
+  }
 }
 
 template <typename Type, std::size_t Dim>
-inline auto ExtractPoint(const toml::table &tbl, std::string_view key) {
+inline void ExtractPointTOML(const toml::table &tbl, std::string_view key,
+                             std::array<Type, Dim> &point) {
   using namespace std::string_view_literals;
   constexpr std::array<std::string_view, 3> point_keys{"x"sv, "y"sv, "z"sv};
   static_assert(
       Dim <= point_keys.size(),
       "Table keys for higher-dimensional points have not yet been defined!");
 
-  std::array<Type, Dim> values{};
   for (std::size_t idx = 0; idx < Dim; ++idx) {
     if (!tbl.contains(point_keys[idx])) {
       std::ostringstream msg;
-      msg << "Invalid parameter `" << key << "`. Table entry does not contain `"
+      msg << "Invalid parameter `" << key << "`. Table entry does not specify `"
           << point_keys[idx] << "`!";
       throw std::runtime_error(msg.str());
     }
@@ -453,10 +522,35 @@ inline auto ExtractPoint(const toml::table &tbl, std::string_view key) {
           << "` instead of `" << BuiltinTypeName<Type>() << "`!";
       throw std::runtime_error(msg.str());
     }
-    values[idx] = Type(*tbl[point_keys[idx]].as<Type>());
-  }
 
-  return ArrayToTuple(values, std::make_index_sequence<Dim>{});
+    point[idx] = Type(*tbl[point_keys[idx]].as<Type>());
+  }
+}
+
+template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
+inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
+  using CoordType = std::tuple_element_t<0, Tuple>;
+  static_assert(std::is_same_v<CoordType, int32_t> ||
+                    std::is_same_v<CoordType, int64_t> ||
+                    std::is_same_v<CoordType, double>,
+                "Only integer (32- and 64-bit) and double-precision floating "
+                "point types are supported!");
+
+  using LookupType = std::conditional_t<std::is_same_v<CoordType, int32_t>,
+                                        int64_t, CoordType>;
+
+  std::array<LookupType, Dim> point{};
+  ExtractPointTOML(tbl, key, point);
+
+  if constexpr (std::is_same_v<LookupType, CoordType>) {
+    return ArrayToTuple(point);
+  } else {  // NOLINT
+    std::array<CoordType, Dim> cast{};
+    for (std::size_t idx = 0; idx < Dim; ++idx) {
+      cast[idx] = SafeIntegerCast(point[idx], key);
+    }
+    return ArrayToTuple(cast);
+  }
 }
 
 class ConfigurationImpl : public Configuration {
@@ -509,51 +603,92 @@ class ConfigurationImpl : public Configuration {
   }
 
   bool GetBoolean(std::string_view key) const override {
-    return ConfigLookup<bool>(config_, key, false);
+    return ConfigLookupScalar<bool>(config_, key, false);
   }
 
   bool GetBooleanOrDefault(std::string_view key,
                            bool default_val) const override {
-    return ConfigLookup<bool>(config_, key, true, default_val);
+    return ConfigLookupScalar<bool>(config_, key, true, default_val);
   }
 
   double GetDouble(std::string_view key) const override {
-    return ConfigLookup<double>(config_, key, false);
+    return ConfigLookupScalar<double>(config_, key, false);
   }
 
   double GetDoubleOrDefault(std::string_view key,
                             double default_val) const override {
-    return ConfigLookup<double>(config_, key, true, default_val);
+    return ConfigLookupScalar<double>(config_, key, true, default_val);
   }
 
   int32_t GetInteger32(std::string_view key) const override {
-    return ConfigLookupInt32(config_, key, false);
+    return ConfigLookupScalar<int32_t>(config_, key, false);
   }
 
   int32_t GetInteger32OrDefault(std::string_view key,
                                 int32_t default_val) const override {
-    return ConfigLookupInt32(config_, key, true, default_val);
+    return ConfigLookupScalar<int32_t>(config_, key, true, default_val);
   }
 
   int64_t GetInteger64(std::string_view key) const override {
-    return ConfigLookup<int64_t>(config_, key, false);
+    return ConfigLookupScalar<int64_t>(config_, key, false);
   }
 
   int64_t GetInteger64OrDefault(std::string_view key,
                                 int64_t default_val) const override {
-    return ConfigLookup<int64_t>(config_, key, true, default_val);
+    return ConfigLookupScalar<int64_t>(config_, key, true, default_val);
   }
 
-  std::vector<std::tuple<int64_t, int64_t>> GetPolygon2D(
-      std::string_view key) const override {
-    return GetPolygonImpl<std::tuple<int64_t, int64_t>, int64_t, 2>(key);
+  std::string GetString(std::string_view key) const override {
+    return ConfigLookupString(config_, key, false);
   }
 
-  std::vector<std::tuple<int64_t, int64_t, int64_t>> GetPolygon3D(
-      std::string_view key) const override {
-    return GetPolygonImpl<std::tuple<int64_t, int64_t, int64_t>, int64_t, 3>(
-        key);
+  std::string GetStringOrDefault(std::string_view key,
+                                 std::string_view default_val) const override {
+    return ConfigLookupString(config_, key, true, default_val);
   }
+
+  std::vector<double> GetDoubleList(std::string_view key) const override {
+    return GetScalarListImpl<double>(key);  // FIXME default val
+  }
+
+  std::vector<int32_t> GetInteger32List(std::string_view key) const override {
+    return GetScalarListImpl<int32_t>(key);
+  }
+
+  // std::vector<std::vector<int32_t>> GetNestedInteger32List(std::string_view
+  // key) const override {
+  // TODO
+  // }
+
+  std::vector<int64_t> GetInteger64List(std::string_view key) const override {
+    return GetScalarListImpl<int64_t>(key);
+  }
+  // std::vector<std::vector<int64_t>> GetNestedInteger64List(std::string_view
+  // key) const override {
+  // TODO
+  // }
+
+  std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
+      std::string_view key) const override {
+    return GetPointsImpl<std::tuple<int32_t, int32_t>>(key);
+  }
+
+  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
+      std::string_view key) const override {
+    return GetPointsImpl<std::tuple<int32_t, int32_t, int32_t>>(key);
+  }
+
+  // std::vector<std::tuple<int32_t, int32_t>> GetPolygon2DInteger32(
+  //     std::string_view key, bool force_cast) const override {
+  //   return GetPolygonImpl<std::tuple<int32_t, int32_t>, int32_t, 2>(key,
+  //   force_cast);
+  // }
+
+  // std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPolygon3DInteger32(
+  //     std::string_view key, bool force_cast) const override {
+  //   return GetPolygonImpl<std::tuple<int32_t, int32_t, int32_t>, int32_t, 3>(
+  //       key, force_cast);
+  // }
 
   // Configuration &GetGroup(std::string_view group_name) override {
   //   //TODO create a copy & return it as unique_ptr (can't use ref to pure
@@ -591,13 +726,62 @@ class ConfigurationImpl : public Configuration {
     return true;
   }
 
-  template <typename Tuple, typename Type, std::size_t Dim>
-  std::vector<Tuple> GetPolygonImpl(std::string_view key) const {
+  template <typename T>
+  std::vector<T> GetScalarListImpl(std::string_view key) const {
+    if (!ConfigContainsKey(config_, key)) {
+      std::string msg{"Key `"};
+      msg += key;
+      msg += "` does not exist!";
+      throw std::runtime_error(msg);
+    }
+
+    const auto &node = config_.at_path(key);
+    if (!node.is_array()) {
+      std::string msg{"Invalid list configuration: Parameter `"};
+      msg += key;
+      msg += "` must be an array, but is `";
+      msg += TomlTypeName(node, key);
+      msg += "`!";
+      throw std::runtime_error(msg);
+    }
+
+    const toml::array &arr = *node.as_array();
+    std::size_t arr_index = 0;
+    std::vector<T> scalars;
+    for (auto &&value : arr) {
+      const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
+      if (value.is_value()) {
+        scalars.push_back(CastScalar<T>(value, fqn));
+      } else {
+        std::string msg{
+            "Invalid list configuration: All entries must be of scalar type `"};
+        msg += BuiltinTypeName<T>();
+        msg += "`, but `";
+        msg += fqn;
+        msg += "` is not!";
+        throw std::runtime_error(msg);
+      }
+      ++arr_index;
+    }
+    return scalars;
+  }
+
+  template <typename Tuple>
+  std::vector<Tuple> GetPointsImpl(std::string_view key) const {
+    if (!ConfigContainsKey(config_, key)) {
+      std::string msg{"Key `"};
+      msg += key;
+      msg += "` does not exist!";
+      throw std::runtime_error(msg);
+    }
+
     const auto node = config_.at_path(key);
     if (!node.is_array()) {
-      std::string msg{"Invalid polygon. Parameter `"};
+      std::string msg{"Invalid point list configuration: `"};
       msg += key;
-      msg += "` must be an array!";
+      msg += "` must be an array, but is of type `";
+      msg += TomlTypeName(node, key);
+      msg += "`!";
       throw std::runtime_error(msg);
     }
 
@@ -608,10 +792,10 @@ class ConfigurationImpl : public Configuration {
       const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
       if (value.is_array()) {
         const auto &pt = *value.as_array();
-        poly.emplace_back(ExtractPoint<Type, Dim>(pt, fqn));
+        poly.emplace_back(ExtractPoint<Tuple>(pt, fqn));
       } else if (value.is_table()) {
         const auto &pt = *value.as_table();
-        poly.emplace_back(ExtractPoint<Type, Dim>(pt, fqn));
+        poly.emplace_back(ExtractPoint<Tuple>(pt, fqn));
       } else {
         std::string msg{
             "Invalid polygon. All parameter entries must be either arrays or "
