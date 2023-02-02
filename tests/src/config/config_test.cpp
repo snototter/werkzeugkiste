@@ -144,6 +144,8 @@ TEST(ConfigTest, Keys1) {
 
     tbl1.param1 = "value"
     tbl1.param2 = 'value'
+
+    tbl2.array = [1, 2, 3]
     )toml";
   const auto config = wkc::Configuration::LoadTomlString(toml_str);
 
@@ -192,6 +194,7 @@ TEST(ConfigTest, Keys2) {
 
     [lvl-1]
     arr2 = [0, 1, 17.4]
+    arr3 = ["a", "b", { name = "value", age = 12.3 }]
 
     [[tests]]
     name = "value"
@@ -205,10 +208,20 @@ TEST(ConfigTest, Keys2) {
 
   // We don't extract "names" of scalar array entries, e.g. "tests[1]" below.
   // Currently, I see no need to change this.
-  const std::vector<std::string> expected_keys{
-      "arr1",       "arr1[1].first", "arr1[1].second",     "lvl-1",
-      "lvl-1.arr2", "lvl-1.lvl-2",   "lvl-1.lvl-2.param1", "lvl-1.lvl-2.param2",
-      "tests",      "tests[0].name", "tests[2].param"};
+  const std::vector<std::string> expected_keys{"arr1",
+                                               "arr1[1].first",
+                                               "arr1[1].second",
+                                               "lvl-1",
+                                               "lvl-1.arr2",
+                                               "lvl-1.arr3",
+                                               "lvl-1.arr3[2].name",
+                                               "lvl-1.arr3[2].age",
+                                               "lvl-1.lvl-2",
+                                               "lvl-1.lvl-2.param1",
+                                               "lvl-1.lvl-2.param2",
+                                               "tests",
+                                               "tests[0].name",
+                                               "tests[2].param"};
   const auto keys = config->ParameterNames();
 
   EXPECT_EQ(expected_keys.size(), keys.size())
