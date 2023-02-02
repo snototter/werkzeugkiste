@@ -1,4 +1,5 @@
-#include <toml++/toml.h>  // NOLINT
+// NOLINTBEGIN
+#include <toml++/toml.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/logging.h>
@@ -11,16 +12,35 @@
 #include <string>
 #include <utility>
 #include <vector>
+// NOLINTEND
+
+// NOLINTNEXTLINE(*macro-usage)
+#define WZK_CONFIG_RAISE_KEY_ERROR(KEY) \
+  do {                                  \
+    std::string msg{"Key `"};           \
+    msg += (KEY);                       \
+    msg += "` does not exist!";         \
+    throw std::runtime_error(msg);      \
+  } while (false)
+
+// NOLINTNEXTLINE(*macro-usage)
+#define WZK_CONFIG_RAISE_TOML_TYPE_ERROR(KEY, NODE, TYPE) \
+  do {                                                    \
+    std::string msg{"Invalid type `"};                    \
+    msg += BuiltinTypeName<TYPE>();                       \
+    msg += "` used to query key `";                       \
+    msg += (KEY);                                         \
+    msg += "`, which is of type `";                       \
+    msg += TomlTypeName((NODE), (KEY));                   \
+    msg += "`!";                                          \
+    throw std::runtime_error(msg);                        \
+  } while (false)
 
 namespace werkzeugkiste::config {
-
-// Forward declarations
-std::vector<std::string> ListTableKeys(const toml::table &tbl,
-                                       std::string_view path);
-
-std::vector<std::string> ListArrayKeys(const toml::array &arr,
-                                       std::string_view path);
-
+namespace utils {
+/// Returns the "fully-qualified TOML path" for the given key and its parent
+/// path. For example, `key = param` & `parent_path = lvl1.lvl2` results
+/// in `lvl1.lvl2.param`.
 inline std::string FullyQualifiedPath(const toml::key &key,
                                       std::string_view parent_path) {
   if (parent_path.length() > 0) {
@@ -29,7 +49,7 @@ inline std::string FullyQualifiedPath(const toml::key &key,
     fqn += key.str();
     return fqn;
   }
-  return std::string(key.str());
+  return std::string{key.str()};
 }
 
 inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
@@ -41,6 +61,14 @@ inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
   return fqn;
 }
 
+// Forward declaration.
+std::vector<std::string> ListTableKeys(const toml::table &tbl,
+                                       std::string_view path);
+
+/// Returns all fully-qualified paths for named parameters within
+/// the given TOML array. For example, "A = [20, { name = "value", age = 30 }"
+/// returns `{ "A[1].name", "A[1].age" }`.
+// NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListArrayKeys(const toml::array &arr,
                                        std::string_view path) {
   std::vector<std::string> keys;
@@ -63,28 +91,9 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
   return keys;
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
                                        std::string_view path) {
-  // auto fq_path = [path](const toml::key &key) -> std::string {
-  //   if (path.length() > 0) {
-  //     std::string fqn{path};
-  //     fqn += '.';
-  //     fqn += key.str();
-  //     return fqn;
-  //   }
-  //   return std::string(key.str());
-  // };
-
-  // // TODO group.name.array[idx]
-  // auto fq_array_element = [fq_path](const toml::key &key, std::size_t idx) ->
-  // std::string {
-  //   std::string fqn = fq_path(key);
-  //   fqn += '[';
-  //   fqn += std::to_string(idx);
-  //   fqn += ']';
-  //   return fqn;
-  // };
-
   std::vector<std::string> keys;
   for (auto &&[key, value] : tbl) {
     keys.emplace_back(FullyQualifiedPath(key, path));
@@ -117,6 +126,7 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
 /// root node.
 /// @param visit_func Function handle to be invoked for each node (except for
 /// the initial `node`).
+// NOLINTNEXTLINE(misc-no-recursion)
 void Traverse(
     toml::node &node, std::string_view path,
     const std::function<void(toml::node &, std::string_view)> &visit_func) {
@@ -155,102 +165,7 @@ void Traverse(
   }
 }
 
-class SingleKeyMatcherImpl : public SingleKeyMatcher {
- public:
-  explicit SingleKeyMatcherImpl(std::string &&pattern)
-      : SingleKeyMatcher(), pattern_(std::move(pattern)) {
-    // TODO https://toml.io/en/v1.0.0
-    // dotted is allowed (and needed to support paths!)
-    // add documentation that quoted keys are not supported! - maybe add a check
-    // and raise an exception if needed?
-    auto it = std::find_if_not(pattern_.begin(), pattern_.end(), [](char c) {
-      return ((isalnum(c) != 0) || (c == '.') || (c == '_') || (c == '-'));
-    });
-
-    is_regex_ = (it != pattern_.end());
-
-    if (is_regex_) {
-      BuildRegex();
-    }
-  }
-
-  ~SingleKeyMatcherImpl() override = default;
-
-  bool Match(std::string_view key) const override {
-    // Always check for equality
-    if (pattern_.compare(key) == 0) {
-      return true;
-    }
-
-    if (is_regex_) {
-      constexpr auto flags = std::regex_constants::match_default;
-      if (std::regex_match(key.begin(), key.end(), regex_, flags)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
- private:
-  std::string pattern_{};
-  bool is_regex_{false};
-  std::regex regex_{};
-
-  inline void BuildRegex() {
-    std::string re{"^"};
-    for (char c : pattern_) {
-      if (c == '*') {
-        re += ".*";
-      } else if ((c == '.') || (c == '[') || (c == ']')) {
-        re += '\\';
-        re += c;
-      } else {  // TODO test backslash handling!
-        re += c;
-      }
-    }
-    re += '$';
-    WKZLOG_ERROR("Converted pattern `{:s}` to regex str `{:s}`", pattern_,
-                 re);  // TODO remove
-    regex_ = std::regex{re};
-  }
-};
-
-std::unique_ptr<SingleKeyMatcher> SingleKeyMatcher::Create(
-    std::string_view pattern) {
-  return std::make_unique<SingleKeyMatcherImpl>(std::string(pattern));
-}
-
-class MultiKeyMatcherImpl : public MultiKeyMatcher {
- public:
-  explicit MultiKeyMatcherImpl(const std::vector<std::string_view> &patterns)
-      : MultiKeyMatcher() {
-    for (const auto &pattern : patterns) {
-      matchers_.emplace_back(SingleKeyMatcherImpl(std::string(pattern)));
-    }
-  }
-
-  ~MultiKeyMatcherImpl() override = default;
-
-  bool MatchAny(std::string_view key) const override {
-    for (const auto &m : matchers_) {
-      if (m.Match(key)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
- private:
-  std::vector<SingleKeyMatcherImpl> matchers_{};
-};
-
-std::unique_ptr<MultiKeyMatcher> MultiKeyMatcher::Create(
-    const std::vector<std::string_view> &patterns) {
-  return std::make_unique<MultiKeyMatcherImpl>(patterns);
-}
-
-inline int32_t SafeIntegerCast(int64_t value64, std::string_view param_name) {
+inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
   constexpr auto min32 =
       static_cast<int64_t>(std::numeric_limits<int32_t>::min());
   constexpr auto max32 =
@@ -269,12 +184,14 @@ inline int32_t SafeIntegerCast(int64_t value64, std::string_view param_name) {
 
 template <typename T>
 inline std::string BuiltinTypeName() {
+  // LCOV_EXCL_START
   std::ostringstream msg;
   msg << "Built-in type `" << typeid(T).name()
       << "` not handled in `BuiltinTypeName(). This is a werkzeugkiste "
          "implementation error. Please report at "
          "https://github.com/snototter/werkzeugkiste/issues";
   throw std::logic_error(msg.str());
+  // LCOV_EXCL_STOP
 }
 
 template <>
@@ -336,6 +253,7 @@ inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
     return "toml::date_time";
   }
 
+  // LCOV_EXCL_START
   std::string msg{"TOML node type for key `"};
   msg += key;
   msg +=
@@ -343,25 +261,7 @@ inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
       "implementation error. Please report at "
       "https://github.com/snototter/werkzeugkiste/issues";
   throw std::logic_error(msg);
-}
-
-template <typename T, typename Node>
-inline void RaiseLookupTypeError(const Node &node, std::string_view key) {
-  std::string msg{"Invalid type `"};
-  msg += BuiltinTypeName<T>();
-  msg += "` used to query key `";
-  msg += key;
-  msg += "`, which is of type `";
-  msg += TomlTypeName(node, key);
-  msg += "`!";
-  throw std::runtime_error(msg);
-}
-
-inline void RaiseKeyError(std::string_view key) {
-  std::string msg{"Key `"};
-  msg += key;
-  msg += "` does not exist!";
-  throw std::runtime_error(msg);
+  // LCOV_EXCL_STOP
 }
 
 /// Returns true if the TOML table contains a valid node at the given,
@@ -380,15 +280,15 @@ T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
       return default_val;
     }
 
-    RaiseKeyError(key);
+    WZK_CONFIG_RAISE_KEY_ERROR(key);
   }
 
   const auto node = tbl.at_path(key);
   if (node.is<T>()) {
-    return T(*node.as<T>());
+    return T{*node.as<T>()};
   }
 
-  RaiseLookupTypeError<T>(node, key);
+  WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
 
 /// Specialization needed for 32-bit integers, because TOML works with
@@ -399,7 +299,7 @@ int32_t ConfigLookupScalar<int32_t>(const toml::table &tbl,
                                     int32_t default_val) {
   const int64_t value64 = ConfigLookupScalar<int64_t>(
       tbl, key, allow_default, static_cast<int64_t>(default_val));
-  return SafeIntegerCast(value64, key);
+  return SafeInteger32Cast(value64, key);
 }
 
 std::string ConfigLookupString(const toml::table &tbl, std::string_view key,
@@ -410,30 +310,30 @@ std::string ConfigLookupString(const toml::table &tbl, std::string_view key,
       return std::string(default_val);
     }
 
-    RaiseKeyError(key);
+    WZK_CONFIG_RAISE_KEY_ERROR(key);
   }
 
   const auto node = tbl.at_path(key);
   if (node.is_string()) {
-    return std::string(*node.as_string());
+    return std::string{*node.as_string()};
   }
 
-  RaiseLookupTypeError<std::string>(node, key);
+  WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, std::string);
 }
 
 template <typename T>
 T CastScalar(const toml::node &node, std::string_view key) {
   if (node.is<T>()) {
-    return T(*node.as<T>());
+    return T{*node.as<T>()};
   }
 
-  RaiseLookupTypeError<T>(node, key);
+  WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
 
 template <>
 int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
   const int64_t value64 = CastScalar<int64_t>(node, key);
-  return SafeIntegerCast(value64, key);
+  return SafeInteger32Cast(value64, key);
 }
 
 template <typename Array, std::size_t... Idx>
@@ -450,8 +350,9 @@ inline auto ArrayToTuple(const std::array<Type, Num> &arr) {
 // template <typename Tuple>
 // inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
 template <typename Type, std::size_t Dim>
-inline void ExtractPointTOML(const toml::array &arr, std::string_view key,
-                             std::array<Type, Dim> &point) {
+inline void ExtractPointFromTOMLArray(const toml::array &arr,
+                                      std::string_view key,
+                                      std::array<Type, Dim> &point) {
   if (arr.size() < Dim) {
     std::ostringstream msg;
     msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
@@ -485,22 +386,23 @@ inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
                                         int64_t, CoordType>;
 
   std::array<LookupType, Dim> point{};
-  ExtractPointTOML(arr, key, point);
+  ExtractPointFromTOMLArray(arr, key, point);
 
   if constexpr (std::is_same_v<CoordType, int32_t>) {
     std::array<CoordType, Dim> cast{};
     for (std::size_t idx = 0; idx < Dim; ++idx) {
-      cast[idx] = SafeIntegerCast(point[idx], key);
+      cast[idx] = SafeInteger32Cast(point[idx], key);
     }
     return ArrayToTuple(cast);
-  } else {  // NOLINT
+  } else {  // NO L I NT
     return ArrayToTuple(point);
   }
 }
 
 template <typename Type, std::size_t Dim>
-inline void ExtractPointTOML(const toml::table &tbl, std::string_view key,
-                             std::array<Type, Dim> &point) {
+inline void ExtractPointFromTOMLTable(const toml::table &tbl,
+                                      std::string_view key,
+                                      std::array<Type, Dim> &point) {
   using namespace std::string_view_literals;
   constexpr std::array<std::string_view, 3> point_keys{"x"sv, "y"sv, "z"sv};
   static_assert(
@@ -540,17 +442,205 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
                                         int64_t, CoordType>;
 
   std::array<LookupType, Dim> point{};
-  ExtractPointTOML(tbl, key, point);
+  ExtractPointFromTOMLTable(tbl, key, point);
 
   if constexpr (std::is_same_v<LookupType, CoordType>) {
     return ArrayToTuple(point);
   } else {  // NOLINT
     std::array<CoordType, Dim> cast{};
     for (std::size_t idx = 0; idx < Dim; ++idx) {
-      cast[idx] = SafeIntegerCast(point[idx], key);
+      cast[idx] = SafeInteger32Cast(point[idx], key);
     }
     return ArrayToTuple(cast);
   }
+}
+
+template <typename Tuple>
+std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
+  if (!ConfigContainsKey(tbl, key)) {
+    std::string msg{"Key `"};
+    msg += key;
+    msg += "` does not exist!";
+    throw std::runtime_error(msg);
+  }
+
+  const auto node = tbl.at_path(key);
+  if (!node.is_array()) {
+    std::string msg{"Invalid point list configuration: `"};
+    msg += key;
+    msg += "` must be an array, but is of type `";
+    msg += TomlTypeName(node, key);
+    msg += "`!";
+    throw std::runtime_error(msg);
+  }
+
+  const toml::array &arr = *node.as_array();
+  std::size_t arr_index = 0;
+  std::vector<Tuple> poly;
+  for (auto &&value : arr) {
+    const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
+    if (value.is_array()) {
+      const auto &pt = *value.as_array();
+      poly.emplace_back(ExtractPoint<Tuple>(pt, fqn));
+    } else if (value.is_table()) {
+      const auto &pt = *value.as_table();
+      poly.emplace_back(ExtractPoint<Tuple>(pt, fqn));
+    } else {
+      std::string msg{
+          "Invalid polygon. All parameter entries must be either arrays or "
+          "tables, but `"};
+      msg += fqn;
+      msg += "` is not!";
+      throw std::runtime_error(msg);
+    }
+    ++arr_index;
+  }
+  return poly;
+}
+
+/// Extracts a list of built-in scalar types (integer, double, bool).
+/// TODO
+template <typename T>
+std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
+  if (!ConfigContainsKey(tbl, key)) {
+    std::string msg{"Key `"};
+    msg += key;
+    msg += "` does not exist!";
+    throw std::runtime_error(msg);
+  }
+
+  const auto &node = tbl.at_path(key);
+  if (!node.is_array()) {
+    std::string msg{"Invalid list configuration: Parameter `"};
+    msg += key;
+    msg += "` must be an array, but is `";
+    msg += TomlTypeName(node, key);
+    msg += "`!";
+    throw std::runtime_error(msg);
+  }
+
+  const toml::array &arr = *node.as_array();
+  std::size_t arr_index = 0;
+  std::vector<T> scalars;
+  for (auto &&value : arr) {
+    const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
+    if (value.is_value()) {
+      scalars.push_back(CastScalar<T>(value, fqn));
+    } else {
+      std::string msg{
+          "Invalid list configuration: All entries must be of scalar type `"};
+      msg += BuiltinTypeName<T>();
+      msg += "`, but `";
+      msg += fqn;
+      msg += "` is not!";
+      throw std::runtime_error(msg);
+    }
+    ++arr_index;
+  }
+  return scalars;
+}
+}  // namespace utils
+
+class SingleKeyMatcherImpl : public SingleKeyMatcher {
+ public:
+  explicit SingleKeyMatcherImpl(std::string &&pattern)
+      : SingleKeyMatcher(), pattern_(std::move(pattern)) {
+    // TODO https://toml.io/en/v1.0.0
+    // dotted is allowed (and needed to support paths!)
+    // add documentation that quoted keys are not supported! - maybe add a check
+    // and raise an exception if needed?
+    auto it = std::find_if_not(pattern_.begin(), pattern_.end(), [](char c) {
+      return ((isalnum(c) != 0) || (c == '.') || (c == '_') || (c == '-'));
+    });
+
+    is_regex_ = (it != pattern_.end());
+
+    if (is_regex_) {
+      BuildRegex();
+    }
+  }
+
+  SingleKeyMatcherImpl() = delete;
+  SingleKeyMatcherImpl(const SingleKeyMatcherImpl &) = default;
+  SingleKeyMatcherImpl(SingleKeyMatcherImpl &&) = default;
+  SingleKeyMatcherImpl &operator=(const SingleKeyMatcherImpl &) = default;
+  SingleKeyMatcherImpl &operator=(SingleKeyMatcherImpl &&) = default;
+  ~SingleKeyMatcherImpl() override = default;
+
+  bool Match(std::string_view key) const override {
+    // Always check for equality
+    if (pattern_.compare(key) == 0) {
+      return true;
+    }
+
+    if (is_regex_) {
+      constexpr auto flags = std::regex_constants::match_default;
+      if (std::regex_match(key.begin(), key.end(), regex_, flags)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+ private:
+  std::string pattern_{};
+  bool is_regex_{false};
+  std::regex regex_{};
+
+  inline void BuildRegex() {
+    std::string re{"^"};
+    for (char c : pattern_) {
+      if (c == '*') {
+        re += ".*";
+      } else if ((c == '.') || (c == '[') || (c == ']')) {
+        re += '\\';
+        re += c;
+      } else {  // TODO test backslash handling!
+        re += c;
+      }
+    }
+    re += '$';
+    regex_ = std::regex{re};
+  }
+};
+
+class MultiKeyMatcherImpl : public MultiKeyMatcher {
+ public:
+  explicit MultiKeyMatcherImpl(const std::vector<std::string_view> &patterns) {
+    for (const auto &pattern : patterns) {
+      matchers_.emplace_back(SingleKeyMatcherImpl(std::string(pattern)));
+    }
+  }
+
+  MultiKeyMatcherImpl() = delete;
+  MultiKeyMatcherImpl(const MultiKeyMatcherImpl &) = default;
+  MultiKeyMatcherImpl(MultiKeyMatcherImpl &&) = default;
+  MultiKeyMatcherImpl &operator=(const MultiKeyMatcherImpl &) = default;
+  MultiKeyMatcherImpl &operator=(MultiKeyMatcherImpl &&) = default;
+  ~MultiKeyMatcherImpl() override = default;
+
+  bool MatchAny(std::string_view key) const override {
+    for (const auto &m : matchers_) {
+      if (m.Match(key)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+ private:
+  std::vector<SingleKeyMatcherImpl> matchers_{};
+};
+
+std::unique_ptr<SingleKeyMatcher> SingleKeyMatcher::Create(
+    std::string_view pattern) {
+  return std::make_unique<SingleKeyMatcherImpl>(std::string(pattern));
+}
+
+std::unique_ptr<MultiKeyMatcher> MultiKeyMatcher::Create(
+    const std::vector<std::string_view> &patterns) {
+  return std::make_unique<MultiKeyMatcherImpl>(patterns);
 }
 
 class ConfigurationImpl : public Configuration {
@@ -592,67 +682,75 @@ class ConfigurationImpl : public Configuration {
         replaced = true;
       }
     };
-    Traverse(config_, ""sv, func);
-    // WKZLOG_ERROR("After replacements:\n{:s}\nreplaced?{}", config_,
-    // replaced);
+    utils::Traverse(config_, ""sv, func);
     return replaced;
   }
 
   std::vector<std::string> ParameterNames() const override {
-    return ListTableKeys(config_, "");
+    using namespace std::string_view_literals;
+    return utils::ListTableKeys(config_, ""sv);
   }
 
   bool GetBoolean(std::string_view key) const override {
-    return ConfigLookupScalar<bool>(config_, key, false);
+    return utils::ConfigLookupScalar<bool>(config_, key,
+                                           /*allow_default=*/false);
   }
 
   bool GetBooleanOrDefault(std::string_view key,
                            bool default_val) const override {
-    return ConfigLookupScalar<bool>(config_, key, true, default_val);
+    return utils::ConfigLookupScalar<bool>(config_, key, /*allow_default=*/true,
+                                           default_val);
   }
 
   double GetDouble(std::string_view key) const override {
-    return ConfigLookupScalar<double>(config_, key, false);
+    return utils::ConfigLookupScalar<double>(config_, key,
+                                             /*allow_default=*/false);
   }
 
   double GetDoubleOrDefault(std::string_view key,
                             double default_val) const override {
-    return ConfigLookupScalar<double>(config_, key, true, default_val);
+    return utils::ConfigLookupScalar<double>(
+        config_, key, /*allow_default=*/true, default_val);
   }
 
   int32_t GetInteger32(std::string_view key) const override {
-    return ConfigLookupScalar<int32_t>(config_, key, false);
+    return utils::ConfigLookupScalar<int32_t>(config_, key,
+                                              /*allow_default=*/false);
   }
 
   int32_t GetInteger32OrDefault(std::string_view key,
                                 int32_t default_val) const override {
-    return ConfigLookupScalar<int32_t>(config_, key, true, default_val);
+    return utils::ConfigLookupScalar<int32_t>(
+        config_, key, /*allow_default=*/true, default_val);
   }
 
   int64_t GetInteger64(std::string_view key) const override {
-    return ConfigLookupScalar<int64_t>(config_, key, false);
+    return utils::ConfigLookupScalar<int64_t>(config_, key,
+                                              /*allow_default=*/false);
   }
 
   int64_t GetInteger64OrDefault(std::string_view key,
                                 int64_t default_val) const override {
-    return ConfigLookupScalar<int64_t>(config_, key, true, default_val);
+    return utils::ConfigLookupScalar<int64_t>(
+        config_, key, /*allow_default=*/true, default_val);
   }
 
   std::string GetString(std::string_view key) const override {
-    return ConfigLookupString(config_, key, false);
+    return utils::ConfigLookupString(config_, key, /*allow_default=*/false);
   }
 
   std::string GetStringOrDefault(std::string_view key,
                                  std::string_view default_val) const override {
-    return ConfigLookupString(config_, key, true, default_val);
+    return utils::ConfigLookupString(config_, key, /*allow_default=*/true,
+                                     default_val);
   }
 
   std::vector<double> GetDoubleList(std::string_view key) const override {
-    return GetScalarListImpl<double>(key);  // FIXME default val
+    return utils::GetScalarList<double>(config_, key);
   }
 
   std::vector<int32_t> GetInteger32List(std::string_view key) const override {
-    return GetScalarListImpl<int32_t>(key);
+    return utils::GetScalarList<int32_t>(config_, key);
   }
 
   // std::vector<std::vector<int32_t>> GetNestedInteger32List(std::string_view
@@ -661,34 +759,27 @@ class ConfigurationImpl : public Configuration {
   // }
 
   std::vector<int64_t> GetInteger64List(std::string_view key) const override {
-    return GetScalarListImpl<int64_t>(key);
+    return utils::GetScalarList<int64_t>(config_, key);
   }
   // std::vector<std::vector<int64_t>> GetNestedInteger64List(std::string_view
   // key) const override {
   // TODO
   // }
 
+  std::vector<std::string> GetStringList(std::string_view key) const override {
+    return utils::GetScalarList<std::string>(config_, key);
+  }
+
   std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
       std::string_view key) const override {
-    return GetPointsImpl<std::tuple<int32_t, int32_t>>(key);
+    return utils::GetPoints<std::tuple<int32_t, int32_t>>(config_, key);
   }
 
   std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
       std::string_view key) const override {
-    return GetPointsImpl<std::tuple<int32_t, int32_t, int32_t>>(key);
+    return utils::GetPoints<std::tuple<int32_t, int32_t, int32_t>>(config_,
+                                                                   key);
   }
-
-  // std::vector<std::tuple<int32_t, int32_t>> GetPolygon2DInteger32(
-  //     std::string_view key, bool force_cast) const override {
-  //   return GetPolygonImpl<std::tuple<int32_t, int32_t>, int32_t, 2>(key,
-  //   force_cast);
-  // }
-
-  // std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPolygon3DInteger32(
-  //     std::string_view key, bool force_cast) const override {
-  //   return GetPolygonImpl<std::tuple<int32_t, int32_t, int32_t>, int32_t, 3>(
-  //       key, force_cast);
-  // }
 
   // Configuration &GetGroup(std::string_view group_name) override {
   //   //TODO create a copy & return it as unique_ptr (can't use ref to pure
@@ -709,8 +800,8 @@ class ConfigurationImpl : public Configuration {
 
   bool EqualsImpl(const ConfigurationImpl *other) const {
     using namespace std::string_view_literals;
-    const auto keys_this = ListTableKeys(config_, ""sv);
-    const auto keys_other = ListTableKeys(other->config_, ""sv);
+    const auto keys_this = utils::ListTableKeys(config_, ""sv);
+    const auto keys_other = utils::ListTableKeys(other->config_, ""sv);
     if (keys_this.size() != keys_other.size()) {
       return false;
     }
@@ -724,89 +815,6 @@ class ConfigurationImpl : public Configuration {
     }
 
     return true;
-  }
-
-  template <typename T>
-  std::vector<T> GetScalarListImpl(std::string_view key) const {
-    if (!ConfigContainsKey(config_, key)) {
-      std::string msg{"Key `"};
-      msg += key;
-      msg += "` does not exist!";
-      throw std::runtime_error(msg);
-    }
-
-    const auto &node = config_.at_path(key);
-    if (!node.is_array()) {
-      std::string msg{"Invalid list configuration: Parameter `"};
-      msg += key;
-      msg += "` must be an array, but is `";
-      msg += TomlTypeName(node, key);
-      msg += "`!";
-      throw std::runtime_error(msg);
-    }
-
-    const toml::array &arr = *node.as_array();
-    std::size_t arr_index = 0;
-    std::vector<T> scalars;
-    for (auto &&value : arr) {
-      const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
-      if (value.is_value()) {
-        scalars.push_back(CastScalar<T>(value, fqn));
-      } else {
-        std::string msg{
-            "Invalid list configuration: All entries must be of scalar type `"};
-        msg += BuiltinTypeName<T>();
-        msg += "`, but `";
-        msg += fqn;
-        msg += "` is not!";
-        throw std::runtime_error(msg);
-      }
-      ++arr_index;
-    }
-    return scalars;
-  }
-
-  template <typename Tuple>
-  std::vector<Tuple> GetPointsImpl(std::string_view key) const {
-    if (!ConfigContainsKey(config_, key)) {
-      std::string msg{"Key `"};
-      msg += key;
-      msg += "` does not exist!";
-      throw std::runtime_error(msg);
-    }
-
-    const auto node = config_.at_path(key);
-    if (!node.is_array()) {
-      std::string msg{"Invalid point list configuration: `"};
-      msg += key;
-      msg += "` must be an array, but is of type `";
-      msg += TomlTypeName(node, key);
-      msg += "`!";
-      throw std::runtime_error(msg);
-    }
-
-    const toml::array &arr = *node.as_array();
-    std::size_t arr_index = 0;
-    std::vector<Tuple> poly;
-    for (auto &&value : arr) {
-      const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
-      if (value.is_array()) {
-        const auto &pt = *value.as_array();
-        poly.emplace_back(ExtractPoint<Tuple>(pt, fqn));
-      } else if (value.is_table()) {
-        const auto &pt = *value.as_table();
-        poly.emplace_back(ExtractPoint<Tuple>(pt, fqn));
-      } else {
-        std::string msg{
-            "Invalid polygon. All parameter entries must be either arrays or "
-            "tables, but `"};
-        msg += fqn;
-        msg += "` is not!";
-        throw std::runtime_error(msg);
-      }
-      ++arr_index;
-    }
-    return poly;
   }
 
   // TODO registered_string_replacements_{};

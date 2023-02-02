@@ -114,16 +114,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //   virtual std::vector<std::vector<int32_t>>
   //   GetNestedInteger32List(std::string_view key) const = 0;
 
+  virtual std::vector<std::string> GetStringList(
+      std::string_view key) const = 0;
+  // TODO do we need a nested list?
+
   virtual std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
       std::string_view key) const = 0;
-  // TODO nested list
+  // TODO do we need a nested list?
+
   virtual std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
       std::string_view key) const = 0;
-  // TODO nested list
+  // TODO do we need a nested list?
 
   // TODO do we need double-precision points ?
 
-  // TODO string list !
   // TODO nested string list?
 
   // TODO should return a copy!

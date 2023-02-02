@@ -85,6 +85,13 @@ TEST(ConfigTest, Types) {
     int = 42
     flt = 1.0
     str = "A string" #TODO others (date, time, date_time)
+    int_list = [1, 2, 3]
+
+    [dates]
+    day = 2023-01-01
+    time1 = 12:34:56
+    time2 = 00:01:02.123456
+
     )toml";
   const auto config = wkc::Configuration::LoadTomlString(toml_str);
 
@@ -133,6 +140,18 @@ TEST(ConfigTest, Types) {
   EXPECT_THROW(config->GetBoolean("str"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32("str"), std::runtime_error);
   EXPECT_THROW(config->GetInteger64("str"), std::runtime_error);
+
+  // Invalid access
+  EXPECT_THROW(config->GetBoolean("int_list"), std::runtime_error);
+  EXPECT_THROW(config->GetBoolean("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32("int_list"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64("int_list"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("int_list"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetString("int_list"), std::runtime_error);
+  EXPECT_THROW(config->GetString("tbl"), std::runtime_error);
 }
 
 TEST(ConfigTest, Keys1) {
@@ -194,7 +213,10 @@ TEST(ConfigTest, Keys2) {
 
     [lvl-1]
     arr2 = [0, 1, 17.4]
-    arr3 = ["a", "b", { name = "value", age = 12.3 }]
+    arr3 = [
+      "a", "b", { name = "value", age = 12.3 },
+      ["inside", "a nested", { type = "array", value = "abc" }]
+    ]
 
     [[tests]]
     name = "value"
@@ -216,6 +238,8 @@ TEST(ConfigTest, Keys2) {
                                                "lvl-1.arr3",
                                                "lvl-1.arr3[2].name",
                                                "lvl-1.arr3[2].age",
+                                               "lvl-1.arr3[3][2].type",
+                                               "lvl-1.arr3[3][2].value",
                                                "lvl-1.lvl-2",
                                                "lvl-1.lvl-2.param1",
                                                "lvl-1.lvl-2.param2",
@@ -340,14 +364,17 @@ TEST(ConfigTest, PointLists) {
     # Missing y dimension (2nd point):
     p1 = [{x = 1, y = 2}, {x = 1, name = 2, param = 3}]
 
-    # Type mix (2nd point)
+    # Mix data types
     p2 = [{x = 1, y = 2}, {x = 1.5, y = 2}]
+    p3 = [[1, 2], [5.5, 1.23]]
 
-    # Type mix
-    p3 = [[1, 2], [3, 4], 5]
+    # Mix "points" (nested arrays) and scalars
+    p4 = [[1, 2], [3, 4], 5]
 
     # 2D & 3D point (Can be converted to 2D polygon)
-    p4 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}]
+    p5 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}]
+    p6 = [[1, 2], [3, 4, 5], [6, 7]]
+
     )toml");
 
   auto poly = config->GetPoints2D("poly1");
@@ -389,9 +416,13 @@ TEST(ConfigTest, PointLists) {
   EXPECT_THROW(config->GetPoints2D("invalid.p1"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p2"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p3"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("invalid.p4"), std::runtime_error);
 
-  EXPECT_NO_THROW(config->GetPoints2D("invalid.p4"));
-  EXPECT_THROW(config->GetPoints3D("invalid.p4"), std::runtime_error);
+  EXPECT_NO_THROW(config->GetPoints2D("invalid.p5"));
+  EXPECT_THROW(config->GetPoints3D("invalid.p5"), std::runtime_error);
+
+  EXPECT_NO_THROW(config->GetPoints2D("invalid.p6"));
+  EXPECT_THROW(config->GetPoints3D("invalid.p6"), std::runtime_error);
 
   // 3D polygons
   EXPECT_THROW(config->GetPoints3D("poly1"), std::runtime_error);
@@ -424,6 +455,7 @@ TEST(ConfigTest, ScalarLists) {
   auto list64 = config->GetInteger64List("ints32");
   EXPECT_EQ(8, list64.size());
   EXPECT_THROW(config->GetDoubleList("ints32"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("ints32"), std::runtime_error);
 
   EXPECT_EQ(1, list32[0]);
   EXPECT_EQ(6, list32[5]);

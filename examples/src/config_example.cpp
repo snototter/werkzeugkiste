@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+// NOLINTBEGIN(*magic-numbers)
 int main(int /* argc */, char** /* argv */) {
   namespace wkc = werkzeugkiste::config;
   namespace wkf = werkzeugkiste::files;
@@ -100,3 +101,4 @@ int main(int /* argc */, char** /* argv */) {
   }
   return 0;
 }
+// NOLINTEND(*magic-numbers)
