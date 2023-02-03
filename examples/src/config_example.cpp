@@ -70,7 +70,7 @@ int main(int /* argc */, char** /* argv */) {
     std::cout << "  " << name << std::endl;
   }
 
-  // config->EnsureAbsolutePaths("CUSTOM/BASE/PATH",
+  // config->AdjustRelativePaths("CUSTOM/BASE/PATH",
   //                             {"*name"sv, "*.regex*"sv, "strings.str5"sv,
   //                              "strings.str[1-3|7]?"sv,
   //                              "products[2].color"sv});

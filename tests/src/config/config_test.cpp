@@ -597,6 +597,9 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config->GetInteger32List("an_int"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32List("not-a-list"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32List("not-a-list.test"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64List("an_int"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64List("not-a-list"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64List("not-a-list.test"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("an_int"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("not-a-list"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("not-a-list.test"), std::runtime_error);
@@ -761,8 +764,8 @@ TEST(ConfigTest, AbsolutePaths) {
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
   auto config = wkc::Configuration::LoadTOMLFile(fname);
 
-  EXPECT_FALSE(config->EnsureAbsolutePaths("...", {"no-such-key"sv}));
-  EXPECT_TRUE(config->EnsureAbsolutePaths(wkf::DirName(__FILE__),
+  EXPECT_FALSE(config->AdjustRelativePaths("...", {"no-such-key"sv}));
+  EXPECT_TRUE(config->AdjustRelativePaths(wkf::DirName(__FILE__),
                                           {"section1.*path"sv}));
 
   std::string expected =
@@ -776,10 +779,10 @@ TEST(ConfigTest, AbsolutePaths) {
   // TODO check special character handling (backslash, umlauts,
   // whitespace)
 
-  EXPECT_THROW(config->EnsureAbsolutePaths("this-will-throw", {"value1"sv}),
+  EXPECT_THROW(config->AdjustRelativePaths("this-will-throw", {"value1"sv}),
                std::runtime_error);
   EXPECT_THROW(
-      config->EnsureAbsolutePaths("this-will-throw", {"section1.time"sv}),
+      config->AdjustRelativePaths("this-will-throw", {"section1.time"sv}),
       std::runtime_error);
 }
 
@@ -921,11 +924,12 @@ TEST(ConfigTest, LoadingToml) {
                std::runtime_error);
 }
 
-TEST(ConfigTest, LoadingJson) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
-    param1 = "value"
-    )toml");
-  EXPECT_THROW(config->ToJSON(), std::logic_error);  // Not yet implemented
-}
+// TODO Can be tested once we have LoadJSONString()
+// TEST(ConfigTest, LoadingJson) {
+//   const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+//     param1 = "value"
+//     )toml");
+//   EXPECT_THROW(config->ToJSON(), std::logic_error);  // Not yet implemented
+// }
 
 // NOLINTEND

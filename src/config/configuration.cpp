@@ -1,4 +1,5 @@
 // NOLINTBEGIN
+#define TOML_ENABLE_FORMATTERS 1
 #include <toml++/toml.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
@@ -851,7 +852,7 @@ class ConfigurationImpl : public Configuration {
     return EqualsImpl(other_impl);
   }
 
-  bool EnsureAbsolutePaths(
+  bool AdjustRelativePaths(
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) override {
     using namespace std::string_view_literals;
@@ -1121,12 +1122,13 @@ class ConfigurationImpl : public Configuration {
 
   std::string ToTOML() const override {
     std::ostringstream repr;
-    repr << config_;
+    repr << toml::toml_formatter{config_};
     return repr.str();
   }
 
   std::string ToJSON() const override {
-    throw std::logic_error{"JSON serialization is not yet supported!"};
+    std::ostringstream repr;
+    repr << toml::json_formatter{config_};
   }
 
  private:

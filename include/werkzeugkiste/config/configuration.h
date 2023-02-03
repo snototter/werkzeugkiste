@@ -62,21 +62,31 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   Configuration &operator=(const Configuration &) = delete;
   Configuration &operator=(Configuration &&) = delete;
 
-  /// Visits all parameter names and ensures that they hold absolute paths.
-  /// Returns true if any parameter has been changed.
-  /// TODO wildcard
-  /// TODO Example
-  virtual bool EnsureAbsolutePaths(
+  /// Adjusts the given parameters to hold either an absolute file path, or the
+  /// result of "base_path / <param>" if they initially held a relative file
+  /// path.
+  ///
+  /// Args:
+  ///   base_path: Base path to be prepended to relative file paths.
+  ///   parameters: A list of parameter names / patterns. The wildcard '*' is
+  ///     also supported. For example, valid names are: "my-param",
+  ///     "files.video1", etc. Valid patterns would be "*path",
+  ///     "some.nested.*.filename", etc.
+  ///
+  /// Returns:
+  ///   True if any parameter has been adjusted.
+  virtual bool AdjustRelativePaths(
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) = 0;
 
+  // TODO doc
   /// Visits all string parameters and replaces any occurrence of the given
   /// needle/replacement pairs. Returns True if any parameter has been changed.
   virtual bool ReplaceStringPlaceholders(
       const std::vector<std::pair<std::string_view, std::string_view>>
           &replacements) = 0;
 
-  // keys and values match exactly
+  /// Returns true if all configuration keys and values match exactly.
   virtual bool Equals(const Configuration *other) const = 0;
 
   /// Returns a list of all (fully-qualified) parameter names, e.g.
@@ -136,10 +146,23 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //    virtual std::unique_ptr<Configuration> GetGroup(std::string_view
   //    group_name) const = 0;
 
-  // TODO doc
+  /// Loads a nested TOML configuration.
+  ///
+  /// For example, if your configuration had a field "storage", which
+  /// should be defined in a separate (e.g. machine-dependent) configuration
+  /// file, the "main" config could define it as `storage = "path/to/conf.toml"`
+  /// This function will then load this TOML and replace `storage` by the
+  /// loaded configuration.
+  /// Suppose that "conf.toml" defines "location = ..." and "duration = ...".
+  /// Then, after loading, you can access these as "storage.location" and
+  /// "storage.duration".
+  ///
+  /// Args:
+  ///   key: Parameter name (fully-qualified TOML path) which holds the
+  ///     file name of the nested TOML configuration (must be of type
+  ///     string)
   virtual void LoadNestedTOMLConfiguration(std::string_view key) = 0;
   // TODO LoadNestedJSONConfiguration(param_name)
-  // TODO LoadNestedLibconfigConfiguration
 
   // TODO do we need std::map<std::string, std::variant<int64_t, double,
   // std::string>> GetDictionary / GetTable
