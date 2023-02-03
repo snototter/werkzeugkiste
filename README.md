@@ -17,6 +17,7 @@ This toolbox will only receive sporadic updates, basically whenever I have to
 reuse (and modernize) some of my older code.
 Currently, it provides the following functionality. Note that the namespace
 name also equals the corresponding CMake target to be linked against:
+* `werkzeugkiste::config`: Utilitity to interact with TOML configurations.
 * `werkzeugkiste::container`: Sorting/lookup utilities and a custom
   circular buffer.
 * `werkzeugkiste::files`: Basic file I/O and filesystem utilities.
@@ -120,7 +121,7 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
   * [x] Export symbols
   * [x] Check if shared library works "locally" (e.g. tests and examples,
     which are separate targets that link against the werkzeugkiste library)
-  * [ ] Check if the export header is correctly distributed in a consuming project
+  * [ ] Check if the export header is correctly distributed in a consuming project on linux
 * [ ] Properly set up Github Actions
   * [x] Test only on linux, but more versions
   * [x] Build library and examples on windows & macos (without testing)
@@ -128,8 +129,7 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
   * [x] Lint on linux
   * [ ] Clean up ci workflow, maybe split into separate (dependent?) workflows
 * [ ] Adjust pre-commit hooks, e.g. https://pypi.org/project/cmake-pre-commit-hooks/
-  * Use errors instead auf autofix?
-
+  * Use errors instead of autofix?
 * [ ] Split CI into different workflows, [run them consecutively](https://stackoverflow.com/questions/58457140/dependencies-between-workflows-on-github-actions) --> would allow quick overview with separate lint/build/test badges
 * [ ] Deploy docs
   * [ ] Check gh-pages action
@@ -137,10 +137,11 @@ Contribution guidelines are summarized in the [CONTRIBUTING](CONTRIBUTING.md) do
 * [ ] Change to newer gcc and add `-Wextra-semi` to dev presets
 * [ ] Change the default clang-format rules
 * [ ] Coverage
-  * [ ] Check coverage target
+  * [x] Check coverage target
   * [ ] Document coverage command
-  * [ ] Set up codecov.io or coveralls on push/release
+  * [x] Set up codecov.io or coveralls on push/release
 * [ ] Utils:
+  * [ ] Configuration utils - WIP
   * [x] Enumeration utils (iterator + flags)
   * [x] strings
   * [ ] circular buffer

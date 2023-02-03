@@ -1,7 +1,5 @@
 #include <werkzeugkiste/geometry/vector.h>
 
-#include <cmath>
-
 namespace werkzeugkiste::geometry {
 
 // Explicit instantiation:

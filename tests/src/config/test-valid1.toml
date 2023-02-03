@@ -4,6 +4,10 @@ value2 = 2.3
 [section1]
 rel_path = "this/is/a/relative/path"
 abs_path = "/this/is/an/absolute/path"
+
+rel_url_path = "file://also/relative"
+abs_url_path = "file:///this/is/also/absolute"
+
 time = 08:00:00
 
 [section2]

@@ -10,11 +10,37 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
+
+class WERKZEUGKISTE_CONFIG_EXPORT SingleKeyMatcher {
+ public:
+  static std::unique_ptr<SingleKeyMatcher> Create(std::string_view pattern);
+  virtual bool Match(std::string_view key) const = 0;
+
+  virtual ~SingleKeyMatcher() = default;
+  SingleKeyMatcher(const SingleKeyMatcher & /* other */) = default;
+  SingleKeyMatcher &operator=(const SingleKeyMatcher & /* other */) = default;
+  SingleKeyMatcher(SingleKeyMatcher && /* other */) = default;
+  SingleKeyMatcher &operator=(SingleKeyMatcher && /* other */) = default;
+
+ protected:
+  SingleKeyMatcher() = default;
+};
+
+class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
+ public:
+  static std::unique_ptr<MultiKeyMatcher> Create(
+      const std::vector<std::string_view> &patterns);
+  virtual ~MultiKeyMatcher() = default;
+
+  virtual bool MatchAny(std::string_view key) const = 0;
+};
 
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
@@ -22,9 +48,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// TODO runtime_error if file doesn't exits or toml is malformed
 
-  static std::unique_ptr<Configuration> LoadTomlFile(std::string_view filename);
+  // TODO must be a unique_ptr, implement copy/move ctor/assignments!
+  static std::unique_ptr<Configuration> LoadTOMLFile(std::string_view filename);
 
-  static std::unique_ptr<Configuration> LoadTomlString(
+  static std::unique_ptr<Configuration> LoadTOMLString(
       std::string_view toml_string);
   //   static std::unique_ptr<Configuration> LoadJSON(std::string_view
   //   filename);
@@ -35,36 +62,110 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   Configuration &operator=(const Configuration &) = delete;
   Configuration &operator=(Configuration &&) = delete;
 
-  /// @brief Registers the given parameter name for future replacement (in
-  /// `MakePathsAbsolute`).
-  /// @param parameter Name of the parameter, e.g. "storage.folder",
-  /// "input_filename", ...
-  // virtual void RegisterPathParameter(std::string_view param_name) = 0;
-
-  /// @brief Ensures that all registered path parameters are absolute.
-  /// @return Number of adjusted parameters.
-  // virtual std::size_t MakePathsAbsolute(std::string_view base_path) = 0;
-
-  // True if anything has been replaced
-  virtual bool EnsureAbsolutePaths(
+  /// Adjusts the given parameters to hold either an absolute file path, or the
+  /// result of "base_path / <param>" if they initially held a relative file
+  /// path.
+  ///
+  /// Args:
+  ///   base_path: Base path to be prepended to relative file paths.
+  ///   parameters: A list of parameter names / patterns. The wildcard '*' is
+  ///     also supported. For example, valid names are: "my-param",
+  ///     "files.video1", etc. Valid patterns would be "*path",
+  ///     "some.nested.*.filename", etc.
+  ///
+  /// Returns:
+  ///   True if any parameter has been adjusted.
+  virtual bool AdjustRelativePaths(
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) = 0;
+
+  // TODO doc
+  /// Visits all string parameters and replaces any occurrence of the given
+  /// needle/replacement pairs. Returns True if any parameter has been changed.
+  virtual bool ReplaceStringPlaceholders(
+      const std::vector<std::pair<std::string_view, std::string_view>>
+          &replacements) = 0;
+
+  /// Returns true if all configuration keys and values match exactly.
+  virtual bool Equals(const Configuration *other) const = 0;
 
   /// Returns a list of all (fully-qualified) parameter names, e.g.
   /// "some_table.param_x".
   virtual std::vector<std::string> ParameterNames() const = 0;
 
-  // TODO LoadNestedTOMLConfiguration(param_name)
+  virtual bool GetBoolean(std::string_view key) const = 0;
+  virtual bool GetBooleanOrDefault(std::string_view key,
+                                   bool default_val) const = 0;
+  virtual void SetBoolean(std::string_view key, bool value) = 0;
+
+  virtual double GetDouble(std::string_view key) const = 0;
+  virtual double GetDoubleOrDefault(std::string_view key,
+                                    double default_val) const = 0;
+  virtual void SetDouble(std::string_view key, double value) = 0;
+
+  virtual int32_t GetInteger32(std::string_view key) const = 0;
+  virtual int32_t GetInteger32OrDefault(std::string_view key,
+                                        int32_t default_val) const = 0;
+  virtual void SetInteger32(std::string_view key, int32_t value) = 0;
+
+  virtual int64_t GetInteger64(std::string_view key) const = 0;
+  virtual int64_t GetInteger64OrDefault(std::string_view key,
+                                        int64_t default_val) const = 0;
+  virtual void SetInteger64(std::string_view key, int64_t value) = 0;
+
+  virtual std::string GetString(std::string_view key) const = 0;
+  virtual std::string GetStringOrDefault(
+      std::string_view key, std::string_view default_val) const = 0;
+  virtual void SetString(std::string_view key, std::string_view value) = 0;
+
+  virtual std::pair<double, double> GetDoublePair(
+      std::string_view key) const = 0;
+  virtual std::vector<double> GetDoubleList(std::string_view key) const = 0;
+
+  virtual std::pair<int32_t, int32_t> GetInteger32Pair(
+      std::string_view key) const = 0;
+  virtual std::vector<int32_t> GetInteger32List(std::string_view key) const = 0;
+
+  virtual std::pair<int64_t, int64_t> GetInteger64Pair(
+      std::string_view key) const = 0;
+  virtual std::vector<int64_t> GetInteger64List(std::string_view key) const = 0;
+
+  virtual std::vector<std::string> GetStringList(
+      std::string_view key) const = 0;
+
+  virtual std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
+      std::string_view key) const = 0;
+
+  virtual std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
+      std::string_view key) const = 0;
+
+  // TODO do we need double-precision points ?
+  // TODO do we need nested lists ?
+
+  // TODO should return a copy!
+  //    virtual std::unique_ptr<Configuration> GetGroup(std::string_view
+  //    group_name) const = 0;
+
+  /// Loads a nested TOML configuration.
+  ///
+  /// For example, if your configuration had a field "storage", which
+  /// should be defined in a separate (e.g. machine-dependent) configuration
+  /// file, the "main" config could define it as `storage = "path/to/conf.toml"`
+  /// This function will then load this TOML and replace `storage` by the
+  /// loaded configuration.
+  /// Suppose that "conf.toml" defines "location = ..." and "duration = ...".
+  /// Then, after loading, you can access these as "storage.location" and
+  /// "storage.duration".
+  ///
+  /// Args:
+  ///   key: Parameter name (fully-qualified TOML path) which holds the
+  ///     file name of the nested TOML configuration (must be of type
+  ///     string)
+  virtual void LoadNestedTOMLConfiguration(std::string_view key) = 0;
   // TODO LoadNestedJSONConfiguration(param_name)
-  // TODO LoadNestedLibconfigConfiguration
-  // TODO MakePathsAbsolute(base, list of params)
 
-  // TODO
-  // https://github.com/snototter/vitocpp/blob/master/src/cpp/vcp_config/config_params.h
-
-  // TODO register params which link to nested config files (would need to be
-  // loaded afterwards)
-  // TODO template T GetCompulsory/GetOptional(param "x.y")
+  // TODO do we need std::map<std::string, std::variant<int64_t, double,
+  // std::string>> GetDictionary / GetTable
 
   /// Returns a TOML-formatted string of this configuration.
   virtual std::string ToTOML() const = 0;

@@ -833,8 +833,7 @@ Plane_<T>::Plane_(const vec_type& p, const vec_type& q, const vec_type& r)
     normal_ = cross.UnitVector();
     offset_ = -normal_.Dot(p);
   } else {
-    // TODO: implement logging and warn about 3 collinear points.
-    WKZLOG_WARN(
+    WZKLOG_WARN(
         "Cannot create a valid plane from 3 collinear points! Inputs were "
         "p={:s}, q={:s}, r={:s}.",
         p, q, r);

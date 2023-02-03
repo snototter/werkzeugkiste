@@ -8,8 +8,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace werkzeugkiste {
-namespace container {
+namespace werkzeugkiste::container {
 
 /// Templated STL compatible iterator for the circular_buffer.
 template <typename T, typename T_nonconst,
@@ -379,7 +378,6 @@ class circular_buffer {
     }
   }
 };
-}  // namespace container
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::container
 
 #endif  // WERKZEUGKISTE_CONTAINER_CIRCULAR_BUFFER_H

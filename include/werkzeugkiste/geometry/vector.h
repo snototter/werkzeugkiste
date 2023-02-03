@@ -878,6 +878,23 @@ class Vec {
   }
 };
 
+// template <typename Type, typename... Types>
+// inline auto TupleToVec(const std::tuple<Type, Types...> &tpl) {
+//   using Vector = Vec<Type, sizeof...(Types)+1>;
+//   return std::make_from_tuple<Vector>(tpl);
+// }
+////template <template <typename Type, typename... Types> class Container>
+////inline auto TuplesToPolygon(Container tuples) {
+// template <typename Type, typename... Types, typename Container>
+// inline auto TuplesToPolygon(const Container &tuples) {
+//   using V = Vec<Type, sizeof...(Types)+1>;
+//   std::vector<V> poly;
+//   for (const auto &tpl : tuples) {
+//     poly.emplace_back(TupleToVec<Type, Types...>(tpl));
+//   }
+//   return poly;
+// }
+
 //-----------------------------------------------------------------------------
 // Aliases & available specializations
 
