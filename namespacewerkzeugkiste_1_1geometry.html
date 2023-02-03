@@ -419,6 +419,18 @@
             </dt>
             <dd></dd>
             <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#adaf9bfbda82fdec4e8f4184bda6ece37" class="m-doc">RoundBase</a>(</span><span class="m-doc-wrap">T value,
+              T base) -&gt; std::enable_if_t&lt;std::is_floating_point_v&lt;T&gt;, T&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2b0def99847da41cb42c9cc32f99440b" class="m-doc">RoundBase</a>(</span><span class="m-doc-wrap">T value,
+              T base) -&gt; std::enable_if_t&lt;std::is_integral_v&lt;T&gt;, T&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
               <div class="m-doc-template">template&lt;typename T, std::size_t Dim&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#aaa2fdc28cedc0ef5675aff98b7cbd54a" class="m-doc">LengthPolygon</a>(</span><span class="m-doc-wrap">const std::vector&lt;<a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&gt;&amp; points) -&gt; double</span>
             </dt>
@@ -1074,6 +1086,28 @@
               <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74afb9e37d8e6419227aa4e6b982a431" class="m-doc-self">Sign</a>(</span><span class="m-doc-wrap">T x) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
 <p>Signum function which returns +1 (if x is positive), 0 (if x equals 0), or -1 (if x is negative). This type-safe implementation is based on <a href="https://stackoverflow.com/a/4609795">https:/<wbr />/<wbr />stackoverflow.com/<wbr />a/<wbr />4609795</a> by <code>user79758</code> (CC BY-SA 4.0).</p>
+          </div></section>
+          <section class="m-doc-details" id="adaf9bfbda82fdec4e8f4184bda6ece37"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="utils_8h.html">&lt;werkzeugkiste/geometry/utils.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;std::is_floating_point_v&lt;T&gt;, T&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adaf9bfbda82fdec4e8f4184bda6ece37" class="m-doc-self">RoundBase</a>(</span><span class="m-doc-wrap">T value,
+              T base)</span></span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a2b0def99847da41cb42c9cc32f99440b"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="utils_8h.html">&lt;werkzeugkiste/geometry/utils.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;std::is_integral_v&lt;T&gt;, T&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b0def99847da41cb42c9cc32f99440b" class="m-doc-self">RoundBase</a>(</span><span class="m-doc-wrap">T value,
+              T base)</span></span>
+            </h3>
+            <p><span></span></p>
           </div></section>
           <section class="m-doc-details" id="aaa2fdc28cedc0ef5675aff98b7cbd54a"><div>
             <h3>

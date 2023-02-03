@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>werkzeugkiste::config namespace | werkzeugkiste</title>
+  <title>werkzeugkiste::config::MultiKeyMatcher class | werkzeugkiste</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -49,33 +49,46 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>config <span class="m-thin">namespace</span>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>MultiKeyMatcher <span class="m-thin">class</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;configuration.h&gt;</a></div>
         </h1>
-        <p>Utilities to handle configurations.</p>
+        <p><span></span></p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#pub-static-methods">Public static functions</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="pub-static-methods">
+          <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>
+            <dt id="a90a42329490b3748a54afb4b35ff7969">
+              <span class="m-doc-wrap-bumper">static auto <a href="#a90a42329490b3748a54afb4b35ff7969" class="m-doc-self">Create</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::string_view&gt;&amp; patterns) -&gt; std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1MultiKeyMatcher.html" class="m-doc">MultiKeyMatcher</a>&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1MultiKeyMatcher.html" class="m-doc">MultiKeyMatcher</a>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a0302b778939c2a75f5efe184a84e761a">
+              <span class="m-doc-wrap-bumper"><a href="#a0302b778939c2a75f5efe184a84e761a" class="m-doc-self">~MultiKeyMatcher</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
             </dt>
             <dd><span></span></dd>
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a610d13c021440113bae015fe6ce40408">
+              <span class="m-doc-wrap-bumper">auto <a href="#a610d13c021440113bae015fe6ce40408" class="m-doc-self">MatchAny</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd><span></span></dd>
           </dl>

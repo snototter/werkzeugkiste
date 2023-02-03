@@ -106,15 +106,20 @@
             </dt>
             <dd></dd>
             <dt>
-              <div class="m-doc-template">template&lt;class Container&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5c95cb4cccfb41bab4dd5961f9d3d90d" class="m-doc">Mean</a>(</span><span class="m-doc-wrap">const Container&amp; values) -&gt; double</span>
+              <div class="m-doc-template">template&lt;class Container, typename T = typename Container::value_type&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a645f97c108d1f0d1f720a4d05aef8954" class="m-doc">Sum</a>(</span><span class="m-doc-wrap">const Container&amp; values) -&gt; std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;, T&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class Container, typename T = typename Container::value_type&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c3b3765a5bd8ac26e0d0087d7608c8d" class="m-doc">Mean</a>(</span><span class="m-doc-wrap">const Container&amp; values) -&gt; std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;, double&gt;</span>
+            </dt>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;class Container&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a href="#a343a3a1912d536933ea475f9fed9d0be" class="m-doc">MinMax</a>(</span><span class="m-doc-wrap">const Container&amp; values,
-              typename Container::value_type* min = nullptr,
-              typename Container::value_type* max = nullptr,
+              <span class="m-doc-wrap-bumper">void <a href="#a730ea26c68abcc0a1a55362145c0dd41" class="m-doc">MinMax</a>(</span><span class="m-doc-wrap">const Container&amp; values,
+              typename Container::value_type* val_min = nullptr,
+              typename Container::value_type* val_max = nullptr,
               std::size_t* idx_min = nullptr,
               std::size_t* idx_max = nullptr)</span>
             </dt>
@@ -214,29 +219,39 @@
             </h3>
 <p>Smoothes the given data points.</p><p>Smoothes the points such that each point is the average over a window of &quot;span&quot; values centered on the processed point. The first and last points won&#x27;t be smoothed, <em>i.e.</em> the behavior is similar to MATLAB&#x27;s <code>smooth</code>.</p><p>Args: data: Any sequence container which can be accessed sequentially. Must provide <code>size()</code>, <code>push_back()</code> and a <code>value_type</code>. window_size: Length of the smoothing window. Must be <strong>odd</strong> and <code>&gt;=3</code> or <code>&lt;=0</code> (no smoothing). For span 1 and 2, an invalid_argument will be thrown.</p><p>Example for span = 5: output[0] = data[0] output[1] = (data[0] + data[1] + data[2]) / 3 output[2] = (data[0] + ... + data[4]) / 5 output[3] = (data[1] + ... + data[5]) / 5</p>
           </div></section>
-          <section class="m-doc-details" id="a5c95cb4cccfb41bab4dd5961f9d3d90d"><div>
+          <section class="m-doc-details" id="a645f97c108d1f0d1f720a4d05aef8954"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="math_8h.html">&lt;werkzeugkiste/container/math.h&gt;</a></div>
               <div class="m-doc-template">
-                template&lt;class Container&gt;
+                template&lt;class Container, typename T = typename Container::value_type&gt;
               </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c95cb4cccfb41bab4dd5961f9d3d90d" class="m-doc-self">Mean</a>(</span><span class="m-doc-wrap">const Container&amp; values)</span></span>
+              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;, T&gt; werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a645f97c108d1f0d1f720a4d05aef8954" class="m-doc-self">Sum</a>(</span><span class="m-doc-wrap">const Container&amp; values)</span></span>
             </h3>
-            <p><span></span></p>
+<p>Computes the sum of the given STL-like container. The container must hold an arithmetic type (integers, floats, etc.)</p>
           </div></section>
-          <section class="m-doc-details" id="a343a3a1912d536933ea475f9fed9d0be"><div>
+          <section class="m-doc-details" id="a0c3b3765a5bd8ac26e0d0087d7608c8d"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="math_8h.html">&lt;werkzeugkiste/container/math.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class Container, typename T = typename Container::value_type&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::enable_if_t&lt;std::is_arithmetic_v&lt;T&gt;, double&gt; werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0c3b3765a5bd8ac26e0d0087d7608c8d" class="m-doc-self">Mean</a>(</span><span class="m-doc-wrap">const Container&amp; values)</span></span>
+            </h3>
+<p>Computes the mean of the given STL-like container. The container must hold an arithmetic type (integers, floats, etc.)</p>
+          </div></section>
+          <section class="m-doc-details" id="a730ea26c68abcc0a1a55362145c0dd41"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="math_8h.html">&lt;werkzeugkiste/container/math.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;class Container&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a343a3a1912d536933ea475f9fed9d0be" class="m-doc-self">MinMax</a>(</span><span class="m-doc-wrap">const Container&amp; values,
-              typename Container::value_type* min = nullptr,
-              typename Container::value_type* max = nullptr,
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />container::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a730ea26c68abcc0a1a55362145c0dd41" class="m-doc-self">MinMax</a>(</span><span class="m-doc-wrap">const Container&amp; values,
+              typename Container::value_type* val_min = nullptr,
+              typename Container::value_type* val_max = nullptr,
               std::size_t* idx_min = nullptr,
               std::size_t* idx_max = nullptr)</span></span>
             </h3>
-<p>Computes the minimum &amp; maximum of the given STL-like sequence container. The underlying <code>value_type</code> must support comparisons via <code>operator&lt;</code>.</p>
+<p>Computes the minimum &amp; maximum of the given STL-like sequence container. Currently, only random access containers are supported. The underlying <code>value_type</code> must support comparisons via <code>operator&lt;</code>.</p>
           </div></section>
           <section class="m-doc-details" id="aed7051e5f97e7b72bad565114345eaad"><div>
             <h3>
