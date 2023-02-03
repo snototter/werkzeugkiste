@@ -91,18 +91,22 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   virtual double GetDouble(std::string_view key) const = 0;
   virtual double GetDoubleOrDefault(std::string_view key,
                                     double default_val) const = 0;
+  virtual void SetDouble(std::string_view key, double value) = 0;
 
   virtual int32_t GetInteger32(std::string_view key) const = 0;
   virtual int32_t GetInteger32OrDefault(std::string_view key,
                                         int32_t default_val) const = 0;
+  virtual void SetInteger32(std::string_view key, int32_t value) = 0;
 
   virtual int64_t GetInteger64(std::string_view key) const = 0;
   virtual int64_t GetInteger64OrDefault(std::string_view key,
                                         int64_t default_val) const = 0;
+  virtual void SetInteger64(std::string_view key, int64_t value) = 0;
 
   virtual std::string GetString(std::string_view key) const = 0;
   virtual std::string GetStringOrDefault(
       std::string_view key, std::string_view default_val) const = 0;
+  virtual void SetString(std::string_view key, std::string_view value) = 0;
 
   virtual std::pair<double, double> GetDoublePair(
       std::string_view key) const = 0;

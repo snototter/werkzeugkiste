@@ -416,8 +416,8 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
 /// @param tbl The "root" table.
 /// @param key The fully-qualified "TOML path".
 /// @param value The value to be set.
-template <typename T, typename TMessage = T>
-void ConfigSetScalar(toml::table &tbl, std::string_view key, T value) {
+template <typename T, typename TMessage = T, typename TValue>
+void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
   const auto path = SplitTomlPath(key);
   if (ConfigContainsKey(tbl, key)) {
     const auto node = tbl.at_path(key);
@@ -431,35 +431,37 @@ void ConfigSetScalar(toml::table &tbl, std::string_view key, T value) {
       msg += "`!";
       throw std::runtime_error{msg};
     }
+
+    auto &ref = *node.as<T>();
+    ref = T{value};
   } else {
     EnsureContainerPathExists(tbl, path.first);
-  }
+    toml::table *parent =
+        path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
+    if (parent == nullptr) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Creating the path hierarchy for `" << key
+          << "` completed without failure, but the parent table `" << path.first
+          << "` is a nullptr. This must be a bug. Please report at"
+             " https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
 
-  toml::table *parent =
-      path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
-  if (parent == nullptr) {
-    // LCOV_EXCL_START
-    std::ostringstream msg;
-    msg << "Creating the path hierarchy for `" << key
-        << "` completed without failure, but the parent table `" << path.first
-        << "` is a nullptr. This must be a bug. Please report at"
-           " https://github.com/snototter/werkzeugkiste/issues";
-    throw std::logic_error{msg.str()};
-    // LCOV_EXCL_STOP
-  }
-
-  auto result = parent->insert_or_assign(path.second, value);
-  if (!ConfigContainsKey(tbl, key)) {
-    // LCOV_EXCL_START
-    std::ostringstream msg;
-    msg << "Assigning `" << key << "` = `" << value
-        << "` completed without failure, but the key cannot be looked up. "
-           "The value should have been "
-        << (result.second ? "inserted" : "assigned")
-        << ". This must be a bug. Please report at "
-           "https://github.com/snototter/werkzeugkiste/issues";
-    throw std::logic_error{msg.str()};
-    // LCOV_EXCL_STOP
+    auto result = parent->insert_or_assign(path.second, value);
+    if (!ConfigContainsKey(tbl, key)) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Assigning `" << key << "` = `" << value
+          << "` completed without failure, but the key cannot be looked up. "
+             "The value should have been "
+          << (result.second ? "inserted" : "assigned")
+          << ". This must be a bug. Please report at "
+             "https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
   }
 }
 
@@ -945,6 +947,10 @@ class ConfigurationImpl : public Configuration {
         config_, key, /*allow_default=*/true, default_val);
   }
 
+  void SetDouble(std::string_view key, double value) override {
+    utils::ConfigSetScalar<double>(config_, key, value);
+  }
+
   int32_t GetInteger32(std::string_view key) const override {
     return utils::ConfigLookupScalar<int32_t>(config_, key,
                                               /*allow_default=*/false);
@@ -954,6 +960,11 @@ class ConfigurationImpl : public Configuration {
                                 int32_t default_val) const override {
     return utils::ConfigLookupScalar<int32_t>(
         config_, key, /*allow_default=*/true, default_val);
+  }
+
+  void SetInteger32(std::string_view key, int32_t value) override {
+    utils::ConfigSetScalar<int64_t, int32_t>(config_, key,
+                                             static_cast<int64_t>(value));
   }
 
   int64_t GetInteger64(std::string_view key) const override {
@@ -967,6 +978,10 @@ class ConfigurationImpl : public Configuration {
         config_, key, /*allow_default=*/true, default_val);
   }
 
+  void SetInteger64(std::string_view key, int64_t value) override {
+    utils::ConfigSetScalar<int64_t>(config_, key, value);
+  }
+
   std::string GetString(std::string_view key) const override {
     return utils::ConfigLookupString(config_, key, /*allow_default=*/false);
   }
@@ -975,6 +990,11 @@ class ConfigurationImpl : public Configuration {
                                  std::string_view default_val) const override {
     return utils::ConfigLookupString(config_, key, /*allow_default=*/true,
                                      default_val);
+  }
+
+  void SetString(std::string_view key, std::string_view value) override {
+    utils::ConfigSetScalar<std::string, std::string, std::string_view>(
+        config_, key, value);
   }
 
   std::pair<double, double> GetDoublePair(std::string_view key) const override {

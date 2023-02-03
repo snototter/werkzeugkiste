@@ -168,12 +168,14 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_THROW(config->GetString("dates.date_time"), std::runtime_error);
 }
 
-TEST(ConfigTest, SetScalarTypes) {
+TEST(ConfigTest, SetScalarTypes1) {
   const std::string toml_str = R"toml(
     bool = true
     int = 42
-    flt = 1.0
-    str = "A string" #TODO others (date, time, date_time)
+    a.string = "value"
+    booleans = [true, false, true]
+
+    array = [0, 1, { int = 2, bool = false }]
     )toml";
   auto config = wkc::Configuration::LoadTOMLString(toml_str);
 
@@ -197,11 +199,82 @@ TEST(ConfigTest, SetScalarTypes) {
   EXPECT_NO_THROW(config->GetBoolean("others.bool"));
   EXPECT_EQ(false, config->GetBoolean("others.bool"));
 
+  // Test a deeper path hierarchy
   EXPECT_THROW(config->GetBoolean("a.deeper.hierarchy.bool"),
                std::runtime_error);
   EXPECT_NO_THROW(config->SetBoolean("a.deeper.hierarchy.bool", false));
   EXPECT_NO_THROW(config->GetBoolean("a.deeper.hierarchy.bool"));
   EXPECT_EQ(false, config->GetBoolean("a.deeper.hierarchy.bool"));
+
+  // Cannot create a path below a scalar type
+  EXPECT_THROW(config->SetBoolean("a.string.below.bool", true),
+               std::runtime_error);
+
+  // Creating an array is also not supported
+  EXPECT_THROW(config->SetBoolean("an_array[3].bool", true),
+               std::runtime_error);
+
+  // Creating a table within an existing array is also not supported:
+  EXPECT_THROW(config->SetBoolean("array[3].bool", true), std::runtime_error);
+
+  // But setting an existing array element is supported:
+  EXPECT_NO_THROW(config->SetBoolean("booleans[1]", true));
+  EXPECT_EQ(true, config->GetBoolean("booleans[0]"));
+  EXPECT_EQ(true, config->GetBoolean("booleans[1]"));
+  EXPECT_EQ(true, config->GetBoolean("booleans[2]"));
+
+  EXPECT_EQ(false, config->GetBoolean("array[2].bool"));
+  EXPECT_NO_THROW(config->SetBoolean("array[2].bool", true));
+  EXPECT_EQ(true, config->GetBoolean("array[2].bool"));
+}
+
+TEST(ConfigTest, SetScalarTypes2) {
+  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+    integer = 12345
+    string = "This is a string"
+
+    [section]
+    float = 1.5
+    string = "value"
+    array = [1, true, "a string"]
+    )toml");
+
+  // Change integers
+  EXPECT_EQ(12345, config->GetInteger32("integer"sv));
+  EXPECT_NO_THROW(config->SetInteger32("integer"sv, -123));
+  EXPECT_EQ(-123, config->GetInteger32("integer"sv));
+
+  EXPECT_EQ(-123, config->GetInteger64("integer"sv));
+  EXPECT_NO_THROW(config->SetInteger64("integer"sv, -2147483649));
+  EXPECT_EQ(-2147483649, config->GetInteger64("integer"sv));
+
+  // Change a double
+  EXPECT_DOUBLE_EQ(1.5, config->GetDouble("section.float"sv));
+  EXPECT_NO_THROW(config->SetDouble("section.float"sv, 0.01));
+  EXPECT_DOUBLE_EQ(0.01, config->GetDouble("section.float"sv));
+
+  // We cannot change the type of an existing parameter
+  EXPECT_THROW(config->SetDouble("integer"sv, 1.5), std::runtime_error);
+
+  // Set a string:
+  EXPECT_EQ("value", config->GetString("section.string"sv));
+  EXPECT_NO_THROW(config->SetString("section.string"sv, "frobmorten"sv));
+  EXPECT_EQ("frobmorten", config->GetString("section.string"sv));
+
+  // Change a string within an array:
+  EXPECT_EQ("a string", config->GetString("section.array[2]"sv));
+  EXPECT_NO_THROW(config->SetString("section.array[2]"sv, "foobar"sv));
+  EXPECT_EQ("foobar", config->GetString("section.array[2]"sv));
+
+  // Add new scalars:
+  EXPECT_NO_THROW(config->SetInteger32("new-values.int32"sv, 3));
+  EXPECT_NO_THROW(config->SetInteger64("new-values.int64"sv, 64));
+  EXPECT_NO_THROW(config->SetDouble("new-values.float"sv, 1e23));
+  EXPECT_NO_THROW(config->SetString("new-values.str", "It works!"));
+  EXPECT_EQ(3, config->GetInteger32("new-values.int32"sv));
+  EXPECT_EQ(64, config->GetInteger32("new-values.int64"sv));
+  EXPECT_DOUBLE_EQ(1e23, config->GetDouble("new-values.float"sv));
+  EXPECT_EQ("It works", config->GetString("new-values.str"sv));
 }
 
 TEST(ConfigTest, Keys1) {
