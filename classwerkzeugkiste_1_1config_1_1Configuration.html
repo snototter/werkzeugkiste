@@ -52,7 +52,7 @@
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>Configuration <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;configuration.h&gt;</a></div>
         </h1>
-        <p><span></span></p>
+        <p>Encapsulates configuration data.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -72,11 +72,11 @@
             <dt>
               <span class="m-doc-wrap-bumper">static auto <a href="#ade11749f3314dc1846f18ee3c25b8434" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt;</span>
             </dt>
-            <dd></dd>
-            <dt id="a6d8deeb12e017fe714e0a4ed48a266bd">
-              <span class="m-doc-wrap-bumper">static auto <a href="#a6d8deeb12e017fe714e0a4ed48a266bd" class="m-doc-self">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt;</span>
+            <dd>Loads a TOML configuration from the given file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a6d8deeb12e017fe714e0a4ed48a266bd" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Loads a TOML configuration from a string.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -115,11 +115,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a76b6427149a6cd06cf189d8f317d3417" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
               const std::vector&lt;std::string_view&gt;&amp; parameters) -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd></dd>
+            <dd>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae8af58e89c7d4092cc878a52b1d204e8" class="m-doc">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements) -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd></dd>
+            <dd>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</dd>
             <dt id="a0f651e9eb3cfedd318e7494f609441e5">
               <span class="m-doc-wrap-bumper">auto <a href="#a0f651e9eb3cfedd318e7494f609441e5" class="m-doc-self">Equals</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>* other) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -127,7 +127,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a23ac27989599a60af1b05aa26af2a77e" class="m-doc">ParameterNames</a>(</span><span class="m-doc-wrap">) const -&gt; std::vector&lt;std::string&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd></dd>
+            <dd>Returns a list of all (fully-qualified) parameter names.</dd>
             <dt id="a66f27d14372210000e92331db629df49">
               <span class="m-doc-wrap-bumper">auto <a href="#a66f27d14372210000e92331db629df49" class="m-doc-self">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -237,7 +237,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ad5192117530469ea0e8a38b14bf2da2e" class="m-doc">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key) <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
-            <dd></dd>
+            <dd>Loads a nested TOML configuration.</dd>
             <dt id="a010427838bf6d262e284f425fd5485cf">
               <span class="m-doc-wrap-bumper">auto <a href="#a010427838bf6d262e284f425fd5485cf" class="m-doc-self">ToTOML</a>(</span><span class="m-doc-wrap">) const -&gt; std::string <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
@@ -254,32 +254,111 @@
             <h3>
               <span class="m-doc-wrap-bumper">static std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade11749f3314dc1846f18ee3c25b8434" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
             </h3>
-<p>Loads the configuration from the given file.</p><p>TODO runtime_error if file doesn&#x27;t exits or toml is malformed</p>
+            <p>Loads a TOML configuration from the given file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename</td>
+                  <td>Path to the <code>.toml</code> file.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6d8deeb12e017fe714e0a4ed48a266bd"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d8deeb12e017fe714e0a4ed48a266bd" class="m-doc-self">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string)</span></span>
+            </h3>
+            <p>Loads a TOML configuration from a string.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">toml_string</td>
+                  <td>String representation of the TOML config.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a76b6427149a6cd06cf189d8f317d3417"><div>
             <h3>
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76b6427149a6cd06cf189d8f317d3417" class="m-doc-self">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
               const std::vector&lt;std::string_view&gt;&amp; parameters) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-<p>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</p><p>Args: base_path: Base path to be prepended to relative file paths. parameters: A list of parameter names / patterns. The wildcard &#x27;*&#x27; is also supported. For example, valid names are: &quot;my-param&quot;, &quot;files.video1&quot;, etc. Valid patterns would be &quot;*path&quot;, &quot;some.nested.*.filename&quot;, etc.</p><p>Returns: True if any parameter has been adjusted.</p>
+            <p>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">base_path</td>
+                  <td>Base path to be prepended to relative file paths.</td>
+                </tr>
+                <tr>
+                  <td>parameters</td>
+                  <td>A list of parameter names / patterns. The wildcard &#x27;*&#x27; is also supported. For example, valid names are: &quot;my-param&quot;, &quot;files.video1&quot;, etc. Valid patterns would be &quot;*path&quot;, &quot;some.nested.*.filename&quot;, etc.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if any parameter has been adjusted.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ae8af58e89c7d4092cc878a52b1d204e8"><div>
             <h3>
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8af58e89c7d4092cc878a52b1d204e8" class="m-doc-self">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-<p>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs. Returns True if any parameter has been changed.</p>
+            <p>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">replacements</td>
+                  <td>List of <code>&lt;search, replacement&gt;</code> pairs.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if any placeholder has actually been replaced.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a23ac27989599a60af1b05aa26af2a77e"><div>
             <h3>
               <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23ac27989599a60af1b05aa26af2a77e" class="m-doc-self">ParameterNames</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-<p>Returns a list of all (fully-qualified) parameter names, e.g. &quot;some_table.param_x&quot;.</p>
+            <p>Returns a list of all (fully-qualified) parameter names.</p>
+<p>Note that this list does <em>not</em> contain a key for each array element. Only if another dictionary/table is within the array, the corresponding entry will be included (for example, <code>arr[3].name</code>)</p>
           </div></section>
           <section class="m-doc-details" id="ad5192117530469ea0e8a38b14bf2da2e"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5192117530469ea0e8a38b14bf2da2e" class="m-doc-self">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key) <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
-<p>Loads a nested TOML configuration.</p><p>For example, if your configuration had a field &quot;storage&quot;, which should be defined in a separate (e.g. machine-dependent) configuration file, the &quot;main&quot; config could define it as <code>storage = &quot;path/to/conf.toml&quot;</code> This function will then load this TOML and replace <code>storage</code> by the loaded configuration. Suppose that &quot;conf.toml&quot; defines &quot;location = ...&quot; and &quot;duration = ...&quot;. Then, after loading, you can access these as &quot;storage.location&quot; and &quot;storage.duration&quot;.</p><p>Args: key: Parameter name (fully-qualified TOML path) which holds the file name of the nested TOML configuration (must be of type string)</p>
+            <p>Loads a nested TOML configuration.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Parameter name (fully-qualified TOML path) which holds the file name of the nested TOML configuration (must be of type string)</td>
+                </tr>
+              </tbody>
+            </table>
+<p>For example, if your configuration had a field &quot;storage&quot;, which should be defined in a separate (e.g. machine-dependent) configuration file, the &quot;main&quot; config could define it as <code>storage = &quot;path/to/conf.toml&quot;</code> This function will then load this TOML and replace <code>storage</code> by the loaded configuration. Suppose that <code>conf.toml</code> defines <code>location = ...</code> and <code>duration = ...</code>. Then, after loading, you can access these as <code>&quot;storage.location&quot;</code> and <code>&quot;storage.duration&quot;</code>.</p>
           </div></section>
         </section>
       </div>
