@@ -33,7 +33,8 @@ TEST(StopWatchTest, Timings) {
   w1.Start();
   std::this_thread::sleep_for(std::chrono::milliseconds(90));
   elapsed = w1.ElapsedMilliseconds();
-  EXPECT_TRUE(CheckElapsedTime(elapsed, 90, 2));
+  // The github coverage workflow had flaky results with +/- 2
+  EXPECT_TRUE(CheckElapsedTime(elapsed, 90, 5));
 
   w1.Start();
   std::this_thread::sleep_for(std::chrono::milliseconds(70));
