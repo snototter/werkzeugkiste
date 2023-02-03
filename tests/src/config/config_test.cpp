@@ -193,7 +193,7 @@ TEST(ConfigTest, SetScalarTypes) {
 
   // Set a nested parameter (must create the hierarchy)
   EXPECT_THROW(config->GetBoolean("others.bool"), std::runtime_error);
-  (config->SetBoolean("others.bool", false));
+  EXPECT_NO_THROW(config->SetBoolean("others.bool", false));
   EXPECT_NO_THROW(config->GetBoolean("others.bool"));
   EXPECT_EQ(false, config->GetBoolean("others.bool"));
 
