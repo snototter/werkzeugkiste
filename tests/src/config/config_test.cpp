@@ -82,13 +82,12 @@ TEST(ConfigTest, FloatingPoint) {
   EXPECT_THROW(config->GetDouble("test"), std::runtime_error);
 }
 
-TEST(ConfigTest, Types) {
+TEST(ConfigTest, GetScalarTypes) {
   const std::string toml_str = R"toml(
     bool = true
     int = 42
     flt = 1.0
     str = "A string" #TODO others (date, time, date_time)
-    int_list = [1, 2, 3]
 
     [dates]
     day = 2023-01-01
@@ -167,6 +166,42 @@ TEST(ConfigTest, Types) {
   EXPECT_THROW(config->GetString("dates.time1"), std::runtime_error);
   EXPECT_THROW(config->GetString("dates.time2"), std::runtime_error);
   EXPECT_THROW(config->GetString("dates.date_time"), std::runtime_error);
+}
+
+TEST(ConfigTest, SetScalarTypes) {
+  const std::string toml_str = R"toml(
+    bool = true
+    int = 42
+    flt = 1.0
+    str = "A string" #TODO others (date, time, date_time)
+    )toml";
+  auto config = wkc::Configuration::LoadTOMLString(toml_str);
+
+  // Adjust a boolean parameter
+  EXPECT_EQ(true, config->GetBoolean("bool"));
+  EXPECT_NO_THROW(config->SetBoolean("bool", false));
+  EXPECT_EQ(false, config->GetBoolean("bool"));
+
+  // Cannot change the type of an existing parameter
+  EXPECT_THROW(config->SetBoolean("int", true), std::runtime_error);
+
+  // Set a non-existing parameter
+  EXPECT_THROW(config->GetBoolean("another_bool"), std::runtime_error);
+  EXPECT_NO_THROW(config->SetBoolean("another_bool", false));
+  EXPECT_NO_THROW(config->GetBoolean("another_bool"));
+  EXPECT_EQ(false, config->GetBoolean("another_bool"));
+
+  // Set a nested parameter (must create the hierarchy)
+  EXPECT_THROW(config->GetBoolean("others.bool"), std::runtime_error);
+  (config->SetBoolean("others.bool", false));
+  EXPECT_NO_THROW(config->GetBoolean("others.bool"));
+  EXPECT_EQ(false, config->GetBoolean("others.bool"));
+
+  EXPECT_THROW(config->GetBoolean("a.deeper.hierarchy.bool"),
+               std::runtime_error);
+  EXPECT_NO_THROW(config->SetBoolean("a.deeper.hierarchy.bool", false));
+  EXPECT_NO_THROW(config->GetBoolean("a.deeper.hierarchy.bool"));
+  EXPECT_EQ(false, config->GetBoolean("a.deeper.hierarchy.bool"));
 }
 
 TEST(ConfigTest, Keys1) {
@@ -589,10 +624,23 @@ TEST(ConfigTest, NestedTOML) {
   const auto fname_invalid_toml =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml"sv);
   std::ostringstream toml_str;
-  toml_str << "integer = 3\nnested_config = \""sv
+  toml_str << "integer = 3\n"
+              "nested_config = \""sv
            << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
-           << "\"\nfloat = 2.0\ninvalid_nested_config = \""sv
-           << fname_invalid_toml << "\""sv;
+           << "\"\n"
+              "float = 2.0\n"
+              "invalid_nested_config = \""sv
+           << fname_invalid_toml
+           << "\"\n"
+              "lvl1.lvl2.lvl3.nested = \""sv
+           << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
+           << "\"\n"
+              "lvl1.arr = [ 1, 2, \""sv
+           << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
+           << "\"]\n"
+              "lvl1.another_arr = [1, { name = 'test', nested = \""
+           << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
+           << "\" }]"sv;
 
   auto config = wkc::Configuration::LoadTOMLString(toml_str.str());
   EXPECT_THROW(config->LoadNestedTOMLConfiguration("no-such-key"sv),
@@ -611,6 +659,28 @@ TEST(ConfigTest, NestedTOML) {
   EXPECT_THROW(config->LoadNestedTOMLConfiguration("invalid_nested_config"sv),
                std::runtime_error);
   EXPECT_EQ(fname_invalid_toml, config->GetString("invalid_nested_config"));
+
+  // Ensure that loading a nested configuration also works at deeper
+  // hierarchy levels.
+  EXPECT_NO_THROW(
+      config->LoadNestedTOMLConfiguration("lvl1.lvl2.lvl3.nested"sv));
+  EXPECT_DOUBLE_EQ(2.3, config->GetDouble("lvl1.lvl2.lvl3.nested.value2"sv));
+  EXPECT_EQ("this/is/a/relative/path",
+            config->GetString("lvl1.lvl2.lvl3.nested.section1.rel_path"sv));
+
+  // It is not allowed to load a nested configuration directly into an array:
+  EXPECT_THROW(config->LoadNestedTOMLConfiguration("lvl1.arr[2]"),
+               std::runtime_error);
+
+  // One could abuse it, however, to load a nested configuration into a table
+  // that is inside an array... Just because you can doesn't mean you should...
+  EXPECT_NO_THROW(
+      config->LoadNestedTOMLConfiguration("lvl1.another_arr[1].nested"sv));
+  EXPECT_DOUBLE_EQ(2.3,
+                   config->GetDouble("lvl1.another_arr[1].nested.value2"sv));
+  EXPECT_EQ(
+      "this/is/a/relative/path",
+      config->GetString("lvl1.another_arr[1].nested.section1.rel_path"sv));
 }
 
 TEST(ConfigTest, AbsolutePaths) {

@@ -86,6 +86,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   virtual bool GetBoolean(std::string_view key) const = 0;
   virtual bool GetBooleanOrDefault(std::string_view key,
                                    bool default_val) const = 0;
+  virtual void SetBoolean(std::string_view key, bool value) = 0;
 
   virtual double GetDouble(std::string_view key) const = 0;
   virtual double GetDoubleOrDefault(std::string_view key,

@@ -22,7 +22,7 @@
     std::string msg{"Key `"};           \
     msg += (KEY);                       \
     msg += "` does not exist!";         \
-    throw std::runtime_error(msg);      \
+    throw std::runtime_error{msg};      \
   } while (false)
 
 // NOLINTNEXTLINE(*macro-usage)
@@ -35,7 +35,7 @@
     msg += "`, which is of type `";                       \
     msg += TomlTypeName((NODE), (KEY));                   \
     msg += "`!";                                          \
-    throw std::runtime_error(msg);                        \
+    throw std::runtime_error{msg};                        \
   } while (false)
 
 namespace werkzeugkiste::config {
@@ -157,7 +157,7 @@ void Traverse(
         "`array` nodes, but `"};
     msg += path;
     msg += "` is neither!";
-    throw std::logic_error(msg);
+    throw std::logic_error{msg};
     // LCOV_EXCL_STOP
   }
 }
@@ -173,7 +173,7 @@ inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
     msg += " = ";
     msg += std::to_string(value64);
     msg += "` exceeds 32-bit integer range!";
-    throw std::range_error(msg);
+    throw std::range_error{msg};
   }
 
   return static_cast<int32_t>(value64);
@@ -187,7 +187,7 @@ inline std::string BuiltinTypeName() {
       << "` not handled in `BuiltinTypeName(). This is a werkzeugkiste "
          "implementation error. Please report at "
          "https://github.com/snototter/werkzeugkiste/issues";
-  throw std::logic_error(msg.str());
+  throw std::logic_error{msg.str()};
   // LCOV_EXCL_STOP
 }
 
@@ -257,7 +257,7 @@ inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
       "` is not handled in `TomlTypeName`. This is a werkzeugkiste "
       "implementation error. Please report at "
       "https://github.com/snototter/werkzeugkiste/issues";
-  throw std::logic_error(msg);
+  throw std::logic_error{msg};
   // LCOV_EXCL_STOP
 }
 
@@ -335,6 +335,134 @@ int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
   return SafeInteger32Cast(value64, key);
 }
 
+inline std::pair<std::string_view, std::string_view> SplitTomlPath(
+    std::string_view path) {
+  std::size_t pos = path.find_last_of('.');
+  if (pos != std::string_view::npos) {
+    return std::make_pair(path.substr(0, pos), path.substr(pos + 1));
+  }
+
+  return std::make_pair(std::string_view{}, path);
+}
+
+void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
+  WZKLOG_ERROR("FIXME EnsureContainerPathExists 1, key is '{}'", key);
+  if (key.empty()) {
+    // We've reached the root node.
+    return;
+  }
+
+  const auto node = tbl.at_path(key);
+  if (node.is_table() || node.is_array()) {
+    // Node exists and is a container.
+    return;
+  }
+
+  if (node.is_value()) {
+    // Node exists, but is a scalar value.
+    std::string msg{
+        "Invalid key: The path anchestors must consist of tables/arrays, but "
+        "`"};
+    msg += key;
+    msg += "` is of type `";
+    msg += TomlTypeName(node, key);
+    msg += "`!";
+    throw std::runtime_error{msg};
+  }
+
+  // Parent does not exist. We now have to recursively create the
+  // parent path, then create a table here.
+  // But first, ensure that we are not asked to create an array:
+  const auto path = SplitTomlPath(key);
+  WZKLOG_ERROR(
+      "FIXME EnsureContainerPathExists 2, parent is '{}', current is '{}'",
+      path.first, path.second);
+  if (path.second.find('[') != std::string_view::npos) {
+    std::string msg{
+        "Cannot create the requested configuration hierarchy. Creating an "
+        "array at `"};
+    msg += key;
+    msg += "` is not supported!";
+    throw std::runtime_error{msg};
+  }
+
+  if (path.first.empty()) {
+    // Create table at root level.
+    tbl.emplace(key, toml::table{});
+  } else {
+    // Create anchestor path.
+    EnsureContainerPathExists(tbl, path.first);
+    const auto &parent = tbl.at_path(path.first);
+    if (parent.is_table()) {
+      parent.as_table()->emplace(path.second, toml::table{});
+    } else {
+      // Would need to parse the array element index from the key.
+      // node.as_array()->emplace(path.second, toml::table{});
+      std::string msg{
+          "Creating a table as a child of an array is not supported! Check "
+          "configuration parameter `"};
+      msg += key;
+      msg += "`!";
+      throw std::runtime_error{msg};
+    }
+  }
+}
+
+/// @brief Allows setting a TOML parameter to an int64, double, bool, or string.
+/// @tparam T Scalar TOML type to be set.
+/// @tparam TMessage Only needed to avoid separate int32 specialization (as
+/// internally, all integers are stored as 64-bit; if there would be an error,
+/// we don't want to show a confusing "user provided 64-bit" error message).
+/// @param tbl The "root" table.
+/// @param key The fully-qualified "TOML path".
+/// @param value The value to be set.
+template <typename T, typename TMessage = T>
+void ConfigSetScalar(toml::table &tbl, std::string_view key, T value) {
+  const auto path = SplitTomlPath(key);
+  if (ConfigContainsKey(tbl, key)) {
+    const auto node = tbl.at_path(key);
+    if (!node.is<T>()) {
+      std::string msg{"Changing the type is not allowed. Parameter `"};
+      msg += key;
+      msg += "` is `";
+      msg += TomlTypeName(node, key);
+      msg += "`, but scalar is of type `";
+      msg += BuiltinTypeName<TMessage>();
+      msg += "`!";
+      throw std::runtime_error{msg};
+    }
+  } else {
+    EnsureContainerPathExists(tbl, path.first);
+  }
+
+  toml::table *parent =
+      path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
+  if (parent == nullptr) {
+    // LCOV_EXCL_START
+    std::ostringstream msg;
+    msg << "Creating the path hierarchy for `" << key
+        << "` completed without failure, but the parent table `" << path.first
+        << "` is a nullptr. This must be a bug. Please report at"
+           " https://github.com/snototter/werkzeugkiste/issues";
+    throw std::logic_error{msg.str()};
+    // LCOV_EXCL_STOP
+  }
+
+  auto result = parent->insert_or_assign(path.second, value);
+  if (!ConfigContainsKey(tbl, key)) {
+    // LCOV_EXCL_START
+    std::ostringstream msg;
+    msg << "Assigning `" << key << "` = `" << value
+        << "` completed without failure, but the key cannot be looked up. "
+           "The value should have been "
+        << (result.second ? "inserted" : "assigned")
+        << ". This must be a bug. Please report at "
+           "https://github.com/snototter/werkzeugkiste/issues";
+    throw std::logic_error{msg.str()};
+    // LCOV_EXCL_STOP
+  }
+}
+
 template <typename Array, std::size_t... Idx>
 inline auto ArrayToTuple(const Array &arr,
                          std::index_sequence<Idx...> /* indices */) {
@@ -356,7 +484,7 @@ inline void ExtractPointFromTOMLArray(const toml::array &arr,
     std::ostringstream msg;
     msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
         << "D point from a " << arr.size() << "-element array!";
-    throw std::runtime_error(msg.str());
+    throw std::runtime_error{msg.str()};
   }
   for (std::size_t idx = 0; idx < Dim; ++idx) {
     if (arr[idx].is_number()) {
@@ -365,7 +493,7 @@ inline void ExtractPointFromTOMLArray(const toml::array &arr,
         msg << "Invalid parameter `" << key << "`. Dimension [" << idx
             << "] is `" << TomlTypeName(arr, key) << "` instead of `"
             << BuiltinTypeName<Type>() << "`!";
-        throw std::runtime_error(msg.str());
+        throw std::runtime_error{msg.str()};
       }
       point[idx] = Type(*arr[idx].as<Type>());
     }
@@ -413,7 +541,7 @@ inline void ExtractPointFromTOMLTable(const toml::table &tbl,
       std::ostringstream msg;
       msg << "Invalid parameter `" << key << "`. Table entry does not specify `"
           << point_keys[idx] << "`!";
-      throw std::runtime_error(msg.str());
+      throw std::runtime_error{msg.str()};
     }
 
     if (!tbl[point_keys[idx]].is<Type>()) {
@@ -421,7 +549,7 @@ inline void ExtractPointFromTOMLTable(const toml::table &tbl,
       msg << "Invalid parameter `" << key << "`. Dimension `" << point_keys[idx]
           << "` is `" << TomlTypeName(tbl[point_keys[idx]], key)
           << "` instead of `" << BuiltinTypeName<Type>() << "`!";
-      throw std::runtime_error(msg.str());
+      throw std::runtime_error{msg.str()};
     }
 
     point[idx] = Type(*tbl[point_keys[idx]].as<Type>());
@@ -457,10 +585,7 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    std::string msg{"Key `"};
-    msg += key;
-    msg += "` does not exist!";
-    throw std::runtime_error(msg);
+    WZK_CONFIG_RAISE_KEY_ERROR(key);
   }
 
   const auto node = tbl.at_path(key);
@@ -470,7 +595,7 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
     msg += "` must be an array, but is of type `";
     msg += TomlTypeName(node, key);
     msg += "`!";
-    throw std::runtime_error(msg);
+    throw std::runtime_error{msg};
   }
 
   const toml::array &arr = *node.as_array();
@@ -490,7 +615,7 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
           "tables, but `"};
       msg += fqn;
       msg += "` is not!";
-      throw std::runtime_error(msg);
+      throw std::runtime_error{msg};
     }
     ++arr_index;
   }
@@ -512,7 +637,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
     msg += "` must be an array, but is `";
     msg += TomlTypeName(node, key);
     msg += "`!";
-    throw std::runtime_error(msg);
+    throw std::runtime_error{msg};
   }
 
   const toml::array &arr = *node.as_array();
@@ -530,7 +655,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
       msg += "`, but `";
       msg += fqn;
       msg += "` is not!";
-      throw std::runtime_error(msg);
+      throw std::runtime_error{msg};
     }
     ++arr_index;
   }
@@ -550,7 +675,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
     msg += "` must be an array, but is `";
     msg += TomlTypeName(node, key);
     msg += "`!";
-    throw std::runtime_error(msg);
+    throw std::runtime_error{msg};
   }
 
   const toml::array &arr = *node.as_array();
@@ -560,7 +685,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
     msg += "` must be a 2-element array, but has ";
     msg += std::to_string(arr.size());
     msg += ((arr.size() == 1) ? " element!" : " elements!");
-    throw std::runtime_error(msg);
+    throw std::runtime_error{msg};
   }
 
   std::size_t arr_index = 0;
@@ -577,7 +702,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
       msg += "`, but `";
       msg += fqn;
       msg += "` is not!";
-      throw std::runtime_error(msg);
+      throw std::runtime_error{msg};
     }
     ++arr_index;
   }
@@ -726,7 +851,7 @@ class ConfigurationImpl : public Configuration {
           msg += "` must be a string, but is `";
           msg += utils::TomlTypeName(node, fqn);
           msg += "`!";
-          throw std::runtime_error(msg);
+          throw std::runtime_error{msg};
         }
 
         // Check if the path is relative
@@ -757,8 +882,8 @@ class ConfigurationImpl : public Configuration {
     // Sanity check, search string can't be empty
     for (const auto &rep : replacements) {
       if (rep.first.empty()) {
-        throw std::runtime_error(
-            "Search string within `ReplaceStrings()` must not be empty!");
+        throw std::runtime_error{
+            "Search string within `ReplaceStrings()` must not be empty!"};
       }
     }
 
@@ -803,6 +928,10 @@ class ConfigurationImpl : public Configuration {
                            bool default_val) const override {
     return utils::ConfigLookupScalar<bool>(config_, key, /*allow_default=*/true,
                                            default_val);
+  }
+
+  void SetBoolean(std::string_view key, bool value) override {
+    utils::ConfigSetScalar<bool>(config_, key, value);
   }
 
   double GetDouble(std::string_view key) const override {
@@ -903,29 +1032,48 @@ class ConfigurationImpl : public Configuration {
       msg += "` to load a nested configuration must be a string, but is `";
       msg += utils::TomlTypeName(node, key);
       msg += "`!";
-      throw std::runtime_error(msg);
+      throw std::runtime_error{msg};
     }
 
     // To replace the node, we first have to remove it.
     std::string fname = std::string(*node.as_string());
 
     try {
-      auto tbl = toml::parse_file(fname);
-      config_.erase(key);
-      auto result = config_.emplace(key, std::move(tbl));
+      auto nested_tbl = toml::parse_file(fname);
+
+      const auto path = utils::SplitTomlPath(key);
+
+      toml::table *parent = path.first.empty()
+                                ? &config_
+                                : config_.at_path(path.first).as_table();
+      if ((parent == nullptr) ||
+          (path.second[path.second.length() - 1] == ']')) {
+        std::string msg{"The parent of parameter `"};
+        msg += key;
+        msg +=
+            "` to load a nested configuration must be the root or a table "
+            "node!";
+        throw std::runtime_error{msg};
+      }
+
+      parent->erase(path.second);
+      auto result = parent->emplace(path.second, std::move(nested_tbl));
+      for (auto foo : utils::ListTableKeys(
+               *parent->at_path(path.second).as_table(), key)) {
+      }
       if (!result.second) {
         // LCOV_EXCL_START
         std::string msg{"Could not insert nested configuration at `"};
         msg += key;
         msg += "`!";
-        throw std::runtime_error(msg);
+        throw std::runtime_error{msg};
         // LCOV_EXCL_STOP
       }
     } catch (const toml::parse_error &err) {
       std::ostringstream msg;
       msg << "Error parsing TOML from \"" << fname
           << "\": " << err.description() << " (" << err.source().begin << ")!";
-      throw std::runtime_error(msg.str());
+      throw std::runtime_error{msg.str()};
     }
   }
 
@@ -936,7 +1084,7 @@ class ConfigurationImpl : public Configuration {
   }
 
   std::string ToJSON() const override {
-    throw std::logic_error("JSON serialization is not yet supported!");
+    throw std::logic_error{"JSON serialization is not yet supported!"};
   }
 
  private:
@@ -975,7 +1123,7 @@ std::unique_ptr<Configuration> Configuration::LoadTOMLString(
     msg << "Error parsing TOML: " << err.description() << " ("
         << err.source().begin << ")!";
     WZKLOG_ERROR(msg.str());  // TODO inconsistent usage!
-    throw std::runtime_error(msg.str());
+    throw std::runtime_error{msg.str()};
   }
 }
 
