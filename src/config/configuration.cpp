@@ -151,12 +151,14 @@ void Traverse(
       ++index;
     }
   } else {
+    // LCOV_EXCL_START
     std::string msg{
         "Traverse() can only be invoked with either `table` or "
         "`array` nodes, but `"};
     msg += path;
     msg += "` is neither!";
     throw std::logic_error(msg);
+    // LCOV_EXCL_STOP
   }
 }
 
@@ -906,16 +908,18 @@ class ConfigurationImpl : public Configuration {
 
     // To replace the node, we first have to remove it.
     std::string fname = std::string(*node.as_string());
-    config_.erase(key);
 
     try {
       auto tbl = toml::parse_file(fname);
+      config_.erase(key);
       auto result = config_.emplace(key, std::move(tbl));
       if (!result.second) {
+        // LCOV_EXCL_START
         std::string msg{"Could not insert nested configuration at `"};
         msg += key;
         msg += "`!";
         throw std::runtime_error(msg);
+        // LCOV_EXCL_STOP
       }
     } catch (const toml::parse_error &err) {
       std::ostringstream msg;

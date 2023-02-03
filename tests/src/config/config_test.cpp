@@ -542,6 +542,8 @@ TEST(ConfigTest, Pairs) {
     mixed_types = [1, "framboozle"]
 
     a_scalar = 1234
+
+    nested_array = [1, [2, [3, 4]]]
     )toml");
 
   // Key error:
@@ -562,6 +564,10 @@ TEST(ConfigTest, Pairs) {
   EXPECT_THROW(config->GetInteger64Pair("a_scalar"), std::runtime_error);
   EXPECT_THROW(config->GetDoublePair("a_scalar"), std::runtime_error);
 
+  EXPECT_THROW(config->GetInteger32Pair("nested_array"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64Pair("nested_array"), std::runtime_error);
+  EXPECT_THROW(config->GetDoublePair("nested_array"), std::runtime_error);
+
   // Load a valid pair
   auto p32 = config->GetInteger32Pair("int32_pair");
   EXPECT_EQ(1024, p32.first);
@@ -580,10 +586,13 @@ TEST(ConfigTest, Pairs) {
 }
 
 TEST(ConfigTest, NestedTOML) {
+  const auto fname_invalid_toml =
+      wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml"sv);
   std::ostringstream toml_str;
   toml_str << "integer = 3\nnested_config = \""sv
            << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
-           << "\"\nfloat = 2.0"sv;
+           << "\"\nfloat = 2.0\ninvalid_nested_config = \""sv
+           << fname_invalid_toml << "\""sv;
 
   auto config = wkc::Configuration::LoadTOMLString(toml_str.str());
   EXPECT_THROW(config->LoadNestedTOMLConfiguration("no-such-key"sv),
@@ -596,6 +605,12 @@ TEST(ConfigTest, NestedTOML) {
   EXPECT_DOUBLE_EQ(2.3, config->GetDouble("nested_config.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
             config->GetString("nested_config.section1.rel_path"sv));
+
+  // When trying to load an invalid TOML file, an exception should be thrown,
+  // and the parameter should not change.
+  EXPECT_THROW(config->LoadNestedTOMLConfiguration("invalid_nested_config"sv),
+               std::runtime_error);
+  EXPECT_EQ(fname_invalid_toml, config->GetString("invalid_nested_config"));
 }
 
 TEST(ConfigTest, AbsolutePaths) {
