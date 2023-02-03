@@ -14,13 +14,21 @@ namespace wkg = werkzeugkiste::geometry;
 // NOLINTBEGIN
 
 TEST(GeometryUtilsTest, AngleConversion) {
+  // Integer angles are cast to double-precision floats:
   EXPECT_DOUBLE_EQ(0.0, wkg::Deg2Rad(0));
-  EXPECT_DOUBLE_EQ(M_PI_4, wkg::Deg2Rad(45));
-  EXPECT_DOUBLE_EQ(M_PI_2, wkg::Deg2Rad(90));
-  EXPECT_DOUBLE_EQ(M_PI, wkg::Deg2Rad(180));
-  EXPECT_DOUBLE_EQ(M_PI * 2, wkg::Deg2Rad(360));
-  EXPECT_DOUBLE_EQ(M_PI * 4, wkg::Deg2Rad(720));
+  EXPECT_DOUBLE_EQ(0.0, wkg::Deg2Rad(0.0));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d / 4, wkg::Deg2Rad(45));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d / 4, wkg::Deg2Rad(45.0));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d / 2, wkg::Deg2Rad(90));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d / 2, wkg::Deg2Rad(90.0));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d, wkg::Deg2Rad(180));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d, wkg::Deg2Rad(180.0));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d * 2, wkg::Deg2Rad(360));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d * 2, wkg::Deg2Rad(360.0));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d * 4, wkg::Deg2Rad(720));
+  EXPECT_DOUBLE_EQ(wkg::constants::pi_d * 4, wkg::Deg2Rad(720.0));
 
+  // Back-and-forth conversion:
   EXPECT_DOUBLE_EQ(0.0, wkg::Rad2Deg(wkg::Deg2Rad(0)));
   EXPECT_DOUBLE_EQ(45, wkg::Rad2Deg(wkg::Deg2Rad(45)));
   EXPECT_DOUBLE_EQ(90, wkg::Rad2Deg(wkg::Deg2Rad(90)));
@@ -29,6 +37,22 @@ TEST(GeometryUtilsTest, AngleConversion) {
   EXPECT_DOUBLE_EQ(270, wkg::Rad2Deg(wkg::Deg2Rad(270)));
   EXPECT_DOUBLE_EQ(360, wkg::Rad2Deg(wkg::Deg2Rad(360)));
   EXPECT_DOUBLE_EQ(480, wkg::Rad2Deg(wkg::Deg2Rad(480)));
+
+  // Single-precision floats:
+  EXPECT_FLOAT_EQ(0.0F, wkg::Deg2Rad(0.0F));
+  EXPECT_FLOAT_EQ(wkg::constants::pi_f / 4, wkg::Deg2Rad(45.0F));
+  EXPECT_FLOAT_EQ(wkg::constants::pi_f / 2, wkg::Deg2Rad(90.0F));
+  EXPECT_FLOAT_EQ(wkg::constants::pi_f, wkg::Deg2Rad(180.0F));
+  EXPECT_FLOAT_EQ(wkg::constants::pi_f * 2, wkg::Deg2Rad(360.0F));
+  EXPECT_FLOAT_EQ(wkg::constants::pi_f * 4, wkg::Deg2Rad(720.0F));
+  EXPECT_FLOAT_EQ(0.0F, wkg::Rad2Deg(wkg::Deg2Rad(0.0F)));
+  EXPECT_FLOAT_EQ(45.0F, wkg::Rad2Deg(wkg::Deg2Rad(45.0F)));
+  EXPECT_FLOAT_EQ(90.0F, wkg::Rad2Deg(wkg::Deg2Rad(90.0F)));
+  EXPECT_FLOAT_EQ(135.0F, wkg::Rad2Deg(wkg::Deg2Rad(135.0F)));
+  EXPECT_FLOAT_EQ(180.0F, wkg::Rad2Deg(wkg::Deg2Rad(180.0F)));
+  EXPECT_FLOAT_EQ(270.0F, wkg::Rad2Deg(wkg::Deg2Rad(270.0F)));
+  EXPECT_FLOAT_EQ(360.0F, wkg::Rad2Deg(wkg::Deg2Rad(360.0F)));
+  EXPECT_FLOAT_EQ(480.0F, wkg::Rad2Deg(wkg::Deg2Rad(480.0F)));
 }
 
 TEST(GeometryUtilsTest, FloatingPointZero) {
