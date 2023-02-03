@@ -26,16 +26,16 @@
   } while (false)
 
 // NOLINTNEXTLINE(*macro-usage)
-#define WZK_CONFIG_RAISE_TOML_TYPE_ERROR(KEY, NODE, TYPE) \
-  do {                                                    \
-    std::string msg{"Invalid type `"};                    \
-    msg += BuiltinTypeName<TYPE>();                       \
-    msg += "` used to query key `";                       \
-    msg += (KEY);                                         \
-    msg += "`, which is of type `";                       \
-    msg += TomlTypeName((NODE), (KEY));                   \
-    msg += "`!";                                          \
-    throw std::runtime_error{msg};                        \
+#define WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(KEY, NODE, TYPE) \
+  do {                                                           \
+    std::string msg{"Invalid type `"};                           \
+    msg += BuiltinTypeName<TYPE>();                              \
+    msg += "` used to query key `";                              \
+    msg += (KEY);                                                \
+    msg += "`, which is of type `";                              \
+    msg += TomlTypeName((NODE), (KEY));                          \
+    msg += "`!";                                                 \
+    throw std::runtime_error{msg};                               \
   } while (false)
 
 namespace werkzeugkiste::config {
@@ -54,6 +54,9 @@ inline std::string FullyQualifiedPath(const toml::key &key,
   return std::string{key.str()};
 }
 
+/// Returns the "fully-qualified TOML path" for the given array index.
+/// For example, `path = section1.arr` & `array_index = 3` results
+/// in `section1.arr[3]`.
 inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
                                                   std::string_view path) {
   std::string fqn{path};
@@ -93,6 +96,7 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
   return keys;
 }
 
+// TODO doc
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
                                        std::string_view path) {
@@ -162,6 +166,8 @@ void Traverse(
   }
 }
 
+/// Casts the value if the given 64-bit integer can be safely cast into a
+/// 32-bit integer. Otherwise, a std::range_error will be thrown.
 inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
   constexpr auto min32 =
       static_cast<int64_t>(std::numeric_limits<int32_t>::min());
@@ -179,6 +185,7 @@ inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
   return static_cast<int32_t>(value64);
 }
 
+/// Utility to print the name of built-in types.
 template <typename T>
 inline std::string BuiltinTypeName() {
   // LCOV_EXCL_START
@@ -212,6 +219,7 @@ inline std::string BuiltinTypeName<std::string>() {
   return "string";
 }
 
+/// Utility to print the type name of a toml::node/toml::node_view.
 template <typename NodeView>
 inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
   if (node.is_table()) {
@@ -269,62 +277,51 @@ inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
   return node.is_value() || node.is_table() || node.is_array();
 }
 
-template <typename T>
-T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
-                     bool allow_default = false, T default_val = T{}) {
+/// Looks up the value at the given key (fully-qualified TOML path).
+/// If the key does not exist, a std::runtime_error will be raised unless
+/// `allow_default` is true (in which case the `default_val` will be
+/// returned instead).
+template <typename Type, typename DefaultType = Type>
+Type ConfigLookupScalar(const toml::table &tbl, std::string_view key,
+                        bool allow_default = false,
+                        DefaultType default_val = DefaultType{}) {
   if (!ConfigContainsKey(tbl, key)) {
     if (allow_default) {
-      return default_val;
+      return Type{default_val};
     }
 
     WZK_CONFIG_RAISE_KEY_ERROR(key);
   }
 
   const auto node = tbl.at_path(key);
-  if (node.is<T>()) {
-    return T{*node.as<T>()};
+  if (node.is<Type>()) {
+    return Type{*node.as<Type>()};
   }
 
-  WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, T);
+  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, Type);
 }
 
 /// Specialization needed for 32-bit integers, because TOML works with
 /// 64-bit integers.
 template <>
-int32_t ConfigLookupScalar<int32_t>(const toml::table &tbl,
-                                    std::string_view key, bool allow_default,
-                                    int32_t default_val) {
+int32_t ConfigLookupScalar<int32_t, int32_t>(const toml::table &tbl,
+                                             std::string_view key,
+                                             bool allow_default,
+                                             int32_t default_val) {
   const int64_t value64 = ConfigLookupScalar<int64_t>(
       tbl, key, allow_default, static_cast<int64_t>(default_val));
   return SafeInteger32Cast(value64, key);
 }
 
-std::string ConfigLookupString(const toml::table &tbl, std::string_view key,
-                               bool allow_default = false,
-                               std::string_view default_val = {}) {
-  if (!ConfigContainsKey(tbl, key)) {
-    if (allow_default) {
-      return std::string(default_val);
-    }
-
-    WZK_CONFIG_RAISE_KEY_ERROR(key);
-  }
-
-  const auto node = tbl.at_path(key);
-  if (node.is_string()) {
-    return std::string{*node.as_string()};
-  }
-
-  WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, std::string);
-}
-
+/// Extracts the value from the toml::node or throws an error if the type
+/// is not correct.
 template <typename T>
 T CastScalar(const toml::node &node, std::string_view key) {
   if (node.is<T>()) {
     return T(*node.as<T>());
   }
 
-  WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, T);
+  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
 
 /// Specialization for 32-bit integers, because internally, integers are
@@ -335,8 +332,11 @@ int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
   return SafeInteger32Cast(value64, key);
 }
 
+/// Splits a fully-qualified TOML path into <anchestor, child>.
+/// This does *not* handle arrays!
 inline std::pair<std::string_view, std::string_view> SplitTomlPath(
     std::string_view path) {
+  // TODO throw an error if the last character is a ']'
   std::size_t pos = path.find_last_of('.');
   if (pos != std::string_view::npos) {
     return std::make_pair(path.substr(0, pos), path.substr(pos + 1));
@@ -345,8 +345,11 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
   return std::make_pair(std::string_view{}, path);
 }
 
+/// Creates all missing nodes (tables).
+/// For example, if `key = "path.to.a.value"`, then this recursive
+/// function will create 4 tables: "path", "path.to", "path.to.a", and
+/// "path.to.a.value".
 void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
-  WZKLOG_ERROR("FIXME EnsureContainerPathExists 1, key is '{}'", key);
   if (key.empty()) {
     // We've reached the root node.
     return;
@@ -374,9 +377,6 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   // parent path, then create a table here.
   // But first, ensure that we are not asked to create an array:
   const auto path = SplitTomlPath(key);
-  WZKLOG_ERROR(
-      "FIXME EnsureContainerPathExists 2, parent is '{}', current is '{}'",
-      path.first, path.second);
   if (path.second.find('[') != std::string_view::npos) {
     std::string msg{
         "Cannot create the requested configuration hierarchy. Creating an "
@@ -465,29 +465,36 @@ void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
   }
 }
 
+/// Utility to turn a std::array into a std::tuple.
 template <typename Array, std::size_t... Idx>
 inline auto ArrayToTuple(const Array &arr,
                          std::index_sequence<Idx...> /* indices */) {
   return std::make_tuple(arr[Idx]...);
 }
 
+/// Utility to turn a std::array into a std::tuple.
 template <typename Type, std::size_t Num>
 inline auto ArrayToTuple(const std::array<Type, Num> &arr) {
   return ArrayToTuple(arr, std::make_index_sequence<Num>{});
 }
 
-// template <typename Tuple>
-// inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
+/// Extracts a single Dim-dimensional point from the given
+/// toml::array into the `point` std::array.
 template <typename Type, std::size_t Dim>
 inline void ExtractPointFromTOMLArray(const toml::array &arr,
                                       std::string_view key,
                                       std::array<Type, Dim> &point) {
+  // The array must have at least Dim entries - more are also allowed, as
+  // they will just be ignored.
   if (arr.size() < Dim) {
     std::ostringstream msg;
     msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
         << "D point from a " << arr.size() << "-element array!";
     throw std::runtime_error{msg.str()};
   }
+
+  // The first Dim entries of the array must be of the
+  // correct data type in order to extract them for the point.
   for (std::size_t idx = 0; idx < Dim; ++idx) {
     if (arr[idx].is_number()) {
       if (!arr[idx].is<Type>()) {
@@ -497,11 +504,13 @@ inline void ExtractPointFromTOMLArray(const toml::array &arr,
             << BuiltinTypeName<Type>() << "`!";
         throw std::runtime_error{msg.str()};
       }
-      point[idx] = Type(*arr[idx].as<Type>());
+      point[idx] = Type{*arr[idx].as<Type>()};
     }
   }
 }
 
+/// Extracts a single Dim-dimensional point as std::tuple from the given
+/// toml::array.
 template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
 inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
   using CoordType = std::tuple_element_t<0, Tuple>;
@@ -528,6 +537,10 @@ inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
   }
 }
 
+/// Extracts a single Dim-dimensional point from the given
+/// toml::table into the `point` std::array. The table must
+/// have "x", "y", ... entries which are used to look up the
+/// corresponding point coordinates.
 template <typename Type, std::size_t Dim>
 inline void ExtractPointFromTOMLTable(const toml::table &tbl,
                                       std::string_view key,
@@ -541,8 +554,9 @@ inline void ExtractPointFromTOMLTable(const toml::table &tbl,
   for (std::size_t idx = 0; idx < Dim; ++idx) {
     if (!tbl.contains(point_keys[idx])) {
       std::ostringstream msg;
-      msg << "Invalid parameter `" << key << "`. Table entry does not specify `"
-          << point_keys[idx] << "`!";
+      msg << "Invalid parameter `" << key
+          << "`. Table entry does not specify the `" << point_keys[idx]
+          << "` coordinate!";
       throw std::runtime_error{msg.str()};
     }
 
@@ -554,10 +568,12 @@ inline void ExtractPointFromTOMLTable(const toml::table &tbl,
       throw std::runtime_error{msg.str()};
     }
 
-    point[idx] = Type(*tbl[point_keys[idx]].as<Type>());
+    point[idx] = Type{*tbl[point_keys[idx]].as<Type>()};
   }
 }
 
+/// Extracts a single Dim-dimensional point as std::tuple from the given
+/// toml::table.
 template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
 inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
   using CoordType = std::tuple_element_t<0, Tuple>;
@@ -584,6 +600,7 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
   }
 }
 
+// TODO doc
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
@@ -664,6 +681,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   return scalars;
 }
 
+// TODO doc
 template <typename T>
 std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
@@ -712,6 +730,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 }
 }  // namespace utils
 
+// TODO doc
 class SingleKeyMatcherImpl : public SingleKeyMatcher {
  public:
   explicit SingleKeyMatcherImpl(std::string &&pattern)
@@ -777,6 +796,7 @@ class SingleKeyMatcherImpl : public SingleKeyMatcher {
   }
 };
 
+// TODO doc
 class MultiKeyMatcherImpl : public MultiKeyMatcher {
  public:
   explicit MultiKeyMatcherImpl(const std::vector<std::string_view> &patterns) {
@@ -983,13 +1003,15 @@ class ConfigurationImpl : public Configuration {
   }
 
   std::string GetString(std::string_view key) const override {
-    return utils::ConfigLookupString(config_, key, /*allow_default=*/false);
+    using namespace std::string_view_literals;
+    return utils::ConfigLookupScalar<std::string, std::string_view>(
+        config_, key, /*allow_default=*/false, ""sv);
   }
 
   std::string GetStringOrDefault(std::string_view key,
                                  std::string_view default_val) const override {
-    return utils::ConfigLookupString(config_, key, /*allow_default=*/true,
-                                     default_val);
+    return utils::ConfigLookupScalar<std::string, std::string_view>(
+        config_, key, /*allow_default=*/true, default_val);
   }
 
   void SetString(std::string_view key, std::string_view value) override {
@@ -1128,9 +1150,6 @@ class ConfigurationImpl : public Configuration {
 
     return true;
   }
-
-  // TODO registered_string_replacements_{};
-  //  std::vector<std::string> path_parameters_{};
 };
 
 std::unique_ptr<Configuration> Configuration::LoadTOMLString(
@@ -1142,7 +1161,7 @@ std::unique_ptr<Configuration> Configuration::LoadTOMLString(
     std::ostringstream msg;
     msg << "Error parsing TOML: " << err.description() << " ("
         << err.source().begin << ")!";
-    WZKLOG_ERROR(msg.str());  // TODO inconsistent usage!
+    WZKLOG_ERROR(msg.str());  // TODO inconsistent usage across library!!
     throw std::runtime_error{msg.str()};
   }
 }

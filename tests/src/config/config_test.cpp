@@ -274,7 +274,7 @@ TEST(ConfigTest, SetScalarTypes2) {
   EXPECT_EQ(3, config->GetInteger32("new-values.int32"sv));
   EXPECT_EQ(64, config->GetInteger32("new-values.int64"sv));
   EXPECT_DOUBLE_EQ(1e23, config->GetDouble("new-values.float"sv));
-  EXPECT_EQ("It works", config->GetString("new-values.str"sv));
+  EXPECT_EQ("It works!", config->GetString("new-values.str"sv));
 }
 
 TEST(ConfigTest, Keys1) {
