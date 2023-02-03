@@ -42,17 +42,18 @@ class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
   virtual bool MatchAny(std::string_view key) const = 0;
 };
 
+/// @brief Encapsulates configuration data.
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
-  /// Loads the configuration from the given file.
-  ///
-  /// TODO runtime_error if file doesn't exits or toml is malformed
-
-  // TODO must be a unique_ptr, implement copy/move ctor/assignments!
+  /// @brief Loads a TOML configuration from the given file.
+  /// @param filename Path to the `.toml` file.
   static std::unique_ptr<Configuration> LoadTOMLFile(std::string_view filename);
 
+  /// @brief Loads a TOML configuration from a string.
+  /// @param toml_string String representation of the TOML config.
   static std::unique_ptr<Configuration> LoadTOMLString(
       std::string_view toml_string);
+
   //   static std::unique_ptr<Configuration> LoadJSON(std::string_view
   //   filename);
 
@@ -62,35 +63,37 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   Configuration &operator=(const Configuration &) = delete;
   Configuration &operator=(Configuration &&) = delete;
 
-  /// Adjusts the given parameters to hold either an absolute file path, or the
-  /// result of "base_path / <param>" if they initially held a relative file
-  /// path.
-  ///
-  /// Args:
-  ///   base_path: Base path to be prepended to relative file paths.
-  ///   parameters: A list of parameter names / patterns. The wildcard '*' is
+  /// @brief Adjusts the given parameters to hold either an absolute file path,
+  /// or the result of "base_path / <param>" if they initially held a relative
+  /// file path.
+  /// @param base_path Base path to be prepended to relative file paths.
+  /// @param parameters A list of parameter names / patterns. The wildcard '*'
+  /// is
   ///     also supported. For example, valid names are: "my-param",
   ///     "files.video1", etc. Valid patterns would be "*path",
   ///     "some.nested.*.filename", etc.
-  ///
-  /// Returns:
-  ///   True if any parameter has been adjusted.
+  /// @return True if any parameter has been adjusted.
   virtual bool AdjustRelativePaths(
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) = 0;
 
-  // TODO doc
-  /// Visits all string parameters and replaces any occurrence of the given
-  /// needle/replacement pairs. Returns True if any parameter has been changed.
+  /// @brief Visits all string parameters and replaces any occurrence of the
+  /// given needle/replacement pairs.
+  /// @param replacements List of `<search, replacement>` pairs.
+  /// @return True if any placeholder has actually been replaced.
   virtual bool ReplaceStringPlaceholders(
       const std::vector<std::pair<std::string_view, std::string_view>>
           &replacements) = 0;
 
-  /// Returns true if all configuration keys and values match exactly.
+  /// @brief Returns true if all configuration keys and values match exactly.
   virtual bool Equals(const Configuration *other) const = 0;
 
-  /// Returns a list of all (fully-qualified) parameter names, e.g.
-  /// "some_table.param_x".
+  /// @brief Returns a list of all (fully-qualified) parameter names.
+  ///
+  /// Note that this list does *not* contain a key for each array
+  /// element. Only if another dictionary/table is within the array,
+  /// the corresponding entry will be included (for example,
+  /// `arr[3].name`)
   virtual std::vector<std::string> ParameterNames() const = 0;
 
   virtual bool GetBoolean(std::string_view key) const = 0;
@@ -146,19 +149,18 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //    virtual std::unique_ptr<Configuration> GetGroup(std::string_view
   //    group_name) const = 0;
 
-  /// Loads a nested TOML configuration.
+  /// @brief Loads a nested TOML configuration.
   ///
   /// For example, if your configuration had a field "storage", which
   /// should be defined in a separate (e.g. machine-dependent) configuration
   /// file, the "main" config could define it as `storage = "path/to/conf.toml"`
   /// This function will then load this TOML and replace `storage` by the
   /// loaded configuration.
-  /// Suppose that "conf.toml" defines "location = ..." and "duration = ...".
-  /// Then, after loading, you can access these as "storage.location" and
-  /// "storage.duration".
+  /// Suppose that `conf.toml` defines `location = ...` and `duration = ...`.
+  /// Then, after loading, you can access these as `"storage.location"` and
+  /// `"storage.duration"`.
   ///
-  /// Args:
-  ///   key: Parameter name (fully-qualified TOML path) which holds the
+  /// @param key Parameter name (fully-qualified TOML path) which holds the
   ///     file name of the nested TOML configuration (must be of type
   ///     string)
   virtual void LoadNestedTOMLConfiguration(std::string_view key) = 0;
@@ -167,10 +169,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO do we need std::map<std::string, std::variant<int64_t, double,
   // std::string>> GetDictionary / GetTable
 
-  /// Returns a TOML-formatted string of this configuration.
+  /// @brief Returns a TOML-formatted string of this configuration.
   virtual std::string ToTOML() const = 0;
 
-  /// Returns a JSON-formatted string of this configuration.
+  /// @brief Returns a JSON-formatted string of this configuration.
   virtual std::string ToJSON() const = 0;
 
  protected:
