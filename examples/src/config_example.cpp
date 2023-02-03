@@ -19,7 +19,7 @@ int main(int /* argc */, char** /* argv */) {
             << "--------------------------------------------------\n"
             << std::endl;
 
-  auto config = wkc::Configuration::LoadTomlString(R"toml(
+  auto config = wkc::Configuration::LoadTOMLString(R"toml(
     an_int = 3
     a_str = 'foo'
     a_float = 1.234
@@ -57,12 +57,12 @@ int main(int /* argc */, char** /* argv */) {
   // config->ParameterNames();  // TODO
 
   try {
-    config = wkc::Configuration::LoadTomlFile("no-such-file.toml");
+    config = wkc::Configuration::LoadTOMLFile("no-such-file.toml");
   } catch (const std::runtime_error&) {
     // TODO
   }
 
-  config = wkc::Configuration::LoadTomlFile(
+  config = wkc::Configuration::LoadTOMLFile(
       wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
   const auto params = config->ParameterNames();
   std::cout << "Parameter names:\n";
@@ -70,9 +70,10 @@ int main(int /* argc */, char** /* argv */) {
     std::cout << "  " << name << std::endl;
   }
 
-  config->EnsureAbsolutePaths("CUSTOM/BASE/PATH",
-                              {"*name"sv, "*.regex*"sv, "strings.str5"sv,
-                               "strings.str[1-3|7]?"sv, "products[2].color"sv});
+  // config->EnsureAbsolutePaths("CUSTOM/BASE/PATH",
+  //                             {"*name"sv, "*.regex*"sv, "strings.str5"sv,
+  //                              "strings.str[1-3|7]?"sv,
+  //                              "products[2].color"sv});
 
   // config->GetDouble("an_int"); //TODO this also throws
   try {
@@ -100,7 +101,7 @@ int main(int /* argc */, char** /* argv */) {
               << config->GetInteger64("integral-numbers.int64") << std::endl;
   }
 
-  const auto list_config = wkc::Configuration::LoadTomlString(R"toml(
+  const auto list_config = wkc::Configuration::LoadTOMLString(R"toml(
     ints32 = [1, 2, 3, 4, 5, 6, -7, -8]
 
     ints64 = [0, 2147483647, 2147483648, -2147483648, -2147483649]

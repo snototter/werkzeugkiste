@@ -12,6 +12,7 @@
 #include <string_view>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 /// Utilities to handle configurations.
@@ -48,9 +49,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// TODO runtime_error if file doesn't exits or toml is malformed
 
   // TODO must be a unique_ptr, implement copy/move ctor/assignments!
-  static std::unique_ptr<Configuration> LoadTomlFile(std::string_view filename);
+  static std::unique_ptr<Configuration> LoadTOMLFile(std::string_view filename);
 
-  static std::unique_ptr<Configuration> LoadTomlString(
+  static std::unique_ptr<Configuration> LoadTOMLString(
       std::string_view toml_string);
   //   static std::unique_ptr<Configuration> LoadJSON(std::string_view
   //   filename);
@@ -61,20 +62,19 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   Configuration &operator=(const Configuration &) = delete;
   Configuration &operator=(Configuration &&) = delete;
 
-  /// @brief Registers the given parameter name for future replacement (in
-  /// `MakePathsAbsolute`).
-  /// @param parameter Name of the parameter, e.g. "storage.folder",
-  /// "input_filename", ...
-  // virtual void RegisterPathParameter(std::string_view param_name) = 0;
-
-  /// @brief Ensures that all registered path parameters are absolute.
-  /// @return Number of adjusted parameters.
-  // virtual std::size_t MakePathsAbsolute(std::string_view base_path) = 0;
-
-  // True if anything has been replaced
+  /// Visits all parameter names and ensures that they hold absolute paths.
+  /// Returns true if any parameter has been changed.
+  /// TODO wildcard
+  /// TODO Example
   virtual bool EnsureAbsolutePaths(
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) = 0;
+
+  /// Visits all string parameters and replaces any occurrence of the given
+  /// needle/replacement pairs. Returns True if any parameter has been changed.
+  virtual bool ReplaceStringPlaceholders(
+      const std::vector<std::pair<std::string_view, std::string_view>>
+          &replacements) = 0;
 
   // keys and values match exactly
   virtual bool Equals(const Configuration *other) const = 0;
@@ -103,10 +103,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   virtual std::string GetStringOrDefault(
       std::string_view key, std::string_view default_val) const = 0;
 
+  virtual std::pair<double, double> GetDoublePair(
+      std::string_view key) const = 0;
   virtual std::vector<double> GetDoubleList(std::string_view key) const = 0;
 
+  virtual std::pair<int32_t, int32_t> GetInteger32Pair(
+      std::string_view key) const = 0;
   virtual std::vector<int32_t> GetInteger32List(std::string_view key) const = 0;
 
+  virtual std::pair<int64_t, int64_t> GetInteger64Pair(
+      std::string_view key) const = 0;
   virtual std::vector<int64_t> GetInteger64List(std::string_view key) const = 0;
 
   virtual std::vector<std::string> GetStringList(
@@ -125,17 +131,13 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //    virtual std::unique_ptr<Configuration> GetGroup(std::string_view
   //    group_name) const = 0;
 
-  // TODO LoadNestedTOMLConfiguration(param_name)
+  // TODO doc
+  virtual void LoadNestedTOMLConfiguration(std::string_view key) = 0;
   // TODO LoadNestedJSONConfiguration(param_name)
   // TODO LoadNestedLibconfigConfiguration
 
-  // TODO GetIntegerPair (e.g. for a size2d)
-  // TODO GetDoublePair
   // TODO do we need std::map<std::string, std::variant<int64_t, double,
   // std::string>> GetDictionary / GetTable
-
-  // TODO
-  // https://github.com/snototter/vitocpp/blob/master/src/cpp/vcp_config/config_params.h
 
   /// Returns a TOML-formatted string of this configuration.
   virtual std::string ToTOML() const = 0;

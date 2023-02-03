@@ -2,7 +2,9 @@
 #include <toml++/toml.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
+#include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/logging.h>
+#include <werkzeugkiste/strings/strings.h>
 
 #include <array>
 #include <functional>
@@ -154,7 +156,6 @@ void Traverse(
         "`array` nodes, but `"};
     msg += path;
     msg += "` is neither!";
-    WZKLOG_ERROR(msg);
     throw std::logic_error(msg);
   }
 }
@@ -324,6 +325,8 @@ T CastScalar(const toml::node &node, std::string_view key) {
   WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
 
+/// Specialization for 32-bit integers, because internally, integers are
+/// stored as 64-bit integers.
 template <>
 int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
   const int64_t value64 = CastScalar<int64_t>(node, key);
@@ -518,8 +521,9 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
     if (value.is_value()) {
       scalars.push_back(CastScalar<T>(value, fqn));
     } else {
-      std::string msg{
-          "Invalid list configuration: All entries must be of scalar type `"};
+      std::string msg{"Invalid list configuration `"};
+      msg += key;
+      msg += "`: All entries must be of scalar type `";
       msg += BuiltinTypeName<T>();
       msg += "`, but `";
       msg += fqn;
@@ -529,6 +533,53 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
     ++arr_index;
   }
   return scalars;
+}
+
+template <typename T>
+std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
+  if (!ConfigContainsKey(tbl, key)) {
+    WZK_CONFIG_RAISE_KEY_ERROR(key);
+  }
+
+  const auto &node = tbl.at_path(key);
+  if (!node.is_array()) {
+    std::string msg{"Invalid pair configuration: Parameter `"};
+    msg += key;
+    msg += "` must be an array, but is `";
+    msg += TomlTypeName(node, key);
+    msg += "`!";
+    throw std::runtime_error(msg);
+  }
+
+  const toml::array &arr = *node.as_array();
+  if (arr.size() != 2) {
+    std::string msg{"Invalid pair configuration: Parameter `"};
+    msg += key;
+    msg += "` must be a 2-element array, but has ";
+    msg += std::to_string(arr.size());
+    msg += ((arr.size() == 1) ? " element!" : " elements!");
+    throw std::runtime_error(msg);
+  }
+
+  std::size_t arr_index = 0;
+  std::array<T, 2> scalars;
+  for (auto &&value : arr) {
+    const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
+    if (value.is_value()) {
+      scalars[arr_index] = CastScalar<T>(value, fqn);
+    } else {
+      std::string msg{"Invalid pair configuration `"};
+      msg += key;
+      msg += "`: Both entries must be of scalar type `";
+      msg += BuiltinTypeName<T>();
+      msg += "`, but `";
+      msg += fqn;
+      msg += "` is not!";
+      throw std::runtime_error(msg);
+    }
+    ++arr_index;
+  }
+  return std::make_pair(scalars[0], scalars[1]);
 }
 }  // namespace utils
 
@@ -661,17 +712,75 @@ class ConfigurationImpl : public Configuration {
     };
 
     bool replaced{false};
-    auto func = [replaced, to_replace, base_path](
-                    toml::node &node, std::string_view fqn) mutable -> void {
-      if (node.is_string() && to_replace(fqn)) {
-        auto &str = *node.as_string();
-        // WZKLOG_ERROR("Will replace param {:s}, was previously {:s}", fqn,
-        // str);
-        str = "*******"sv;
-        // TODO 1) fullfile basepath! must link to file utils
-        // TODO 2) check special character handling (backslash, umlauts,
-        // whitespace)
-        replaced = true;
+    bool *rep_ptr = &replaced;
+    auto func = [rep_ptr, to_replace, base_path](toml::node &node,
+                                                 std::string_view fqn) -> void {
+      if (to_replace(fqn)) {
+        // Ensure that the provided key/pattern did not pick up a wrong node by
+        // mistake:
+        if (!node.is_string()) {
+          std::string msg{"Inside `EnsureAbsolutePaths()`, path parameter `"};
+          msg += fqn;
+          msg += "` must be a string, but is `";
+          msg += utils::TomlTypeName(node, fqn);
+          msg += "`!";
+          throw std::runtime_error(msg);
+        }
+
+        // Check if the path is relative
+        const std::string param_str = utils::CastScalar<std::string>(node, fqn);
+        const bool is_file_url = strings::StartsWith(param_str, "file://");
+        std::string path = is_file_url ? param_str.substr(7) : param_str;
+
+        if (!files::IsAbsolute(path)) {
+          auto &str = *node.as_string();
+          const std::string abspath =
+              files::FullFile(base_path, std::string_view(path));
+          if (is_file_url) {
+            str = "file://" + abspath;
+          } else {
+            str = abspath;
+          }
+          *rep_ptr = true;
+        }
+      }
+    };
+    utils::Traverse(config_, ""sv, func);
+    return replaced;
+  }
+
+  bool ReplaceStringPlaceholders(
+      const std::vector<std::pair<std::string_view, std::string_view>>
+          &replacements) override {
+    // Sanity check, search string can't be empty
+    for (const auto &rep : replacements) {
+      if (rep.first.empty()) {
+        throw std::runtime_error(
+            "Search string within `ReplaceStrings()` must not be empty!");
+      }
+    }
+
+    using namespace std::string_view_literals;
+    bool replaced{false};
+    bool *rep_ptr = &replaced;
+    auto func = [rep_ptr, replacements](toml::node &node,
+                                        std::string_view fqn) -> void {
+      if (node.is_string()) {
+        std::string param_str = utils::CastScalar<std::string>(node, fqn);
+        bool matched{false};
+        for (const auto &rep : replacements) {
+          std::size_t pos{0};
+          while ((pos = param_str.find(rep.first, pos)) != std::string::npos) {
+            param_str.replace(pos, rep.first.length(), rep.second);
+            matched = true;
+          }
+        }
+
+        if (matched) {
+          auto &str = *node.as_string();
+          str = param_str;
+          *rep_ptr = true;
+        }
       }
     };
     utils::Traverse(config_, ""sv, func);
@@ -737,12 +846,26 @@ class ConfigurationImpl : public Configuration {
                                      default_val);
   }
 
+  std::pair<double, double> GetDoublePair(std::string_view key) const override {
+    return utils::GetScalarPair<double>(config_, key);
+  }
+
   std::vector<double> GetDoubleList(std::string_view key) const override {
     return utils::GetScalarList<double>(config_, key);
   }
 
+  std::pair<int32_t, int32_t> GetInteger32Pair(
+      std::string_view key) const override {
+    return utils::GetScalarPair<int32_t>(config_, key);
+  }
+
   std::vector<int32_t> GetInteger32List(std::string_view key) const override {
     return utils::GetScalarList<int32_t>(config_, key);
+  }
+
+  std::pair<int64_t, int64_t> GetInteger64Pair(
+      std::string_view key) const override {
+    return utils::GetScalarPair<int64_t>(config_, key);
   }
 
   std::vector<int64_t> GetInteger64List(std::string_view key) const override {
@@ -762,6 +885,44 @@ class ConfigurationImpl : public Configuration {
       std::string_view key) const override {
     return utils::GetPoints<std::tuple<int32_t, int32_t, int32_t>>(config_,
                                                                    key);
+  }
+
+  void LoadNestedTOMLConfiguration(std::string_view key) override {
+    // TODO refactor (TOML/JSON --> function handle)
+
+    if (!utils::ConfigContainsKey(config_, key)) {
+      WZK_CONFIG_RAISE_KEY_ERROR(key);
+    }
+
+    const auto &node = config_.at_path(key);
+    if (!node.is_string()) {
+      std::string msg{"Parameter `"};
+      msg += key;
+      msg += "` to load a nested configuration must be a string, but is `";
+      msg += utils::TomlTypeName(node, key);
+      msg += "`!";
+      throw std::runtime_error(msg);
+    }
+
+    // To replace the node, we first have to remove it.
+    std::string fname = std::string(*node.as_string());
+    config_.erase(key);
+
+    try {
+      auto tbl = toml::parse_file(fname);
+      auto result = config_.emplace(key, std::move(tbl));
+      if (!result.second) {
+        std::string msg{"Could not insert nested configuration at `"};
+        msg += key;
+        msg += "`!";
+        throw std::runtime_error(msg);
+      }
+    } catch (const toml::parse_error &err) {
+      std::ostringstream msg;
+      msg << "Error parsing TOML from \"" << fname
+          << "\": " << err.description() << " (" << err.source().begin << ")!";
+      throw std::runtime_error(msg.str());
+    }
   }
 
   std::string ToTOML() const override {
@@ -800,7 +961,7 @@ class ConfigurationImpl : public Configuration {
   //  std::vector<std::string> path_parameters_{};
 };
 
-std::unique_ptr<Configuration> Configuration::LoadTomlString(
+std::unique_ptr<Configuration> Configuration::LoadTOMLString(
     std::string_view toml_string) {
   try {
     toml::table tbl = toml::parse(toml_string);
@@ -809,15 +970,14 @@ std::unique_ptr<Configuration> Configuration::LoadTomlString(
     std::ostringstream msg;
     msg << "Error parsing TOML: " << err.description() << " ("
         << err.source().begin << ")!";
-    WZKLOG_ERROR(msg.str());
+    WZKLOG_ERROR(msg.str());  // TODO inconsistent usage!
     throw std::runtime_error(msg.str());
   }
 }
 
-std::unique_ptr<Configuration> Configuration::LoadTomlFile(
+std::unique_ptr<Configuration> Configuration::LoadTOMLFile(
     std::string_view filename) {
-  const std::string toml = werkzeugkiste::files::CatAsciiFile(filename);
-  return Configuration::LoadTomlString(toml);
+  return Configuration::LoadTOMLString(files::CatAsciiFile(filename));
 }
 
 // std::unique_ptr<Configuration> Configuration::LoadJSON(std::string_view

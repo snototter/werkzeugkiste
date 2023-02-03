@@ -3,26 +3,28 @@
 
 #include <werkzeugkiste/files/files_export.h>
 
+#include <initializer_list>
 #include <string>
+#include <string_view>
 #include <vector>
 
 /// File system utilities.
 namespace werkzeugkiste::files {
 
 WERKZEUGKISTE_FILES_EXPORT
-bool Exists(const std::string& name);
+bool Exists(const std::string &name);
 
 WERKZEUGKISTE_FILES_EXPORT
-bool IsDir(const std::string& path);
+bool IsDir(const std::string &path);
 
 WERKZEUGKISTE_FILES_EXPORT
-std::string FullFile(const std::string& p1, const std::string& p2);
+std::string FullFile(std::string_view p1, std::string_view p2);
 
 WERKZEUGKISTE_FILES_EXPORT
-std::string FullFile(const std::vector<std::string>& path_tokens);
+std::string FullFile(const std::vector<std::string> &path_tokens);
 
 WERKZEUGKISTE_FILES_EXPORT
-std::string FullFile(std::initializer_list<std::string> path_tokens);
+std::string FullFile(std::initializer_list<std::string_view> path_tokens);
 
 /// Splits the string by the system's path delimiter (fwd or bwd slash)
 /// and returns the parent entry.
@@ -30,11 +32,14 @@ std::string FullFile(std::initializer_list<std::string> path_tokens);
 /// * /path/to/foo --> /path/to
 /// * /path/to/foo.h --> /path/to
 WERKZEUGKISTE_FILES_EXPORT
-std::string Parent(const std::string& path);
+std::string Parent(std::string_view path);
 
 /// TODO doc
 WERKZEUGKISTE_FILES_EXPORT
-std::string DirName(const std::string& path);
+std::string DirName(const std::string &path);
+
+WERKZEUGKISTE_FILES_EXPORT
+bool IsAbsolute(std::string_view path);
 
 }  // namespace werkzeugkiste::files
 

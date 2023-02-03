@@ -55,9 +55,10 @@ bool IsDir(const std::string& path) {
   return false;
 }
 
-std::string FullFile(const std::string& p1, const std::string& p2) {
-  std::string path(p1);
-  if (!strings::EndsWith(p1, k_file_separator)) {
+std::string FullFile(std::string_view p1, std::string_view p2) {
+  std::string path{p1};
+  if (!strings::EndsWith(p1, k_file_separator) &&
+      !strings::StartsWith(p2, k_file_separator)) {
     path += k_file_separator;
   }
   path += p2;
@@ -65,10 +66,10 @@ std::string FullFile(const std::string& p1, const std::string& p2) {
 }
 
 std::string FullFile(const std::vector<std::string>& path_tokens) {
-  std::string path;
+  std::string path{};
   bool prepend_delim = false;
   for (const auto& token : path_tokens) {
-    if (prepend_delim) {
+    if (prepend_delim && !strings::StartsWith(token, k_file_separator)) {
       path += k_file_separator;
     }
     path += token;
@@ -77,11 +78,11 @@ std::string FullFile(const std::vector<std::string>& path_tokens) {
   return path;
 }
 
-std::string FullFile(std::initializer_list<std::string> path_tokens) {
-  std::string path;
+std::string FullFile(std::initializer_list<std::string_view> path_tokens) {
+  std::string path{};
   bool prepend_delim = false;
   for (const auto& token : path_tokens) {
-    if (prepend_delim) {
+    if (prepend_delim && !strings::StartsWith(token, k_file_separator)) {
       path += k_file_separator;
     }
     path += token;
@@ -90,7 +91,7 @@ std::string FullFile(std::initializer_list<std::string> path_tokens) {
   return path;
 }
 
-std::string Parent(const std::string& path) {
+std::string Parent(std::string_view path) {
   std::vector<std::string> components = strings::Split(path, k_file_separator);
   if (components.size() < 2) {
     std::string res;
@@ -108,6 +109,15 @@ std::string DirName(const std::string& path) {
   } else {
     return Parent(path);
   }
+}
+
+bool IsAbsolute(std::string_view path) {
+#if defined(__linux__) || defined(__unix__)
+  return (path.length() > 0) && (path[0] == k_file_separator);
+#else
+  throw std::logic_error(
+      "IsAbsolute() is only implemented for Unix-based systems!");
+#endif
 }
 
 }  // namespace werkzeugkiste::files

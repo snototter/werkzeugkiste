@@ -16,8 +16,11 @@ namespace wkg = werkzeugkiste::geometry;
 namespace wks = werkzeugkiste::strings;
 
 // NOLINTBEGIN
+
+using namespace std::string_view_literals;
+
 TEST(ConfigTest, Integers) {
-  const auto config = wkc::Configuration::LoadTomlString(R"toml(
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     int32_1 = -123456
     int32_2 = +987654
     int32_max = 2147483647
@@ -46,7 +49,7 @@ TEST(ConfigTest, Integers) {
 }
 
 TEST(ConfigTest, FloatingPoint) {
-  const auto config = wkc::Configuration::LoadTomlString(R"toml(
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     int = 32
 
     flt1 = +1.0
@@ -94,7 +97,7 @@ TEST(ConfigTest, Types) {
     date_time = 1912-07-23T08:37:00-08:00
 
     )toml";
-  const auto config = wkc::Configuration::LoadTomlString(toml_str);
+  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
 
   // Boolean parameter
   EXPECT_EQ(true, config->GetBoolean("bool"));
@@ -178,7 +181,7 @@ TEST(ConfigTest, Keys1) {
 
     tbl2.array = [1, 2, 3]
     )toml";
-  const auto config = wkc::Configuration::LoadTomlString(toml_str);
+  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
 
   const auto keys = config->ParameterNames();
   std::istringstream iss(toml_str);
@@ -238,7 +241,7 @@ TEST(ConfigTest, Keys2) {
     [[tests]]
     param = "value"
     )toml";
-  const auto config = wkc::Configuration::LoadTomlString(toml_str);
+  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
 
   // We don't extract "names" of scalar array entries, e.g. "tests[1]" below.
   // Currently, I see no need to change this.
@@ -356,7 +359,7 @@ inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
 // }
 
 TEST(ConfigTest, PointLists) {
-  const auto config = wkc::Configuration::LoadTomlString(R"toml(
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     str = "not a point list"
 
     poly1 = [[1, 2], [3, 4], [5, 6], [-7, -8]]
@@ -456,7 +459,7 @@ TEST(ConfigTest, PointLists) {
 }
 
 TEST(ConfigTest, ScalarLists) {
-  const auto config = wkc::Configuration::LoadTomlString(R"toml(
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     ints32 = [1, 2, 3, 4, 5, 6, -7, -8]
 
     ints64 = [0, 2147483647, 2147483648, -2147483648, -2147483649]
@@ -470,6 +473,8 @@ TEST(ConfigTest, ScalarLists) {
 
     mixed_types = [1, 2, "framboozle"]
 
+    an_int = 1234
+
     [not-a-list]
     name = "test"
     )toml");
@@ -481,8 +486,10 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config->GetStringList("no-such-key"), std::runtime_error);
 
   // Try to load a wrong data type as list:
+  EXPECT_THROW(config->GetInteger32List("an_int"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32List("not-a-list"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32List("not-a-list.test"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("an_int"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("not-a-list"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("not-a-list.test"), std::runtime_error);
 
@@ -522,20 +529,173 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config->GetDoubleList("invalid_int_flt"), std::runtime_error);
 }
 
+TEST(ConfigTest, Pairs) {
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+    int_list = [1, 2, 3, 4]
+
+    int32_pair = [1024, 768]
+
+    int64_pair = [2147483647, 2147483648]
+
+    float_pair = [0.5, 1.0]
+
+    mixed_types = [1, "framboozle"]
+
+    a_scalar = 1234
+    )toml");
+
+  // Key error:
+  EXPECT_THROW(config->GetInteger32Pair("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64Pair("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetDoublePair("no-such-key"), std::runtime_error);
+
+  // A pair must be an array of 2 elements
+  EXPECT_THROW(config->GetInteger32Pair("int_list"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64Pair("int_list"), std::runtime_error);
+  EXPECT_THROW(config->GetDoublePair("int_list"), std::runtime_error);
+
+  EXPECT_THROW(config->GetInteger32Pair("mixed_types"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64Pair("mixed_types"), std::runtime_error);
+  EXPECT_THROW(config->GetDoublePair("mixed_types"), std::runtime_error);
+
+  EXPECT_THROW(config->GetInteger32Pair("a_scalar"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64Pair("a_scalar"), std::runtime_error);
+  EXPECT_THROW(config->GetDoublePair("a_scalar"), std::runtime_error);
+
+  // Load a valid pair
+  auto p32 = config->GetInteger32Pair("int32_pair");
+  EXPECT_EQ(1024, p32.first);
+  EXPECT_EQ(768, p32.second);
+
+  EXPECT_THROW(config->GetInteger32Pair("int64_pair"), std::runtime_error);
+  auto p64 = config->GetInteger64Pair("int64_pair");
+  EXPECT_EQ(2147483647, p64.first);
+  EXPECT_EQ(2147483648, p64.second);
+
+  EXPECT_THROW(config->GetInteger32Pair("float_pair"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64Pair("float_pair"), std::runtime_error);
+  auto pdbl = config->GetDoublePair("float_pair");
+  EXPECT_DOUBLE_EQ(0.5, pdbl.first);
+  EXPECT_DOUBLE_EQ(1.0, pdbl.second);
+}
+
+TEST(ConfigTest, NestedTOML) {
+  std::ostringstream toml_str;
+  toml_str << "integer = 3\nnested_config = \""sv
+           << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
+           << "\"\nfloat = 2.0"sv;
+
+  auto config = wkc::Configuration::LoadTOMLString(toml_str.str());
+  EXPECT_THROW(config->LoadNestedTOMLConfiguration("no-such-key"sv),
+               std::runtime_error);
+  EXPECT_THROW(config->LoadNestedTOMLConfiguration("integer"sv),
+               std::runtime_error);
+  config->LoadNestedTOMLConfiguration("nested_config"sv);
+
+  EXPECT_EQ(1, config->GetInteger32("nested_config.value1"sv));
+  EXPECT_DOUBLE_EQ(2.3, config->GetDouble("nested_config.value2"sv));
+  EXPECT_EQ("this/is/a/relative/path",
+            config->GetString("nested_config.section1.rel_path"sv));
+}
+
+TEST(ConfigTest, AbsolutePaths) {
+  const std::string fname =
+      wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
+  auto config = wkc::Configuration::LoadTOMLFile(fname);
+
+  EXPECT_FALSE(config->EnsureAbsolutePaths("...", {"no-such-key"sv}));
+  EXPECT_TRUE(config->EnsureAbsolutePaths(wkf::DirName(__FILE__),
+                                          {"section1.*path"sv}));
+
+  std::string expected =
+      wkf::FullFile(wkf::DirName(__FILE__), "this/is/a/relative/path"sv);
+  EXPECT_EQ(expected, config->GetString("section1.rel_path"sv));
+
+  expected =
+      "file://" + wkf::FullFile(wkf::DirName(__FILE__), "also/relative"sv);
+  EXPECT_EQ(expected, config->GetString("section1.rel_url_path"sv));
+
+  // TODO check special character handling (backslash, umlauts,
+  // whitespace)
+
+  EXPECT_THROW(config->EnsureAbsolutePaths("this-will-throw", {"value1"sv}),
+               std::runtime_error);
+  EXPECT_THROW(
+      config->EnsureAbsolutePaths("this-will-throw", {"section1.time"sv}),
+      std::runtime_error);
+}
+
+TEST(ConfigTest, StringReplacements) {
+  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+    str1 = ""
+    str2 = "This is a test"
+    str3 = "Hello world!"
+    value = 123
+
+    str_list = ["List test", "Frobmorten"]
+
+    [table]
+    str1 = "Another test!"
+    str2 = "Untouched"
+
+    [[configs]]
+    name = "%TOREP%/a"
+
+    [[configs]]
+    name = "%TOREP%/b"
+
+    [[configs]]
+    name = "%TOREP%/C"
+
+    [[configs]]
+    name = "%TOREP%/D"
+    )toml");
+
+  EXPECT_FALSE(config->ReplaceStringPlaceholders({}));
+  EXPECT_FALSE(
+      config->ReplaceStringPlaceholders({{"no-such-text"sv, "bar"sv}}));
+  // Invalid search string
+  EXPECT_THROW(config->ReplaceStringPlaceholders({{""sv, "replace"sv}}),
+               std::runtime_error);
+
+  // Replace words
+  EXPECT_TRUE(config->ReplaceStringPlaceholders(
+      {{"test"sv, "123"sv}, {"world"sv, "replacement"sv}}));
+  // Already replaced
+  EXPECT_FALSE(config->ReplaceStringPlaceholders(
+      {{"test"sv, "123"sv}, {"world"sv, "replacement"sv}}));
+
+  EXPECT_EQ("", config->GetString("str1"));
+  EXPECT_EQ("This is a 123", config->GetString("str2"));
+  EXPECT_EQ("Hello replacement!", config->GetString("str3"));
+  EXPECT_EQ(123, config->GetInteger32("value"));
+  EXPECT_EQ("List 123", config->GetString("str_list[0]"));
+  EXPECT_EQ("Frobmorten", config->GetString("str_list[1]"));
+  EXPECT_EQ("Another 123!", config->GetString("table.str1"));
+  EXPECT_EQ("Untouched", config->GetString("table.str2"));
+  EXPECT_EQ("%TOREP%/C", config->GetString("configs[2].name"));
+
+  EXPECT_TRUE(config->ReplaceStringPlaceholders({{"%TOREP%", "..."}}));
+  EXPECT_EQ(".../a", config->GetString("configs[0].name"));
+  EXPECT_EQ(".../b", config->GetString("configs[1].name"));
+  EXPECT_EQ(".../C", config->GetString("configs[2].name"));
+  EXPECT_EQ(".../D", config->GetString("configs[3].name"));
+}
+
 TEST(ConfigTest, LoadingToml) {
   const std::string fname =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
 
   // Load valid TOML, then reload its string representation
-  const auto config1 = wkc::Configuration::LoadTomlFile(fname);
-  const auto reloaded = wkc::Configuration::LoadTomlString(config1->ToTOML());
+  const auto config1 = wkc::Configuration::LoadTOMLFile(fname);
+  const auto reloaded = wkc::Configuration::LoadTOMLString(config1->ToTOML());
   EXPECT_TRUE(config1->Equals(reloaded.get()));
   EXPECT_TRUE(reloaded->Equals(config1.get()));
   // Also the string representations should be equal
   EXPECT_EQ(config1->ToTOML(), reloaded->ToTOML());
 
   // Load a different configuration:
-  const auto config2 = wkc::Configuration::LoadTomlString(R"toml(
+  const auto config2 = wkc::Configuration::LoadTOMLString(R"toml(
     param1 = "value"
     param2 = "value"
 
@@ -549,7 +709,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_TRUE(config2->Equals(config2.get()));
 
   // White space mustn't affect the equality check
-  auto config3 = wkc::Configuration::LoadTomlString(R"toml(
+  auto config3 = wkc::Configuration::LoadTOMLString(R"toml(
 
     param1 =     "value"
 
@@ -565,7 +725,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_TRUE(config3->Equals(config2.get()));
 
   // Change the first string parameter
-  config3 = wkc::Configuration::LoadTomlString(R"toml(
+  config3 = wkc::Configuration::LoadTOMLString(R"toml(
     param1 = "value!"
     param2 = "value"
 
@@ -576,7 +736,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_FALSE(config3->Equals(config2.get()));
 
   // Change the 3rd parameter type
-  config3 = wkc::Configuration::LoadTomlString(R"toml(
+  config3 = wkc::Configuration::LoadTOMLString(R"toml(
     param1 = "value"
     param2 = "value"
 
@@ -589,22 +749,22 @@ TEST(ConfigTest, LoadingToml) {
   // Edge cases for equality comparison:
   EXPECT_FALSE(config1->Equals(nullptr));
 
-  const auto empty = wkc::Configuration::LoadTomlString("");
+  const auto empty = wkc::Configuration::LoadTOMLString("");
   EXPECT_FALSE(empty->Equals(config1.get()));
   EXPECT_FALSE(config1->Equals(empty.get()));
 
   // Edge cases for TOML loading:
-  EXPECT_THROW(wkc::Configuration::LoadTomlFile("this-does-not-exist.toml"),
+  EXPECT_THROW(wkc::Configuration::LoadTOMLFile("this-does-not-exist.toml"),
                std::runtime_error);
 
   const std::string fname_invalid =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml");
-  EXPECT_THROW(wkc::Configuration::LoadTomlFile(fname_invalid),
+  EXPECT_THROW(wkc::Configuration::LoadTOMLFile(fname_invalid),
                std::runtime_error);
 }
 
 TEST(ConfigTest, LoadingJson) {
-  const auto config = wkc::Configuration::LoadTomlString(R"toml(
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     param1 = "value"
     )toml");
   EXPECT_THROW(config->ToJSON(), std::logic_error);  // Not yet implemented
