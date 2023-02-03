@@ -318,7 +318,7 @@ std::string ConfigLookupString(const toml::table &tbl, std::string_view key,
 template <typename T>
 T CastScalar(const toml::node &node, std::string_view key) {
   if (node.is<T>()) {
-    return T{*node.as<T>()};
+    return T(*node.as<T>());
   }
 
   WZK_CONFIG_RAISE_TOML_TYPE_ERROR(key, node, T);
@@ -497,10 +497,7 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    std::string msg{"Key `"};
-    msg += key;
-    msg += "` does not exist!";
-    throw std::runtime_error(msg);
+    WZK_CONFIG_RAISE_KEY_ERROR(key);
   }
 
   const auto &node = tbl.at_path(key);

@@ -99,6 +99,59 @@ int main(int /* argc */, char** /* argv */) {
     std::cout << "Query int64 correctly: "
               << config->GetInteger64("integral-numbers.int64") << std::endl;
   }
+
+  const auto list_config = wkc::Configuration::LoadTomlString(R"toml(
+    ints32 = [1, 2, 3, 4, 5, 6, -7, -8]
+
+    ints64 = [0, 2147483647, 2147483648, -2147483648, -2147483649]
+
+    floats = [0.5, 1.0, 1.0e23]
+
+    strings = ["abc", "Foo", "Frobmorten", "Test String"]
+
+    # Type mix
+    invalid_int_flt = [1, 2, 3, 4.5, 5]
+
+    mixed_types = [1, 2, "framboozle"]
+
+    [not-a-list]
+    name = "test"
+    )toml");
+
+  try {
+    list_config->GetInteger32List("no-such-key");
+    throw std::logic_error("Shouldn't be here");
+  } catch (const std::runtime_error& e) {
+    std::cout << "Tried invalid key, got exception: " << e.what() << std::endl;
+    ;
+  }
+
+  try {
+    list_config->GetInteger32List("not-a-list");
+    throw std::logic_error("Shouldn't be here");
+  } catch (const std::runtime_error& e) {
+    std::cout << "Tried loading a table as a list, got exception: " << e.what()
+              << std::endl;
+    ;
+  }
+
+  try {
+    list_config->GetInteger32List("mixed_types");
+    throw std::logic_error("Shouldn't be here");
+  } catch (const std::runtime_error& e) {
+    std::cout << "Tried loading an inhomogeneous array as scalar list, got "
+                 "exception: "
+              << e.what() << std::endl;
+    ;
+  }
+
+  auto list_str = list_config->GetStringList("strings");
+  std::cout << "Loaded string list: {";
+  for (const auto& s : list_str) {
+    std::cout << '"' << s << "\", ";
+  }
+  std::cout << "}" << std::endl;
+
   return 0;
 }
 // NOLINTEND(*magic-numbers)

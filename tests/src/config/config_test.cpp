@@ -419,6 +419,7 @@ TEST(ConfigTest, PointLists) {
   EXPECT_EQ(wkg::Vec2i(30, 40), vec[1]);
   EXPECT_EQ(wkg::Vec2i(50, 60), vec[2]);
 
+  // Cannot load an array of tables as a scalar list:
   EXPECT_THROW(config->GetInteger32List("poly2"), std::runtime_error);
 
   // An N-dimensional polygon can be looked up from any list of at
@@ -467,33 +468,39 @@ TEST(ConfigTest, ScalarLists) {
     # Type mix
     invalid_int_flt = [1, 2, 3, 4.5, 5]
 
-    invalid_types = [1, 2, "framboozle"]
+    mixed_types = [1, 2, "framboozle"]
 
     [not-a-list]
     name = "test"
     )toml");
 
+  // Key error:
   EXPECT_THROW(config->GetInteger32List("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64List("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetDoubleList("no-such-key"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("no-such-key"), std::runtime_error);
 
+  // Try to load a wrong data type as list:
   EXPECT_THROW(config->GetInteger32List("not-a-list"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32List("not-a-list.test"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("not-a-list"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("not-a-list.test"), std::runtime_error);
 
-  EXPECT_THROW(config->GetInteger32List("invalid_types"), std::runtime_error);
-  EXPECT_THROW(config->GetStringList("invalid_types"), std::runtime_error);
+  // Cannot load an inhomogeneous array:
+  EXPECT_THROW(config->GetInteger32List("mixed_types"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("mixed_types"), std::runtime_error);
 
   auto list32 = config->GetInteger32List("ints32");
   EXPECT_EQ(8, list32.size());
   auto list64 = config->GetInteger64List("ints32");
   EXPECT_EQ(8, list64.size());
-  EXPECT_THROW(config->GetDoubleList("ints32"), std::runtime_error);
-  EXPECT_THROW(config->GetStringList("ints32"), std::runtime_error);
-
   EXPECT_EQ(1, list32[0]);
   EXPECT_EQ(6, list32[5]);
   EXPECT_EQ(-8, list32[7]);
 
-  EXPECT_THROW(config->GetInteger32List("no-such-key"), std::runtime_error);
+  // Cannot load integers as other types:
+  EXPECT_THROW(config->GetDoubleList("ints32"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("ints32"), std::runtime_error);
 
   EXPECT_THROW(config->GetInteger32List("ints64"), std::runtime_error);
   list64 = config->GetInteger64List("ints64");
@@ -504,6 +511,11 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_DOUBLE_EQ(0.5, list_dbl[0]);
   EXPECT_DOUBLE_EQ(1.0, list_dbl[1]);
   EXPECT_DOUBLE_EQ(1e23, list_dbl[2]);
+
+  // Cannot load floats as other types:
+  EXPECT_THROW(config->GetInteger32List("floats"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64List("floats"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("floats"), std::runtime_error);
 
   EXPECT_THROW(config->GetInteger32List("invalid_int_flt"), std::runtime_error);
   EXPECT_THROW(config->GetInteger64List("invalid_int_flt"), std::runtime_error);
