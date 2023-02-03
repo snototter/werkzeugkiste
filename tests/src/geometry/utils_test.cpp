@@ -349,4 +349,34 @@ TEST(GeometryUtilsTest, Signum) {
   EXPECT_EQ(wkg::Sign(-(1e-6)), -1);
 }
 
+TEST(GeometryUtilsTest, Rounding) {
+  // Base 5
+  EXPECT_DOUBLE_EQ(10.0, wkg::RoundBase(9.0, 5.0));
+  EXPECT_DOUBLE_EQ(15.0, wkg::RoundBase(13.0, 5.0));
+  EXPECT_DOUBLE_EQ(10.0, wkg::RoundBase(12.4, 5.0));
+
+  EXPECT_EQ(10, wkg::RoundBase(9, 5));
+  EXPECT_EQ(15, wkg::RoundBase(13, 5));
+  EXPECT_EQ(10, wkg::RoundBase(12, 5));
+
+  // Base 2
+  EXPECT_EQ(2, wkg::RoundBase(1, 2));
+  EXPECT_DOUBLE_EQ(2.0, wkg::RoundBase(1.0, 2.0));
+  EXPECT_DOUBLE_EQ(0.0, wkg::RoundBase(0.2, 2.0));
+
+  // Base 10
+  EXPECT_EQ(0, wkg::RoundBase(1, 10));
+  EXPECT_EQ(20, wkg::RoundBase(15, 10));
+  EXPECT_EQ(12350, wkg::RoundBase(12345, 10));
+  EXPECT_DOUBLE_EQ(10.0, wkg::RoundBase(14.9, 10.0));
+
+  // Base < 1
+  EXPECT_DOUBLE_EQ(1.00, wkg::RoundBase(0.96, 0.1));
+  EXPECT_DOUBLE_EQ(0.95, wkg::RoundBase(0.96, 0.05));
+  EXPECT_DOUBLE_EQ(1.00, wkg::RoundBase(0.999, 0.1));
+  EXPECT_DOUBLE_EQ(0.90, wkg::RoundBase(0.921, 0.05));
+  EXPECT_DOUBLE_EQ(0.67, wkg::RoundBase(0.671, 0.01));
+  EXPECT_DOUBLE_EQ(0.70, wkg::RoundBase(0.671, 0.1));
+}
+
 // NOLINTEND

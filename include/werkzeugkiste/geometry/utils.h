@@ -171,6 +171,22 @@ inline constexpr int Sign(T x) {
   return _util_sign(x, std::is_signed<T>());
 }
 
+//-----------------------------------------------------------------------------
+// Rounding
+template <typename T>
+inline std::enable_if_t<std::is_floating_point_v<T>, T> RoundBase(T value,
+                                                                  T base) {
+  return base * std::round(value / base);
+}
+
+template <typename T>
+inline std::enable_if_t<std::is_integral_v<T>, T> RoundBase(T value, T base) {
+  // TODO apply safe parameter cast!
+  double rounded =
+      RoundBase(static_cast<double>(value), static_cast<double>(base));
+  return static_cast<T>(rounded);
+}
+
 }  // namespace werkzeugkiste::geometry
 
 // NOLINTEND(*-magic-numbers)
