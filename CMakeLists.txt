@@ -412,8 +412,11 @@ set_target_properties(
 
 target_include_directories(
   werkzeugkiste-config ${warning_guard}
-  PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
-         "$<BUILD_INTERFACE:${tomlplusplus_SOURCE_DIR}/include>")
+  PUBLIC "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
+
+target_include_directories(
+  werkzeugkiste-config ${warning_guard}
+  PRIVATE "$<BUILD_INTERFACE:${tomlplusplus_SOURCE_DIR}/include>")
 
 target_include_directories(
   werkzeugkiste-config SYSTEM
@@ -478,7 +481,7 @@ set_target_properties(
   werkzeugkiste-timing
   werkzeugkiste-logging
   werkzeugkiste-werkzeugkiste
-  PROPERTIES POSITION_INDEPENDENT_CODE ON)
+  PROPERTIES POSITION_INDEPENDENT_CODE ON CXX_STANDARD_REQUIRED ON)
 
 # ##############################################################################
 # ---- Install rules ----
