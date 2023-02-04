@@ -45,6 +45,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
 /// @brief Encapsulates configuration data.
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
+  //  using date_type = std::tuple<uint16_t, uint8_t, uint8_t>;
+
   /// @brief Loads a TOML configuration from the given file.
   /// @param filename Path to the `.toml` file.
   static std::unique_ptr<Configuration> LoadTOMLFile(std::string_view filename);
@@ -120,6 +122,18 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   virtual std::string GetStringOrDefault(
       std::string_view key, std::string_view default_val) const = 0;
   virtual void SetString(std::string_view key, std::string_view value) = 0;
+
+  //---------------------------------------------------------------------------
+  // Date/time data types
+
+  //  virtual date_type GetDate(std::string_view key) const = 0;
+  //  virtual date_type GetDateOrDefault(std::string_view key,
+  //                                     const date_type &default_val) const =
+  //                                     0;
+  //  virtual void SetDate(std::string_view key, const date_type &value) = 0;
+
+  //---------------------------------------------------------------------------
+  // Lists/pairs of scalar data types
 
   virtual std::pair<double, double> GetDoublePair(
       std::string_view key) const = 0;
