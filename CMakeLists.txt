@@ -469,6 +469,17 @@ target_link_libraries(
             werkzeugkiste::timing
             werkzeugkiste::logging)
 
+set_target_properties(
+  werkzeugkiste-config
+  werkzeugkiste-container
+  werkzeugkiste-files
+  werkzeugkiste-geometry
+  werkzeugkiste-strings
+  werkzeugkiste-timing
+  werkzeugkiste-logging
+  werkzeugkiste-werkzeugkiste
+  PROPERTIES POSITION_INDEPENDENT_CODE ON)
+
 # ##############################################################################
 # ---- Install rules ----
 
