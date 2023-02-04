@@ -1129,6 +1129,7 @@ class ConfigurationImpl : public Configuration {
   std::string ToJSON() const override {
     std::ostringstream repr;
     repr << toml::json_formatter{config_};
+    return repr.str();
   }
 
  private:

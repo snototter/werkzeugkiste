@@ -924,12 +924,12 @@ TEST(ConfigTest, LoadingToml) {
                std::runtime_error);
 }
 
-// TODO Can be tested once we have LoadJSONString()
-// TEST(ConfigTest, LoadingJson) {
-//   const auto config = wkc::Configuration::LoadTOMLString(R"toml(
-//     param1 = "value"
-//     )toml");
-//   EXPECT_THROW(config->ToJSON(), std::logic_error);  // Not yet implemented
-// }
+// TODO Can be properly tested once we have LoadJSONString()
+TEST(ConfigTest, LoadingJson) {
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+    param1 = "value"
+    )toml");
+  EXPECT_TRUE(config->ToJSON().length() > 0);
+}
 
 // NOLINTEND
