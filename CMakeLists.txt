@@ -90,13 +90,13 @@ endif(spdlog_FOUND)
 # ---- Container Utils: werkzeugkiste::container ----
 
 # Header files (this utility is header-only)
-set(wkzgcontainer_PUBLIC_HEADER_FILES
+set(wzkgcontainer_PUBLIC_HEADER_FILES
     include/werkzeugkiste/container/circular_buffer.h
     include/werkzeugkiste/container/sort.h
     include/werkzeugkiste/container/math.h ${werkzeugkiste_VERSION_HEADER})
 # Library
 add_library(werkzeugkiste-container INTERFACE)
-# add_library(werkzeugkiste-container ${wkzgcontainer_PUBLIC_HEADER_FILES} )
+# add_library(werkzeugkiste-container ${wzkgcontainer_PUBLIC_HEADER_FILES} )
 # Namespace'd alias
 add_library(werkzeugkiste::container ALIAS werkzeugkiste-container)
 
@@ -130,7 +130,7 @@ target_compile_features(werkzeugkiste-container INTERFACE cxx_std_17)
 # ##############################################################################
 # ---- Math/Geometry Utils: werkzeugkiste::geometry ----
 # Header files
-set(wkzggeometry_PUBLIC_HEADER_FILES
+set(wzkggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/geometry/geometry.h
     include/werkzeugkiste/geometry/utils.h
     include/werkzeugkiste/geometry/vector.h
@@ -140,11 +140,11 @@ set(wkzggeometry_PUBLIC_HEADER_FILES
     include/werkzeugkiste/logging.h
     ${werkzeugkiste_VERSION_HEADER})
 # Source files
-set(wkzggeometry_SOURCE_FILES src/geometry/primitives.cpp
+set(wzkggeometry_SOURCE_FILES src/geometry/primitives.cpp
                               src/geometry/vector.cpp)
 # Library
-add_library(werkzeugkiste-geometry ${wkzggeometry_PUBLIC_HEADER_FILES}
-                                   ${wkzggeometry_SOURCE_FILES})
+add_library(werkzeugkiste-geometry ${wzkggeometry_PUBLIC_HEADER_FILES}
+                                   ${wzkggeometry_SOURCE_FILES})
 # Namespace'd alias
 add_library(werkzeugkiste::geometry ALIAS werkzeugkiste-geometry)
 
@@ -190,13 +190,13 @@ target_compile_features(werkzeugkiste-geometry PUBLIC cxx_std_17)
 
 # ##############################################################################
 # String Utils: werkzeugkiste::strings Header files
-set(wkzgstrings_PUBLIC_HEADER_FILES include/werkzeugkiste/strings/strings.h
+set(wzkgstrings_PUBLIC_HEADER_FILES include/werkzeugkiste/strings/strings.h
                                     ${werkzeugkiste_VERSION_HEADER})
 # Source files
-set(wkzgstrings_SOURCE_FILES src/strings/strings.cpp)
+set(wzkgstrings_SOURCE_FILES src/strings/strings.cpp)
 # Library
-add_library(werkzeugkiste-strings ${wkzgstrings_PUBLIC_HEADER_FILES}
-                                  ${wkzgstrings_SOURCE_FILES})
+add_library(werkzeugkiste-strings ${wzkgstrings_PUBLIC_HEADER_FILES}
+                                  ${wzkgstrings_SOURCE_FILES})
 # Namespace'd alias
 add_library(werkzeugkiste::strings ALIAS werkzeugkiste-strings)
 
@@ -241,14 +241,14 @@ target_compile_features(werkzeugkiste-strings PUBLIC cxx_std_17)
 # ---- File Utils: werkzeugkiste::files ----
 # ---- Note: Library must be declared after ::strings ----
 # Header files
-set(wkzgfiles_PUBLIC_HEADER_FILES
+set(wzkgfiles_PUBLIC_HEADER_FILES
     include/werkzeugkiste/files/fileio.h include/werkzeugkiste/files/filesys.h
     include/werkzeugkiste/logging.h ${werkzeugkiste_VERSION_HEADER})
 # Source files
-set(wkzgfiles_SOURCE_FILES src/files/fileio.cpp src/files/filesys.cpp)
+set(wzkgfiles_SOURCE_FILES src/files/fileio.cpp src/files/filesys.cpp)
 # Library
-add_library(werkzeugkiste-files ${wkzgfiles_PUBLIC_HEADER_FILES}
-                                ${wkzgfiles_SOURCE_FILES})
+add_library(werkzeugkiste-files ${wzkgfiles_PUBLIC_HEADER_FILES}
+                                ${wzkgfiles_SOURCE_FILES})
 # Namespace'd alias
 add_library(werkzeugkiste::files ALIAS werkzeugkiste-files)
 
@@ -311,14 +311,14 @@ target_compile_features(werkzeugkiste-files PUBLIC cxx_std_17)
 # ##############################################################################
 # ---- Clock Utils: werkzeugkiste::timing ----
 # Header files
-set(wkzgtiming_PUBLIC_HEADER_FILES
+set(wzkgtiming_PUBLIC_HEADER_FILES
     include/werkzeugkiste/timing/stopwatch.h
     include/werkzeugkiste/timing/tictoc.h ${werkzeugkiste_VERSION_HEADER})
 # Source files
-set(wkzgtiming_SOURCE_FILES src/timing/stopwatch.cpp src/timing/tictoc.cpp)
+set(wzkgtiming_SOURCE_FILES src/timing/stopwatch.cpp src/timing/tictoc.cpp)
 # Library
-add_library(werkzeugkiste-timing ${wkzgtiming_PUBLIC_HEADER_FILES}
-                                 ${wkzgtiming_SOURCE_FILES})
+add_library(werkzeugkiste-timing ${wzkgtiming_PUBLIC_HEADER_FILES}
+                                 ${wzkgtiming_SOURCE_FILES})
 # Namespace'd alias
 add_library(werkzeugkiste::timing ALIAS werkzeugkiste-timing)
 
@@ -367,16 +367,16 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(tomlplusplus)
 
 # Header files
-set(wkzgconfig_HEADER_FILES
+set(wzkgconfig_HEADER_FILES
     include/werkzeugkiste/config/configuration.h
     include/werkzeugkiste/logging.h
     ${tomlplusplus_SOURCE_DIR}/include/toml++/toml.h
     ${werkzeugkiste_VERSION_HEADER})
 # Source files
-set(wkzgconfig_SOURCE_FILES src/config/configuration.cpp)
+set(wzkgconfig_SOURCE_FILES src/config/configuration.cpp)
 # Library
-add_library(werkzeugkiste-config ${wkzgconfig_HEADER_FILES}
-                                 ${wkzgconfig_SOURCE_FILES})
+add_library(werkzeugkiste-config ${wzkgconfig_HEADER_FILES}
+                                 ${wzkgconfig_SOURCE_FILES})
 # Namespace'd alias
 add_library(werkzeugkiste::config ALIAS werkzeugkiste-config)
 
@@ -430,9 +430,9 @@ target_compile_features(werkzeugkiste-config PUBLIC cxx_std_17)
 # TODO does the all-in-one target need the other headers explicitly? they should
 # be implicitly deployed by the corresponding sub-utilitiy target (?)
 add_library(werkzeugkiste-werkzeugkiste INTERFACE)
-# add_library(werkzeugkiste-werkzeugkiste ${wkzgcontainer_PUBLIC_HEADER_FILES}
-# ${wkzggeometry_PUBLIC_HEADER_FILES} ${wkzgstrings_PUBLIC_HEADER_FILES}
-# ${wkzgfiles_PUBLIC_HEADER_FILES} ${wkzgtiming_PUBLIC_HEADER_FILES}
+# add_library(werkzeugkiste-werkzeugkiste ${wzkgcontainer_PUBLIC_HEADER_FILES}
+# ${wzkggeometry_PUBLIC_HEADER_FILES} ${wzkgstrings_PUBLIC_HEADER_FILES}
+# ${wzkgfiles_PUBLIC_HEADER_FILES} ${wzkgtiming_PUBLIC_HEADER_FILES}
 # ${werkzeugkiste_VERSION_HEADER} )
 # ---- Namespace'd alias ----
 add_library(werkzeugkiste::werkzeugkiste ALIAS werkzeugkiste-werkzeugkiste)

@@ -29,7 +29,7 @@ const char k_file_separator = '/';
 #endif  // WIN32
 
 bool Exists(const std::string& name) {
-#ifdef WKZ_HAS_FILESYSTEM
+#ifdef WZK_HAS_FILESYSTEM
   std::filesystem::path pth{name};
   return std::filesystem::exists(pth);
 #else
@@ -37,7 +37,7 @@ bool Exists(const std::string& name) {
   const bool status = f.good();
   f.close();
   return status;
-#endif  // WKZ_HAS_FILESYSTEM
+#endif  // WZK_HAS_FILESYSTEM
 }
 
 // taken from
