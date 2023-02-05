@@ -54,8 +54,6 @@ int main(int /* argc */, char** /* argv */) {
   std::cout << "But it can be replaced with a default value: "
             << config->GetDoubleOrDefault("no.such.key", 42) << std::endl;
 
-  // config->ParameterNames();  // TODO
-
   try {
     config = wkc::Configuration::LoadTOMLFile("no-such-file.toml");
   } catch (const std::runtime_error&) {
@@ -64,7 +62,7 @@ int main(int /* argc */, char** /* argv */) {
 
   config = wkc::Configuration::LoadTOMLFile(
       wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
-  const auto params = config->ParameterNames();
+  const auto params = config->ListParameterNames(false);
   std::cout << "Parameter names:\n";
   for (const auto& name : params) {
     std::cout << "  " << name << std::endl;

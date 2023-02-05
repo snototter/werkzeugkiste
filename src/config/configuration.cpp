@@ -69,27 +69,32 @@ inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
 
 // Forward declaration.
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
-                                       std::string_view path);
+                                       std::string_view path,
+                                       bool include_array_entries);
 
 /// Returns all fully-qualified paths for named parameters within
 /// the given TOML array. For example, "A = [20, { name = "value", age = 30 }"
 /// returns `{ "A[1].name", "A[1].age" }`.
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListArrayKeys(const toml::array &arr,
-                                       std::string_view path) {
+                                       std::string_view path,
+                                       bool include_array_entries) {
   std::vector<std::string> keys;
   std::size_t array_index = 0;
   for (auto &&value : arr) {
+    const std::string fqn = FullyQualifiedArrayElementPath(array_index, path);
+    if (include_array_entries) {
+      keys.push_back(fqn);
+    }
     if (value.is_table()) {
       const toml::table &tbl = *value.as_table();
-      const auto subkeys =
-          ListTableKeys(tbl, FullyQualifiedArrayElementPath(array_index, path));
+      const auto subkeys = ListTableKeys(tbl, fqn, include_array_entries);
       keys.insert(keys.end(), subkeys.begin(), subkeys.end());
     }
     if (value.is_array()) {
       const toml::array &nested_arr = *value.as_array();
-      const auto subkeys = ListArrayKeys(
-          nested_arr, FullyQualifiedArrayElementPath(array_index, path));
+      const auto subkeys =
+          ListArrayKeys(nested_arr, fqn, include_array_entries);
       keys.insert(keys.end(), subkeys.begin(), subkeys.end());
     }
     ++array_index;
@@ -100,18 +105,23 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
 // TODO doc
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
-                                       std::string_view path) {
+                                       std::string_view path,
+                                       bool include_array_entries) {
   std::vector<std::string> keys;
   for (auto &&[key, value] : tbl) {
+    // Each parameter within a table is a "named parameter", i.e. it has
+    // a separate name that should always be included.
     keys.emplace_back(FullyQualifiedPath(key, path));
     if (value.is_array()) {
       const auto subkeys =
-          ListArrayKeys(*value.as_array(), FullyQualifiedPath(key, path));
+          ListArrayKeys(*value.as_array(), FullyQualifiedPath(key, path),
+                        include_array_entries);
       keys.insert(keys.end(), subkeys.begin(), subkeys.end());
     }
     if (value.is_table()) {
       const auto subkeys =
-          ListTableKeys(*value.as_table(), FullyQualifiedPath(key, path));
+          ListTableKeys(*value.as_table(), FullyQualifiedPath(key, path),
+                        include_array_entries);
       keys.insert(keys.end(), subkeys.begin(), subkeys.end());
     }
   }
@@ -937,9 +947,10 @@ class ConfigurationImpl : public Configuration {
     return replaced;
   }
 
-  std::vector<std::string> ParameterNames() const override {
+  std::vector<std::string> ListParameterNames(
+      bool include_array_entries) const override {
     using namespace std::string_view_literals;
-    return utils::ListTableKeys(config_, ""sv);
+    return utils::ListTableKeys(config_, ""sv, include_array_entries);
   }
 
   bool GetBoolean(std::string_view key) const override {
@@ -1100,10 +1111,8 @@ class ConfigurationImpl : public Configuration {
       }
 
       parent->erase(path.second);
-      auto result = parent->emplace(path.second, std::move(nested_tbl));
-      for (auto foo : utils::ListTableKeys(
-               *parent->at_path(path.second).as_table(), key)) {
-      }
+      const auto result = parent->emplace(path.second, std::move(nested_tbl));
+
       if (!result.second) {
         // LCOV_EXCL_START
         std::string msg{"Could not insert nested configuration at `"};
@@ -1137,8 +1146,8 @@ class ConfigurationImpl : public Configuration {
 
   bool EqualsImpl(const ConfigurationImpl *other) const {
     using namespace std::string_view_literals;
-    const auto keys_this = utils::ListTableKeys(config_, ""sv);
-    const auto keys_other = utils::ListTableKeys(other->config_, ""sv);
+    const auto keys_this = utils::ListTableKeys(config_, ""sv, true);
+    const auto keys_other = utils::ListTableKeys(other->config_, ""sv, true);
     if (keys_this.size() != keys_other.size()) {
       return false;
     }

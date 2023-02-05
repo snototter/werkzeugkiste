@@ -70,10 +70,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// file path.
   /// @param base_path Base path to be prepended to relative file paths.
   /// @param parameters A list of parameter names / patterns. The wildcard '*'
-  /// is
-  ///     also supported. For example, valid names are: "my-param",
-  ///     "files.video1", etc. Valid patterns would be "*path",
-  ///     "some.nested.*.filename", etc.
+  /// is also supported. For example, valid names are: "my-param",
+  /// "files.video1", etc. Valid patterns would be "*path",
+  /// "some.nested.*.filename", etc.
   /// @return True if any parameter has been adjusted.
   virtual bool AdjustRelativePaths(
       std::string_view base_path,
@@ -92,11 +91,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// @brief Returns a list of all (fully-qualified) parameter names.
   ///
-  /// Note that this list does *not* contain a key for each array
-  /// element. Only if another dictionary/table is within the array,
-  /// the corresponding entry will be included (for example,
-  /// `arr[3].name`)
-  virtual std::vector<std::string> ParameterNames() const = 0;
+  /// @param include_array_entries If true, the name of each parameter will
+  /// be returned, *i.e.* each array element will be included. Otherwise,
+  /// only named parameters (*e.g.* a dictionary/table within an array, such
+  /// as `arr[3].name`) will be included.
+  virtual std::vector<std::string> ListParameterNames(
+      bool include_array_entries) const = 0;
 
   virtual bool GetBoolean(std::string_view key) const = 0;
   virtual bool GetBooleanOrDefault(std::string_view key,
