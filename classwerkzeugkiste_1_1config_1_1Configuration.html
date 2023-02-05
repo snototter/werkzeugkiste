@@ -125,7 +125,7 @@
             </dt>
             <dd>Returns true if all configuration keys and values match exactly.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a23ac27989599a60af1b05aa26af2a77e" class="m-doc">ParameterNames</a>(</span><span class="m-doc-wrap">) const -&gt; std::vector&lt;std::string&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a984516d22bf9798cb924c61ce7a27729" class="m-doc">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const -&gt; std::vector&lt;std::string&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
             </dt>
             <dd>Returns a list of all (fully-qualified) parameter names.</dd>
             <dt id="a66f27d14372210000e92331db629df49">
@@ -335,12 +335,22 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a23ac27989599a60af1b05aa26af2a77e"><div>
+          <section class="m-doc-details" id="a984516d22bf9798cb924c61ce7a27729"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a23ac27989599a60af1b05aa26af2a77e" class="m-doc-self">ParameterNames</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a984516d22bf9798cb924c61ce7a27729" class="m-doc-self">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const <span class="m-label m-warning">pure virtual</span></span></span>
             </h3>
             <p>Returns a list of all (fully-qualified) parameter names.</p>
-<p>Note that this list does <em>not</em> contain a key for each array element. Only if another dictionary/table is within the array, the corresponding entry will be included (for example, <code>arr[3].name</code>)</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">include_array_entries</td>
+                  <td>If true, the name of each parameter will be returned, <em>i.e.</em> each array element will be included. Otherwise, only named parameters (<em>e.g.</em> a dictionary/table within an array, such as <code>arr[3].name</code>) will be included.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ad5192117530469ea0e8a38b14bf2da2e"><div>
             <h3>
