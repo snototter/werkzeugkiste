@@ -12,20 +12,6 @@
 
 namespace wkc = werkzeugkiste::container;
 
-template <typename Container>
-std::string Stringify(const Container &c) {
-  std::ostringstream s;
-  s << "{";
-  for (std::size_t idx = 0; idx < c.size(); ++idx) {
-    if (idx > 0) {
-      s << ", ";
-    }
-    s << c[idx];
-  }
-  s << "}";
-  return s.str();
-}
-
 // NOLINTBEGIN(*magic-numbers, readability-identifier-naming)
 // TODO adjust parameter orders (expected, computed_val)
 TEST(ContainerUtilsTest, Smooth) {

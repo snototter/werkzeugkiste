@@ -289,9 +289,10 @@ TEST(ConfigTest, Keys1) {
 
     tbl2.array = [1, 2, 3]
     )toml";
-  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
 
-  const auto keys = config->ParameterNames();
+  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
+  const auto keys = config->ListParameterNames(false);
+
   std::istringstream iss(toml_str);
   std::string line;
   while (std::getline(iss, line)) {
@@ -308,19 +309,6 @@ TEST(ConfigTest, Keys1) {
     const auto pos = std::find(keys.begin(), keys.end(), key);
     EXPECT_NE(keys.end(), pos) << "Key `" << key << "` not found!";
   }
-}
-
-std::string Stringify(const std::vector<std::string> &v) {
-  std::ostringstream s;
-  s << "{";
-  for (std::size_t idx = 0; idx < v.size(); ++idx) {
-    if (idx > 0) {
-      s << ", ";
-    }
-    s << v[idx];
-  }
-  s << "}";
-  return s.str();
 }
 
 TEST(ConfigTest, Keys2) {
@@ -351,25 +339,51 @@ TEST(ConfigTest, Keys2) {
     )toml";
   const auto config = wkc::Configuration::LoadTOMLString(toml_str);
 
-  // We don't extract "names" of scalar array entries, e.g. "tests[1]" below.
-  // Currently, I see no need to change this.
-  const std::vector<std::string> expected_keys{"arr1",
-                                               "arr1[1].first",
-                                               "arr1[1].second",
-                                               "lvl-1",
-                                               "lvl-1.arr2",
-                                               "lvl-1.arr3",
-                                               "lvl-1.arr3[2].name",
-                                               "lvl-1.arr3[2].age",
-                                               "lvl-1.arr3[3][2].type",
-                                               "lvl-1.arr3[3][2].value",
-                                               "lvl-1.lvl-2",
-                                               "lvl-1.lvl-2.param1",
-                                               "lvl-1.lvl-2.param2",
-                                               "tests",
-                                               "tests[0].name",
-                                               "tests[2].param"};
-  const auto keys = config->ParameterNames();
+  // First, check without extracting the array keys.
+  std::vector<std::string> expected_keys{"arr1",
+                                         "arr1[1].first",
+                                         "arr1[1].second",
+                                         "lvl-1",
+                                         "lvl-1.arr2",
+                                         "lvl-1.arr3",
+                                         "lvl-1.arr3[2].name",
+                                         "lvl-1.arr3[2].age",
+                                         "lvl-1.arr3[3][2].type",
+                                         "lvl-1.arr3[3][2].value",
+                                         "lvl-1.lvl-2",
+                                         "lvl-1.lvl-2.param1",
+                                         "lvl-1.lvl-2.param2",
+                                         "tests",
+                                         "tests[0].name",
+                                         "tests[2].param"};
+  auto keys = config->ListParameterNames(false);
+
+  EXPECT_EQ(expected_keys.size(), keys.size())
+      << "Extracted keys: " << Stringify(keys)
+      << "\nExpected keys:  " << Stringify(expected_keys) << "!";
+
+  for (const auto &expected : expected_keys) {
+    const auto pos = std::find(keys.begin(), keys.end(), expected);
+    EXPECT_NE(keys.end(), pos) << "Key `" << expected << "` not found!";
+  }
+
+  // Second, test with *all* keys
+  expected_keys.push_back("arr1[0]");
+  expected_keys.push_back("lvl-1.arr2[0]");
+  expected_keys.push_back("lvl-1.arr2[1]");
+  expected_keys.push_back("lvl-1.arr2[2]");
+  expected_keys.push_back("lvl-1.arr3[0]");
+  expected_keys.push_back("lvl-1.arr3[1]");
+  expected_keys.push_back("lvl-1.arr3[2]");
+  expected_keys.push_back("lvl-1.arr3[3]");
+  expected_keys.push_back("lvl-1.arr3[3][0]");
+  expected_keys.push_back("lvl-1.arr3[3][1]");
+  expected_keys.push_back("lvl-1.arr3[3][2]");
+  expected_keys.push_back("tests[0]");
+  expected_keys.push_back("tests[1]");
+  expected_keys.push_back("tests[2]");
+
+  keys = config->ListParameterNames(true);
 
   EXPECT_EQ(expected_keys.size(), keys.size())
       << "Extracted keys: " << Stringify(keys)

@@ -5,7 +5,10 @@
 #include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
 
+#include <sstream>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 /// Check if an elapsed time "tick value" is within the
 /// range [expected-pm, expected+pm].
@@ -56,6 +59,20 @@ inline ::testing::AssertionResult CheckVectorEqual(
     }
     return ::testing::AssertionFailure() << msg.str();
   }
+}
+
+template <typename Container>
+inline std::string Stringify(const Container& v) {
+  std::ostringstream s;
+  s << "{";
+  for (std::size_t idx = 0; idx < v.size(); ++idx) {
+    if (idx > 0) {
+      s << ", ";
+    }
+    s << v[idx];
+  }
+  s << "}";
+  return s.str();
 }
 
 #endif  // WERKZEUGKISTE_TEST_UTILS_H
