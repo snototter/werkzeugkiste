@@ -367,8 +367,10 @@ TEST(ConfigTest, Keys2) {
     EXPECT_NE(keys.end(), pos) << "Key `" << expected << "` not found!";
   }
 
-  // Second, test with *all* keys
+  // Second, test with *all* keys. This should explicitly include each
+  // array entry, too.
   expected_keys.push_back("arr1[0]");
+  expected_keys.push_back("arr1[1]");
   expected_keys.push_back("lvl-1.arr2[0]");
   expected_keys.push_back("lvl-1.arr2[1]");
   expected_keys.push_back("lvl-1.arr2[2]");
