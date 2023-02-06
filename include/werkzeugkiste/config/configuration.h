@@ -42,6 +42,15 @@ class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
   virtual bool MatchAny(std::string_view key) const = 0;
 };
 
+// enum class ConfigType : unsigned char {
+//   Boolean,
+//   Integer,
+//   FloatingPoint,
+//   String,
+//   List,
+//   Table
+// };
+
 /// @brief Encapsulates configuration data.
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
@@ -97,6 +106,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// as `arr[3].name`) will be included.
   virtual std::vector<std::string> ListParameterNames(
       bool include_array_entries) const = 0;
+
+  // TODO Contains + exceptions
+  // or std::optional<>?
+  // or GetBoolean(key, may_throw) or GetBoolean<may_throw>(key)
+  // virtual bool Contains(std::string_view key) const = 0;
 
   virtual bool GetBoolean(std::string_view key) const = 0;
   virtual bool GetBooleanOrDefault(std::string_view key,
