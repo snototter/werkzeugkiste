@@ -17,39 +17,78 @@
 
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
+//-----------------------------------------------------------------------------
+// Readable type identifiers to support meaningful error messages
 
-class WERKZEUGKISTE_CONFIG_EXPORT SingleKeyMatcher {
- public:
-  static std::unique_ptr<SingleKeyMatcher> Create(std::string_view pattern);
-  virtual bool Match(std::string_view key) const = 0;
+template <typename T>
+constexpr const char *TypeName() {
+  return typeid(T).name();
+}
 
-  virtual ~SingleKeyMatcher() = default;
-  SingleKeyMatcher(const SingleKeyMatcher & /* other */) = default;
-  SingleKeyMatcher &operator=(const SingleKeyMatcher & /* other */) = default;
-  SingleKeyMatcher(SingleKeyMatcher && /* other */) = default;
-  SingleKeyMatcher &operator=(SingleKeyMatcher && /* other */) = default;
+#define WZK_REGISTER_TYPENAME_SPECIALIZATION(T) \
+  template <>                                   \
+  constexpr const char *TypeName<T>() {         \
+    return #T;                                  \
+  }
 
- protected:
-  SingleKeyMatcher() = default;
+WZK_REGISTER_TYPENAME_SPECIALIZATION(bool)
+
+template <>
+constexpr const char *TypeName<int32_t>() {
+  return "int32";
+}
+template <>
+constexpr const char *TypeName<int64_t>() {
+  return "int64";
+}
+
+WZK_REGISTER_TYPENAME_SPECIALIZATION(float)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(double)
+
+WZK_REGISTER_TYPENAME_SPECIALIZATION(std::string)
+
+//-----------------------------------------------------------------------------
+// Supported parameters
+
+enum class ConfigType : unsigned char {
+  /// @brief Either true or false.
+  Boolean,
+
+  /// @brief A 32- or 64-bit integer.
+  ///
+  /// Internally, integers are always handled as 64-bits.
+  Integer,
+
+  /// @brief A single- or double-precision floating point number.
+  ///
+  /// Internally, floating point numbers are always represented by a double.
+  FloatingPoint,
+
+  /// TODO
+  String,
+
+  /// TODO
+  List,
+
+  /// TODO
+  Table
 };
 
-class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
+// TODO ostream/istream overloads
+
+class KeyError : public std::exception {
  public:
-  static std::unique_ptr<MultiKeyMatcher> Create(
-      const std::vector<std::string_view> &patterns);
-  virtual ~MultiKeyMatcher() = default;
+  explicit KeyError(std::string_view key) {
+    msg_ = "Key `";
+    msg_ += key;
+    msg_ += "` does not exist!";
+  }
 
-  virtual bool MatchAny(std::string_view key) const = 0;
+  const char *what() const noexcept override { return msg_.c_str(); }
+
+ private:
+  std::string msg_{};
 };
-
-// enum class ConfigType : unsigned char {
-//   Boolean,
-//   Integer,
-//   FloatingPoint,
-//   String,
-//   List,
-//   Table
-// };
 
 /// @brief Encapsulates configuration data.
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
@@ -106,6 +145,17 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// as `arr[3].name`) will be included.
   virtual std::vector<std::string> ListParameterNames(
       bool include_array_entries) const = 0;
+
+  /// @brief Checks if the given key exists in this configuration.
+  /// @param key Fully-qualified identifier of the parameter.
+  virtual bool Contains(std::string_view key) const = 0;
+
+  /// @brief Returns the type of the parameter at the given key.
+  ///
+  /// Throws an exception if the key is not found.
+  ///
+  /// @param key Fully-qualified identifier of the parameter.
+  virtual ConfigType Type(std::string_view key) const = 0;
 
   // TODO Contains + exceptions
   // or std::optional<>?
@@ -205,6 +255,33 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
  protected:
   Configuration() = default;
+};
+
+//-----------------------------------------------------------------------------
+// Key (parameter name) matching to support access via wildcards
+
+class WERKZEUGKISTE_CONFIG_EXPORT SingleKeyMatcher {
+ public:
+  static std::unique_ptr<SingleKeyMatcher> Create(std::string_view pattern);
+  virtual bool Match(std::string_view key) const = 0;
+
+  virtual ~SingleKeyMatcher() = default;
+  SingleKeyMatcher(const SingleKeyMatcher & /* other */) = default;
+  SingleKeyMatcher &operator=(const SingleKeyMatcher & /* other */) = default;
+  SingleKeyMatcher(SingleKeyMatcher && /* other */) = default;
+  SingleKeyMatcher &operator=(SingleKeyMatcher && /* other */) = default;
+
+ protected:
+  SingleKeyMatcher() = default;
+};
+
+class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
+ public:
+  static std::unique_ptr<MultiKeyMatcher> Create(
+      const std::vector<std::string_view> &patterns);
+  virtual ~MultiKeyMatcher() = default;
+
+  virtual bool MatchAny(std::string_view key) const = 0;
 };
 
 }  // namespace werkzeugkiste::config

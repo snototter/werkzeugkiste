@@ -37,7 +37,7 @@ TEST(ConfigTest, Integers) {
 
   EXPECT_EQ(-1, config->GetInteger32OrDefault("test", -1));
   EXPECT_EQ(17, config->GetInteger32OrDefault("another", 17));
-  EXPECT_THROW(config->GetInteger32("test"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32("test"), wkc::KeyError);
 
   EXPECT_EQ(-123456, config->GetInteger64("int32_1"));
   EXPECT_EQ(+987654, config->GetInteger64("int32_2"));
@@ -45,7 +45,7 @@ TEST(ConfigTest, Integers) {
   EXPECT_EQ(+2147483648, config->GetInteger64("int32_max_overflow"));
   EXPECT_EQ(-1, config->GetInteger64OrDefault("test", -1));
   EXPECT_EQ(17, config->GetInteger64OrDefault("another", 17));
-  EXPECT_THROW(config->GetInteger64("test"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64("test"), wkc::KeyError);
 }
 
 TEST(ConfigTest, FloatingPoint) {
@@ -79,7 +79,55 @@ TEST(ConfigTest, FloatingPoint) {
   EXPECT_TRUE(std::isnan(config->GetDouble("spec3")));
 
   EXPECT_EQ(-16.0, config->GetDoubleOrDefault("test", -16));
-  EXPECT_THROW(config->GetDouble("test"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("test"), wkc::KeyError);
+}
+
+TEST(ConfigTest, QueryTypes) {
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+    bool = true
+    int = 42
+    flt = 1.0
+    str = "A string"
+    lst = [1, 2, 3.5]
+
+    [dates]
+    day = 2023-01-01
+    time1 = 12:34:56
+    time2 = 00:01:02.123456
+    date_time = 1912-07-23T08:37:00-08:00
+
+    )toml");
+
+  EXPECT_TRUE(config->Contains("bool"));
+  EXPECT_FALSE(config->Contains("bool1"));
+  EXPECT_EQ(wkc::ConfigType::Boolean, config->Type("bool"));
+
+  EXPECT_TRUE(config->Contains("int"));
+  EXPECT_FALSE(config->Contains("in"));
+  EXPECT_EQ(wkc::ConfigType::Integer, config->Type("int"));
+
+  EXPECT_TRUE(config->Contains("flt"));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config->Type("flt"));
+
+  EXPECT_TRUE(config->Contains("str"));
+  EXPECT_EQ(wkc::ConfigType::String, config->Type("str"));
+
+  EXPECT_TRUE(config->Contains("lst"));
+  EXPECT_EQ(wkc::ConfigType::List, config->Type("lst"));
+
+  EXPECT_TRUE(config->Contains("lst[0]"));
+  EXPECT_EQ(wkc::ConfigType::Integer, config->Type("lst[0]"));
+  EXPECT_TRUE(config->Contains("lst[1]"));
+  EXPECT_EQ(wkc::ConfigType::Integer, config->Type("lst[1]"));
+  EXPECT_TRUE(config->Contains("lst[2]"));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config->Type("lst[2]"));
+  EXPECT_FALSE(config->Contains("lst[3]"));
+  EXPECT_THROW(config->Type("lst[3]"), wkc::KeyError);
+
+  EXPECT_TRUE(config->Contains("dates"));
+  EXPECT_EQ(wkc::ConfigType::Table, config->Type("dates"));
+
+  // TODO dates
 }
 
 TEST(ConfigTest, GetScalarTypes) {
@@ -88,6 +136,8 @@ TEST(ConfigTest, GetScalarTypes) {
     int = 42
     flt = 1.0
     str = "A string" #TODO others (date, time, date_time)
+
+    int_list = [1, 2, 3]
 
     [dates]
     day = 2023-01-01
@@ -100,7 +150,7 @@ TEST(ConfigTest, GetScalarTypes) {
 
   // Boolean parameter
   EXPECT_EQ(true, config->GetBoolean("bool"));
-  EXPECT_THROW(config->GetBoolean("no-such.bool"), std::runtime_error);
+  EXPECT_THROW(config->GetBoolean("no-such.bool"), wkc::KeyError);
   EXPECT_TRUE(config->GetBooleanOrDefault("no-such.bool", true));
   EXPECT_FALSE(config->GetBooleanOrDefault("no-such.bool", false));
 
@@ -136,7 +186,7 @@ TEST(ConfigTest, GetScalarTypes) {
   const std::string expected{"A string"};
   EXPECT_EQ(expected, config->GetString("str"));
 
-  EXPECT_THROW(config->GetString("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetString("no-such-key"), wkc::KeyError);
 
   EXPECT_EQ("...", config->GetStringOrDefault("no-such-key", "..."));
 
@@ -146,15 +196,15 @@ TEST(ConfigTest, GetScalarTypes) {
 
   // Invalid access
   EXPECT_THROW(config->GetBoolean("int_list"), std::runtime_error);
-  EXPECT_THROW(config->GetBoolean("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetBoolean("tbl"), wkc::KeyError);
   EXPECT_THROW(config->GetInteger32("int_list"), std::runtime_error);
-  EXPECT_THROW(config->GetInteger32("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32("tbl"), wkc::KeyError);
   EXPECT_THROW(config->GetInteger64("int_list"), std::runtime_error);
-  EXPECT_THROW(config->GetInteger64("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64("tbl"), wkc::KeyError);
   EXPECT_THROW(config->GetDouble("int_list"), std::runtime_error);
-  EXPECT_THROW(config->GetDouble("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetDouble("tbl"), wkc::KeyError);
   EXPECT_THROW(config->GetString("int_list"), std::runtime_error);
-  EXPECT_THROW(config->GetString("tbl"), std::runtime_error);
+  EXPECT_THROW(config->GetString("tbl"), wkc::KeyError);
 
   EXPECT_THROW(config->GetDouble("dates"), std::runtime_error);
   EXPECT_THROW(config->GetDouble("dates.day"), std::runtime_error);
@@ -188,20 +238,19 @@ TEST(ConfigTest, SetScalarTypes1) {
   EXPECT_THROW(config->SetBoolean("int", true), std::runtime_error);
 
   // Set a non-existing parameter
-  EXPECT_THROW(config->GetBoolean("another_bool"), std::runtime_error);
+  EXPECT_THROW(config->GetBoolean("another_bool"), wkc::KeyError);
   EXPECT_NO_THROW(config->SetBoolean("another_bool", false));
   EXPECT_NO_THROW(config->GetBoolean("another_bool"));
   EXPECT_EQ(false, config->GetBoolean("another_bool"));
 
   // Set a nested parameter (must create the hierarchy)
-  EXPECT_THROW(config->GetBoolean("others.bool"), std::runtime_error);
+  EXPECT_THROW(config->GetBoolean("others.bool"), wkc::KeyError);
   EXPECT_NO_THROW(config->SetBoolean("others.bool", false));
   EXPECT_NO_THROW(config->GetBoolean("others.bool"));
   EXPECT_EQ(false, config->GetBoolean("others.bool"));
 
   // Test a deeper path hierarchy
-  EXPECT_THROW(config->GetBoolean("a.deeper.hierarchy.bool"),
-               std::runtime_error);
+  EXPECT_THROW(config->GetBoolean("a.deeper.hierarchy.bool"), wkc::KeyError);
   EXPECT_NO_THROW(config->SetBoolean("a.deeper.hierarchy.bool", false));
   EXPECT_NO_THROW(config->GetBoolean("a.deeper.hierarchy.bool"));
   EXPECT_EQ(false, config->GetBoolean("a.deeper.hierarchy.bool"));
@@ -556,7 +605,7 @@ TEST(ConfigTest, PointLists) {
   EXPECT_NO_THROW(config->GetPoints2D("poly4"));
   EXPECT_NO_THROW(config->GetPoints3D("poly4"));
 
-  EXPECT_THROW(config->GetPoints2D("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetPoints2D("no-such-key"), wkc::KeyError);
   EXPECT_THROW(config->GetPoints2D("str"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p1"), std::runtime_error);
   EXPECT_THROW(config->GetPoints2D("invalid.p2"), std::runtime_error);
@@ -604,21 +653,23 @@ TEST(ConfigTest, ScalarLists) {
     )toml");
 
   // Key error:
-  EXPECT_THROW(config->GetInteger32List("no-such-key"), std::runtime_error);
-  EXPECT_THROW(config->GetInteger64List("no-such-key"), std::runtime_error);
-  EXPECT_THROW(config->GetDoubleList("no-such-key"), std::runtime_error);
-  EXPECT_THROW(config->GetStringList("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32List("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config->GetInteger64List("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config->GetDoubleList("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config->GetStringList("no-such-key"), wkc::KeyError);
 
   // Try to load a wrong data type as list:
   EXPECT_THROW(config->GetInteger32List("an_int"), std::runtime_error);
   EXPECT_THROW(config->GetInteger32List("not-a-list"), std::runtime_error);
-  EXPECT_THROW(config->GetInteger32List("not-a-list.test"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32List("not-a-list.no-such-key"),
+               wkc::KeyError);
   EXPECT_THROW(config->GetInteger64List("an_int"), std::runtime_error);
   EXPECT_THROW(config->GetInteger64List("not-a-list"), std::runtime_error);
-  EXPECT_THROW(config->GetInteger64List("not-a-list.test"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger64List("not-a-list.no-such-key"),
+               wkc::KeyError);
   EXPECT_THROW(config->GetStringList("an_int"), std::runtime_error);
   EXPECT_THROW(config->GetStringList("not-a-list"), std::runtime_error);
-  EXPECT_THROW(config->GetStringList("not-a-list.test"), std::runtime_error);
+  EXPECT_THROW(config->GetStringList("not-a-list.no-such-key"), wkc::KeyError);
 
   // Cannot load an inhomogeneous array:
   EXPECT_THROW(config->GetInteger32List("mixed_types"), std::runtime_error);
@@ -674,9 +725,9 @@ TEST(ConfigTest, Pairs) {
     )toml");
 
   // Key error:
-  EXPECT_THROW(config->GetInteger32Pair("no-such-key"), std::runtime_error);
-  EXPECT_THROW(config->GetInteger64Pair("no-such-key"), std::runtime_error);
-  EXPECT_THROW(config->GetDoublePair("no-such-key"), std::runtime_error);
+  EXPECT_THROW(config->GetInteger32Pair("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config->GetInteger64Pair("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config->GetDoublePair("no-such-key"), wkc::KeyError);
 
   // A pair must be an array of 2 elements
   EXPECT_THROW(config->GetInteger32Pair("int_list"), std::runtime_error);
@@ -736,7 +787,7 @@ TEST(ConfigTest, NestedTOML) {
 
   auto config = wkc::Configuration::LoadTOMLString(toml_str.str());
   EXPECT_THROW(config->LoadNestedTOMLConfiguration("no-such-key"sv),
-               std::runtime_error);
+               wkc::KeyError);
   EXPECT_THROW(config->LoadNestedTOMLConfiguration("integer"sv),
                std::runtime_error);
   config->LoadNestedTOMLConfiguration("nested_config"sv);
