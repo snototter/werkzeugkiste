@@ -19,6 +19,9 @@ int main(int /* argc */, char** /* argv */) {
             << "--------------------------------------------------\n"
             << std::endl;
 
+  std::cout << "TODO type names: " << wkc::TypeName<bool>() << ", "
+            << wkc::TypeName<float>();
+
   auto config = wkc::Configuration::LoadTOMLString(R"toml(
     an_int = 3
     a_str = 'foo'

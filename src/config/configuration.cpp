@@ -18,19 +18,10 @@
 // NOLINTEND
 
 // NOLINTNEXTLINE(*macro-usage)
-#define WZK_CONFIG_RAISE_KEY_ERROR(KEY) \
-  do {                                  \
-    std::string msg{"Key `"};           \
-    msg += (KEY);                       \
-    msg += "` does not exist!";         \
-    throw std::runtime_error{msg};      \
-  } while (false)
-
-// NOLINTNEXTLINE(*macro-usage)
 #define WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(KEY, NODE, TYPE) \
   do {                                                           \
     std::string msg{"Invalid type `"};                           \
-    msg += BuiltinTypeName<TYPE>();                              \
+    msg += TypeName<TYPE>();                                     \
     msg += "` used to query key `";                              \
     msg += (KEY);                                                \
     msg += "`, which is of type `";                              \
@@ -196,40 +187,6 @@ inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
   return static_cast<int32_t>(value64);
 }
 
-/// Utility to print the name of built-in types.
-template <typename T>
-inline std::string BuiltinTypeName() {
-  // LCOV_EXCL_START
-  std::ostringstream msg;
-  msg << "Built-in type `" << typeid(T).name()
-      << "` not handled in `BuiltinTypeName(). This is a werkzeugkiste "
-         "implementation error. Please report at "
-         "https://github.com/snototter/werkzeugkiste/issues";
-  throw std::logic_error{msg.str()};
-  // LCOV_EXCL_STOP
-}
-
-template <>
-inline std::string BuiltinTypeName<bool>() {
-  return "bool";
-}
-template <>
-inline std::string BuiltinTypeName<double>() {
-  return "double";
-}
-template <>
-inline std::string BuiltinTypeName<int32_t>() {
-  return "int32_t";
-}
-template <>
-inline std::string BuiltinTypeName<int64_t>() {
-  return "int64_t";
-}
-template <>
-inline std::string BuiltinTypeName<std::string>() {
-  return "string";
-}
-
 /// Utility to print the type name of a toml::node/toml::node_view.
 template <typename NodeView>
 inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
@@ -301,7 +258,7 @@ Type ConfigLookupScalar(const toml::table &tbl, std::string_view key,
       return Type{default_val};
     }
 
-    WZK_CONFIG_RAISE_KEY_ERROR(key);
+    throw werkzeugkiste::config::KeyError(key);
   }
 
   const auto node = tbl.at_path(key);
@@ -438,7 +395,7 @@ void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
       msg += "` is `";
       msg += TomlTypeName(node, key);
       msg += "`, but scalar is of type `";
-      msg += BuiltinTypeName<TMessage>();
+      msg += TypeName<TMessage>();
       msg += "`!";
       throw std::runtime_error{msg};
     }
@@ -512,7 +469,7 @@ inline void ExtractPointFromTOMLArray(const toml::array &arr,
         std::ostringstream msg;
         msg << "Invalid parameter `" << key << "`. Dimension [" << idx
             << "] is `" << TomlTypeName(arr, key) << "` instead of `"
-            << BuiltinTypeName<Type>() << "`!";
+            << TypeName<Type>() << "`!";
         throw std::runtime_error{msg.str()};
       }
       point[idx] = Type{*arr[idx].as<Type>()};
@@ -575,7 +532,7 @@ inline void ExtractPointFromTOMLTable(const toml::table &tbl,
       std::ostringstream msg;
       msg << "Invalid parameter `" << key << "`. Dimension `" << point_keys[idx]
           << "` is `" << TomlTypeName(tbl[point_keys[idx]], key)
-          << "` instead of `" << BuiltinTypeName<Type>() << "`!";
+          << "` instead of `" << TypeName<Type>() << "`!";
       throw std::runtime_error{msg.str()};
     }
 
@@ -615,7 +572,7 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    WZK_CONFIG_RAISE_KEY_ERROR(key);
+    throw werkzeugkiste::config::KeyError(key);
   }
 
   const auto node = tbl.at_path(key);
@@ -657,7 +614,7 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    WZK_CONFIG_RAISE_KEY_ERROR(key);
+    throw werkzeugkiste::config::KeyError(key);
   }
 
   const auto &node = tbl.at_path(key);
@@ -681,7 +638,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
       std::string msg{"Invalid list configuration `"};
       msg += key;
       msg += "`: All entries must be of scalar type `";
-      msg += BuiltinTypeName<T>();
+      msg += TypeName<T>();
       msg += "`, but `";
       msg += fqn;
       msg += "` is not!";
@@ -696,7 +653,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    WZK_CONFIG_RAISE_KEY_ERROR(key);
+    throw werkzeugkiste::config::KeyError(key);
   }
 
   const auto &node = tbl.at_path(key);
@@ -729,7 +686,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
       std::string msg{"Invalid pair configuration `"};
       msg += key;
       msg += "`: Both entries must be of scalar type `";
-      msg += BuiltinTypeName<T>();
+      msg += TypeName<T>();
       msg += "`, but `";
       msg += fqn;
       msg += "` is not!";
@@ -953,6 +910,42 @@ class ConfigurationImpl : public Configuration {
     return utils::ListTableKeys(config_, ""sv, include_array_entries);
   }
 
+  bool Contains(std::string_view key) const override {
+    return utils::ConfigContainsKey(config_, key);
+  }
+
+  ConfigType Type(std::string_view key) const override {
+    const auto nv = config_.at_path(key);
+    switch (nv.type()) {
+      case toml::node_type::none:
+        throw werkzeugkiste::config::KeyError(key);
+
+      case toml::node_type::table:
+        return ConfigType::Table;
+
+      case toml::node_type::array:
+        return ConfigType::List;
+
+      case toml::node_type::string:
+        return ConfigType::String;
+
+      case toml::node_type::integer:
+        return ConfigType::Integer;
+
+      case toml::node_type::floating_point:
+        return ConfigType::FloatingPoint;
+
+      case toml::node_type::boolean:
+        return ConfigType::Boolean;
+
+        /*TODO
+                  date,			///< The node is a toml::value<date>.
+                  time,			///< The node is a toml::value<time>.
+                  date_time		///< The node is a
+           toml::value<date_time>.*/
+    }
+  }
+
   bool GetBoolean(std::string_view key) const override {
     return utils::ConfigLookupScalar<bool>(config_, key,
                                            /*allow_default=*/false);
@@ -1076,7 +1069,7 @@ class ConfigurationImpl : public Configuration {
     // TODO refactor (TOML/JSON --> function handle)
 
     if (!utils::ConfigContainsKey(config_, key)) {
-      WZK_CONFIG_RAISE_KEY_ERROR(key);
+      throw werkzeugkiste::config::KeyError(key);
     }
 
     const auto &node = config_.at_path(key);
