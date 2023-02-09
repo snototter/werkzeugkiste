@@ -19,6 +19,18 @@ namespace wks = werkzeugkiste::strings;
 
 using namespace std::string_view_literals;
 
+TEST(ConfigTest, TypeUtils) {
+  EXPECT_EQ("bool", wkc::TypeName<bool>());
+  EXPECT_EQ("int32", wkc::TypeName<int32_t>());
+  EXPECT_EQ("int64", wkc::TypeName<int64_t>());
+  EXPECT_EQ("float", wkc::TypeName<float>());
+  EXPECT_EQ("double", wkc::TypeName<double>());
+  EXPECT_EQ("string", wkc::TypeName<std::string>());
+  EXPECT_EQ("string_view", wkc::TypeName<std::string_view>());
+
+  EXPECT_NE("ushort", wkc::TypeName<unsigned short>());
+}
+
 TEST(ConfigTest, Integers) {
   const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     int32_1 = -123456
@@ -122,7 +134,13 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_TRUE(config->Contains("lst[2]"));
   EXPECT_EQ(wkc::ConfigType::FloatingPoint, config->Type("lst[2]"));
   EXPECT_FALSE(config->Contains("lst[3]"));
+
   EXPECT_THROW(config->Type("lst[3]"), wkc::KeyError);
+  try {
+    config->Type("lst[3]");
+  } catch (const wkc::KeyError &e) {
+    EXPECT_EQ("Key `lst[3]` does not exist!", e.what());
+  }
 
   EXPECT_TRUE(config->Contains("dates"));
   EXPECT_EQ(wkc::ConfigType::Table, config->Type("dates"));

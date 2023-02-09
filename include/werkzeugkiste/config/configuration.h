@@ -45,7 +45,14 @@ constexpr const char *TypeName<int64_t>() {
 WZK_REGISTER_TYPENAME_SPECIALIZATION(float)
 WZK_REGISTER_TYPENAME_SPECIALIZATION(double)
 
-WZK_REGISTER_TYPENAME_SPECIALIZATION(std::string)
+template <>
+constexpr const char *TypeName<std::string>() {
+  return "string";
+}
+template <>
+constexpr const char *TypeName<std::string_view>() {
+  return "string_view";
+}
 
 //-----------------------------------------------------------------------------
 // Supported parameters

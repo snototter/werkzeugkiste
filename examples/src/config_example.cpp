@@ -7,11 +7,20 @@
 #include <string>
 #include <vector>
 
+// TODO
+#include <werkzeugkiste/config/casts.h>
+
 // NOLINTBEGIN(*magic-numbers)
 int main(int /* argc */, char** /* argv */) {
   namespace wkc = werkzeugkiste::config;
   namespace wkf = werkzeugkiste::files;
   using namespace std::string_view_literals;
+
+  // TODO move to tests
+  static_assert(wkc::are_integral_v<int, short>, "TODO");
+  static_assert(!wkc::are_integral_v<std::string, short>, "TODO");
+  static_assert(wkc::are_floating_point_v<float, double>, "TODO");
+  static_assert(!wkc::are_floating_point_v<std::string, float>, "TODO");
 
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"

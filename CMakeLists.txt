@@ -369,6 +369,7 @@ FetchContent_MakeAvailable(tomlplusplus)
 # Header files
 set(wzkgconfig_HEADER_FILES
     include/werkzeugkiste/config/configuration.h
+    include/werkzeugkiste/config/casts.h
     include/werkzeugkiste/logging.h
     ${tomlplusplus_SOURCE_DIR}/include/toml++/toml.h
     ${werkzeugkiste_VERSION_HEADER})
