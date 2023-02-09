@@ -139,7 +139,8 @@ TEST(ConfigTest, QueryTypes) {
   try {
     config->Type("lst[3]");
   } catch (const wkc::KeyError &e) {
-    EXPECT_EQ("Key `lst[3]` does not exist!", e.what());
+    const std::string exp_msg{"Key `lst[3]` does not exist!"};
+    EXPECT_EQ(exp_msg, std::string(e.what()));
   }
 
   EXPECT_TRUE(config->Contains("dates"));
