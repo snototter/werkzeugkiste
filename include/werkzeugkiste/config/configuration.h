@@ -4,6 +4,7 @@
 #include <werkzeugkiste/config/config_export.h>
 
 #include <cmath>
+#include <initializer_list>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -25,6 +26,7 @@ constexpr const char *TypeName() {
   return typeid(T).name();
 }
 
+// NOLINTNEXTLINE(*macro-usage)
 #define WZK_REGISTER_TYPENAME_SPECIALIZATION(T) \
   template <>                                   \
   constexpr const char *TypeName<T>() {         \
@@ -32,20 +34,27 @@ constexpr const char *TypeName() {
   }
 
 WZK_REGISTER_TYPENAME_SPECIALIZATION(bool)
-
-template <>
-constexpr const char *TypeName<int32_t>() {
-  return "int32";
-}
-template <>
-constexpr const char *TypeName<int64_t>() {
-  return "int64";
-}
-
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int8_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint8_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int16_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint16_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int32_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint32_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int64_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint64_t)
 WZK_REGISTER_TYPENAME_SPECIALIZATION(float)
 WZK_REGISTER_TYPENAME_SPECIALIZATION(double)
 
-WZK_REGISTER_TYPENAME_SPECIALIZATION(std::string)
+template <>
+constexpr const char *TypeName<std::string>() {
+  return "string";
+}
+template <>
+constexpr const char *TypeName<std::string_view>() {
+  return "string_view";
+}
+
+#undef WZK_REGISTER_TYPENAME_SPECIALIZATION
 
 //-----------------------------------------------------------------------------
 // Supported parameters
@@ -67,14 +76,27 @@ enum class ConfigType : unsigned char {
   /// TODO
   String,
 
+  // TODO date
+
   /// TODO
   List,
 
   /// TODO
-  Table
+  Group
+
 };
 
 // TODO ostream/istream overloads
+
+class ParseError : public std::exception {
+ public:
+  explicit ParseError(const std::string &msg) : msg_{msg} {}
+
+  const char *what() const noexcept override { return msg_.c_str(); }
+
+ private:
+  std::string msg_{};
+};
 
 class KeyError : public std::exception {
  public:
@@ -90,52 +112,75 @@ class KeyError : public std::exception {
   std::string msg_{};
 };
 
+// TODO wrong config type assumed
+class TypeError : public std::exception {
+ public:
+  explicit TypeError(const std::string &msg) : msg_{msg} {}
+
+  const char *what() const noexcept override { return msg_.c_str(); }
+
+ private:
+  std::string msg_{};
+};
+
 /// @brief Encapsulates configuration data.
+///
+/// Design decisions:
+/// * Internally, a TOML configuration is used to store the parameters.
+/// * I prefer explicit method names over a templated "Get<>".
+/// * Get("unknown-key") throws a KeyError instead of returning an optional
+///   scalar. As an alternative to exception handling, use `Contains` or
+///   `Get<Type>Or`, which returns a default value.
+/// * Nested lists are not supported.
+///
+/// TODOs:
+/// * [ ] Do we need double-precision points ?
+/// * [ ] LoadNestedJSONConfiguration
+/// * [ ] LoadJSONFile
+/// * [ ] LoadJSONString
+/// * [ ] LoadLibconfigFile   ?
+/// * [ ] LoadLibconfigString ?
+/// * [ ] ToLibconfigString   ?
+/// * [ ] Date
+/// * [ ] Time
+/// * [ ] DateTime
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
-  //  using date_type = std::tuple<uint16_t, uint8_t, uint8_t>;
+  //  //  using date_type = std::tuple<uint16_t, uint8_t, uint8_t>;
+
+  Configuration();
+  ~Configuration();
+
+  Configuration(const Configuration &other);
+  Configuration &operator=(const Configuration &other);
+
+  Configuration(Configuration &&other) noexcept;
+  Configuration &operator=(Configuration &&other) noexcept;
 
   /// @brief Loads a TOML configuration from the given file.
   /// @param filename Path to the `.toml` file.
-  static std::unique_ptr<Configuration> LoadTOMLFile(std::string_view filename);
+  static Configuration LoadTOMLFile(std::string_view filename);
 
   /// @brief Loads a TOML configuration from a string.
   /// @param toml_string String representation of the TOML config.
-  static std::unique_ptr<Configuration> LoadTOMLString(
-      std::string_view toml_string);
+  static Configuration LoadTOMLString(std::string_view toml_string);
 
-  //   static std::unique_ptr<Configuration> LoadJSON(std::string_view
-  //   filename);
-
-  virtual ~Configuration() = default;
-  Configuration(const Configuration &) = delete;
-  Configuration(Configuration &&) = delete;
-  Configuration &operator=(const Configuration &) = delete;
-  Configuration &operator=(Configuration &&) = delete;
-
-  /// @brief Adjusts the given parameters to hold either an absolute file path,
-  /// or the result of "base_path / <param>" if they initially held a relative
-  /// file path.
-  /// @param base_path Base path to be prepended to relative file paths.
-  /// @param parameters A list of parameter names / patterns. The wildcard '*'
-  /// is also supported. For example, valid names are: "my-param",
-  /// "files.video1", etc. Valid patterns would be "*path",
-  /// "some.nested.*.filename", etc.
-  /// @return True if any parameter has been adjusted.
-  virtual bool AdjustRelativePaths(
-      std::string_view base_path,
-      const std::vector<std::string_view> &parameters) = 0;
-
-  /// @brief Visits all string parameters and replaces any occurrence of the
-  /// given needle/replacement pairs.
-  /// @param replacements List of `<search, replacement>` pairs.
-  /// @return True if any placeholder has actually been replaced.
-  virtual bool ReplaceStringPlaceholders(
-      const std::vector<std::pair<std::string_view, std::string_view>>
-          &replacements) = 0;
+  /// @brief Returns true if this configuration has no parameters set.
+  bool Empty() const;
 
   /// @brief Returns true if all configuration keys and values match exactly.
-  virtual bool Equals(const Configuration *other) const = 0;
+  bool Equals(const Configuration &other) const;
+
+  /// @brief Checks if the given key exists in this configuration.
+  /// @param key Fully-qualified identifier of the parameter.
+  bool Contains(std::string_view key) const;
+
+  /// @brief Returns the type of the parameter at the given key.
+  ///
+  /// Throws an exception if the key is not found.
+  ///
+  /// @param key Fully-qualified identifier of the parameter.
+  ConfigType Type(std::string_view key) const;
 
   /// @brief Returns a list of all (fully-qualified) parameter names.
   ///
@@ -143,49 +188,31 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// be returned, *i.e.* each array element will be included. Otherwise,
   /// only named parameters (*e.g.* a dictionary/table within an array, such
   /// as `arr[3].name`) will be included.
-  virtual std::vector<std::string> ListParameterNames(
-      bool include_array_entries) const = 0;
+  std::vector<std::string> ListParameterNames(bool include_array_entries) const;
 
-  /// @brief Checks if the given key exists in this configuration.
-  /// @param key Fully-qualified identifier of the parameter.
-  virtual bool Contains(std::string_view key) const = 0;
+  //---------------------------------------------------------------------------
+  // Scalar data types
 
-  /// @brief Returns the type of the parameter at the given key.
-  ///
-  /// Throws an exception if the key is not found.
-  ///
-  /// @param key Fully-qualified identifier of the parameter.
-  virtual ConfigType Type(std::string_view key) const = 0;
+  bool GetBoolean(std::string_view key) const;
+  bool GetBooleanOr(std::string_view key, bool default_val) const;
+  void SetBoolean(std::string_view key, bool value);
 
-  // TODO Contains + exceptions
-  // or std::optional<>?
-  // or GetBoolean(key, may_throw) or GetBoolean<may_throw>(key)
-  // virtual bool Contains(std::string_view key) const = 0;
+  int32_t GetInteger32(std::string_view key) const;
+  int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
+  void SetInteger32(std::string_view key, int32_t value);
 
-  virtual bool GetBoolean(std::string_view key) const = 0;
-  virtual bool GetBooleanOrDefault(std::string_view key,
-                                   bool default_val) const = 0;
-  virtual void SetBoolean(std::string_view key, bool value) = 0;
+  int64_t GetInteger64(std::string_view key) const;
+  int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
+  void SetInteger64(std::string_view key, int64_t value);
 
-  virtual double GetDouble(std::string_view key) const = 0;
-  virtual double GetDoubleOrDefault(std::string_view key,
-                                    double default_val) const = 0;
-  virtual void SetDouble(std::string_view key, double value) = 0;
+  double GetDouble(std::string_view key) const;
+  double GetDoubleOr(std::string_view key, double default_val) const;
+  void SetDouble(std::string_view key, double value);
 
-  virtual int32_t GetInteger32(std::string_view key) const = 0;
-  virtual int32_t GetInteger32OrDefault(std::string_view key,
-                                        int32_t default_val) const = 0;
-  virtual void SetInteger32(std::string_view key, int32_t value) = 0;
-
-  virtual int64_t GetInteger64(std::string_view key) const = 0;
-  virtual int64_t GetInteger64OrDefault(std::string_view key,
-                                        int64_t default_val) const = 0;
-  virtual void SetInteger64(std::string_view key, int64_t value) = 0;
-
-  virtual std::string GetString(std::string_view key) const = 0;
-  virtual std::string GetStringOrDefault(
-      std::string_view key, std::string_view default_val) const = 0;
-  virtual void SetString(std::string_view key, std::string_view value) = 0;
+  std::string GetString(std::string_view key) const;
+  std::string GetStringOr(std::string_view key,
+                          std::string_view default_val) const;
+  void SetString(std::string_view key, std::string_view value);
 
   //---------------------------------------------------------------------------
   // Date/time data types
@@ -196,36 +223,54 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //                                     0;
   //  virtual void SetDate(std::string_view key, const date_type &value) = 0;
 
+  // TODO
   //---------------------------------------------------------------------------
-  // Lists/pairs of scalar data types
+  //  Lists/pairs of scalar data types
 
-  virtual std::pair<double, double> GetDoublePair(
-      std::string_view key) const = 0;
-  virtual std::vector<double> GetDoubleList(std::string_view key) const = 0;
+  std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
+  std::vector<int32_t> GetInteger32List(std::string_view key) const;
 
-  virtual std::pair<int32_t, int32_t> GetInteger32Pair(
-      std::string_view key) const = 0;
-  virtual std::vector<int32_t> GetInteger32List(std::string_view key) const = 0;
+  std::pair<int64_t, int64_t> GetInteger64Pair(std::string_view key) const;
+  std::vector<int64_t> GetInteger64List(std::string_view key) const;
 
-  virtual std::pair<int64_t, int64_t> GetInteger64Pair(
-      std::string_view key) const = 0;
-  virtual std::vector<int64_t> GetInteger64List(std::string_view key) const = 0;
+  std::pair<double, double> GetDoublePair(std::string_view key) const;
+  std::vector<double> GetDoubleList(std::string_view key) const;
 
-  virtual std::vector<std::string> GetStringList(
-      std::string_view key) const = 0;
+  std::vector<std::string> GetStringList(std::string_view key) const;
 
-  virtual std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
-      std::string_view key) const = 0;
+  std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
+      std::string_view key) const;
 
-  virtual std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
-      std::string_view key) const = 0;
+  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
+      std::string_view key) const;
 
-  // TODO do we need double-precision points ?
-  // TODO do we need nested lists ?
+  /// @brief Returns a copy of the sub-group.
+  /// @param key Fully-qualified name of the parameter (which must be a
+  ///   group, e.g. a JSON dictionary, a TOML table, or a libconfig group).
+  Configuration GetGroup(std::string_view key) const;
 
-  // TODO should return a copy!
-  //    virtual std::unique_ptr<Configuration> GetGroup(std::string_view
-  //    group_name) const = 0;
+  //---------------------------------------------------------------------------
+  // Special utilities
+
+  /// @brief Adjusts the given parameters to hold either an absolute file path,
+  /// or the result of "base_path / <param>" if they initially held a relative
+  /// file path.
+  /// @param base_path Base path to be prepended to relative file paths.
+  /// @param parameters A list of parameter names / patterns. The wildcard '*'
+  /// is also supported. For example, valid names are: "my-param",
+  /// "files.video1", etc. Valid patterns would be "*path",
+  /// "some.nested.*.filename", etc.
+  /// @return True if any parameter has been adjusted.
+  bool AdjustRelativePaths(std::string_view base_path,
+                           const std::vector<std::string_view> &parameters);
+
+  /// @brief Visits all string parameters and replaces any occurrence of the
+  /// given needle/replacement pairs.
+  /// @param replacements List of `<search, replacement>` pairs.
+  /// @return True if any placeholder has actually been replaced.
+  bool ReplaceStringPlaceholders(
+      const std::vector<std::pair<std::string_view, std::string_view>>
+          &replacements);
 
   /// @brief Loads a nested TOML configuration.
   ///
@@ -241,47 +286,45 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Parameter name (fully-qualified TOML path) which holds the
   ///     file name of the nested TOML configuration (must be of type
   ///     string)
-  virtual void LoadNestedTOMLConfiguration(std::string_view key) = 0;
-  // TODO LoadNestedJSONConfiguration(param_name)
-
-  // TODO do we need std::map<std::string, std::variant<int64_t, double,
-  // std::string>> GetDictionary / GetTable
+  void LoadNestedTOMLConfiguration(std::string_view key);
 
   /// @brief Returns a TOML-formatted string of this configuration.
-  virtual std::string ToTOML() const = 0;
+  std::string ToTOML() const;
 
   /// @brief Returns a JSON-formatted string of this configuration.
-  virtual std::string ToJSON() const = 0;
+  std::string ToJSON() const;
 
- protected:
-  Configuration() = default;
+ private:
+  struct Impl;
+  std::unique_ptr<Impl> pimpl_;
 };
 
 //-----------------------------------------------------------------------------
 // Key (parameter name) matching to support access via wildcards
 
-class WERKZEUGKISTE_CONFIG_EXPORT SingleKeyMatcher {
+class WERKZEUGKISTE_CONFIG_EXPORT KeyMatcher {
  public:
-  static std::unique_ptr<SingleKeyMatcher> Create(std::string_view pattern);
-  virtual bool Match(std::string_view key) const = 0;
+  KeyMatcher();
+  explicit KeyMatcher(std::initializer_list<std::string_view> keys);
+  explicit KeyMatcher(const std::vector<std::string_view> &keys);
 
-  virtual ~SingleKeyMatcher() = default;
-  SingleKeyMatcher(const SingleKeyMatcher & /* other */) = default;
-  SingleKeyMatcher &operator=(const SingleKeyMatcher & /* other */) = default;
-  SingleKeyMatcher(SingleKeyMatcher && /* other */) = default;
-  SingleKeyMatcher &operator=(SingleKeyMatcher && /* other */) = default;
+  ~KeyMatcher();
 
- protected:
-  SingleKeyMatcher() = default;
-};
+  KeyMatcher(const KeyMatcher &other);
+  KeyMatcher &operator=(const KeyMatcher &other);
 
-class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
- public:
-  static std::unique_ptr<MultiKeyMatcher> Create(
-      const std::vector<std::string_view> &patterns);
-  virtual ~MultiKeyMatcher() = default;
+  KeyMatcher(KeyMatcher &&other) noexcept;
+  KeyMatcher &operator=(KeyMatcher &&other) noexcept;
 
-  virtual bool MatchAny(std::string_view key) const = 0;
+  void RegisterKey(std::string_view key);
+
+  bool Match(std::string_view query) const;
+
+  bool Empty() const;
+
+ private:
+  struct Impl;
+  std::unique_ptr<Impl> pimpl_;
 };
 
 }  // namespace werkzeugkiste::config

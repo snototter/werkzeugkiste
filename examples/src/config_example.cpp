@@ -7,6 +7,29 @@
 #include <string>
 #include <vector>
 
+// TODO
+#include <werkzeugkiste/config/casts.h>
+
+template <typename T, typename S>
+void CastingCheck(S val) {
+  namespace wkc = werkzeugkiste::config;
+  std::cout << "Casting check:"
+            << "\n* from " << wkc::TypeName<S>() << "(" << std::to_string(val)
+            << ") to " << wkc::TypeName<T>() << "\n* sizeof S(" << sizeof(S)
+            << ") -. (" << sizeof(T) << ')'
+            << "\n* is promotable: " << wkc::IsPromotable<S, T>() << "\n* cast "
+            << std::to_string(val) << " = ";
+  try {
+    if constexpr (std::is_same_v<int8_t, T>) {
+      std::cout << std::to_string(wkc::CheckedCast<T>(val)) << std::endl;
+    } else {
+      std::cout << wkc::CheckedCast<T>(val) << std::endl << std::endl;
+    }
+  } catch (const std::domain_error& e) {
+    WZKLOG_CRITICAL("Caught exception during CheckedCast: {}", e.what());
+  }
+}
+
 // NOLINTBEGIN(*magic-numbers)
 int main(int /* argc */, char** /* argv */) {
   namespace wkc = werkzeugkiste::config;
@@ -18,9 +41,6 @@ int main(int /* argc */, char** /* argv */) {
             << "    Configuration utilities demo\n"
             << "--------------------------------------------------\n"
             << std::endl;
-
-  std::cout << "TODO type names: " << wkc::TypeName<bool>() << ", "
-            << wkc::TypeName<float>();
 
   auto config = wkc::Configuration::LoadTOMLString(R"toml(
     an_int = 3
@@ -40,22 +60,21 @@ int main(int /* argc */, char** /* argv */) {
     [absolute_paths]
     )toml");
 
-  // config->EnsureAbsolutePaths("TODO", {"path", "*.folder"});
-  std::cout << "Query a double: " << config->GetDouble("a_float") << std::endl;
+  std::cout << "Query a double: " << config.GetDouble("a_float") << std::endl;
   try {
-    config->GetDouble("a_str");
+    config.GetDouble("a_str");
   } catch (const std::runtime_error& e) {
     std::cout << "Can't convert a string to double: " << e.what() << std::endl;
   }
 
-  // config->GetDouble("an_int"); //TODO this also throws
+  // config.GetDouble("an_int"); //TODO this also throws
   try {
-    config->GetDouble("no.such.key");
+    config.GetDouble("no.such.key");
   } catch (const std::runtime_error& e) {
     std::cout << "Can't look up a non-existing key: " << e.what() << std::endl;
   }
   std::cout << "But it can be replaced with a default value: "
-            << config->GetDoubleOrDefault("no.such.key", 42) << std::endl;
+            << config.GetDoubleOr("no.such.key", 42) << std::endl;
 
   try {
     config = wkc::Configuration::LoadTOMLFile("no-such-file.toml");
@@ -65,41 +84,40 @@ int main(int /* argc */, char** /* argv */) {
 
   config = wkc::Configuration::LoadTOMLFile(
       wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
-  const auto params = config->ListParameterNames(false);
+  const auto params = config.ListParameterNames(false);
   std::cout << "Parameter names:\n";
   for (const auto& name : params) {
     std::cout << "  " << name << std::endl;
   }
 
-  // config->AdjustRelativePaths("CUSTOM/BASE/PATH",
+  // config.AdjustRelativePaths("CUSTOM/BASE/PATH",
   //                             {"*name"sv, "*.regex*"sv, "strings.str5"sv,
   //                              "strings.str[1-3|7]?"sv,
   //                              "products[2].color"sv});
 
-  // config->GetDouble("an_int"); //TODO this also throws
+  // config.GetDouble("an_int"); //TODO this also throws
   try {
-    // TODO header lookup returns contains() -> false! ??
-    //  config->GetDouble("date-time-params.local-date");
-    config->GetDouble("date-time-params.local-date.ld1");
+    // TODO header lookup returns contains() . false! ??
+    //  config.GetDouble("date-time-params.local-date");
+    config.GetDouble("date-time-params.local-date.ld1");
   } catch (const std::runtime_error& e) {
     std::cout << "Tried wrong type: " << e.what() << std::endl;
   }
   try {
-    config->GetDouble("date-time-params.local-date");
+    config.GetDouble("date-time-params.local-date");
   } catch (const std::runtime_error& e) {
     std::cout << "Tried wrong type: " << e.what() << std::endl;
   }
 
   try {
     std::cout << "Query int32_max: "
-              << config->GetInteger32("integral-numbers.int32_max")
-              << std::endl;
+              << config.GetInteger32("integral-numbers.int32_max") << std::endl;
     std::cout << "Query int64 as int32 (should throw exception): "
-              << config->GetInteger32("integral-numbers.int64") << std::endl;
+              << config.GetInteger32("integral-numbers.int64") << std::endl;
   } catch (const std::runtime_error& e) {
     std::cout << "Caught exception: " << e.what() << std::endl;
     std::cout << "Query int64 correctly: "
-              << config->GetInteger64("integral-numbers.int64") << std::endl;
+              << config.GetInteger64("integral-numbers.int64") << std::endl;
   }
 
   const auto list_config = wkc::Configuration::LoadTOMLString(R"toml(
@@ -121,7 +139,7 @@ int main(int /* argc */, char** /* argv */) {
     )toml");
 
   try {
-    list_config->GetInteger32List("no-such-key");
+    list_config.GetInteger32List("no-such-key");
     throw std::logic_error("Shouldn't be here");
   } catch (const std::runtime_error& e) {
     std::cout << "Tried invalid key, got exception: " << e.what() << std::endl;
@@ -129,7 +147,7 @@ int main(int /* argc */, char** /* argv */) {
   }
 
   try {
-    list_config->GetInteger32List("not-a-list");
+    list_config.GetInteger32List("not-a-list");
     throw std::logic_error("Shouldn't be here");
   } catch (const std::runtime_error& e) {
     std::cout << "Tried loading a table as a list, got exception: " << e.what()
@@ -138,7 +156,7 @@ int main(int /* argc */, char** /* argv */) {
   }
 
   try {
-    list_config->GetInteger32List("mixed_types");
+    list_config.GetInteger32List("mixed_types");
     throw std::logic_error("Shouldn't be here");
   } catch (const std::runtime_error& e) {
     std::cout << "Tried loading an inhomogeneous array as scalar list, got "
@@ -147,12 +165,43 @@ int main(int /* argc */, char** /* argv */) {
     ;
   }
 
-  auto list_str = list_config->GetStringList("strings");
+  auto list_str = list_config.GetStringList("strings");
   std::cout << "Loaded string list: {";
   for (const auto& s : list_str) {
     std::cout << '"' << s << "\", ";
   }
   std::cout << "}" << std::endl;
+
+  //---------------------------------------------------------------------------
+  // Exemplary type casts
+  CastingCheck<int>(true);
+  CastingCheck<bool>(0);
+  CastingCheck<bool>(1);
+  CastingCheck<bool>(2);
+  CastingCheck<int8_t>(127L);
+  CastingCheck<int8_t>(128L);
+  CastingCheck<uint8_t>(128L);
+  CastingCheck<uint8_t>(255L);
+  CastingCheck<uint8_t>(256L);
+
+  CastingCheck<int>(int16_t(42));
+  CastingCheck<int>((uint16_t)42);
+  CastingCheck<uint>((int8_t)0);
+  CastingCheck<uint>((int8_t)-42);
+
+  CastingCheck<double>(0.2f);
+  CastingCheck<double>(0.1f);
+  CastingCheck<long double>(0.2f);
+
+  CastingCheck<std::string>(0.2f);
+
+  CastingCheck<float>(1.0);
+  CastingCheck<float>(0.0);
+  CastingCheck<float>(0.5);
+  CastingCheck<float>(-24.0);
+  CastingCheck<float>(0.2);
+  CastingCheck<float>(3.141592653589793238462643383279502884L);
+  CastingCheck<float>(1.0005);
 
   return 0;
 }
