@@ -10,6 +10,26 @@
 // TODO
 #include <werkzeugkiste/config/casts.h>
 
+template <typename T, typename S>
+void CastingCheck(S val) {
+  namespace wkc = werkzeugkiste::config;
+  std::cout << "Casting check:"
+            << "\n* from " << wkc::TypeName<S>() << "(" << std::to_string(val)
+            << ") to " << wkc::TypeName<T>() << "\n* sizeof S(" << sizeof(S)
+            << ") --> (" << sizeof(T) << ')'
+            << "\n* is promotable: " << wkc::IsPromotable<S, T>() << "\n* cast "
+            << std::to_string(val) << " = ";
+  try {
+    if constexpr (std::is_same_v<int8_t, T>) {
+      std::cout << std::to_string(wkc::CheckedCast<T>(val)) << std::endl;
+    } else {
+      std::cout << wkc::CheckedCast<T>(val) << std::endl << std::endl;
+    }
+  } catch (const std::domain_error& e) {
+    WZKLOG_CRITICAL("Caught exception during CheckedCast: {}", e.what());
+  }
+}
+
 // NOLINTBEGIN(*magic-numbers)
 int main(int /* argc */, char** /* argv */) {
   namespace wkc = werkzeugkiste::config;
@@ -17,10 +37,39 @@ int main(int /* argc */, char** /* argv */) {
   using namespace std::string_view_literals;
 
   // TODO move to tests
-  static_assert(wkc::are_integral_v<int, short>, "TODO");
+  static_assert(wkc::are_integral_v<int, int16_t>, "TODO");
   static_assert(!wkc::are_integral_v<std::string, short>, "TODO");
   static_assert(wkc::are_floating_point_v<float, double>, "TODO");
   static_assert(!wkc::are_floating_point_v<std::string, float>, "TODO");
+
+  CastingCheck<int>(true);
+  CastingCheck<bool>(0);
+  CastingCheck<bool>(1);
+  CastingCheck<bool>(2);
+  CastingCheck<int8_t>(127L);
+  CastingCheck<int8_t>(128L);
+  CastingCheck<uint8_t>(128L);
+  CastingCheck<uint8_t>(255L);
+  CastingCheck<uint8_t>(256L);
+
+  CastingCheck<int>(int16_t(42));
+  CastingCheck<int>((uint16_t)42);
+  CastingCheck<uint>((int8_t)0);
+  CastingCheck<uint>((int8_t)-42);
+
+  CastingCheck<double>(0.2f);
+  CastingCheck<double>(0.1f);
+  CastingCheck<long double>(0.2f);
+
+  CastingCheck<std::string>(0.2f);
+
+  CastingCheck<float>(1.0);
+  CastingCheck<float>(0.0);
+  CastingCheck<float>(0.5);
+  CastingCheck<float>(-24.0);
+  CastingCheck<float>(0.2);
+  CastingCheck<float>(3.141592653589793238462643383279502884L);
+  CastingCheck<float>(1.0005);
 
   std::cout << "--------------------------------------------------\n"
             << "    Werkzeugkiste v" << werkzeugkiste::Version() << "\n"
