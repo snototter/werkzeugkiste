@@ -4,6 +4,7 @@
 #include <werkzeugkiste/config/config_export.h>
 
 #include <cmath>
+#include <initializer_list>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -25,6 +26,7 @@ constexpr const char *TypeName() {
   return typeid(T).name();
 }
 
+// NOLINTNEXTLINE(*macro-usage)
 #define WZK_REGISTER_TYPENAME_SPECIALIZATION(T) \
   template <>                                   \
   constexpr const char *TypeName<T>() {         \
@@ -32,16 +34,14 @@ constexpr const char *TypeName() {
   }
 
 WZK_REGISTER_TYPENAME_SPECIALIZATION(bool)
-
-template <>
-constexpr const char *TypeName<int32_t>() {
-  return "int32";
-}
-template <>
-constexpr const char *TypeName<int64_t>() {
-  return "int64";
-}
-
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int8_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint8_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int16_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint16_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int32_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint32_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(int64_t)
+WZK_REGISTER_TYPENAME_SPECIALIZATION(uint64_t)
 WZK_REGISTER_TYPENAME_SPECIALIZATION(float)
 WZK_REGISTER_TYPENAME_SPECIALIZATION(double)
 
@@ -262,33 +262,38 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
  protected:
   Configuration() = default;
+
+  // private:
+  // struct impl;
+  // std::unique_ptr<impl*> pimpl_{};
 };
 
 //-----------------------------------------------------------------------------
 // Key (parameter name) matching to support access via wildcards
 
-class WERKZEUGKISTE_CONFIG_EXPORT SingleKeyMatcher {
+class WERKZEUGKISTE_CONFIG_EXPORT KeyMatcher {
  public:
-  static std::unique_ptr<SingleKeyMatcher> Create(std::string_view pattern);
-  virtual bool Match(std::string_view key) const = 0;
+  KeyMatcher();
+  explicit KeyMatcher(std::initializer_list<std::string_view> keys);
+  explicit KeyMatcher(const std::vector<std::string_view> &keys);
 
-  virtual ~SingleKeyMatcher() = default;
-  SingleKeyMatcher(const SingleKeyMatcher & /* other */) = default;
-  SingleKeyMatcher &operator=(const SingleKeyMatcher & /* other */) = default;
-  SingleKeyMatcher(SingleKeyMatcher && /* other */) = default;
-  SingleKeyMatcher &operator=(SingleKeyMatcher && /* other */) = default;
+  ~KeyMatcher();
 
- protected:
-  SingleKeyMatcher() = default;
-};
+  KeyMatcher(const KeyMatcher &other);
+  KeyMatcher &operator=(const KeyMatcher &other);
 
-class WERKZEUGKISTE_CONFIG_EXPORT MultiKeyMatcher {
- public:
-  static std::unique_ptr<MultiKeyMatcher> Create(
-      const std::vector<std::string_view> &patterns);
-  virtual ~MultiKeyMatcher() = default;
+  KeyMatcher(KeyMatcher &&other) noexcept;
+  KeyMatcher &operator=(KeyMatcher &&other) noexcept;
 
-  virtual bool MatchAny(std::string_view key) const = 0;
+  void RegisterKey(std::string_view key);
+
+  bool Match(std::string_view query) const;
+
+  bool Empty() const;
+
+ private:
+  struct Impl;
+  std::unique_ptr<Impl> pimpl_;
 };
 
 }  // namespace werkzeugkiste::config

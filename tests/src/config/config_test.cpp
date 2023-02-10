@@ -21,13 +21,23 @@ using namespace std::string_view_literals;
 
 TEST(ConfigTest, TypeUtils) {
   EXPECT_EQ("bool", wkc::TypeName<bool>());
-  EXPECT_EQ("int32", wkc::TypeName<int32_t>());
-  EXPECT_EQ("int64", wkc::TypeName<int64_t>());
+
+  EXPECT_EQ("int8_t", wkc::TypeName<int8_t>());
+  EXPECT_EQ("uint8_t", wkc::TypeName<uint8_t>());
+  EXPECT_EQ("int16_t", wkc::TypeName<int16_t>());
+  EXPECT_EQ("uint16_t", wkc::TypeName<uint16_t>());
+  EXPECT_EQ("int32_t", wkc::TypeName<int32_t>());
+  EXPECT_EQ("uint32_t", wkc::TypeName<uint32_t>());
+  EXPECT_EQ("int64_t", wkc::TypeName<int64_t>());
+  EXPECT_EQ("uint64_t", wkc::TypeName<uint64_t>());
+
   EXPECT_EQ("float", wkc::TypeName<float>());
   EXPECT_EQ("double", wkc::TypeName<double>());
+
   EXPECT_EQ("string", wkc::TypeName<std::string>());
   EXPECT_EQ("string_view", wkc::TypeName<std::string_view>());
 
+  EXPECT_NO_THROW(wkc::TypeName<unsigned short>());
   EXPECT_NE("ushort", wkc::TypeName<unsigned short>());
 }
 
@@ -466,56 +476,111 @@ TEST(ConfigTest, Keys2) {
 }
 
 TEST(ConfigTest, KeyMatching) {
-  auto mm = wkc::MultiKeyMatcher::Create({"this-is.a-valid.key"});
+  // Default construction
+  wkc::KeyMatcher empty{};
+  EXPECT_TRUE(empty.Empty());
 
-  EXPECT_FALSE(mm->MatchAny("this.is.a-valid.key"));
-  EXPECT_FALSE(mm->MatchAny("this_is.a_valid.key"));
-  EXPECT_FALSE(mm->MatchAny("this-is.a-valid.ke"));
-  EXPECT_FALSE(mm->MatchAny("this-is.a-valid.key2"));
-  EXPECT_TRUE(mm->MatchAny("this-is.a-valid.key"));
+  auto matcher = wkc::KeyMatcher{"this-is.a-valid.key"sv};
+  EXPECT_FALSE(matcher.Empty());
 
-  mm = wkc::MultiKeyMatcher::Create({"plain-key", "a.b.c1"});
-  EXPECT_FALSE(mm->MatchAny("this-is.a-valid.key"));
-  EXPECT_TRUE(mm->MatchAny("plain-key"));
-  EXPECT_TRUE(mm->MatchAny("a.b.c1"));
-  EXPECT_FALSE(mm->MatchAny("a.b.c"));
+  EXPECT_FALSE(matcher.Match("this.is.a-valid.key"sv));
+  EXPECT_FALSE(matcher.Match("this_is.a_valid.key"sv));
+  EXPECT_FALSE(matcher.Match("this-is.a-valid.ke"sv));
+  EXPECT_FALSE(matcher.Match("this-is.a-valid.key2"sv));
 
-  auto single = wkc::SingleKeyMatcher::Create("pattern*");
-  EXPECT_TRUE(single->Match("pattern"));
-  EXPECT_TRUE(single->Match("pattern-"));
-  EXPECT_TRUE(single->Match("pattern1"));
-  EXPECT_FALSE(single->Match("a-pattern"));
+  EXPECT_TRUE(matcher.Match("this-is.a-valid.key"sv));
+  EXPECT_FALSE(matcher.Match("this-is.a-valid.keY"sv));
 
-  single = wkc::SingleKeyMatcher::Create("*pattern*");
-  EXPECT_TRUE(single->Match("pattern"));
-  EXPECT_TRUE(single->Match("pattern-"));
-  EXPECT_TRUE(single->Match("pattern1"));
-  EXPECT_TRUE(single->Match("a-pattern"));
-  EXPECT_FALSE(single->Match("pAttern"));
-  EXPECT_FALSE(single->Match("pat-tern"));
+  // Force copy construction
+  wkc::KeyMatcher copy{matcher};
+  EXPECT_FALSE(copy.Empty());
+  EXPECT_TRUE(copy.Match("this-is.a-valid.key"sv));
+  EXPECT_FALSE(copy.Match("this-is.a-valid.keY"sv));
 
-  single = wkc::SingleKeyMatcher::Create("table.*.param");
-  EXPECT_FALSE(single->Match("table.param"));
-  EXPECT_TRUE(single->Match("table.sub.param"));
-  EXPECT_TRUE(single->Match("table.Sub123.param"));
-  EXPECT_FALSE(single->Match("table1.sub.param"));
-  EXPECT_FALSE(single->Match("table.sub.param1"));
+  EXPECT_TRUE(matcher.Match("this-is.a-valid.key"sv));
+  EXPECT_FALSE(matcher.Match("this-is.a-valid.keY"sv));
+
+  // Force move construction
+  wkc::KeyMatcher moved{std::move(matcher)};
+  EXPECT_FALSE(moved.Empty());
+  EXPECT_TRUE(moved.Match("this-is.a-valid.key"sv));
+  EXPECT_FALSE(moved.Match("this-is.a-valid.keY"sv));
+
+  // Copy/move assignments are tested after the following
+  // multi-key matching tests.
+  matcher = wkc::KeyMatcher{{"plain-key"sv, "a.b.c1"sv}};
+  EXPECT_FALSE(matcher.Match("this-is.a-valid.key"sv));
+  EXPECT_TRUE(matcher.Match("plain-key"sv));
+  EXPECT_TRUE(matcher.Match("a.b.c1"sv));
+  EXPECT_FALSE(matcher.Match("a.b.c"sv));
+
+  // Wildcard
+  matcher = wkc::KeyMatcher{"pattern*"sv};
+  EXPECT_TRUE(matcher.Match("pattern"sv));
+  EXPECT_TRUE(matcher.Match("pattern-"sv));
+  EXPECT_TRUE(matcher.Match("pattern1"sv));
+  EXPECT_FALSE(matcher.Match("a-pattern"sv));
+
+  // Test copy assignment
+  copy = matcher;
+  EXPECT_FALSE(copy.Empty());
+  EXPECT_TRUE(copy.Match("pattern"sv));
+  EXPECT_TRUE(copy.Match("pattern-"sv));
+  EXPECT_TRUE(copy.Match("pattern1"sv));
+  EXPECT_FALSE(copy.Match("a-pattern"sv));
+
+  EXPECT_FALSE(matcher.Empty());
+  EXPECT_TRUE(matcher.Match("pattern"sv));
+  EXPECT_TRUE(matcher.Match("pattern-"sv));
+  EXPECT_TRUE(matcher.Match("pattern1"sv));
+  EXPECT_FALSE(matcher.Match("a-pattern"sv));
+
+  // Multiple wildcards
+  matcher = wkc::KeyMatcher{"*pattern*"sv};
+  EXPECT_TRUE(matcher.Match("pattern"sv));
+  EXPECT_TRUE(matcher.Match("pattern-"sv));
+  EXPECT_TRUE(matcher.Match("pattern1"sv));
+  EXPECT_TRUE(matcher.Match("a-pattern"sv));
+  EXPECT_FALSE(matcher.Match("pAttern"sv));
+  EXPECT_FALSE(matcher.Match("pat-tern"sv));
+
+  // Move assignment
+  moved = std::move(matcher);
+  EXPECT_FALSE(moved.Empty());
+  EXPECT_TRUE(moved.Match("pattern"sv));
+  EXPECT_TRUE(moved.Match("pattern-"sv));
+  EXPECT_TRUE(moved.Match("pattern1"sv));
+  EXPECT_TRUE(moved.Match("a-pattern"sv));
+  EXPECT_FALSE(moved.Match("pAttern"sv));
+  EXPECT_FALSE(moved.Match("pat-tern"sv));
+
+  // Another wildcard (to match multiple sub-levels)
+  matcher = wkc::KeyMatcher{"table.*.param"sv};
+  EXPECT_FALSE(matcher.Match("table.param"sv));
+  EXPECT_TRUE(matcher.Match("table.sub.param"sv));
+  EXPECT_TRUE(matcher.Match("table.Sub123.param"sv));
+  EXPECT_TRUE(matcher.Match("table.sub.foo.param"sv));
+  EXPECT_TRUE(matcher.Match("table.sub.foo.Bar.param"sv));
+  EXPECT_FALSE(matcher.Match("table1.sub.param"sv));
+  EXPECT_FALSE(matcher.Match("table.sub.param1"sv));
 
   // We explicitly use only a basic substitution.
   // Yes, this invalid keys matches. No, this is not a problem
   // because the matching is only used internally to select
   // existing nodes (and an invalid key could not have been created
   // to begin with...)
-  single = wkc::SingleKeyMatcher::Create("arr[*].*");
-  EXPECT_TRUE(single->Match("arr[*].*"));
-  EXPECT_FALSE(single->Match("arr*"));
-  EXPECT_FALSE(single->Match("arr.name"));
-  EXPECT_FALSE(single->Match("arr[]name"));
-  EXPECT_TRUE(single->Match("arr[0].name"));
-  EXPECT_TRUE(single->Match("arr[1].name"));
-  EXPECT_TRUE(single->Match("arr[-10].name"));
-  EXPECT_TRUE(single->Match("arr[123].name"));
-  EXPECT_TRUE(single->Match("arr[123].*"));
+  matcher = wkc::KeyMatcher{"arr[*].*"sv};
+  EXPECT_TRUE(matcher.Match("arr[*].*"sv));
+  EXPECT_FALSE(matcher.Match("arr*"sv));
+  EXPECT_FALSE(matcher.Match("arr.name"sv));
+  EXPECT_FALSE(matcher.Match("arr[]name"sv));
+  EXPECT_TRUE(matcher.Match("arr[0].name"sv));
+  EXPECT_TRUE(matcher.Match("arr[1].name"sv));
+  EXPECT_TRUE(matcher.Match("arr[-10].name"sv));
+  EXPECT_TRUE(matcher.Match("arr[123].name"sv));
+  EXPECT_TRUE(matcher.Match("arr[123].*"sv));
+  EXPECT_TRUE(matcher.Match("arr[0][1].*"sv));
+  EXPECT_TRUE(matcher.Match("arr[0][1][2].*"sv));
 }
 
 template <typename VecType, typename Tuples>

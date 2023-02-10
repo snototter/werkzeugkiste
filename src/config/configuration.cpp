@@ -10,7 +10,7 @@
 #include <array>
 #include <functional>
 #include <limits>
-#include <regex>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -698,110 +698,9 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 }
 }  // namespace utils
 
-// TODO doc
-class SingleKeyMatcherImpl : public SingleKeyMatcher {
- public:
-  explicit SingleKeyMatcherImpl(std::string &&pattern)
-      : SingleKeyMatcher(), pattern_(std::move(pattern)) {
-    // TODO https://toml.io/en/v1.0.0
-    // dotted is allowed (and needed to support paths!)
-    // add documentation that quoted keys are not supported! - maybe add a check
-    // and raise an exception if needed?
-    auto it = std::find_if_not(pattern_.begin(), pattern_.end(), [](char c) {
-      return ((isalnum(c) != 0) || (c == '.') || (c == '_') || (c == '-'));
-    });
-
-    is_regex_ = (it != pattern_.end());
-
-    if (is_regex_) {
-      BuildRegex();
-    }
-  }
-
-  SingleKeyMatcherImpl() = delete;
-  SingleKeyMatcherImpl(const SingleKeyMatcherImpl &) = default;
-  SingleKeyMatcherImpl(SingleKeyMatcherImpl &&) = default;
-  SingleKeyMatcherImpl &operator=(const SingleKeyMatcherImpl &) = default;
-  SingleKeyMatcherImpl &operator=(SingleKeyMatcherImpl &&) = default;
-  ~SingleKeyMatcherImpl() override = default;
-
-  bool Match(std::string_view key) const override {
-    // Always check for equality
-    if (pattern_.compare(key) == 0) {
-      return true;
-    }
-
-    if (is_regex_) {
-      constexpr auto flags = std::regex_constants::match_default;
-      if (std::regex_match(key.begin(), key.end(), regex_, flags)) {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
- private:
-  std::string pattern_{};
-  bool is_regex_{false};
-  std::regex regex_{};
-
-  inline void BuildRegex() {
-    std::string re{"^"};
-    for (char c : pattern_) {
-      if (c == '*') {
-        re += ".*";
-      } else if ((c == '.') || (c == '[') || (c == ']')) {
-        re += '\\';
-        re += c;
-      } else {
-        re += c;
-      }
-    }
-    re += '$';
-    WZKLOG_CRITICAL("Built regex for SingleKeyMatcher: {:s}", re);
-    regex_ = std::regex{re};
-  }
-};
-
-// TODO doc
-class MultiKeyMatcherImpl : public MultiKeyMatcher {
- public:
-  explicit MultiKeyMatcherImpl(const std::vector<std::string_view> &patterns) {
-    for (const auto &pattern : patterns) {
-      matchers_.emplace_back(SingleKeyMatcherImpl(std::string(pattern)));
-    }
-  }
-
-  MultiKeyMatcherImpl() = delete;
-  MultiKeyMatcherImpl(const MultiKeyMatcherImpl &) = default;
-  MultiKeyMatcherImpl(MultiKeyMatcherImpl &&) = default;
-  MultiKeyMatcherImpl &operator=(const MultiKeyMatcherImpl &) = default;
-  MultiKeyMatcherImpl &operator=(MultiKeyMatcherImpl &&) = default;
-  ~MultiKeyMatcherImpl() override = default;
-
-  bool MatchAny(std::string_view key) const override {
-    for (const auto &m : matchers_) {
-      if (m.Match(key)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
- private:
-  std::vector<SingleKeyMatcherImpl> matchers_{};
-};
-
-std::unique_ptr<SingleKeyMatcher> SingleKeyMatcher::Create(
-    std::string_view pattern) {
-  return std::make_unique<SingleKeyMatcherImpl>(std::string(pattern));
-}
-
-std::unique_ptr<MultiKeyMatcher> MultiKeyMatcher::Create(
-    const std::vector<std::string_view> &patterns) {
-  return std::make_unique<MultiKeyMatcherImpl>(patterns);
-}
+// struct Configuration::Impl {
+//   toml::table config_;
+// };
 
 class ConfigurationImpl : public Configuration {
  public:
@@ -823,9 +722,9 @@ class ConfigurationImpl : public Configuration {
       std::string_view base_path,
       const std::vector<std::string_view> &parameters) override {
     using namespace std::string_view_literals;
-    MultiKeyMatcherImpl matcher{parameters};
+    KeyMatcher matcher{parameters};
     auto to_replace = [matcher](std::string_view fqn) -> bool {
-      return matcher.MatchAny(fqn);
+      return matcher.Match(fqn);
     };
 
     bool replaced{false};
@@ -1176,8 +1075,4 @@ std::unique_ptr<Configuration> Configuration::LoadTOMLFile(
   return Configuration::LoadTOMLString(files::CatAsciiFile(filename));
 }
 
-// std::unique_ptr<Configuration> Configuration::LoadJSON(std::string_view
-// filename) {
-//     return std::make_unique<ConfigurationImpl>(ConfigurationImpl()); // TODO
-// }
 }  // namespace werkzeugkiste::config
