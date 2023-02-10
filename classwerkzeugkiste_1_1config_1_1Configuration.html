@@ -66,15 +66,16 @@
             </li>
           </ul>
         </div>
+<p>Design decisions:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>I prefer explicit method names over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> instead of returning an optional scalar. As an alternative to exception handling, use <code>Contains</code> or <code>Get&lt;Type&gt;Or</code>, which returns a default value.</li><li>Nested lists are not supported.</li></ul><p>TODOs:</p><ul><li>[ ] Do we need double-precision points ?</li><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] LoadLibconfigFile ?</li><li>[ ] LoadLibconfigString ?</li><li>[ ] ToLibconfigString ?</li><li>[ ] Date</li><li>[ ] Time</li><li>[ ] DateTime</li></ul>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#ade11749f3314dc1846f18ee3c25b8434" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a91939c8dae00f9e8794b232b20a44302" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from the given file.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#a6d8deeb12e017fe714e0a4ed48a266bd" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ae3e70e3f931babab7eec207220c1a060" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from a string.</dd>
           </dl>
@@ -82,20 +83,20 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a93e1fb414f05cdb1c9814a86f15acb8f">
-              <span class="m-doc-wrap-bumper"><a href="#a93e1fb414f05cdb1c9814a86f15acb8f" class="m-doc-self">~Configuration</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
+            <dt id="a6e780785128600dc759cb9124512cf93">
+              <span class="m-doc-wrap-bumper"><a href="#a6e780785128600dc759cb9124512cf93" class="m-doc-self">Configuration</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a27e9efc829a6267dbe1ad2d77111decd">
-              <span class="m-doc-wrap-bumper"><a href="#a27e9efc829a6267dbe1ad2d77111decd" class="m-doc-self">Configuration</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt id="a912507c2e4f0bd12908c799c60d54f89">
+              <span class="m-doc-wrap-bumper"><a href="#a912507c2e4f0bd12908c799c60d54f89" class="m-doc-self">~Configuration</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="acfc3fa631742ea5713b1f3b821fc8ee8">
-              <span class="m-doc-wrap-bumper"><a href="#acfc3fa631742ea5713b1f3b821fc8ee8" class="m-doc-self">Configuration</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp;&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt id="ac62e04110420600e5321b40b13dbde78">
+              <span class="m-doc-wrap-bumper"><a href="#ac62e04110420600e5321b40b13dbde78" class="m-doc-self">Configuration</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; other)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a0aab70979cbb4ff44762e18c38b6f52a">
-              <span class="m-doc-wrap-bumper"><a href="#a0aab70979cbb4ff44762e18c38b6f52a" class="m-doc-self">Configuration</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a6b42d1b7b7671ec23a357a1e89f15c53">
+              <span class="m-doc-wrap-bumper"><a href="#a6b42d1b7b7671ec23a357a1e89f15c53" class="m-doc-self">Configuration</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -103,164 +104,172 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a10ef5618a85f512451311e13e37ae865">
-              <span class="m-doc-wrap-bumper">auto <a href="#a10ef5618a85f512451311e13e37ae865" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp;) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt id="a3d2cda811d845f47e9502acbd4ce874e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3d2cda811d845f47e9502acbd4ce874e" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; other) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="aa047c781bb6a43f268e1771d463e2947">
-              <span class="m-doc-wrap-bumper">auto <a href="#aa047c781bb6a43f268e1771d463e2947" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp;&amp;) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            <dt id="ae15947e2234ed077e76bd5646b14a75d">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae15947e2234ed077e76bd5646b14a75d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp;&amp; other) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd><span></span></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a76b6427149a6cd06cf189d8f317d3417" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
-              const std::vector&lt;std::string_view&gt;&amp; parameters) -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="ae7ddf086b04b51dca5e0bdbd1a1b41bf">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7ddf086b04b51dca5e0bdbd1a1b41bf" class="m-doc-self">Empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
-            <dd>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae8af58e89c7d4092cc878a52b1d204e8" class="m-doc">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements) -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</dd>
-            <dt id="a0f651e9eb3cfedd318e7494f609441e5">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0f651e9eb3cfedd318e7494f609441e5" class="m-doc-self">Equals</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>* other) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dd>Returns true if this configuration has no parameters set.</dd>
+            <dt id="aa170a607389ed71d0b66eeafb180ba84">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa170a607389ed71d0b66eeafb180ba84" class="m-doc-self">Equals</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd>Returns true if all configuration keys and values match exactly.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a984516d22bf9798cb924c61ce7a27729" class="m-doc">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const -&gt; std::vector&lt;std::string&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
-            </dt>
-            <dd>Returns a list of all (fully-qualified) parameter names.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3fe67fec19ac887e875f68903fd827a4" class="m-doc">Contains</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9457f9510a75a6a245277a683b02177a" class="m-doc">Contains</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
             </dt>
             <dd>Checks if the given key exists in this configuration.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa40708468d172eb0fc07c6743146dad3" class="m-doc">Type</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a> <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a84c5a32b850c9caf85dcc12d30791589" class="m-doc">Type</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a></span>
             </dt>
             <dd>Returns the type of the parameter at the given key.</dd>
-            <dt id="a66f27d14372210000e92331db629df49">
-              <span class="m-doc-wrap-bumper">auto <a href="#a66f27d14372210000e92331db629df49" class="m-doc-self">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a30b4d2443c9807379b6e623f8eb95049" class="m-doc">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const -&gt; std::vector&lt;std::string&gt;</span>
+            </dt>
+            <dd>Returns a list of all (fully-qualified) parameter names.</dd>
+            <dt id="a95296db8058e86db55350c4ba94107cd">
+              <span class="m-doc-wrap-bumper">auto <a href="#a95296db8058e86db55350c4ba94107cd" class="m-doc-self">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a933f8108bbc456edb9cc366f3e15e865">
-              <span class="m-doc-wrap-bumper">auto <a href="#a933f8108bbc456edb9cc366f3e15e865" class="m-doc-self">GetBooleanOrDefault</a>(</span><span class="m-doc-wrap">std::string_view key,
-              bool default_val) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="aa802d50f4b9cd05b476b6235f6bc1ae5">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa802d50f4b9cd05b476b6235f6bc1ae5" class="m-doc-self">GetBooleanOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool default_val) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a507a4c498b85cdfd67159f38affa8225">
-              <span class="m-doc-wrap-bumper">void <a href="#a507a4c498b85cdfd67159f38affa8225" class="m-doc-self">SetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key,
-              bool value) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="ab00f7367e393073156bbc990338ced55">
+              <span class="m-doc-wrap-bumper">void <a href="#ab00f7367e393073156bbc990338ced55" class="m-doc-self">SetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool value)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a12583b46f66e5b9bd54850bdf279f5fd">
-              <span class="m-doc-wrap-bumper">auto <a href="#a12583b46f66e5b9bd54850bdf279f5fd" class="m-doc-self">GetDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; double <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a0e62d33cadd8243ed0131c9d6a761067">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0e62d33cadd8243ed0131c9d6a761067" class="m-doc-self">GetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int32_t</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="ac88294378d83d133b05a6e404ec8794e">
-              <span class="m-doc-wrap-bumper">auto <a href="#ac88294378d83d133b05a6e404ec8794e" class="m-doc-self">GetDoubleOrDefault</a>(</span><span class="m-doc-wrap">std::string_view key,
-              double default_val) const -&gt; double <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a22afad86b80bb2e65c3ce49205f9e75d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a22afad86b80bb2e65c3ce49205f9e75d" class="m-doc-self">GetInteger32Or</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int32_t default_val) const -&gt; int32_t</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a5ba0d35d181d285e1c76a4c3a5b5581a">
-              <span class="m-doc-wrap-bumper">void <a href="#a5ba0d35d181d285e1c76a4c3a5b5581a" class="m-doc-self">SetDouble</a>(</span><span class="m-doc-wrap">std::string_view key,
-              double value) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a0bfd10ac84bb413c367ae19835ea75f2">
+              <span class="m-doc-wrap-bumper">void <a href="#a0bfd10ac84bb413c367ae19835ea75f2" class="m-doc-self">SetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int32_t value)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a9e60e617372f0644a70d42d32a7b8f1c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a9e60e617372f0644a70d42d32a7b8f1c" class="m-doc-self">GetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int32_t <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="adbf37babfe3208a2f87e5da0935d850a">
+              <span class="m-doc-wrap-bumper">auto <a href="#adbf37babfe3208a2f87e5da0935d850a" class="m-doc-self">GetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int64_t</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a7bba0d053daf6a50c65fab37dfd92942">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7bba0d053daf6a50c65fab37dfd92942" class="m-doc-self">GetInteger32OrDefault</a>(</span><span class="m-doc-wrap">std::string_view key,
-              int32_t default_val) const -&gt; int32_t <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="abdff03b2fae4c66024806a126290d5c6">
+              <span class="m-doc-wrap-bumper">auto <a href="#abdff03b2fae4c66024806a126290d5c6" class="m-doc-self">GetInteger64Or</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int64_t default_val) const -&gt; int64_t</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="aac5b3984faf53910c9e61409739057ce">
-              <span class="m-doc-wrap-bumper">void <a href="#aac5b3984faf53910c9e61409739057ce" class="m-doc-self">SetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key,
-              int32_t value) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a44cc3e7129ebedc290bdbbc0355e24fe">
+              <span class="m-doc-wrap-bumper">void <a href="#a44cc3e7129ebedc290bdbbc0355e24fe" class="m-doc-self">SetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int64_t value)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a7a7f5e2c1e5d206c27aceeead2ea109f">
-              <span class="m-doc-wrap-bumper">auto <a href="#a7a7f5e2c1e5d206c27aceeead2ea109f" class="m-doc-self">GetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int64_t <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a749e5cc0b14f47da66a8872c06492bb2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a749e5cc0b14f47da66a8872c06492bb2" class="m-doc-self">GetDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; double</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="abe8ee1489eb7fd9f9a2d0d8e52dea812">
-              <span class="m-doc-wrap-bumper">auto <a href="#abe8ee1489eb7fd9f9a2d0d8e52dea812" class="m-doc-self">GetInteger64OrDefault</a>(</span><span class="m-doc-wrap">std::string_view key,
-              int64_t default_val) const -&gt; int64_t <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a1a8446005a5bc279410553344e167e89">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a8446005a5bc279410553344e167e89" class="m-doc-self">GetDoubleOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+              double default_val) const -&gt; double</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a7549a638e628e6977c2ec5deb69c273d">
-              <span class="m-doc-wrap-bumper">void <a href="#a7549a638e628e6977c2ec5deb69c273d" class="m-doc-self">SetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key,
-              int64_t value) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="aee676c05e77cdd40f4a73d2e9cdcf08f">
+              <span class="m-doc-wrap-bumper">void <a href="#aee676c05e77cdd40f4a73d2e9cdcf08f" class="m-doc-self">SetDouble</a>(</span><span class="m-doc-wrap">std::string_view key,
+              double value)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="af5f77a3bd7d44dff90b86fae150ac4c1">
-              <span class="m-doc-wrap-bumper">auto <a href="#af5f77a3bd7d44dff90b86fae150ac4c1" class="m-doc-self">GetString</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::string <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a4e524cbe51f6900224854ec8ab887e85">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e524cbe51f6900224854ec8ab887e85" class="m-doc-self">GetString</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::string</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a4923d99a972c6a7911ebf696045d76cc">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4923d99a972c6a7911ebf696045d76cc" class="m-doc-self">GetStringOrDefault</a>(</span><span class="m-doc-wrap">std::string_view key,
-              std::string_view default_val) const -&gt; std::string <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a999d272971345113c7c7986a8678eb2e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a999d272971345113c7c7986a8678eb2e" class="m-doc-self">GetStringOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::string_view default_val) const -&gt; std::string</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a0854c7c85ac3491fc11916df1cf0b190">
-              <span class="m-doc-wrap-bumper">void <a href="#a0854c7c85ac3491fc11916df1cf0b190" class="m-doc-self">SetString</a>(</span><span class="m-doc-wrap">std::string_view key,
-              std::string_view value) <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a0ac5d89d24217d481ee7f003d6e6d836">
+              <span class="m-doc-wrap-bumper">void <a href="#a0ac5d89d24217d481ee7f003d6e6d836" class="m-doc-self">SetString</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::string_view value)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="aadcbee2105a4d76fdb0986be384b332a">
-              <span class="m-doc-wrap-bumper">auto <a href="#aadcbee2105a4d76fdb0986be384b332a" class="m-doc-self">GetDoublePair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;double, double&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a243f7bdfcd6199343d1c5ff0e35bde31">
+              <span class="m-doc-wrap-bumper">auto <a href="#a243f7bdfcd6199343d1c5ff0e35bde31" class="m-doc-self">GetInteger32Pair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;int32_t, int32_t&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="acafbd8a7b12a1d9714dd6ce424046233">
-              <span class="m-doc-wrap-bumper">auto <a href="#acafbd8a7b12a1d9714dd6ce424046233" class="m-doc-self">GetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;double&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a0b276bb9b1f95e1019099048091ed179">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0b276bb9b1f95e1019099048091ed179" class="m-doc-self">GetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int32_t&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a0a10e7a57c99cdc1466159ffef6b060d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0a10e7a57c99cdc1466159ffef6b060d" class="m-doc-self">GetInteger32Pair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;int32_t, int32_t&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="ab60c950551eeb082a47bea3de74dc36f">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab60c950551eeb082a47bea3de74dc36f" class="m-doc-self">GetInteger64Pair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;int64_t, int64_t&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a0a81aeab0a650ee7f1d4b657cc52fe4d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0a81aeab0a650ee7f1d4b657cc52fe4d" class="m-doc-self">GetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int32_t&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a93d084bccf63cfa9ed669d63cf9153ef">
+              <span class="m-doc-wrap-bumper">auto <a href="#a93d084bccf63cfa9ed669d63cf9153ef" class="m-doc-self">GetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int64_t&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a5826fcd94ec02236162d75aadb0fb074">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5826fcd94ec02236162d75aadb0fb074" class="m-doc-self">GetInteger64Pair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;int64_t, int64_t&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a4f216f811175abb371cba9965f35969e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f216f811175abb371cba9965f35969e" class="m-doc-self">GetDoublePair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;double, double&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a5d3fd78b1dfb795dd8220faccc08f665">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5d3fd78b1dfb795dd8220faccc08f665" class="m-doc-self">GetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int64_t&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a6a0cbff7c370019ededf8f66d01f2cff">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a0cbff7c370019ededf8f66d01f2cff" class="m-doc-self">GetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;double&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a721d68f39583d27e63ef28a23b5a9f7a">
-              <span class="m-doc-wrap-bumper">auto <a href="#a721d68f39583d27e63ef28a23b5a9f7a" class="m-doc-self">GetStringList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::string&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="ab85a411c339a43deda45b4abdaf321d9">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab85a411c339a43deda45b4abdaf321d9" class="m-doc-self">GetStringList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::string&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a24849e1f18bfa63198cb17829c3f74f2">
-              <span class="m-doc-wrap-bumper">auto <a href="#a24849e1f18bfa63198cb17829c3f74f2" class="m-doc-self">GetPoints2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::tuple&lt;int32_t, int32_t&gt;&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="aef744e6be6b70b27bea13479ad81e4bf">
+              <span class="m-doc-wrap-bumper">auto <a href="#aef744e6be6b70b27bea13479ad81e4bf" class="m-doc-self">GetPoints2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::tuple&lt;int32_t, int32_t&gt;&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a5dcb4a1dea603c6ba2d2184c2d312222">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5dcb4a1dea603c6ba2d2184c2d312222" class="m-doc-self">GetPoints3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::tuple&lt;int32_t, int32_t, int32_t&gt;&gt; <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a88132f4a3bba447363fd497d64e8a6f6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a88132f4a3bba447363fd497d64e8a6f6" class="m-doc-self">GetPoints3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::tuple&lt;int32_t, int32_t, int32_t&gt;&gt;</span>
             </dt>
             <dd><span></span></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ad5192117530469ea0e8a38b14bf2da2e" class="m-doc">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key) <span class="m-label m-flat m-warning">pure virtual</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0678e52fff3e9c871bb0480702a1c34" class="m-doc">GetGroup</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Returns a copy of the sub-group.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a390d1627ce2261f9111cd5295e5b0450" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
+              const std::vector&lt;std::string_view&gt;&amp; parameters) -&gt; bool</span>
+            </dt>
+            <dd>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae96887f1b24e2c6e644576b9b2a9d03c" class="m-doc">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements) -&gt; bool</span>
+            </dt>
+            <dd>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a296192c4fff7988e7a2f70a6e3b3a365" class="m-doc">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
             <dd>Loads a nested TOML configuration.</dd>
-            <dt id="a010427838bf6d262e284f425fd5485cf">
-              <span class="m-doc-wrap-bumper">auto <a href="#a010427838bf6d262e284f425fd5485cf" class="m-doc-self">ToTOML</a>(</span><span class="m-doc-wrap">) const -&gt; std::string <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a6f1f7c117ca9cf128abfe64e2b279f9f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f1f7c117ca9cf128abfe64e2b279f9f" class="m-doc-self">ToTOML</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
             <dd>Returns a TOML-formatted string of this configuration.</dd>
-            <dt id="adea5d44d3ad5618d73b8e5a6806f3ece">
-              <span class="m-doc-wrap-bumper">auto <a href="#adea5d44d3ad5618d73b8e5a6806f3ece" class="m-doc-self">ToJSON</a>(</span><span class="m-doc-wrap">) const -&gt; std::string <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="a92d2c7908b1ef29d8ac143e131cdbe7f">
+              <span class="m-doc-wrap-bumper">auto <a href="#a92d2c7908b1ef29d8ac143e131cdbe7f" class="m-doc-self">ToJSON</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
             <dd>Returns a JSON-formatted string of this configuration.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ade11749f3314dc1846f18ee3c25b8434"><div>
+          <section class="m-doc-details" id="a91939c8dae00f9e8794b232b20a44302"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ade11749f3314dc1846f18ee3c25b8434" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91939c8dae00f9e8794b232b20a44302" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
             </h3>
             <p>Loads a TOML configuration from the given file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -275,9 +284,9 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a6d8deeb12e017fe714e0a4ed48a266bd"><div>
+          <section class="m-doc-details" id="ae3e70e3f931babab7eec207220c1a060"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d8deeb12e017fe714e0a4ed48a266bd" class="m-doc-self">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string)</span></span>
+              <span class="m-doc-wrap-bumper">static <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae3e70e3f931babab7eec207220c1a060" class="m-doc-self">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string)</span></span>
             </h3>
             <p>Loads a TOML configuration from a string.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -292,10 +301,79 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a76b6427149a6cd06cf189d8f317d3417"><div>
+          <section class="m-doc-details" id="a9457f9510a75a6a245277a683b02177a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a76b6427149a6cd06cf189d8f317d3417" class="m-doc-self">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
-              const std::vector&lt;std::string_view&gt;&amp; parameters) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9457f9510a75a6a245277a683b02177a" class="m-doc-self">Contains</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Checks if the given key exists in this configuration.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified identifier of the parameter.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a84c5a32b850c9caf85dcc12d30791589"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84c5a32b850c9caf85dcc12d30791589" class="m-doc-self">Type</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns the type of the parameter at the given key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified identifier of the parameter.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Throws an exception if the key is not found.</p>
+          </div></section>
+          <section class="m-doc-details" id="a30b4d2443c9807379b6e623f8eb95049"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a30b4d2443c9807379b6e623f8eb95049" class="m-doc-self">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const</span></span>
+            </h3>
+            <p>Returns a list of all (fully-qualified) parameter names.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">include_array_entries</td>
+                  <td>If true, the name of each parameter will be returned, <em>i.e.</em> each array element will be included. Otherwise, only named parameters (<em>e.g.</em> a dictionary/table within an array, such as <code>arr[3].name</code>) will be included.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab0678e52fff3e9c871bb0480702a1c34"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0678e52fff3e9c871bb0480702a1c34" class="m-doc-self">GetGroup</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a copy of the sub-group.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the parameter (which must be a group, e.g. a JSON dictionary, a TOML table, or a libconfig group).</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a390d1627ce2261f9111cd5295e5b0450"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a390d1627ce2261f9111cd5295e5b0450" class="m-doc-self">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
+              const std::vector&lt;std::string_view&gt;&amp; parameters)</span></span>
             </h3>
             <p>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -320,9 +398,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ae8af58e89c7d4092cc878a52b1d204e8"><div>
+          <section class="m-doc-details" id="ae96887f1b24e2c6e644576b9b2a9d03c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae8af58e89c7d4092cc878a52b1d204e8" class="m-doc-self">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae96887f1b24e2c6e644576b9b2a9d03c" class="m-doc-self">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements)</span></span>
             </h3>
             <p>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -343,61 +421,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a984516d22bf9798cb924c61ce7a27729"><div>
+          <section class="m-doc-details" id="a296192c4fff7988e7a2f70a6e3b3a365"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a984516d22bf9798cb924c61ce7a27729" class="m-doc-self">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Returns a list of all (fully-qualified) parameter names.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">include_array_entries</td>
-                  <td>If true, the name of each parameter will be returned, <em>i.e.</em> each array element will be included. Otherwise, only named parameters (<em>e.g.</em> a dictionary/table within an array, such as <code>arr[3].name</code>) will be included.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a3fe67fec19ac887e875f68903fd827a4"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3fe67fec19ac887e875f68903fd827a4" class="m-doc-self">Contains</a>(</span><span class="m-doc-wrap">std::string_view key) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Checks if the given key exists in this configuration.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">key</td>
-                  <td>Fully-qualified identifier of the parameter.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="aa40708468d172eb0fc07c6743146dad3"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa40708468d172eb0fc07c6743146dad3" class="m-doc-self">Type</a>(</span><span class="m-doc-wrap">std::string_view key) const <span class="m-label m-warning">pure virtual</span></span></span>
-            </h3>
-            <p>Returns the type of the parameter at the given key.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">key</td>
-                  <td>Fully-qualified identifier of the parameter.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>Throws an exception if the key is not found.</p>
-          </div></section>
-          <section class="m-doc-details" id="ad5192117530469ea0e8a38b14bf2da2e"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5192117530469ea0e8a38b14bf2da2e" class="m-doc-self">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key) <span class="m-label m-warning">pure virtual</span></span></span>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a296192c4fff7988e7a2f70a6e3b3a365" class="m-doc-self">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
             </h3>
             <p>Loads a nested TOML configuration.</p>
             <table class="m-table m-fullwidth m-flat">

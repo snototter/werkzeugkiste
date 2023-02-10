@@ -58,18 +58,45 @@
             <li>
               Reference
               <ul>
+                <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
                 <li><a href="#enum-members">Enums</a></li>
                 <li><a href="#func-members">Functions</a></li>
+                <li><a href="#var-members">Variables</a></li>
               </ul>
             </li>
           </ul>
         </div>
+        <section id="namespaces">
+          <h2><a href="#namespaces">Namespaces</a></h2>
+          <dl class="m-doc">
+            <dt>namespace <a href="namespacewerkzeugkiste_1_1config_1_1detail.html" class="m-doc">detail</a></dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;class A, class B&gt;</div>
+              struct <a href="structwerkzeugkiste_1_1config_1_1are__integral.html" class="m-doc">are_integral</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class A, class B&gt;</div>
+              struct <a href="structwerkzeugkiste_1_1config_1_1are__floating__point.html" class="m-doc">are_floating_point</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              class <a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">ParseError</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              class <a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a>
             </dt>
             <dd><span></span></dd>
             <dt>
@@ -77,11 +104,7 @@
             </dt>
             <dd>Encapsulates configuration data.</dd>
             <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>
-            </dt>
-            <dd><span></span></dd>
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1MultiKeyMatcher.html" class="m-doc">MultiKeyMatcher</a>
+              class <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -95,7 +118,7 @@
               <a href="#aa45c374d0d5c8db2ba494b4789867222a072f02cab92dcb89792657037629ac66" class="m-doc">FloatingPoint</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a27118326006d3829667a400ad23d5d98" class="m-doc">String</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a4ee29ca12c7d126654bd0e5275de6135" class="m-doc">List</a>,
-              <a href="#aa45c374d0d5c8db2ba494b4789867222a51c45b795d5d18a3e4e0c37e8b20a141" class="m-doc">Table</a> }</span>
+              <a href="#aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0" class="m-doc">Group</a> }</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -104,18 +127,43 @@
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;typename S, typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5bf1429d78454f214a3f93a3a7bd0062" class="m-doc">IsPromotable</a>(</span><span class="m-doc-wrap">) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2823a369ae700bb91c9423c3f99fe38c" class="m-doc">CheckedCast</a>(</span><span class="m-doc-wrap">const S value) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>TODO Cast between number types (or cast to their string representation)</dd>
+            <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a45f2ad9a909269007a0bd927aa5da3fd" class="m-doc">TypeName</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd><span></span></dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aab3d313b864abe741b6e41e0c4d549ff" class="m-doc">TypeName&lt;int32_t&gt;</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#aaf926afefcde21f968ed15b22a11f474" class="m-doc">TypeName&lt;std::string&gt;</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd><span></span></dd>
             <dt>
               <div class="m-doc-template">template&lt;&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a679588a277d86ba1bdac6ee354bb6acd" class="m-doc">TypeName&lt;int64_t&gt;</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a820aec29e854cde3212588bcb9c124f2" class="m-doc">TypeName&lt;std::string_view&gt;</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+        <section id="var-members">
+          <h2><a href="#var-members">Variables</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;class A, class B&gt;</div>
+              bool <a href="#af093a2e6b68e720d65c8ecfa3fe655aa" class="m-doc">are_integral_v</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;class A, class B&gt;</div>
+              bool <a href="#a99db23445fe1b0b5e4d53a4e1019e35e" class="m-doc">are_floating_point_v</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -164,7 +212,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td><a href="#aa45c374d0d5c8db2ba494b4789867222a51c45b795d5d18a3e4e0c37e8b20a141" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a51c45b795d5d18a3e4e0c37e8b20a141">Table</a></td>
+                  <td><a href="#aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0">Group</a></td>
                   <td>
                   <p>TODO.</p>
                   </td>
@@ -175,6 +223,26 @@
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5bf1429d78454f214a3f93a3a7bd0062"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename S, typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bf1429d78454f214a3f93a3a7bd0062" class="m-doc-self">IsPromotable</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a2823a369ae700bb91c9423c3f99fe38c"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename T, typename S&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">T werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2823a369ae700bb91c9423c3f99fe38c" class="m-doc-self">CheckedCast</a>(</span><span class="m-doc-wrap">const S value) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>TODO Cast between number types (or cast to their string representation)</p>
+          </div></section>
           <section class="m-doc-details" id="a45f2ad9a909269007a0bd927aa5da3fd"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
@@ -185,23 +253,46 @@
             </h3>
             <p><span></span></p>
           </div></section>
-          <section class="m-doc-details" id="aab3d313b864abe741b6e41e0c4d549ff"><div>
+          <section class="m-doc-details" id="aaf926afefcde21f968ed15b22a11f474"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const char* werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aab3d313b864abe741b6e41e0c4d549ff" class="m-doc-self">TypeName&lt;int32_t&gt;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const char* werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaf926afefcde21f968ed15b22a11f474" class="m-doc-self">TypeName&lt;std::string&gt;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p><span></span></p>
           </div></section>
-          <section class="m-doc-details" id="a679588a277d86ba1bdac6ee354bb6acd"><div>
+          <section class="m-doc-details" id="a820aec29e854cde3212588bcb9c124f2"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const char* werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a679588a277d86ba1bdac6ee354bb6acd" class="m-doc-self">TypeName&lt;int64_t&gt;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">const char* werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a820aec29e854cde3212588bcb9c124f2" class="m-doc-self">TypeName&lt;std::string_view&gt;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="af093a2e6b68e720d65c8ecfa3fe655aa"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class A, class B&gt;
+              </div>
+              bool werkzeugkiste::<wbr />config::<wbr /><a href="#af093a2e6b68e720d65c8ecfa3fe655aa" class="m-doc-self">are_integral_v</a> <span class="m-label m-primary">constexpr</span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a99db23445fe1b0b5e4d53a4e1019e35e"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;class A, class B&gt;
+              </div>
+              bool werkzeugkiste::<wbr />config::<wbr /><a href="#a99db23445fe1b0b5e4d53a4e1019e35e" class="m-doc-self">are_floating_point_v</a> <span class="m-label m-primary">constexpr</span>
             </h3>
             <p><span></span></p>
           </div></section>

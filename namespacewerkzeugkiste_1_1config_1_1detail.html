@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>werkzeugkiste</title>
+  <title>werkzeugkiste::config::detail namespace | werkzeugkiste</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -30,7 +30,7 @@
                 <li><a href="about.html">About</a></li>
               </ol>
             </li>
-            <li><a href="namespaces.html" id="m-navbar-current">Namespaces</a></li>
+            <li><a href="namespaces.html">Namespaces</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="3">
             <li><a href="annotated.html">Classes</a></li>
@@ -48,47 +48,73 @@
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>Namespaces</h1>
-        <ul class="m-doc">
-          <li>namespace <a href="namespacestd.html" class="m-doc">std</a> <span class="m-doc"><span></span></span></li>
-          <li class="m-doc-collapsible">
-            <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespacewerkzeugkiste.html" class="m-doc">werkzeugkiste</a> <span class="m-doc"><span></span></span>
-            <ul class="m-doc">
-              <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespacewerkzeugkiste_1_1config.html" class="m-doc">config</a> <span class="m-doc">Utilities to handle configurations.</span>
-                <ul class="m-doc">
-                  <li>namespace <a href="namespacewerkzeugkiste_1_1config_1_1detail.html" class="m-doc">detail</a> <span class="m-doc"><span></span></span></li>
-                </ul>
-              </li>
-              <li>namespace <a href="namespacewerkzeugkiste_1_1container.html" class="m-doc">container</a> <span class="m-doc">Utility functions for standard containers.</span></li>
-              <li>namespace <a href="namespacewerkzeugkiste_1_1files.html" class="m-doc">files</a> <span class="m-doc">File system utilities.</span></li>
-              <li class="m-doc-collapsible">
-                <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespacewerkzeugkiste_1_1geometry.html" class="m-doc">geometry</a> <span class="m-doc">Math utils for 2D/3D geometry.</span>
-                <ul class="m-doc">
-                  <li>namespace <a href="namespacewerkzeugkiste_1_1geometry_1_1constants.html" class="m-doc">constants</a> <span class="m-doc">Mathematical constants.</span></li>
-                </ul>
-              </li>
-              <li>namespace <a href="namespacewerkzeugkiste_1_1strings.html" class="m-doc">strings</a> <span class="m-doc"></span></li>
-              <li>namespace <a href="namespacewerkzeugkiste_1_1timing.html" class="m-doc">timing</a> <span class="m-doc"></span></li>
-            </ul>
-          </li>
-        </ul>
-        <script>
-        function toggle(e) {
-            e.parentElement.className = e.parentElement.className == 'm-doc-collapsible' ?
-                'm-doc-expansible' : 'm-doc-collapsible';
-            return false;
-        }
-        /* Collapse all nodes marked as such. Doing it via JS instead of
-           directly in markup so disabling it doesn't harm usability. The list
-           is somehow regenerated on every iteration and shrinks as I change
-           the classes. It's not documented anywhere and I'm not sure if this
-           is the same across browsers, so I am going backwards in that list to
-           be sure. */
-        var collapsed = document.getElementsByClassName("collapsed");
-        for(var i = collapsed.length - 1; i >= 0; --i)
-            collapsed[i].className = 'm-doc-expansible';
-        </script>
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>detail <span class="m-thin">namespace</span>
+          <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
+        </h1>
+        <p><span></span></p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#func-members">Functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="func-members">
+          <h2><a href="#func-members">Functions</a></h2>
+          <dl class="m-doc">
+            <dt id="aa5fe7c994649f5fd8c9b35da5c4d28bb">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aa5fe7c994649f5fd8c9b35da5c4d28bb" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+              std::false_type,
+              std::true_type) -&gt; T</span>
+            </dt>
+            <dd>Helper to cast from a SIGNED to an UNSIGNED integral value.</dd>
+            <dt id="a60b8d71ef63e58d59abde5a9155a3b47">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a60b8d71ef63e58d59abde5a9155a3b47" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+              std::false_type,
+              std::false_type) -&gt; T</span>
+            </dt>
+            <dd>Helper to cast from an UNSIGNED to a SIGNED integral value.</dd>
+            <dt id="acf5b3fe55bfbb539bc4e418efdd369ac">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#acf5b3fe55bfbb539bc4e418efdd369ac" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+              std::false_type) -&gt; T</span>
+            </dt>
+            <dd>Helper/dispatcher to cast between DIFFERENTLY SIGNED integral types.</dd>
+            <dt id="a30b9825984c99e8c9636a134e0b2c527">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a30b9825984c99e8c9636a134e0b2c527" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+              std::true_type) -&gt; T</span>
+            </dt>
+            <dd>Helper to cast between integral types of the SAME SIGN.</dd>
+            <dt id="a7c9e23b1c0e293b674d21caaaa78a7d4">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7c9e23b1c0e293b674d21caaaa78a7d4" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Dispatcher to cast between integral types.</dd>
+            <dt id="a13416c6afc2ada8c0d075fe77aac6ddd">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a13416c6afc2ada8c0d075fe77aac6ddd" class="m-doc-self">CheckedFloatingPointCast</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a6f435aa0ec6c2656c82226f1004ed45b">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f435aa0ec6c2656c82226f1004ed45b" class="m-doc-self">CheckedIntegralToFloatingPointCast</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a356b2d2f144ee6a90908b5a205862eb2">
+              <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a356b2d2f144ee6a90908b5a205862eb2" class="m-doc-self">CheckedFloatingPointToIntegralCast</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>

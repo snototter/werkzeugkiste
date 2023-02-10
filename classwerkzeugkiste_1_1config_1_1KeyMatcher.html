@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>werkzeugkiste::config::SingleKeyMatcher class | werkzeugkiste</title>
+  <title>werkzeugkiste::config::KeyMatcher class | werkzeugkiste</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -49,7 +49,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>SingleKeyMatcher <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>KeyMatcher <span class="m-thin">class</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;configuration.h&gt;</a></div>
         </h1>
         <p><span></span></p>
@@ -59,39 +59,37 @@
             <li>
               Reference
               <ul>
-                <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
-        <section id="pub-static-methods">
-          <h2><a href="#pub-static-methods">Public static functions</a></h2>
-          <dl class="m-doc">
-            <dt id="aad478c1e5bf11f66e0752e77a514c2f6">
-              <span class="m-doc-wrap-bumper">static auto <a href="#aad478c1e5bf11f66e0752e77a514c2f6" class="m-doc-self">Create</a>(</span><span class="m-doc-wrap">std::string_view pattern) -&gt; std::unique_ptr&lt;<a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>&gt;</span>
-            </dt>
-            <dd><span></span></dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="ad42f89b3625c6bc0f5458beba42557e3">
-              <span class="m-doc-wrap-bumper"><a href="#ad42f89b3625c6bc0f5458beba42557e3" class="m-doc-self">~SingleKeyMatcher</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-warning">virtual</span></span>
+            <dt id="a93e3b406017869cded2c551d7bb0ba35">
+              <span class="m-doc-wrap-bumper"><a href="#a93e3b406017869cded2c551d7bb0ba35" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a6f67ae2a35e2b6fa491ef1c0dec71f92">
-              <span class="m-doc-wrap-bumper"><a href="#a6f67ae2a35e2b6fa491ef1c0dec71f92" class="m-doc-self">SingleKeyMatcher</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a03aaa7c14b463a7e07d6eb9196684f88">
+              <span class="m-doc-wrap-bumper"><a href="#a03aaa7c14b463a7e07d6eb9196684f88" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;std::string_view&gt; keys) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd><span></span></dd>
-            <dt id="afa182bc335c37b76e37aad7f38fdbcfe">
-              <span class="m-doc-wrap-bumper"><a href="#afa182bc335c37b76e37aad7f38fdbcfe" class="m-doc-self">SingleKeyMatcher</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a64238e5580a3824387a4e3fb2917953c">
+              <span class="m-doc-wrap-bumper"><a href="#a64238e5580a3824387a4e3fb2917953c" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::string_view&gt;&amp; keys) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a18e0d21b0fe75d8b9e327481a6e172e8">
-              <span class="m-doc-wrap-bumper"><a href="#a18e0d21b0fe75d8b9e327481a6e172e8" class="m-doc-self">SingleKeyMatcher</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">protected</span> <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a70266b090978e9810f2a81026b8a957b">
+              <span class="m-doc-wrap-bumper"><a href="#a70266b090978e9810f2a81026b8a957b" class="m-doc-self">~KeyMatcher</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a03a48bc4efd76dd6c6593eccef783542">
+              <span class="m-doc-wrap-bumper"><a href="#a03a48bc4efd76dd6c6593eccef783542" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; other)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a18f41df32d49198cbaf14ea93dfdba89">
+              <span class="m-doc-wrap-bumper"><a href="#a18f41df32d49198cbaf14ea93dfdba89" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -99,16 +97,24 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a43433f47f8483b39f2c2c85bb6966d44">
-              <span class="m-doc-wrap-bumper">auto <a href="#a43433f47f8483b39f2c2c85bb6966d44" class="m-doc-self">Match</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span></span>
+            <dt id="ad04875ab755e0d9532e9ae3b87351b4d">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad04875ab755e0d9532e9ae3b87351b4d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; other) -&gt; <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="adaa0ec8012a67a6ecfdd49cb03082f22">
-              <span class="m-doc-wrap-bumper">auto <a href="#adaa0ec8012a67a6ecfdd49cb03082f22" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>&amp;) -&gt; <a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a9680a49a3fe14a463440a23d7d4d67ed">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9680a49a3fe14a463440a23d7d4d67ed" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;&amp; other) -&gt; <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a4225aaf6e05b2a57d794067226928197">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4225aaf6e05b2a57d794067226928197" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>&amp;&amp;) -&gt; <a href="classwerkzeugkiste_1_1config_1_1SingleKeyMatcher.html" class="m-doc">SingleKeyMatcher</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a106f4bf35f72bc34cd176cc4641fce86">
+              <span class="m-doc-wrap-bumper">void <a href="#a106f4bf35f72bc34cd176cc4641fce86" class="m-doc-self">RegisterKey</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a864af426f7a46e04cd7ceaeaf5a4f025">
+              <span class="m-doc-wrap-bumper">auto <a href="#a864af426f7a46e04cd7ceaeaf5a4f025" class="m-doc-self">Match</a>(</span><span class="m-doc-wrap">std::string_view query) const -&gt; bool</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a1efb4b1e710f093f59d3236a766de902">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1efb4b1e710f093f59d3236a766de902" class="m-doc-self">Empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
           </dl>
