@@ -49,25 +49,25 @@ TEST(ConfigTest, Integers) {
     int32_max_overflow = 2147483648
     int32_min = -2147483648
     int32_min_overflow = -2147483649
-    )toml");
-  EXPECT_EQ(-123456, config.GetInteger32("int32_1"));
-  EXPECT_EQ(987654, config.GetInteger32("int32_2"));
-  EXPECT_EQ(2147483647, config.GetInteger32("int32_max"));
-  EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"));
-  EXPECT_THROW(config.GetInteger32("int32_min_overflow"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("int32_max_overflow"), wkc::TypeError);
+    )toml"sv);
+  EXPECT_EQ(-123456, config.GetInteger32("int32_1"sv));
+  EXPECT_EQ(987654, config.GetInteger32("int32_2"sv));
+  EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
+  EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
+  EXPECT_THROW(config.GetInteger32("int32_min_overflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
 
-  EXPECT_EQ(-1, config.GetInteger32Or("test", -1));
-  EXPECT_EQ(17, config.GetInteger32Or("another", 17));
-  EXPECT_THROW(config.GetInteger32("test"), wkc::KeyError);
+  EXPECT_EQ(-1, config.GetInteger32Or("test"sv, -1));
+  EXPECT_EQ(17, config.GetInteger32Or("another"sv, 17));
+  EXPECT_THROW(config.GetInteger32("test"sv), wkc::KeyError);
 
-  EXPECT_EQ(-123456, config.GetInteger64("int32_1"));
-  EXPECT_EQ(+987654, config.GetInteger64("int32_2"));
-  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_overflow"));
-  EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"));
-  EXPECT_EQ(-1, config.GetInteger64Or("test", -1));
-  EXPECT_EQ(17, config.GetInteger64Or("another", 17));
-  EXPECT_THROW(config.GetInteger64("test"), wkc::KeyError);
+  EXPECT_EQ(-123456, config.GetInteger64("int32_1"sv));
+  EXPECT_EQ(+987654, config.GetInteger64("int32_2"sv));
+  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_overflow"sv));
+  EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
+  EXPECT_EQ(-1, config.GetInteger64Or("test"sv, -1));
+  EXPECT_EQ(17, config.GetInteger64Or("another"sv, 17));
+  EXPECT_THROW(config.GetInteger64("test"sv), wkc::KeyError);
 }
 
 TEST(ConfigTest, FloatingPoint) {
@@ -81,28 +81,28 @@ TEST(ConfigTest, FloatingPoint) {
     spec1 = inf
     spec2 = -inf
     spec3 = nan
-    )toml");
+    )toml"sv);
 
   // An integer cannot be loaded as double (there's no safe cast from
   // 64-bit int to double).
-  EXPECT_THROW(config.GetDouble("int"), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("int"sv), wkc::TypeError);
 
   // Similarly, a double can't be loaded as another type.
-  EXPECT_THROW(config.GetInteger32("flt1"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("flt1"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("flt1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64("flt1"sv), wkc::TypeError);
 
-  EXPECT_DOUBLE_EQ(+1.0, config.GetDouble("flt1"));
-  EXPECT_DOUBLE_EQ(-3.1415, config.GetDouble("flt2"));
-  EXPECT_DOUBLE_EQ(+5e22, config.GetDouble("flt3"));
+  EXPECT_DOUBLE_EQ(+1.0, config.GetDouble("flt1"sv));
+  EXPECT_DOUBLE_EQ(-3.1415, config.GetDouble("flt2"sv));
+  EXPECT_DOUBLE_EQ(+5e22, config.GetDouble("flt3"sv));
 
   EXPECT_DOUBLE_EQ(+std::numeric_limits<double>::infinity(),
-                   config.GetDouble("spec1"));
+                   config.GetDouble("spec1"sv));
   EXPECT_DOUBLE_EQ(-std::numeric_limits<double>::infinity(),
-                   config.GetDouble("spec2"));
-  EXPECT_TRUE(std::isnan(config.GetDouble("spec3")));
+                   config.GetDouble("spec2"sv));
+  EXPECT_TRUE(std::isnan(config.GetDouble("spec3"sv)));
 
-  EXPECT_EQ(-16.0, config.GetDoubleOr("test", -16));
-  EXPECT_THROW(config.GetDouble("test"), wkc::KeyError);
+  EXPECT_EQ(-16.0, config.GetDoubleOr("test"sv, -16));
+  EXPECT_THROW(config.GetDouble("test"sv), wkc::KeyError);
 }
 
 TEST(ConfigTest, QueryTypes) {
@@ -119,7 +119,7 @@ TEST(ConfigTest, QueryTypes) {
     time2 = 00:01:02.123456
     date_time = 1912-07-23T08:37:00-08:00
 
-    )toml");
+    )toml"sv);
 
   EXPECT_THROW(config.Type(""sv), wkc::KeyError);
 
@@ -163,7 +163,8 @@ TEST(ConfigTest, QueryTypes) {
 }
 
 TEST(ConfigTest, GetScalarTypes) {
-  const std::string toml_str = R"toml(
+  // TODO test date types
+  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     bool = true
     int = 42
     flt = 1.0
@@ -177,135 +178,141 @@ TEST(ConfigTest, GetScalarTypes) {
     time2 = 00:01:02.123456
     date_time = 1912-07-23T08:37:00-08:00
 
-    )toml";
-  // TODO test date types
-  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
+    )toml"sv);
 
   // Boolean parameter
-  EXPECT_EQ(true, config.GetBoolean("bool"));
-  EXPECT_THROW(config.GetBoolean("no-such.bool"), wkc::KeyError);
-  EXPECT_TRUE(config.GetBooleanOr("no-such.bool", true));
-  EXPECT_FALSE(config.GetBooleanOr("no-such.bool", false));
+  EXPECT_EQ(true, config.GetBoolean("bool"sv));
+  EXPECT_THROW(config.GetBoolean("no-such.bool"sv), wkc::KeyError);
+  EXPECT_TRUE(config.GetBooleanOr("no-such.bool"sv, true));
+  EXPECT_FALSE(config.GetBooleanOr("no-such.bool"sv, false));
 
-  EXPECT_THROW(config.GetInteger32("bool"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32Or("bool", 0), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("bool"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Or("bool", 2), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("bool"), wkc::TypeError);
-  EXPECT_THROW(config.GetDoubleOr("bool", 1.0), wkc::TypeError);
-  EXPECT_THROW(config.GetString("bool"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringOr("bool", "..."), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Or("bool"sv, 0), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Or("bool"sv, 2), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleOr("bool"sv, 1.0), wkc::TypeError);
+  EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringOr("bool"sv, "..."sv), wkc::TypeError);
 
   // Integer parameter
-  EXPECT_EQ(42, config.GetInteger32("int"));
-  EXPECT_EQ(42, config.GetInteger64("int"));
+  EXPECT_EQ(42, config.GetInteger32("int"sv));
+  EXPECT_EQ(42, config.GetInteger64("int"sv));
 
-  EXPECT_THROW(config.GetBoolean("int"), wkc::TypeError);
-  EXPECT_THROW(config.GetBooleanOr("int", true), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("int"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("int"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringOr("int", "..."), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBooleanOr("int"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringOr("int"sv, "..."sv), wkc::TypeError);
 
   // Double parameter
-  EXPECT_DOUBLE_EQ(1.0, config.GetDouble("flt"));
+  EXPECT_DOUBLE_EQ(1.0, config.GetDouble("flt"sv));
 
-  EXPECT_THROW(config.GetBoolean("flt"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("flt"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("flt"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("flt"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringOr("flt", "..."), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64("flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringOr("flt"sv, "..."sv), wkc::TypeError);
 
   // String parameter
   const std::string expected{"A string"};
-  EXPECT_EQ(expected, config.GetString("str"));
+  EXPECT_EQ(expected, config.GetString("str"sv));
 
-  EXPECT_THROW(config.GetString("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config.GetString("no-such-key"sv), wkc::KeyError);
 
-  EXPECT_EQ("...", config.GetStringOr("no-such-key", "..."));
+  EXPECT_EQ("...", config.GetStringOr("no-such-key"sv, "..."sv));
 
-  EXPECT_THROW(config.GetBoolean("str"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("str"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("str"), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64("str"sv), wkc::TypeError);
 
   // Invalid access
-  EXPECT_THROW(config.GetBoolean("int_list"), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolean("tbl"), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger32("int_list"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("tbl"), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger64("int_list"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("tbl"), wkc::KeyError);
-  EXPECT_THROW(config.GetDouble("int_list"), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("tbl"), wkc::KeyError);
-  EXPECT_THROW(config.GetString("int_list"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("tbl"), wkc::KeyError);
+  EXPECT_THROW(config.GetBoolean("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger64("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetDouble("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetString("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("tbl"sv), wkc::KeyError);
 
-  EXPECT_THROW(config.GetDouble("dates"), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.day"), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.time1"), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.time2"), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.date_time"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.day"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.time1"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.time2"), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.date_time"), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates.time1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates.time2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates.date_time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates.time1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates.time2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates.date_time"sv), wkc::TypeError);
 }
 
 TEST(ConfigTest, SetScalarTypes1) {
-  const std::string toml_str = R"toml(
+  auto config = wkc::Configuration::LoadTOMLString(R"toml(
     bool = true
     int = 42
     a.string = "value"
     booleans = [true, false, true]
 
     array = [0, 1, { int = 2, bool = false }]
-    )toml";
-  auto config = wkc::Configuration::LoadTOMLString(toml_str);
+    )toml"sv);
 
   // Adjust a boolean parameter
-  EXPECT_EQ(true, config.GetBoolean("bool"));
-  EXPECT_NO_THROW(config.SetBoolean("bool", false));
-  EXPECT_EQ(false, config.GetBoolean("bool"));
+  EXPECT_EQ(true, config.GetBoolean("bool"sv));
+  EXPECT_NO_THROW(config.SetBoolean("bool"sv, false));
+  EXPECT_EQ(false, config.GetBoolean("bool"sv));
 
   // Cannot change the type of an existing parameter
-  EXPECT_THROW(config.SetBoolean("int", true), wkc::TypeError);
+  EXPECT_THROW(config.SetBoolean("int"sv, true), wkc::TypeError);
 
   // Set a non-existing parameter
-  EXPECT_THROW(config.GetBoolean("another_bool"), wkc::KeyError);
-  EXPECT_NO_THROW(config.SetBoolean("another_bool", false));
-  EXPECT_NO_THROW(config.GetBoolean("another_bool"));
-  EXPECT_EQ(false, config.GetBoolean("another_bool"));
+  EXPECT_THROW(config.GetBoolean("another_bool"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.SetBoolean("another_bool"sv, false));
+  EXPECT_NO_THROW(config.GetBoolean("another_bool"sv));
+  EXPECT_EQ(false, config.GetBoolean("another_bool"sv));
 
   // Set a nested parameter (must create the hierarchy)
-  EXPECT_THROW(config.GetBoolean("others.bool"), wkc::KeyError);
-  EXPECT_NO_THROW(config.SetBoolean("others.bool", false));
-  EXPECT_NO_THROW(config.GetBoolean("others.bool"));
-  EXPECT_EQ(false, config.GetBoolean("others.bool"));
+  EXPECT_THROW(config.GetBoolean("others.bool"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.SetBoolean("others.bool"sv, false));
+  EXPECT_NO_THROW(config.GetBoolean("others.bool"sv));
+  EXPECT_EQ(false, config.GetBoolean("others.bool"sv));
 
   // Test a deeper path hierarchy
-  EXPECT_THROW(config.GetBoolean("a.deeper.hierarchy.bool"), wkc::KeyError);
-  EXPECT_NO_THROW(config.SetBoolean("a.deeper.hierarchy.bool", false));
-  EXPECT_NO_THROW(config.GetBoolean("a.deeper.hierarchy.bool"));
-  EXPECT_EQ(false, config.GetBoolean("a.deeper.hierarchy.bool"));
+  EXPECT_THROW(config.GetBoolean("a.deeper.hierarchy.bool"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.SetBoolean("a.deeper.hierarchy.bool"sv, false));
+  EXPECT_NO_THROW(config.GetBoolean("a.deeper.hierarchy.bool"sv));
+  EXPECT_EQ(false, config.GetBoolean("a.deeper.hierarchy.bool"sv));
 
   // Cannot create a path below a scalar type
-  EXPECT_THROW(config.SetBoolean("a.string.below.bool", true), wkc::TypeError);
+  EXPECT_THROW(config.SetBoolean("a.string.below.bool"sv, true),
+               wkc::TypeError);
 
   // Creating an array is also not supported
-  EXPECT_THROW(config.SetBoolean("an_array[3].bool", true), wkc::TypeError);
+  EXPECT_THROW(config.SetBoolean("an_array[3].bool"sv, true), wkc::TypeError);
 
   // Creating a table within an existing array is also not supported:
-  EXPECT_THROW(config.SetBoolean("array[3].bool", true), wkc::TypeError);
+  EXPECT_THROW(config.SetBoolean("array[3].bool"sv, true), wkc::TypeError);
+
+  // Currently, we don't support replacing/inserting array elements.
+  EXPECT_THROW(config.SetBoolean("array[3]"sv, true), wkc::TypeError);
+
+  // Creating a table as a child of an array is also not supported. There's
+  // currently no need for such exotic use cases.
+  EXPECT_THROW(config.SetBoolean("array[4].another_table.value"sv, true),
+               wkc::TypeError);
 
   // But setting an existing array element is supported:
-  EXPECT_NO_THROW(config.SetBoolean("booleans[1]", true));
-  EXPECT_EQ(true, config.GetBoolean("booleans[0]"));
-  EXPECT_EQ(true, config.GetBoolean("booleans[1]"));
-  EXPECT_EQ(true, config.GetBoolean("booleans[2]"));
+  EXPECT_NO_THROW(config.SetBoolean("booleans[1]"sv, true));
+  EXPECT_EQ(true, config.GetBoolean("booleans[0]"sv));
+  EXPECT_EQ(true, config.GetBoolean("booleans[1]"sv));
+  EXPECT_EQ(true, config.GetBoolean("booleans[2]"sv));
 
-  EXPECT_EQ(false, config.GetBoolean("array[2].bool"));
-  EXPECT_NO_THROW(config.SetBoolean("array[2].bool", true));
-  EXPECT_EQ(true, config.GetBoolean("array[2].bool"));
+  EXPECT_EQ(false, config.GetBoolean("array[2].bool"sv));
+  EXPECT_NO_THROW(config.SetBoolean("array[2].bool"sv, true));
+  EXPECT_EQ(true, config.GetBoolean("array[2].bool"sv));
 }
 
 TEST(ConfigTest, SetScalarTypes2) {
@@ -317,7 +324,7 @@ TEST(ConfigTest, SetScalarTypes2) {
     float = 1.5
     string = "value"
     array = [1, true, "a string"]
-    )toml");
+    )toml"sv);
 
   // Change integers
   EXPECT_EQ(12345, config.GetInteger32("integer"sv));
@@ -387,7 +394,7 @@ TEST(ConfigTest, Keys1) {
     }
 
     const auto pos = std::find(keys.begin(), keys.end(), key);
-    EXPECT_NE(keys.end(), pos) << "Key `" << key << "` not found!";
+    EXPECT_NE(keys.end(), pos) << "Key `"sv << key << "` not found!"sv;
   }
 }
 
@@ -399,7 +406,7 @@ void CheckExpectedKeys(const std::vector<std::string> &expected_keys,
 
   for (const auto &expected : expected_keys) {
     const auto pos = std::find(keys.begin(), keys.end(), expected);
-    EXPECT_NE(keys.end(), pos) << "Key `" << expected << "` not found!";
+    EXPECT_NE(keys.end(), pos) << "Key `"sv << expected << "` not found!"sv;
   }
 }
 
@@ -473,12 +480,12 @@ TEST(ConfigTest, Keys2) {
   keys = config.ListParameterNames(true);
 
   EXPECT_EQ(expected_keys.size(), keys.size())
-      << "Extracted keys: " << Stringify(keys)
-      << "\nExpected keys:  " << Stringify(expected_keys) << "!";
+      << "Extracted keys: "sv << Stringify(keys) << "\nExpected keys:  "sv
+      << Stringify(expected_keys) << "!"sv;
 
   for (const auto &expected : expected_keys) {
     const auto pos = std::find(keys.begin(), keys.end(), expected);
-    EXPECT_NE(keys.end(), pos) << "Key `" << expected << "` not found!";
+    EXPECT_NE(keys.end(), pos) << "Key `"sv << expected << "` not found!"sv;
   }
 }
 
@@ -658,16 +665,16 @@ TEST(ConfigTest, PointLists) {
     p6 = [{x = 1, y = 2}, {x = 1, y = 2, z = 3}]
     p7 = [[1, 2], [3, 4, 5], [6, 7]]
 
-    )toml");
+    )toml"sv);
 
-  auto poly = config.GetPoints2D("poly1");
+  auto poly = config.GetPoints2D("poly1"sv);
   EXPECT_EQ(4, poly.size());
 
-  auto list = config.GetInteger32List("poly1[0]");
+  auto list = config.GetInteger32List("poly1[0]"sv);
   EXPECT_EQ(2, list.size());
   EXPECT_EQ(1, list[0]);
   EXPECT_EQ(2, list[1]);
-  list = config.GetInteger32List("poly1[2]");
+  list = config.GetInteger32List("poly1[2]"sv);
   EXPECT_EQ(2, list.size());
   EXPECT_EQ(5, list[0]);
   EXPECT_EQ(6, list[1]);
@@ -678,7 +685,7 @@ TEST(ConfigTest, PointLists) {
   EXPECT_EQ(wkg::Vec2i(5, 6), vec[2]);
   EXPECT_EQ(wkg::Vec2i(-7, -8), vec[3]);
 
-  poly = config.GetPoints2D("poly2");
+  poly = config.GetPoints2D("poly2"sv);
   EXPECT_EQ(3, poly.size());
 
   vec = TuplesToVecs<wkg::Vec2i>(poly);
@@ -687,34 +694,34 @@ TEST(ConfigTest, PointLists) {
   EXPECT_EQ(wkg::Vec2i(50, 60), vec[2]);
 
   // Cannot load an array of tables as a scalar list:
-  EXPECT_THROW(config.GetInteger32List("poly2"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("poly2"sv), wkc::TypeError);
 
   // An N-dimensional polygon can be looked up from any list of at
   // least N-dimensional points:
-  EXPECT_NO_THROW(config.GetPoints2D("poly3"));
-  EXPECT_NO_THROW(config.GetPoints3D("poly3"));
-  EXPECT_NO_THROW(config.GetPoints2D("poly4"));
-  EXPECT_NO_THROW(config.GetPoints3D("poly4"));
+  EXPECT_NO_THROW(config.GetPoints2D("poly3"sv));
+  EXPECT_NO_THROW(config.GetPoints3D("poly3"sv));
+  EXPECT_NO_THROW(config.GetPoints2D("poly4"sv));
+  EXPECT_NO_THROW(config.GetPoints3D("poly4"sv));
 
-  EXPECT_THROW(config.GetPoints2D("no-such-key"), wkc::KeyError);
-  EXPECT_THROW(config.GetPoints2D("str"), wkc::TypeError);
-  EXPECT_THROW(config.GetPoints2D("invalid.p1"), wkc::TypeError);
-  EXPECT_THROW(config.GetPoints2D("invalid.p2"), wkc::TypeError);
-  EXPECT_THROW(config.GetPoints2D("invalid.p3"), wkc::TypeError);
-  EXPECT_THROW(config.GetPoints2D("invalid.p4"), wkc::TypeError);
-  EXPECT_THROW(config.GetPoints2D("invalid.p5"), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints2D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetPoints2D("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints2D("invalid.p1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints2D("invalid.p2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints2D("invalid.p3"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints2D("invalid.p4"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints2D("invalid.p5"sv), wkc::TypeError);
 
-  EXPECT_NO_THROW(config.GetPoints2D("invalid.p6"));
-  EXPECT_THROW(config.GetPoints3D("invalid.p6"), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetPoints2D("invalid.p6"sv));
+  EXPECT_THROW(config.GetPoints3D("invalid.p6"sv), wkc::TypeError);
 
-  EXPECT_NO_THROW(config.GetPoints2D("invalid.p7"));
-  EXPECT_THROW(config.GetPoints3D("invalid.p7"), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetPoints2D("invalid.p7"sv));
+  EXPECT_THROW(config.GetPoints3D("invalid.p7"sv), wkc::TypeError);
 
   // 3D polygons
-  EXPECT_THROW(config.GetPoints3D("poly1"), wkc::TypeError);
-  EXPECT_THROW(config.GetPoints3D("poly2"), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints3D("poly1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetPoints3D("poly2"sv), wkc::TypeError);
 
-  auto poly3d = config.GetPoints3D("poly3");
+  auto poly3d = config.GetPoints3D("poly3"sv);
   EXPECT_EQ(3, poly3d.size());
   std::vector<wkg::Vec3i> vec3d = TuplesToVecs<wkg::Vec3i>(poly3d);
   EXPECT_EQ(wkg::Vec3i(1, 2, 3), vec3d[0]);
@@ -741,61 +748,61 @@ TEST(ConfigTest, ScalarLists) {
 
     [not-a-list]
     name = "test"
-    )toml");
+    )toml"sv);
 
   // Key error:
-  EXPECT_THROW(config.GetInteger32List("no-such-key"), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger64List("no-such-key"), wkc::KeyError);
-  EXPECT_THROW(config.GetDoubleList("no-such-key"), wkc::KeyError);
-  EXPECT_THROW(config.GetStringList("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32List("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger64List("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetDoubleList("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetStringList("no-such-key"sv), wkc::KeyError);
 
   // Try to load a wrong data type as list:
-  EXPECT_THROW(config.GetInteger32List("an_int"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("not-a-list"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("not-a-list.no-such-key"),
+  EXPECT_THROW(config.GetInteger32List("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("not-a-list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("not-a-list.no-such-key"sv),
                wkc::KeyError);
-  EXPECT_THROW(config.GetInteger64List("an_int"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("not-a-list"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("not-a-list.no-such-key"),
+  EXPECT_THROW(config.GetInteger64List("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("not-a-list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("not-a-list.no-such-key"sv),
                wkc::KeyError);
-  EXPECT_THROW(config.GetStringList("an_int"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringList("not-a-list"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringList("not-a-list.no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config.GetStringList("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("not-a-list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("not-a-list.no-such-key"sv), wkc::KeyError);
 
   // Cannot load an inhomogeneous array:
-  EXPECT_THROW(config.GetInteger32List("mixed_types"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringList("mixed_types"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("mixed_types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("mixed_types"sv), wkc::TypeError);
 
-  auto list32 = config.GetInteger32List("ints32");
+  auto list32 = config.GetInteger32List("ints32"sv);
   EXPECT_EQ(8, list32.size());
-  auto list64 = config.GetInteger64List("ints32");
+  auto list64 = config.GetInteger64List("ints32"sv);
   EXPECT_EQ(8, list64.size());
   EXPECT_EQ(1, list32[0]);
   EXPECT_EQ(6, list32[5]);
   EXPECT_EQ(-8, list32[7]);
 
   // Cannot load integers as other types:
-  EXPECT_THROW(config.GetDoubleList("ints32"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringList("ints32"), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("ints32"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("ints32"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger32List("ints64"), wkc::TypeError);
-  list64 = config.GetInteger64List("ints64");
+  EXPECT_THROW(config.GetInteger32List("ints64"sv), wkc::TypeError);
+  list64 = config.GetInteger64List("ints64"sv);
   EXPECT_EQ(5, list64.size());
 
-  auto list_dbl = config.GetDoubleList("floats");
+  auto list_dbl = config.GetDoubleList("floats"sv);
   EXPECT_EQ(3, list_dbl.size());
   EXPECT_DOUBLE_EQ(0.5, list_dbl[0]);
   EXPECT_DOUBLE_EQ(1.0, list_dbl[1]);
   EXPECT_DOUBLE_EQ(1e23, list_dbl[2]);
 
   // Cannot load floats as other types:
-  EXPECT_THROW(config.GetInteger32List("floats"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("floats"), wkc::TypeError);
-  EXPECT_THROW(config.GetStringList("floats"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("floats"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("floats"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("floats"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger32List("invalid_int_flt"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("invalid_int_flt"), wkc::TypeError);
-  EXPECT_THROW(config.GetDoubleList("invalid_int_flt"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("invalid_int_flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("invalid_int_flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("invalid_int_flt"sv), wkc::TypeError);
 }
 
 TEST(ConfigTest, Pairs) {
@@ -813,43 +820,43 @@ TEST(ConfigTest, Pairs) {
     a_scalar = 1234
 
     nested_array = [1, [2, [3, 4]]]
-    )toml");
+    )toml"sv);
 
   // Key error:
-  EXPECT_THROW(config.GetInteger32Pair("no-such-key"), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger64Pair("no-such-key"), wkc::KeyError);
-  EXPECT_THROW(config.GetDoublePair("no-such-key"), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32Pair("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger64Pair("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetDoublePair("no-such-key"sv), wkc::KeyError);
 
   // A pair must be an array of 2 elements
-  EXPECT_THROW(config.GetInteger32Pair("int_list"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("int_list"), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("int_list"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Pair("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Pair("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoublePair("int_list"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger32Pair("mixed_types"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("mixed_types"), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("mixed_types"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Pair("mixed_types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Pair("mixed_types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoublePair("mixed_types"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger32Pair("a_scalar"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("a_scalar"), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("a_scalar"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Pair("a_scalar"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Pair("a_scalar"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoublePair("a_scalar"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger32Pair("nested_array"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("nested_array"), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("nested_array"), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Pair("nested_array"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Pair("nested_array"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoublePair("nested_array"sv), wkc::TypeError);
 
   // Load a valid pair
-  auto p32 = config.GetInteger32Pair("int32_pair");
+  auto p32 = config.GetInteger32Pair("int32_pair"sv);
   EXPECT_EQ(1024, p32.first);
   EXPECT_EQ(768, p32.second);
 
-  EXPECT_THROW(config.GetInteger32Pair("int64_pair"), wkc::TypeError);
-  auto p64 = config.GetInteger64Pair("int64_pair");
+  EXPECT_THROW(config.GetInteger32Pair("int64_pair"sv), wkc::TypeError);
+  auto p64 = config.GetInteger64Pair("int64_pair"sv);
   EXPECT_EQ(2147483647, p64.first);
   EXPECT_EQ(2147483648, p64.second);
 
-  EXPECT_THROW(config.GetInteger32Pair("float_pair"), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("float_pair"), wkc::TypeError);
-  auto pdbl = config.GetDoublePair("float_pair");
+  EXPECT_THROW(config.GetInteger32Pair("float_pair"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Pair("float_pair"sv), wkc::TypeError);
+  auto pdbl = config.GetDoublePair("float_pair"sv);
   EXPECT_DOUBLE_EQ(0.5, pdbl.first);
   EXPECT_DOUBLE_EQ(1.0, pdbl.second);
 }
@@ -873,7 +880,7 @@ TEST(ConfigTest, GetGroup) {
 
     [dates]
     day = 2023-01-01
-    )toml");
+    )toml"sv);
 
   EXPECT_THROW(config.GetGroup("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetGroup("str"sv), wkc::TypeError);
@@ -923,7 +930,7 @@ TEST(ConfigTest, SetGroup) {
 
     [dates]
     day = 2023-01-01
-    )toml");
+    )toml"sv);
 
   wkc::Configuration empty{};
 
@@ -988,7 +995,7 @@ TEST(ConfigTest, NestedTOML) {
   // and the parameter should not change.
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("invalid_nested_config"sv),
                wkc::ParseError);
-  EXPECT_EQ(fname_invalid_toml, config.GetString("invalid_nested_config"));
+  EXPECT_EQ(fname_invalid_toml, config.GetString("invalid_nested_config"sv));
 
   // Ensure that loading a nested configuration also works at deeper
   // hierarchy levels.
@@ -999,7 +1006,7 @@ TEST(ConfigTest, NestedTOML) {
             config.GetString("lvl1.lvl2.lvl3.nested.section1.rel_path"sv));
 
   // It is not allowed to load a nested configuration directly into an array:
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1.arr[2]"),
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1.arr[2]"sv),
                wkc::TypeError);
 
   // One could abuse it, however, to load a nested configuration into a table
@@ -1014,7 +1021,7 @@ TEST(ConfigTest, NestedTOML) {
 
 TEST(ConfigTest, AbsolutePaths) {
   const std::string fname =
-      wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
+      wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv);
   auto config = wkc::Configuration::LoadTOMLFile(fname);
 
   EXPECT_FALSE(config.AdjustRelativePaths("...", {"no-such-key"sv}));
@@ -1063,7 +1070,7 @@ TEST(ConfigTest, StringReplacements) {
 
     [[configs]]
     name = "%TOREP%/D"
-    )toml");
+    )toml"sv);
 
   EXPECT_FALSE(config.ReplaceStringPlaceholders({}));
   EXPECT_FALSE(config.ReplaceStringPlaceholders({{"no-such-text"sv, "bar"sv}}));
@@ -1078,21 +1085,21 @@ TEST(ConfigTest, StringReplacements) {
   EXPECT_FALSE(config.ReplaceStringPlaceholders(
       {{"test"sv, "123"sv}, {"world"sv, "replacement"sv}}));
 
-  EXPECT_EQ("", config.GetString("str1"));
-  EXPECT_EQ("This is a 123", config.GetString("str2"));
-  EXPECT_EQ("Hello replacement!", config.GetString("str3"));
-  EXPECT_EQ(123, config.GetInteger32("value"));
-  EXPECT_EQ("List 123", config.GetString("str_list[0]"));
-  EXPECT_EQ("Frobmorten", config.GetString("str_list[1]"));
-  EXPECT_EQ("Another 123!", config.GetString("table.str1"));
-  EXPECT_EQ("Untouched", config.GetString("table.str2"));
-  EXPECT_EQ("%TOREP%/C", config.GetString("configs[2].name"));
+  EXPECT_EQ("", config.GetString("str1"sv));
+  EXPECT_EQ("This is a 123", config.GetString("str2"sv));
+  EXPECT_EQ("Hello replacement!", config.GetString("str3"sv));
+  EXPECT_EQ(123, config.GetInteger32("value"sv));
+  EXPECT_EQ("List 123", config.GetString("str_list[0]"sv));
+  EXPECT_EQ("Frobmorten", config.GetString("str_list[1]"sv));
+  EXPECT_EQ("Another 123!", config.GetString("table.str1"sv));
+  EXPECT_EQ("Untouched", config.GetString("table.str2"sv));
+  EXPECT_EQ("%TOREP%/C", config.GetString("configs[2].name"sv));
 
-  EXPECT_TRUE(config.ReplaceStringPlaceholders({{"%TOREP%", "..."}}));
-  EXPECT_EQ(".../a", config.GetString("configs[0].name"));
-  EXPECT_EQ(".../b", config.GetString("configs[1].name"));
-  EXPECT_EQ(".../C", config.GetString("configs[2].name"));
-  EXPECT_EQ(".../D", config.GetString("configs[3].name"));
+  EXPECT_TRUE(config.ReplaceStringPlaceholders({{"%TOREP%"sv, "..."sv}}));
+  EXPECT_EQ(".../a", config.GetString("configs[0].name"sv));
+  EXPECT_EQ(".../b", config.GetString("configs[1].name"sv));
+  EXPECT_EQ(".../C", config.GetString("configs[2].name"sv));
+  EXPECT_EQ(".../D", config.GetString("configs[3].name"sv));
 }
 
 TEST(ConfigTest, Construction) {
@@ -1199,20 +1206,24 @@ TEST(ConfigTest, LoadingToml) {
     param2 = "value"
 
     param3 = [1, 2]
-    )toml");
+    )toml"sv);
   EXPECT_FALSE(config1.Equals(config3));
   EXPECT_FALSE(config2.Equals(config3));
   EXPECT_FALSE(config3.Equals(config2));
 
-  const auto empty = wkc::Configuration::LoadTOMLString("");
+  const auto empty = wkc::Configuration::LoadTOMLString(""sv);
   EXPECT_FALSE(empty.Equals(config1));
   EXPECT_FALSE(config1.Equals(empty));
 
+  const auto def = wkc::Configuration();
+  EXPECT_TRUE(def.Empty());
+  EXPECT_TRUE(empty.Equals(def));
+
   // Edge cases for TOML loading:
-  EXPECT_THROW(wkc::Configuration::LoadTOMLFile("this-does-not-exist.toml"),
+  EXPECT_THROW(wkc::Configuration::LoadTOMLFile("this-does-not-exist.toml"sv),
                wkc::ParseError);
   try {
-    wkc::Configuration::LoadTOMLFile("this-does-not-exist.toml");
+    wkc::Configuration::LoadTOMLFile("this-does-not-exist.toml"sv);
   } catch (const wkc::ParseError &e) {
     const std::string exp_err{
         "Cannot open file. Check path: \"this-does-not-exist.toml\"."};
@@ -1220,7 +1231,7 @@ TEST(ConfigTest, LoadingToml) {
   }
 
   const std::string fname_invalid =
-      wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml");
+      wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml"sv);
   EXPECT_THROW(wkc::Configuration::LoadTOMLFile(fname_invalid),
                wkc::ParseError);
   try {
@@ -1228,7 +1239,7 @@ TEST(ConfigTest, LoadingToml) {
     EXPECT_TRUE(false);
   } catch (const wkc::ParseError &e) {
     EXPECT_TRUE(wks::StartsWith(e.what(), "Error while parsing value: "sv))
-        << "Error message was: " << e.what();
+        << "Error message was: "sv << e.what();
   }
 }
 
@@ -1236,7 +1247,7 @@ TEST(ConfigTest, LoadingToml) {
 TEST(ConfigTest, LoadingJson) {
   const auto config = wkc::Configuration::LoadTOMLString(R"toml(
     param1 = "value"
-    )toml");
+    )toml"sv);
   EXPECT_TRUE(config.ToJSON().length() > 0);
 }
 
