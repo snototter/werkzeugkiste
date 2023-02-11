@@ -194,6 +194,8 @@ TEST(CastTest, IntegralToFloating) {
 
   using lng_limits = std::numeric_limits<int64_t>;
   EXPECT_THROW(wkc::CheckedCast<float>(lng_limits::max()), std::domain_error);
+  EXPECT_THROW(wkc::CheckedCast<float>(lng_limits::max() - 1),
+               std::domain_error);
   EXPECT_THROW(wkc::CheckedCast<float>(lng_limits::min() + 1),
                std::domain_error);
   // Powers of two can be exactly represented:

@@ -859,10 +859,16 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config.GetInteger32List("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("not-a-list.no-such-key"sv),
                wkc::KeyError);
+
   EXPECT_THROW(config.GetInteger64List("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("not-a-list.no-such-key"sv),
                wkc::KeyError);
+
+  EXPECT_THROW(config.GetDoubleList("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("not-a-list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("not-a-list.no-such-key"sv), wkc::KeyError);
+
   EXPECT_THROW(config.GetStringList("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("not-a-list.no-such-key"sv), wkc::KeyError);
