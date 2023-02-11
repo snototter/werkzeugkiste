@@ -296,8 +296,8 @@ TEST(ConfigTest, SetScalarTypes1) {
   // Creating a table within an existing array is also not supported:
   EXPECT_THROW(config.SetBoolean("array[3].bool"sv, true), wkc::TypeError);
 
-  // Currently, we don't support replacing/inserting array elements.
-  EXPECT_THROW(config.SetBoolean("array[3]"sv, true), wkc::TypeError);
+  // Currently, we don't support replacing/inserting array elements:
+  EXPECT_THROW(config.SetBoolean("array[3]"sv, true), std::logic_error);
 
   // Creating a table as a child of an array is also not supported. There's
   // currently no need for such exotic use cases.

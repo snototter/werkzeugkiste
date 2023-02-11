@@ -428,8 +428,9 @@ void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
       msg << "Assigning `" << key << "` = `" << value
           << "` completed without failure, but the key cannot be looked up. "
              "The value should have been "
-          << (result.second ? "inserted" : "assigned")
-          << ". This must be a bug. Please report at "
+          << (result.second ? "inserted" : "assigned") << " at parent{`"
+          << path.first << "`}, current{`" << path.second
+          << "`}. This must be a bug. Please report at "
              "https://github.com/snototter/werkzeugkiste/issues";
       throw std::logic_error{msg.str()};
       // LCOV_EXCL_STOP
