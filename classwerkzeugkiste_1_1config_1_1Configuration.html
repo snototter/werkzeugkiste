@@ -66,7 +66,7 @@
             </li>
           </ul>
         </div>
-<p>Design decisions:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>I prefer explicit method names over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> instead of returning an optional scalar. As an alternative to exception handling, use <code>Contains</code> or <code>Get&lt;Type&gt;Or</code>, which returns a default value.</li><li>Nested lists are not supported.</li></ul><p>TODOs:</p><ul><li>[ ] Do we need double-precision points ?</li><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] LoadLibconfigFile ?</li><li>[ ] LoadLibconfigString ?</li><li>[ ] ToLibconfigString ?</li><li>[ ] Date</li><li>[ ] Time</li><li>[ ] DateTime</li></ul>
+<p>TODO doc:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>I prefer explicit method names over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li></ul><p>TODOs:</p><ul><li>[x] Numeric casts. Implicitly cast if lossless conversion is possible.</li><li>[ ] Do we need double-precision points ?</li><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] LoadLibconfigFile ?</li><li>[ ] LoadLibconfigString ?</li><li>[ ] ToLibconfigString ?</li><li>[ ] Date</li><li>[ ] Time</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] DateTime</li><li>[ ] Setters for ...Pair</li><li>[ ] Setters for ...List</li><li>[x] SetGroup</li><li>[x] Return optional&lt;Scalar&gt;</li></ul>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -141,6 +141,10 @@
               bool default_val) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
+            <dt id="a141877639ace7b745753da10ad1b8a93">
+              <span class="m-doc-wrap-bumper">auto <a href="#a141877639ace7b745753da10ad1b8a93" class="m-doc-self">GetOptionalBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;bool&gt;</span>
+            </dt>
+            <dd><span></span></dd>
             <dt id="ab00f7367e393073156bbc990338ced55">
               <span class="m-doc-wrap-bumper">void <a href="#ab00f7367e393073156bbc990338ced55" class="m-doc-self">SetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool value)</span>
@@ -153,6 +157,10 @@
             <dt id="a22afad86b80bb2e65c3ce49205f9e75d">
               <span class="m-doc-wrap-bumper">auto <a href="#a22afad86b80bb2e65c3ce49205f9e75d" class="m-doc-self">GetInteger32Or</a>(</span><span class="m-doc-wrap">std::string_view key,
               int32_t default_val) const -&gt; int32_t</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="affe8dae092ee32f2d83c1672a346684d">
+              <span class="m-doc-wrap-bumper">auto <a href="#affe8dae092ee32f2d83c1672a346684d" class="m-doc-self">GetOptionalInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;int32_t&gt;</span>
             </dt>
             <dd><span></span></dd>
             <dt id="a0bfd10ac84bb413c367ae19835ea75f2">
@@ -169,6 +177,10 @@
               int64_t default_val) const -&gt; int64_t</span>
             </dt>
             <dd><span></span></dd>
+            <dt id="a242ece3fcfe6aa3f73aa2e6f25f64051">
+              <span class="m-doc-wrap-bumper">auto <a href="#a242ece3fcfe6aa3f73aa2e6f25f64051" class="m-doc-self">GetOptionalInteger64</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;int64_t&gt;</span>
+            </dt>
+            <dd><span></span></dd>
             <dt id="a44cc3e7129ebedc290bdbbc0355e24fe">
               <span class="m-doc-wrap-bumper">void <a href="#a44cc3e7129ebedc290bdbbc0355e24fe" class="m-doc-self">SetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key,
               int64_t value)</span>
@@ -183,6 +195,10 @@
               double default_val) const -&gt; double</span>
             </dt>
             <dd><span></span></dd>
+            <dt id="a65402cb4db45da60b3da06bcaaab0d6c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a65402cb4db45da60b3da06bcaaab0d6c" class="m-doc-self">GetOptionalDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;double&gt;</span>
+            </dt>
+            <dd><span></span></dd>
             <dt id="aee676c05e77cdd40f4a73d2e9cdcf08f">
               <span class="m-doc-wrap-bumper">void <a href="#aee676c05e77cdd40f4a73d2e9cdcf08f" class="m-doc-self">SetDouble</a>(</span><span class="m-doc-wrap">std::string_view key,
               double value)</span>
@@ -195,6 +211,10 @@
             <dt id="a999d272971345113c7c7986a8678eb2e">
               <span class="m-doc-wrap-bumper">auto <a href="#a999d272971345113c7c7986a8678eb2e" class="m-doc-self">GetStringOr</a>(</span><span class="m-doc-wrap">std::string_view key,
               std::string_view default_val) const -&gt; std::string</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="afdf0238e6f6acdb89c28918f4929d720">
+              <span class="m-doc-wrap-bumper">auto <a href="#afdf0238e6f6acdb89c28918f4929d720" class="m-doc-self">GetOptionalString</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;std::string&gt;</span>
             </dt>
             <dd><span></span></dd>
             <dt id="a0ac5d89d24217d481ee7f003d6e6d836">
@@ -242,6 +262,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab0678e52fff3e9c871bb0480702a1c34" class="m-doc">GetGroup</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Returns a copy of the sub-group.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a07ed87aeddbd79393736ae3ab36d01c8" class="m-doc">SetGroup</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
+            </dt>
+            <dd>Inserts (or replaces) the given configuration group.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a390d1627ce2261f9111cd5295e5b0450" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
               const std::vector&lt;std::string_view&gt;&amp; parameters) -&gt; bool</span>
@@ -369,6 +394,29 @@
                 </tr>
               </tbody>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a07ed87aeddbd79393736ae3ab36d01c8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a07ed87aeddbd79393736ae3ab36d01c8" class="m-doc-self">SetGroup</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span></span>
+            </h3>
+            <p>Inserts (or replaces) the given configuration group.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the parameter. If it exists, it must already be a group. The empty string is not allowed. To replace the &quot;root&quot;, create a new <code><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></code> instance instead or use the overloaded assignment operators.</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>The group to be inserted.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>If the <code>key</code> already exists, it must be a group. Otherwise, the parameter will be newly created, along with all &quot;parent&quot; in the fully-qualified name (which defines a &quot;path&quot; through the configuration table/tree).</p>
           </div></section>
           <section class="m-doc-details" id="a390d1627ce2261f9111cd5295e5b0450"><div>
             <h3>
