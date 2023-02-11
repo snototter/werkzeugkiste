@@ -330,7 +330,9 @@ TEST(ConfigTest, GetScalarTypes) {
             config.GetDateOr("no-such-key"sv, wkc::date{1234, 12, 30}));
 
   // Date parameter
-  wkc::time time{1, 2, 3, 123456};
+  // Note that the nanoseconds ".123" will be parsed accoring to the TOML
+  // specification into "123000000" nanoseconds.
+  wkc::time time{1, 2, 3, 123456000};
   EXPECT_EQ(time, config.GetTime("dates.time"sv));
   EXPECT_TRUE(config.GetOptionalTime("dates.time"sv).has_value());
   EXPECT_EQ(time, config.GetOptionalTime("dates.time"sv).value());

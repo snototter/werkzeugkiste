@@ -30,6 +30,14 @@ std::string ConfigTypeToString(const ConfigType &ct) {
     case ConfigType::Group:
       return "group";
   }
+
+  // LCOV_EXCL_START
+  std::ostringstream msg;
+  msg << "ConfigType (" << static_cast<int>(ct)
+      << ") is not handled within `ConfigTypeToString`. Please file an issue "
+         "at https://github.com/snototter/werkzeugkiste/issues";
+  throw std::logic_error(msg.str());
+  // LCOV_EXCL_STOP
 }
 
 std::string date::ToString() const {
@@ -46,14 +54,6 @@ bool date::operator==(const date &other) const {
 bool date::operator!=(const date &other) const { return !(*this == other); }
 
 bool date::operator<(const date &other) const {
-  //  if (year == other.year) {
-  //    if (month == other.month) {
-  //      return day < other.day;
-  //    }
-  //    return month < other.month;
-  //  }
-
-  //  return (year < other.year);
   return Pack(*this) < Pack(other);
 }
 
@@ -62,7 +62,6 @@ bool date::operator<=(const date &other) const {
 }
 
 bool date::operator>(const date &other) const {
-  //  return !((*this == other) || (other < *this));
   return Pack(*this) > Pack(other);
 }
 
@@ -86,16 +85,6 @@ bool time::operator==(const time &other) const {
 bool time::operator!=(const time &other) const { return !(*this == other); }
 
 bool time::operator<(const time &other) const {
-  //  if (hour == other.hour) {
-  //    if (minute == other.minute) {
-  //      if (second == other.second) {
-  //        return (nanosecond < other.nanosecond);
-  //      }
-  //      return (second < other.second);
-  //    }
-  //    return (minute < other.minute);
-  //  }
-  //  return (hour < other.hour);
   return Pack(*this) < Pack(other);
 }
 
@@ -104,7 +93,6 @@ bool time::operator<=(const time &other) const {
 }
 
 bool time::operator>(const time &other) const {
-  //  return !((*this == other) || (other < *this));
   return Pack(*this) > Pack(other);
 }
 
