@@ -79,14 +79,14 @@ KeyMatcher::KeyMatcher() : pimpl_{new Impl{}} {}
 KeyMatcher::KeyMatcher(std::initializer_list<std::string_view> keys)
     : pimpl_{new Impl{}} {
   for (auto key : keys) {
-    pimpl_->RegisterKey(key);
+    RegisterKey(key);
   }
 }
 
 KeyMatcher::KeyMatcher(const std::vector<std::string_view> &keys)
     : pimpl_{new Impl{}} {
   for (auto key : keys) {
-    pimpl_->RegisterKey(key);
+    RegisterKey(key);
   }
 }
 
