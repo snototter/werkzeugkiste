@@ -27,6 +27,12 @@ TEST(ConfigTest, Static) {
   static_assert(!wkc::are_floating_point_v<float, int>);
   static_assert(!wkc::are_floating_point_v<int, float>);
   static_assert(!wkc::are_floating_point_v<std::string, float>);
+
+  static_assert(wkc::IsPromotable<int, long>());
+  static_assert(wkc::IsPromotable<char, int>());
+  static_assert(wkc::IsPromotable<float, double>());
+  static_assert(!wkc::IsPromotable<int, char>());
+  static_assert(!wkc::IsPromotable<uint, int>());
 }
 
 TEST(ConfigTest, Boolean) {
