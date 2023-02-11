@@ -718,6 +718,28 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 #undef WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR
 }  // namespace utils
 
+std::string ToString(const ConfigType &ct) {
+  switch (ct) {
+    case ConfigType::Boolean:
+      return "bool";
+
+    case ConfigType::Integer:
+      return "int";
+
+    case ConfigType::FloatingPoint:
+      return "double";
+
+    case ConfigType::String:
+      return "string";
+
+    case ConfigType::List:
+      return "list";
+
+    case ConfigType::Group:
+      return "group";
+  }
+}
+
 // Abusing the PImpl idiom to hide the internally used TOML table.
 struct Configuration::Impl {
   toml::table config_root{};
