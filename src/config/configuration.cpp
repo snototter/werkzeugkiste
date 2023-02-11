@@ -1,6 +1,8 @@
 // NOLINTBEGIN
 #define TOML_ENABLE_FORMATTERS 1
 #include <toml++/toml.h>
+// NOLINTEND
+
 #include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
@@ -16,7 +18,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-// NOLINTEND
 
 namespace werkzeugkiste::config {
 namespace utils {
