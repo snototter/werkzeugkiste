@@ -940,36 +940,15 @@ TEST(ConfigTest, SetGroup) {
   empty.SetString("my-str", "value");
   EXPECT_FALSE(empty.Empty());
   EXPECT_NO_THROW(config.SetGroup("lvl1.grp3"sv, empty));
+  EXPECT_TRUE(config.Contains("lvl1.grp3.my-bool"sv));
+  EXPECT_TRUE(config.Contains("lvl1.grp3.my-int32"sv));
+  EXPECT_TRUE(config.Contains("lvl1.grp3.my-str"sv));
 
   group = config.GetGroup("lvl1.grp3"sv);
   EXPECT_FALSE(group.Empty());
 
   auto keys = group.ListParameterNames(true);
   CheckExpectedKeys({"my-bool", "my-int32", "my-str"}, keys);
-
-  // auto sub = config.GetGroup("lvl1.grp1"sv);
-  // EXPECT_FALSE(sub.Empty());
-  // auto keys = sub.ListParameterNames(true);
-  // CheckExpectedKeys({"str", "lst", "lst[0]", "lst[1]"}, keys);
-
-  // sub = config.GetGroup("lvl1.grp2"sv);
-  // EXPECT_FALSE(sub.Empty());
-  // keys = sub.ListParameterNames(false);
-  // CheckExpectedKeys({"str", "val"}, keys);
-
-  // sub = config.GetGroup("lvl1"sv);
-  // EXPECT_FALSE(sub.Empty());
-  // keys = sub.ListParameterNames(true);
-  // const std::vector<std::string> expected{
-  //     "flt",         "grp1", "grp1.str", "grp1.lst", "grp1.lst[0]",
-  //     "grp1.lst[1]", "grp2", "grp2.str", "grp2.val", "grp3"};
-  // CheckExpectedKeys(expected, keys);
-
-  // // Empty sub-group
-  // sub = config.GetGroup("lvl1.grp3"sv);
-  // EXPECT_TRUE(sub.Empty());
-  // keys = sub.ListParameterNames(false);
-  // EXPECT_EQ(0, keys.size());
 }
 
 TEST(ConfigTest, NestedTOML) {
