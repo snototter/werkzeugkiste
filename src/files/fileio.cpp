@@ -14,8 +14,7 @@ std::vector<std::string> ReadAsciiFile(std::string_view filename) {
     std::string msg{"Cannot open file. Check path: \""};
     msg += filename;
     msg += "\".";
-    WZKLOG_ERROR(msg);
-    throw std::runtime_error(msg);
+    throw IOError(msg);
   }
 
   std::vector<std::string> lines;
@@ -33,8 +32,7 @@ std::string CatAsciiFile(std::string_view filename) {
     std::string msg{"Cannot open file. Check path: \""};
     msg += filename;
     msg += "\".";
-    WZKLOG_ERROR(msg);
-    throw std::runtime_error(msg);
+    throw IOError(msg);
   }
 
   std::stringstream sstr;
@@ -50,8 +48,7 @@ AsciiFileIterator::AsciiFileIterator(std::string_view filename) {
     std::string msg{"Cannot open file. Check path: \""};
     msg += filename;
     msg += "\".";
-    WZKLOG_ERROR(msg);
-    throw std::runtime_error(msg);
+    throw IOError(msg);
   }
 
   // Load first line

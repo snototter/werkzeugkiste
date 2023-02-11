@@ -272,38 +272,11 @@ T CastScalar(const NodeView &node, std::string_view key) {
       return std::string{*node.as_string()};
     }
   } else {
-    throw std::logic_error("Type not yet supported!");  // TODO
+    // TODO This method could be extended to handle date/time
+    throw std::logic_error("Type not yet supported!");
   }
   WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
-// template <typename T, typename NodeView>
-// T CastScalar(const NodeView &node, std::string_view key) {
-//   if constexpr (std::is_arithmetic_v<T>) {
-//     if (node.is_integer()) {
-//       return CheckedCast<T>(*node.as_integer());
-//     } else if (node.is_floating_point()) {
-//       return CheckedCast<T>(*node.as_floating_point());
-//     }
-//   } else {
-//     if (node.is<T>()) {
-//       if constexpr (std::is_same_v<T, std::string>) {
-//         return std::string{*node.as<std::string>()};
-//       } else {
-//         return static_cast<T>(*node.as<T>());
-//       }
-//     }
-//   }
-
-//  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
-//}
-
-///// Specialization for 32-bit integers, because internally, integers are
-///// stored as 64-bit integers.
-// template <>
-// int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
-//   const int64_t value64 = CastScalar<int64_t>(node, key);
-//   return SafeInteger32Cast(value64, key);
-// }
 
 /// Looks up the value at the given key (fully-qualified TOML path).
 /// If the key does not exist, a KeyError will be raised unless
@@ -323,23 +296,7 @@ T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
 
   const auto node = tbl.at_path(key);
   return CastScalar<T>(node, key);
-  //  if (node.is<T>()) {
-  //    return T{*node.as<T>()};
-  //  }
-  //  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
-
-///// Specialization needed for 32-bit integers, because TOML works with
-///// 64-bit integers.
-// template <>
-// int32_t ConfigLookupScalar<int32_t, int32_t>(const toml::table &tbl,
-//                                              std::string_view key,
-//                                              bool allow_default,
-//                                              int32_t default_val) {
-//   const int64_t value64 = ConfigLookupScalar<int64_t>(
-//       tbl, key, allow_default, static_cast<int64_t>(default_val));
-//   return SafeInteger32Cast(value64, key);
-// }
 
 /// Looks up the value at the given key (fully-qualified TOML path).
 /// If the key does not exist, a nullopt will be returned.
@@ -352,31 +309,16 @@ std::optional<T> ConfigLookupOptional(const toml::table &tbl,
 
   const auto node = tbl.at_path(key);
   return CastScalar<T>(node, key);
-  //  const auto node = tbl.at_path(key);
-  //  if (node.is<T>()) {
-  //    return T{*node.as<T>()};
-  //  }
-
-  //  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
-
-///// Specialization needed for 32-bit integers, because TOML works with
-///// 64-bit integers.
-// template <>
-// std::optional<int32_t> ConfigLookupOptional<int32_t>(const toml::table &tbl,
-//                                                      std::string_view key) {
-//   auto opt64 = ConfigLookupOptional<int64_t>(tbl, key);
-//   if (opt64.has_value()) {
-//     return std::make_optional<int32_t>(SafeInteger32Cast(opt64.value(),
-//     key));
-//   }
-//   return std::nullopt;
-// }
 
 /// Splits a fully-qualified TOML path into <anchestor, child>.
 /// This does *not* handle arrays!
 inline std::pair<std::string_view, std::string_view> SplitTomlPath(
     std::string_view path) {
+  // TODO This doesn't work for array elements. Currently, this is
+  // not an issue, because we don't allow creating array elements (as
+  // there is no need to do so). If this requirement changes, make sure
+  // to support "fancy" paths, such as "arr[3][0][1].internal.array[0]".
   std::size_t pos = path.find_last_of('.');
   if (pos != std::string_view::npos) {
     return std::make_pair(path.substr(0, pos), path.substr(pos + 1));
@@ -642,7 +584,7 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
   }
 }
 
-// TODO doc
+/// Extracts a list of points (a polyline) of integer or double.
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
@@ -814,7 +756,6 @@ Configuration Configuration::LoadTOMLString(std::string_view toml_string) {
   } catch (const toml::parse_error &err) {
     std::ostringstream msg;
     msg << err.description() << " (" << err.source().begin << ")!";
-    //    WZKLOG_ERROR(msg.str());  // TODO inconsistent usage across library!!
     throw ParseError(msg.str());
   }
 }
@@ -822,7 +763,7 @@ Configuration Configuration::LoadTOMLString(std::string_view toml_string) {
 Configuration Configuration::LoadTOMLFile(std::string_view filename) {
   try {
     return Configuration::LoadTOMLString(files::CatAsciiFile(filename));
-  } catch (const std::runtime_error &e) {
+  } catch (const werkzeugkiste::files::IOError &e) {
     throw ParseError(e.what());
   }
 }

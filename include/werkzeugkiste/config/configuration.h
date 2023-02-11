@@ -87,6 +87,8 @@ enum class ConfigType : unsigned char {
 
 // TODO ostream/istream overloads for ConfigType
 
+//-----------------------------------------------------------------------------
+// Exceptions
 // TODO doc: parsing error (syntax, I/O)
 class ParseError : public std::exception {
  public:
