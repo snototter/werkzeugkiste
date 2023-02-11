@@ -1,4 +1,5 @@
 #include <werkzeugkiste/config/casts.h>
+#include <werkzeugkiste/strings/strings.h>
 
 #include <cmath>
 #include <exception>
@@ -8,6 +9,7 @@
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::config;
+namespace wks = werkzeugkiste::strings;
 
 // NOLINTBEGIN
 TEST(CastTest, Static) {
@@ -138,7 +140,7 @@ TEST(CastTest, FloatingPoint) {
   EXPECT_DOUBLE_EQ(24.0, wkc::CheckedCast<double>(24.0L));
   EXPECT_DOUBLE_EQ(24.0F, wkc::CheckedCast<float>(24.0L));
 
-  // TODO Invalid casts missing!
+  // TODO Extend with edge cases!
 }
 
 TEST(CastTest, FloatingToIntegral) {
@@ -156,7 +158,7 @@ TEST(CastTest, FloatingToIntegral) {
   EXPECT_THROW(wkc::CheckedCast<int8_t>(312.0), std::domain_error);
   EXPECT_EQ(312, wkc::CheckedCast<int16_t>(312.0));
 
-  EXPECT_THROW(wkc::CheckedCast<int8_t>(0.5), std::runtime_error);
+  EXPECT_THROW(wkc::CheckedCast<int8_t>(0.5), std::domain_error);
   EXPECT_EQ(1, wkc::CheckedCast<int8_t>(1.0));
   EXPECT_EQ(-2, wkc::CheckedCast<int8_t>(-2.0));
 
@@ -164,8 +166,8 @@ TEST(CastTest, FloatingToIntegral) {
   EXPECT_THROW(wkc::CheckedCast<int32_t>(limits_dbl::lowest()),
                std::domain_error);
 
-  EXPECT_THROW(wkc::CheckedCast<uint32_t>(0.2), std::runtime_error);
-  EXPECT_THROW(wkc::CheckedCast<uint32_t>(1e-5), std::runtime_error);
+  EXPECT_THROW(wkc::CheckedCast<uint32_t>(0.2), std::domain_error);
+  EXPECT_THROW(wkc::CheckedCast<uint32_t>(1e-5), std::domain_error);
   EXPECT_THROW(wkc::CheckedCast<uint32_t>(-1.0), std::domain_error);
 
   int64_t value = 1L << 40;
@@ -210,17 +212,6 @@ TEST(CastTest, IntegralToFloating) {
             wkc::CheckedCast<int64_t>(wkc::CheckedCast<float>(1L << 62)));
   EXPECT_EQ(1L << 63,
             wkc::CheckedCast<int64_t>(wkc::CheckedCast<float>(1L << 63)));
-}
-
-TEST(CastTest, StringRepresentation) {
-  EXPECT_EQ("0", wkc::CheckedCast<std::string>(0));
-  EXPECT_EQ("0.0", wkc::CheckedCast<std::string>(0.0));
-  EXPECT_EQ("0.0", wkc::CheckedCast<std::string>(0.0F));
-
-  EXPECT_EQ("-42", wkc::CheckedCast<std::string>(-42));
-  EXPECT_EQ("1", wkc::CheckedCast<std::string>(1));
-  EXPECT_EQ("1.0", wkc::CheckedCast<std::string>(1.0));
-  EXPECT_EQ("0.5", wkc::CheckedCast<std::string>(0.5F));
 }
 
 // NOLINTEND

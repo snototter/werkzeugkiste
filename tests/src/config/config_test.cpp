@@ -1,3 +1,4 @@
+#include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/geometry/vector.h>
@@ -52,42 +53,48 @@ TEST(ConfigTest, Integers) {
     )toml"sv);
   EXPECT_TRUE(config.GetOptionalInteger32("int32_1"sv).has_value());
   EXPECT_EQ(-123456, config.GetOptionalInteger32("int32_1"sv).value());
+
   EXPECT_EQ(-123456, config.GetInteger32("int32_1"sv));
   EXPECT_EQ(987654, config.GetInteger32("int32_2"sv));
+
   EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
   EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
+
   EXPECT_THROW(config.GetInteger32("int32_min_overflow"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+
   EXPECT_THROW(config.GetOptionalInteger32("int32_min_overflow"sv),
                wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInteger32("int32_max_overflow"sv),
                wkc::TypeError);
 
   EXPECT_EQ(-1, config.GetInteger32Or("test"sv, -1));
-  EXPECT_EQ(17, config.GetInteger32Or("another"sv, 17));
+  EXPECT_EQ(17, config.GetInteger32Or("test"sv, 17));
   EXPECT_THROW(config.GetInteger32("test"sv), wkc::KeyError);
   EXPECT_FALSE(config.GetOptionalInteger32("test"sv).has_value());
 
   EXPECT_EQ(-123456, config.GetInteger64("int32_1"sv));
   EXPECT_TRUE(config.GetOptionalInteger64("int32_1"sv).has_value());
   EXPECT_EQ(-123456, config.GetOptionalInteger64("int32_1"sv).value());
+
   EXPECT_EQ(+987654, config.GetInteger64("int32_2"sv));
 
   EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_overflow"sv));
   EXPECT_EQ(-2147483649,
             config.GetOptionalInteger64("int32_min_overflow"sv).value());
+
   EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
   EXPECT_EQ(+2147483648,
             config.GetOptionalInteger64("int32_max_overflow"sv).value());
 
   EXPECT_EQ(-1, config.GetInteger64Or("test"sv, -1));
-  EXPECT_EQ(17, config.GetInteger64Or("another"sv, 17));
+  EXPECT_EQ(17, config.GetInteger64Or("test"sv, 17));
   EXPECT_THROW(config.GetInteger64("test"sv), wkc::KeyError);
   EXPECT_FALSE(config.GetOptionalInteger64("test"sv).has_value());
 }
 
 TEST(ConfigTest, FloatingPoint) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  auto config = wkc::Configuration::LoadTOMLString(R"toml(
     int = 32
 
     flt1 = +1.0
@@ -99,15 +106,7 @@ TEST(ConfigTest, FloatingPoint) {
     spec3 = nan
     )toml"sv);
 
-  // An integer cannot be loaded as double (there's no safe cast from
-  // 64-bit int to double).
-  EXPECT_THROW(config.GetDouble("int"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalDouble("int"sv), wkc::TypeError);
-
-  // Similarly, a double can't be loaded as another type.
-  EXPECT_THROW(config.GetInteger32("flt1"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("flt1"sv), wkc::TypeError);
-
+  // General access of floating point parameters:
   EXPECT_TRUE(config.GetOptionalDouble("flt1"sv).has_value());
   EXPECT_DOUBLE_EQ(+1.0, config.GetOptionalDouble("flt1"sv).value());
   EXPECT_DOUBLE_EQ(+1.0, config.GetDouble("flt1"sv));
@@ -116,17 +115,32 @@ TEST(ConfigTest, FloatingPoint) {
   EXPECT_DOUBLE_EQ(-3.1415, config.GetOptionalDouble("flt2"sv).value());
   EXPECT_DOUBLE_EQ(+5e22, config.GetDouble("flt3"sv));
 
-  EXPECT_FALSE(config.GetOptionalDouble("no-such-key"sv).has_value());
-
-  EXPECT_DOUBLE_EQ(+std::numeric_limits<double>::infinity(),
-                   config.GetDouble("spec1"sv));
-  EXPECT_DOUBLE_EQ(-std::numeric_limits<double>::infinity(),
-                   config.GetDouble("spec2"sv));
-  EXPECT_TRUE(std::isnan(config.GetDouble("spec3"sv)));
-
   EXPECT_THROW(config.GetDouble("test"sv), wkc::KeyError);
   EXPECT_DOUBLE_EQ(-16.0, config.GetDoubleOr("test"sv, -16));
   EXPECT_FALSE(config.GetOptionalDouble("test"sv).has_value());
+
+  // Querying special numbers:
+  using limits = std::numeric_limits<double>;
+  EXPECT_DOUBLE_EQ(+limits::infinity(), config.GetDouble("spec1"sv));
+  EXPECT_DOUBLE_EQ(-limits::infinity(), config.GetDouble("spec2"sv));
+  EXPECT_TRUE(std::isnan(config.GetDouble("spec3"sv)));
+
+  // Setting special numbers:
+  config.SetDouble("my-inf"sv, -limits::infinity());
+  EXPECT_TRUE(std::isinf(config.GetDouble("my-inf"sv)));
+  EXPECT_DOUBLE_EQ(-limits::infinity(), config.GetDouble("my-inf"sv));
+
+  config.SetDouble("my-nan"sv, limits::quiet_NaN());
+  EXPECT_TRUE(std::isnan(config.GetDouble("my-nan"sv)));
+
+  // Implicit conversion is possible if the value is exactly representable:
+  EXPECT_DOUBLE_EQ(32.0, config.GetDouble("int"sv));
+  EXPECT_DOUBLE_EQ(32.0, config.GetOptionalDouble("int"sv).value());
+  EXPECT_EQ(1, config.GetInteger32("flt1"sv));
+  EXPECT_EQ(1L, config.GetInteger64("flt1"sv));
+  // -3.14 is not:
+  EXPECT_THROW(config.GetInteger32("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64("flt2"sv), wkc::TypeError);
 }
 
 TEST(ConfigTest, QueryTypes) {
@@ -233,18 +247,20 @@ TEST(ConfigTest, GetScalarTypes) {
 
   EXPECT_THROW(config.GetBoolean("int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetBooleanOr("int"sv, true), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringOr("int"sv, "..."sv), wkc::TypeError);
+  // This integer is exactly representable by a double
+  EXPECT_DOUBLE_EQ(42.0, config.GetDouble("int"sv));
 
   // Double parameter
   EXPECT_DOUBLE_EQ(1.0, config.GetDouble("flt"sv));
 
   EXPECT_THROW(config.GetBoolean("flt"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("flt"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringOr("flt"sv, "..."sv), wkc::TypeError);
+  // This float is exactly representable by an integer
+  EXPECT_EQ(1, config.GetInteger32("flt"sv));
+  EXPECT_EQ(1L, config.GetInteger64("flt"sv));
 
   // String parameter
   const std::string expected{"A string"};
@@ -773,12 +789,16 @@ TEST(ConfigTest, ScalarLists) {
 
     ints64 = [0, 2147483647, 2147483648, -2147483648, -2147483649]
 
+    ints64_castable = [-3000, 68000, 0, 12345678]
+
     floats = [0.5, 1.0, 1.0e23]
+
+    floats_castable = [0.0, -2.0, 100.0, 12345.0]
 
     strings = ["abc", "Foo", "Frobmorten", "Test String"]
 
     # Type mix
-    invalid_int_flt = [1, 2, 3, 4.5, 5]
+    mixed_int_flt = [1, 2, 3, 4.5, 5]
 
     mixed_types = [1, 2, "framboozle"]
 
@@ -819,11 +839,14 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_EQ(6, list32[5]);
   EXPECT_EQ(-8, list32[7]);
 
-  // Cannot load integers as other types:
-  EXPECT_THROW(config.GetDoubleList("ints32"sv), wkc::TypeError);
+  // Integers can be implicitly converted to floating point numbers:
+  EXPECT_NO_THROW(config.GetDoubleList("ints32"sv));
   EXPECT_THROW(config.GetStringList("ints32"sv), wkc::TypeError);
 
+  // Implicit type conversion:
   EXPECT_THROW(config.GetInteger32List("ints64"sv), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetInteger32List("ints64_castable"sv));
+
   list64 = config.GetInteger64List("ints64"sv);
   EXPECT_EQ(5, list64.size());
 
@@ -833,14 +856,22 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_DOUBLE_EQ(1.0, list_dbl[1]);
   EXPECT_DOUBLE_EQ(1e23, list_dbl[2]);
 
-  // Cannot load floats as other types:
+  // As a user, you should assume that a float cannot be
+  // queried as another type by default:
   EXPECT_THROW(config.GetInteger32List("floats"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("floats"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("floats"sv), wkc::TypeError);
+  // But if an exact representation is possible, we allow implicit
+  // type conversion:
+  EXPECT_NO_THROW(config.GetInteger32List("floats_castable"sv));
+  EXPECT_NO_THROW(config.GetInteger64List("floats_castable"sv));
+  EXPECT_THROW(config.GetStringList("floats_castable"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger32List("invalid_int_flt"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("invalid_int_flt"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDoubleList("invalid_int_flt"sv), wkc::TypeError);
+  // Implicit conversion to integers fails for fractional numbers,
+  // such as "4.5" in mixed_int_flt:
+  EXPECT_THROW(config.GetInteger32List("mixed_int_flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("mixed_int_flt"sv), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetDoubleList("mixed_int_flt"sv));
 }
 
 TEST(ConfigTest, Pairs) {

@@ -1,6 +1,7 @@
 // NOLINTBEGIN
 #define TOML_ENABLE_FORMATTERS 1
 #include <toml++/toml.h>
+#include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/files/filesys.h>
@@ -245,41 +246,100 @@ inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
   return node.is_value() || node.is_table() || node.is_array();
 }
 
+/// Extracts the value from the toml::node or throws an error if the type
+/// is not correct.
+/// Tries converting numeric types if a lossless cast is feasible.
+template <typename T, typename NodeView>
+T CastScalar(const NodeView &node, std::string_view key) {
+  static_assert(std::is_arithmetic_v<bool>,
+                "Boolean must be a number type to use numeric casts for "
+                "parameter extraction!");
+
+  if constexpr (std::is_same_v<T, bool>) {
+    if (node.is_boolean()) {
+      return static_cast<bool>(*node.as_boolean());
+    }
+  } else if constexpr (std::is_arithmetic_v<T>) {
+    if (node.is_integer()) {
+      return CheckedCast<T, int64_t, TypeError>(
+          static_cast<int64_t>(*node.as_integer()));
+    } else if (node.is_floating_point()) {
+      return CheckedCast<T, double, TypeError>(
+          static_cast<double>(*node.as_floating_point()));
+    }
+  } else if constexpr (std::is_same_v<T, std::string>) {
+    if (node.is_string()) {
+      return std::string{*node.as_string()};
+    }
+  } else {
+    throw std::logic_error("Type not yet supported!");  // TODO
+  }
+  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+}
+// template <typename T, typename NodeView>
+// T CastScalar(const NodeView &node, std::string_view key) {
+//   if constexpr (std::is_arithmetic_v<T>) {
+//     if (node.is_integer()) {
+//       return CheckedCast<T>(*node.as_integer());
+//     } else if (node.is_floating_point()) {
+//       return CheckedCast<T>(*node.as_floating_point());
+//     }
+//   } else {
+//     if (node.is<T>()) {
+//       if constexpr (std::is_same_v<T, std::string>) {
+//         return std::string{*node.as<std::string>()};
+//       } else {
+//         return static_cast<T>(*node.as<T>());
+//       }
+//     }
+//   }
+
+//  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+//}
+
+///// Specialization for 32-bit integers, because internally, integers are
+///// stored as 64-bit integers.
+// template <>
+// int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
+//   const int64_t value64 = CastScalar<int64_t>(node, key);
+//   return SafeInteger32Cast(value64, key);
+// }
+
 /// Looks up the value at the given key (fully-qualified TOML path).
 /// If the key does not exist, a KeyError will be raised unless
 /// `allow_default` is true (in which case the `default_val` will be
 /// returned instead).
-template <typename Type, typename DefaultType = Type>
-Type ConfigLookupScalar(const toml::table &tbl, std::string_view key,
-                        bool allow_default = false,
-                        DefaultType default_val = DefaultType{}) {
+template <typename T, typename DefaultType = T>
+T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
+                     bool allow_default = false,
+                     DefaultType default_val = DefaultType{}) {
   if (!ConfigContainsKey(tbl, key)) {
     if (allow_default) {
-      return Type{default_val};
+      return T{default_val};
     }
 
     throw werkzeugkiste::config::KeyError(key);
   }
 
   const auto node = tbl.at_path(key);
-  if (node.is<Type>()) {
-    return Type{*node.as<Type>()};
-  }
-
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, Type);
+  return CastScalar<T>(node, key);
+  //  if (node.is<T>()) {
+  //    return T{*node.as<T>()};
+  //  }
+  //  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
 
-/// Specialization needed for 32-bit integers, because TOML works with
-/// 64-bit integers.
-template <>
-int32_t ConfigLookupScalar<int32_t, int32_t>(const toml::table &tbl,
-                                             std::string_view key,
-                                             bool allow_default,
-                                             int32_t default_val) {
-  const int64_t value64 = ConfigLookupScalar<int64_t>(
-      tbl, key, allow_default, static_cast<int64_t>(default_val));
-  return SafeInteger32Cast(value64, key);
-}
+///// Specialization needed for 32-bit integers, because TOML works with
+///// 64-bit integers.
+// template <>
+// int32_t ConfigLookupScalar<int32_t, int32_t>(const toml::table &tbl,
+//                                              std::string_view key,
+//                                              bool allow_default,
+//                                              int32_t default_val) {
+//   const int64_t value64 = ConfigLookupScalar<int64_t>(
+//       tbl, key, allow_default, static_cast<int64_t>(default_val));
+//   return SafeInteger32Cast(value64, key);
+// }
 
 /// Looks up the value at the given key (fully-qualified TOML path).
 /// If the key does not exist, a nullopt will be returned.
@@ -291,47 +351,27 @@ std::optional<T> ConfigLookupOptional(const toml::table &tbl,
   }
 
   const auto node = tbl.at_path(key);
-  if (node.is<T>()) {
-    return T{*node.as<T>()};
-  }
+  return CastScalar<T>(node, key);
+  //  const auto node = tbl.at_path(key);
+  //  if (node.is<T>()) {
+  //    return T{*node.as<T>()};
+  //  }
 
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+  //  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
 }
 
-/// Specialization needed for 32-bit integers, because TOML works with
-/// 64-bit integers.
-template <>
-std::optional<int32_t> ConfigLookupOptional<int32_t>(const toml::table &tbl,
-                                                     std::string_view key) {
-  auto opt64 = ConfigLookupOptional<int64_t>(tbl, key);
-  if (opt64.has_value()) {
-    return std::make_optional<int32_t>(SafeInteger32Cast(opt64.value(), key));
-  }
-  return std::nullopt;
-}
-
-/// Extracts the value from the toml::node or throws an error if the type
-/// is not correct.
-template <typename T>
-T CastScalar(const toml::node &node, std::string_view key) {
-  if (node.is<T>()) {
-    if constexpr (std::is_same_v<T, std::string>) {
-      return std::string{*node.as<std::string>()};
-    } else {
-      return static_cast<T>(*node.as<T>());
-    }
-  }
-
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
-}
-
-/// Specialization for 32-bit integers, because internally, integers are
-/// stored as 64-bit integers.
-template <>
-int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
-  const int64_t value64 = CastScalar<int64_t>(node, key);
-  return SafeInteger32Cast(value64, key);
-}
+///// Specialization needed for 32-bit integers, because TOML works with
+///// 64-bit integers.
+// template <>
+// std::optional<int32_t> ConfigLookupOptional<int32_t>(const toml::table &tbl,
+//                                                      std::string_view key) {
+//   auto opt64 = ConfigLookupOptional<int64_t>(tbl, key);
+//   if (opt64.has_value()) {
+//     return std::make_optional<int32_t>(SafeInteger32Cast(opt64.value(),
+//     key));
+//   }
+//   return std::nullopt;
+// }
 
 /// Splits a fully-qualified TOML path into <anchestor, child>.
 /// This does *not* handle arrays!
@@ -737,16 +777,6 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 
 // Abusing the PImpl idiom to hide the internally used TOML table.
 struct Configuration::Impl {
-  //  Impl() = default;
-
-  //  // Copyable
-  //  Impl(const Impl &) = default;
-  //  Impl &operator=(const Impl &) = default;
-
-  //  // Moveable
-  //  Impl(Impl &&) = default;
-  //  Impl &operator=(Impl &&) = default;
-
   toml::table config_root{};
 };
 
@@ -1134,8 +1164,7 @@ bool Configuration::AdjustRelativePaths(
 
       if (!files::IsAbsolute(path)) {
         auto &str = *node.as_string();
-        const std::string abspath =
-            files::FullFile(base_path, std::string_view{path});
+        const std::string abspath = files::FullFile(base_path, path);
         if (is_file_url) {
           str = "file://" + abspath;
         } else {

@@ -126,16 +126,15 @@ class TypeError : public std::exception {
 
 /// @brief Encapsulates configuration data.
 ///
-/// Design decisions:
+/// TODO doc:
 /// * Internally, a TOML configuration is used to store the parameters.
 /// * I prefer explicit method names over a templated "Get<>".
 /// * Get("unknown-key") throws a KeyError if the parameter does not exist.
 /// * GetOptional returns an optional scalar.
 /// * Get..Or returns a default value if the parameter does not exist.
-/// * Nested lists are not supported.
 ///
 /// TODOs:
-/// * [ ] Numeric casts. Implicitly cast if lossless conversion is possible.
+/// * [x] Numeric casts. Implicitly cast if lossless conversion is possible.
 /// * [ ] Do we need double-precision points ?
 /// * [ ] LoadNestedJSONConfiguration
 /// * [ ] LoadJSONFile
@@ -145,6 +144,9 @@ class TypeError : public std::exception {
 /// * [ ] ToLibconfigString   ?
 /// * [ ] Date
 /// * [ ] Time
+/// * [ ] NestedLists int & double (for "matrices")
+/// * [ ] If eigen3 is available, enable GetMatrix.
+///       Static dimensions vs dynamic?
 /// * [ ] DateTime
 /// * [ ] Setters for ...Pair
 /// * [ ] Setters for ...List

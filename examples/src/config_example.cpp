@@ -78,8 +78,8 @@ int main(int /* argc */, char** /* argv */) {
 
   try {
     config = wkc::Configuration::LoadTOMLFile("no-such-file.toml");
-  } catch (const std::runtime_error&) {
-    // TODO
+  } catch (const wkc::ParseError& e) {
+    std::cout << e.what() << std::endl;
   }
 
   config = wkc::Configuration::LoadTOMLFile(
@@ -97,8 +97,6 @@ int main(int /* argc */, char** /* argv */) {
 
   // config.GetDouble("an_int"); //TODO this also throws
   try {
-    // TODO header lookup returns contains() . false! ??
-    //  config.GetDouble("date-time-params.local-date");
     config.GetDouble("date-time-params.local-date.ld1");
   } catch (const std::runtime_error& e) {
     std::cout << "Tried wrong type: " << e.what() << std::endl;
@@ -143,7 +141,6 @@ int main(int /* argc */, char** /* argv */) {
     throw std::logic_error("Shouldn't be here");
   } catch (const std::runtime_error& e) {
     std::cout << "Tried invalid key, got exception: " << e.what() << std::endl;
-    ;
   }
 
   try {
@@ -152,7 +149,6 @@ int main(int /* argc */, char** /* argv */) {
   } catch (const std::runtime_error& e) {
     std::cout << "Tried loading a table as a list, got exception: " << e.what()
               << std::endl;
-    ;
   }
 
   try {
@@ -192,8 +188,6 @@ int main(int /* argc */, char** /* argv */) {
   CastingCheck<double>(0.2f);
   CastingCheck<double>(0.1f);
   CastingCheck<long double>(0.2f);
-
-  CastingCheck<std::string>(0.2f);
 
   CastingCheck<float>(1.0);
   CastingCheck<float>(0.0);
