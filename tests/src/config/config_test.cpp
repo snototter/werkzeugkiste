@@ -49,7 +49,7 @@ TEST(ConfigTest, Integers) {
     int32_max = 2147483647
     int32_max_overflow = 2147483648
     int32_min = -2147483648
-    int32_min_overflow = -2147483649
+    int32_min_underflow = -2147483649
     )toml"sv);
   EXPECT_TRUE(config.GetOptionalInteger32("int32_1"sv).has_value());
   EXPECT_EQ(-123456, config.GetOptionalInteger32("int32_1"sv).value());
@@ -60,10 +60,21 @@ TEST(ConfigTest, Integers) {
   EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
   EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
 
-  EXPECT_THROW(config.GetInteger32("int32_min_overflow"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("int32_min_underflow"sv), wkc::TypeError);
+  try {
+    config.GetInteger32("int32_min_underflow"sv);
+  } catch (const wkc::TypeError &e) {
+    EXPECT_TRUE(wks::StartsWith(e.what(), "Underflow"sv));
+  }
 
-  EXPECT_THROW(config.GetOptionalInteger32("int32_min_overflow"sv),
+  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+  try {
+    config.GetInteger32("int32_max_overflow"sv);
+  } catch (const wkc::TypeError &e) {
+    EXPECT_TRUE(wks::StartsWith(e.what(), "Overflow"sv));
+  }
+
+  EXPECT_THROW(config.GetOptionalInteger32("int32_min_underflow"sv),
                wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInteger32("int32_max_overflow"sv),
                wkc::TypeError);
@@ -79,9 +90,9 @@ TEST(ConfigTest, Integers) {
 
   EXPECT_EQ(+987654, config.GetInteger64("int32_2"sv));
 
-  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_overflow"sv));
+  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_underflow"sv));
   EXPECT_EQ(-2147483649,
-            config.GetOptionalInteger64("int32_min_overflow"sv).value());
+            config.GetOptionalInteger64("int32_min_underflow"sv).value());
 
   EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
   EXPECT_EQ(+2147483648,

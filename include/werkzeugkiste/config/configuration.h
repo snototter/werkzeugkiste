@@ -37,6 +37,7 @@ constexpr const char *TypeName() {
 // NOLINTNEXTLINE(*macro-usage)
 #define WZKREG_TNSPEC(T) WZKREG_TNSPEC_STR(T, T)
 
+// LCOV_EXCL_START
 WZKREG_TNSPEC(bool)
 WZKREG_TNSPEC(int8_t)
 WZKREG_TNSPEC(uint8_t)
@@ -50,6 +51,7 @@ WZKREG_TNSPEC(float)
 WZKREG_TNSPEC(double)
 WZKREG_TNSPEC_STR(std::string, string)
 WZKREG_TNSPEC_STR(std::string_view, string_view)
+// LCOV_EXCL_STOP
 
 #undef WZKREG_TNSPEC
 #undef WZKREG_TNSPEC_STR
