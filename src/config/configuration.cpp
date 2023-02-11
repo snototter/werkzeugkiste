@@ -1058,7 +1058,7 @@ std::optional<time> Configuration::GetOptionalTime(std::string_view key) const {
 void Configuration::SetTime(std::string_view key, const time &value) {
   using namespace std::string_view_literals;
   utils::ConfigSetDateTime<time, toml::time>(pimpl_->config_root, key, value,
-                                             "date"sv);
+                                             "time"sv);
 }
 
 //---------------------------------------------------------------------------

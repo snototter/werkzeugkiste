@@ -2,7 +2,6 @@
 #define WERKZEUGKISTE_CONFIG_CASTS_H
 
 #include <werkzeugkiste/config/configuration.h>
-#include <werkzeugkiste/logging.h>  //TODO remove
 
 #include <cmath>
 #include <limits>
@@ -201,8 +200,8 @@ T CheckedFloatingPointCast(S value) {
 
   // Handle special floating point values.
   if (std::isnan(value)) {
+    // No need to distinguish "signed NaNs" for now.
     return tgt_limits::quiet_NaN();
-    // TODO do we need signed NaNs?
   }
   if (std::isinf(value)) {
     return (value > S{0}) ? tgt_limits::infinity() : -tgt_limits::infinity();
@@ -229,9 +228,6 @@ T CheckedFloatingPointCast(S value) {
   //  const S src_restored = static_cast<S>(tgt_val);
 
   //  const S diff = std::fabs(value - src_restored);
-  //  WZKLOG_ERROR(
-  //        "TODO check diff: {} --> {} vs restored {}, diff: {}",
-  //        value, tgt_val, src_restored, diff);
   //  if (diff > src_limits::epsilon()) {
   //    throw std::domain_error("TODO precision lost");
   //  }
@@ -290,7 +286,7 @@ constexpr std::pair<S, S> RangeForFloatingToIntegralCast() {
   }
 
   S max_val{};
-  if constexpr (flt_exp_bits >= int_exp_bits) {
+  if constexpr (int_exp_bits < flt_exp_bits) {
     max_val = exp2<S>(int_exp_bits);
   } else {
     max_val = flt_limits::infinity;

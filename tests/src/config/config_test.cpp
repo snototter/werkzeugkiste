@@ -330,7 +330,7 @@ TEST(ConfigTest, GetScalarTypes) {
             config.GetDateOr("no-such-key"sv, wkc::date{1234, 12, 30}));
 
   // Date parameter
-  // Note that the nanoseconds ".123" will be parsed accoring to the TOML
+  // Note that the nanoseconds ".123" will be parsed according to the TOML
   // specification into "123000000" nanoseconds.
   wkc::time time{1, 2, 3, 123456000};
   EXPECT_EQ(time, config.GetTime("dates.time"sv));
@@ -524,16 +524,22 @@ TEST(ConfigTest, DateTypes) {
 
   EXPECT_EQ("2000-11-04", wkc::date(2000, 11, 04).ToString());
 
-  // Check that the `time` type is implemented correctly
-  // TODO
+  std::ostringstream str;
+  str << wkc::date{2000, 11, 04};
+  EXPECT_EQ("2000-11-04", str.str());
 
+  // Check that the `time` type is implemented correctly
   auto time = wkc::time{23, 49, 30, 987654321};
   auto tpl_time = time.ToTuple();
   EXPECT_EQ(time.hour, std::get<0>(tpl_time));
   EXPECT_EQ(time.minute, std::get<1>(tpl_time));
   EXPECT_EQ(time.second, std::get<2>(tpl_time));
   EXPECT_EQ(time.nanosecond, std::get<3>(tpl_time));
+
   EXPECT_EQ("23:49:30.987654321", time.ToString());
+  std::ostringstream().swap(str);
+  str << time;
+  EXPECT_EQ("23:49:30.987654321", str.str());
 
   EXPECT_LE(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
   EXPECT_LT(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
