@@ -4,11 +4,23 @@
 #include <werkzeugkiste/files/files_export.h>
 
 #include <fstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 namespace werkzeugkiste::files {
+class IOError : public std::exception {
+ public:
+  explicit IOError(std::string msg) : msg_{std::move(msg)} {}
+
+  const char *what() const noexcept override { return msg_.c_str(); }
+
+ private:
+  std::string msg_{};
+};
+
 /// Reads all lines of the plain text file.
 std::vector<std::string> WERKZEUGKISTE_FILES_EXPORT
 ReadAsciiFile(std::string_view filename);

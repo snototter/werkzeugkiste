@@ -10,21 +10,34 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 
-#define WZK_CASTS_THROW_OVERFLOW(SRC, TGT, VAL)                        \
+// NOLINTNEXTLINE(*macro-usage)
+#define WZK_CASTS_THROW_OVERFLOW(EXC, SRC, TGT, VAL)                   \
   do {                                                                 \
     std::ostringstream msg;                                            \
     msg << "Overflow when casting " << std::to_string(VAL) << " from " \
         << TypeName<SRC>() << " to " << TypeName<TGT>() << '!';        \
-    throw std::domain_error(msg.str());                                \
+    throw EXC(msg.str());                                              \
   } while (false);
 
-#define WZK_CASTS_THROW_UNDERFLOW(SRC, TGT, VAL)                        \
+// NOLINTNEXTLINE(*macro-usage)
+#define WZK_CASTS_THROW_UNDERFLOW(EXC, SRC, TGT, VAL)                   \
   do {                                                                  \
     std::ostringstream msg;                                             \
     msg << "Underflow when casting " << std::to_string(VAL) << " from " \
         << TypeName<SRC>() << " to " << TypeName<TGT>() << '!';         \
-    throw std::domain_error(msg.str());                                 \
+    throw EXC(msg.str());                                               \
+  } while (false);
+
+// NOLINTNEXTLINE(*macro-usage)
+#define WZK_CASTS_THROW_NOT_REPRESENTABLE(EXC, SRC, TGT, VAL)        \
+  do {                                                               \
+    std::ostringstream msg;                                          \
+    msg << "Error while casting " << std::to_string(VAL) << " from " \
+        << TypeName<SRC>() << " to " << TypeName<TGT>()              \
+        << ". Value is not exactly representable in target type!";   \
+    throw EXC(msg.str());                                            \
   } while (false);
 
 /// Utilities to handle configurations.
@@ -77,11 +90,11 @@ constexpr bool IsPromotable() {
 namespace detail {
 
 /// Helper to cast from a SIGNED to an UNSIGNED integral value.
-template <typename T, typename S>
+template <typename T, typename S, typename Exc>
 T CheckedIntegralCast(const S value, std::false_type /* same_sign */,
                       std::true_type /* src_is_signed */) {
   if (value < static_cast<S>(0)) {
-    WZK_CASTS_THROW_UNDERFLOW(S, T, value);
+    WZK_CASTS_THROW_UNDERFLOW(Exc, S, T, value);
   }
 
   // Source value is positive, can be safely cast to its corresponding
@@ -95,14 +108,14 @@ T CheckedIntegralCast(const S value, std::false_type /* same_sign */,
                                    unsigned_src, T>;
 
   if (static_cast<wider>(value) > static_cast<wider>(tgt_limits::max())) {
-    WZK_CASTS_THROW_OVERFLOW(S, T, value);
+    WZK_CASTS_THROW_OVERFLOW(Exc, S, T, value);
   }
 
   return static_cast<T>(value);
 }
 
 /// Helper to cast from an UNSIGNED to a SIGNED integral value.
-template <typename T, typename S>
+template <typename T, typename S, typename Exc>
 T CheckedIntegralCast(const S value, std::false_type /* same_sign */,
                       std::false_type /* src_is_signed */) {
   // Casting from unsigned to signed.
@@ -119,26 +132,26 @@ T CheckedIntegralCast(const S value, std::false_type /* same_sign */,
   // type for comparison.
   using tgt_limits = std::numeric_limits<T>;
   if (static_cast<wider>(value) > static_cast<wider>(tgt_limits::max())) {
-    WZK_CASTS_THROW_OVERFLOW(S, T, value);
+    WZK_CASTS_THROW_OVERFLOW(Exc, S, T, value);
   }
 
   return static_cast<T>(value);
 }
 
 /// Helper/dispatcher to cast between DIFFERENTLY SIGNED integral types.
-template <typename T, typename S>
+template <typename T, typename S, typename Exc>
 T CheckedIntegralCast(const S value, std::false_type /* same_sign */) {
   using src_limits = std::numeric_limits<S>;
   using tgt_limits = std::numeric_limits<T>;
   static_assert(src_limits::is_signed != tgt_limits::is_signed);
 
-  return CheckedIntegralCast<T, S>(
+  return CheckedIntegralCast<T, S, Exc>(
       value, std::false_type{},
       std::integral_constant<bool, src_limits::is_signed>{});
 }
 
 /// Helper to cast between integral types of the SAME SIGN.
-template <typename T, typename S>
+template <typename T, typename S, typename Exc>
 T CheckedIntegralCast(const S value, std::true_type /* same_sign */) {
   using src_limits = std::numeric_limits<S>;
   using tgt_limits = std::numeric_limits<T>;
@@ -148,17 +161,17 @@ T CheckedIntegralCast(const S value, std::true_type /* same_sign */) {
   // Same sign, but narrowing the type width. The source is wider,
   // thus we can safely promote the target domain limits:
   if (value < static_cast<S>(tgt_limits::lowest())) {
-    WZK_CASTS_THROW_UNDERFLOW(S, T, value);
+    WZK_CASTS_THROW_UNDERFLOW(Exc, S, T, value);
   }
   if (value > static_cast<S>(tgt_limits::max())) {
-    WZK_CASTS_THROW_OVERFLOW(S, T, value);
+    WZK_CASTS_THROW_OVERFLOW(Exc, S, T, value);
   }
 
   return static_cast<T>(value);
 }
 
 /// Dispatcher to cast between integral types.
-template <typename T, typename S>
+template <typename T, typename S, typename Exc>
 constexpr T CheckedIntegralCast(const S value) {
   if constexpr (std::is_same_v<T, bool>) {
     return value != S{0};
@@ -167,11 +180,11 @@ constexpr T CheckedIntegralCast(const S value) {
   using src_limits = std::numeric_limits<S>;
   using tgt_limits = std::numeric_limits<T>;
   constexpr bool same_sign = src_limits::is_signed == tgt_limits::is_signed;
-  return CheckedIntegralCast<T, S>(value,
-                                   std::integral_constant<bool, same_sign>{});
+  return CheckedIntegralCast<T, S, Exc>(
+      value, std::integral_constant<bool, same_sign>{});
 }
 
-template <typename T, typename S>
+template <typename T, typename S, typename Exc>
 T CheckedFloatingPointCast(S value) {
   static_assert(are_floating_point_v<T, S>,
                 "Template parameters must be floating point types!");
@@ -198,10 +211,10 @@ T CheckedFloatingPointCast(S value) {
   // Narrowing from source to target. Thus, we can safely promote the
   // target type's limits:
   if (value < static_cast<S>(tgt_limits::lowest())) {
-    WZK_CASTS_THROW_UNDERFLOW(S, T, value);
+    WZK_CASTS_THROW_UNDERFLOW(Exc, S, T, value);
   }
   if (value > static_cast<S>(tgt_limits::max())) {
-    WZK_CASTS_THROW_OVERFLOW(S, T, value);
+    WZK_CASTS_THROW_OVERFLOW(Exc, S, T, value);
   }
 
   // The number is representable in the target type,
@@ -226,48 +239,130 @@ T CheckedFloatingPointCast(S value) {
   //  return tgt_val;
 }
 
+template <typename T>
+constexpr T exp2(int exp) {
+  if (exp < 0) {
+    throw std::logic_error("Exponent must be >= 0");
+  }
+
+  T val{1};
+  constexpr T mul{2};
+  for (int i{0}; i < exp; ++i) {
+    val *= mul;
+  }
+  return val;
+}
+
+/// Returns the <min,max> pair, such that:
+/// * `min` is the lowest floating point value which *will not*
+///   underflow when converted to T (integral).
+/// * `max` is the lowest floating point value which *will*
+///   overflow when converted to T (integral).
 template <typename T, typename S>
+constexpr std::pair<S, S> RangeForFloatingToIntegralCast() {
+  static_assert(std::is_floating_point_v<S>);
+  static_assert(std::is_integral_v<T>);
+
+  using flt_limits = std::numeric_limits<S>;
+  using int_limits = std::numeric_limits<T>;
+
+  // Check how many bits we have in the exponent to
+  // get the representable powers of 2.
+  // This will only work for numbers based on the
+  // binary representation (i.e. all the standard
+  // float/int implementations).
+  static_assert(int_limits::radix == 2);
+  constexpr int int_exp_bits = int_limits::digits;
+
+  static_assert(flt_limits::radix == 2);
+  static_assert(flt_limits::is_iec559);
+  constexpr int flt_exp_bits = flt_limits::max_exponent - 1;
+
+  S min_val{};
+  if constexpr (int_limits::is_signed) {
+    if constexpr (int_exp_bits < flt_exp_bits) {
+      min_val = -exp2<S>(int_exp_bits);
+    } else {
+      min_val = flt_limits::lowest;
+    }
+  } else {
+    min_val = S{0};
+  }
+
+  S max_val{};
+  if constexpr (flt_exp_bits >= int_exp_bits) {
+    max_val = exp2<S>(int_exp_bits);
+  } else {
+    max_val = flt_limits::infinity;
+  }
+
+  return std::make_pair(min_val, max_val);
+}
+
+template <typename T, typename S, typename Exc>
 T CheckedIntegralToFloatingPointCast(S value) {
   static_assert(std::is_integral_v<S>);
   static_assert(std::is_floating_point_v<T>);
 
-  // FIXME range check
-  return static_cast<T>(value);
+  // TODO perform range check first
+
+  // Check if cast is lossless
+  T cast = static_cast<T>(value);
+  S check = static_cast<S>(cast);
+
+  if (check != value) {
+    std::ostringstream msg;
+    msg << "Cannot perform lossless cast from " << TypeName<S>() << " value "
+        << value << " to " << TypeName<T>() << ". Result would be " << check
+        << '!';
+    throw Exc{msg.str()};
+  }
+  return cast;
 }
 
-template <typename T, typename S>
+template <typename T, typename S, typename Exc>
 T CheckedFloatingPointToIntegralCast(S value) {
   static_assert(std::is_floating_point_v<S>);
   static_assert(std::is_integral_v<T>);
 
   if (std::isinf(value) || std::isnan(value)) {
-    throw std::domain_error("TODO cannot cast inf/nan to integral type");
+    std::ostringstream msg;
+    msg << "Cannot represent " << (std::isinf(value) ? "inf" : "NaN") << " by "
+        << TypeName<T>() << '!';
+    throw Exc{msg.str()};
   }
 
-  // FIXME range check
-  return static_cast<T>(value);
-  //  using int_limits = std::numeric_limits<T>;
-  //  if constexpr (int_limits::is_signed) {
+  constexpr std::pair<S, S> range = RangeForFloatingToIntegralCast<T, S>();
 
-  //  } else {
-  //    // Unsigned integer
-  //    if (value < static_cast<S>(0)) {
-  //      WZK_CASTS_THROW_UNDERFLOW(S, T, value);
-  //    }
-  //  }
+  if (value < range.first) {
+    WZK_CASTS_THROW_UNDERFLOW(Exc, S, T, value);
+  }
+
+  if (value >= range.second) {
+    WZK_CASTS_THROW_OVERFLOW(Exc, S, T, value);
+  }
+
+  // It is within the range, but it could still be a fractional
+  // number. Thus, we convert and check the result.
+  T cast = static_cast<T>(value);
+  S check = static_cast<S>(cast);
+
+  const S diff = std::fabs(value - check);
+  if (diff > std::numeric_limits<S>::epsilon()) {
+    WZK_CASTS_THROW_NOT_REPRESENTABLE(Exc, S, T, value);
+  }
+
+  return cast;
 }
 }  // namespace detail
 
-/// TODO Cast between number types (or cast to their string representation)
-template <typename T, typename S>
+/// Returns the T value if S is exactly representable in the target
+/// type. Otherwise, an exception will be thrown. Supports casts
+/// between numeric types.
+template <typename T, typename S, typename Exc = std::domain_error>
 constexpr T CheckedCast(const S value) {
   static_assert(std::is_arithmetic_v<S>);
-  static_assert(std::is_arithmetic_v<T> || std::is_same_v<T, std::string>);
-
-  // Special case: Conversion to string.
-  if constexpr (std::is_same_v<T, std::string>) {
-    return std::to_string(value);
-  }
+  static_assert(std::is_arithmetic_v<T>);
 
   if constexpr (std::is_same_v<S, T>) {
     return value;
@@ -275,27 +370,36 @@ constexpr T CheckedCast(const S value) {
 
   if constexpr (are_integral_v<S, T>) {
     if constexpr (!IsPromotable<S, T>()) {
-      return detail::CheckedIntegralCast<T, S>(value);
+      return detail::CheckedIntegralCast<T, S, Exc>(value);
     }
     return static_cast<T>(value);
   }
 
   if constexpr (are_floating_point_v<S, T>) {
     if constexpr (!IsPromotable<S, T>()) {
-      return detail::CheckedFloatingPointCast<T, S>(value);
+      return detail::CheckedFloatingPointCast<T, S, Exc>(value);
     }
     return static_cast<T>(value);
   }
 
-  if constexpr (std::is_integral_v<S> && std::is_floating_point_v<T>) {
-    return detail::CheckedIntegralToFloatingPointCast<T, S>(value);
-  }
+  if constexpr (std::is_same_v<T, bool>) {
+    if constexpr (std::is_floating_point_v<S>) {
+      return std::fabs(value) < std::numeric_limits<S>::epsilon();
+    }
 
-  if constexpr (std::is_floating_point_v<S> && std::is_integral_v<T>) {
-    return detail::CheckedFloatingPointToIntegralCast<T, S>(value);
-  }
+    if constexpr (std::is_integral_v<S>) {
+      return value != 0;
+    }
+  } else {
+    if constexpr (std::is_integral_v<S> && std::is_floating_point_v<T>) {
+      return detail::CheckedIntegralToFloatingPointCast<T, S, Exc>(value);
+    }
 
-  throw std::logic_error("TODO Not supported!");
+    if constexpr (std::is_floating_point_v<S> && std::is_integral_v<T>) {
+      return detail::CheckedFloatingPointToIntegralCast<T, S, Exc>(value);
+    }
+  }
+  throw std::logic_error("The requested cast is not supported!");
 }
 
 }  // namespace werkzeugkiste::config

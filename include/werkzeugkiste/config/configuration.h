@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -27,34 +28,31 @@ constexpr const char *TypeName() {
 }
 
 // NOLINTNEXTLINE(*macro-usage)
-#define WZK_REGISTER_TYPENAME_SPECIALIZATION(T) \
-  template <>                                   \
-  constexpr const char *TypeName<T>() {         \
-    return #T;                                  \
+#define WZKREG_TNSPEC_STR(T, R)         \
+  template <>                           \
+  constexpr const char *TypeName<T>() { \
+    return #R;                          \
   }
 
-WZK_REGISTER_TYPENAME_SPECIALIZATION(bool)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int8_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint8_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int16_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint16_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int32_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint32_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int64_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint64_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(float)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(double)
+// NOLINTNEXTLINE(*macro-usage)
+#define WZKREG_TNSPEC(T) WZKREG_TNSPEC_STR(T, T)
 
-template <>
-constexpr const char *TypeName<std::string>() {
-  return "string";
-}
-template <>
-constexpr const char *TypeName<std::string_view>() {
-  return "string_view";
-}
+WZKREG_TNSPEC(bool)
+WZKREG_TNSPEC(int8_t)
+WZKREG_TNSPEC(uint8_t)
+WZKREG_TNSPEC(int16_t)
+WZKREG_TNSPEC(uint16_t)
+WZKREG_TNSPEC(int32_t)
+WZKREG_TNSPEC(uint32_t)
+WZKREG_TNSPEC(int64_t)
+WZKREG_TNSPEC(uint64_t)
+WZKREG_TNSPEC(float)
+WZKREG_TNSPEC(double)
+WZKREG_TNSPEC_STR(std::string, string)
+WZKREG_TNSPEC_STR(std::string_view, string_view)
 
-#undef WZK_REGISTER_TYPENAME_SPECIALIZATION
+#undef WZKREG_TNSPEC
+#undef WZKREG_TNSPEC_STR
 
 //-----------------------------------------------------------------------------
 // Supported parameters
@@ -73,24 +71,28 @@ enum class ConfigType : unsigned char {
   /// Internally, floating point numbers are always represented by a double.
   FloatingPoint,
 
-  /// TODO
+  /// @brief A string.
   String,
 
   // TODO date
+  // TODO time
+  // TODO date_time
 
-  /// TODO
+  /// @brief A list (vector) of unnamed parameters.
   List,
 
-  /// TODO
+  /// @brief A group (dictionary) of named parameters.
   Group
-
 };
 
-// TODO ostream/istream overloads
+// TODO ostream/istream overloads for ConfigType
 
+//-----------------------------------------------------------------------------
+// Exceptions
+// TODO doc: parsing error (syntax, I/O)
 class ParseError : public std::exception {
  public:
-  explicit ParseError(const std::string &msg) : msg_{msg} {}
+  explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
 
   const char *what() const noexcept override { return msg_.c_str(); }
 
@@ -98,12 +100,13 @@ class ParseError : public std::exception {
   std::string msg_{};
 };
 
+// TODO doc: config key/parameter name does not exist
 class KeyError : public std::exception {
  public:
-  explicit KeyError(std::string_view key) {
-    msg_ = "Key `";
-    msg_ += key;
-    msg_ += "` does not exist!";
+  // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
+  explicit KeyError(std::string_view key) : msg_{"Key `"} {
+    msg_.append(key);
+    msg_.append("` does not exist!");
   }
 
   const char *what() const noexcept override { return msg_.c_str(); }
@@ -112,10 +115,10 @@ class KeyError : public std::exception {
   std::string msg_{};
 };
 
-// TODO wrong config type assumed
+// TODO doc: wrong type assumed for getter/setter
 class TypeError : public std::exception {
  public:
-  explicit TypeError(const std::string &msg) : msg_{msg} {}
+  explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
 
   const char *what() const noexcept override { return msg_.c_str(); }
 
@@ -125,15 +128,15 @@ class TypeError : public std::exception {
 
 /// @brief Encapsulates configuration data.
 ///
-/// Design decisions:
+/// TODO doc:
 /// * Internally, a TOML configuration is used to store the parameters.
 /// * I prefer explicit method names over a templated "Get<>".
-/// * Get("unknown-key") throws a KeyError instead of returning an optional
-///   scalar. As an alternative to exception handling, use `Contains` or
-///   `Get<Type>Or`, which returns a default value.
-/// * Nested lists are not supported.
+/// * Get("unknown-key") throws a KeyError if the parameter does not exist.
+/// * GetOptional returns an optional scalar.
+/// * Get..Or returns a default value if the parameter does not exist.
 ///
 /// TODOs:
+/// * [x] Numeric casts. Implicitly cast if lossless conversion is possible.
 /// * [ ] Do we need double-precision points ?
 /// * [ ] LoadNestedJSONConfiguration
 /// * [ ] LoadJSONFile
@@ -143,7 +146,14 @@ class TypeError : public std::exception {
 /// * [ ] ToLibconfigString   ?
 /// * [ ] Date
 /// * [ ] Time
+/// * [ ] NestedLists int & double (for "matrices")
+/// * [ ] If eigen3 is available, enable GetMatrix.
+///       Static dimensions vs dynamic?
 /// * [ ] DateTime
+/// * [ ] Setters for ...Pair
+/// * [ ] Setters for ...List
+/// * [x] SetGroup
+/// * [x] Return optional<Scalar>
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   //  //  using date_type = std::tuple<uint16_t, uint8_t, uint8_t>;
@@ -195,23 +205,28 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   bool GetBoolean(std::string_view key) const;
   bool GetBooleanOr(std::string_view key, bool default_val) const;
+  std::optional<bool> GetOptionalBoolean(std::string_view key) const;
   void SetBoolean(std::string_view key, bool value);
 
   int32_t GetInteger32(std::string_view key) const;
   int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
+  std::optional<int32_t> GetOptionalInteger32(std::string_view key) const;
   void SetInteger32(std::string_view key, int32_t value);
 
   int64_t GetInteger64(std::string_view key) const;
   int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
+  std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
   void SetInteger64(std::string_view key, int64_t value);
 
   double GetDouble(std::string_view key) const;
   double GetDoubleOr(std::string_view key, double default_val) const;
+  std::optional<double> GetOptionalDouble(std::string_view key) const;
   void SetDouble(std::string_view key, double value);
 
   std::string GetString(std::string_view key) const;
   std::string GetStringOr(std::string_view key,
                           std::string_view default_val) const;
+  std::optional<std::string> GetOptionalString(std::string_view key) const;
   void SetString(std::string_view key, std::string_view value);
 
   //---------------------------------------------------------------------------
@@ -223,7 +238,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //                                     0;
   //  virtual void SetDate(std::string_view key, const date_type &value) = 0;
 
-  // TODO
   //---------------------------------------------------------------------------
   //  Lists/pairs of scalar data types
 
@@ -248,6 +262,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified name of the parameter (which must be a
   ///   group, e.g. a JSON dictionary, a TOML table, or a libconfig group).
   Configuration GetGroup(std::string_view key) const;
+
+  /// @brief Inserts (or replaces) the given configuration group.
+  ///
+  /// If the `key` already exists, it must be a group. Otherwise, the
+  /// parameter will be newly created, along with all "parent" in the
+  /// fully-qualified name (which defines a "path" through the configuration
+  /// table/tree).
+  ///
+  /// @param key Fully-qualified name of the parameter. If it exists, it must
+  ///   already be a group. The empty string is not allowed. To replace the
+  ///   "root", create a new `Configuration` instance instead or use the
+  ///   overloaded assignment operators.
+  /// @param group The group to be inserted.
+  void SetGroup(std::string_view key, const Configuration &group);
 
   //---------------------------------------------------------------------------
   // Special utilities
@@ -305,7 +333,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 class WERKZEUGKISTE_CONFIG_EXPORT KeyMatcher {
  public:
   KeyMatcher();
-  explicit KeyMatcher(std::initializer_list<std::string_view> keys);
+  KeyMatcher(std::initializer_list<std::string_view> keys);
   explicit KeyMatcher(const std::vector<std::string_view> &keys);
 
   ~KeyMatcher();

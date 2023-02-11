@@ -19,6 +19,7 @@ Checks: "*,\
   -readability-identifier-length,\
   -readability-else-after-return,\
   -readability-use-anyofallof,\
+  -readability-redundant-access-specifiers,\
   -bugprone-easily-swappable-parameters,\
   -misc-non-private-member-variables-in-classes"
 WarningsAsErrors: ''
@@ -136,7 +137,7 @@ CheckOptions:
   - key: 'readability-identifier-naming.PublicMethodCase'
     value: 'CamelCase'
   - key: 'readability-identifier-naming.ScopedEnumConstantCase'
-    value: 'lower_case'
+    value: 'CamelCase'
   - key: 'readability-identifier-naming.StaticConstantCase'
     value: 'lower_case'
   - key: 'readability-identifier-naming.StaticVariableCase'

@@ -45,14 +45,14 @@ struct KeyMatcher::Impl {
  private:
   std::vector<std::pair<std::string, std::optional<std::regex>>> patterns_{};
 
-  inline bool IsRegex(std::string_view key) {
+  static bool IsRegex(std::string_view key) {
     const auto *it = std::find_if_not(key.begin(), key.end(), [](char c) {
       return ((isalnum(c) != 0) || (c == '.') || (c == '_') || (c == '-'));
     });
     return it != key.end();
   }
 
-  inline std::optional<std::regex> BuildRegex(std::string_view key) {
+  static std::optional<std::regex> BuildRegex(std::string_view key) {
     if (!IsRegex(key)) {
       return std::nullopt;
     }
@@ -79,14 +79,14 @@ KeyMatcher::KeyMatcher() : pimpl_{new Impl{}} {}
 KeyMatcher::KeyMatcher(std::initializer_list<std::string_view> keys)
     : pimpl_{new Impl{}} {
   for (auto key : keys) {
-    pimpl_->RegisterKey(key);
+    RegisterKey(key);
   }
 }
 
 KeyMatcher::KeyMatcher(const std::vector<std::string_view> &keys)
     : pimpl_{new Impl{}} {
   for (auto key : keys) {
-    pimpl_->RegisterKey(key);
+    RegisterKey(key);
   }
 }
 

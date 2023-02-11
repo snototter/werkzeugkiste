@@ -9,8 +9,8 @@ namespace wkf = werkzeugkiste::files;
 namespace wks = werkzeugkiste::strings;
 
 TEST(FileIOTest, ReadFile) {
-  EXPECT_THROW(wkf::CatAsciiFile("no-such-file"), std::runtime_error);
-  EXPECT_THROW(wkf::ReadAsciiFile("no-such-file"), std::runtime_error);
+  EXPECT_THROW(wkf::CatAsciiFile("no-such-file"), wkf::IOError);
+  EXPECT_THROW(wkf::ReadAsciiFile("no-such-file"), wkf::IOError);
 
   std::string content = wks::RTrim(wkf::CatAsciiFile(__FILE__));
   auto lines = wkf::ReadAsciiFile(__FILE__);
@@ -24,7 +24,7 @@ TEST(FileIOTest, ReadFile) {
 }
 
 TEST(FileIOTest, Iterator) {
-  EXPECT_THROW(wkf::AsciiFileIterator("no-such-file"), std::runtime_error);
+  EXPECT_THROW(wkf::AsciiFileIterator("no-such-file"), wkf::IOError);
 
   std::vector<std::string> lines;
   wkf::AsciiFileIterator iterator{__FILE__};

@@ -1,6 +1,9 @@
 // NOLINTBEGIN
 #define TOML_ENABLE_FORMATTERS 1
 #include <toml++/toml.h>
+// NOLINTEND
+
+#include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/files/filesys.h>
@@ -15,7 +18,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-// NOLINTEND
 
 namespace werkzeugkiste::config {
 namespace utils {
@@ -191,11 +193,11 @@ inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
 template <typename NodeView>
 inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
   if (node.is_table()) {
-    return "table";
+    return "group";
   }
 
   if (node.is_array()) {
-    return "array";
+    return "list";
   }
 
   if (node.is_integer()) {
@@ -245,65 +247,79 @@ inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
   return node.is_value() || node.is_table() || node.is_array();
 }
 
+/// Extracts the value from the toml::node or throws an error if the type
+/// is not correct.
+/// Tries converting numeric types if a lossless cast is feasible.
+template <typename T, typename NodeView>
+T CastScalar(const NodeView &node, std::string_view key) {
+  static_assert(std::is_arithmetic_v<bool>,
+                "Boolean must be a number type to use numeric casts for "
+                "parameter extraction!");
+
+  if constexpr (std::is_same_v<T, bool>) {
+    if (node.is_boolean()) {
+      return static_cast<bool>(*node.as_boolean());
+    }
+  } else if constexpr (std::is_arithmetic_v<T>) {
+    if (node.is_integer()) {
+      return CheckedCast<T, int64_t, TypeError>(
+          static_cast<int64_t>(*node.as_integer()));
+    } else if (node.is_floating_point()) {
+      return CheckedCast<T, double, TypeError>(
+          static_cast<double>(*node.as_floating_point()));
+    }
+  } else if constexpr (std::is_same_v<T, std::string>) {
+    if (node.is_string()) {
+      return std::string{*node.as_string()};
+    }
+  } else {
+    // TODO This method could be extended to handle date/time
+    throw std::logic_error("Type not yet supported!");
+  }
+  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+}
+
 /// Looks up the value at the given key (fully-qualified TOML path).
 /// If the key does not exist, a KeyError will be raised unless
 /// `allow_default` is true (in which case the `default_val` will be
 /// returned instead).
-template <typename Type, typename DefaultType = Type>
-Type ConfigLookupScalar(const toml::table &tbl, std::string_view key,
-                        bool allow_default = false,
-                        DefaultType default_val = DefaultType{}) {
+template <typename T, typename DefaultType = T>
+T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
+                     bool allow_default = false,
+                     DefaultType default_val = DefaultType{}) {
   if (!ConfigContainsKey(tbl, key)) {
     if (allow_default) {
-      return Type{default_val};
+      return T{default_val};
     }
 
     throw werkzeugkiste::config::KeyError(key);
   }
 
   const auto node = tbl.at_path(key);
-  if (node.is<Type>()) {
-    return Type{*node.as<Type>()};
-  }
-
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, Type);
+  return CastScalar<T>(node, key);
 }
 
-/// Specialization needed for 32-bit integers, because TOML works with
-/// 64-bit integers.
-template <>
-int32_t ConfigLookupScalar<int32_t, int32_t>(const toml::table &tbl,
-                                             std::string_view key,
-                                             bool allow_default,
-                                             int32_t default_val) {
-  const int64_t value64 = ConfigLookupScalar<int64_t>(
-      tbl, key, allow_default, static_cast<int64_t>(default_val));
-  return SafeInteger32Cast(value64, key);
-}
-
-/// Extracts the value from the toml::node or throws an error if the type
-/// is not correct.
+/// Looks up the value at the given key (fully-qualified TOML path).
+/// If the key does not exist, a nullopt will be returned.
 template <typename T>
-T CastScalar(const toml::node &node, std::string_view key) {
-  if (node.is<T>()) {
-    return T(*node.as<T>());
+std::optional<T> ConfigLookupOptional(const toml::table &tbl,
+                                      std::string_view key) {
+  if (!ConfigContainsKey(tbl, key)) {
+    return std::nullopt;
   }
 
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
-}
-
-/// Specialization for 32-bit integers, because internally, integers are
-/// stored as 64-bit integers.
-template <>
-int32_t CastScalar<int32_t>(const toml::node &node, std::string_view key) {
-  const int64_t value64 = CastScalar<int64_t>(node, key);
-  return SafeInteger32Cast(value64, key);
+  const auto node = tbl.at_path(key);
+  return CastScalar<T>(node, key);
 }
 
 /// Splits a fully-qualified TOML path into <anchestor, child>.
 /// This does *not* handle arrays!
 inline std::pair<std::string_view, std::string_view> SplitTomlPath(
     std::string_view path) {
+  // TODO This doesn't work for array elements. Currently, this is
+  // not an issue, because we don't allow creating array elements (as
+  // there is no need to do so). If this requirement changes, make sure
+  // to support "fancy" paths, such as "arr[3][0][1].internal.array[0]".
   std::size_t pos = path.find_last_of('.');
   if (pos != std::string_view::npos) {
     return std::make_pair(path.substr(0, pos), path.substr(pos + 1));
@@ -316,6 +332,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 /// For example, if `key = "path.to.a.value"`, then this recursive
 /// function will create 4 tables: "path", "path.to", "path.to.a", and
 /// "path.to.a.value".
+// NOLINTNEXTLINE(misc-no-recursion)
 void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   if (key.empty()) {
     // We've reached the root node.
@@ -423,8 +440,9 @@ void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
       msg << "Assigning `" << key << "` = `" << value
           << "` completed without failure, but the key cannot be looked up. "
              "The value should have been "
-          << (result.second ? "inserted" : "assigned")
-          << ". This must be a bug. Please report at "
+          << (result.second ? "inserted" : "assigned") << " at parent{`"
+          << path.first << "`}, current{`" << path.second
+          << "`}. This must be a bug. Please report at "
              "https://github.com/snototter/werkzeugkiste/issues";
       throw std::logic_error{msg.str()};
       // LCOV_EXCL_STOP
@@ -567,7 +585,7 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
   }
 }
 
-// TODO doc
+/// Extracts a list of points (a polyline) of integer or double.
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
@@ -628,7 +646,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
 
   const toml::array &arr = *node.as_array();
   std::size_t arr_index = 0;
-  std::vector<T> scalars;
+  std::vector<T> scalars{};
   for (auto &&value : arr) {
     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
     if (value.is_value()) {
@@ -677,7 +695,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   }
 
   std::size_t arr_index = 0;
-  std::array<T, 2> scalars;
+  std::array<T, 2> scalars{};
   for (auto &&value : arr) {
     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
     if (value.is_value()) {
@@ -702,16 +720,6 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 
 // Abusing the PImpl idiom to hide the internally used TOML table.
 struct Configuration::Impl {
-  //  Impl() = default;
-
-  //  // Copyable
-  //  Impl(const Impl &) = default;
-  //  Impl &operator=(const Impl &) = default;
-
-  //  // Moveable
-  //  Impl(Impl &&) = default;
-  //  Impl &operator=(Impl &&) = default;
-
   toml::table config_root{};
 };
 
@@ -749,7 +757,6 @@ Configuration Configuration::LoadTOMLString(std::string_view toml_string) {
   } catch (const toml::parse_error &err) {
     std::ostringstream msg;
     msg << err.description() << " (" << err.source().begin << ")!";
-    //    WZKLOG_ERROR(msg.str());  // TODO inconsistent usage across library!!
     throw ParseError(msg.str());
   }
 }
@@ -757,20 +764,21 @@ Configuration Configuration::LoadTOMLString(std::string_view toml_string) {
 Configuration Configuration::LoadTOMLFile(std::string_view filename) {
   try {
     return Configuration::LoadTOMLString(files::CatAsciiFile(filename));
-  } catch (const std::runtime_error &e) {
+  } catch (const werkzeugkiste::files::IOError &e) {
     throw ParseError(e.what());
   }
 }
 
 bool Configuration::Empty() const {
-  return (pimpl_ == nullptr) || (pimpl_->config_root.size() == 0);
+  return (pimpl_ == nullptr) || (pimpl_->config_root.empty());
 }
 
 bool Configuration::Equals(const Configuration &other) const {
   using namespace std::string_view_literals;
-  const auto keys_this = utils::ListTableKeys(pimpl_->config_root, ""sv, true);
-  const auto keys_other =
-      utils::ListTableKeys(other.pimpl_->config_root, ""sv, true);
+  const auto keys_this = utils::ListTableKeys(pimpl_->config_root, ""sv,
+                                              /*include_array_entries=*/true);
+  const auto keys_other = utils::ListTableKeys(other.pimpl_->config_root, ""sv,
+                                               /*include_array_entries=*/true);
 
   if (keys_this.size() != keys_other.size()) {
     return false;
@@ -815,11 +823,14 @@ ConfigType Configuration::Type(std::string_view key) const {
     case toml::node_type::boolean:
       return ConfigType::Boolean;
 
-      /*TODO
-                date,			///< The node is a toml::value<date>.
-                time,			///< The node is a toml::value<time>.
-                date_time		///< The node is a
-         toml::value<date_time>.*/
+      // TODO date, time, date_time
+
+    default: {
+      std::string msg{"TOML node type `"};
+      msg += utils::TomlTypeName(nv, key);
+      msg += "` is not yet handled in `Configuration::Type`!";
+      throw std::logic_error(msg);
+    }
   }
 }
 
@@ -842,6 +853,11 @@ bool Configuration::GetBooleanOr(std::string_view key, bool default_val) const {
                                          /*allow_default=*/true, default_val);
 }
 
+std::optional<bool> Configuration::GetOptionalBoolean(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<bool>(pimpl_->config_root, key);
+}
+
 void Configuration::SetBoolean(std::string_view key, bool value) {
   utils::ConfigSetScalar<bool>(pimpl_->config_root, key, value);
 }
@@ -855,6 +871,11 @@ int32_t Configuration::GetInteger32Or(std::string_view key,
                                       int32_t default_val) const {
   return utils::ConfigLookupScalar<int32_t>(
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
+}
+
+std::optional<int32_t> Configuration::GetOptionalInteger32(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<int32_t>(pimpl_->config_root, key);
 }
 
 void Configuration::SetInteger32(std::string_view key, int32_t value) {
@@ -873,6 +894,11 @@ int64_t Configuration::GetInteger64Or(std::string_view key,
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
 }
 
+std::optional<int64_t> Configuration::GetOptionalInteger64(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<int64_t>(pimpl_->config_root, key);
+}
+
 void Configuration::SetInteger64(std::string_view key, int64_t value) {
   utils::ConfigSetScalar<int64_t>(pimpl_->config_root, key, value);
 }
@@ -886,6 +912,11 @@ double Configuration::GetDoubleOr(std::string_view key,
                                   double default_val) const {
   return utils::ConfigLookupScalar<double>(pimpl_->config_root, key,
                                            /*allow_default=*/true, default_val);
+}
+
+std::optional<double> Configuration::GetOptionalDouble(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<double>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDouble(std::string_view key, double value) {
@@ -902,6 +933,11 @@ std::string Configuration::GetStringOr(std::string_view key,
                                        std::string_view default_val) const {
   return utils::ConfigLookupScalar<std::string, std::string_view>(
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
+}
+
+std::optional<std::string> Configuration::GetOptionalString(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<std::string>(pimpl_->config_root, key);
 }
 
 void Configuration::SetString(std::string_view key, std::string_view value) {
@@ -967,15 +1003,71 @@ Configuration Configuration::GetGroup(std::string_view key) const {
   const auto nv = pimpl_->config_root.at_path(key);
 
   if (!nv.is_table()) {
-    std::string msg{"Inside `GetGroup`: Parameter `"};
+    std::string msg{"Cannot retrieve `"};
     msg += key;
-    msg += "` is not a group!";
+    msg += "` as a group, because it is a`";
+    msg += utils::TomlTypeName(nv, key);
+    msg += "`!";
     throw TypeError{msg};
   }
 
   const toml::table &tbl = *nv.as_table();
   cfg.pimpl_->config_root = tbl;
   return cfg;
+}
+
+void Configuration::SetGroup(std::string_view key, const Configuration &group) {
+  if (key.empty()) {
+    throw KeyError{
+        "Cannot replace this configuration with a parameter group. Key cannot "
+        "be empty in `SetGroup`!"};
+  }
+
+  const auto path = utils::SplitTomlPath(key);
+  if (utils::ConfigContainsKey(pimpl_->config_root, key)) {
+    const auto node = pimpl_->config_root.at_path(key);
+    if (!node.is_table()) {
+      std::string msg{"Cannot insert parameter group at `"};
+      msg += key;
+      msg += "`. Existing parameter is of type `";
+      msg += utils::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+
+    auto &ref = *node.as_table();
+    ref = group.pimpl_->config_root;
+  } else {
+    utils::EnsureContainerPathExists(pimpl_->config_root, path.first);
+    toml::table *parent =
+        path.first.empty() ? &pimpl_->config_root
+                           : pimpl_->config_root.at_path(path.first).as_table();
+    if (parent == nullptr) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Creating the path hierarchy to insert parameter group at `" << key
+          << "` completed without failure, but the parent table `" << path.first
+          << "` is a nullptr. This must be a bug. Please report at"
+             " https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
+
+    auto result =
+        parent->insert_or_assign(path.second, group.pimpl_->config_root);
+    if (!utils::ConfigContainsKey(pimpl_->config_root, key)) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Assigning parameter group to `" << key
+          << "` completed without failure, but the key cannot be looked up. "
+             "The value should have been "
+          << (result.second ? "inserted" : "assigned")
+          << ". This must be a bug. Please report at "
+             "https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -1009,12 +1101,12 @@ bool Configuration::AdjustRelativePaths(
       // Check if the path is relative
       const std::string param_str = utils::CastScalar<std::string>(node, fqn);
       const bool is_file_url = strings::StartsWith(param_str, "file://");
+      // NOLINTNEXTLINE(*magic-numbers)
       std::string path = is_file_url ? param_str.substr(7) : param_str;
 
       if (!files::IsAbsolute(path)) {
         auto &str = *node.as_string();
-        const std::string abspath =
-            files::FullFile(base_path, std::string_view(path));
+        const std::string abspath = files::FullFile(base_path, path);
         if (is_file_url) {
           str = "file://" + abspath;
         } else {

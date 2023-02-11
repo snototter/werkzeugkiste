@@ -15,23 +15,23 @@ void CastingCheck(S val) {
   namespace wkc = werkzeugkiste::config;
   std::cout << "Casting check:"
             << "\n* from " << wkc::TypeName<S>() << "(" << std::to_string(val)
-            << ") to " << wkc::TypeName<T>() << "\n* sizeof S(" << sizeof(S)
-            << ") -. (" << sizeof(T) << ')'
-            << "\n* is promotable: " << wkc::IsPromotable<S, T>() << "\n* cast "
-            << std::to_string(val) << " = ";
+            << ") to " << wkc::TypeName<T>() << "\n* sizeof from(" << sizeof(S)
+            << ") vs sizeof to(" << sizeof(T)
+            << ")\n* is promotable: " << wkc::IsPromotable<S, T>()
+            << "\n* cast " << std::to_string(val) << " = ";
   try {
     if constexpr (std::is_same_v<int8_t, T>) {
       std::cout << std::to_string(wkc::CheckedCast<T>(val)) << std::endl;
     } else {
       std::cout << wkc::CheckedCast<T>(val) << std::endl << std::endl;
     }
-  } catch (const std::domain_error& e) {
-    WZKLOG_CRITICAL("Caught exception during CheckedCast: {}", e.what());
+  } catch (const std::domain_error &e) {
+    WZKLOG_CRITICAL("Caught exception during CheckedCast:\n{}\n", e.what());
   }
 }
 
 // NOLINTBEGIN(*magic-numbers)
-int main(int /* argc */, char** /* argv */) {
+int main(int /* argc */, char ** /* argv */) {
   namespace wkc = werkzeugkiste::config;
   namespace wkf = werkzeugkiste::files;
   using namespace std::string_view_literals;
@@ -63,14 +63,14 @@ int main(int /* argc */, char** /* argv */) {
   std::cout << "Query a double: " << config.GetDouble("a_float") << std::endl;
   try {
     config.GetDouble("a_str");
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::TypeError &e) {
     std::cout << "Can't convert a string to double: " << e.what() << std::endl;
   }
 
   // config.GetDouble("an_int"); //TODO this also throws
   try {
     config.GetDouble("no.such.key");
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::KeyError &e) {
     std::cout << "Can't look up a non-existing key: " << e.what() << std::endl;
   }
   std::cout << "But it can be replaced with a default value: "
@@ -78,15 +78,15 @@ int main(int /* argc */, char** /* argv */) {
 
   try {
     config = wkc::Configuration::LoadTOMLFile("no-such-file.toml");
-  } catch (const std::runtime_error&) {
-    // TODO
+  } catch (const wkc::ParseError &e) {
+    std::cout << e.what() << std::endl;
   }
 
   config = wkc::Configuration::LoadTOMLFile(
       wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
   const auto params = config.ListParameterNames(false);
   std::cout << "Parameter names:\n";
-  for (const auto& name : params) {
+  for (const auto &name : params) {
     std::cout << "  " << name << std::endl;
   }
 
@@ -97,15 +97,13 @@ int main(int /* argc */, char** /* argv */) {
 
   // config.GetDouble("an_int"); //TODO this also throws
   try {
-    // TODO header lookup returns contains() . false! ??
-    //  config.GetDouble("date-time-params.local-date");
     config.GetDouble("date-time-params.local-date.ld1");
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::TypeError &e) {
     std::cout << "Tried wrong type: " << e.what() << std::endl;
   }
   try {
     config.GetDouble("date-time-params.local-date");
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::TypeError &e) {
     std::cout << "Tried wrong type: " << e.what() << std::endl;
   }
 
@@ -114,7 +112,7 @@ int main(int /* argc */, char** /* argv */) {
               << config.GetInteger32("integral-numbers.int32_max") << std::endl;
     std::cout << "Query int64 as int32 (should throw exception): "
               << config.GetInteger32("integral-numbers.int64") << std::endl;
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::TypeError &e) {
     std::cout << "Caught exception: " << e.what() << std::endl;
     std::cout << "Query int64 correctly: "
               << config.GetInteger64("integral-numbers.int64") << std::endl;
@@ -130,8 +128,6 @@ int main(int /* argc */, char** /* argv */) {
     strings = ["abc", "Foo", "Frobmorten", "Test String"]
 
     # Type mix
-    invalid_int_flt = [1, 2, 3, 4.5, 5]
-
     mixed_types = [1, 2, "framboozle"]
 
     [not-a-list]
@@ -141,24 +137,22 @@ int main(int /* argc */, char** /* argv */) {
   try {
     list_config.GetInteger32List("no-such-key");
     throw std::logic_error("Shouldn't be here");
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::KeyError &e) {
     std::cout << "Tried invalid key, got exception: " << e.what() << std::endl;
-    ;
   }
 
   try {
     list_config.GetInteger32List("not-a-list");
     throw std::logic_error("Shouldn't be here");
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::TypeError &e) {
     std::cout << "Tried loading a table as a list, got exception: " << e.what()
               << std::endl;
-    ;
   }
 
   try {
     list_config.GetInteger32List("mixed_types");
     throw std::logic_error("Shouldn't be here");
-  } catch (const std::runtime_error& e) {
+  } catch (const wkc::TypeError &e) {
     std::cout << "Tried loading an inhomogeneous array as scalar list, got "
                  "exception: "
               << e.what() << std::endl;
@@ -167,7 +161,7 @@ int main(int /* argc */, char** /* argv */) {
 
   auto list_str = list_config.GetStringList("strings");
   std::cout << "Loaded string list: {";
-  for (const auto& s : list_str) {
+  for (const auto &s : list_str) {
     std::cout << '"' << s << "\", ";
   }
   std::cout << "}" << std::endl;
@@ -184,16 +178,14 @@ int main(int /* argc */, char** /* argv */) {
   CastingCheck<uint8_t>(255L);
   CastingCheck<uint8_t>(256L);
 
-  CastingCheck<int>(int16_t(42));
-  CastingCheck<int>((uint16_t)42);
-  CastingCheck<uint>((int8_t)0);
-  CastingCheck<uint>((int8_t)-42);
+  CastingCheck<int>(static_cast<int16_t>(42));
+  CastingCheck<int>(static_cast<uint16_t>(42));
+  CastingCheck<uint>(static_cast<int8_t>(0));
+  CastingCheck<uint>(static_cast<int8_t>(-42));
 
   CastingCheck<double>(0.2f);
   CastingCheck<double>(0.1f);
   CastingCheck<long double>(0.2f);
-
-  CastingCheck<std::string>(0.2f);
 
   CastingCheck<float>(1.0);
   CastingCheck<float>(0.0);
