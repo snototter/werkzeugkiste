@@ -718,16 +718,16 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 #undef WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR
 }  // namespace utils
 
-std::string ToString(const ConfigType &ct) {
+std::string ConfigTypeToString(const ConfigType &ct) {
   switch (ct) {
     case ConfigType::Boolean:
-      return "bool";
+      return "boolean";
 
     case ConfigType::Integer:
-      return "int";
+      return "integer";
 
     case ConfigType::FloatingPoint:
-      return "double";
+      return "floating_point";
 
     case ConfigType::String:
       return "string";

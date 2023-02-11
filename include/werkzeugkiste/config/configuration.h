@@ -86,7 +86,7 @@ enum class ConfigType : unsigned char {
 };
 
 // TODO ostream/istream overloads for ConfigType
-std::string ToString(const ConfigType &ct);
+std::string ConfigTypeToString(const ConfigType &ct);
 
 //-----------------------------------------------------------------------------
 // Exceptions
