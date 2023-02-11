@@ -35,6 +35,14 @@ TEST(CastTest, Static) {
   static_assert(wkc::IsPromotable<float, double>());
   static_assert(!wkc::IsPromotable<int, char>());
   static_assert(!wkc::IsPromotable<uint, int>());
+
+  EXPECT_DOUBLE_EQ(1.0F, wkc::detail::exp2<float>(0));
+  EXPECT_DOUBLE_EQ(8.0F, wkc::detail::exp2<float>(3));
+  EXPECT_DOUBLE_EQ(32.0F, wkc::detail::exp2<double>(5));
+  EXPECT_THROW(wkc::detail::exp2<float>(-1), std::logic_error);
+
+  auto range = wkc::detail::RangeForFloatingToIntegralCast<int8_t, float>();
+  EXPECT_DOUBLE_EQ(-wkc::detail::exp2<float>(7), range.first);
 }
 
 TEST(CastTest, Boolean) {
@@ -194,6 +202,8 @@ TEST(CastTest, IntegralToFloating) {
 
   using lng_limits = std::numeric_limits<int64_t>;
   EXPECT_THROW(wkc::CheckedCast<float>(lng_limits::max()), std::domain_error);
+  EXPECT_THROW(wkc::CheckedCast<float>(lng_limits::max() - 1),
+               std::domain_error);
   EXPECT_THROW(wkc::CheckedCast<float>(lng_limits::min() + 1),
                std::domain_error);
   // Powers of two can be exactly represented:

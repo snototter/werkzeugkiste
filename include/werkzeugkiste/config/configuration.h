@@ -2,13 +2,14 @@
 #define WERKZEUGKISTE_CONFIG_CONFIGURATION_H
 
 #include <werkzeugkiste/config/config_export.h>
+#include <werkzeugkiste/config/keymatcher.h>
+#include <werkzeugkiste/config/types.h>
 
 #include <cmath>
 #include <initializer_list>
 #include <limits>
 #include <memory>
 #include <optional>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -20,80 +21,9 @@
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
 //-----------------------------------------------------------------------------
-// Readable type identifiers to support meaningful error messages
-
-template <typename T>
-constexpr const char *TypeName() {
-  return typeid(T).name();
-}
-
-// NOLINTNEXTLINE(*macro-usage)
-#define WZKREG_TNSPEC_STR(T, R)         \
-  template <>                           \
-  constexpr const char *TypeName<T>() { \
-    return #R;                          \
-  }
-
-// NOLINTNEXTLINE(*macro-usage)
-#define WZKREG_TNSPEC(T) WZKREG_TNSPEC_STR(T, T)
-
-// LCOV_EXCL_START
-WZKREG_TNSPEC(bool)
-WZKREG_TNSPEC(int8_t)
-WZKREG_TNSPEC(uint8_t)
-WZKREG_TNSPEC(int16_t)
-WZKREG_TNSPEC(uint16_t)
-WZKREG_TNSPEC(int32_t)
-WZKREG_TNSPEC(uint32_t)
-WZKREG_TNSPEC(int64_t)
-WZKREG_TNSPEC(uint64_t)
-WZKREG_TNSPEC(float)
-WZKREG_TNSPEC(double)
-WZKREG_TNSPEC_STR(std::string, string)
-WZKREG_TNSPEC_STR(std::string_view, string_view)
-// LCOV_EXCL_STOP
-
-#undef WZKREG_TNSPEC
-#undef WZKREG_TNSPEC_STR
-
-//-----------------------------------------------------------------------------
-// Supported parameters
-
-enum class ConfigType : unsigned char {
-  /// @brief Either true or false.
-  Boolean,
-
-  /// @brief A 32- or 64-bit integer.
-  ///
-  /// Internally, integers are always handled as 64-bits.
-  Integer,
-
-  /// @brief A single- or double-precision floating point number.
-  ///
-  /// Internally, floating point numbers are always represented by a double.
-  FloatingPoint,
-
-  /// @brief A string.
-  String,
-
-  // TODO date
-  // TODO time
-  // TODO date_time
-
-  /// @brief A list (vector) of unnamed parameters.
-  List,
-
-  /// @brief A group (dictionary) of named parameters.
-  Group
-};
-
-// TODO ostream/istream overloads for ConfigType
-std::string ConfigTypeToString(const ConfigType &ct);
-
-//-----------------------------------------------------------------------------
 // Exceptions
 // TODO doc: parsing error (syntax, I/O)
-class ParseError : public std::exception {
+class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::exception {
  public:
   explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
 
@@ -104,7 +34,7 @@ class ParseError : public std::exception {
 };
 
 // TODO doc: config key/parameter name does not exist
-class KeyError : public std::exception {
+class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
  public:
   // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
   explicit KeyError(std::string_view key) : msg_{"Key `"} {
@@ -119,7 +49,7 @@ class KeyError : public std::exception {
 };
 
 // TODO doc: wrong type assumed for getter/setter
-class TypeError : public std::exception {
+class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::exception {
  public:
   explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
 
@@ -159,8 +89,6 @@ class TypeError : public std::exception {
 /// * [x] Return optional<Scalar>
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
-  //  //  using date_type = std::tuple<uint16_t, uint8_t, uint8_t>;
-
   Configuration();
   ~Configuration();
 
@@ -235,11 +163,15 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Date/time data types
 
-  //  virtual date_type GetDate(std::string_view key) const = 0;
-  //  virtual date_type GetDateOrDefault(std::string_view key,
-  //                                     const date_type &default_val) const =
-  //                                     0;
-  //  virtual void SetDate(std::string_view key, const date_type &value) = 0;
+  date GetDate(std::string_view key) const;
+  date GetDateOr(std::string_view key, const date &default_val) const;
+  std::optional<date> GetOptionalDate(std::string_view key) const;
+  void SetDate(std::string_view key, const date &value);
+
+  time GetTime(std::string_view key) const;
+  time GetTimeOr(std::string_view key, const time &default_val) const;
+  std::optional<time> GetOptionalTime(std::string_view key) const;
+  void SetTime(std::string_view key, const time &value);
 
   //---------------------------------------------------------------------------
   //  Lists/pairs of scalar data types

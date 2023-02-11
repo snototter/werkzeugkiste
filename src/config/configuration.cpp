@@ -15,7 +15,6 @@
 #include <limits>
 #include <optional>
 #include <sstream>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -217,15 +216,15 @@ inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
   }
 
   if (node.is_date()) {
-    return "toml::date";
+    return "date";
   }
 
   if (node.is_time()) {
-    return "toml::time";
+    return "time";
   }
 
   if (node.is_date_time()) {
-    return "toml::date_time";
+    return "date_time";
   }
 
   // LCOV_EXCL_START
@@ -271,6 +270,16 @@ T CastScalar(const NodeView &node, std::string_view key) {
   } else if constexpr (std::is_same_v<T, std::string>) {
     if (node.is_string()) {
       return std::string{*node.as_string()};
+    }
+  } else if constexpr (std::is_same_v<T, date>) {
+    if (node.is_date()) {
+      toml::date d{*node.as_date()};
+      return date{d.year, d.month, d.day};
+    }
+  } else if constexpr (std::is_same_v<T, time>) {
+    if (node.is_time()) {
+      toml::time t{*node.as_time()};
+      return time{t.hour, t.minute, t.second, t.nanosecond};
     }
   } else {
     // TODO This method could be extended to handle date/time
@@ -434,6 +443,65 @@ void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
     }
 
     auto result = parent->insert_or_assign(path.second, value);
+    if (!ConfigContainsKey(tbl, key)) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Assigning `" << key << "` = `" << value
+          << "` completed without failure, but the key cannot be looked up. "
+             "The value should have been "
+          << (result.second ? "inserted" : "assigned") << " at parent{`"
+          << path.first << "`}, current{`" << path.second
+          << "`}. This must be a bug. Please report at "
+             "https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
+  }
+}
+
+template <typename Tcfg, typename Ttoml>
+void ConfigSetDateTime(toml::table &tbl, std::string_view key,
+                       const Tcfg &value, std::string_view tp_name_message) {
+  const auto path = SplitTomlPath(key);
+  Ttoml tval{};
+  if constexpr (std::is_same_v<Tcfg, date>) {
+    tval = toml::date{value.year, value.month, value.day};
+  } else if constexpr (std::is_same_v<Tcfg, time>) {
+    tval = toml::time{value.hour, value.minute, value.second, value.nanosecond};
+  }
+  // TODO add date_time
+
+  if (ConfigContainsKey(tbl, key)) {
+    const auto node = tbl.at_path(key);
+    if (!node.is<Ttoml>()) {
+      std::string msg{"Changing the type is not allowed. Parameter `"};
+      msg += key;
+      msg += "` is `";
+      msg += TomlTypeName(node, key);
+      msg += "`, but scalar is of type `";
+      msg += tp_name_message;
+      msg += "`!";
+      throw TypeError{msg};
+    }
+
+    auto &ref = *node.as<Ttoml>();
+    ref = tval;
+  } else {
+    EnsureContainerPathExists(tbl, path.first);
+    toml::table *parent =
+        path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
+    if (parent == nullptr) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Creating the path hierarchy for `" << key
+          << "` completed without failure, but the parent table `" << path.first
+          << "` is a nullptr. This must be a bug. Please report at"
+             " https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
+
+    auto result = parent->insert_or_assign(path.second, tval);
     if (!ConfigContainsKey(tbl, key)) {
       // LCOV_EXCL_START
       std::ostringstream msg;
@@ -718,28 +786,6 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 #undef WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR
 }  // namespace utils
 
-std::string ConfigTypeToString(const ConfigType &ct) {
-  switch (ct) {
-    case ConfigType::Boolean:
-      return "boolean";
-
-    case ConfigType::Integer:
-      return "integer";
-
-    case ConfigType::FloatingPoint:
-      return "floating_point";
-
-    case ConfigType::String:
-      return "string";
-
-    case ConfigType::List:
-      return "list";
-
-    case ConfigType::Group:
-      return "group";
-  }
-}
-
 // Abusing the PImpl idiom to hide the internally used TOML table.
 struct Configuration::Impl {
   toml::table config_root{};
@@ -844,6 +890,9 @@ ConfigType Configuration::Type(std::string_view key) const {
 
     case toml::node_type::boolean:
       return ConfigType::Boolean;
+
+    case toml::node_type::date:
+      return ConfigType::Date;
 
       // TODO date, time, date_time
 
@@ -965,6 +1014,51 @@ std::optional<std::string> Configuration::GetOptionalString(
 void Configuration::SetString(std::string_view key, std::string_view value) {
   utils::ConfigSetScalar<std::string, std::string, std::string_view>(
       pimpl_->config_root, key, value);
+}
+
+//---------------------------------------------------------------------------
+// Date/time data types
+
+date Configuration::GetDate(std::string_view key) const {
+  return utils::ConfigLookupScalar<date>(pimpl_->config_root, key,
+                                         /*allow_default=*/false);
+}
+
+date Configuration::GetDateOr(std::string_view key,
+                              const date &default_val) const {
+  return utils::ConfigLookupScalar<date>(pimpl_->config_root, key,
+                                         /*allow_default=*/true, default_val);
+}
+
+std::optional<date> Configuration::GetOptionalDate(std::string_view key) const {
+  return utils::ConfigLookupOptional<date>(pimpl_->config_root, key);
+}
+
+void Configuration::SetDate(std::string_view key, const date &value) {
+  using namespace std::string_view_literals;
+  utils::ConfigSetDateTime<date, toml::date>(pimpl_->config_root, key, value,
+                                             "date"sv);
+}
+
+time Configuration::GetTime(std::string_view key) const {
+  return utils::ConfigLookupScalar<time>(pimpl_->config_root, key,
+                                         /*allow_default=*/false);
+}
+
+time Configuration::GetTimeOr(std::string_view key,
+                              const time &default_val) const {
+  return utils::ConfigLookupScalar<time>(pimpl_->config_root, key,
+                                         /*allow_default=*/true, default_val);
+}
+
+std::optional<time> Configuration::GetOptionalTime(std::string_view key) const {
+  return utils::ConfigLookupOptional<time>(pimpl_->config_root, key);
+}
+
+void Configuration::SetTime(std::string_view key, const time &value) {
+  using namespace std::string_view_literals;
+  utils::ConfigSetDateTime<time, toml::time>(pimpl_->config_root, key, value,
+                                             "time"sv);
 }
 
 //---------------------------------------------------------------------------

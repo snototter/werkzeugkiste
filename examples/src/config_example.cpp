@@ -9,6 +9,7 @@
 
 // TODO
 #include <werkzeugkiste/config/casts.h>
+#include <werkzeugkiste/logging.h>
 
 template <typename T, typename S>
 void CastingCheck(S val) {

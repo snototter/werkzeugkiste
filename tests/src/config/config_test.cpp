@@ -38,6 +38,8 @@ TEST(ConfigTest, TypeUtils) {
   EXPECT_EQ("string", wkc::TypeName<std::string>());
   EXPECT_EQ("string_view", wkc::TypeName<std::string_view>());
 
+  EXPECT_EQ("date", wkc::TypeName<wkc::date>());
+
   EXPECT_NO_THROW(wkc::TypeName<unsigned short>());
   EXPECT_NE("ushort", wkc::TypeName<unsigned short>());
 }
@@ -208,6 +210,9 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_TRUE(config.Contains("dates"sv));
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("dates"sv));
 
+  EXPECT_TRUE(config.Contains("dates.day"sv));
+  EXPECT_EQ(wkc::ConfigType::Date, config.Type("dates.day"sv));
+
   // TODO test date types
 
   EXPECT_THROW(config.GetBoolean("lst"sv), wkc::TypeError);
@@ -224,6 +229,8 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_EQ("floating_point",
             wkc::ConfigTypeToString(wkc::ConfigType::FloatingPoint));
   EXPECT_EQ("string", wkc::ConfigTypeToString(wkc::ConfigType::String));
+  EXPECT_EQ("date", wkc::ConfigTypeToString(wkc::ConfigType::Date));
+  EXPECT_EQ("time", wkc::ConfigTypeToString(wkc::ConfigType::Time));
   EXPECT_EQ("list", wkc::ConfigTypeToString(wkc::ConfigType::List));
   EXPECT_EQ("group", wkc::ConfigTypeToString(wkc::ConfigType::Group));
 }
@@ -239,9 +246,8 @@ TEST(ConfigTest, GetScalarTypes) {
     int_list = [1, 2, 3]
 
     [dates]
-    day = 2023-01-01
-    time1 = 12:34:56
-    time2 = 00:01:02.123456
+    day = 2023-01-02
+    time = 01:02:03.123456
     date_time = 1912-07-23T08:37:00-08:00
 
     )toml"sv);
@@ -308,6 +314,40 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_THROW(config.GetInteger64("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInteger64("str"sv), wkc::TypeError);
 
+  // Date parameter
+  EXPECT_EQ(wkc::date(2023, 01, 02), config.GetDate("dates.day"sv));
+  EXPECT_NE(wkc::date(2022, 01, 02), config.GetDate("dates.day"sv));
+
+  EXPECT_TRUE(config.GetOptionalDate("dates.day"sv).has_value());
+  EXPECT_EQ(wkc::date(2023, 01, 02),
+            config.GetOptionalDate("dates.day"sv).value());
+
+  EXPECT_THROW(config.GetDate("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateOr("str"sv, wkc::date{1234, 12, 30}),
+               wkc::TypeError);
+  EXPECT_THROW(config.GetDate("no-such-key"sv), wkc::KeyError);
+  EXPECT_EQ(wkc::date(1234, 12, 30),
+            config.GetDateOr("no-such-key"sv, wkc::date{1234, 12, 30}));
+
+  // Date parameter
+  // Note that the nanoseconds ".123" will be parsed according to the TOML
+  // specification into "123000000" nanoseconds.
+  wkc::time time{1, 2, 3, 123456000};
+  EXPECT_EQ(time, config.GetTime("dates.time"sv));
+  EXPECT_TRUE(config.GetOptionalTime("dates.time"sv).has_value());
+  EXPECT_EQ(time, config.GetOptionalTime("dates.time"sv).value());
+  // TODO expect_ne time + offset, gettime()
+
+  EXPECT_THROW(config.GetTime("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTime("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTimeOr("str"sv, time), wkc::TypeError);
+
+  EXPECT_THROW(config.GetTime("no-such-key"sv), wkc::KeyError);
+  EXPECT_EQ(time, config.GetTimeOr("no-such-key"sv, time));
+  EXPECT_FALSE(config.GetOptionalTime("no-such-key"sv).has_value());
+
+  // TODO date_time
+
   // Invalid access
   EXPECT_THROW(config.GetBoolean("int_list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetBoolean("tbl"sv), wkc::KeyError);
@@ -322,13 +362,11 @@ TEST(ConfigTest, GetScalarTypes) {
 
   EXPECT_THROW(config.GetDouble("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.day"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.time1"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.time2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates.time"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.date_time"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates.day"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.time1"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.time2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates.time"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates.date_time"sv), wkc::TypeError);
 }
 
@@ -444,6 +482,86 @@ TEST(ConfigTest, SetScalarTypes2) {
   EXPECT_EQ(64, config.GetInteger32("new-values.int64"sv));
   EXPECT_DOUBLE_EQ(1e23, config.GetDouble("new-values.float"sv));
   EXPECT_EQ("It works!", config.GetString("new-values.str"sv));
+
+  // Set a date
+  EXPECT_FALSE(config.Contains("my-day"sv));
+  EXPECT_FALSE(config.GetOptionalDate("my-day"sv).has_value());
+  wkc::date day{2023, 9, 3};
+  EXPECT_NO_THROW(config.SetDate("my-day"sv, day));
+  EXPECT_TRUE(config.Contains("my-day"sv));
+  EXPECT_EQ(day, config.GetDate("my-day"sv));
+  EXPECT_EQ(day, config.GetOptionalDate("my-day"sv).value());
+}
+
+TEST(ConfigTest, DateTypes) {
+  // Check that the `date` type is implemented correctly
+  auto date = wkc::date(2000, 11, 04);
+  auto tpl_date = date.ToTuple();
+  EXPECT_EQ(date.year, std::get<0>(tpl_date));
+  EXPECT_EQ(date.month, std::get<1>(tpl_date));
+  EXPECT_EQ(date.day, std::get<2>(tpl_date));
+
+  EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2020, 1, 21));
+  EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2000, 11, 21));
+  EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2000, 10, 21));
+
+  EXPECT_LE(wkc::date(2000, 10, 20), wkc::date(2000, 10, 21));
+
+  EXPECT_NE(wkc::date(2000, 10, 20), wkc::date(2000, 10, 21));
+  EXPECT_EQ(wkc::date(2000, 10, 20), wkc::date(2000, 10, 20));
+
+  EXPECT_FALSE(wkc::date(2000, 10, 20) < wkc::date(2000, 10, 20));
+  EXPECT_FALSE(wkc::date(2000, 10, 20) > wkc::date(2000, 10, 20));
+  EXPECT_FALSE(wkc::date(2000, 10, 20) != wkc::date(2000, 10, 20));
+
+  EXPECT_LE(wkc::date(2000, 10, 20), wkc::date(2000, 10, 20));
+  EXPECT_GE(wkc::date(2000, 10, 20), wkc::date(2000, 10, 20));
+
+  EXPECT_GT(wkc::date(2000, 10, 21), wkc::date(2000, 10, 20));
+  EXPECT_GT(wkc::date(2000, 11, 04), wkc::date(2000, 10, 20));
+  EXPECT_GT(wkc::date(2001, 1, 01), wkc::date(2000, 10, 20));
+  EXPECT_GE(wkc::date(2001, 1, 01), wkc::date(2000, 10, 20));
+
+  EXPECT_EQ("2000-11-04", wkc::date(2000, 11, 04).ToString());
+
+  std::ostringstream str;
+  str << wkc::date{2000, 11, 04};
+  EXPECT_EQ("2000-11-04", str.str());
+
+  // Check that the `time` type is implemented correctly
+  auto time = wkc::time{23, 49, 30, 987654321};
+  auto tpl_time = time.ToTuple();
+  EXPECT_EQ(time.hour, std::get<0>(tpl_time));
+  EXPECT_EQ(time.minute, std::get<1>(tpl_time));
+  EXPECT_EQ(time.second, std::get<2>(tpl_time));
+  EXPECT_EQ(time.nanosecond, std::get<3>(tpl_time));
+
+  EXPECT_EQ("23:49:30.987654321", time.ToString());
+  std::ostringstream().swap(str);
+  str << time;
+  EXPECT_EQ("23:49:30.987654321", str.str());
+
+  EXPECT_LE(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
+  EXPECT_LT(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
+  EXPECT_LT(wkc::time(8, 10, 22, 1), wkc::time(8, 10, 22, 2));
+  EXPECT_LT(wkc::time(8, 10, 22), wkc::time(8, 10, 23));
+  EXPECT_LT(wkc::time(8, 10, 22, 1), wkc::time(8, 11, 22));
+  EXPECT_LT(wkc::time(8, 10, 22, 1), wkc::time(10, 10, 22));
+
+  EXPECT_NE(wkc::time(10, 11, 12, 999888777), wkc::time(10, 11, 12, 999888776));
+  EXPECT_EQ(wkc::time(10, 11, 12, 999888777), wkc::time(10, 11, 12, 999888777));
+
+  EXPECT_LE(wkc::time(10, 11, 12, 999888777), wkc::time(10, 11, 12, 999888777));
+  EXPECT_GE(wkc::time(10, 11, 12, 999888777), wkc::time(10, 11, 12, 999888777));
+
+  EXPECT_FALSE(wkc::time(10, 11, 12, 999888777) <
+               wkc::time(10, 11, 12, 999888777));
+  EXPECT_FALSE(wkc::time(10, 11, 12, 999888777) >
+               wkc::time(10, 11, 12, 999888777));
+  EXPECT_FALSE(wkc::time(10, 11, 12, 999888777) !=
+               wkc::time(10, 11, 12, 999888777));
+
+  EXPECT_GT(wkc::time(12, 10, 2, 1), wkc::time(12, 10, 2));
 }
 
 TEST(ConfigTest, Keys1) {
@@ -859,10 +977,16 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config.GetInteger32List("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("not-a-list.no-such-key"sv),
                wkc::KeyError);
+
   EXPECT_THROW(config.GetInteger64List("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("not-a-list.no-such-key"sv),
                wkc::KeyError);
+
+  EXPECT_THROW(config.GetDoubleList("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("not-a-list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("not-a-list.no-such-key"sv), wkc::KeyError);
+
   EXPECT_THROW(config.GetStringList("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("not-a-list.no-such-key"sv), wkc::KeyError);
