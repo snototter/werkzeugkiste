@@ -974,9 +974,11 @@ Configuration Configuration::GetGroup(std::string_view key) const {
   const auto nv = pimpl_->config_root.at_path(key);
 
   if (!nv.is_table()) {
-    std::string msg{"Inside `GetGroup`: Parameter `"};
+    std::string msg{"Cannot retrieve `"};
     msg += key;
-    msg += "` is not a group!";
+    msg += "` as a group, because it is a`";
+    msg += utils::TomlTypeName(nv, key);
+    msg += "`!";
     throw TypeError{msg};
   }
 
