@@ -184,10 +184,10 @@ int main(int /* argc */, char** /* argv */) {
   CastingCheck<uint8_t>(255L);
   CastingCheck<uint8_t>(256L);
 
-  CastingCheck<int>(int16_t(42));
-  CastingCheck<int>((uint16_t)42);
-  CastingCheck<uint>((int8_t)0);
-  CastingCheck<uint>((int8_t)-42);
+  CastingCheck<int>(static_cast<int16_t>(42));
+  CastingCheck<int>(static_cast<uint16_t>(42));
+  CastingCheck<uint>(static_cast<int8_t>(0));
+  CastingCheck<uint>(static_cast<int8_t>(-42));
 
   CastingCheck<double>(0.2f);
   CastingCheck<double>(0.1f);

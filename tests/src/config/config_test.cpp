@@ -904,6 +904,74 @@ TEST(ConfigTest, GetGroup) {
   EXPECT_EQ(0, keys.size());
 }
 
+TEST(ConfigTest, SetGroup) {
+  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+    str = "A string"
+
+    [lvl1]
+    flt = 1.0
+
+    [lvl1.grp1]
+    str = "g1"
+    lst = [1, 2]
+
+    [lvl1.grp2]
+    str = "g2"
+    val = 3
+
+    [lvl1.grp3]
+
+    [dates]
+    day = 2023-01-01
+    )toml");
+
+  wkc::Configuration empty{};
+
+  EXPECT_THROW(config.SetGroup(""sv, empty), wkc::KeyError);
+  EXPECT_THROW(config.SetGroup("dates.day"sv, empty), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetGroup("empty"sv, empty));
+
+  EXPECT_TRUE(config.Contains("empty"sv));
+  auto group = config.GetGroup("empty"sv);
+  EXPECT_TRUE(group.Empty());
+
+  empty.SetBoolean("my-bool", true);
+  empty.SetInteger32("my-int32", 23);
+  empty.SetString("my-str", "value");
+  EXPECT_FALSE(empty.Empty());
+  EXPECT_NO_THROW(config.SetGroup("lvl1.grp3"sv, empty));
+
+  group = config.GetGroup("lvl1.grp3"sv);
+  EXPECT_FALSE(group.Empty());
+
+  auto keys = group.ListParameterNames(true);
+  CheckExpectedKeys({"my-bool", "my-int32", "my-str"}, keys);
+
+  // auto sub = config.GetGroup("lvl1.grp1"sv);
+  // EXPECT_FALSE(sub.Empty());
+  // auto keys = sub.ListParameterNames(true);
+  // CheckExpectedKeys({"str", "lst", "lst[0]", "lst[1]"}, keys);
+
+  // sub = config.GetGroup("lvl1.grp2"sv);
+  // EXPECT_FALSE(sub.Empty());
+  // keys = sub.ListParameterNames(false);
+  // CheckExpectedKeys({"str", "val"}, keys);
+
+  // sub = config.GetGroup("lvl1"sv);
+  // EXPECT_FALSE(sub.Empty());
+  // keys = sub.ListParameterNames(true);
+  // const std::vector<std::string> expected{
+  //     "flt",         "grp1", "grp1.str", "grp1.lst", "grp1.lst[0]",
+  //     "grp1.lst[1]", "grp2", "grp2.str", "grp2.val", "grp3"};
+  // CheckExpectedKeys(expected, keys);
+
+  // // Empty sub-group
+  // sub = config.GetGroup("lvl1.grp3"sv);
+  // EXPECT_TRUE(sub.Empty());
+  // keys = sub.ListParameterNames(false);
+  // EXPECT_EQ(0, keys.size());
+}
+
 TEST(ConfigTest, NestedTOML) {
   const auto fname_invalid_toml =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml"sv);

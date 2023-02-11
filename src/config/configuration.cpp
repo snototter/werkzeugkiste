@@ -191,11 +191,11 @@ inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
 template <typename NodeView>
 inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
   if (node.is_table()) {
-    return "table";
+    return "group";
   }
 
   if (node.is_array()) {
-    return "array";
+    return "list";
   }
 
   if (node.is_integer()) {
@@ -286,7 +286,11 @@ int32_t ConfigLookupScalar<int32_t, int32_t>(const toml::table &tbl,
 template <typename T>
 T CastScalar(const toml::node &node, std::string_view key) {
   if (node.is<T>()) {
-    return T(*node.as<T>());
+    if constexpr (std::is_same_v<T, std::string>) {
+      return std::string{*node.as<std::string>()};
+    } else {
+      return static_cast<T>(*node.as<T>());
+    }
   }
 
   WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
@@ -316,6 +320,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 /// For example, if `key = "path.to.a.value"`, then this recursive
 /// function will create 4 tables: "path", "path.to", "path.to.a", and
 /// "path.to.a.value".
+// NOLINTNEXTLINE(misc-no-recursion)
 void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   if (key.empty()) {
     // We've reached the root node.
@@ -628,7 +633,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
 
   const toml::array &arr = *node.as_array();
   std::size_t arr_index = 0;
-  std::vector<T> scalars;
+  std::vector<T> scalars{};
   for (auto &&value : arr) {
     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
     if (value.is_value()) {
@@ -677,7 +682,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   }
 
   std::size_t arr_index = 0;
-  std::array<T, 2> scalars;
+  std::array<T, 2> scalars{};
   for (auto &&value : arr) {
     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
     if (value.is_value()) {
@@ -763,14 +768,15 @@ Configuration Configuration::LoadTOMLFile(std::string_view filename) {
 }
 
 bool Configuration::Empty() const {
-  return (pimpl_ == nullptr) || (pimpl_->config_root.size() == 0);
+  return (pimpl_ == nullptr) || (pimpl_->config_root.empty());
 }
 
 bool Configuration::Equals(const Configuration &other) const {
   using namespace std::string_view_literals;
-  const auto keys_this = utils::ListTableKeys(pimpl_->config_root, ""sv, true);
-  const auto keys_other =
-      utils::ListTableKeys(other.pimpl_->config_root, ""sv, true);
+  const auto keys_this = utils::ListTableKeys(pimpl_->config_root, ""sv,
+                                              /*include_array_entries=*/true);
+  const auto keys_other = utils::ListTableKeys(other.pimpl_->config_root, ""sv,
+                                               /*include_array_entries=*/true);
 
   if (keys_this.size() != keys_other.size()) {
     return false;
@@ -978,6 +984,60 @@ Configuration Configuration::GetGroup(std::string_view key) const {
   return cfg;
 }
 
+void Configuration::SetGroup(std::string_view key, const Configuration &group) {
+  if (key.empty()) {
+    throw KeyError{
+        "Cannot replace this configuration with a parameter group. Key cannot "
+        "be empty in `SetGroup`!"};
+  }
+
+  const auto path = utils::SplitTomlPath(key);
+  if (utils::ConfigContainsKey(pimpl_->config_root, key)) {
+    const auto node = pimpl_->config_root.at_path(key);
+    if (!node.is_table()) {
+      std::string msg{"Cannot insert parameter group at `"};
+      msg += key;
+      msg += "`. Existing parameter is of type `";
+      msg += utils::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+
+    auto &ref = *node.as_table();
+    ref = group.pimpl_->config_root;
+  } else {
+    utils::EnsureContainerPathExists(pimpl_->config_root, path.first);
+    toml::table *parent =
+        path.first.empty() ? &pimpl_->config_root
+                           : pimpl_->config_root.at_path(path.first).as_table();
+    if (parent == nullptr) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Creating the path hierarchy to insert parameter group at `" << key
+          << "` completed without failure, but the parent table `" << path.first
+          << "` is a nullptr. This must be a bug. Please report at"
+             " https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
+
+    auto result =
+        parent->insert_or_assign(path.second, group.pimpl_->config_root);
+    if (!utils::ConfigContainsKey(pimpl_->config_root, key)) {
+      // LCOV_EXCL_START
+      std::ostringstream msg;
+      msg << "Assigning parameter group to `" << key
+          << "` completed without failure, but the key cannot be looked up. "
+             "The value should have been "
+          << (result.second ? "inserted" : "assigned")
+          << ". This must be a bug. Please report at "
+             "https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg.str()};
+      // LCOV_EXCL_STOP
+    }
+  }
+}
+
 //---------------------------------------------------------------------------
 // Special utilities
 
@@ -1009,12 +1069,13 @@ bool Configuration::AdjustRelativePaths(
       // Check if the path is relative
       const std::string param_str = utils::CastScalar<std::string>(node, fqn);
       const bool is_file_url = strings::StartsWith(param_str, "file://");
+      // NOLINTNEXTLINE(*magic-numbers)
       std::string path = is_file_url ? param_str.substr(7) : param_str;
 
       if (!files::IsAbsolute(path)) {
         auto &str = *node.as_string();
         const std::string abspath =
-            files::FullFile(base_path, std::string_view(path));
+            files::FullFile(base_path, std::string_view{path});
         if (is_file_url) {
           str = "file://" + abspath;
         } else {

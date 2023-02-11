@@ -73,24 +73,26 @@ enum class ConfigType : unsigned char {
   /// Internally, floating point numbers are always represented by a double.
   FloatingPoint,
 
-  /// TODO
+  /// @brief A string.
   String,
 
   // TODO date
+  // TODO time
+  // TODO date_time
 
-  /// TODO
+  /// @brief A list (vector) of unnamed parameters.
   List,
 
-  /// TODO
+  /// @brief A group (dictionary) of named parameters.
   Group
-
 };
 
-// TODO ostream/istream overloads
+// TODO ostream/istream overloads for ConfigType
 
+// TODO doc: parsing error (syntax, I/O)
 class ParseError : public std::exception {
  public:
-  explicit ParseError(const std::string &msg) : msg_{msg} {}
+  explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
 
   const char *what() const noexcept override { return msg_.c_str(); }
 
@@ -98,12 +100,13 @@ class ParseError : public std::exception {
   std::string msg_{};
 };
 
+// TODO doc: config key/parameter name does not exist
 class KeyError : public std::exception {
  public:
-  explicit KeyError(std::string_view key) {
-    msg_ = "Key `";
-    msg_ += key;
-    msg_ += "` does not exist!";
+  // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
+  explicit KeyError(std::string_view key) : msg_{"Key `"} {
+    msg_.append(key);
+    msg_.append("` does not exist!");
   }
 
   const char *what() const noexcept override { return msg_.c_str(); }
@@ -112,10 +115,10 @@ class KeyError : public std::exception {
   std::string msg_{};
 };
 
-// TODO wrong config type assumed
+// TODO doc: wrong type assumed for getter/setter
 class TypeError : public std::exception {
  public:
-  explicit TypeError(const std::string &msg) : msg_{msg} {}
+  explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
 
   const char *what() const noexcept override { return msg_.c_str(); }
 
@@ -144,6 +147,9 @@ class TypeError : public std::exception {
 /// * [ ] Date
 /// * [ ] Time
 /// * [ ] DateTime
+/// * [ ] Setters for ...Pair
+/// * [ ] Setters for ...List
+/// * [x] SetGroup
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   //  //  using date_type = std::tuple<uint16_t, uint8_t, uint8_t>;
@@ -249,6 +255,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   group, e.g. a JSON dictionary, a TOML table, or a libconfig group).
   Configuration GetGroup(std::string_view key) const;
 
+  // TODO doc
+  void SetGroup(std::string_view key, const Configuration &group);
+
   //---------------------------------------------------------------------------
   // Special utilities
 
@@ -305,7 +314,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 class WERKZEUGKISTE_CONFIG_EXPORT KeyMatcher {
  public:
   KeyMatcher();
-  explicit KeyMatcher(std::initializer_list<std::string_view> keys);
+  KeyMatcher(std::initializer_list<std::string_view> keys);
   explicit KeyMatcher(const std::vector<std::string_view> &keys);
 
   ~KeyMatcher();
