@@ -49,7 +49,7 @@ TEST(ConfigTest, Integers) {
     int32_max = 2147483647
     int32_max_overflow = 2147483648
     int32_min = -2147483648
-    int32_min_overflow = -2147483649
+    int32_min_underflow = -2147483649
     )toml"sv);
   EXPECT_TRUE(config.GetOptionalInteger32("int32_1"sv).has_value());
   EXPECT_EQ(-123456, config.GetOptionalInteger32("int32_1"sv).value());
@@ -60,10 +60,21 @@ TEST(ConfigTest, Integers) {
   EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
   EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
 
-  EXPECT_THROW(config.GetInteger32("int32_min_overflow"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("int32_min_underflow"sv), wkc::TypeError);
+  try {
+    config.GetInteger32("int32_min_underflow"sv);
+  } catch (const wkc::TypeError &e) {
+    EXPECT_TRUE(wks::StartsWith(e.what(), "Underflow"sv));
+  }
 
-  EXPECT_THROW(config.GetOptionalInteger32("int32_min_overflow"sv),
+  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+  try {
+    config.GetInteger32("int32_max_overflow"sv);
+  } catch (const wkc::TypeError &e) {
+    EXPECT_TRUE(wks::StartsWith(e.what(), "Overflow"sv));
+  }
+
+  EXPECT_THROW(config.GetOptionalInteger32("int32_min_underflow"sv),
                wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInteger32("int32_max_overflow"sv),
                wkc::TypeError);
@@ -79,9 +90,9 @@ TEST(ConfigTest, Integers) {
 
   EXPECT_EQ(+987654, config.GetInteger64("int32_2"sv));
 
-  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_overflow"sv));
+  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_underflow"sv));
   EXPECT_EQ(-2147483649,
-            config.GetOptionalInteger64("int32_min_overflow"sv).value());
+            config.GetOptionalInteger64("int32_min_underflow"sv).value());
 
   EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
   EXPECT_EQ(+2147483648,
@@ -198,6 +209,23 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("dates"sv));
 
   // TODO test date types
+
+  EXPECT_THROW(config.GetBoolean("lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.time1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.time2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.date_time"sv), wkc::TypeError);
+
+  // Verify the string representation of the custom type enum:
+  EXPECT_EQ("boolean", wkc::ConfigTypeToString(wkc::ConfigType::Boolean));
+  EXPECT_EQ("integer", wkc::ConfigTypeToString(wkc::ConfigType::Integer));
+  EXPECT_EQ("floating_point",
+            wkc::ConfigTypeToString(wkc::ConfigType::FloatingPoint));
+  EXPECT_EQ("string", wkc::ConfigTypeToString(wkc::ConfigType::String));
+  EXPECT_EQ("list", wkc::ConfigTypeToString(wkc::ConfigType::List));
+  EXPECT_EQ("group", wkc::ConfigTypeToString(wkc::ConfigType::Group));
 }
 
 TEST(ConfigTest, GetScalarTypes) {
@@ -693,6 +721,8 @@ TEST(ConfigTest, PointLists) {
 
     poly3 = [[1, 2, 3], [4, 5, 6], {x = -9, y = 0, z = -3}]
 
+    poly64 = [[-10, 20], [1, 3], [2147483647, 2147483648], [0, 21474836480]]
+
     [[poly4]]
     x = 100
     y = 200
@@ -721,6 +751,11 @@ TEST(ConfigTest, PointLists) {
 
     )toml"sv);
 
+  // Sanity checks
+  EXPECT_THROW(config.GetPoints2D("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("str"sv), wkc::TypeError);
+
+  // Retrieve a polyline
   auto poly = config.GetPoints2D("poly1"sv);
   EXPECT_EQ(4, poly.size());
 
@@ -756,6 +791,9 @@ TEST(ConfigTest, PointLists) {
   EXPECT_NO_THROW(config.GetPoints3D("poly3"sv));
   EXPECT_NO_THROW(config.GetPoints2D("poly4"sv));
   EXPECT_NO_THROW(config.GetPoints3D("poly4"sv));
+
+  // Points uses 32-bit integers. Cause an overflow:
+  EXPECT_THROW(config.GetPoints2D("poly64"sv), wkc::TypeError);
 
   EXPECT_THROW(config.GetPoints2D("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetPoints2D("str"sv), wkc::TypeError);
@@ -802,6 +840,8 @@ TEST(ConfigTest, ScalarLists) {
 
     mixed_types = [1, 2, "framboozle"]
 
+    nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
+
     an_int = 1234
 
     [not-a-list]
@@ -827,10 +867,19 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config.GetStringList("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("not-a-list.no-such-key"sv), wkc::KeyError);
 
-  // Cannot load an inhomogeneous array:
+  // Cannot load inhomogeneous arrays:
   EXPECT_THROW(config.GetInteger32List("mixed_types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("mixed_types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("mixed_types"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("mixed_types"sv), wkc::TypeError);
 
+  EXPECT_THROW(config.GetInteger32List("nested_lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("nested_lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("nested_lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("nested_lst"sv), wkc::TypeError);
+
+  // Lists must consist of elements of the same type (unless an
+  // implicit & lossless cast is available)
   auto list32 = config.GetInteger32List("ints32"sv);
   EXPECT_EQ(8, list32.size());
   auto list64 = config.GetInteger64List("ints32"sv);
@@ -861,8 +910,8 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config.GetInteger32List("floats"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("floats"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("floats"sv), wkc::TypeError);
-  // But if an exact representation is possible, we allow implicit
-  // type conversion:
+  // But if an exact representation (i.e. a lossless cast) is
+  // possible, we allow implicit type conversion:
   EXPECT_NO_THROW(config.GetInteger32List("floats_castable"sv));
   EXPECT_NO_THROW(config.GetInteger64List("floats_castable"sv));
   EXPECT_THROW(config.GetStringList("floats_castable"sv), wkc::TypeError);
