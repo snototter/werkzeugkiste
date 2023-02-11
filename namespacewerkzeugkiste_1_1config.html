@@ -107,6 +107,14 @@
               class <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>
             </dt>
             <dd><span></span></dd>
+            <dt>
+              struct <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              struct <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>
+            </dt>
+            <dd><span></span></dd>
           </dl>
         </section>
         <section id="enum-members">
@@ -117,6 +125,8 @@
               <a href="#aa45c374d0d5c8db2ba494b4789867222aa0faef0851b4294c06f2b94bb1cb2044" class="m-doc">Integer</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a072f02cab92dcb89792657037629ac66" class="m-doc">FloatingPoint</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a27118326006d3829667a400ad23d5d98" class="m-doc">String</a>,
+              <a href="#aa45c374d0d5c8db2ba494b4789867222a44749712dbec183e983dcd78a7736c41" class="m-doc">Date</a>,
+              <a href="#aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530" class="m-doc">Time</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a4ee29ca12c7d126654bd0e5275de6135" class="m-doc">List</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0" class="m-doc">Group</a> }</span>
             </dt>
@@ -137,12 +147,12 @@
             </dt>
             <dd></dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a45f2ad9a909269007a0bd927aa5da3fd" class="m-doc">TypeName</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::string</span>
             </dt>
             <dd><span></span></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5026936f341b164f19767f745fd4a50d" class="m-doc">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct) -&gt; std::string</span>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a45f2ad9a909269007a0bd927aa5da3fd" class="m-doc">TypeName</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -167,7 +177,7 @@
           <section class="m-doc-details" id="aa45c374d0d5c8db2ba494b4789867222"><div>
             <h3>
               enum class werkzeugkiste::<wbr />config::<wbr /><a href="#aa45c374d0d5c8db2ba494b4789867222" class="m-doc-self">ConfigType</a>: unsigned char
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
             </h3>
             <p><span></span></p>
             <table class="m-table m-fullwidth m-flat m-doc">
@@ -197,6 +207,18 @@
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222a27118326006d3829667a400ad23d5d98" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a27118326006d3829667a400ad23d5d98">String</a></td>
                   <td>
                   <p>A string.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa45c374d0d5c8db2ba494b4789867222a44749712dbec183e983dcd78a7736c41" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a44749712dbec183e983dcd78a7736c41">Date</a></td>
+                  <td>
+                  <p>A date.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530">Time</a></td>
+                  <td>
+                  <p>A time.</p>
                   </td>
                 </tr>
                 <tr>
@@ -237,20 +259,20 @@
             </h3>
 <p>Returns the T value if S is exactly representable in the target type. Otherwise, an exception will be thrown. Supports casts between numeric types.</p>
           </div></section>
+          <section class="m-doc-details" id="a0ccee9dccf309d5590d43326ba5f9312"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT std::string werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc-self">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
           <section class="m-doc-details" id="a45f2ad9a909269007a0bd927aa5da3fd"><div>
             <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
               <span class="m-doc-wrap-bumper">const char* werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f2ad9a909269007a0bd927aa5da3fd" class="m-doc-self">TypeName</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p><span></span></p>
-          </div></section>
-          <section class="m-doc-details" id="a5026936f341b164f19767f745fd4a50d"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5026936f341b164f19767f745fd4a50d" class="m-doc-self">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
             </h3>
             <p><span></span></p>
           </div></section>

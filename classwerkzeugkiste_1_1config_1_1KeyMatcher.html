@@ -92,6 +92,30 @@
               <span class="m-doc-wrap-bumper"><a href="#a18f41df32d49198cbaf14ea93dfdba89" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a93e3b406017869cded2c551d7bb0ba35" class="m-doc">KeyMatcher</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a03aaa7c14b463a7e07d6eb9196684f88" class="m-doc">KeyMatcher</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;std::string_view&gt; keys)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a64238e5580a3824387a4e3fb2917953c" class="m-doc">KeyMatcher</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::string_view&gt;&amp; keys) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a70266b090978e9810f2a81026b8a957b" class="m-doc">~KeyMatcher</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a03a48bc4efd76dd6c6593eccef783542" class="m-doc">KeyMatcher</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; other)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#a18f41df32d49198cbaf14ea93dfdba89" class="m-doc">KeyMatcher</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd><span></span></dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -117,7 +141,107 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a1efb4b1e710f093f59d3236a766de902" class="m-doc-self">Empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad04875ab755e0d9532e9ae3b87351b4d" class="m-doc">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; other) -&gt; <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9680a49a3fe14a463440a23d7d4d67ed" class="m-doc">operator=</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;&amp; other) -&gt; <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a106f4bf35f72bc34cd176cc4641fce86" class="m-doc">RegisterKey</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a864af426f7a46e04cd7ceaeaf5a4f025" class="m-doc">Match</a>(</span><span class="m-doc-wrap">std::string_view query) const -&gt; bool</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1efb4b1e710f093f59d3236a766de902" class="m-doc">Empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd><span></span></dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a93e3b406017869cded2c551d7bb0ba35"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93e3b406017869cded2c551d7bb0ba35" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a03aaa7c14b463a7e07d6eb9196684f88"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03aaa7c14b463a7e07d6eb9196684f88" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;std::string_view&gt; keys)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a64238e5580a3824387a4e3fb2917953c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a64238e5580a3824387a4e3fb2917953c" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::string_view&gt;&amp; keys) <span class="m-label m-info">explicit</span> </span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a70266b090978e9810f2a81026b8a957b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70266b090978e9810f2a81026b8a957b" class="m-doc-self">~KeyMatcher</a>(</span><span class="m-doc-wrap">)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a03a48bc4efd76dd6c6593eccef783542"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a03a48bc4efd76dd6c6593eccef783542" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; other)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a18f41df32d49198cbaf14ea93dfdba89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a18f41df32d49198cbaf14ea93dfdba89" class="m-doc-self">KeyMatcher</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="ad04875ab755e0d9532e9ae3b87351b4d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad04875ab755e0d9532e9ae3b87351b4d" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; other)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a9680a49a3fe14a463440a23d7d4d67ed"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp; werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9680a49a3fe14a463440a23d7d4d67ed" class="m-doc-self">operator=</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a106f4bf35f72bc34cd176cc4641fce86"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a106f4bf35f72bc34cd176cc4641fce86" class="m-doc-self">RegisterKey</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a864af426f7a46e04cd7ceaeaf5a4f025"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a864af426f7a46e04cd7ceaeaf5a4f025" class="m-doc-self">Match</a>(</span><span class="m-doc-wrap">std::string_view query) const</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="a1efb4b1e710f093f59d3236a766de902"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />KeyMatcher::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1efb4b1e710f093f59d3236a766de902" class="m-doc-self">Empty</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p><span></span></p>
+          </div></section>
         </section>
       </div>
     </div>
