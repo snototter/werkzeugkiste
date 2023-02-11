@@ -11,6 +11,7 @@
 #include <string>
 #include <type_traits>
 
+// NOLINTNEXTLINE(*macro-usage)
 #define WZK_CASTS_THROW_OVERFLOW(SRC, TGT, VAL)                        \
   do {                                                                 \
     std::ostringstream msg;                                            \
@@ -19,6 +20,7 @@
     throw std::domain_error(msg.str());                                \
   } while (false);
 
+// NOLINTNEXTLINE(*macro-usage)
 #define WZK_CASTS_THROW_UNDERFLOW(SRC, TGT, VAL)                        \
   do {                                                                  \
     std::ostringstream msg;                                             \
