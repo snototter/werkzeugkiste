@@ -281,6 +281,35 @@ int32_t ConfigLookupScalar<int32_t, int32_t>(const toml::table &tbl,
   return SafeInteger32Cast(value64, key);
 }
 
+/// Looks up the value at the given key (fully-qualified TOML path).
+/// If the key does not exist, a nullopt will be returned.
+template <typename T>
+std::optional<T> ConfigLookupOptional(const toml::table &tbl,
+                                      std::string_view key) {
+  if (!ConfigContainsKey(tbl, key)) {
+    return std::nullopt;
+  }
+
+  const auto node = tbl.at_path(key);
+  if (node.is<T>()) {
+    return T{*node.as<T>()};
+  }
+
+  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+}
+
+/// Specialization needed for 32-bit integers, because TOML works with
+/// 64-bit integers.
+template <>
+std::optional<int32_t> ConfigLookupOptional<int32_t>(const toml::table &tbl,
+                                                     std::string_view key) {
+  auto opt64 = ConfigLookupOptional<int64_t>(tbl, key);
+  if (opt64.has_value()) {
+    return std::make_optional<int32_t>(SafeInteger32Cast(opt64.value(), key));
+  }
+  return std::nullopt;
+}
+
 /// Extracts the value from the toml::node or throws an error if the type
 /// is not correct.
 template <typename T>
@@ -822,11 +851,14 @@ ConfigType Configuration::Type(std::string_view key) const {
     case toml::node_type::boolean:
       return ConfigType::Boolean;
 
-      /*TODO
-                date,			///< The node is a toml::value<date>.
-                time,			///< The node is a toml::value<time>.
-                date_time		///< The node is a
-         toml::value<date_time>.*/
+      // TODO date, time, date_time
+
+    default: {
+      std::string msg{"TOML node type `"};
+      msg += utils::TomlTypeName(nv, key);
+      msg += "` is not yet handled in `Configuration::Type`!";
+      throw std::logic_error(msg);
+    }
   }
 }
 
@@ -849,6 +881,11 @@ bool Configuration::GetBooleanOr(std::string_view key, bool default_val) const {
                                          /*allow_default=*/true, default_val);
 }
 
+std::optional<bool> Configuration::GetOptionalBoolean(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<bool>(pimpl_->config_root, key);
+}
+
 void Configuration::SetBoolean(std::string_view key, bool value) {
   utils::ConfigSetScalar<bool>(pimpl_->config_root, key, value);
 }
@@ -862,6 +899,11 @@ int32_t Configuration::GetInteger32Or(std::string_view key,
                                       int32_t default_val) const {
   return utils::ConfigLookupScalar<int32_t>(
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
+}
+
+std::optional<int32_t> Configuration::GetOptionalInteger32(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<int32_t>(pimpl_->config_root, key);
 }
 
 void Configuration::SetInteger32(std::string_view key, int32_t value) {
@@ -880,6 +922,11 @@ int64_t Configuration::GetInteger64Or(std::string_view key,
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
 }
 
+std::optional<int64_t> Configuration::GetOptionalInteger64(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<int64_t>(pimpl_->config_root, key);
+}
+
 void Configuration::SetInteger64(std::string_view key, int64_t value) {
   utils::ConfigSetScalar<int64_t>(pimpl_->config_root, key, value);
 }
@@ -893,6 +940,11 @@ double Configuration::GetDoubleOr(std::string_view key,
                                   double default_val) const {
   return utils::ConfigLookupScalar<double>(pimpl_->config_root, key,
                                            /*allow_default=*/true, default_val);
+}
+
+std::optional<double> Configuration::GetOptionalDouble(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<double>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDouble(std::string_view key, double value) {
@@ -909,6 +961,11 @@ std::string Configuration::GetStringOr(std::string_view key,
                                        std::string_view default_val) const {
   return utils::ConfigLookupScalar<std::string, std::string_view>(
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
+}
+
+std::optional<std::string> Configuration::GetOptionalString(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<std::string>(pimpl_->config_root, key);
 }
 
 void Configuration::SetString(std::string_view key, std::string_view value) {

@@ -7,6 +7,7 @@
 #include <initializer_list>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -27,34 +28,31 @@ constexpr const char *TypeName() {
 }
 
 // NOLINTNEXTLINE(*macro-usage)
-#define WZK_REGISTER_TYPENAME_SPECIALIZATION(T) \
-  template <>                                   \
-  constexpr const char *TypeName<T>() {         \
-    return #T;                                  \
+#define WZKREG_TNSPEC_STR(T, R)         \
+  template <>                           \
+  constexpr const char *TypeName<T>() { \
+    return #R;                          \
   }
 
-WZK_REGISTER_TYPENAME_SPECIALIZATION(bool)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int8_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint8_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int16_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint16_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int32_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint32_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(int64_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(uint64_t)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(float)
-WZK_REGISTER_TYPENAME_SPECIALIZATION(double)
+// NOLINTNEXTLINE(*macro-usage)
+#define WZKREG_TNSPEC(T) WZKREG_TNSPEC_STR(T, T)
 
-template <>
-constexpr const char *TypeName<std::string>() {
-  return "string";
-}
-template <>
-constexpr const char *TypeName<std::string_view>() {
-  return "string_view";
-}
+WZKREG_TNSPEC(bool)
+WZKREG_TNSPEC(int8_t)
+WZKREG_TNSPEC(uint8_t)
+WZKREG_TNSPEC(int16_t)
+WZKREG_TNSPEC(uint16_t)
+WZKREG_TNSPEC(int32_t)
+WZKREG_TNSPEC(uint32_t)
+WZKREG_TNSPEC(int64_t)
+WZKREG_TNSPEC(uint64_t)
+WZKREG_TNSPEC(float)
+WZKREG_TNSPEC(double)
+WZKREG_TNSPEC_STR(std::string, string)
+WZKREG_TNSPEC_STR(std::string_view, string_view)
 
-#undef WZK_REGISTER_TYPENAME_SPECIALIZATION
+#undef WZKREG_TNSPEC
+#undef WZKREG_TNSPEC_STR
 
 //-----------------------------------------------------------------------------
 // Supported parameters
@@ -131,12 +129,13 @@ class TypeError : public std::exception {
 /// Design decisions:
 /// * Internally, a TOML configuration is used to store the parameters.
 /// * I prefer explicit method names over a templated "Get<>".
-/// * Get("unknown-key") throws a KeyError instead of returning an optional
-///   scalar. As an alternative to exception handling, use `Contains` or
-///   `Get<Type>Or`, which returns a default value.
+/// * Get("unknown-key") throws a KeyError if the parameter does not exist.
+/// * GetOptional returns an optional scalar.
+/// * Get..Or returns a default value if the parameter does not exist.
 /// * Nested lists are not supported.
 ///
 /// TODOs:
+/// * [ ] Numeric casts. Implicitly cast if lossless conversion is possible.
 /// * [ ] Do we need double-precision points ?
 /// * [ ] LoadNestedJSONConfiguration
 /// * [ ] LoadJSONFile
@@ -150,6 +149,7 @@ class TypeError : public std::exception {
 /// * [ ] Setters for ...Pair
 /// * [ ] Setters for ...List
 /// * [x] SetGroup
+/// * [x] Return optional<Scalar>
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   //  //  using date_type = std::tuple<uint16_t, uint8_t, uint8_t>;
@@ -201,23 +201,28 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   bool GetBoolean(std::string_view key) const;
   bool GetBooleanOr(std::string_view key, bool default_val) const;
+  std::optional<bool> GetOptionalBoolean(std::string_view key) const;
   void SetBoolean(std::string_view key, bool value);
 
   int32_t GetInteger32(std::string_view key) const;
   int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
+  std::optional<int32_t> GetOptionalInteger32(std::string_view key) const;
   void SetInteger32(std::string_view key, int32_t value);
 
   int64_t GetInteger64(std::string_view key) const;
   int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
+  std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
   void SetInteger64(std::string_view key, int64_t value);
 
   double GetDouble(std::string_view key) const;
   double GetDoubleOr(std::string_view key, double default_val) const;
+  std::optional<double> GetOptionalDouble(std::string_view key) const;
   void SetDouble(std::string_view key, double value);
 
   std::string GetString(std::string_view key) const;
   std::string GetStringOr(std::string_view key,
                           std::string_view default_val) const;
+  std::optional<std::string> GetOptionalString(std::string_view key) const;
   void SetString(std::string_view key, std::string_view value);
 
   //---------------------------------------------------------------------------
@@ -229,7 +234,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //                                     0;
   //  virtual void SetDate(std::string_view key, const date_type &value) = 0;
 
-  // TODO
   //---------------------------------------------------------------------------
   //  Lists/pairs of scalar data types
 
@@ -255,7 +259,18 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   group, e.g. a JSON dictionary, a TOML table, or a libconfig group).
   Configuration GetGroup(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Inserts (or replaces) the given configuration group.
+  ///
+  /// If the `key` already exists, it must be a group. Otherwise, the
+  /// parameter will be newly created, along with all "parent" in the
+  /// fully-qualified name (which defines a "path" through the configuration
+  /// table/tree).
+  ///
+  /// @param key Fully-qualified name of the parameter. If it exists, it must
+  ///   already be a group. The empty string is not allowed. To replace the
+  ///   "root", create a new `Configuration` instance instead or use the
+  ///   overloaded assignment operators.
+  /// @param group The group to be inserted.
   void SetGroup(std::string_view key, const Configuration &group);
 
   //---------------------------------------------------------------------------

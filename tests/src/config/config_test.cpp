@@ -50,24 +50,40 @@ TEST(ConfigTest, Integers) {
     int32_min = -2147483648
     int32_min_overflow = -2147483649
     )toml"sv);
+  EXPECT_TRUE(config.GetOptionalInteger32("int32_1"sv).has_value());
+  EXPECT_EQ(-123456, config.GetOptionalInteger32("int32_1"sv).value());
   EXPECT_EQ(-123456, config.GetInteger32("int32_1"sv));
   EXPECT_EQ(987654, config.GetInteger32("int32_2"sv));
   EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
   EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
   EXPECT_THROW(config.GetInteger32("int32_min_overflow"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger32("int32_min_overflow"sv),
+               wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger32("int32_max_overflow"sv),
+               wkc::TypeError);
 
   EXPECT_EQ(-1, config.GetInteger32Or("test"sv, -1));
   EXPECT_EQ(17, config.GetInteger32Or("another"sv, 17));
   EXPECT_THROW(config.GetInteger32("test"sv), wkc::KeyError);
+  EXPECT_FALSE(config.GetOptionalInteger32("test"sv).has_value());
 
   EXPECT_EQ(-123456, config.GetInteger64("int32_1"sv));
+  EXPECT_TRUE(config.GetOptionalInteger64("int32_1"sv).has_value());
+  EXPECT_EQ(-123456, config.GetOptionalInteger64("int32_1"sv).value());
   EXPECT_EQ(+987654, config.GetInteger64("int32_2"sv));
+
   EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_overflow"sv));
+  EXPECT_EQ(-2147483649,
+            config.GetOptionalInteger64("int32_min_overflow"sv).value());
   EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
+  EXPECT_EQ(+2147483648,
+            config.GetOptionalInteger64("int32_max_overflow"sv).value());
+
   EXPECT_EQ(-1, config.GetInteger64Or("test"sv, -1));
   EXPECT_EQ(17, config.GetInteger64Or("another"sv, 17));
   EXPECT_THROW(config.GetInteger64("test"sv), wkc::KeyError);
+  EXPECT_FALSE(config.GetOptionalInteger64("test"sv).has_value());
 }
 
 TEST(ConfigTest, FloatingPoint) {
@@ -86,14 +102,21 @@ TEST(ConfigTest, FloatingPoint) {
   // An integer cannot be loaded as double (there's no safe cast from
   // 64-bit int to double).
   EXPECT_THROW(config.GetDouble("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalDouble("int"sv), wkc::TypeError);
 
   // Similarly, a double can't be loaded as another type.
   EXPECT_THROW(config.GetInteger32("flt1"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64("flt1"sv), wkc::TypeError);
 
+  EXPECT_TRUE(config.GetOptionalDouble("flt1"sv).has_value());
+  EXPECT_DOUBLE_EQ(+1.0, config.GetOptionalDouble("flt1"sv).value());
   EXPECT_DOUBLE_EQ(+1.0, config.GetDouble("flt1"sv));
   EXPECT_DOUBLE_EQ(-3.1415, config.GetDouble("flt2"sv));
+  EXPECT_TRUE(config.GetOptionalDouble("flt2"sv).has_value());
+  EXPECT_DOUBLE_EQ(-3.1415, config.GetOptionalDouble("flt2"sv).value());
   EXPECT_DOUBLE_EQ(+5e22, config.GetDouble("flt3"sv));
+
+  EXPECT_FALSE(config.GetOptionalDouble("no-such-key"sv).has_value());
 
   EXPECT_DOUBLE_EQ(+std::numeric_limits<double>::infinity(),
                    config.GetDouble("spec1"sv));
@@ -101,8 +124,9 @@ TEST(ConfigTest, FloatingPoint) {
                    config.GetDouble("spec2"sv));
   EXPECT_TRUE(std::isnan(config.GetDouble("spec3"sv)));
 
-  EXPECT_EQ(-16.0, config.GetDoubleOr("test"sv, -16));
   EXPECT_THROW(config.GetDouble("test"sv), wkc::KeyError);
+  EXPECT_DOUBLE_EQ(-16.0, config.GetDoubleOr("test"sv, -16));
+  EXPECT_FALSE(config.GetOptionalDouble("test"sv).has_value());
 }
 
 TEST(ConfigTest, QueryTypes) {
@@ -182,18 +206,26 @@ TEST(ConfigTest, GetScalarTypes) {
 
   // Boolean parameter
   EXPECT_EQ(true, config.GetBoolean("bool"sv));
+  EXPECT_TRUE(config.GetOptionalBoolean("bool"sv).has_value());
+  EXPECT_EQ(true, config.GetOptionalBoolean("bool"sv).value());
+
   EXPECT_THROW(config.GetBoolean("no-such.bool"sv), wkc::KeyError);
+  EXPECT_FALSE(config.GetOptionalBoolean("no-such.bool"sv).has_value());
   EXPECT_TRUE(config.GetBooleanOr("no-such.bool"sv, true));
   EXPECT_FALSE(config.GetBooleanOr("no-such.bool"sv, false));
 
   EXPECT_THROW(config.GetInteger32("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32Or("bool"sv, 0), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger32("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64Or("bool"sv, 2), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger64("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleOr("bool"sv, 1.0), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalDouble("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringOr("bool"sv, "..."sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalString("bool"sv), wkc::TypeError);
 
   // Integer parameter
   EXPECT_EQ(42, config.GetInteger32("int"sv));
@@ -217,14 +249,20 @@ TEST(ConfigTest, GetScalarTypes) {
   // String parameter
   const std::string expected{"A string"};
   EXPECT_EQ(expected, config.GetString("str"sv));
+  EXPECT_TRUE(config.GetOptionalString("str"sv).has_value());
+  EXPECT_EQ("A string", config.GetOptionalString("str"sv).value());
 
   EXPECT_THROW(config.GetString("no-such-key"sv), wkc::KeyError);
+  EXPECT_FALSE(config.GetOptionalBoolean("no-such-key"sv).has_value());
 
   EXPECT_EQ("...", config.GetStringOr("no-such-key"sv, "..."sv));
 
   EXPECT_THROW(config.GetBoolean("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalBoolean("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger32("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger64("str"sv), wkc::TypeError);
 
   // Invalid access
   EXPECT_THROW(config.GetBoolean("int_list"sv), wkc::TypeError);
