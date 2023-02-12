@@ -45,7 +45,7 @@ TEST(ConfigTest, TypeUtils) {
 }
 
 TEST(ConfigTest, Integers) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     int32_1 = -123456
     int32_2 = +987654
     int32_max = 2147483647
@@ -107,7 +107,7 @@ TEST(ConfigTest, Integers) {
 }
 
 TEST(ConfigTest, FloatingPoint) {
-  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  auto config = wkc::LoadTOMLString(R"toml(
     int = 32
 
     flt1 = +1.0
@@ -157,7 +157,7 @@ TEST(ConfigTest, FloatingPoint) {
 }
 
 TEST(ConfigTest, QueryTypes) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     bool = true
     int = 42
     flt = 1.0
@@ -237,7 +237,7 @@ TEST(ConfigTest, QueryTypes) {
 
 TEST(ConfigTest, GetScalarTypes) {
   // TODO test date types
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     bool = true
     int = 42
     flt = 1.0
@@ -371,7 +371,7 @@ TEST(ConfigTest, GetScalarTypes) {
 }
 
 TEST(ConfigTest, SetScalarTypes1) {
-  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  auto config = wkc::LoadTOMLString(R"toml(
     bool = true
     int = 42
     a.string = "value"
@@ -436,7 +436,7 @@ TEST(ConfigTest, SetScalarTypes1) {
 }
 
 TEST(ConfigTest, SetScalarTypes2) {
-  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  auto config = wkc::LoadTOMLString(R"toml(
     integer = 12345
     string = "This is a string"
 
@@ -506,7 +506,7 @@ TEST(ConfigTest, Keys1) {
     tbl2.array = [1, 2, 3]
     )toml";
 
-  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
+  const auto config = wkc::LoadTOMLString(toml_str);
   const auto keys = config.ListParameterNames(false);
 
   std::istringstream iss(toml_str);
@@ -565,7 +565,7 @@ TEST(ConfigTest, Keys2) {
     [[tests]]
     param = "value"
     )toml";
-  const auto config = wkc::Configuration::LoadTOMLString(toml_str);
+  const auto config = wkc::LoadTOMLString(toml_str);
 
   // First, check without extracting the array keys.
   std::vector<std::string> expected_keys{"arr1",
@@ -759,7 +759,7 @@ inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
 // }
 
 TEST(ConfigTest, PointLists) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     str = "not a point list"
 
     poly1 = [[1, 2], [3, 4], [5, 6], [-7, -8]]
@@ -869,7 +869,7 @@ TEST(ConfigTest, PointLists) {
 }
 
 TEST(ConfigTest, ScalarLists) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     ints32 = [1, 2, 3, 4, 5, 6, -7, -8]
 
     ints64 = [0, 2147483647, 2147483648, -2147483648, -2147483649]
@@ -977,7 +977,7 @@ TEST(ConfigTest, ScalarLists) {
 }
 
 TEST(ConfigTest, Pairs) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     int_list = [1, 2, 3, 4]
 
     int32_pair = [1024, 768]
@@ -1033,7 +1033,7 @@ TEST(ConfigTest, Pairs) {
 }
 
 TEST(ConfigTest, GetGroup) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     str = "A string"
 
     [lvl1]
@@ -1083,7 +1083,7 @@ TEST(ConfigTest, GetGroup) {
 }
 
 TEST(ConfigTest, SetGroup) {
-  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  auto config = wkc::LoadTOMLString(R"toml(
     str = "A string"
 
     [lvl1]
@@ -1151,7 +1151,7 @@ TEST(ConfigTest, NestedTOML) {
            << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
            << "\" }]"sv;
 
-  auto config = wkc::Configuration::LoadTOMLString(toml_str.str());
+  auto config = wkc::LoadTOMLString(toml_str.str());
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("no-such-key"sv),
                wkc::KeyError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("integer"sv), wkc::TypeError);
@@ -1193,7 +1193,7 @@ TEST(ConfigTest, NestedTOML) {
 TEST(ConfigTest, AbsolutePaths) {
   const std::string fname =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv);
-  auto config = wkc::Configuration::LoadTOMLFile(fname);
+  auto config = wkc::LoadTOMLFile(fname);
 
   EXPECT_FALSE(config.AdjustRelativePaths("...", {"no-such-key"sv}));
   EXPECT_TRUE(
@@ -1218,7 +1218,7 @@ TEST(ConfigTest, AbsolutePaths) {
 }
 
 TEST(ConfigTest, StringReplacements) {
-  auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  auto config = wkc::LoadTOMLString(R"toml(
     str1 = ""
     str2 = "This is a test"
     str3 = "Hello world!"
@@ -1278,7 +1278,7 @@ TEST(ConfigTest, Construction) {
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
 
   // Force copy construction
-  auto config = wkc::Configuration::LoadTOMLFile(fname);
+  auto config = wkc::LoadTOMLFile(fname);
   wkc::Configuration copy{config};
 
   EXPECT_TRUE(config.Equals(copy));
@@ -1323,15 +1323,15 @@ TEST(ConfigTest, LoadingToml) {
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
 
   // Load valid TOML, then reload its string representation
-  const auto config1 = wkc::Configuration::LoadTOMLFile(fname);
-  const auto reloaded = wkc::Configuration::LoadTOMLString(config1.ToTOML());
+  const auto config1 = wkc::LoadTOMLFile(fname);
+  const auto reloaded = wkc::LoadTOMLString(config1.ToTOML());
   EXPECT_TRUE(config1.Equals(reloaded));
   EXPECT_TRUE(reloaded.Equals(config1));
   // Also the string representations should be equal
   EXPECT_EQ(config1.ToTOML(), reloaded.ToTOML());
 
   // Load a different configuration:
-  const auto config2 = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config2 = wkc::LoadTOMLString(R"toml(
     param1 = "value"
     param2 = "value"
 
@@ -1345,7 +1345,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_TRUE(config2.Equals(config2));
 
   // White space mustn't affect the equality check
-  auto config3 = wkc::Configuration::LoadTOMLString(R"toml(
+  auto config3 = wkc::LoadTOMLString(R"toml(
 
     param1 =     "value"
 
@@ -1361,7 +1361,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_TRUE(config3.Equals(config2));
 
   // Change the first string parameter
-  config3 = wkc::Configuration::LoadTOMLString(R"toml(
+  config3 = wkc::LoadTOMLString(R"toml(
     param1 = "value!"
     param2 = "value"
 
@@ -1372,7 +1372,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_FALSE(config3.Equals(config2));
 
   // Change the 3rd parameter type
-  config3 = wkc::Configuration::LoadTOMLString(R"toml(
+  config3 = wkc::LoadTOMLString(R"toml(
     param1 = "value"
     param2 = "value"
 
@@ -1382,7 +1382,7 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_FALSE(config2.Equals(config3));
   EXPECT_FALSE(config3.Equals(config2));
 
-  const auto empty = wkc::Configuration::LoadTOMLString(""sv);
+  const auto empty = wkc::LoadTOMLString(""sv);
   EXPECT_FALSE(empty.Equals(config1));
   EXPECT_FALSE(config1.Equals(empty));
 
@@ -1391,10 +1391,10 @@ TEST(ConfigTest, LoadingToml) {
   EXPECT_TRUE(empty.Equals(def));
 
   // Edge cases for TOML loading:
-  EXPECT_THROW(wkc::Configuration::LoadTOMLFile("this-does-not-exist.toml"sv),
+  EXPECT_THROW(wkc::LoadTOMLFile("this-does-not-exist.toml"sv),
                wkc::ParseError);
   try {
-    wkc::Configuration::LoadTOMLFile("this-does-not-exist.toml"sv);
+    wkc::LoadTOMLFile("this-does-not-exist.toml"sv);
   } catch (const wkc::ParseError &e) {
     const std::string exp_err{
         "Cannot open file. Check path: \"this-does-not-exist.toml\"."};
@@ -1403,10 +1403,9 @@ TEST(ConfigTest, LoadingToml) {
 
   const std::string fname_invalid =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml"sv);
-  EXPECT_THROW(wkc::Configuration::LoadTOMLFile(fname_invalid),
-               wkc::ParseError);
+  EXPECT_THROW(wkc::LoadTOMLFile(fname_invalid), wkc::ParseError);
   try {
-    wkc::Configuration::LoadTOMLFile(fname_invalid);
+    wkc::LoadTOMLFile(fname_invalid);
     EXPECT_TRUE(false);
   } catch (const wkc::ParseError &e) {
     EXPECT_TRUE(wks::StartsWith(e.what(), "Error while parsing value: "sv))
@@ -1416,7 +1415,7 @@ TEST(ConfigTest, LoadingToml) {
 
 // TODO Can be properly tested once we have LoadJSONString()
 TEST(ConfigTest, LoadingJson) {
-  const auto config = wkc::Configuration::LoadTOMLString(R"toml(
+  const auto config = wkc::LoadTOMLString(R"toml(
     param1 = "value"
     )toml"sv);
   EXPECT_TRUE(config.ToJSON().length() > 0);

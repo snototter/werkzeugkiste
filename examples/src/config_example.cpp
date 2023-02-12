@@ -78,13 +78,13 @@ int main(int /* argc */, char ** /* argv */) {
             << config.GetDoubleOr("no.such.key", 42) << std::endl;
 
   try {
-    config = wkc::Configuration::LoadTOMLFile("no-such-file.toml");
+    config = wkc::LoadTOMLFile("no-such-file.toml");
   } catch (const wkc::ParseError &e) {
     std::cout << e.what() << std::endl;
   }
 
-  config = wkc::Configuration::LoadTOMLFile(
-      wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
+  config =
+      wkc::LoadTOMLFile(wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
   const auto params = config.ListParameterNames(false);
   std::cout << "Parameter names:\n";
   for (const auto &name : params) {

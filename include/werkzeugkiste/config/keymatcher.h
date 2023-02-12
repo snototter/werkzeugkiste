@@ -1,22 +1,13 @@
-#ifndef WERKZEUGKISTE_CONFIG_CONFIGURATION_H
-#define WERKZEUGKISTE_CONFIG_CONFIGURATION_H
+#ifndef WERKZEUGKISTE_CONFIG_KEYMATCHER_H
+#define WERKZEUGKISTE_CONFIG_KEYMATCHER_H
 
 #include <werkzeugkiste/config/config_export.h>
-#include <werkzeugkiste/config/types.h>
 
-#include <cmath>
 #include <initializer_list>
 #include <limits>
 #include <memory>
-#include <optional>
-#include <ostream>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <tuple>
-#include <type_traits>
-#include <utility>
 #include <vector>
 
 /// Utilities to handle configurations.
