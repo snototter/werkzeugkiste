@@ -97,9 +97,8 @@ T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
       WZK_RAISE_NUMBER_PARSE_ERROR(parsed, min_val, max_val, DT);
     }
     return CheckedCast<T, int, ParseError>(parsed);
-  } catch (const std::invalid_argument &e) {
-    throw ParseError{e.what()};
-  } catch (const std::out_of_range &e) {
+  } catch (const std::logic_error &e) {
+    // All exceptions thrown within stoi are derived from logic_error
     throw ParseError{e.what()};
   }
 }
