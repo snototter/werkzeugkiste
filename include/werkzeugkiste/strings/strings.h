@@ -91,9 +91,19 @@ WERKZEUGKISTE_STRINGS_EXPORT
 bool IsNumeric(const std::string& s);
 
 /// Tokenizes the string by the given delimiter.
+///
+/// Note that an empty trailing token will be skipped.
+/// For example: Split("a-b-c", '-') returns the same 3 tokens (namely,
+/// "a", "b" and "c") as Split("a-b-c-", '-'). For "a-b-c--", however,
+/// "a", "b", "c" and "" would be returned.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::vector<std::string> Split(std::string_view s, char delim);
 
+/// Tokenizes the string by the given delimiter.
+///
+/// Note that empty tokens will be skipped.
+/// For example: Tokenize("a-b-c", "-") returns the same 3 tokens (namely,
+/// "a", "b" and "c") as Tokenize("a-b-c-", "-") and also "-a-b-c--".
 WERKZEUGKISTE_STRINGS_EXPORT
 std::vector<std::string_view> Tokenize(std::string_view s,
                                        std::string_view delim);

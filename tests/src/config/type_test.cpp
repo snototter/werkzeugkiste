@@ -55,10 +55,12 @@ TEST(ConfigTest, DateParsing) {
 
   // Most common format: Y-m-d
   EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date::FromString("2023-02-28"));
+  // A trailing delimiter will be ignored
+  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date::FromString("2023-02-28-"));
+
   EXPECT_THROW(wkc::date::FromString("2023-1"), wkc::ParseError);
   EXPECT_THROW(wkc::date::FromString("2023-1-"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("2023-1-2-"),
-               wkc::ParseError);  // TODO check tokenizer
+  EXPECT_THROW(wkc::date::FromString("2023-1-2--"), wkc::ParseError);
   EXPECT_THROW(wkc::date::FromString("-2023-1-2-"), wkc::ParseError);
   EXPECT_THROW(wkc::date::FromString("invalid"), wkc::ParseError);
   EXPECT_THROW(wkc::date::FromString("invalid-"), wkc::ParseError);
@@ -74,8 +76,11 @@ TEST(ConfigTest, DateParsing) {
 
   // We also commonly use: d.m.Y
   EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date::FromString("01.03.2020"));
+  // A trailing delimiter will be ignored
+  EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date::FromString("01.03.2020."));
+
   EXPECT_THROW(wkc::date::FromString("1.2."), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("1.2.2023."), wkc::ParseError);
+  EXPECT_THROW(wkc::date::FromString("1.2.2023.."), wkc::ParseError);
   EXPECT_THROW(wkc::date::FromString(".1.2.2023."), wkc::ParseError);
   EXPECT_THROW(wkc::date::FromString("invalid"), wkc::ParseError);
   EXPECT_THROW(wkc::date::FromString("invalid."), wkc::ParseError);

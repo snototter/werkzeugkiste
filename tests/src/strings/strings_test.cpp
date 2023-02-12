@@ -37,31 +37,31 @@ TEST(StringUtilsTest, Prefix) {
 }
 
 TEST(StringUtilsTest, CaseConversion) {
-  EXPECT_EQ(wks::Upper("abcdefghijklmnopqrstuvwxyz"),
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  EXPECT_EQ(wks::Upper("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-  EXPECT_EQ(wks::Upper("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"),
-            "1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>");
+  EXPECT_EQ("ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            wks::Upper("abcdefghijklmnopqrstuvwxyz"));
+  EXPECT_EQ("ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            wks::Upper("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+  EXPECT_EQ("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>",
+            wks::Upper("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"));
 
-  EXPECT_EQ(wks::Lower("abcdefghijklmnopqrstuvwxyz"),
-            "abcdefghijklmnopqrstuvwxyz");
-  EXPECT_EQ(wks::Lower("ABCDEFGHIJKLMNOPQRSTUVWXYZ"),
-            "abcdefghijklmnopqrstuvwxyz");
-  EXPECT_EQ(wks::Lower("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"),
-            "1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>");
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz",
+            wks::Lower("abcdefghijklmnopqrstuvwxyz"));
+  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz",
+            wks::Lower("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+  EXPECT_EQ("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>",
+            wks::Lower("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"));
 }
 
 TEST(StringUtilsTest, Trimming) {
   // Tab \t, Line feed \n, vertical tab \v, form feed \f, space, ...
-  EXPECT_EQ(wks::Trim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"),
-            "abc \t\r\n\v\f123");
+  EXPECT_EQ("abc \t\r\n\v\f123",
+            wks::Trim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
 
-  EXPECT_EQ(wks::LTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"),
-            "abc \t\r\n\v\f123 \t\r\n\v\f");
+  EXPECT_EQ("abc \t\r\n\v\f123 \t\r\n\v\f",
+            wks::LTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
 
-  EXPECT_EQ(wks::RTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"),
-            " \t\r\n\v\fabc \t\r\n\v\f123");
+  EXPECT_EQ(" \t\r\n\v\fabc \t\r\n\v\f123",
+            wks::RTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
 }
 
 TEST(StringUtilsTest, IsNumeric) {
@@ -93,18 +93,84 @@ TEST(StringUtilsTest, IsNumeric) {
 
 TEST(StringUtilsTest, Tokenize) {
   auto tokens = wks::Split("A;Line ;\tto;be;split ;;", ';');
-  EXPECT_EQ(tokens.size(), 6);
-  EXPECT_EQ(tokens[0], "A");
-  EXPECT_EQ(tokens[1], "Line ");
-  EXPECT_EQ(tokens[2], "\tto");
-  EXPECT_EQ(tokens[3], "be");
-  EXPECT_EQ(tokens[4], "split ");
+  EXPECT_EQ(6, tokens.size());
+  EXPECT_EQ("A", tokens[0]);
+  EXPECT_EQ("Line ", tokens[1]);
+  EXPECT_EQ("\tto", tokens[2]);
+  EXPECT_EQ("be", tokens[3]);
+  EXPECT_EQ("split ", tokens[4]);
   EXPECT_TRUE(tokens[5].empty());
 
   auto s = "Another;string;for;tokenization;";
   tokens = wks::Split(s, '!');
-  EXPECT_EQ(tokens.size(), 1);
-  EXPECT_EQ(tokens[0], s);
+  EXPECT_EQ(1, tokens.size());
+  EXPECT_EQ(s, tokens[0]);
+
+  // Split
+  auto tokens_spl = wks::Split("a-b", '-');
+  EXPECT_EQ(2, tokens_spl.size());
+  EXPECT_EQ("a", tokens_spl[0]);
+  EXPECT_EQ("b", tokens_spl[1]);
+  // `Split` skips the FINAL empty token
+  tokens_spl = wks::Split("a-b-", '-');
+  EXPECT_EQ(2, tokens_spl.size());
+  EXPECT_EQ("a", tokens_spl[0]);
+  EXPECT_EQ("b", tokens_spl[1]);
+  // But *only* the last
+  tokens_spl = wks::Split("-a--b--", '-');
+  EXPECT_EQ(5, tokens_spl.size());
+  EXPECT_TRUE(tokens_spl[0].empty());
+  EXPECT_EQ("a", tokens_spl[1]);
+  EXPECT_TRUE(tokens_spl[2].empty());
+  EXPECT_EQ("b", tokens_spl[3]);
+  EXPECT_TRUE(tokens_spl[4].empty());
+
+  // Tokenize
+  auto tokens_tok = wks::Tokenize("a-b", "-");
+  EXPECT_EQ(2, tokens_tok.size());
+  EXPECT_EQ("a", tokens_tok[0]);
+  EXPECT_EQ("b", tokens_tok[1]);
+  // `Tokenize` skips ALL empty tokens
+  tokens_tok = wks::Tokenize("a-b-", "-");
+  EXPECT_EQ(2, tokens_tok.size());
+  EXPECT_EQ("a", tokens_tok[0]);
+  EXPECT_EQ("b", tokens_tok[1]);
+
+  tokens_tok = wks::Tokenize("-a--b--", "-");
+  EXPECT_EQ(2, tokens_tok.size());
+  EXPECT_EQ("a", tokens_tok[0]);
+  EXPECT_EQ("b", tokens_tok[1]);
+
+  // Beware of the different behaviors:
+  tokens_spl = wks::Split("1.2.3", '.');
+  tokens_tok = wks::Tokenize("1.2.3", ".");
+  EXPECT_EQ(3, tokens_spl.size()) << Stringify(tokens_spl);
+  EXPECT_EQ(3, tokens_tok.size()) << Stringify(tokens_tok);
+
+  tokens_spl = wks::Split("1..2.3", '.');
+  tokens_tok = wks::Tokenize("1..2.3", ".");
+  EXPECT_EQ(4, tokens_spl.size()) << Stringify(tokens_spl);
+  EXPECT_EQ(3, tokens_tok.size()) << Stringify(tokens_tok);
+
+  tokens_spl = wks::Split(".1.2.3", '.');
+  tokens_tok = wks::Tokenize(".1.2.3", ".");
+  EXPECT_EQ(4, tokens_spl.size()) << Stringify(tokens_spl);
+  EXPECT_EQ(3, tokens_tok.size()) << Stringify(tokens_tok);
+
+  tokens_spl = wks::Split("1.2.3.", '.');
+  tokens_tok = wks::Tokenize("1.2.3.", ".");
+  EXPECT_EQ(3, tokens_spl.size()) << Stringify(tokens_spl);
+  EXPECT_EQ(3, tokens_tok.size()) << Stringify(tokens_tok);
+
+  tokens_spl = wks::Split("1.2.3..", '.');
+  tokens_tok = wks::Tokenize("1.2.3..", ".");
+  EXPECT_EQ(4, tokens_spl.size()) << Stringify(tokens_spl);
+  EXPECT_EQ(3, tokens_tok.size()) << Stringify(tokens_tok);
+
+  tokens_spl = wks::Split("1.2.3.4", '.');
+  tokens_tok = wks::Tokenize("1.2.3.4", ".");
+  EXPECT_EQ(4, tokens_spl.size()) << Stringify(tokens_spl);
+  EXPECT_EQ(4, tokens_tok.size()) << Stringify(tokens_tok);
 }
 
 TEST(StringUtilsTest, Replace) {
@@ -113,35 +179,36 @@ TEST(StringUtilsTest, Replace) {
   EXPECT_TRUE(wks::Replace("", "", "def").empty());
 
   // Nothing changes if search string is empty
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "", "!!!!!"), "ABC123abc;:_");
+  EXPECT_EQ("ABC123abc;:_", wks::Replace("ABC123abc;:_", "", "!!!!!"));
 
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "a", "!!"), "ABC123!!bc;:_");
+  EXPECT_EQ("ABC123!!bc;:_", wks::Replace("ABC123abc;:_", "a", "!!"));
 
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "abcdef", "!!"), "ABC123abc;:_");
+  EXPECT_EQ("ABC123abc;:_", wks::Replace("ABC123abc;:_", "abcdef", "!!"));
 
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "BC", ""), "A123abc;:_");
+  EXPECT_EQ("A123abc;:_", wks::Replace("ABC123abc;:_", "BC", ""));
 
   // All occurrences should be replaced
-  EXPECT_EQ(wks::Replace("ABC123abc123ABC123abc123", "BC", ".."),
-            "A..123abc123A..123abc123");
+  EXPECT_EQ("A..123abc123A..123abc123",
+            wks::Replace("ABC123abc123ABC123abc123", "BC", ".."));
 
   // Use 'Replace' to 'Remove' a substring
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", "bc", ""), "ABC123a;:_");
+  EXPECT_EQ("ABC123a;:_", wks::Replace("ABC123abc;:_", "bc", ""));
 
   // Also, the character-only version should be tested
-  EXPECT_EQ(wks::Replace("ABC123abc;:_", 'a', '0'), "ABC1230bc;:_");
+  EXPECT_EQ("ABC1230bc;:_", wks::Replace("ABC123abc;:_", 'a', '0'));
 
-  EXPECT_EQ(wks::Replace("ABC1A3abc;:_", 'A', '!'), "!BC1!3abc;:_");
+  EXPECT_EQ("!BC1!3abc;:_", wks::Replace("ABC1A3abc;:_", 'A', '!'));
 }
 
 TEST(StringUtilsTest, Remove) {
-  EXPECT_EQ(wks::Remove("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>", '\\'),
-            "1234567890+*~#'-_.:,;´`?}=])[({/&%$§3!^°@<|>");
+  EXPECT_EQ(
+      "1234567890+*~#'-_.:,;´`?}=])[({/&%$§3!^°@<|>",
+      wks::Remove("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>", '\\'));
 
-  EXPECT_EQ(wks::Remove("abcDEFghiABCdefGHIabc", 'a'), "bcDEFghiABCdefGHIbc");
+  EXPECT_EQ("bcDEFghiABCdefGHIbc", wks::Remove("abcDEFghiABCdefGHIabc", 'a'));
 
-  EXPECT_EQ(wks::Remove("abcDEFghiABCdefGHIabc", {'a', 'b', 'C'}),
-            "cDEFghiABdefGHIc");
+  EXPECT_EQ("cDEFghiABdefGHIc",
+            wks::Remove("abcDEFghiABCdefGHIabc", {'a', 'b', 'C'}));
 }
 
 TEST(StringUtilsTest, URL) {
@@ -150,75 +217,75 @@ TEST(StringUtilsTest, URL) {
   // load a camera's SDP description)
   std::string protocol, remainder;
   EXPECT_TRUE(wks::GetUrlProtocol("file://foo.txt", protocol, remainder));
-  EXPECT_EQ(protocol, "file://");
-  EXPECT_EQ(remainder, "foo.txt");
+  EXPECT_EQ("file://", protocol);
+  EXPECT_EQ("foo.txt", remainder);
 
   EXPECT_TRUE(wks::GetUrlProtocol("UnChecked://SomeU.R.I:?asdf=foo", protocol,
                                   remainder));
-  EXPECT_EQ(protocol, "UnChecked://");
-  EXPECT_EQ(remainder, "SomeU.R.I:?asdf=foo");
+  EXPECT_EQ("UnChecked://", protocol);
+  EXPECT_EQ("SomeU.R.I:?asdf=foo", remainder);
 
   EXPECT_FALSE(wks::GetUrlProtocol("foo.txt", protocol, remainder));
   EXPECT_TRUE(protocol.empty());
-  EXPECT_EQ(remainder, "foo.txt");
+  EXPECT_EQ("foo.txt", remainder);
 
   // When logging connection strings, I want to hide
   // any potential authentication information (but still
   // know that it was actually provided in the URL string):
-  EXPECT_EQ(wks::ObscureUrlAuthentication("file://foobar"), "file://foobar");
+  EXPECT_EQ("file://foobar", wks::ObscureUrlAuthentication("file://foobar"));
 
-  EXPECT_EQ(wks::ObscureUrlAuthentication("http://user:pass@foo.bar"),
-            "http://<auth>@foo.bar");
+  EXPECT_EQ("http://<auth>@foo.bar",
+            wks::ObscureUrlAuthentication("http://user:pass@foo.bar"));
 
-  EXPECT_EQ(wks::ObscureUrlAuthentication("rtsp://user:pass@foo.bar:12345"),
-            "rtsp://<auth>@foo.bar:12345");
+  EXPECT_EQ("rtsp://<auth>@foo.bar:12345",
+            wks::ObscureUrlAuthentication("rtsp://user:pass@foo.bar:12345"));
 
   EXPECT_EQ(
-      wks::ObscureUrlAuthentication("https://user@192.168.0.1:8080/cam.cgi"),
-      "https://<auth>@192.168.0.1:8080/cam.cgi");
+      "https://<auth>@192.168.0.1:8080/cam.cgi",
+      wks::ObscureUrlAuthentication("https://user@192.168.0.1:8080/cam.cgi"));
 
-  EXPECT_EQ(wks::ObscureUrlAuthentication("user:pass@some.thing:12345"),
-            "<auth>@some.thing:12345");
+  EXPECT_EQ("<auth>@some.thing:12345",
+            wks::ObscureUrlAuthentication("user:pass@some.thing:12345"));
 
   // If we want to strip the subpaths and parameters of a URL:
-  EXPECT_EQ(wks::ClipUrl("https://root@192.168.0.1:8080/cam.cgi"),
-            "https://<auth>@192.168.0.1:8080");
+  EXPECT_EQ("https://<auth>@192.168.0.1:8080",
+            wks::ClipUrl("https://root@192.168.0.1:8080/cam.cgi"));
 
-  EXPECT_EQ(wks::ClipUrl("https://192.168.0.1:8080?image=still&overlay=off"),
-            "https://192.168.0.1:8080");
+  EXPECT_EQ("https://192.168.0.1:8080",
+            wks::ClipUrl("https://192.168.0.1:8080?image=still&overlay=off"));
 
-  EXPECT_EQ(wks::ClipUrl("file:///a/file/needs/special/handling.txt"),
-            "file:///a/file/needs/special/handling.txt");
+  EXPECT_EQ("file:///a/file/needs/special/handling.txt",
+            wks::ClipUrl("file:///a/file/needs/special/handling.txt"));
 }
 
 TEST(StringUtilsTest, Slug) {
-  EXPECT_EQ(wks::Slug("nothing-to-be-slugged"), "nothing-to-be-slugged");
+  EXPECT_EQ("nothing-to-be-slugged", wks::Slug("nothing-to-be-slugged"));
 
-  EXPECT_EQ(wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "),
-            "replace-some-spaces-and-underscores");
+  EXPECT_EQ("replace-some-spaces-and-underscores",
+            wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "));
 
-  EXPECT_EQ(wks::Slug(" \r\n\t\v\f"), "");
-  EXPECT_EQ(wks::Slug("a \r\n\t\v\f"), "a");
-  EXPECT_EQ(wks::Slug(" \r\n\t\v\fb"), "b");
-  EXPECT_EQ(wks::Slug("A \r\n\t\v\fB"), "a-b");
+  EXPECT_EQ("", wks::Slug(" \r\n\t\v\f"));
+  EXPECT_EQ("a", wks::Slug("a \r\n\t\v\f"));
+  EXPECT_EQ("b", wks::Slug(" \r\n\t\v\fb"));
+  EXPECT_EQ("a-b", wks::Slug("A \r\n\t\v\fB"));
 
-  EXPECT_EQ(wks::Slug("#2 \u00b123%"), "nr2-pm23pc");
+  EXPECT_EQ("nr2-pm23pc", wks::Slug("#2 \u00b123%"));
   EXPECT_TRUE(wks::Slug(":?`!").empty());
   EXPECT_TRUE(wks::Slug("").empty());
 
-  EXPECT_EQ(wks::Slug("Österreich!"), "oesterreich");
-  EXPECT_EQ(wks::Slug("€   $ \t \n µ   \t"), "euro-dollar-mu");
-  EXPECT_EQ(wks::Slug("ÄäÖöÜü"), "aeaeoeoeueue");
+  EXPECT_EQ("oesterreich", wks::Slug("Österreich!"));
+  EXPECT_EQ("euro-dollar-mu", wks::Slug("€   $ \t \n µ   \t"));
+  EXPECT_EQ("aeaeoeoeueue", wks::Slug("ÄäÖöÜü"));
 
   // TODO test all replacement characters!
 }
 
 TEST(StringUtilsTest, Shorten) {
   // Edge cases: empty & desired length 0 or longer than string
-  EXPECT_EQ(wks::Shorten("", 4), "");
-  EXPECT_EQ(wks::Shorten("abc", 0), "");
-  EXPECT_EQ(wks::Shorten("abc", 3), "abc");
-  EXPECT_EQ(wks::Shorten("abc", 10), "abc");
+  EXPECT_EQ("", wks::Shorten("", 4));
+  EXPECT_EQ("", wks::Shorten("abc", 0));
+  EXPECT_EQ("abc", wks::Shorten("abc", 3));
+  EXPECT_EQ("abc", wks::Shorten("abc", 10));
 
   // Desired length shorter than (custom) ellipsis
   EXPECT_THROW(wks::Shorten("abc", 2), std::invalid_argument);
@@ -226,28 +293,28 @@ TEST(StringUtilsTest, Shorten) {
                std::invalid_argument);
 
   // Ellipsis left
-  EXPECT_EQ(wks::Shorten("0123456789", 3, -1), "...");
-  EXPECT_EQ(wks::Shorten("0123456789", 4, -1), "...9");
-  EXPECT_EQ(wks::Shorten("0123456789", 5, -1), "...89");
-  EXPECT_EQ(wks::Shorten("0123456789", 4, -1, "_"), "_789");
-  EXPECT_EQ(wks::Shorten("0123456789", 5, -1, "_"), "_6789");
+  EXPECT_EQ("...", wks::Shorten("0123456789", 3, -1));
+  EXPECT_EQ("...9", wks::Shorten("0123456789", 4, -1));
+  EXPECT_EQ("...89", wks::Shorten("0123456789", 5, -1));
+  EXPECT_EQ("_789", wks::Shorten("0123456789", 4, -1, "_"));
+  EXPECT_EQ("_6789", wks::Shorten("0123456789", 5, -1, "_"));
 
   // Ellipsis centered
-  EXPECT_EQ(wks::Shorten("0123456789", 3, 0), "...");
-  EXPECT_EQ(wks::Shorten("0123456789", 4, 0), "...9");
-  EXPECT_EQ(wks::Shorten("0123456789", 5, 0), "0...9");
-  EXPECT_EQ(wks::Shorten("0123456789", 1, 0, "_"), "_");
-  EXPECT_EQ(wks::Shorten("0123456789", 2, 0, "_"), "_9");
-  EXPECT_EQ(wks::Shorten("0123456789", 3, 0, "_"), "0_9");
-  EXPECT_EQ(wks::Shorten("0123456789", 4, 0, "_"), "0_89");
-  EXPECT_EQ(wks::Shorten("0123456789", 5, 0, "_"), "01_89");
+  EXPECT_EQ("...", wks::Shorten("0123456789", 3, 0));
+  EXPECT_EQ("...9", wks::Shorten("0123456789", 4, 0));
+  EXPECT_EQ("0...9", wks::Shorten("0123456789", 5, 0));
+  EXPECT_EQ("_", wks::Shorten("0123456789", 1, 0, "_"));
+  EXPECT_EQ("_9", wks::Shorten("0123456789", 2, 0, "_"));
+  EXPECT_EQ("0_9", wks::Shorten("0123456789", 3, 0, "_"));
+  EXPECT_EQ("0_89", wks::Shorten("0123456789", 4, 0, "_"));
+  EXPECT_EQ("01_89", wks::Shorten("0123456789", 5, 0, "_"));
 
   // Ellipsis right
-  EXPECT_EQ(wks::Shorten("0123456789", 3, 1), "...");
-  EXPECT_EQ(wks::Shorten("0123456789", 4, 1), "0...");
-  EXPECT_EQ(wks::Shorten("0123456789", 5, 1), "01...");
-  EXPECT_EQ(wks::Shorten("0123456789", 4, 1, "_"), "012_");
-  EXPECT_EQ(wks::Shorten("0123456789", 5, 1, "_"), "0123_");
+  EXPECT_EQ("...", wks::Shorten("0123456789", 3, 1));
+  EXPECT_EQ("0...", wks::Shorten("0123456789", 4, 1));
+  EXPECT_EQ("01...", wks::Shorten("0123456789", 5, 1));
+  EXPECT_EQ("012_", wks::Shorten("0123456789", 4, 1, "_"));
+  EXPECT_EQ("0123_", wks::Shorten("0123456789", 5, 1, "_"));
 }
 
 // NOLINTEND
