@@ -72,6 +72,14 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
 
+  /// Parses a date.
+  ///
+  /// Supported formats are:
+  /// * Y-m-d
+  /// * d.m.Y
+  /// TODO check if we should add others.
+  static date FromString(std::string_view str);
+
   bool operator==(const date &other) const;
   bool operator!=(const date &other) const;
   bool operator<(const date &other) const;
