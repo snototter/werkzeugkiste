@@ -64,6 +64,12 @@ constexpr bool IsPromotable() {
     return true;
   }
 
+  // We allow C-style bool conversion, i.e. 0 is false, any other
+  // value is true.
+  if constexpr (std::is_same_v<T, bool>) {
+    return true;
+  }
+
   using src_limits = std::numeric_limits<S>;
   using tgt_limits = std::numeric_limits<T>;
 
@@ -75,12 +81,6 @@ constexpr bool IsPromotable() {
   if constexpr (are_integral_v<T, S> &&
                 (tgt_limits::is_signed == src_limits::is_signed)) {
     return (tgt_limits::digits >= src_limits::digits);
-  }
-
-  // We allow C-style bool conversion, i.e. 0 is false, any other
-  // value is true.
-  if constexpr (std::is_same_v<S, bool>) {
-    return true;
   }
 
   return false;

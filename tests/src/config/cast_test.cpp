@@ -43,6 +43,31 @@ TEST(CastTest, Static) {
 
   auto range = wkc::detail::RangeForFloatingToIntegralCast<int8_t, float>();
   EXPECT_DOUBLE_EQ(-wkc::detail::exp2<float>(7), range.first);
+
+  // To increase the coverage, we also need to perform these checks at runtime
+  bool val = wkc::IsPromotable<int, int>();
+  EXPECT_TRUE(val);
+  val = wkc::IsPromotable<float, double>();
+  EXPECT_TRUE(val);
+  val = wkc::IsPromotable<long double, float>();
+  EXPECT_FALSE(val);
+
+  val = wkc::IsPromotable<int8_t, int16_t>();
+  EXPECT_TRUE(val);
+  val = wkc::IsPromotable<uint8_t, uint16_t>();
+  EXPECT_TRUE(val);
+
+  val = wkc::IsPromotable<int32_t, int16_t>();
+  EXPECT_FALSE(val);
+  val = wkc::IsPromotable<uint32_t, uint16_t>();
+  EXPECT_FALSE(val);
+
+  val = wkc::IsPromotable<bool, uint8_t>();
+  EXPECT_TRUE(val);
+
+  // C-style bool conversion is allowed
+  val = wkc::IsPromotable<uint8_t, bool>();
+  EXPECT_TRUE(val);
 }
 
 TEST(CastTest, Boolean) {
@@ -123,10 +148,21 @@ TEST(CastTest, Integral) {
   EXPECT_EQ(127, wkc::CheckedCast<uint16_t>(static_cast<int8_t>(127)));
 
   // (5) From unsigned to signed, narrowing:
-  // TODO
+  EXPECT_EQ(127, wkc::CheckedCast<int8_t>(static_cast<uint8_t>(127)));
+  EXPECT_EQ(127, wkc::CheckedCast<int8_t>(static_cast<uint16_t>(127)));
+  EXPECT_EQ(0, wkc::CheckedCast<int8_t>(static_cast<uint16_t>(0)));
+  EXPECT_THROW(wkc::CheckedCast<int8_t>(static_cast<uint8_t>(255)),
+               std::domain_error);
+  EXPECT_THROW(wkc::CheckedCast<int8_t>(static_cast<uint32_t>(1000)),
+               std::domain_error);
+  EXPECT_THROW(wkc::CheckedCast<int16_t>(static_cast<uint32_t>(100000)),
+               std::domain_error);
 
   // (6) From unsigned to signed, widening/promotion:
-  // TODO
+  EXPECT_EQ(127, wkc::CheckedCast<int16_t>(static_cast<uint16_t>(127)));
+  EXPECT_EQ(1000, wkc::CheckedCast<int32_t>(static_cast<uint16_t>(1000)));
+  EXPECT_EQ(0, wkc::CheckedCast<int32_t>(static_cast<uint16_t>(0)));
+  EXPECT_EQ(12345L, wkc::CheckedCast<long>(static_cast<uint16_t>(12345)));
 
   // (7) From unsigned to unsigned, narrowing cast:
   EXPECT_EQ(0, wkc::CheckedCast<uint8_t>(0UL));
@@ -149,6 +185,24 @@ TEST(CastTest, FloatingPoint) {
   EXPECT_DOUBLE_EQ(24.0F, wkc::CheckedCast<float>(24.0L));
 
   // TODO Extend with edge cases!
+  using dbl_limits = std::numeric_limits<double>;
+  EXPECT_TRUE(std::isnan(wkc::CheckedCast<float>(dbl_limits::quiet_NaN())));
+  EXPECT_TRUE(std::isnan(wkc::CheckedCast<double>(dbl_limits::quiet_NaN())));
+  EXPECT_TRUE(std::isinf(wkc::CheckedCast<float>(dbl_limits::infinity())));
+  EXPECT_GT(wkc::CheckedCast<float>(dbl_limits::infinity()), 0.0F);
+  EXPECT_LT(wkc::CheckedCast<float>(-dbl_limits::infinity()), 0.0F);
+
+  float flt_val = std::numeric_limits<float>::lowest();
+  double dbl_val = static_cast<double>(flt_val);
+  EXPECT_DOUBLE_EQ(flt_val, wkc::CheckedCast<float>(dbl_val));
+
+  flt_val = std::numeric_limits<float>::max();
+  dbl_val = static_cast<double>(flt_val);
+  EXPECT_DOUBLE_EQ(flt_val, wkc::CheckedCast<float>(dbl_val));
+
+  EXPECT_THROW(wkc::CheckedCast<float>(dbl_limits::max()), std::domain_error);
+  EXPECT_THROW(wkc::CheckedCast<float>(dbl_limits::lowest()),
+               std::domain_error);
 }
 
 TEST(CastTest, FloatingToIntegral) {
