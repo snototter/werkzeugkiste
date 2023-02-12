@@ -196,6 +196,15 @@ int main(int /* argc */, char ** /* argv */) {
   CastingCheck<float>(3.141592653589793238462643383279502884L);
   CastingCheck<float>(1.0005);
 
+  //---------------------------------------------------------------------------
+  // Type example
+  std::cout << "Parsing time representations:\n"
+            << wkc::time::FromString("08:30") << "\n"
+            << wkc::time::FromString("23:59:59") << "\n"
+            << wkc::time::FromString("23:59:59.123") << "\n"
+            << wkc::time::FromString("23:59:59.123456") << "\n"
+            << wkc::time::FromString("23:59:59.123456789") << std::endl;
+
   return 0;
 }
 // NOLINTEND(*magic-numbers)

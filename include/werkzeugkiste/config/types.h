@@ -72,6 +72,14 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
 
+  /// Parses a date.
+  ///
+  /// Supported formats are:
+  /// * Y-m-d
+  /// * d.m.Y
+  /// TODO check if we should add others.
+  static date FromString(std::string_view str);
+
   bool operator==(const date &other) const;
   bool operator!=(const date &other) const;
   bool operator<(const date &other) const;
@@ -117,6 +125,16 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 
   /// Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
+
+  /// Parses a time.
+  ///
+  /// Supported formats are:
+  /// * HH:MM
+  /// * HH:MM:SS
+  /// * HH:MM:SS.sss (for milliseconds)
+  /// * HH:MM:SS.ssssss (for microseconds)
+  /// * HH:MM:SS.sssssssss (for nanoseconds)
+  static time FromString(std::string_view str);
 
   bool operator==(const time &other) const;
   bool operator!=(const time &other) const;

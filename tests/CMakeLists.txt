@@ -41,6 +41,7 @@ add_executable(
   src/test_utils.cpp
   src/config/config_test.cpp
   src/config/cast_test.cpp
+  src/config/type_test.cpp
   src/geometry/utils_test.cpp
   src/geometry/projection_test.cpp
   src/geometry/primitives_test.cpp
