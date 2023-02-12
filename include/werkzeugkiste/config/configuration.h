@@ -260,6 +260,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
 /// @brief Loads a TOML configuration from the given file.
 /// @param filename Path to the `.toml` file.
+WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadTOMLFile(std::string_view filename);
 
 /// @brief Loads a TOML configuration from a string.
@@ -268,6 +269,7 @@ Configuration LoadTOMLFile(std::string_view filename);
 /// for convenience only.
 ///
 /// @param toml_string String representation of the TOML config.
+WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadTOMLString(std::string_view toml_string);
 
 }  // namespace werkzeugkiste::config
