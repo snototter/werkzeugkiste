@@ -415,6 +415,9 @@ void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
   const auto path = SplitTomlPath(key);
   if (ConfigContainsKey(tbl, key)) {
     const auto node = tbl.at_path(key);
+
+    // TODO For int<->double, try casting, similar to CastScalar/LookupScalar
+
     if (!node.is<T>()) {
       std::string msg{"Changing the type is not allowed. Parameter `"};
       msg += key;
