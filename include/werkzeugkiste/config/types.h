@@ -126,6 +126,16 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   /// Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
 
+  /// Parses a time.
+  ///
+  /// Supported formats are:
+  /// * HH:MM
+  /// * HH:MM:SS
+  /// * HH:MM:SS.sss (for milliseconds)
+  /// * HH:MM:SS.ssssss (for microseconds)
+  /// * HH:MM:SS.sssssssss (for nanoseconds)
+  static time FromString(std::string_view str);
+
   bool operator==(const time &other) const;
   bool operator!=(const time &other) const;
   bool operator<(const time &other) const;
