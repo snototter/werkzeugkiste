@@ -894,15 +894,16 @@ ConfigType Configuration::Type(std::string_view key) const {
     case toml::node_type::date:
       return ConfigType::Date;
 
-      // TODO date, time, date_time
+    case toml::node_type::time:
+      return ConfigType::Time;
 
-    default: {
-      std::string msg{"TOML node type `"};
-      msg += utils::TomlTypeName(nv, key);
-      msg += "` is not yet handled in `Configuration::Type`!";
-      throw std::logic_error(msg);
-    }
+      // TODO date_time
   }
+
+  std::string msg{"TOML node type `"};
+  msg += utils::TomlTypeName(nv, key);
+  msg += "` is not yet handled in `Configuration::Type`!";
+  throw std::logic_error(msg);
 }
 
 std::vector<std::string> Configuration::ListParameterNames(
