@@ -1,5 +1,6 @@
 #include <werkzeugkiste/config/keymatcher.h>
 
+#include <algorithm>
 #include <optional>
 #include <regex>
 #include <utility>  // pair, swap
