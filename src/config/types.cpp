@@ -4,6 +4,7 @@
 #include <werkzeugkiste/logging.h>
 #include <werkzeugkiste/strings/strings.h>
 
+#include <algorithm>
 #include <cctype>
 #include <iomanip>
 #include <sstream>
