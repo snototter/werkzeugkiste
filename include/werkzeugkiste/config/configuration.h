@@ -98,10 +98,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   Configuration(Configuration &&other) noexcept;
   Configuration &operator=(Configuration &&other) noexcept;
 
-  /// @brief Loads a TOML configuration from the given file.
-  /// @param filename Path to the `.toml` file.
-  static Configuration LoadTOMLFile(std::string_view filename);
-
   /// @brief Loads a TOML configuration from a string.
   /// @param toml_string String representation of the TOML config.
   static Configuration LoadTOMLString(std::string_view toml_string);
@@ -262,33 +258,17 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::unique_ptr<Impl> pimpl_;
 };
 
-//-----------------------------------------------------------------------------
-// Key (parameter name) matching to support access via wildcards
+/// @brief Loads a TOML configuration from the given file.
+/// @param filename Path to the `.toml` file.
+Configuration LoadTOMLFile(std::string_view filename);
 
-class WERKZEUGKISTE_CONFIG_EXPORT KeyMatcher {
- public:
-  KeyMatcher();
-  KeyMatcher(std::initializer_list<std::string_view> keys);
-  explicit KeyMatcher(const std::vector<std::string_view> &keys);
-
-  ~KeyMatcher();
-
-  KeyMatcher(const KeyMatcher &other);
-  KeyMatcher &operator=(const KeyMatcher &other);
-
-  KeyMatcher(KeyMatcher &&other) noexcept;
-  KeyMatcher &operator=(KeyMatcher &&other) noexcept;
-
-  void RegisterKey(std::string_view key);
-
-  bool Match(std::string_view query) const;
-
-  bool Empty() const;
-
- private:
-  struct Impl;
-  std::unique_ptr<Impl> pimpl_;
-};
+/// @brief Loads a TOML configuration from a string.
+///
+/// This invoces Configuration::LoadTOMLString and is provided
+/// for convenience only.
+///
+/// @param toml_string String representation of the TOML config.
+Configuration LoadTOMLString(std::string_view toml_string);
 
 }  // namespace werkzeugkiste::config
 

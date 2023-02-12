@@ -5,6 +5,7 @@
 
 #include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
+#include <werkzeugkiste/config/keymatcher.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/logging.h>
@@ -829,14 +830,6 @@ Configuration Configuration::LoadTOMLString(std::string_view toml_string) {
   }
 }
 
-Configuration Configuration::LoadTOMLFile(std::string_view filename) {
-  try {
-    return Configuration::LoadTOMLString(files::CatAsciiFile(filename));
-  } catch (const werkzeugkiste::files::IOError &e) {
-    throw ParseError(e.what());
-  }
-}
-
 bool Configuration::Empty() const {
   return (pimpl_ == nullptr) || (pimpl_->config_root.empty());
 }
@@ -1341,6 +1334,18 @@ std::string Configuration::ToJSON() const {
   std::ostringstream repr;
   repr << toml::json_formatter{pimpl_->config_root};
   return repr.str();
+}
+
+Configuration LoadTOMLString(std::string_view toml_string) {
+  return Configuration::LoadTOMLString(toml_string);
+}
+
+Configuration LoadTOMLFile(std::string_view filename) {
+  try {
+    return LoadTOMLString(files::CatAsciiFile(filename));
+  } catch (const werkzeugkiste::files::IOError &e) {
+    throw ParseError(e.what());
+  }
 }
 
 }  // namespace werkzeugkiste::config
