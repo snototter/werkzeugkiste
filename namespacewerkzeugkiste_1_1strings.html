@@ -119,16 +119,16 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab1f50321eeb92e9e62960fa6755d9487" class="m-doc">IsNumeric</a>(</span><span class="m-doc-wrap">const std::string&amp; s) -&gt; WERKZEUGKISTE_STRINGS_EXPORT bool</span>
             </dt>
             <dd></dd>
-            <dt id="ae0c7ae937d6669fa471ade64594cdf31">
-              <span class="m-doc-wrap-bumper">auto <a href="#ae0c7ae937d6669fa471ade64594cdf31" class="m-doc-self">Split</a>(</span><span class="m-doc-wrap">std::string_view s,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae0c7ae937d6669fa471ade64594cdf31" class="m-doc">Split</a>(</span><span class="m-doc-wrap">std::string_view s,
               char delim) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string&gt;</span>
             </dt>
-            <dd>Tokenizes the string by the given delimiter.</dd>
-            <dt id="ab0a9d6fb7cd9fb385c1b650242ff9942">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab0a9d6fb7cd9fb385c1b650242ff9942" class="m-doc-self">Tokenize</a>(</span><span class="m-doc-wrap">std::string_view s,
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab0a9d6fb7cd9fb385c1b650242ff9942" class="m-doc">Tokenize</a>(</span><span class="m-doc-wrap">std::string_view s,
               std::string_view delim) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string_view&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd></dd>
             <dt id="a87da07f659fd83d2780b005f0dfb14f7">
               <div class="m-doc-template">template&lt;typename Container, typename Tp = std::decay_t&lt;                                 decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a87da07f659fd83d2780b005f0dfb14f7" class="m-doc-self">Concatenate</a>(</span><span class="m-doc-wrap">const Container&amp; container,
@@ -204,6 +204,20 @@
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT bool werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1f50321eeb92e9e62960fa6755d9487" class="m-doc-self">IsNumeric</a>(</span><span class="m-doc-wrap">const std::string&amp; s)</span></span>
             </h3>
 <p>Returns true if the string can be safely cast into either an <code>int64_t</code> or a <code>double</code> type.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae0c7ae937d6669fa471ade64594cdf31"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string&gt; werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0c7ae937d6669fa471ade64594cdf31" class="m-doc-self">Split</a>(</span><span class="m-doc-wrap">std::string_view s,
+              char delim)</span></span>
+            </h3>
+<p>Tokenizes the string by the given delimiter.</p><p>Note that an empty trailing token will be skipped. For example: Split(&quot;a-b-c&quot;, &#x27;-&#x27;) returns the same 3 tokens (namely, &quot;a&quot;, &quot;b&quot; and &quot;c&quot;) as Split(&quot;a-b-c-&quot;, &#x27;-&#x27;). For &quot;a-b-c--&quot;, however, &quot;a&quot;, &quot;b&quot;, &quot;c&quot; and &quot;&quot; would be returned.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab0a9d6fb7cd9fb385c1b650242ff9942"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string_view&gt; werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0a9d6fb7cd9fb385c1b650242ff9942" class="m-doc-self">Tokenize</a>(</span><span class="m-doc-wrap">std::string_view s,
+              std::string_view delim)</span></span>
+            </h3>
+<p>Tokenizes the string by the given delimiter.</p><p>Note that empty tokens will be skipped. For example: Tokenize(&quot;a-b-c&quot;, &quot;-&quot;) returns the same 3 tokens (namely, &quot;a&quot;, &quot;b&quot; and &quot;c&quot;) as Tokenize(&quot;a-b-c-&quot;, &quot;-&quot;) and also &quot;-a-b-c--&quot;.</p>
           </div></section>
           <section class="m-doc-details" id="a240b78bfae2a24097e03b237f8d79f8b"><div>
             <h3>
