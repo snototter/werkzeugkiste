@@ -491,6 +491,26 @@ TEST(ConfigTest, SetScalarTypes2) {
   EXPECT_TRUE(config.Contains("my-day"sv));
   EXPECT_EQ(day, config.GetDate("my-day"sv));
   EXPECT_EQ(day, config.GetOptionalDate("my-day"sv).value());
+
+  EXPECT_EQ(day, config.GetDateOr("no-such-key"sv, day));
+
+  EXPECT_THROW(config.SetDate("string"sv, wkc::date{}), wkc::TypeError);
+
+  // Set a time
+  EXPECT_FALSE(config.Contains("my-time"sv));
+  EXPECT_FALSE(config.GetOptionalTime("my-time"sv).has_value());
+
+  wkc::time tm{10, 42, 59};
+  EXPECT_NO_THROW(config.SetTime("my-time"sv, tm));
+  EXPECT_TRUE(config.Contains("my-time"sv));
+  EXPECT_EQ(tm, config.GetTime("my-time"sv));
+  EXPECT_EQ(tm, config.GetOptionalTime("my-time"sv).value());
+
+  EXPECT_EQ(tm, config.GetTimeOr("no-such-key"sv, tm));
+
+  EXPECT_THROW(config.SetTime("string"sv, wkc::time{}), wkc::TypeError);
+
+  // TODO set date_time
 }
 
 TEST(ConfigTest, Keys1) {

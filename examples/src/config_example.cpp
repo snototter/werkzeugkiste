@@ -18,16 +18,16 @@ void CastingCheck(S val) {
             << "\n* from " << wkc::TypeName<S>() << "(" << std::to_string(val)
             << ") to " << wkc::TypeName<T>() << "\n* sizeof from(" << sizeof(S)
             << ") vs sizeof to(" << sizeof(T)
-            << ")\n* is promotable: " << wkc::IsPromotable<S, T>()
+            << ")\n* is promotable: " << wkc::is_promotable<S, T>()
             << "\n* cast " << std::to_string(val) << " = ";
   try {
     if constexpr (std::is_same_v<int8_t, T>) {
-      std::cout << std::to_string(wkc::CheckedCast<T>(val)) << std::endl;
+      std::cout << std::to_string(wkc::checked_numcast<T>(val)) << std::endl;
     } else {
-      std::cout << wkc::CheckedCast<T>(val) << std::endl << std::endl;
+      std::cout << wkc::checked_numcast<T>(val) << std::endl << std::endl;
     }
   } catch (const std::domain_error &e) {
-    WZKLOG_CRITICAL("Caught exception during CheckedCast:\n{}\n", e.what());
+    WZKLOG_CRITICAL("Caught exception during checked_numcast:\n{}\n", e.what());
   }
 }
 
