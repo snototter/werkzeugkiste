@@ -262,24 +262,29 @@ T CastScalar(const NodeView &node, std::string_view key) {
     }
   } else if constexpr (std::is_arithmetic_v<T>) {
     if (node.is_integer()) {
-      return CheckedCast<T, int64_t, TypeError>(
+      return checked_numcast<T, int64_t, TypeError>(
           static_cast<int64_t>(*node.as_integer()));
     } else if (node.is_floating_point()) {
-      return CheckedCast<T, double, TypeError>(
+      return checked_numcast<T, double, TypeError>(
           static_cast<double>(*node.as_floating_point()));
     }
   } else if constexpr (std::is_same_v<T, std::string>) {
     if (node.is_string()) {
+      // return std::string{node.template value<std::string_view>().value()};
+      //      using namespace std::string_view_literals;
+      //      return std::string{node.value_or(""sv)};
       return std::string{*node.as_string()};
+      //      const auto &ref = *node.template as<std::string>();
+      //      return std::string{ref};
     }
   } else if constexpr (std::is_same_v<T, date>) {
     if (node.is_date()) {
-      toml::date d{*node.as_date()};
+      const toml::date &d = node.as_date()->get();
       return date{d.year, d.month, d.day};
     }
   } else if constexpr (std::is_same_v<T, time>) {
     if (node.is_time()) {
-      toml::time t{*node.as_time()};
+      const toml::time &t = node.as_time()->get();
       return time{t.hour, t.minute, t.second, t.nanosecond};
     }
   } else {
@@ -473,8 +478,8 @@ void ConfigSetDateTime(toml::table &tbl, std::string_view key,
   } else if constexpr (std::is_same_v<Tcfg, time>) {
     tval = toml::time{value.hour, value.minute, value.second, value.nanosecond};
   }
-  // TODO add date_time
 
+  // TODO add date_time
   if (ConfigContainsKey(tbl, key)) {
     const auto node = tbl.at_path(key);
     if (!node.is<Ttoml>()) {
@@ -833,6 +838,14 @@ Configuration Configuration::LoadTOMLString(std::string_view toml_string) {
   }
 }
 
+Configuration Configuration::LoadTOMLFile(std::string_view filename) {
+  try {
+    return LoadTOMLString(files::CatAsciiFile(filename));
+  } catch (const werkzeugkiste::files::IOError &e) {
+    throw ParseError(e.what());
+  }
+}
+
 bool Configuration::Empty() const {
   return (pimpl_ == nullptr) || (pimpl_->config_root.empty());
 }
@@ -896,10 +909,12 @@ ConfigType Configuration::Type(std::string_view key) const {
       // TODO date_time
   }
 
+  // LCOV_EXCL_START
   std::string msg{"TOML node type `"};
   msg += utils::TomlTypeName(nv, key);
   msg += "` is not yet handled in `Configuration::Type`!";
   throw std::logic_error(msg);
+  // LCOV_EXCL_STOP
 }
 
 std::vector<std::string> Configuration::ListParameterNames(
@@ -1337,18 +1352,6 @@ std::string Configuration::ToJSON() const {
   std::ostringstream repr;
   repr << toml::json_formatter{pimpl_->config_root};
   return repr.str();
-}
-
-Configuration LoadTOMLString(std::string_view toml_string) {
-  return Configuration::LoadTOMLString(toml_string);
-}
-
-Configuration LoadTOMLFile(std::string_view filename) {
-  try {
-    return LoadTOMLString(files::CatAsciiFile(filename));
-  } catch (const werkzeugkiste::files::IOError &e) {
-    throw ParseError(e.what());
-  }
 }
 
 }  // namespace werkzeugkiste::config
