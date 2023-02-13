@@ -138,20 +138,20 @@
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;typename S, typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5bf1429d78454f214a3f93a3a7bd0062" class="m-doc">IsPromotable</a>(</span><span class="m-doc-wrap">) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab015f8ec2b4d32c7e1895bc23606c722" class="m-doc">is_promotable</a>(</span><span class="m-doc-wrap">) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd><span></span></dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc = std::domain_error&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9ce7b8de58b188974bdb68752d0aa09c" class="m-doc">CheckedCast</a>(</span><span class="m-doc-wrap">const S value) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E = std::domain_error&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9393108107be2d4f7cbeb540e8ea8225" class="m-doc">checked_numcast</a>(</span><span class="m-doc-wrap">const S value) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5d527845d1a470f6e8ba374c863611ec" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a94407362a42c1ce626bfb1e9ca747296" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from the given file.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ed801c4eea8b553a44fe7362778b5e2" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ce8591bf157775d1c73f8a12b3d588f" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from a string.</dd>
             <dt>
@@ -247,29 +247,29 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a5bf1429d78454f214a3f93a3a7bd0062"><div>
+          <section class="m-doc-details" id="ab015f8ec2b4d32c7e1895bc23606c722"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
               <div class="m-doc-template">
                 template&lt;typename S, typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5bf1429d78454f214a3f93a3a7bd0062" class="m-doc-self">IsPromotable</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab015f8ec2b4d32c7e1895bc23606c722" class="m-doc-self">is_promotable</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
             <p><span></span></p>
           </div></section>
-          <section class="m-doc-details" id="a9ce7b8de58b188974bdb68752d0aa09c"><div>
+          <section class="m-doc-details" id="a9393108107be2d4f7cbeb540e8ea8225"><div>
             <h3>
               <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
               <div class="m-doc-template">
-                template&lt;typename T, typename S, typename Exc = std::domain_error&gt;
+                template&lt;typename T, typename S, typename E = std::domain_error&gt;
               </div>
-              <span class="m-doc-wrap-bumper">T werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ce7b8de58b188974bdb68752d0aa09c" class="m-doc-self">CheckedCast</a>(</span><span class="m-doc-wrap">const S value) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">T werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9393108107be2d4f7cbeb540e8ea8225" class="m-doc-self">checked_numcast</a>(</span><span class="m-doc-wrap">const S value) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Returns the T value if S is exactly representable in the target type. Otherwise, an exception will be thrown. Supports casts between numeric types.</p>
+<p>Returns the T value if S is exactly representable in the target type. Otherwise, an exception will be thrown. Supports casts between numeric types. The template parameter E allows changing the exception which will be thrown if the cast is not possible without losing precision.</p>
           </div></section>
-          <section class="m-doc-details" id="a5d527845d1a470f6e8ba374c863611ec"><div>
+          <section class="m-doc-details" id="a94407362a42c1ce626bfb1e9ca747296"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5d527845d1a470f6e8ba374c863611ec" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a94407362a42c1ce626bfb1e9ca747296" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
             </h3>
             <p>Loads a TOML configuration from the given file.</p>
@@ -285,9 +285,9 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a2ed801c4eea8b553a44fe7362778b5e2"><div>
+          <section class="m-doc-details" id="a2ce8591bf157775d1c73f8a12b3d588f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ed801c4eea8b553a44fe7362778b5e2" class="m-doc-self">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string)</span></span>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ce8591bf157775d1c73f8a12b3d588f" class="m-doc-self">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
             </h3>
             <p>Loads a TOML configuration from a string.</p>
@@ -302,7 +302,6 @@
                 </tr>
               </tbody>
             </table>
-<p>This invoces <a href="classwerkzeugkiste_1_1config_1_1Configuration.html#ae3e70e3f931babab7eec207220c1a060" class="m-doc">Configuration::<wbr />LoadTOMLString</a> and is provided for convenience only.</p>
           </div></section>
           <section class="m-doc-details" id="a0ccee9dccf309d5590d43326ba5f9312"><div>
             <h3>

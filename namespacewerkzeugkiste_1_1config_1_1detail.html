@@ -67,40 +67,40 @@
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
-            <dt id="a0599c2987fe99848be11ef3f9e787d09">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0599c2987fe99848be11ef3f9e787d09" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+            <dt id="ab935ad55793d38d24f8067c660e787dd">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab935ad55793d38d24f8067c660e787dd" class="m-doc-self">sign_aware_integral_cast</a>(</span><span class="m-doc-wrap">const S value,
               std::false_type,
               std::true_type) -&gt; T</span>
             </dt>
             <dd>Helper to cast from a SIGNED to an UNSIGNED integral value.</dd>
-            <dt id="a0e47e5da80dc4f00a27692d9a46d81a6">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e47e5da80dc4f00a27692d9a46d81a6" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+            <dt id="a05c0878aa4d4915bca4e980c15bd54eb">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a05c0878aa4d4915bca4e980c15bd54eb" class="m-doc-self">sign_aware_integral_cast</a>(</span><span class="m-doc-wrap">const S value,
               std::false_type,
               std::false_type) -&gt; T</span>
             </dt>
             <dd>Helper to cast from an UNSIGNED to a SIGNED integral value.</dd>
-            <dt id="a5b4b9cfba79041e03afdf08cdfd3431b">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5b4b9cfba79041e03afdf08cdfd3431b" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+            <dt id="a0c98d3429499d9985fa4bbcfb1c5eba5">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0c98d3429499d9985fa4bbcfb1c5eba5" class="m-doc-self">integral_cast</a>(</span><span class="m-doc-wrap">const S value,
               std::false_type) -&gt; T</span>
             </dt>
             <dd>Helper/dispatcher to cast between DIFFERENTLY SIGNED integral types.</dd>
-            <dt id="a4cf424bbcbd3c628fa145abada0adb27">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4cf424bbcbd3c628fa145abada0adb27" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value,
+            <dt id="af7b1130be31237e71cee2fe83e727b3c">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#af7b1130be31237e71cee2fe83e727b3c" class="m-doc-self">integral_cast</a>(</span><span class="m-doc-wrap">const S value,
               std::true_type) -&gt; T</span>
             </dt>
             <dd>Helper to cast between integral types of the SAME SIGN.</dd>
-            <dt id="a0e046ebdefbb7791fcd5cdc7c0cdba02">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0e046ebdefbb7791fcd5cdc7c0cdba02" class="m-doc-self">CheckedIntegralCast</a>(</span><span class="m-doc-wrap">const S value) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dt id="a2439fedca33807d793f3966862535828">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2439fedca33807d793f3966862535828" class="m-doc-self">int_to_int</a>(</span><span class="m-doc-wrap">const S value) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Dispatcher to cast between integral types.</dd>
-            <dt id="aa6d30b953b3fce6d6af7314726fe45ff">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa6d30b953b3fce6d6af7314726fe45ff" class="m-doc-self">CheckedFloatingPointCast</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+            <dt id="abfb7743eb3c9594a66b9d030fea682bb">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#abfb7743eb3c9594a66b9d030fea682bb" class="m-doc-self">float_to_float</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
             </dt>
             <dd><span></span></dd>
             <dt id="a6c5f6dfde11d6c6a0fec4421ab2e6976">
@@ -110,29 +110,29 @@
             <dd><span></span></dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aee5f387d0c98638ca25ceaa5a7563cf5" class="m-doc">RangeForFloatingToIntegralCast</a>(</span><span class="m-doc-wrap">) -&gt; std::pair&lt;S, S&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a16ea10626fbcd108ed68a04ad93d57a4" class="m-doc">float_to_int_range</a>(</span><span class="m-doc-wrap">) -&gt; std::pair&lt;S, S&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd></dd>
-            <dt id="a4adbc0223b33f5ab74ed9f794bb0a135">
+            <dt id="ab1ef920337da5cad8d3b24a2135eba6b">
               <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4adbc0223b33f5ab74ed9f794bb0a135" class="m-doc-self">CheckedIntegralToFloatingPointCast</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab1ef920337da5cad8d3b24a2135eba6b" class="m-doc-self">int_to_float</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="aa5b6379704656df7cccac860d9dd1d38">
+            <dt id="a753cc50c6a694c32d7eaacb62a0cd8a7">
               <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa5b6379704656df7cccac860d9dd1d38" class="m-doc-self">CheckedFloatingPointToIntegralCast</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a753cc50c6a694c32d7eaacb62a0cd8a7" class="m-doc-self">float_to_int</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
             </dt>
             <dd><span></span></dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aee5f387d0c98638ca25ceaa5a7563cf5"><div>
+          <section class="m-doc-details" id="a16ea10626fbcd108ed68a04ad93d57a4"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T, typename S&gt;
               </div>
-              <span class="m-doc-wrap-bumper">std::pair&lt;S, S&gt; werkzeugkiste::<wbr />config::<wbr />detail::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee5f387d0c98638ca25ceaa5a7563cf5" class="m-doc-self">RangeForFloatingToIntegralCast</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+              <span class="m-doc-wrap-bumper">std::pair&lt;S, S&gt; werkzeugkiste::<wbr />config::<wbr />detail::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16ea10626fbcd108ed68a04ad93d57a4" class="m-doc-self">float_to_int_range</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
 <p>Returns the &lt;min,max&gt; pair, such that:</p><ul><li><code>min</code> is the lowest floating point value which <em>will not</em> underflow when converted to T (integral).</li><li><code>max</code> is the lowest floating point value which <em>will</em> overflow when converted to T (integral).</li></ul>
           </div></section>
