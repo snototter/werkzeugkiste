@@ -104,7 +104,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// @brief Loads a TOML configuration from the given file.
   /// @param filename Path to the `.toml` file.
-  static Configuration LoadTOMLFile(std::string_view toml_string);
+  static Configuration LoadTOMLFile(std::string_view filename);
 
   /// @brief Returns true if this configuration has no parameters set.
   bool Empty() const;

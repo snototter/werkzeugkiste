@@ -9,7 +9,6 @@
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::config;
-namespace wks = werkzeugkiste::strings;
 
 // NOLINTBEGIN
 TEST(CastTest, Static) {

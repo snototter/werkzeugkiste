@@ -186,4 +186,52 @@ TEST(TypeTest, TimeParsing) {
   EXPECT_THROW(wkc::time::FromString("invalid:input"), wkc::ParseError);
 }
 
+TEST(TypeTest, TimeOffset) {
+  // Check that the `time_offset` type is implemented correctly
+  wkc::time_offset offset{};
+  EXPECT_EQ("Z", offset.ToString());
+
+  offset = wkc::time_offset{90};
+  EXPECT_EQ(90, offset.minutes);
+  offset = wkc::time_offset{1, 30};
+  EXPECT_EQ(90, offset.minutes);
+  EXPECT_EQ("+01:30", offset.ToString());
+
+  offset = wkc::time_offset{-61};
+  EXPECT_EQ(-61, offset.minutes);
+
+  offset = wkc::time_offset{-1, -18};
+  EXPECT_EQ(-78, offset.minutes);
+  EXPECT_EQ("-01:18", offset.ToString());
+
+  offset = wkc::time_offset{-1, 18};
+  EXPECT_EQ(-42, offset.minutes);
+  EXPECT_EQ("-00:42", offset.ToString());
+
+  EXPECT_EQ(25, wkc::time_offset(1, -35).minutes);
+  EXPECT_EQ(-25, wkc::time_offset(-1, 35).minutes);
+  EXPECT_EQ(-95, wkc::time_offset(-1, -35).minutes);
+
+  EXPECT_EQ(-24, wkc::time_offset(0, -24).minutes);
+  EXPECT_THROW(wkc::time_offset(-24, 0), wkc::TypeError);
+  EXPECT_THROW(wkc::time_offset(24, 0), wkc::TypeError);
+
+  // Operators
+  //  EXPECT_NE(wkc::time_offset(-))
+
+  // Parsing
+  EXPECT_EQ("-00:42", offset.ToString());
+  EXPECT_EQ(offset, wkc::time_offset::FromString(offset.ToString()));
+  EXPECT_EQ(0, wkc::time_offset::FromString("Z").minutes);
+  EXPECT_EQ(0, wkc::time_offset::FromString("z").minutes);
+  EXPECT_EQ(62, wkc::time_offset::FromString("+01:02").minutes);
+  EXPECT_EQ(-63, wkc::time_offset::FromString("-01:03").minutes);
+  EXPECT_THROW(wkc::time_offset::FromString("+01:02Z"), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset::FromString("+01:02z"), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset::FromString("+01:-02"), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset::FromString("-01:-02"), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset::FromString("-24:02"), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset::FromString("+23:60"), wkc::ParseError);
+}
+
 // NOLINTEND

@@ -184,9 +184,9 @@ int main(int /* argc */, char ** /* argv */) {
   CastingCheck<uint>(static_cast<int8_t>(0));
   CastingCheck<uint>(static_cast<int8_t>(-42));
 
-  CastingCheck<double>(0.2f);
-  CastingCheck<double>(0.1f);
-  CastingCheck<long double>(0.2f);
+  CastingCheck<double>(0.2F);
+  CastingCheck<double>(0.1F);
+  CastingCheck<long double>(0.2F);
 
   CastingCheck<float>(1.0);
   CastingCheck<float>(0.0);

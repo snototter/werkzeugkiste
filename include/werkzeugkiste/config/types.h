@@ -1,9 +1,9 @@
 #ifndef WERKZEUGKISTE_CONFIG_TYPES_H
 #define WERKZEUGKISTE_CONFIG_TYPES_H
 
-#include <stdint.h>
 #include <werkzeugkiste/config/config_export.h>
 
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <tuple>
@@ -94,10 +94,13 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   }
 
  private:
+  // NOLINTBEGIN(*-magic-numbers)
   static constexpr uint32_t Pack(const date &d) noexcept {
-    return (static_cast<uint32_t>(d.year) << 16) |
-           (static_cast<uint32_t>(d.month) << 8) | static_cast<uint32_t>(d.day);
+    return (static_cast<uint32_t>(d.year) << 16U) |
+           (static_cast<uint32_t>(d.month) << 8U) |
+           static_cast<uint32_t>(d.day);
   }
+  // NOLINTEND(*-magic-numbers)
 };
 
 struct WERKZEUGKISTE_CONFIG_EXPORT time {
@@ -150,11 +153,57 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   }
 
  private:
+  // NOLINTBEGIN(*-magic-numbers)
   static constexpr uint64_t Pack(const time &t) noexcept {
-    return (static_cast<uint64_t>(t.hour) << 48) |
-           (static_cast<uint64_t>(t.minute) << 40) |
-           (static_cast<uint64_t>(t.second) << 32) |
+    return (static_cast<uint64_t>(t.hour) << 48U) |
+           (static_cast<uint64_t>(t.minute) << 40U) |
+           (static_cast<uint64_t>(t.second) << 32U) |
            static_cast<uint64_t>(t.nanosecond);
+  }
+  // NOLINTEND(*-magic-numbers)
+};
+
+//-----------------------------------------------------------------------------
+// Time zone offset
+
+// TODO doc
+// Caveats:
+// * Cannot represent the 'unknown local offset convention', i.e.
+//   distinguishing between -00:00 and +00:00.
+// https://www.rfc-editor.org/rfc/rfc3339
+struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
+ public:
+  /// The offset from UTC+0 in minutes.
+  int16_t minutes{};
+
+  time_offset() = default;
+
+  explicit time_offset(int16_t m) : minutes{m} {}
+
+  // TODO doc + highlight that (-1, 30) is *not* equivalent to "-01:30", but
+  // instead "-00:30".
+  time_offset(int8_t h, int8_t m);
+
+  /// Returns "Z" or "+/-HH:MM".
+  std::string ToString() const;
+
+  /// Parses a time offset.
+  /// Supported formats are:
+  /// * Z
+  /// * [+-]?HH:MM
+  static time_offset FromString(std::string_view str);
+
+  bool operator==(const time_offset &other) const;
+  bool operator!=(const time_offset &other) const;
+  bool operator<(const time_offset &other) const;
+  bool operator<=(const time_offset &other) const;
+  bool operator>(const time_offset &other) const;
+  bool operator>=(const time_offset &other) const;
+
+  /// Overloaded stream operator.
+  friend std::ostream &operator<<(std::ostream &os, const time_offset &t) {
+    os << t.ToString();
+    return os;
   }
 };
 

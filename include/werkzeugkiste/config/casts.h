@@ -167,10 +167,6 @@ T integral_cast(const S value, std::true_type /* same_sign */) {
 /// Dispatcher to cast between integral types.
 template <typename T, typename S, typename E>
 constexpr T int_to_int(const S value) {
-  //  if constexpr (std::is_same_v<T, bool>) {
-  //    return value != S{0};
-  //  }
-
   using src_limits = std::numeric_limits<S>;
   using tgt_limits = std::numeric_limits<T>;
   constexpr bool same_sign = src_limits::is_signed == tgt_limits::is_signed;
@@ -361,6 +357,7 @@ constexpr T checked_numcast(const S value) {
     return value;
   }
 
+  // NOLINTBEGIN(llvm-else-after-return)
   if constexpr (std::is_same_v<T, bool>) {
     // Allow C-style cast to boolean, i.e. if a number is (close to) 0,
     // it is interpreted as `false`. Otherwise, it will be cast to `true`.
@@ -377,20 +374,18 @@ constexpr T checked_numcast(const S value) {
     // custom exotic number implementations.)
     return value ? static_cast<T>(1) : static_cast<T>(0);
   } else {
-    // int -> int
-    if constexpr (are_integral_v<S, T>) {
-      if constexpr (!is_promotable<S, T>()) {
-        return detail::int_to_int<T, S, E>(value);
-      }
+    if constexpr (is_promotable<S, T>()) {
       return static_cast<T>(value);
     }
 
+    // int -> int
+    if constexpr (!is_promotable<S, T>() && are_integral_v<S, T>) {
+      return detail::int_to_int<T, S, E>(value);
+    }
+
     // float -> float
-    if constexpr (are_floating_point_v<S, T>) {
-      if constexpr (!is_promotable<S, T>()) {
-        return detail::float_to_float<T, S, E>(value);
-      }
-      return static_cast<T>(value);
+    if constexpr (!is_promotable<S, T>() && are_floating_point_v<S, T>) {
+      return detail::float_to_float<T, S, E>(value);
     }
 
     // int -> float
@@ -403,6 +398,7 @@ constexpr T checked_numcast(const S value) {
       return detail::float_to_int<T, S, E>(value);
     }
   }
+  // NOLINTEND(llvm-else-after-return)
 
   throw std::logic_error("The requested cast is not supported!");
 }

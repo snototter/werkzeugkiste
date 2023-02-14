@@ -840,7 +840,7 @@ Configuration Configuration::LoadTOMLString(std::string_view toml_string) {
 
 Configuration Configuration::LoadTOMLFile(std::string_view filename) {
   try {
-    return LoadTOMLString(files::CatAsciiFile(filename));
+    return Configuration::LoadTOMLString(files::CatAsciiFile(filename));
   } catch (const werkzeugkiste::files::IOError &e) {
     throw ParseError(e.what());
   }
