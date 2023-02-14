@@ -5,11 +5,14 @@
 #include <exception>
 #include <limits>
 #include <sstream>
+#include <string>
+#include <string_view>
 
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::config;
 namespace wks = werkzeugkiste::strings;
+using namespace std::string_view_literals;
 
 // NOLINTBEGIN
 TEST(TypeTest, DateType) {
@@ -50,54 +53,54 @@ TEST(TypeTest, DateType) {
 
 TEST(TypeTest, DateParsing) {
   auto date = wkc::date(2000, 11, 04);
-  auto parsed = wkc::date::FromString(date.ToString());
+  auto parsed = wkc::date(date.ToString());
   EXPECT_EQ(date, parsed);
 
   // Most common format: Y-m-d
-  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date::FromString("2023-02-28"));
+  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date("2023-02-28"sv));
   // A trailing delimiter will be ignored
-  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date::FromString("2023-02-28-"));
+  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date("2023-02-28-"sv));
 
-  EXPECT_THROW(wkc::date::FromString("2023-1"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("2023-1-"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("2023-1-2--"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("-2023-1-2-"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("invalid"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("invalid-"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("Y-m-d"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1-"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1-2--"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("-2023-1-2-"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("invalid"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("invalid-"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("Y-m-d"sv), wkc::ParseError);
 
   // There are only basic value range checks, but you can still
   // enter invalid dates:
-  EXPECT_EQ(wkc::date(1, 2, 3), wkc::date::FromString("1-2-3"));
-  EXPECT_EQ(wkc::date(2023, 02, 31), wkc::date::FromString("2023-02-31"));
+  EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("1-2-3"sv));
+  EXPECT_EQ(wkc::date(2023, 02, 31), wkc::date("2023-02-31"sv));
 
-  EXPECT_THROW(wkc::date::FromString("2023-02-0"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("2023-02-32"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("2023-13-3"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("2023-0-3"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("10000-1-3"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-02-0"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-02-32"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-13-3"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-0-3"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("10000-1-3"sv), wkc::ParseError);
 
   // We also commonly use: d.m.Y
-  EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date::FromString("01.03.2020"));
+  EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date("01.03.2020"sv));
   // A trailing delimiter will be ignored
-  EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date::FromString("01.03.2020."));
+  EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date("01.03.2020."sv));
 
-  EXPECT_THROW(wkc::date::FromString("1.2."), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("1.2.2023.."), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString(".1.2.2023."), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("invalid"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("invalid."), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("d.m.Y"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("1.2."), wkc::ParseError);
+  EXPECT_THROW(wkc::date("1.2.2023.."), wkc::ParseError);
+  EXPECT_THROW(wkc::date(".1.2.2023."), wkc::ParseError);
+  EXPECT_THROW(wkc::date("invalid"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("invalid."), wkc::ParseError);
+  EXPECT_THROW(wkc::date("d.m.Y"), wkc::ParseError);
 
-  EXPECT_EQ(wkc::date(2023, 02, 31), wkc::date::FromString("31.02.2023"));
-  EXPECT_EQ(wkc::date(2023, 12, 3), wkc::date::FromString("3.12.2023"));
-  EXPECT_EQ(wkc::date(1, 2, 3), wkc::date::FromString("3.2.1"));
+  EXPECT_EQ(wkc::date(2023, 02, 31), wkc::date("31.02.2023"));
+  EXPECT_EQ(wkc::date(2023, 12, 3), wkc::date("3.12.2023"));
+  EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("3.2.1"));
 
-  EXPECT_THROW(wkc::date::FromString("30.1.10000"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("30.0.1234"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("30.13.1234"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("0.2.1234"), wkc::ParseError);
-  EXPECT_THROW(wkc::date::FromString("32.2.1234"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("30.1.10000"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("30.0.1234"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("30.13.1234"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("0.2.1234"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("32.2.1234"), wkc::ParseError);
 }
 
 TEST(TypeTest, TimeType) {
@@ -139,51 +142,51 @@ TEST(TypeTest, TimeType) {
 
 TEST(TypeTest, TimeParsing) {
   auto time = wkc::time{8, 10, 32, 123456789};
-  auto parsed = wkc::time::FromString(time.ToString());
+  auto parsed = wkc::time{time.ToString()};
   EXPECT_EQ(time, parsed);
 
-  EXPECT_EQ(wkc::time(10, 11), wkc::time::FromString("10:11"));
-  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time::FromString("10:11:12"));
+  EXPECT_EQ(wkc::time(10, 11), wkc::time("10:11"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time("10:11:12"sv));
 
   // White space is allowed
-  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time::FromString(" 10:11:12"));
-  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time::FromString(" 10:11:12 "));
-  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time::FromString(" 10: 11:12"));
+  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time(" 10:11:12"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time(" 10:11:12 "sv));
+  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time(" 10: 11:12"sv));
 
   // Sub-second component must explicitly contain either 3 (ms), 6 (us)
   // or 9 (ns) digits.
-  EXPECT_THROW(wkc::time::FromString("10:11:12.1"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11:12.12"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11:12.1234"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11:12.12345"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11:12.1234567"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11:12.12345678"), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.1"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.12"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.1234"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.12345"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.1234567"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.12345678"sv), wkc::ParseError);
 
-  EXPECT_EQ(wkc::time(10, 11, 12, 1000000),
-            wkc::time::FromString("10:11:12.001"));
-  EXPECT_EQ(wkc::time(10, 11, 12, 1002000),
-            wkc::time::FromString("10:11:12.001002"));
-  EXPECT_EQ(wkc::time(10, 11, 12, 1002003),
-            wkc::time::FromString("10:11:12.001002003"));
+  EXPECT_EQ(wkc::time(10, 11, 12, 1000000), wkc::time("10:11:12.001"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12, 1002000), wkc::time("10:11:12.001002"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12, 1002003), wkc::time("10:11:12.001002003"sv));
 
   // Parsing checks the value ranges:
-  EXPECT_THROW(wkc::time::FromString("-1:00"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("24:00"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("00:-1"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("00:60"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("00:01:-1"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("00:01:60"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("00:01:02.-12"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("00:01:02.1234567890"), wkc::ParseError);
+  EXPECT_THROW(wkc::time("-1:00"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("24:00"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("00:-1"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("00:60"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("00:01:-1"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("00:01:60"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("00:01:02.-12"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("00:01:02.1234567890"sv), wkc::ParseError);
 
   // Further invalid inputs:
-  EXPECT_THROW(wkc::time::FromString("10:11:12:123"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11::12"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString(":10:11:12"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11.12"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("10:11:12."), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("now"), wkc::ParseError);
-  EXPECT_THROW(wkc::time::FromString("invalid:input"), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12:123"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11::12"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time(":10:11:12"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11.12"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12."sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("now"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("invalid:input"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("tomorrow"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("today"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("yesterday"sv), wkc::ParseError);
 }
 
 TEST(TypeTest, TimeOffset) {
@@ -217,21 +220,40 @@ TEST(TypeTest, TimeOffset) {
   EXPECT_THROW(wkc::time_offset(24, 0), wkc::TypeError);
 
   // Operators
-  //  EXPECT_NE(wkc::time_offset(-))
+  EXPECT_TRUE(wkc::time_offset("-01:30"sv) < wkc::time_offset("-01:20"sv));
+  EXPECT_TRUE(wkc::time_offset("-01:30"sv) <= wkc::time_offset("-01:20"sv));
+  EXPECT_TRUE(wkc::time_offset("-01:30"sv) != wkc::time_offset("-01:20"sv));
+
+  EXPECT_TRUE(wkc::time_offset("-01:20"sv) > wkc::time_offset("-01:30"sv));
+  EXPECT_TRUE(wkc::time_offset("-01:20"sv) >= wkc::time_offset("-01:30"sv));
+
+  EXPECT_TRUE(wkc::time_offset("-00:10"sv) <= wkc::time_offset("-00:10"sv));
+  EXPECT_TRUE(wkc::time_offset("-00:10"sv) == wkc::time_offset("-00:10"sv));
+  EXPECT_TRUE(wkc::time_offset("-00:10"sv) >= wkc::time_offset("-00:10"sv));
+
+  EXPECT_TRUE(wkc::time_offset("-00:10"sv) < wkc::time_offset("00:10"sv));
+
+  EXPECT_TRUE(wkc::time_offset("00:10"sv) < wkc::time_offset("10:50"sv));
+  EXPECT_TRUE(wkc::time_offset("00:10"sv) <= wkc::time_offset("10:50"sv));
+  EXPECT_TRUE(wkc::time_offset("02:00"sv) > wkc::time_offset("00:50"sv));
+  EXPECT_TRUE(wkc::time_offset("02:00"sv) >= wkc::time_offset("00:50"sv));
 
   // Parsing
   EXPECT_EQ("-00:42", offset.ToString());
-  EXPECT_EQ(offset, wkc::time_offset::FromString(offset.ToString()));
-  EXPECT_EQ(0, wkc::time_offset::FromString("Z").minutes);
-  EXPECT_EQ(0, wkc::time_offset::FromString("z").minutes);
-  EXPECT_EQ(62, wkc::time_offset::FromString("+01:02").minutes);
-  EXPECT_EQ(-63, wkc::time_offset::FromString("-01:03").minutes);
-  EXPECT_THROW(wkc::time_offset::FromString("+01:02Z"), wkc::ParseError);
-  EXPECT_THROW(wkc::time_offset::FromString("+01:02z"), wkc::ParseError);
-  EXPECT_THROW(wkc::time_offset::FromString("+01:-02"), wkc::ParseError);
-  EXPECT_THROW(wkc::time_offset::FromString("-01:-02"), wkc::ParseError);
-  EXPECT_THROW(wkc::time_offset::FromString("-24:02"), wkc::ParseError);
-  EXPECT_THROW(wkc::time_offset::FromString("+23:60"), wkc::ParseError);
+  EXPECT_EQ(offset, wkc::time_offset(offset.ToString()));
+  EXPECT_EQ(0, wkc::time_offset(""sv).minutes);
+  EXPECT_EQ(0, wkc::time_offset("Z"sv).minutes);
+  EXPECT_EQ(0, wkc::time_offset("z"sv).minutes);
+  EXPECT_EQ(0, wkc::time_offset("+00:00"sv).minutes);
+  EXPECT_EQ(0, wkc::time_offset("-00:00"sv).minutes);
+  EXPECT_EQ(62, wkc::time_offset("+01:02"sv).minutes);
+  EXPECT_EQ(-63, wkc::time_offset("-01:03"sv).minutes);
+  EXPECT_THROW(wkc::time_offset("+01:02Z"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset("+01:02z"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset("+01:-02"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset("-01:-02"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset("-24:02"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset("+23:60"sv), wkc::ParseError);
 }
 
 // NOLINTEND

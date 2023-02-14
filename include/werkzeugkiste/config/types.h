@@ -4,6 +4,7 @@
 #include <werkzeugkiste/config/config_export.h>
 
 #include <cstdint>
+#include <optional>
 #include <ostream>
 #include <string>
 #include <tuple>
@@ -63,6 +64,13 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
 
   date() = default;
 
+  /// @brief Parses a string representation.
+  ///
+  /// Supported formats are:
+  /// * Y-m-d
+  /// * d.m.Y
+  explicit date(std::string_view str);
+
   date(uint16_t y, uint8_t m, uint8_t d) : year{y}, month{m}, day{d} {}
 
   std::tuple<uint16_t, uint8_t, uint8_t> ToTuple() const {
@@ -71,14 +79,6 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
 
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
-
-  /// Parses a date.
-  ///
-  /// Supported formats are:
-  /// * Y-m-d
-  /// * d.m.Y
-  /// TODO check if we should add others.
-  static date FromString(std::string_view str);
 
   bool operator==(const date &other) const;
   bool operator!=(const date &other) const;
@@ -119,6 +119,16 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 
   time() = default;
 
+  /// @brief Parses a string representation.
+  ///
+  /// Supported formats are:
+  /// * HH:MM
+  /// * HH:MM:SS
+  /// * HH:MM:SS.sss (for milliseconds)
+  /// * HH:MM:SS.ssssss (for microseconds)
+  /// * HH:MM:SS.sssssssss (for nanoseconds)
+  explicit time(std::string_view str);
+
   time(uint8_t h, uint8_t m, uint8_t s = 0, uint32_t ns = 0)
       : hour{h}, minute{m}, second{s}, nanosecond{ns} {}
 
@@ -128,16 +138,6 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 
   /// Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
-
-  /// Parses a time.
-  ///
-  /// Supported formats are:
-  /// * HH:MM
-  /// * HH:MM:SS
-  /// * HH:MM:SS.sss (for milliseconds)
-  /// * HH:MM:SS.ssssss (for microseconds)
-  /// * HH:MM:SS.sssssssss (for nanoseconds)
-  static time FromString(std::string_view str);
 
   bool operator==(const time &other) const;
   bool operator!=(const time &other) const;
@@ -180,18 +180,19 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
 
   explicit time_offset(int16_t m) : minutes{m} {}
 
+  /// @brief Parses a string representation.
+  ///
+  /// Supported formats are:
+  /// * Z
+  /// * [+-]?HH:MM
+  explicit time_offset(std::string_view str);
+
   // TODO doc + highlight that (-1, 30) is *not* equivalent to "-01:30", but
   // instead "-00:30".
   time_offset(int8_t h, int8_t m);
 
   /// Returns "Z" or "+/-HH:MM".
   std::string ToString() const;
-
-  /// Parses a time offset.
-  /// Supported formats are:
-  /// * Z
-  /// * [+-]?HH:MM
-  static time_offset FromString(std::string_view str);
 
   bool operator==(const time_offset &other) const;
   bool operator!=(const time_offset &other) const;

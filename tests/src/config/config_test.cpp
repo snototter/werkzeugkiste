@@ -8,6 +8,7 @@
 #include <exception>
 #include <limits>
 #include <sstream>
+#include <string_view>
 
 #include "../test_utils.h"
 

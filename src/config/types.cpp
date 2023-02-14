@@ -21,7 +21,7 @@ namespace werkzeugkiste::config {
     std::string msg{"Invalid string representation for a "}; \
     msg += (#TP);                                            \
     msg += ": `";                                            \
-    msg += STR;                                              \
+    msg += (STR);                                            \
     msg += "`!";                                             \
     throw ParseError(msg);                                   \
   } while (false)
@@ -71,15 +71,6 @@ std::string ConfigTypeToString(const ConfigType &ct) {
   // LCOV_EXCL_STOP
 }
 
-std::string date::ToString() const {
-  // The unary operator+ ensures that uint8 values are
-  // interpreted as numbers and not ASCII characters.
-  std::ostringstream s;
-  s << std::setfill('0') << std::setw(4) << +year << '-' << std::setw(2)
-    << +month << '-' << std::setw(2) << +day;
-  return s.str();
-}
-
 template <typename T, typename DT>
 T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
   try {
@@ -105,7 +96,7 @@ T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
 }
 
 // NOLINTBEGIN(*magic-numbers)
-date date::FromString(std::string_view str) {
+date ParseDateString(std::string_view str) {
   date parsed{};
   std::size_t pos = str.find_first_of('-');
   if (pos != std::string_view::npos) {
@@ -139,6 +130,22 @@ date date::FromString(std::string_view str) {
 }
 // NOLINTEND(*magic-numbers)
 
+date::date(std::string_view str) {
+  const date other = ParseDateString(str);
+  year = other.year;
+  month = other.month;
+  day = other.day;
+}
+
+std::string date::ToString() const {
+  // The unary operator+ ensures that uint8 values are
+  // interpreted as numbers and not ASCII characters.
+  std::ostringstream s;
+  s << std::setfill('0') << std::setw(4) << +year << '-' << std::setw(2)
+    << +month << '-' << std::setw(2) << +day;
+  return s.str();
+}
+
 bool date::operator==(const date &other) const {
   return (year == other.year) && (month == other.month) && (day == other.day);
 }
@@ -161,32 +168,21 @@ bool date::operator>=(const date &other) const {
   return Pack(*this) >= Pack(other);
 }
 
-std::string time::ToString() const {
-  // The unary operator+ ensures that uint8 values are
-  // interpreted as numbers and not ASCII characters.
-  std::ostringstream s;
-  s << std::setfill('0') << std::setw(2) << +hour << ':' << std::setw(2)
-    << +minute << ':' << std::setw(2) << +second << '.' << std::setw(9)
-    << +nanosecond;
-  return s.str();
-}
-
 // NOLINTBEGIN(*magic-numbers)
-time time::FromString(std::string_view str) {
-  std::vector<std::string> hms_tokens = strings::Split(str, ':');
+time::time(std::string_view str) {
+  const std::vector<std::string> hms_tokens = strings::Split(str, ':');
   if ((hms_tokens.size() < 2) || (hms_tokens.size() > 3)) {
     WZK_RAISE_DATETIME_PARSE_ERROR(str, time);
   }
 
-  time parsed{};
-  parsed.hour = ParseIntegralNumber<uint8_t, time>(hms_tokens[0], 0, 23);
-  parsed.minute = ParseIntegralNumber<uint8_t, time>(hms_tokens[1], 0, 59);
+  hour = ParseIntegralNumber<uint8_t, time>(hms_tokens[0], 0, 23);
+  minute = ParseIntegralNumber<uint8_t, time>(hms_tokens[1], 0, 59);
 
   if (hms_tokens.size() > 2) {
     std::size_t pos = hms_tokens[2].find_first_of('.');
     if (pos != std::string::npos) {
-      parsed.second = ParseIntegralNumber<uint8_t, time>(
-          hms_tokens[2].substr(0, pos), 0, 59);
+      second = ParseIntegralNumber<uint8_t, time>(hms_tokens[2].substr(0, pos),
+                                                  0, 59);
 
       const auto subsec_str = hms_tokens[2].substr(pos + 1);
       if ((subsec_str.length() != 3) && (subsec_str.length() != 6) &&
@@ -206,13 +202,22 @@ time time::FromString(std::string_view str) {
       } else if (subsec_str.length() == 6) {
         subsec_val *= 1000;
       }
-      parsed.nanosecond = subsec_val;
+      nanosecond = subsec_val;
 
     } else {
-      parsed.second = ParseIntegralNumber<uint8_t, time>(hms_tokens[2], 0, 59);
+      second = ParseIntegralNumber<uint8_t, time>(hms_tokens[2], 0, 59);
     }
   }
-  return parsed;
+}
+
+std::string time::ToString() const {
+  // The unary operator+ ensures that uint8 values are
+  // interpreted as numbers and not ASCII characters.
+  std::ostringstream s;
+  s << std::setfill('0') << std::setw(2) << +hour << ':' << std::setw(2)
+    << +minute << ':' << std::setw(2) << +second << '.' << std::setw(9)
+    << +nanosecond;
+  return s.str();
 }
 // NOLINTEND(*magic-numbers)
 
@@ -239,6 +244,32 @@ bool time::operator>=(const time &other) const {
   return Pack(*this) >= Pack(other);
 }
 
+// NOLINTBEGIN(*magic-numbers)
+time_offset::time_offset(std::string_view str) {
+  // TODO input string should already be trimmed - do NOT allow white space!
+  std::size_t pos = str.find_first_of(':');
+  if (pos == std::string::npos) {
+    if ((str.length() > 0) && !((str[0] == 'z') || (str[0] == 'Z'))) {
+      WZK_RAISE_DATETIME_PARSE_ERROR(str, time_offset);
+    }
+    minutes = 0;
+  } else {
+    const int16_t hrs = ParseIntegralNumber<int16_t, time_offset>(
+        std::string{str.substr(0, pos)}, -23, 23);
+    const int16_t mins = ParseIntegralNumber<int16_t, time_offset>(
+        std::string{str.substr(pos + 1)}, 0, 59);
+    // Offset minutes in RFC 3339 format can only be positive. The
+    // string "-01:23", however, corresponds to a total offset of
+    // "-83 minutes". Thus, we need to adjust the parsed minutes accordingly.
+    minutes = static_cast<int16_t>(hrs * 60);
+    if ((hrs < 0) || (str[0] == '-')) {
+      minutes -= mins;
+    } else {
+      minutes += mins;
+    }
+  }
+}
+
 time_offset::time_offset(int8_t h, int8_t m) {
   if ((h < -23) || (h > 23) || (m < -59) || (m > 59)) {
     std::ostringstream msg;
@@ -247,7 +278,7 @@ time_offset::time_offset(int8_t h, int8_t m) {
            "-60 < m < 60!";
     throw TypeError(msg.str());
   }
-  minutes = static_cast<int16_t>(h) * 60 + m;
+  minutes = static_cast<int16_t>(h * 60 + m);
 }
 
 std::string time_offset::ToString() const {
@@ -264,37 +295,36 @@ std::string time_offset::ToString() const {
     << ':' << std::setw(2) << +mins;
   return s.str();
 }
-
-// NOLINTBEGIN(*magic-numbers)
-time_offset time_offset::FromString(std::string_view str) {
-  // TODO string must be trimmed - do NOT allow white space!
-  if (str.empty()) {
-    return time_offset{0};
-  }
-
-  // TODO If str.contains('Z' or 'z') -> the rest can only be white space
-  if ((str.length() == 1) && ((str[0] == 'Z') || (str[0] == 'z'))) {
-    return time_offset{0};
-  }
-
-  std::vector<std::string> tokens = strings::Split(str, ':');
-  if (tokens.size() != 2) {
-    WZK_RAISE_DATETIME_PARSE_ERROR(str, time_offset);
-  }
-
-  const int8_t hrs =
-      ParseIntegralNumber<int8_t, time_offset>(tokens[0], -23, 23);
-  const int8_t mins =
-      ParseIntegralNumber<int8_t, time_offset>(tokens[1], 0, 59);
-  // Offset minutes in RFC 3339 format can only be positive. The
-  // string "-01:23", however, corresponds to a total offset of
-  // "-83 minutes". For the constructor, we need to adjust the
-  // parsed minutes accordingly.
-  const bool is_negative = (hrs < 0) || (str[0] == '-');
-  return time_offset(hrs,
-                     is_negative ? (static_cast<int8_t>(-1) * mins) : mins);
-}
 // NOLINTEND(*magic-numbers)
+
+// time_offset time_offset::FromString(std::string_view str) {
+//   // TODO string must be trimmed - do NOT allow white space!
+//   if (str.empty()) {
+//     return time_offset{0};
+//   }
+
+//  // TODO If str.contains('Z' or 'z') -> the rest can only be white space
+//  if ((str.length() == 1) && ((str[0] == 'Z') || (str[0] == 'z'))) {
+//    return time_offset{0};
+//  }
+
+//  std::vector<std::string> tokens = strings::Split(str, ':');
+//  if (tokens.size() != 2) {
+//    WZK_RAISE_DATETIME_PARSE_ERROR(str, time_offset);
+//  }
+
+//  const int8_t hrs =
+//      ParseIntegralNumber<int8_t, time_offset>(tokens[0], -23, 23);
+//  const int8_t mins =
+//      ParseIntegralNumber<int8_t, time_offset>(tokens[1], 0, 59);
+//  // Offset minutes in RFC 3339 format can only be positive. The
+//  // string "-01:23", however, corresponds to a total offset of
+//  // "-83 minutes". For the constructor, we need to adjust the
+//  // parsed minutes accordingly.
+//  const bool is_negative = (hrs < 0) || (str[0] == '-');
+//  return time_offset(hrs,
+//                     is_negative ? (static_cast<int8_t>(-1) * mins) : mins);
+//}
 
 bool time_offset::operator==(const time_offset &other) const {
   return minutes == other.minutes;
