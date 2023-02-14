@@ -16,7 +16,7 @@ using namespace std::string_view_literals;
 
 // NOLINTBEGIN
 TEST(TypeTest, DateType) {
-  // Check that the `date` type is implemented correctly
+  // Check basic handling of the `date` type
   auto date = wkc::date(2000, 11, 04);
   auto tpl_date = date.ToTuple();
   EXPECT_EQ(date.year, std::get<0>(tpl_date));
@@ -52,6 +52,7 @@ TEST(TypeTest, DateType) {
 }
 
 TEST(TypeTest, DateParsing) {
+  // Check date parsing in detail
   auto date = wkc::date(2000, 11, 04);
   auto parsed = wkc::date(date.ToString());
   EXPECT_EQ(date, parsed);
@@ -104,7 +105,7 @@ TEST(TypeTest, DateParsing) {
 }
 
 TEST(TypeTest, TimeType) {
-  // Check that the `time` type is implemented correctly
+  // Check basic handling of the `time` type
   auto time = wkc::time{23, 49, 30, 987654321};
   auto tpl_time = time.ToTuple();
   EXPECT_EQ(time.hour, std::get<0>(tpl_time));
@@ -141,6 +142,7 @@ TEST(TypeTest, TimeType) {
 }
 
 TEST(TypeTest, TimeParsing) {
+  // Check time parsing in detail
   auto time = wkc::time{8, 10, 32, 123456789};
   auto parsed = wkc::time{time.ToString()};
   EXPECT_EQ(time, parsed);
@@ -148,10 +150,10 @@ TEST(TypeTest, TimeParsing) {
   EXPECT_EQ(wkc::time(10, 11), wkc::time("10:11"sv));
   EXPECT_EQ(wkc::time(10, 11, 12), wkc::time("10:11:12"sv));
 
-  // White space is allowed
-  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time(" 10:11:12"sv));
-  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time(" 10:11:12 "sv));
-  EXPECT_EQ(wkc::time(10, 11, 12), wkc::time(" 10: 11:12"sv));
+  // White space is not allowed
+  EXPECT_THROW(wkc::time(" 10:11:12"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time(" 10:11:12 "sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time(" 10: 11:12"sv), wkc::ParseError);
 
   // Sub-second component must explicitly contain either 3 (ms), 6 (us)
   // or 9 (ns) digits.
@@ -190,7 +192,7 @@ TEST(TypeTest, TimeParsing) {
 }
 
 TEST(TypeTest, TimeOffset) {
-  // Check that the `time_offset` type is implemented correctly
+  // Check basic handling of the `time_offset` type
   wkc::time_offset offset{};
   EXPECT_EQ("Z", offset.ToString());
 
@@ -254,6 +256,95 @@ TEST(TypeTest, TimeOffset) {
   EXPECT_THROW(wkc::time_offset("-01:-02"sv), wkc::ParseError);
   EXPECT_THROW(wkc::time_offset("-24:02"sv), wkc::ParseError);
   EXPECT_THROW(wkc::time_offset("+23:60"sv), wkc::ParseError);
+}
+
+TEST(TypeTest, DateTime) {
+  // Check basic handling of the `date_time` type, which encapsulates
+  // the separately tested date, time and offset types.
+
+  wkc::time time{8, 10, 32, 123456789};
+  wkc::date date{2000, 11, 04};
+
+  wkc::date_time dt{date, time};
+  EXPECT_EQ(date, dt.date);
+  EXPECT_EQ(time, dt.time);
+  EXPECT_FALSE(dt.offset.has_value());
+
+  EXPECT_EQ(dt, wkc::date_time(dt.ToString()));
+  EXPECT_EQ("2000-11-04T08:10:32.123456789", dt.ToString());
+
+  dt.offset = wkc::time_offset{};
+  EXPECT_EQ(dt, wkc::date_time(dt.ToString()));
+  EXPECT_EQ("2000-11-04T08:10:32.123456789Z", dt.ToString());
+
+  dt.time.nanosecond = 0;
+  EXPECT_EQ("2000-11-04T08:10:32Z", dt.ToString());
+
+  wkc::time_offset offset{-1, -12};
+  dt.offset = offset;
+  EXPECT_EQ(dt, wkc::date_time(dt.ToString()));
+  EXPECT_EQ("2000-11-04T08:10:32-01:12", dt.ToString());
+
+  // Parsing valid formats according to RFC 3339.
+  dt = wkc::date_time{wkc::date{2023, 2, 14}, wkc::time{21, 8, 23}};
+  // Offset has not been set.
+  EXPECT_NE(dt, wkc::date_time{"2023-02-14T21:08:23Z"sv});
+  dt.offset = wkc::time_offset{0};
+  EXPECT_NE(dt, wkc::date_time{"2023-02-14T21:08:23"sv});
+
+  // For readability, the delimiter between date and time can
+  // also be a space or underscore.
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23Z"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14_21:08:23Z"sv});
+
+  // Uppercase and lowercase letters T/Z are valid.
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23Z"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23z"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14t21:08:23z"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14t21:08:23Z"sv});
+
+  // 'Z' is equal to an offset of +/-00:00
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23-00:00"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23+00:00"sv});
+
+  // TODO EXPECT_LT(dt, wkc::date_time{"2023-02-14_21:08:23.880Z"sv});
+  dt.time.nanosecond = 880000000;
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14_21:08:23.880Z"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23.880Z"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23.880Z"sv});
+
+  // TODO offset != 0 will fail
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:08:23.880+01:00"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T20:08:23.880-01:00"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14t22:08:23+01:00"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23Z"sv});
+
+  // TODO extensions:
+  // * validate date (leapyear + exact days per month)
+  // * implement date_time + time_offset --> UTC+00:00 (might require
+  //   +/- one day)
+  // * keyerror --> return closest key with levenshtein distance < X
+
+  /**
+2023-02-14T21:30:03Z
+2023-02-14T21:30:03.8Z
+2023-02-14T21:30:03.88Z
+2023-02-14T21:30:03.880Z
+2023-02-14T21:30:03+00:00
+2023-02-14T21:30:03.8+00:00
+2023-02-14T22:30:03+01:00
+2023-02-14T22:30:03.8+01:00
+2023-02-14T22:30:03.88+01:00
+2023-02-14T22:30:03.880+01:00*/
+
+  // TODO invalid strings
+  EXPECT_THROW(wkc::date_time("invalid"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date_time("now"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date_time("today"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date_time("tomorrow"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date_time("yesterday"sv), wkc::ParseError);
+
+  // TODO Comparison operators
 }
 
 // NOLINTEND

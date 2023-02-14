@@ -71,14 +71,17 @@ std::string ConfigTypeToString(const ConfigType &ct) {
   // LCOV_EXCL_STOP
 }
 
+//-----------------------------------------------------------------------------
+// Number parsing for date & time types
+
 template <typename T, typename DT>
 T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
   try {
     // stoi would accept (and truncate) floating point numbers. Thus,
-    // we need to make sure that only [+-][0-9] inputs are fed into it:
+    // we need to make sure that only [+-][0-9] inputs are fed into it.
+    // White space is not allowed.
     const auto pos = std::find_if(str.begin(), str.end(), [](char c) -> bool {
-      return !(std::isdigit(c) || std::isspace(c) || (c == '-') || (c == '+'));
-      // TODO remove whitespace -> is not allowed if we stick to RFC
+      return !(std::isdigit(c) || (c == '-') || (c == '+'));
     });
     if (pos != str.end()) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, DT);
@@ -94,6 +97,9 @@ T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
     throw ParseError{e.what()};
   }
 }
+
+//-----------------------------------------------------------------------------
+// Date
 
 // NOLINTBEGIN(*magic-numbers)
 date ParseDateString(std::string_view str) {
@@ -168,6 +174,9 @@ bool date::operator>=(const date &other) const {
   return Pack(*this) >= Pack(other);
 }
 
+//-----------------------------------------------------------------------------
+// Time
+
 // NOLINTBEGIN(*magic-numbers)
 time::time(std::string_view str) {
   const std::vector<std::string> hms_tokens = strings::Split(str, ':');
@@ -215,8 +224,10 @@ std::string time::ToString() const {
   // interpreted as numbers and not ASCII characters.
   std::ostringstream s;
   s << std::setfill('0') << std::setw(2) << +hour << ':' << std::setw(2)
-    << +minute << ':' << std::setw(2) << +second << '.' << std::setw(9)
-    << +nanosecond;
+    << +minute << ':' << std::setw(2) << +second;
+  if (nanosecond > 0) {
+    s << '.' << std::setw(9) << +nanosecond;
+  }
   return s.str();
 }
 // NOLINTEND(*magic-numbers)
@@ -244,9 +255,11 @@ bool time::operator>=(const time &other) const {
   return Pack(*this) >= Pack(other);
 }
 
+//-----------------------------------------------------------------------------
+// Time Offset
+
 // NOLINTBEGIN(*magic-numbers)
 time_offset::time_offset(std::string_view str) {
-  // TODO input string should already be trimmed - do NOT allow white space!
   std::size_t pos = str.find_first_of(':');
   if (pos == std::string::npos) {
     if ((str.length() > 0) && !((str[0] == 'z') || (str[0] == 'Z'))) {
@@ -297,35 +310,6 @@ std::string time_offset::ToString() const {
 }
 // NOLINTEND(*magic-numbers)
 
-// time_offset time_offset::FromString(std::string_view str) {
-//   // TODO string must be trimmed - do NOT allow white space!
-//   if (str.empty()) {
-//     return time_offset{0};
-//   }
-
-//  // TODO If str.contains('Z' or 'z') -> the rest can only be white space
-//  if ((str.length() == 1) && ((str[0] == 'Z') || (str[0] == 'z'))) {
-//    return time_offset{0};
-//  }
-
-//  std::vector<std::string> tokens = strings::Split(str, ':');
-//  if (tokens.size() != 2) {
-//    WZK_RAISE_DATETIME_PARSE_ERROR(str, time_offset);
-//  }
-
-//  const int8_t hrs =
-//      ParseIntegralNumber<int8_t, time_offset>(tokens[0], -23, 23);
-//  const int8_t mins =
-//      ParseIntegralNumber<int8_t, time_offset>(tokens[1], 0, 59);
-//  // Offset minutes in RFC 3339 format can only be positive. The
-//  // string "-01:23", however, corresponds to a total offset of
-//  // "-83 minutes". For the constructor, we need to adjust the
-//  // parsed minutes accordingly.
-//  const bool is_negative = (hrs < 0) || (str[0] == '-');
-//  return time_offset(hrs,
-//                     is_negative ? (static_cast<int8_t>(-1) * mins) : mins);
-//}
-
 bool time_offset::operator==(const time_offset &other) const {
   return minutes == other.minutes;
 }
@@ -348,6 +332,46 @@ bool time_offset::operator>(const time_offset &other) const {
 
 bool time_offset::operator>=(const time_offset &other) const {
   return minutes >= other.minutes;
+}
+
+//-----------------------------------------------------------------------------
+// Date-time
+
+date_time::date_time(std::string_view str) {
+  // TODO 19 would be rfc (16 is missing ":SS")
+  if (str.length() <= 16) {
+    WZK_RAISE_DATETIME_PARSE_ERROR(str, date_time);
+  }
+  this->date = config::date{str.substr(0, 10)};
+
+  const std::string_view tm_str{str.substr(11)};
+  const std::size_t pos_off = tm_str.find_first_of("zZ+-");
+  if (pos_off == std::string_view::npos) {
+    this->time = config::time{tm_str};
+  } else {
+    this->time = config::time{tm_str.substr(0, pos_off)};
+    // [zZ+-] are needed to parse the offset (in contrast to the
+    // delimiter between date and time)
+    this->offset = config::time_offset{tm_str.substr(pos_off)};
+  }
+}
+
+std::string date_time::ToString() const {
+  std::ostringstream s;
+  s << this->date << 'T' << this->time;
+  if (this->offset.has_value()) {
+    s << this->offset.value();
+  }
+  return s.str();
+}
+
+bool date_time::operator==(const date_time &other) const {
+  return (this->date == other.date) && (this->time == other.time) &&
+         (this->offset == other.offset);
+}
+
+bool date_time::operator!=(const date_time &other) const {
+  return !(*this == other);
 }
 
 #undef WZK_RAISE_DATETIME_PARSE_ERROR

@@ -201,8 +201,44 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
   bool operator>(const time_offset &other) const;
   bool operator>=(const time_offset &other) const;
 
-  /// Overloaded stream operator.
+  /// @brief Overloaded stream operator.
   friend std::ostream &operator<<(std::ostream &os, const time_offset &t) {
+    os << t.ToString();
+    return os;
+  }
+};
+
+//-----------------------------------------------------------------------------
+// Date-time
+
+struct date_time {
+ public:
+  config::date date{};
+  config::time time{};
+  std::optional<time_offset> offset{std::nullopt};
+
+  date_time() = default;
+
+  explicit date_time(std::string_view);
+
+  date_time(const config::date &d, const config::time &t) : date{d}, time{t} {}
+
+  date_time(const config::date &d, const config::time &t, const time_offset &o)
+      : date{d}, time{t}, offset{o} {}
+
+  /// @brief Returns the representation in RFC 3339 format.
+  std::string ToString() const;
+
+  // TODO operators
+  bool operator==(const date_time &other) const;
+  bool operator!=(const date_time &other) const;
+  //  bool operator<(const time_offset &other) const;
+  //  bool operator<=(const time_offset &other) const;
+  //  bool operator>(const time_offset &other) const;
+  //  bool operator>=(const time_offset &other) const;
+
+  /// @brief Prints the RFC 3339 representation out to the stream.
+  friend std::ostream &operator<<(std::ostream &os, const date_time &t) {
     os << t.ToString();
     return os;
   }
