@@ -51,6 +51,9 @@ enum class ConfigType : unsigned char {
 WERKZEUGKISTE_CONFIG_EXPORT
 std::string ConfigTypeToString(const ConfigType &ct);
 
+//-----------------------------------------------------------------------------
+// Date
+
 struct WERKZEUGKISTE_CONFIG_EXPORT date {
  public:
   /// The year.
@@ -71,7 +74,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   /// * d.m.Y
   explicit date(std::string_view str);
 
-  date(uint16_t y, uint8_t m, uint8_t d) : year{y}, month{m}, day{d} {}
+  date(uint16_t y, uint8_t m, uint8_t d);
 
   std::tuple<uint16_t, uint8_t, uint8_t> ToTuple() const {
     return std::make_tuple(year, month, day);
@@ -86,6 +89,12 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   bool operator<=(const date &other) const;
   bool operator>(const date &other) const;
   bool operator>=(const date &other) const;
+
+  // Pre-increment
+  date &operator++();
+
+  // Pre-decrement
+  date &operator--();
 
   /// Overloaded stream operator.
   friend std::ostream &operator<<(std::ostream &os, const date &d) {
@@ -102,6 +111,9 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   }
   // NOLINTEND(*-magic-numbers)
 };
+
+//-----------------------------------------------------------------------------
+// Time
 
 struct WERKZEUGKISTE_CONFIG_EXPORT time {
  public:
@@ -168,9 +180,10 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 
 // TODO doc
 // Caveats:
-// * Cannot represent the 'unknown local offset convention', i.e.
-//   distinguishing between -00:00 and +00:00.
+// time_offset cannot represent the 'unknown local offset convention', i.e.
+// distinguishing between -00:00 and +00:00.
 // https://www.rfc-editor.org/rfc/rfc3339
+// --> this is done via the optional<time_offset> in date_time instead.
 struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
  public:
   /// The offset from UTC+0 in minutes.
@@ -226,8 +239,14 @@ struct date_time {
   date_time(const config::date &d, const config::time &t, const time_offset &o)
       : date{d}, time{t}, offset{o} {}
 
+  // TODO s.t. offset == +00:00. If no offset is set, it is assumed to be
+  // UTC already.
+  date_time UTC() const;
+
   /// @brief Returns the representation in RFC 3339 format.
   std::string ToString() const;
+
+  inline bool IsLocal() const { return !offset.has_value(); }
 
   // TODO operators
   bool operator==(const date_time &other) const;

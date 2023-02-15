@@ -30,10 +30,30 @@ namespace werkzeugkiste::config {
 #define WZK_RAISE_NUMBER_PARSE_ERROR(VAL, MI, MA, DT)                  \
   do {                                                                 \
     std::ostringstream msg;                                            \
-    msg << "Invalid number " << +(VAL) << " while parsing a " << (#DT) \
-        << ", value muste be in [" << +(MI) << ", " << +(MA) << "]!";  \
+    msg << "Invalid number " << +(VAL) << " while parsing a `" << (DT) \
+        << "`. Value must be in [" << +(MI) << ", " << +(MA) << "]!";  \
     throw ParseError(msg.str());                                       \
   } while (false)
+
+//-----------------------------------------------------------------------------
+// Internal utility namespace
+namespace detail {
+// Collection of low-level date algorithms, along with an excellent analysis
+// of their performance: http://howardhinnant.github.io/date_algorithms.html
+constexpr bool IsLeapYear(uint16_t year) noexcept {
+  return (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
+}
+
+constexpr uint8_t LastDayOfMonthCommonYear(uint8_t m) noexcept {
+  constexpr uint8_t days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  return days[m - 1];
+}
+
+constexpr uint8_t LastDayOfMonth(uint16_t year, uint8_t month) noexcept {
+  return ((month != 2) || !IsLeapYear(year)) ? LastDayOfMonthCommonYear(month)
+                                             : static_cast<uint8_t>(29);
+}
+}  // namespace detail
 
 std::string ConfigTypeToString(const ConfigType &ct) {
   switch (ct) {
@@ -74,8 +94,9 @@ std::string ConfigTypeToString(const ConfigType &ct) {
 //-----------------------------------------------------------------------------
 // Number parsing for date & time types
 
-template <typename T, typename DT>
-T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
+template <typename T>
+T ParseIntegralNumber(const std::string &str, int min_val, int max_val,
+                      std::string_view type_str) {
   try {
     // stoi would accept (and truncate) floating point numbers. Thus,
     // we need to make sure that only [+-][0-9] inputs are fed into it.
@@ -84,12 +105,12 @@ T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
       return !(std::isdigit(c) || (c == '-') || (c == '+'));
     });
     if (pos != str.end()) {
-      WZK_RAISE_DATETIME_PARSE_ERROR(str, DT);
+      WZK_RAISE_DATETIME_PARSE_ERROR(str, type_str);
     }
 
     const int parsed = std::stoi(str);
     if ((parsed < min_val) || (parsed > max_val)) {
-      WZK_RAISE_NUMBER_PARSE_ERROR(parsed, min_val, max_val, DT);
+      WZK_RAISE_NUMBER_PARSE_ERROR(parsed, min_val, max_val, type_str);
     }
     return checked_numcast<T, int, ParseError>(parsed);
   } catch (const std::logic_error &e) {
@@ -103,6 +124,8 @@ T ParseIntegralNumber(const std::string &str, int min_val, int max_val) {
 
 // NOLINTBEGIN(*magic-numbers)
 date ParseDateString(std::string_view str) {
+  using namespace std::string_view_literals;
+
   date parsed{};
   std::size_t pos = str.find_first_of('-');
   if (pos != std::string_view::npos) {
@@ -111,9 +134,11 @@ date ParseDateString(std::string_view str) {
     if (tokens.size() != 3) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
-    parsed.year = ParseIntegralNumber<uint16_t, date>(tokens[0], 0, 9999);
-    parsed.month = ParseIntegralNumber<uint8_t, date>(tokens[1], 1, 12);
-    parsed.day = ParseIntegralNumber<uint8_t, date>(tokens[2], 1, 31);
+    parsed.year = ParseIntegralNumber<uint16_t>(tokens[0], 0, 9999, "date"sv);
+    parsed.month = ParseIntegralNumber<uint8_t>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseIntegralNumber<uint8_t>(
+        tokens[2], 1, detail::LastDayOfMonth(parsed.year, parsed.month),
+        "date"sv);
 
     return parsed;
   }
@@ -125,9 +150,11 @@ date ParseDateString(std::string_view str) {
     if (tokens.size() != 3) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
-    parsed.day = ParseIntegralNumber<uint8_t, date>(tokens[0], 1, 31);
-    parsed.month = ParseIntegralNumber<uint8_t, date>(tokens[1], 1, 12);
-    parsed.year = ParseIntegralNumber<uint16_t, date>(tokens[2], 0, 9999);
+    parsed.year = ParseIntegralNumber<uint16_t>(tokens[2], 0, 9999, "date"sv);
+    parsed.month = ParseIntegralNumber<uint8_t>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseIntegralNumber<uint8_t>(
+        tokens[0], 1, detail::LastDayOfMonth(parsed.year, parsed.month),
+        "date"sv);
 
     return parsed;
   }
@@ -141,6 +168,13 @@ date::date(std::string_view str) {
   year = other.year;
   month = other.month;
   day = other.day;
+}
+
+date::date(uint16_t y, uint8_t m, uint8_t d) : year{y}, month{m}, day{d} {
+  // TODO create invalid date error
+  // TODO change all numbers to integer to remove warnings, or add cast madness
+  // TODO separate IsValid()?
+  // TODO throw
 }
 
 std::string date::ToString() const {
@@ -174,24 +208,55 @@ bool date::operator>=(const date &other) const {
   return Pack(*this) >= Pack(other);
 }
 
+date &date::operator++() {
+  if (day == detail::LastDayOfMonth(year, month)) {
+    day = 1;
+    if (month == 12) {
+      month = 1;
+      ++year;
+    } else {
+      ++month;
+    }
+  } else {
+    ++day;
+  }
+  return *this;
+}
+
+date &date::operator--() {
+  if (day == 1) {
+    if (month == 1) {
+      month = 12;
+      --year;
+    } else {
+      --month;
+    }
+    day = detail::LastDayOfMonth(year, month);
+  } else {
+    --day;
+  }
+  return *this;
+}
+
 //-----------------------------------------------------------------------------
 // Time
 
 // NOLINTBEGIN(*magic-numbers)
 time::time(std::string_view str) {
+  using namespace std::string_view_literals;
   const std::vector<std::string> hms_tokens = strings::Split(str, ':');
   if ((hms_tokens.size() < 2) || (hms_tokens.size() > 3)) {
     WZK_RAISE_DATETIME_PARSE_ERROR(str, time);
   }
 
-  hour = ParseIntegralNumber<uint8_t, time>(hms_tokens[0], 0, 23);
-  minute = ParseIntegralNumber<uint8_t, time>(hms_tokens[1], 0, 59);
+  hour = ParseIntegralNumber<uint8_t>(hms_tokens[0], 0, 23, "time"sv);
+  minute = ParseIntegralNumber<uint8_t>(hms_tokens[1], 0, 59, "time"sv);
 
   if (hms_tokens.size() > 2) {
     std::size_t pos = hms_tokens[2].find_first_of('.');
     if (pos != std::string::npos) {
-      second = ParseIntegralNumber<uint8_t, time>(hms_tokens[2].substr(0, pos),
-                                                  0, 59);
+      second = ParseIntegralNumber<uint8_t>(hms_tokens[2].substr(0, pos), 0, 59,
+                                            "time"sv);
 
       const auto subsec_str = hms_tokens[2].substr(pos + 1);
       if ((subsec_str.length() != 3) && (subsec_str.length() != 6) &&
@@ -204,7 +269,7 @@ time::time(std::string_view str) {
         throw ParseError(msg);
       }
       uint32_t subsec_val =
-          ParseIntegralNumber<uint32_t, time>(subsec_str, 0, 999999999);
+          ParseIntegralNumber<uint32_t>(subsec_str, 0, 999999999, "time"sv);
 
       if (subsec_str.length() == 3) {
         subsec_val *= 1000000;
@@ -214,7 +279,7 @@ time::time(std::string_view str) {
       nanosecond = subsec_val;
 
     } else {
-      second = ParseIntegralNumber<uint8_t, time>(hms_tokens[2], 0, 59);
+      second = ParseIntegralNumber<uint8_t>(hms_tokens[2], 0, 59, "time"sv);
     }
   }
 }
@@ -260,6 +325,8 @@ bool time::operator>=(const time &other) const {
 
 // NOLINTBEGIN(*magic-numbers)
 time_offset::time_offset(std::string_view str) {
+  using namespace std::string_view_literals;
+
   std::size_t pos = str.find_first_of(':');
   if (pos == std::string::npos) {
     if ((str.length() > 0) && !((str[0] == 'z') || (str[0] == 'Z'))) {
@@ -267,10 +334,10 @@ time_offset::time_offset(std::string_view str) {
     }
     minutes = 0;
   } else {
-    const int16_t hrs = ParseIntegralNumber<int16_t, time_offset>(
-        std::string{str.substr(0, pos)}, -23, 23);
-    const int16_t mins = ParseIntegralNumber<int16_t, time_offset>(
-        std::string{str.substr(pos + 1)}, 0, 59);
+    const int16_t hrs = ParseIntegralNumber<int16_t>(
+        std::string{str.substr(0, pos)}, -23, 23, "time_offset"sv);
+    const int16_t mins = ParseIntegralNumber<int16_t>(
+        std::string{str.substr(pos + 1)}, 0, 59, "time_offset"sv);
     // Offset minutes in RFC 3339 format can only be positive. The
     // string "-01:23", however, corresponds to a total offset of
     // "-83 minutes". Thus, we need to adjust the parsed minutes accordingly.
@@ -356,6 +423,31 @@ date_time::date_time(std::string_view str) {
   }
 }
 
+date_time date_time::UTC() const {
+  date_time utc{this->date, this->time};
+  constexpr int16_t min_per_day = 1440;
+  if (this->offset.has_value()) {
+    int16_t minutes = static_cast<int16_t>(utc.time.hour) * 60 +
+                      utc.time.minute - offset.value().minutes;
+    if (minutes >= min_per_day) {
+      ++utc.date;
+      WZKLOG_CRITICAL("TODO +1 day");
+      minutes -= min_per_day;
+    }
+    if (minutes < 0) {
+      WZKLOG_CRITICAL("TODO -1 day");
+      --utc.date;
+      minutes += min_per_day;
+    }
+
+    utc.time.hour = static_cast<int8_t>(minutes / 60);
+    utc.time.minute = static_cast<int8_t>(minutes % 60);
+    WZKLOG_INFO("new time: {}", utc.time);
+  }
+
+  return utc;
+}
+
 std::string date_time::ToString() const {
   std::ostringstream s;
   s << this->date << 'T' << this->time;
@@ -366,8 +458,14 @@ std::string date_time::ToString() const {
 }
 
 bool date_time::operator==(const date_time &other) const {
-  return (this->date == other.date) && (this->time == other.time) &&
-         (this->offset == other.offset);
+  if (IsLocal() || other.IsLocal()) {
+    return (this->date == other.date) && (this->time == other.time) &&
+           (this->offset == other.offset);
+  }
+
+  const date_time utc1 = UTC();
+  const date_time utc2 = other.UTC();
+  return (utc1.date == utc2.date) && (utc1.time == utc2.time);
 }
 
 bool date_time::operator!=(const date_time &other) const {

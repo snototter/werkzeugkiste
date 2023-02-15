@@ -70,10 +70,13 @@ TEST(TypeTest, DateParsing) {
   EXPECT_THROW(wkc::date("invalid-"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("Y-m-d"sv), wkc::ParseError);
 
-  // There are only basic value range checks, but you can still
-  // enter invalid dates:
+  // Dates will be checked
   EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("1-2-3"sv));
-  EXPECT_EQ(wkc::date(2023, 02, 31), wkc::date("2023-02-31"sv));
+  EXPECT_THROW(wkc::date(2023, 02, 31), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-02-31"sv), wkc::ParseError);
+
+  EXPECT_THROW(wkc::date("2023-02-29"sv), wkc::ParseError);
+  EXPECT_NO_THROW(wkc::date("2024-02-29"sv));
 
   EXPECT_THROW(wkc::date("2023-02-0"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("2023-02-32"sv), wkc::ParseError);
@@ -306,6 +309,7 @@ TEST(TypeTest, DateTime) {
   // 'Z' is equal to an offset of +/-00:00
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23-00:00"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23+00:00"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23Z"sv});
 
   // TODO EXPECT_LT(dt, wkc::date_time{"2023-02-14_21:08:23.880Z"sv});
   dt.time.nanosecond = 880000000;
@@ -313,11 +317,17 @@ TEST(TypeTest, DateTime) {
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23.880Z"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23.880Z"sv});
 
-  // TODO offset != 0 will fail
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:08:23.880+01:00"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T20:08:23.880-01:00"sv});
-  EXPECT_EQ(dt, wkc::date_time{"2023-02-14t22:08:23+01:00"sv});
-  EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23Z"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14t22:08:23.880+01:00"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:08:23.880+01:00"sv});
+
+  EXPECT_NE(dt, wkc::date_time{"2023-02-14T22:08:23+01:00"sv});  // ns differ
+
+  EXPECT_EQ(wkc::date_time{"2024-02-29 00:45:12.123+01:00"sv},
+            wkc::date_time{"2024-02-28 23:45:12.123Z"sv});
+  EXPECT_EQ(wkc::date_time("2024-02-29 00:45:12.123+01:00"sv).UTC(),
+            wkc::date_time("2024-02-28 23:45:12.123Z"sv).UTC());
 
   // TODO extensions:
   // * validate date (leapyear + exact days per month)
