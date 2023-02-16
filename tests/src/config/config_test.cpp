@@ -392,11 +392,11 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_THROW(config.GetDouble("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.day"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.time"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.date_time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates.dt1"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates.day"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates.time"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.date_time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates.dt1"sv), wkc::TypeError);
 }
 
 TEST(ConfigTest, SetScalarTypes1) {
