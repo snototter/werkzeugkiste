@@ -193,6 +193,11 @@ std::string Shorten(std::string_view s, std::size_t desired_length,
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Indent(std::string_view s, std::size_t n, char character = ' ');
 
+/// Returns the the minimum number of single-character edits (i.e. insertions,
+/// deletions or substitutions) required to change one string into the other.
+WERKZEUGKISTE_STRINGS_EXPORT
+std::size_t LevenshteinDistance(std::string_view str1, std::string_view str2);
+
 }  // namespace werkzeugkiste::strings
 
 #endif  // WERKZEUGKISTE_STRINGS_STRINGS_H

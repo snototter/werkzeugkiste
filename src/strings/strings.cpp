@@ -357,4 +357,37 @@ std::string Indent(std::string_view s, std::size_t n, char character) {
   return out;
 }
 
+std::size_t LevenshteinDistance(std::string_view str1, std::string_view str2) {
+  const std::size_t min_size = str1.size();
+  const std::size_t max_size = str2.size();
+
+  // Ensure first string is longer (or both are equally long).
+  if (min_size > max_size) {
+    return LevenshteinDistance(str2, str1);
+  }
+
+  std::vector<std::size_t> dist(min_size + 1);
+  for (std::size_t i = 0; i <= min_size; ++i) {
+    dist[i] = i;
+  }
+
+  for (std::size_t j = 1; j <= max_size; ++j) {
+    std::size_t prev_diagonal = dist[0];
+    std::size_t prev_diagonal_save{};
+    ++dist[0];
+
+    for (std::size_t i = 1; i <= min_size; ++i) {
+      prev_diagonal_save = dist[i];
+      if (str1[i - 1] == str2[j - 1]) {
+        dist[i] = prev_diagonal;
+      } else {
+        dist[i] = std::min(std::min(dist[i - 1], dist[i]), prev_diagonal) + 1;
+      }
+      prev_diagonal = prev_diagonal_save;
+    }
+  }
+
+  return dist[min_size];
+}
+
 }  // namespace werkzeugkiste::strings

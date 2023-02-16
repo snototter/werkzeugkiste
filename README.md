@@ -20,7 +20,7 @@ name also equals the corresponding CMake target to be linked against:
 * `werkzeugkiste::config`: Utilitity to interact with TOML configurations.
 * `werkzeugkiste::container`: Sorting/lookup utilities and a custom
   circular buffer.
-* `werkzeugkiste::files`: Basic file I/O and filesystem utilities.
+* `werkzeugkiste::files`: Basic file I/O and filesystem utilities.  
   _Caveat:_ These utilities are only tested on GNU/Linux and will be replaced
   by wrappers to C++17's `std::filesystem`.
 * `werkzeugkiste::geometry`: Math utilities, focused on basic 2D & 3D geometry.

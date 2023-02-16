@@ -2,38 +2,42 @@
 
 #include <chrono>
 #include <string>
+#include <string_view>
 #include <thread>
 
 #include "../test_utils.h"
 
 namespace wks = werkzeugkiste::strings;
+using namespace std::string_view_literals;
 
 // NOLINTBEGIN
 
 TEST(StringUtilsTest, Suffix) {
-  EXPECT_TRUE(wks::EndsWith("Some string", "string"));
-  EXPECT_FALSE(wks::EndsWith("Some string", "String"));  // case mismatch
-  EXPECT_TRUE(wks::EndsWith("Some string", "ing"));
-  EXPECT_TRUE(wks::EndsWith("Some string", "g"));   // single character string
-  EXPECT_TRUE(wks::EndsWith("Some string", 'g'));   // character
-  EXPECT_FALSE(wks::EndsWith("Some string", 'G'));  // character
-  EXPECT_FALSE(wks::EndsWith("Some string", ""));   // empty string
-  EXPECT_FALSE(wks::EndsWith("", ""));
-  EXPECT_FALSE(wks::EndsWith("", "st"));
+  EXPECT_TRUE(wks::EndsWith("Some string"sv, "string"sv));
+  EXPECT_FALSE(wks::EndsWith("Some string"sv, "String"sv));  // case mismatch
+  EXPECT_TRUE(wks::EndsWith("Some string"sv, "ing"sv));
+  EXPECT_TRUE(
+      wks::EndsWith("Some string"sv, "g"sv));         // single character string
+  EXPECT_TRUE(wks::EndsWith("Some string"sv, 'g'));   // character
+  EXPECT_FALSE(wks::EndsWith("Some string"sv, 'G'));  // character
+  EXPECT_FALSE(wks::EndsWith("Some string"sv, ""sv));  // empty string
+  EXPECT_FALSE(wks::EndsWith(""sv, ""sv));
+  EXPECT_FALSE(wks::EndsWith(""sv, "st"sv));
 }
 
 TEST(StringUtilsTest, Prefix) {
-  EXPECT_TRUE(wks::StartsWith("Another test string", "Another "));
-  EXPECT_FALSE(
-      wks::StartsWith("Another test string", "another "));  // case mismatch
-  EXPECT_TRUE(wks::StartsWith("Another test string", "An"));
-  EXPECT_TRUE(
-      wks::StartsWith("Another test string", "A"));  // single character string
-  EXPECT_TRUE(wks::StartsWith("Another test string", 'A'));   // character
-  EXPECT_FALSE(wks::StartsWith("Another test string", 'a'));  // character
-  EXPECT_FALSE(wks::StartsWith("Another test string", ""));   // empty string
-  EXPECT_FALSE(wks::StartsWith("", ""));
-  EXPECT_FALSE(wks::StartsWith("", "A"));
+  EXPECT_TRUE(wks::StartsWith("Another test string"sv, "Another "sv));
+  // Case mismatch:
+  EXPECT_FALSE(wks::StartsWith("Another test string"sv, "another "sv));
+  EXPECT_TRUE(wks::StartsWith("Another test string"sv, "An"sv));
+  // Single character string vs. characters:
+  EXPECT_TRUE(wks::StartsWith("Another test string"sv, "A"sv));
+  EXPECT_TRUE(wks::StartsWith("Another test string"sv, 'A'));
+  EXPECT_FALSE(wks::StartsWith("Another test string"sv, 'a'));
+
+  EXPECT_FALSE(wks::StartsWith("Another test string"sv, ""sv));
+  EXPECT_FALSE(wks::StartsWith(""sv, ""sv));
+  EXPECT_FALSE(wks::StartsWith(""sv, "A"sv));
 }
 
 TEST(StringUtilsTest, CaseConversion) {
@@ -315,6 +319,17 @@ TEST(StringUtilsTest, Shorten) {
   EXPECT_EQ("01...", wks::Shorten("0123456789", 5, 1));
   EXPECT_EQ("012_", wks::Shorten("0123456789", 4, 1, "_"));
   EXPECT_EQ("0123_", wks::Shorten("0123456789", 5, 1, "_"));
+}
+
+TEST(StringUtilsTest, Levenshtein) {
+  EXPECT_EQ(0, wks::LevenshteinDistance(""sv, ""sv));
+  EXPECT_EQ(0, wks::LevenshteinDistance("Frobmorten"sv, "Frobmorten"sv));
+  EXPECT_EQ(7, wks::LevenshteinDistance("Frambozzle"sv, "Frobmorten"sv));
+  EXPECT_EQ(3, wks::LevenshteinDistance("kitten"sv, "sitting"sv));
+  EXPECT_EQ(3, wks::LevenshteinDistance("Kitten"sv, "sitting"sv));
+  EXPECT_EQ(1, wks::LevenshteinDistance("my-key"sv, "my-keY"sv));
+  EXPECT_EQ(3, wks::LevenshteinDistance("Hello"sv, "halo"sv));
+  EXPECT_EQ(6, wks::LevenshteinDistance("my-key"sv, ""sv));
 }
 
 // NOLINTEND
