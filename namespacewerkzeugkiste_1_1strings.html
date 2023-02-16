@@ -189,6 +189,11 @@
               char character = &#x27; &#x27;) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
             <dd>Returns the string indented by n-times the given character.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad5e15cccf24ab33c96f7485eecf61aba" class="m-doc">LevenshteinDistance</a>(</span><span class="m-doc-wrap">std::string_view str1,
+              std::string_view str2) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::size_t</span>
+            </dt>
+            <dd></dd>
           </dl>
         </section>
         <section>
@@ -262,6 +267,13 @@
               std::string_view ellipsis = &quot;...&quot;)</span></span>
             </h3>
 <p>Returns a string with length &lt;= <code>desired_length</code>, where the customizable <code>ellipsis</code> has been inserted to indicate that the input string has been clipped.</p><p>Argument ellipsis_position specifies where the ellipsis will be placed:</p><ul><li><code>&lt; 0</code>: Left</li><li><code>0</code>: Centered</li><li><code>&gt; 0</code>: Right</li></ul>
+          </div></section>
+          <section class="m-doc-details" id="ad5e15cccf24ab33c96f7485eecf61aba"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::size_t werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5e15cccf24ab33c96f7485eecf61aba" class="m-doc-self">LevenshteinDistance</a>(</span><span class="m-doc-wrap">std::string_view str1,
+              std::string_view str2)</span></span>
+            </h3>
+<p>Returns the the minimum number of single-character edits (i.e. insertions, deletions or substitutions) required to change one string into the other.</p>
           </div></section>
         </section>
       </div>
