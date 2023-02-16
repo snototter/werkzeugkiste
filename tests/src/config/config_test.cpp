@@ -24,14 +24,14 @@ using namespace std::string_view_literals;
 TEST(ConfigTest, TypeUtils) {
   EXPECT_EQ("bool", wkc::TypeName<bool>());
 
-  EXPECT_EQ("int8_t", wkc::TypeName<int8_t>());
-  EXPECT_EQ("uint8_t", wkc::TypeName<uint8_t>());
-  EXPECT_EQ("int16_t", wkc::TypeName<int16_t>());
-  EXPECT_EQ("uint16_t", wkc::TypeName<uint16_t>());
-  EXPECT_EQ("int32_t", wkc::TypeName<int32_t>());
-  EXPECT_EQ("uint32_t", wkc::TypeName<uint32_t>());
-  EXPECT_EQ("int64_t", wkc::TypeName<int64_t>());
-  EXPECT_EQ("uint64_t", wkc::TypeName<uint64_t>());
+  EXPECT_EQ("char", wkc::TypeName<char>());
+  EXPECT_EQ("unsigned char", wkc::TypeName<unsigned char>());
+  EXPECT_EQ("short", wkc::TypeName<short>());
+  EXPECT_EQ("unsigned short", wkc::TypeName<unsigned short>());
+  EXPECT_EQ("int", wkc::TypeName<int>());
+  EXPECT_EQ("unsigned int", wkc::TypeName<unsigned int>());
+  EXPECT_EQ("long int", wkc::TypeName<long int>());
+  EXPECT_EQ("unsigned long int", wkc::TypeName<unsigned long int>());
 
   EXPECT_EQ("float", wkc::TypeName<float>());
   EXPECT_EQ("double", wkc::TypeName<double>());

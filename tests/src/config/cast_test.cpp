@@ -35,6 +35,10 @@ TEST(CastTest, Static) {
   static_assert(!wkc::is_promotable<int, char>());
   static_assert(!wkc::is_promotable<uint, int>());
 
+  static_assert(wkc::is_promotable<int_fast8_t, int_fast16_t>());
+  static_assert(wkc::is_promotable<int_fast8_t, int_fast8_t>());
+  static_assert(wkc::is_promotable<int_fast16_t, int_fast16_t>());
+
   EXPECT_DOUBLE_EQ(1.0F, wkc::detail::exp2<float>(0));
   EXPECT_DOUBLE_EQ(8.0F, wkc::detail::exp2<float>(3));
   EXPECT_DOUBLE_EQ(32.0F, wkc::detail::exp2<double>(5));

@@ -49,6 +49,28 @@ TEST(TypeTest, DateType) {
   std::ostringstream str;
   str << wkc::date{2000, 11, 04};
   EXPECT_EQ("2000-11-04", str.str());
+
+  // Decrement
+  EXPECT_EQ(wkc::date(2000, 12, 1), --wkc::date(2000, 12, 2));
+  EXPECT_EQ(wkc::date(2000, 11, 30), --wkc::date(2000, 12, 1));
+  EXPECT_EQ(wkc::date(2000, 11, 1), --wkc::date(2000, 11, 2));
+  EXPECT_EQ(wkc::date(2000, 10, 31), --wkc::date(2000, 11, 1));
+
+  EXPECT_EQ(wkc::date(2000, 2, 29), --wkc::date(2000, 3, 1));
+  EXPECT_EQ(wkc::date(1999, 2, 28), --wkc::date(1999, 3, 1));
+
+  EXPECT_EQ(wkc::date(1999, 2, 1), --wkc::date(1999, 2, 2));
+  EXPECT_EQ(wkc::date(1999, 1, 31), --wkc::date(1999, 2, 1));
+
+  // Increment
+  EXPECT_EQ(wkc::date(2000, 12, 1), ++wkc::date(2000, 11, 30));
+  EXPECT_EQ(wkc::date(2000, 12, 2), ++wkc::date(2000, 12, 1));
+  EXPECT_EQ(wkc::date(2000, 12, 31), ++wkc::date(2000, 12, 30));
+  EXPECT_EQ(wkc::date(2001, 1, 1), ++wkc::date(2000, 12, 31));
+
+  EXPECT_EQ(wkc::date(2004, 2, 29), ++wkc::date(2004, 2, 28));
+  EXPECT_EQ(wkc::date(2004, 3, 1), ++wkc::date(2004, 2, 29));
+  EXPECT_EQ(wkc::date(2005, 3, 1), ++wkc::date(2005, 2, 28));
 }
 
 TEST(TypeTest, DateParsing) {
@@ -72,7 +94,12 @@ TEST(TypeTest, DateParsing) {
 
   // Dates will be checked
   EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("1-2-3"sv));
-  EXPECT_THROW(wkc::date(2023, 02, 31), wkc::ParseError);
+
+  EXPECT_THROW(wkc::date(2023, 02, 31), wkc::ValueError);
+  EXPECT_NO_THROW(wkc::date(2023, 02, 28));
+  EXPECT_THROW(wkc::date(2023, 02, 29), wkc::ValueError);
+  EXPECT_NO_THROW(wkc::date(2024, 02, 29));
+
   EXPECT_THROW(wkc::date("2023-02-31"sv), wkc::ParseError);
 
   EXPECT_THROW(wkc::date("2023-02-29"sv), wkc::ParseError);
@@ -89,37 +116,60 @@ TEST(TypeTest, DateParsing) {
   // A trailing delimiter will be ignored
   EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date("01.03.2020."sv));
 
-  EXPECT_THROW(wkc::date("1.2."), wkc::ParseError);
-  EXPECT_THROW(wkc::date("1.2.2023.."), wkc::ParseError);
-  EXPECT_THROW(wkc::date(".1.2.2023."), wkc::ParseError);
-  EXPECT_THROW(wkc::date("invalid"), wkc::ParseError);
-  EXPECT_THROW(wkc::date("invalid."), wkc::ParseError);
-  EXPECT_THROW(wkc::date("d.m.Y"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("1.2."sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("1.2.2023.."sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date(".1.2.2023."sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("invalid"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("invalid."sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("d.m.Y"sv), wkc::ParseError);
 
-  EXPECT_EQ(wkc::date(2023, 02, 31), wkc::date("31.02.2023"));
-  EXPECT_EQ(wkc::date(2023, 12, 3), wkc::date("3.12.2023"));
-  EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("3.2.1"));
+  EXPECT_THROW(wkc::date(2023, 02, 31), wkc::ValueError);
+  EXPECT_THROW(wkc::date("31.02.2023"), wkc::ParseError);
 
-  EXPECT_THROW(wkc::date("30.1.10000"), wkc::ParseError);
-  EXPECT_THROW(wkc::date("30.0.1234"), wkc::ParseError);
-  EXPECT_THROW(wkc::date("30.13.1234"), wkc::ParseError);
-  EXPECT_THROW(wkc::date("0.2.1234"), wkc::ParseError);
-  EXPECT_THROW(wkc::date("32.2.1234"), wkc::ParseError);
+  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date("28.02.2023"sv));
+  EXPECT_EQ(wkc::date(2023, 12, 3), wkc::date("3.12.2023"sv));
+  EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("3.2.1"sv));
+
+  EXPECT_THROW(wkc::date("30.1.10000"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("30.0.1234"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("30.13.1234"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("0.2.1234"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("32.2.1234"sv), wkc::ParseError);
 }
 
 TEST(TypeTest, TimeType) {
   // Check basic handling of the `time` type
-  auto time = wkc::time{23, 49, 30, 987654321};
+  wkc::time time{23, 49, 30, 987654321};
   auto tpl_time = time.ToTuple();
   EXPECT_EQ(time.hour, std::get<0>(tpl_time));
   EXPECT_EQ(time.minute, std::get<1>(tpl_time));
   EXPECT_EQ(time.second, std::get<2>(tpl_time));
   EXPECT_EQ(time.nanosecond, std::get<3>(tpl_time));
 
+  // Printing a time
   EXPECT_EQ("23:49:30.987654321", time.ToString());
   std::ostringstream str;
   str << time;
   EXPECT_EQ("23:49:30.987654321", str.str());
+
+  time.nanosecond = 100000000;
+  EXPECT_EQ("23:49:30.100", time.ToString());
+  time.nanosecond = 120000000;
+  EXPECT_EQ("23:49:30.120", time.ToString());
+  time.nanosecond = 123000000;
+  EXPECT_EQ("23:49:30.123", time.ToString());
+  time.nanosecond = 123400000;
+  EXPECT_EQ("23:49:30.123400", time.ToString());
+  time.nanosecond = 123450000;
+  EXPECT_EQ("23:49:30.123450", time.ToString());
+  time.nanosecond = 123456000;
+  EXPECT_EQ("23:49:30.123456", time.ToString());
+  time.nanosecond = 123456700;
+  EXPECT_EQ("23:49:30.123456700", time.ToString());
+  time.nanosecond = 123456780;
+  EXPECT_EQ("23:49:30.123456780", time.ToString());
+  time.nanosecond = 123456789;
+  EXPECT_EQ("23:49:30.123456789", time.ToString());
 
   EXPECT_LE(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
   EXPECT_LT(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));

@@ -10,7 +10,6 @@
 #include <limits>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -20,44 +19,6 @@
 
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
-//-----------------------------------------------------------------------------
-// Exceptions
-// TODO doc: parsing error (syntax, I/O)
-class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::exception {
- public:
-  explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
-};
-
-// TODO doc: config key/parameter name does not exist
-class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
- public:
-  // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-  explicit KeyError(std::string_view key) : msg_{"Key `"} {
-    msg_.append(key);
-    msg_.append("` does not exist!");
-  }
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
-};
-
-// TODO doc: wrong type assumed for getter/setter
-class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::exception {
- public:
-  explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
-};
 
 /// @brief Encapsulates configuration data.
 ///
