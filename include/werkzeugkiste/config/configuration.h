@@ -38,12 +38,12 @@ namespace werkzeugkiste::config {
 /// * [ ] LoadLibconfigFile   ?
 /// * [ ] LoadLibconfigString ?
 /// * [ ] ToLibconfigString   ?
-/// * [ ] Date
-/// * [ ] Time
+/// * [x] Date
+/// * [x] Time
+/// * [ ] DateTime
 /// * [ ] NestedLists int & double (for "matrices")
 /// * [ ] If eigen3 is available, enable GetMatrix.
 ///       Static dimensions vs dynamic?
-/// * [ ] DateTime
 /// * [ ] Setters for ...Pair
 /// * [ ] Setters for ...List
 /// * [x] SetGroup
@@ -134,6 +134,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::optional<time> GetOptionalTime(std::string_view key) const;
   void SetTime(std::string_view key, const time &value);
 
+  date_time GetDateTime(std::string_view key) const;
+  date_time GetDateTimeOr(std::string_view key,
+                          const date_time &default_val) const;
+  std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
+  void SetDateTime(std::string_view key, const date_time &value);
   //---------------------------------------------------------------------------
   //  Lists/pairs of scalar data types
 

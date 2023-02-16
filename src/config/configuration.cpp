@@ -287,6 +287,18 @@ T CastScalar(const NodeView &node, std::string_view key) {
       const toml::time &t = node.as_time()->get();
       return time{t.hour, t.minute, t.second, t.nanosecond};
     }
+  } else if constexpr (std::is_same_v<T, date_time>) {
+    if (node.is_date_time()) {
+      const toml::date_time &dt = node.as_date_time()->get();
+      date_time tmp{};
+      tmp.date = date{dt.date.year, dt.date.month, dt.date.day};
+      tmp.time = time{dt.time.hour, dt.time.minute, dt.time.second,
+                      dt.time.nanosecond};
+      if (dt.offset.has_value()) {
+        tmp.offset = time_offset{dt.offset.value().minutes};
+      }
+      return tmp;
+    }
   } else {
     // TODO This method could be extended to handle date/time
     throw std::logic_error("Type not yet supported!");
@@ -477,9 +489,23 @@ void ConfigSetDateTime(toml::table &tbl, std::string_view key,
     tval = toml::date{value.year, value.month, value.day};
   } else if constexpr (std::is_same_v<Tcfg, time>) {
     tval = toml::time{value.hour, value.minute, value.second, value.nanosecond};
+  } else if constexpr (std::is_same_v<Tcfg, date_time>) {
+    if (value.IsLocal()) {
+      tval = toml::date_time{
+          toml::date{value.date.year, value.date.month, value.date.day},
+          toml::time{value.time.hour, value.time.minute, value.time.second,
+                     value.time.nanosecond}};
+    } else {
+      toml::time_offset offset{};
+      offset.minutes = static_cast<int16_t>(value.offset.value().minutes);
+      tval = toml::date_time{
+          toml::date{value.date.year, value.date.month, value.date.day},
+          toml::time{value.time.hour, value.time.minute, value.time.second,
+                     value.time.nanosecond},
+          offset};
+    }
   }
 
-  // TODO add date_time
   if (ConfigContainsKey(tbl, key)) {
     const auto node = tbl.at_path(key);
     if (!node.is<Ttoml>()) {
@@ -906,7 +932,8 @@ ConfigType Configuration::Type(std::string_view key) const {
     case toml::node_type::time:
       return ConfigType::Time;
 
-      // TODO date_time
+    case toml::node_type::date_time:
+      return ConfigType::DateTime;
   }
 
   // LCOV_EXCL_START
@@ -1071,6 +1098,29 @@ void Configuration::SetTime(std::string_view key, const time &value) {
   using namespace std::string_view_literals;
   utils::ConfigSetDateTime<time, toml::time>(pimpl_->config_root, key, value,
                                              "time"sv);
+}
+
+date_time Configuration::GetDateTime(std::string_view key) const {
+  return utils::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
+                                              /*allow_default=*/false);
+}
+
+date_time Configuration::GetDateTimeOr(std::string_view key,
+                                       const date_time &default_val) const {
+  return utils::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
+                                              /*allow_default=*/true,
+                                              default_val);
+}
+
+std::optional<date_time> Configuration::GetOptionalDateTime(
+    std::string_view key) const {
+  return utils::ConfigLookupOptional<date_time>(pimpl_->config_root, key);
+}
+
+void Configuration::SetDateTime(std::string_view key, const date_time &value) {
+  using namespace std::string_view_literals;
+  utils::ConfigSetDateTime<date_time, toml::date_time>(pimpl_->config_root, key,
+                                                       value, "date_time"sv);
 }
 
 //---------------------------------------------------------------------------

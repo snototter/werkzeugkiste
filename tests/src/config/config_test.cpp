@@ -257,7 +257,8 @@ TEST(ConfigTest, GetScalarTypes) {
     [dates]
     day = 2023-01-02
     time = 01:02:03.123456
-    date_time = 1912-07-23T08:37:00-08:00
+    dt1 = 1912-07-23T08:37:00-08:00
+    dt2 = 2004-02-28T23:59:59.999888-01:00
 
     )toml"sv);
 
@@ -338,14 +339,12 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_EQ(wkc::date(1234, 12, 30),
             config.GetDateOr("no-such-key"sv, wkc::date{1234, 12, 30}));
 
-  // Date parameter
-  // Note that the nanoseconds ".123" will be parsed according to the TOML
+  // The fractional seconds ".123" will be parsed according to the TOML
   // specification into "123000000" nanoseconds.
   wkc::time time{1, 2, 3, 123456000};
   EXPECT_EQ(time, config.GetTime("dates.time"sv));
   EXPECT_TRUE(config.GetOptionalTime("dates.time"sv).has_value());
   EXPECT_EQ(time, config.GetOptionalTime("dates.time"sv).value());
-  // TODO expect_ne time + offset, gettime()
 
   EXPECT_THROW(config.GetTime("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetTime("dates.day"sv), wkc::TypeError);
@@ -355,7 +354,28 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_EQ(time, config.GetTimeOr("no-such-key"sv, time));
   EXPECT_FALSE(config.GetOptionalTime("no-such-key"sv).has_value());
 
-  // TODO date_time
+  // Date-time parameter
+  auto dt1 = wkc::date_time{"1912-07-23T08:37:00-08:00"sv};
+  auto dt2 = wkc::date_time{"2004-02-28T23:59:59.999888-01:00"sv};
+  EXPECT_EQ(dt1, config.GetDateTime("dates.dt1"sv));
+  EXPECT_EQ(dt2, config.GetDateTime("dates.dt2"sv));
+  EXPECT_NE(dt1, dt2);
+
+  EXPECT_TRUE(config.GetOptionalDateTime("dates.dt1"sv).has_value());
+  EXPECT_EQ(dt1, config.GetOptionalDateTime("dates.dt1"sv).value());
+
+  EXPECT_THROW(config.GetDateTime("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTimeOr("str"sv, dt1), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("no-such-key"sv), wkc::KeyError);
+  EXPECT_EQ(dt2, config.GetDateTimeOr("no-such-key"sv, dt2));
+
+  dt2.offset = std::nullopt;
+  EXPECT_NE(dt2, config.GetDateTime("dates.dt2"sv));
+  dt2.offset = wkc::time_offset{-59};
+  EXPECT_NE(dt2, config.GetDateTime("dates.dt2"sv));
+  dt2.offset = wkc::time_offset{-60};
+  EXPECT_EQ(dt2, config.GetDateTime("dates.dt2"sv));
 
   // Invalid access
   EXPECT_THROW(config.GetBoolean("int_list"sv), wkc::TypeError);
