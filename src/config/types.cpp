@@ -106,6 +106,11 @@ std::string ConfigTypeToString(const ConfigType &ct) {
   // LCOV_EXCL_STOP
 }
 
+std::ostream &operator<<(std::ostream &os, const ConfigType &ct) {
+  os << ConfigTypeToString(ct);
+  return os;
+}
+
 //-----------------------------------------------------------------------------
 // Number parsing for date & time types
 

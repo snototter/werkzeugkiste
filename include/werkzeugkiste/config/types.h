@@ -97,6 +97,10 @@ enum class ConfigType : unsigned char {
 WERKZEUGKISTE_CONFIG_EXPORT
 std::string ConfigTypeToString(const ConfigType &ct);
 
+/// Prints the string representation of a `ConfigType` out to the stream.
+WERKZEUGKISTE_CONFIG_EXPORT
+std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
+
 //-----------------------------------------------------------------------------
 // Date
 

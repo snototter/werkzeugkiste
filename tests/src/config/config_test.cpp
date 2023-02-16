@@ -232,8 +232,16 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_EQ("string", wkc::ConfigTypeToString(wkc::ConfigType::String));
   EXPECT_EQ("date", wkc::ConfigTypeToString(wkc::ConfigType::Date));
   EXPECT_EQ("time", wkc::ConfigTypeToString(wkc::ConfigType::Time));
+  EXPECT_EQ("date_time", wkc::ConfigTypeToString(wkc::ConfigType::DateTime));
   EXPECT_EQ("list", wkc::ConfigTypeToString(wkc::ConfigType::List));
   EXPECT_EQ("group", wkc::ConfigTypeToString(wkc::ConfigType::Group));
+
+  // Stream operator should be properly overloaded
+  std::ostringstream str;
+  str << wkc::ConfigType::Date;
+  EXPECT_EQ("date", str.str());
+  str << '!' << wkc::ConfigType::FloatingPoint;
+  EXPECT_EQ("date!floating_point", str.str());
 }
 
 TEST(ConfigTest, GetScalarTypes) {
