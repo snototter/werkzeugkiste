@@ -59,11 +59,17 @@ constexpr uint_fast8_t LastDayOfMonth(uint_fast16_t year,
                                              : static_cast<uint_fast8_t>(29);
 }
 
-constexpr bool IsValid(uint_fast16_t year, uint_fast8_t month,
-                       uint_fast8_t day) noexcept {
+constexpr bool IsValidDate(uint_fast16_t year, uint_fast8_t month,
+                           uint_fast8_t day) noexcept {
   return ((month < 1) || (month > 12))
              ? false
              : ((day > 0) && (day <= LastDayOfMonth(year, month)));
+}
+
+constexpr bool IsValidTime(uint_fast8_t hour, uint_fast8_t minute,
+                           uint_fast8_t second, uint_fast32_t nanosecond) {
+  return (hour < 24) && (minute < 60) && (second < 60) &&
+         (nanosecond < 1000000000);
 }
 }  // namespace detail
 
@@ -194,7 +200,7 @@ date::date(std::string_view str) {
 
 date::date(uint_fast16_t y, uint_fast8_t m, uint_fast8_t d)
     : year{y}, month{m}, day{d} {
-  if (!detail::IsValid(y, m, d)) {
+  if (!detail::IsValidDate(y, m, d)) {
     std::ostringstream msg;
     msg << "Cannot create a valid `date` from " << +y << ", " << +m << ", "
         << +d << '!';
@@ -311,6 +317,16 @@ time::time(std::string_view str) {
       second =
           ParseDateTimeNumber<uint_fast8_t>(hms_tokens[2], 0, 59, "time"sv);
     }
+  }
+}
+
+time::time(uint_fast8_t h, uint_fast8_t m, uint_fast8_t s, uint_fast32_t ns)
+    : hour{h}, minute{m}, second{s}, nanosecond{ns} {
+  if (!detail::IsValidTime(h, m, s, ns)) {
+    std::ostringstream msg;
+    msg << "Cannot create a valid `time` from " << +h << ':' << +m << ':' << +s
+        << '.' << +ns << '!';
+    throw ValueError(msg.str());
   }
 }
 

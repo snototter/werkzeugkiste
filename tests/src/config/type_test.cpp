@@ -172,10 +172,17 @@ TEST(TypeTest, TimeType) {
   EXPECT_EQ("23:49:30.123456789", time.ToString());
 
   // Invalid value ranges.
+  EXPECT_NO_THROW(wkc::time(0, 0, 0));
+  EXPECT_NO_THROW(wkc::time(0, 10, 22));
   EXPECT_NO_THROW(wkc::time(8, 10, 22));
-  EXPECT_THROW(wkc::time(0, 10, 22), wkc::ValueError);
+
+  EXPECT_NO_THROW(wkc::time(23, 10, 22));
   EXPECT_THROW(wkc::time(24, 10, 22), wkc::ValueError);
+
+  EXPECT_NO_THROW(wkc::time(8, 59, 22));
   EXPECT_THROW(wkc::time(8, 60, 22), wkc::ValueError);
+
+  EXPECT_NO_THROW(wkc::time(8, 10, 59));
   EXPECT_THROW(wkc::time(8, 10, 60), wkc::ValueError);
 
   // Overloaded operators.
@@ -221,6 +228,12 @@ TEST(TypeTest, TimeParsing) {
   EXPECT_EQ(wkc::time(10, 11, 12, 100000000), wkc::time("10:11:12.1"sv));
   EXPECT_EQ(wkc::time(10, 11, 12, 120000000), wkc::time("10:11:12.12"sv));
   EXPECT_EQ(wkc::time(10, 11, 12, 123000000), wkc::time("10:11:12.123"sv));
+  EXPECT_THROW(wkc::time("10:11:12.1 3"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12. 12"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.12 "sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12. 123"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.123 "sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time("10:11:12.1 23"sv), wkc::ParseError);
   EXPECT_THROW(wkc::time("10:11:12.1234"sv), wkc::ParseError);
   EXPECT_THROW(wkc::time("10:11:12.12345"sv), wkc::ParseError);
   EXPECT_EQ(wkc::time(10, 11, 12, 123456000), wkc::time("10:11:12.123456"sv));

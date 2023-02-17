@@ -1503,7 +1503,17 @@ TEST(ConfigTest, InvalidDateTimes) {
   EXPECT_THROW(wkc::LoadTOMLString("dt = 1990-12-31T15:59:60-08:00"),
                wkc::ParseError);
 
+  // Leap seconds are not supported.
   EXPECT_THROW(wkc::date_time({1990, 12, 31}, {23, 59, 60}), wkc::ValueError);
+  EXPECT_THROW(wkc::date_time{"1990-12-31T23:59:60Z"sv}, wkc::ParseError);
+
+  // Unknown Local Offset Convention (-00:00) is not supported, i.e. it
+  // will be silently converted to UTC+0.
+  EXPECT_NO_THROW(wkc::date_time{"1990-12-31T23:59:59Z"sv});
+  EXPECT_NO_THROW(wkc::date_time{"1990-12-31T23:59:59-00:00"sv});
+  EXPECT_NO_THROW(wkc::date_time{"1990-12-31T23:59:59+00:00"sv});
+  EXPECT_EQ(wkc::date_time{"1990-12-31T23:59:59-00:00"sv},
+            wkc::date_time{"1990-12-31T23:59:59+00:00"sv});
 }
 
 // TODO Can be properly tested once we have LoadJSONString()

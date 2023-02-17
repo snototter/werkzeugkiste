@@ -191,8 +191,8 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   /// * HH:MM:SS.sssssssss (for nanoseconds)
   explicit time(std::string_view str);
 
-  time(uint_fast8_t h, uint_fast8_t m, uint_fast8_t s = 0, uint_fast32_t ns = 0)
-      : hour{h}, minute{m}, second{s}, nanosecond{ns} {}
+  time(uint_fast8_t h, uint_fast8_t m, uint_fast8_t s = 0,
+       uint_fast32_t ns = 0);
 
   std::tuple<uint_fast8_t, uint_fast8_t, uint_fast8_t, uint_fast32_t> ToTuple()
       const {
