@@ -208,18 +208,26 @@ TEST(TypeTest, TimeParsing) {
   EXPECT_THROW(wkc::time(" 10:11:12 "sv), wkc::ParseError);
   EXPECT_THROW(wkc::time(" 10: 11:12"sv), wkc::ParseError);
 
-  // Sub-second component must explicitly contain either 3 (ms), 6 (us)
+  // Sub-second component must explicitly contain either 1, 2, 3 (ms), 6 (us)
   // or 9 (ns) digits.
-  EXPECT_THROW(wkc::time("10:11:12.1"sv), wkc::ParseError);
-  EXPECT_THROW(wkc::time("10:11:12.12"sv), wkc::ParseError);
+  EXPECT_EQ(wkc::time(10, 11, 12, 100000000), wkc::time("10:11:12.1"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12, 120000000), wkc::time("10:11:12.12"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12, 123000000), wkc::time("10:11:12.123"sv));
   EXPECT_THROW(wkc::time("10:11:12.1234"sv), wkc::ParseError);
   EXPECT_THROW(wkc::time("10:11:12.12345"sv), wkc::ParseError);
+  EXPECT_EQ(wkc::time(10, 11, 12, 123456000), wkc::time("10:11:12.123456"sv));
   EXPECT_THROW(wkc::time("10:11:12.1234567"sv), wkc::ParseError);
   EXPECT_THROW(wkc::time("10:11:12.12345678"sv), wkc::ParseError);
+  EXPECT_EQ(wkc::time(10, 11, 12, 123456789),
+            wkc::time("10:11:12.123456789"sv));
 
+  // Second/fraction delimiter can be '.' or ','
   EXPECT_EQ(wkc::time(10, 11, 12, 1000000), wkc::time("10:11:12.001"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12, 1000000), wkc::time("10:11:12,001"sv));
   EXPECT_EQ(wkc::time(10, 11, 12, 1002000), wkc::time("10:11:12.001002"sv));
+  EXPECT_EQ(wkc::time(10, 11, 12, 1002000), wkc::time("10:11:12,001002"sv));
   EXPECT_EQ(wkc::time(10, 11, 12, 1002003), wkc::time("10:11:12.001002003"sv));
+  EXPECT_THROW(wkc::time("10:11:12,001.002003"sv), wkc::ParseError);
 
   // Parsing checks the value ranges:
   EXPECT_THROW(wkc::time("-1:00"sv), wkc::ParseError);
@@ -341,13 +349,16 @@ TEST(TypeTest, DateTime) {
   // Parsing valid formats according to RFC 3339.
   dt = wkc::date_time{wkc::date{2023, 2, 14}, wkc::time{21, 8, 23}};
   // Offset has not been set.
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23"sv});
   EXPECT_NE(dt, wkc::date_time{"2023-02-14T21:08:23Z"sv});
   dt.offset = wkc::time_offset{0};
   EXPECT_NE(dt, wkc::date_time{"2023-02-14T21:08:23"sv});
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23Z"sv});
 
   // For readability, the delimiter between date and time can
-  // also be a space or underscore.
+  // also be a space.
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23Z"sv});
+  // Underscore is also commonly used.
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14_21:08:23Z"sv});
 
   // Uppercase and lowercase letters T/Z are valid.
@@ -361,17 +372,17 @@ TEST(TypeTest, DateTime) {
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23+00:00"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23Z"sv});
 
-  // TODO EXPECT_LT(dt, wkc::date_time{"2023-02-14_21:08:23.880Z"sv});
+  // Parsing with nanoseconds.
   dt.time.nanosecond = 880000000;
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14_21:08:23.880Z"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14 21:08:23.880Z"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T21:08:23.880Z"sv});
 
+  // Parsing with additional offset.
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:08:23.880+01:00"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T20:08:23.880-01:00"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14t22:08:23.880+01:00"sv});
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:08:23.880+01:00"sv});
-
   EXPECT_NE(dt, wkc::date_time{"2023-02-14T22:08:23+01:00"sv});  // ns differ
 
   EXPECT_EQ(wkc::date_time{"2024-02-29 00:45:12.123+01:00"sv},
@@ -379,25 +390,21 @@ TEST(TypeTest, DateTime) {
   EXPECT_EQ(wkc::date_time("2024-02-29 00:45:12.123+01:00"sv).UTC(),
             wkc::date_time("2024-02-28 23:45:12.123Z"sv).UTC());
 
-  // TODO extensions:
-  // * validate date (leapyear + exact days per month)
-  // * implement date_time + time_offset --> UTC+00:00 (might require
-  //   +/- one day)
-  // * keyerror --> return closest key with levenshtein distance < X
+  EXPECT_NE(dt, wkc::date_time{"2023-02-14T21:08:23"sv});
 
-  /**
-2023-02-14T21:30:03Z
-2023-02-14T21:30:03.8Z
-2023-02-14T21:30:03.88Z
-2023-02-14T21:30:03.880Z
-2023-02-14T21:30:03+00:00
-2023-02-14T21:30:03.8+00:00
-2023-02-14T22:30:03+01:00
-2023-02-14T22:30:03.8+01:00
-2023-02-14T22:30:03.88+01:00
-2023-02-14T22:30:03.880+01:00*/
+  dt.time = wkc::time{"22:30:03"sv};
+  dt.offset = wkc::time_offset{60};
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:30:03+01:00"sv});
+  EXPECT_NE(dt, wkc::date_time{"2023-02-14T22:30:03.8+01:00"sv});
+  dt.time.nanosecond = 800000000;
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:30:03.8+01:00"sv});
+  EXPECT_NE(dt, wkc::date_time{"2023-02-14T22:30:03.88+01:00"sv});
+  dt.time.nanosecond = 880000000;
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:30:03.88+01:00"sv});
+  dt.time.nanosecond = 884000000;
+  EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:30:03.884+01:00"sv});
 
-  // TODO invalid strings
+  // Invalid strings
   EXPECT_THROW(wkc::date_time("invalid"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date_time("now"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date_time("today"sv), wkc::ParseError);
@@ -405,6 +412,7 @@ TEST(TypeTest, DateTime) {
   EXPECT_THROW(wkc::date_time("yesterday"sv), wkc::ParseError);
 
   // TODO Comparison operators
+  // TODO EXPECT_LT(dt, wkc::date_time{"2023-02-14_21:08:23.880Z"sv});
 }
 
 // NOLINTEND

@@ -20,7 +20,7 @@
 #include <vector>
 
 namespace werkzeugkiste::config {
-namespace utils {
+namespace detail {
 // NOLINTNEXTLINE(*macro-usage)
 #define WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(KEY, NODE, TYPE) \
   do {                                                           \
@@ -819,7 +819,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
 }
 
 #undef WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR
-}  // namespace utils
+}  // namespace detail
 
 // Abusing the PImpl idiom to hide the internally used TOML table.
 struct Configuration::Impl {
@@ -878,10 +878,10 @@ bool Configuration::Empty() const {
 
 bool Configuration::Equals(const Configuration &other) const {
   using namespace std::string_view_literals;
-  const auto keys_this = utils::ListTableKeys(pimpl_->config_root, ""sv,
-                                              /*include_array_entries=*/true);
-  const auto keys_other = utils::ListTableKeys(other.pimpl_->config_root, ""sv,
+  const auto keys_this = detail::ListTableKeys(pimpl_->config_root, ""sv,
                                                /*include_array_entries=*/true);
+  const auto keys_other = detail::ListTableKeys(other.pimpl_->config_root, ""sv,
+                                                /*include_array_entries=*/true);
 
   if (keys_this.size() != keys_other.size()) {
     return false;
@@ -899,7 +899,7 @@ bool Configuration::Equals(const Configuration &other) const {
 }
 
 bool Configuration::Contains(std::string_view key) const {
-  return utils::ConfigContainsKey(pimpl_->config_root, key);
+  return detail::ConfigContainsKey(pimpl_->config_root, key);
 }
 
 ConfigType Configuration::Type(std::string_view key) const {
@@ -938,7 +938,7 @@ ConfigType Configuration::Type(std::string_view key) const {
 
   // LCOV_EXCL_START
   std::string msg{"TOML node type `"};
-  msg += utils::TomlTypeName(nv, key);
+  msg += detail::TomlTypeName(nv, key);
   msg += "` is not yet handled in `Configuration::Type`!";
   throw std::logic_error(msg);
   // LCOV_EXCL_STOP
@@ -947,111 +947,113 @@ ConfigType Configuration::Type(std::string_view key) const {
 std::vector<std::string> Configuration::ListParameterNames(
     bool include_array_entries) const {
   using namespace std::string_view_literals;
-  return utils::ListTableKeys(pimpl_->config_root, ""sv, include_array_entries);
+  return detail::ListTableKeys(pimpl_->config_root, ""sv,
+                               include_array_entries);
 }
 
 //---------------------------------------------------------------------------
 // Scalar data types
 
 bool Configuration::GetBoolean(std::string_view key) const {
-  return utils::ConfigLookupScalar<bool>(pimpl_->config_root, key,
-                                         /*allow_default=*/false);
+  return detail::ConfigLookupScalar<bool>(pimpl_->config_root, key,
+                                          /*allow_default=*/false);
 }
 
 bool Configuration::GetBooleanOr(std::string_view key, bool default_val) const {
-  return utils::ConfigLookupScalar<bool>(pimpl_->config_root, key,
-                                         /*allow_default=*/true, default_val);
+  return detail::ConfigLookupScalar<bool>(pimpl_->config_root, key,
+                                          /*allow_default=*/true, default_val);
 }
 
 std::optional<bool> Configuration::GetOptionalBoolean(
     std::string_view key) const {
-  return utils::ConfigLookupOptional<bool>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<bool>(pimpl_->config_root, key);
 }
 
 void Configuration::SetBoolean(std::string_view key, bool value) {
-  utils::ConfigSetScalar<bool>(pimpl_->config_root, key, value);
+  detail::ConfigSetScalar<bool>(pimpl_->config_root, key, value);
 }
 
 int32_t Configuration::GetInteger32(std::string_view key) const {
-  return utils::ConfigLookupScalar<int32_t>(pimpl_->config_root, key,
-                                            /*allow_default=*/false);
+  return detail::ConfigLookupScalar<int32_t>(pimpl_->config_root, key,
+                                             /*allow_default=*/false);
 }
 
 int32_t Configuration::GetInteger32Or(std::string_view key,
                                       int32_t default_val) const {
-  return utils::ConfigLookupScalar<int32_t>(
+  return detail::ConfigLookupScalar<int32_t>(
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
 }
 
 std::optional<int32_t> Configuration::GetOptionalInteger32(
     std::string_view key) const {
-  return utils::ConfigLookupOptional<int32_t>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<int32_t>(pimpl_->config_root, key);
 }
 
 void Configuration::SetInteger32(std::string_view key, int32_t value) {
-  utils::ConfigSetScalar<int64_t, int32_t>(pimpl_->config_root, key,
-                                           static_cast<int64_t>(value));
+  detail::ConfigSetScalar<int64_t, int32_t>(pimpl_->config_root, key,
+                                            static_cast<int64_t>(value));
 }
 
 int64_t Configuration::GetInteger64(std::string_view key) const {
-  return utils::ConfigLookupScalar<int64_t>(pimpl_->config_root, key,
-                                            /*allow_default=*/false);
+  return detail::ConfigLookupScalar<int64_t>(pimpl_->config_root, key,
+                                             /*allow_default=*/false);
 }
 
 int64_t Configuration::GetInteger64Or(std::string_view key,
                                       int64_t default_val) const {
-  return utils::ConfigLookupScalar<int64_t>(
+  return detail::ConfigLookupScalar<int64_t>(
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
 }
 
 std::optional<int64_t> Configuration::GetOptionalInteger64(
     std::string_view key) const {
-  return utils::ConfigLookupOptional<int64_t>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<int64_t>(pimpl_->config_root, key);
 }
 
 void Configuration::SetInteger64(std::string_view key, int64_t value) {
-  utils::ConfigSetScalar<int64_t>(pimpl_->config_root, key, value);
+  detail::ConfigSetScalar<int64_t>(pimpl_->config_root, key, value);
 }
 
 double Configuration::GetDouble(std::string_view key) const {
-  return utils::ConfigLookupScalar<double>(pimpl_->config_root, key,
-                                           /*allow_default=*/false);
+  return detail::ConfigLookupScalar<double>(pimpl_->config_root, key,
+                                            /*allow_default=*/false);
 }
 
 double Configuration::GetDoubleOr(std::string_view key,
                                   double default_val) const {
-  return utils::ConfigLookupScalar<double>(pimpl_->config_root, key,
-                                           /*allow_default=*/true, default_val);
+  return detail::ConfigLookupScalar<double>(pimpl_->config_root, key,
+                                            /*allow_default=*/true,
+                                            default_val);
 }
 
 std::optional<double> Configuration::GetOptionalDouble(
     std::string_view key) const {
-  return utils::ConfigLookupOptional<double>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<double>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDouble(std::string_view key, double value) {
-  utils::ConfigSetScalar<double>(pimpl_->config_root, key, value);
+  detail::ConfigSetScalar<double>(pimpl_->config_root, key, value);
 }
 
 std::string Configuration::GetString(std::string_view key) const {
   using namespace std::string_view_literals;
-  return utils::ConfigLookupScalar<std::string, std::string_view>(
+  return detail::ConfigLookupScalar<std::string, std::string_view>(
       pimpl_->config_root, key, /*allow_default=*/false, ""sv);
 }
 
 std::string Configuration::GetStringOr(std::string_view key,
                                        std::string_view default_val) const {
-  return utils::ConfigLookupScalar<std::string, std::string_view>(
+  return detail::ConfigLookupScalar<std::string, std::string_view>(
       pimpl_->config_root, key, /*allow_default=*/true, default_val);
 }
 
 std::optional<std::string> Configuration::GetOptionalString(
     std::string_view key) const {
-  return utils::ConfigLookupOptional<std::string>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<std::string>(pimpl_->config_root, key);
 }
 
 void Configuration::SetString(std::string_view key, std::string_view value) {
-  utils::ConfigSetScalar<std::string, std::string, std::string_view>(
+  detail::ConfigSetScalar<std::string, std::string, std::string_view>(
       pimpl_->config_root, key, value);
 }
 
@@ -1059,68 +1061,68 @@ void Configuration::SetString(std::string_view key, std::string_view value) {
 // Date/time data types
 
 date Configuration::GetDate(std::string_view key) const {
-  return utils::ConfigLookupScalar<date>(pimpl_->config_root, key,
-                                         /*allow_default=*/false);
+  return detail::ConfigLookupScalar<date>(pimpl_->config_root, key,
+                                          /*allow_default=*/false);
 }
 
 date Configuration::GetDateOr(std::string_view key,
                               const date &default_val) const {
-  return utils::ConfigLookupScalar<date>(pimpl_->config_root, key,
-                                         /*allow_default=*/true, default_val);
+  return detail::ConfigLookupScalar<date>(pimpl_->config_root, key,
+                                          /*allow_default=*/true, default_val);
 }
 
 std::optional<date> Configuration::GetOptionalDate(std::string_view key) const {
-  return utils::ConfigLookupOptional<date>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<date>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDate(std::string_view key, const date &value) {
   using namespace std::string_view_literals;
-  utils::ConfigSetDateTime<date, toml::date>(pimpl_->config_root, key, value,
-                                             "date"sv);
+  detail::ConfigSetDateTime<date, toml::date>(pimpl_->config_root, key, value,
+                                              "date"sv);
 }
 
 time Configuration::GetTime(std::string_view key) const {
-  return utils::ConfigLookupScalar<time>(pimpl_->config_root, key,
-                                         /*allow_default=*/false);
+  return detail::ConfigLookupScalar<time>(pimpl_->config_root, key,
+                                          /*allow_default=*/false);
 }
 
 time Configuration::GetTimeOr(std::string_view key,
                               const time &default_val) const {
-  return utils::ConfigLookupScalar<time>(pimpl_->config_root, key,
-                                         /*allow_default=*/true, default_val);
+  return detail::ConfigLookupScalar<time>(pimpl_->config_root, key,
+                                          /*allow_default=*/true, default_val);
 }
 
 std::optional<time> Configuration::GetOptionalTime(std::string_view key) const {
-  return utils::ConfigLookupOptional<time>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<time>(pimpl_->config_root, key);
 }
 
 void Configuration::SetTime(std::string_view key, const time &value) {
   using namespace std::string_view_literals;
-  utils::ConfigSetDateTime<time, toml::time>(pimpl_->config_root, key, value,
-                                             "time"sv);
+  detail::ConfigSetDateTime<time, toml::time>(pimpl_->config_root, key, value,
+                                              "time"sv);
 }
 
 date_time Configuration::GetDateTime(std::string_view key) const {
-  return utils::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
-                                              /*allow_default=*/false);
+  return detail::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
+                                               /*allow_default=*/false);
 }
 
 date_time Configuration::GetDateTimeOr(std::string_view key,
                                        const date_time &default_val) const {
-  return utils::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
-                                              /*allow_default=*/true,
-                                              default_val);
+  return detail::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
+                                               /*allow_default=*/true,
+                                               default_val);
 }
 
 std::optional<date_time> Configuration::GetOptionalDateTime(
     std::string_view key) const {
-  return utils::ConfigLookupOptional<date_time>(pimpl_->config_root, key);
+  return detail::ConfigLookupOptional<date_time>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDateTime(std::string_view key, const date_time &value) {
   using namespace std::string_view_literals;
-  utils::ConfigSetDateTime<date_time, toml::date_time>(pimpl_->config_root, key,
-                                                       value, "date_time"sv);
+  detail::ConfigSetDateTime<date_time, toml::date_time>(
+      pimpl_->config_root, key, value, "date_time"sv);
 }
 
 //---------------------------------------------------------------------------
@@ -1128,47 +1130,47 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
 
 std::pair<double, double> Configuration::GetDoublePair(
     std::string_view key) const {
-  return utils::GetScalarPair<double>(pimpl_->config_root, key);
+  return detail::GetScalarPair<double>(pimpl_->config_root, key);
 }
 
 std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
-  return utils::GetScalarList<double>(pimpl_->config_root, key);
+  return detail::GetScalarList<double>(pimpl_->config_root, key);
 }
 
 std::pair<int32_t, int32_t> Configuration::GetInteger32Pair(
     std::string_view key) const {
-  return utils::GetScalarPair<int32_t>(pimpl_->config_root, key);
+  return detail::GetScalarPair<int32_t>(pimpl_->config_root, key);
 }
 
 std::vector<int32_t> Configuration::GetInteger32List(
     std::string_view key) const {
-  return utils::GetScalarList<int32_t>(pimpl_->config_root, key);
+  return detail::GetScalarList<int32_t>(pimpl_->config_root, key);
 }
 
 std::pair<int64_t, int64_t> Configuration::GetInteger64Pair(
     std::string_view key) const {
-  return utils::GetScalarPair<int64_t>(pimpl_->config_root, key);
+  return detail::GetScalarPair<int64_t>(pimpl_->config_root, key);
 }
 
 std::vector<int64_t> Configuration::GetInteger64List(
     std::string_view key) const {
-  return utils::GetScalarList<int64_t>(pimpl_->config_root, key);
+  return detail::GetScalarList<int64_t>(pimpl_->config_root, key);
 }
 
 std::vector<std::string> Configuration::GetStringList(
     std::string_view key) const {
-  return utils::GetScalarList<std::string>(pimpl_->config_root, key);
+  return detail::GetScalarList<std::string>(pimpl_->config_root, key);
 }
 
 std::vector<std::tuple<int32_t, int32_t>> Configuration::GetPoints2D(
     std::string_view key) const {
-  return utils::GetPoints<std::tuple<int32_t, int32_t>>(pimpl_->config_root,
-                                                        key);
+  return detail::GetPoints<std::tuple<int32_t, int32_t>>(pimpl_->config_root,
+                                                         key);
 }
 
 std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetPoints3D(
     std::string_view key) const {
-  return utils::GetPoints<std::tuple<int32_t, int32_t, int32_t>>(
+  return detail::GetPoints<std::tuple<int32_t, int32_t, int32_t>>(
       pimpl_->config_root, key);
 }
 
@@ -1184,7 +1186,7 @@ Configuration Configuration::GetGroup(std::string_view key) const {
     std::string msg{"Cannot retrieve `"};
     msg += key;
     msg += "` as a group, because it is a`";
-    msg += utils::TomlTypeName(nv, key);
+    msg += detail::TomlTypeName(nv, key);
     msg += "`!";
     throw TypeError{msg};
   }
@@ -1201,14 +1203,14 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
         "be empty in `SetGroup`!"};
   }
 
-  const auto path = utils::SplitTomlPath(key);
-  if (utils::ConfigContainsKey(pimpl_->config_root, key)) {
+  const auto path = detail::SplitTomlPath(key);
+  if (detail::ConfigContainsKey(pimpl_->config_root, key)) {
     const auto node = pimpl_->config_root.at_path(key);
     if (!node.is_table()) {
       std::string msg{"Cannot insert parameter group at `"};
       msg += key;
       msg += "`. Existing parameter is of type `";
-      msg += utils::TomlTypeName(node, key);
+      msg += detail::TomlTypeName(node, key);
       msg += "`!";
       throw TypeError{msg};
     }
@@ -1216,7 +1218,7 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
     auto &ref = *node.as_table();
     ref = group.pimpl_->config_root;
   } else {
-    utils::EnsureContainerPathExists(pimpl_->config_root, path.first);
+    detail::EnsureContainerPathExists(pimpl_->config_root, path.first);
     toml::table *parent =
         path.first.empty() ? &pimpl_->config_root
                            : pimpl_->config_root.at_path(path.first).as_table();
@@ -1233,7 +1235,7 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
 
     auto result =
         parent->insert_or_assign(path.second, group.pimpl_->config_root);
-    if (!utils::ConfigContainsKey(pimpl_->config_root, key)) {
+    if (!detail::ConfigContainsKey(pimpl_->config_root, key)) {
       // LCOV_EXCL_START
       std::ostringstream msg;
       msg << "Assigning parameter group to `" << key
@@ -1271,13 +1273,13 @@ bool Configuration::AdjustRelativePaths(
         std::string msg{"Inside `EnsureAbsolutePaths()`, path parameter `"};
         msg += fqn;
         msg += "` must be a string, but is `";
-        msg += utils::TomlTypeName(node, fqn);
+        msg += detail::TomlTypeName(node, fqn);
         msg += "`!";
         throw TypeError{msg};
       }
 
       // Check if the path is relative
-      const std::string param_str = utils::CastScalar<std::string>(node, fqn);
+      const std::string param_str = detail::CastScalar<std::string>(node, fqn);
       const bool is_file_url = strings::StartsWith(param_str, "file://");
       // NOLINTNEXTLINE(*magic-numbers)
       std::string path = is_file_url ? param_str.substr(7) : param_str;
@@ -1294,7 +1296,7 @@ bool Configuration::AdjustRelativePaths(
       }
     }
   };
-  utils::Traverse(pimpl_->config_root, ""sv, func);
+  detail::Traverse(pimpl_->config_root, ""sv, func);
   return replaced;
 }
 
@@ -1315,7 +1317,7 @@ bool Configuration::ReplaceStringPlaceholders(
   auto func = [rep_ptr, replacements](toml::node &node,
                                       std::string_view fqn) -> void {
     if (node.is_string()) {
-      std::string param_str = utils::CastScalar<std::string>(node, fqn);
+      std::string param_str = detail::CastScalar<std::string>(node, fqn);
       bool matched{false};
       for (const auto &rep : replacements) {
         std::size_t pos{0};
@@ -1332,14 +1334,14 @@ bool Configuration::ReplaceStringPlaceholders(
       }
     }
   };
-  utils::Traverse(pimpl_->config_root, ""sv, func);
+  detail::Traverse(pimpl_->config_root, ""sv, func);
   return replaced;
 }
 
 void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   // TODO refactor (TOML/JSON --> function handle)
 
-  if (!utils::ConfigContainsKey(pimpl_->config_root, key)) {
+  if (!detail::ConfigContainsKey(pimpl_->config_root, key)) {
     throw werkzeugkiste::config::KeyError(key);
   }
 
@@ -1348,7 +1350,7 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
     std::string msg{"Parameter `"};
     msg += key;
     msg += "` to load a nested configuration must be a string, but is `";
-    msg += utils::TomlTypeName(node, key);
+    msg += detail::TomlTypeName(node, key);
     msg += "`!";
     throw TypeError{msg};
   }
@@ -1359,7 +1361,7 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   try {
     auto nested_tbl = toml::parse_file(fname);
 
-    const auto path = utils::SplitTomlPath(key);
+    const auto path = detail::SplitTomlPath(key);
 
     toml::table *parent =
         path.first.empty() ? &pimpl_->config_root
