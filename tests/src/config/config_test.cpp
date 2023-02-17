@@ -175,6 +175,7 @@ TEST(ConfigTest, QueryTypes) {
 
   EXPECT_THROW(config.Type(""sv), wkc::KeyError);
 
+  // Bool, int, float, string
   EXPECT_TRUE(config.Contains("bool"sv));
   EXPECT_FALSE(config.Contains("bool1"sv));
   EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("bool"sv));
@@ -189,6 +190,7 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_TRUE(config.Contains("str"sv));
   EXPECT_EQ(wkc::ConfigType::String, config.Type("str"sv));
 
+  // List
   EXPECT_TRUE(config.Contains("lst"sv));
   EXPECT_EQ(wkc::ConfigType::List, config.Type("lst"sv));
 
@@ -208,14 +210,23 @@ TEST(ConfigTest, QueryTypes) {
     EXPECT_EQ(exp_msg, std::string(e.what()));
   }
 
+  // Group/table
   EXPECT_TRUE(config.Contains("dates"sv));
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("dates"sv));
 
+  // Date & time
   EXPECT_TRUE(config.Contains("dates.day"sv));
   EXPECT_EQ(wkc::ConfigType::Date, config.Type("dates.day"sv));
 
-  // TODO test date types
+  EXPECT_TRUE(config.Contains("dates.time1"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, config.Type("dates.time1"sv));
+  EXPECT_TRUE(config.Contains("dates.time2"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, config.Type("dates.time2"sv));
 
+  EXPECT_TRUE(config.Contains("dates.date_time"sv));
+  EXPECT_EQ(wkc::ConfigType::DateTime, config.Type("dates.date_time"sv));
+
+  // Access invalid types
   EXPECT_THROW(config.GetBoolean("lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetBoolean("dates"sv), wkc::TypeError);
@@ -245,7 +256,6 @@ TEST(ConfigTest, QueryTypes) {
 }
 
 TEST(ConfigTest, GetScalarTypes) {
-  // TODO test date types
   const auto config = wkc::LoadTOMLString(R"toml(
     bool = true
     int = 42
@@ -355,8 +365,8 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_FALSE(config.GetOptionalTime("no-such-key"sv).has_value());
 
   // Date-time parameter
-  auto dt1 = wkc::date_time{"1912-07-23T08:37:00-08:00"sv};
-  auto dt2 = wkc::date_time{"2004-02-28T23:59:59.999888-01:00"sv};
+  const wkc::date_time dt1{"1912-07-23T08:37:00-08:00"sv};
+  wkc::date_time dt2{"2004-02-28T23:59:59.999888-01:00"sv};
   EXPECT_EQ(dt1, config.GetDateTime("dates.dt1"sv));
   EXPECT_EQ(dt2, config.GetDateTime("dates.dt2"sv));
   EXPECT_NE(dt1, dt2);
@@ -388,7 +398,17 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_THROW(config.GetDouble("tbl"sv), wkc::KeyError);
   EXPECT_THROW(config.GetString("int_list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetDate("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDate("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetTime("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTime("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetDateTime("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("tbl"sv), wkc::KeyError);
 
+  EXPECT_THROW(config.GetInteger32("dates"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("dates.time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("dates.dt1"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.day"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.time"sv), wkc::TypeError);
@@ -399,7 +419,7 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_THROW(config.GetString("dates.dt1"sv), wkc::TypeError);
 }
 
-TEST(ConfigTest, SetScalarTypes1) {
+TEST(ConfigTest, SetBoolean) {
   auto config = wkc::LoadTOMLString(R"toml(
     bool = true
     int = 42
@@ -464,7 +484,7 @@ TEST(ConfigTest, SetScalarTypes1) {
   EXPECT_EQ(true, config.GetBoolean("array[2].bool"sv));
 }
 
-TEST(ConfigTest, SetScalarTypes2) {
+TEST(ConfigTest, SetOtherScalarTypes) {
   auto config = wkc::LoadTOMLString(R"toml(
     integer = 12345
     string = "This is a string"
@@ -539,7 +559,21 @@ TEST(ConfigTest, SetScalarTypes2) {
 
   EXPECT_THROW(config.SetTime("string"sv, wkc::time{}), wkc::TypeError);
 
-  // TODO set date_time
+  // Set a date_time
+  EXPECT_FALSE(config.Contains("my-dt"sv));
+  EXPECT_FALSE(config.GetOptionalDateTime("my-dt"sv).has_value());
+
+  wkc::date_time dt{{2000, 1, 1}, {0, 30, 28, 123000000}, wkc::time_offset{60}};
+  EXPECT_NO_THROW(config.SetDateTime("my-dt"sv, dt));
+  EXPECT_TRUE(config.Contains("my-dt"sv));
+  EXPECT_EQ(dt, config.GetDateTime("my-dt"sv));
+  EXPECT_EQ(dt, config.GetOptionalDateTime("my-dt"sv).value());
+
+  EXPECT_EQ(dt, config.GetDateTimeOr("no-such-key"sv, dt));
+
+  EXPECT_THROW(config.SetDateTime("string"sv, dt), wkc::TypeError);
+  EXPECT_THROW(config.SetDateTime("string"sv, wkc::date_time{}),
+               wkc::TypeError);
 }
 
 TEST(ConfigTest, Keys1) {
@@ -1322,7 +1356,7 @@ TEST(ConfigTest, StringReplacements) {
   EXPECT_EQ(".../D", config.GetString("configs[3].name"sv));
 }
 
-TEST(ConfigTest, Construction) {
+TEST(ConfigTest, ConfigConstruction) {
   const std::string fname =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
 
@@ -1460,6 +1494,16 @@ TEST(ConfigTest, LoadingToml) {
     EXPECT_TRUE(wks::StartsWith(e.what(), "Error while parsing value: "sv))
         << "Error message was: "sv << e.what();
   }
+}
+
+TEST(ConfigTest, InvalidDateTimes) {
+  // Leap seconds are not supported.
+  EXPECT_THROW(wkc::LoadTOMLString("dt = 1990-12-31T23:59:60Z"),
+               wkc::ParseError);
+  EXPECT_THROW(wkc::LoadTOMLString("dt = 1990-12-31T15:59:60-08:00"),
+               wkc::ParseError);
+
+  EXPECT_THROW(wkc::date_time({1990, 12, 31}, {23, 59, 60}), wkc::ValueError);
 }
 
 // TODO Can be properly tested once we have LoadJSONString()

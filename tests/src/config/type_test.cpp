@@ -171,6 +171,14 @@ TEST(TypeTest, TimeType) {
   time.nanosecond = 123456789;
   EXPECT_EQ("23:49:30.123456789", time.ToString());
 
+  // Invalid value ranges.
+  EXPECT_NO_THROW(wkc::time(8, 10, 22));
+  EXPECT_THROW(wkc::time(0, 10, 22), wkc::ValueError);
+  EXPECT_THROW(wkc::time(24, 10, 22), wkc::ValueError);
+  EXPECT_THROW(wkc::time(8, 60, 22), wkc::ValueError);
+  EXPECT_THROW(wkc::time(8, 10, 60), wkc::ValueError);
+
+  // Overloaded operators.
   EXPECT_LE(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
   EXPECT_LT(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
   EXPECT_LT(wkc::time(8, 10, 22, 1), wkc::time(8, 10, 22, 2));
@@ -403,6 +411,17 @@ TEST(TypeTest, DateTime) {
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:30:03.88+01:00"sv});
   dt.time.nanosecond = 884000000;
   EXPECT_EQ(dt, wkc::date_time{"2023-02-14T22:30:03.884+01:00"sv});
+
+  // RFC 3339 Examples, p. 10
+  dt = wkc::date_time{{1985, 4, 12}, {23, 20, 50, 520000000}};
+  EXPECT_TRUE(dt.IsLocal());
+  dt.offset = wkc::time_offset{0};
+  EXPECT_FALSE(dt.IsLocal());
+  EXPECT_EQ(dt, wkc::date_time{"1985-04-12T23:20:50.52Z"sv});
+
+  dt = wkc::date_time{{1996, 12, 19}, {16, 39, 57}, {-8, 0}};
+  EXPECT_FALSE(dt.IsLocal());
+  EXPECT_EQ(dt, wkc::date_time{"1996-12-20T00:39:57Z"sv});
 
   // Invalid strings
   EXPECT_THROW(wkc::date_time("invalid"sv), wkc::ParseError);
