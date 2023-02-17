@@ -277,25 +277,30 @@ time::time(std::string_view str) {
   minute = ParseDateTimeNumber<uint_fast8_t>(hms_tokens[1], 0, 59, "time"sv);
 
   if (hms_tokens.size() > 2) {
-    std::size_t pos = hms_tokens[2].find_first_of('.');
+    // Delimiter between second and fraction component can be '.' or ','.
+    std::size_t pos = hms_tokens[2].find_first_of(".,");
     if (pos != std::string::npos) {
       second = ParseDateTimeNumber<uint_fast8_t>(hms_tokens[2].substr(0, pos),
                                                  0, 59, "time"sv);
 
       const auto subsec_str = hms_tokens[2].substr(pos + 1);
-      if ((subsec_str.length() != 3) && (subsec_str.length() != 6) &&
-          (subsec_str.length() != 9)) {
+      if ((subsec_str.length() > 3) &&
+          ((subsec_str.length() != 6) && (subsec_str.length() != 9))) {
         std::string msg{"Invalid string representation for a time: `"};
         msg += str;
         msg +=
-            "`. Specify sub-second component by 3 (ms), 6 (us) or 9 (ns) "
-            "digits!";
+            "`. Specify sub-second component by 1, 2, 3 (ms), 6 (us) "
+            "or 9 (ns) digits!";
         throw ParseError(msg);
       }
       uint_fast32_t subsec_val = ParseDateTimeNumber<uint_fast32_t>(
           subsec_str, 0, 999999999, "time"sv);
 
-      if (subsec_str.length() == 3) {
+      if (subsec_str.length() == 1) {
+        subsec_val *= 100000000;
+      } else if (subsec_str.length() == 2) {
+        subsec_val *= 10000000;
+      } else if (subsec_str.length() == 3) {
         subsec_val *= 1000000;
       } else if (subsec_str.length() == 6) {
         subsec_val *= 1000;
