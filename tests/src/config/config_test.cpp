@@ -8,6 +8,7 @@
 #include <exception>
 #include <limits>
 #include <sstream>
+#include <string_view>
 
 #include "../test_utils.h"
 
@@ -23,14 +24,14 @@ using namespace std::string_view_literals;
 TEST(ConfigTest, TypeUtils) {
   EXPECT_EQ("bool", wkc::TypeName<bool>());
 
-  EXPECT_EQ("int8_t", wkc::TypeName<int8_t>());
-  EXPECT_EQ("uint8_t", wkc::TypeName<uint8_t>());
-  EXPECT_EQ("int16_t", wkc::TypeName<int16_t>());
-  EXPECT_EQ("uint16_t", wkc::TypeName<uint16_t>());
-  EXPECT_EQ("int32_t", wkc::TypeName<int32_t>());
-  EXPECT_EQ("uint32_t", wkc::TypeName<uint32_t>());
-  EXPECT_EQ("int64_t", wkc::TypeName<int64_t>());
-  EXPECT_EQ("uint64_t", wkc::TypeName<uint64_t>());
+  EXPECT_EQ("char", wkc::TypeName<char>());
+  EXPECT_EQ("unsigned char", wkc::TypeName<unsigned char>());
+  EXPECT_EQ("short", wkc::TypeName<short>());
+  EXPECT_EQ("unsigned short", wkc::TypeName<unsigned short>());
+  EXPECT_EQ("int", wkc::TypeName<int>());
+  EXPECT_EQ("unsigned int", wkc::TypeName<unsigned int>());
+  EXPECT_EQ("long int", wkc::TypeName<long int>());
+  EXPECT_EQ("unsigned long int", wkc::TypeName<unsigned long int>());
 
   EXPECT_EQ("float", wkc::TypeName<float>());
   EXPECT_EQ("double", wkc::TypeName<double>());
@@ -231,8 +232,16 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_EQ("string", wkc::ConfigTypeToString(wkc::ConfigType::String));
   EXPECT_EQ("date", wkc::ConfigTypeToString(wkc::ConfigType::Date));
   EXPECT_EQ("time", wkc::ConfigTypeToString(wkc::ConfigType::Time));
+  EXPECT_EQ("date_time", wkc::ConfigTypeToString(wkc::ConfigType::DateTime));
   EXPECT_EQ("list", wkc::ConfigTypeToString(wkc::ConfigType::List));
   EXPECT_EQ("group", wkc::ConfigTypeToString(wkc::ConfigType::Group));
+
+  // Stream operator should be properly overloaded
+  std::ostringstream str;
+  str << wkc::ConfigType::Date;
+  EXPECT_EQ("date", str.str());
+  str << '!' << wkc::ConfigType::FloatingPoint;
+  EXPECT_EQ("date!floating_point", str.str());
 }
 
 TEST(ConfigTest, GetScalarTypes) {
@@ -248,7 +257,8 @@ TEST(ConfigTest, GetScalarTypes) {
     [dates]
     day = 2023-01-02
     time = 01:02:03.123456
-    date_time = 1912-07-23T08:37:00-08:00
+    dt1 = 1912-07-23T08:37:00-08:00
+    dt2 = 2004-02-28T23:59:59.999888-01:00
 
     )toml"sv);
 
@@ -329,14 +339,12 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_EQ(wkc::date(1234, 12, 30),
             config.GetDateOr("no-such-key"sv, wkc::date{1234, 12, 30}));
 
-  // Date parameter
-  // Note that the nanoseconds ".123" will be parsed according to the TOML
+  // The fractional seconds ".123" will be parsed according to the TOML
   // specification into "123000000" nanoseconds.
   wkc::time time{1, 2, 3, 123456000};
   EXPECT_EQ(time, config.GetTime("dates.time"sv));
   EXPECT_TRUE(config.GetOptionalTime("dates.time"sv).has_value());
   EXPECT_EQ(time, config.GetOptionalTime("dates.time"sv).value());
-  // TODO expect_ne time + offset, gettime()
 
   EXPECT_THROW(config.GetTime("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetTime("dates.day"sv), wkc::TypeError);
@@ -346,7 +354,28 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_EQ(time, config.GetTimeOr("no-such-key"sv, time));
   EXPECT_FALSE(config.GetOptionalTime("no-such-key"sv).has_value());
 
-  // TODO date_time
+  // Date-time parameter
+  auto dt1 = wkc::date_time{"1912-07-23T08:37:00-08:00"sv};
+  auto dt2 = wkc::date_time{"2004-02-28T23:59:59.999888-01:00"sv};
+  EXPECT_EQ(dt1, config.GetDateTime("dates.dt1"sv));
+  EXPECT_EQ(dt2, config.GetDateTime("dates.dt2"sv));
+  EXPECT_NE(dt1, dt2);
+
+  EXPECT_TRUE(config.GetOptionalDateTime("dates.dt1"sv).has_value());
+  EXPECT_EQ(dt1, config.GetOptionalDateTime("dates.dt1"sv).value());
+
+  EXPECT_THROW(config.GetDateTime("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTimeOr("str"sv, dt1), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("no-such-key"sv), wkc::KeyError);
+  EXPECT_EQ(dt2, config.GetDateTimeOr("no-such-key"sv, dt2));
+
+  dt2.offset = std::nullopt;
+  EXPECT_NE(dt2, config.GetDateTime("dates.dt2"sv));
+  dt2.offset = wkc::time_offset{-59};
+  EXPECT_NE(dt2, config.GetDateTime("dates.dt2"sv));
+  dt2.offset = wkc::time_offset{-60};
+  EXPECT_EQ(dt2, config.GetDateTime("dates.dt2"sv));
 
   // Invalid access
   EXPECT_THROW(config.GetBoolean("int_list"sv), wkc::TypeError);
@@ -363,11 +392,11 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_THROW(config.GetDouble("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.day"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.time"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDouble("dates.date_time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dates.dt1"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates.day"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("dates.time"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetString("dates.date_time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("dates.dt1"sv), wkc::TypeError);
 }
 
 TEST(ConfigTest, SetScalarTypes1) {

@@ -184,9 +184,9 @@ int main(int /* argc */, char ** /* argv */) {
   CastingCheck<uint>(static_cast<int8_t>(0));
   CastingCheck<uint>(static_cast<int8_t>(-42));
 
-  CastingCheck<double>(0.2f);
-  CastingCheck<double>(0.1f);
-  CastingCheck<long double>(0.2f);
+  CastingCheck<double>(0.2F);
+  CastingCheck<double>(0.1F);
+  CastingCheck<long double>(0.2F);
 
   CastingCheck<float>(1.0);
   CastingCheck<float>(0.0);
@@ -199,11 +199,11 @@ int main(int /* argc */, char ** /* argv */) {
   //---------------------------------------------------------------------------
   // Type example
   std::cout << "Parsing time representations:\n"
-            << wkc::time::FromString("08:30") << "\n"
-            << wkc::time::FromString("23:59:59") << "\n"
-            << wkc::time::FromString("23:59:59.123") << "\n"
-            << wkc::time::FromString("23:59:59.123456") << "\n"
-            << wkc::time::FromString("23:59:59.123456789") << std::endl;
+            << wkc::time{"08:30"sv} << "\n"
+            << wkc::time{"23:59:59"sv} << "\n"
+            << wkc::time{"23:59:59.123"sv} << "\n"
+            << wkc::time{"23:59:59.123456"sv} << "\n"
+            << wkc::time{"23:59:59.123456789"sv} << std::endl;
 
   return 0;
 }

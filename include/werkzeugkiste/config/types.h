@@ -1,16 +1,62 @@
 #ifndef WERKZEUGKISTE_CONFIG_TYPES_H
 #define WERKZEUGKISTE_CONFIG_TYPES_H
 
-#include <stdint.h>
 #include <werkzeugkiste/config/config_export.h>
 
+#include <cstdint>
+#include <optional>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <type_traits>
 #include <typeinfo>
 
 namespace werkzeugkiste::config {
+//-----------------------------------------------------------------------------
+// Exceptions
+// TODO doc: parsing error (syntax, I/O)
+class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::exception {
+ public:
+  explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
+
+  const char *what() const noexcept override { return msg_.c_str(); }
+
+ private:
+  std::string msg_{};
+};
+
+// TODO doc: config key/parameter name does not exist
+class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
+ public:
+  // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
+  explicit KeyError(std::string_view key) : msg_{"Key `"} {
+    msg_.append(key);
+    msg_.append("` does not exist!");
+  }
+
+  const char *what() const noexcept override { return msg_.c_str(); }
+
+ private:
+  std::string msg_{};
+};
+
+// TODO doc: wrong type assumed for getter/setter
+class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::exception {
+ public:
+  explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
+
+  const char *what() const noexcept override { return msg_.c_str(); }
+
+ private:
+  std::string msg_{};
+};
+
+class WERKZEUGKISTE_CONFIG_EXPORT ValueError : public std::domain_error {
+ public:
+  explicit ValueError(const std::string &msg) : std::domain_error{msg} {}
+};
+
 //-----------------------------------------------------------------------------
 // Supported parameters
 
@@ -37,7 +83,8 @@ enum class ConfigType : unsigned char {
   /// @brief A time.
   Time,
 
-  // TODO date_time
+  /// @brief An RFC 3339 date time.
+  DateTime,
 
   /// @brief A list (vector) of unnamed parameters.
   List,
@@ -50,35 +97,41 @@ enum class ConfigType : unsigned char {
 WERKZEUGKISTE_CONFIG_EXPORT
 std::string ConfigTypeToString(const ConfigType &ct);
 
+/// Prints the string representation of a `ConfigType` out to the stream.
+WERKZEUGKISTE_CONFIG_EXPORT
+std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
+
+//-----------------------------------------------------------------------------
+// Date
+
 struct WERKZEUGKISTE_CONFIG_EXPORT date {
  public:
   /// The year.
-  uint16_t year{};
+  uint_fast16_t year{};
 
   /// The month, from 1-12.
-  uint8_t month{};
+  uint_fast8_t month{};
 
   /// The day, from 1-31.
-  uint8_t day{};
+  uint_fast8_t day{};
 
   date() = default;
 
-  date(uint16_t y, uint8_t m, uint8_t d) : year{y}, month{m}, day{d} {}
+  /// @brief Parses a string representation.
+  ///
+  /// Supported formats are:
+  /// * Y-m-d
+  /// * d.m.Y
+  explicit date(std::string_view str);
 
-  std::tuple<uint16_t, uint8_t, uint8_t> ToTuple() const {
+  date(uint_fast16_t y, uint_fast8_t m, uint_fast8_t d);
+
+  std::tuple<uint_fast16_t, uint_fast8_t, uint_fast8_t> ToTuple() const {
     return std::make_tuple(year, month, day);
   }
 
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
-
-  /// Parses a date.
-  ///
-  /// Supported formats are:
-  /// * Y-m-d
-  /// * d.m.Y
-  /// TODO check if we should add others.
-  static date FromString(std::string_view str);
 
   bool operator==(const date &other) const;
   bool operator!=(const date &other) const;
@@ -87,6 +140,12 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   bool operator>(const date &other) const;
   bool operator>=(const date &other) const;
 
+  // Pre-increment
+  date &operator++();
+
+  // Pre-decrement
+  date &operator--();
+
   /// Overloaded stream operator.
   friend std::ostream &operator<<(std::ostream &os, const date &d) {
     os << d.ToString();
@@ -94,39 +153,35 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   }
 
  private:
-  static constexpr uint32_t Pack(const date &d) noexcept {
-    return (static_cast<uint32_t>(d.year) << 16) |
-           (static_cast<uint32_t>(d.month) << 8) | static_cast<uint32_t>(d.day);
+  // NOLINTBEGIN(*-magic-numbers)
+  static constexpr uint_fast32_t Pack(const date &d) noexcept {
+    return (static_cast<uint_fast32_t>(d.year) << 16U) |
+           (static_cast<uint_fast32_t>(d.month) << 8U) |
+           static_cast<uint_fast32_t>(d.day);
   }
+  // NOLINTEND(*-magic-numbers)
 };
+
+//-----------------------------------------------------------------------------
+// Time
 
 struct WERKZEUGKISTE_CONFIG_EXPORT time {
  public:
   /// The hour, from 0-23.
-  uint8_t hour{};
+  uint_fast8_t hour{};
 
   /// The minute, from 0-59.
-  uint8_t minute{};
+  uint_fast8_t minute{};
 
   /// The second, from 0-59.
-  uint8_t second{};
+  uint_fast8_t second{};
 
   /// The nanoseconds, from 0-999999999.
-  uint32_t nanosecond{};
+  uint_fast32_t nanosecond{};
 
   time() = default;
 
-  time(uint8_t h, uint8_t m, uint8_t s = 0, uint32_t ns = 0)
-      : hour{h}, minute{m}, second{s}, nanosecond{ns} {}
-
-  std::tuple<uint8_t, uint8_t, uint8_t, uint32_t> ToTuple() const {
-    return std::make_tuple(hour, minute, second, nanosecond);
-  }
-
-  /// Returns "HH:MM:SS.sssssssss".
-  std::string ToString() const;
-
-  /// Parses a time.
+  /// @brief Parses a string representation.
   ///
   /// Supported formats are:
   /// * HH:MM
@@ -134,7 +189,18 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   /// * HH:MM:SS.sss (for milliseconds)
   /// * HH:MM:SS.ssssss (for microseconds)
   /// * HH:MM:SS.sssssssss (for nanoseconds)
-  static time FromString(std::string_view str);
+  explicit time(std::string_view str);
+
+  time(uint_fast8_t h, uint_fast8_t m, uint_fast8_t s = 0, uint_fast32_t ns = 0)
+      : hour{h}, minute{m}, second{s}, nanosecond{ns} {}
+
+  std::tuple<uint_fast8_t, uint_fast8_t, uint_fast8_t, uint_fast32_t> ToTuple()
+      const {
+    return std::make_tuple(hour, minute, second, nanosecond);
+  }
+
+  /// Returns "HH:MM:SS.sssssssss".
+  std::string ToString() const;
 
   bool operator==(const time &other) const;
   bool operator!=(const time &other) const;
@@ -150,11 +216,101 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   }
 
  private:
-  static constexpr uint64_t Pack(const time &t) noexcept {
-    return (static_cast<uint64_t>(t.hour) << 48) |
-           (static_cast<uint64_t>(t.minute) << 40) |
-           (static_cast<uint64_t>(t.second) << 32) |
-           static_cast<uint64_t>(t.nanosecond);
+  // NOLINTBEGIN(*-magic-numbers)
+  static constexpr uint_fast64_t Pack(const time &t) noexcept {
+    return (static_cast<uint_fast64_t>(t.hour) << 48U) |
+           (static_cast<uint_fast64_t>(t.minute) << 40U) |
+           (static_cast<uint_fast64_t>(t.second) << 32U) |
+           static_cast<uint_fast64_t>(t.nanosecond);
+  }
+  // NOLINTEND(*-magic-numbers)
+};
+
+//-----------------------------------------------------------------------------
+// Time zone offset
+
+// TODO doc
+// Caveats:
+// time_offset cannot represent the 'unknown local offset convention', i.e.
+// distinguishing between -00:00 and +00:00.
+// https://www.rfc-editor.org/rfc/rfc3339
+// --> this is done via the optional<time_offset> in date_time instead.
+struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
+ public:
+  /// The offset from UTC+0 in minutes.
+  int_fast16_t minutes{};
+
+  time_offset() = default;
+
+  explicit time_offset(int_fast16_t m) : minutes{m} {}
+
+  /// @brief Parses a string representation.
+  ///
+  /// Supported formats are:
+  /// * Z
+  /// * [+-]?HH:MM
+  explicit time_offset(std::string_view str);
+
+  // TODO doc + highlight that (-1, 30) is *not* equivalent to "-01:30", but
+  // instead "-00:30".
+  time_offset(int_fast8_t h, int_fast8_t m);
+
+  /// Returns "Z" or "+/-HH:MM".
+  std::string ToString() const;
+
+  bool operator==(const time_offset &other) const;
+  bool operator!=(const time_offset &other) const;
+  bool operator<(const time_offset &other) const;
+  bool operator<=(const time_offset &other) const;
+  bool operator>(const time_offset &other) const;
+  bool operator>=(const time_offset &other) const;
+
+  /// @brief Overloaded stream operator.
+  friend std::ostream &operator<<(std::ostream &os, const time_offset &t) {
+    os << t.ToString();
+    return os;
+  }
+};
+
+//-----------------------------------------------------------------------------
+// Date-time
+
+struct date_time {
+ public:
+  config::date date{};
+  config::time time{};
+  std::optional<time_offset> offset{std::nullopt};
+
+  date_time() = default;
+
+  explicit date_time(std::string_view str);
+
+  date_time(const config::date &d, const config::time &t) : date{d}, time{t} {}
+
+  date_time(const config::date &d, const config::time &t, const time_offset &o)
+      : date{d}, time{t}, offset{o} {}
+
+  // TODO s.t. offset == +00:00. If no offset is set, it is assumed to be
+  // UTC already.
+  date_time UTC() const;
+
+  /// @brief Returns the representation in RFC 3339 format.
+  std::string ToString() const;
+
+  inline bool IsLocal() const { return !offset.has_value(); }
+
+  // TODO operators
+  bool operator==(const date_time &other) const;
+  bool operator!=(const date_time &other) const;
+  //  bool operator<(const time_offset &other) const;
+  //  bool operator<=(const time_offset &other) const;
+  //  bool operator>(const time_offset &other) const;
+  //  bool operator>=(const time_offset &other) const;
+
+  /// @brief Prints the RFC 3339 representation out to the stream.
+  friend std::ostream &operator<<(std::ostream &os, const date_time &t) {
+    os << t.ToString();
+    return os;
   }
 };
 
@@ -178,14 +334,14 @@ constexpr const char *TypeName() {
 
 // LCOV_EXCL_START
 WZKREG_TNSPEC(bool)
-WZKREG_TNSPEC(int8_t)
-WZKREG_TNSPEC(uint8_t)
-WZKREG_TNSPEC(int16_t)
-WZKREG_TNSPEC(uint16_t)
-WZKREG_TNSPEC(int32_t)
-WZKREG_TNSPEC(uint32_t)
-WZKREG_TNSPEC(int64_t)
-WZKREG_TNSPEC(uint64_t)
+WZKREG_TNSPEC(char)
+WZKREG_TNSPEC(unsigned char)
+WZKREG_TNSPEC(short)
+WZKREG_TNSPEC(unsigned short)
+WZKREG_TNSPEC(int)
+WZKREG_TNSPEC(unsigned int)
+WZKREG_TNSPEC(long int)
+WZKREG_TNSPEC(unsigned long int)
 WZKREG_TNSPEC(float)
 WZKREG_TNSPEC(double)
 

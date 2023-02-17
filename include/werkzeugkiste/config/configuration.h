@@ -10,7 +10,6 @@
 #include <limits>
 #include <memory>
 #include <optional>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -20,44 +19,6 @@
 
 /// Utilities to handle configurations.
 namespace werkzeugkiste::config {
-//-----------------------------------------------------------------------------
-// Exceptions
-// TODO doc: parsing error (syntax, I/O)
-class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::exception {
- public:
-  explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
-};
-
-// TODO doc: config key/parameter name does not exist
-class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
- public:
-  // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-  explicit KeyError(std::string_view key) : msg_{"Key `"} {
-    msg_.append(key);
-    msg_.append("` does not exist!");
-  }
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
-};
-
-// TODO doc: wrong type assumed for getter/setter
-class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::exception {
- public:
-  explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
-};
 
 /// @brief Encapsulates configuration data.
 ///
@@ -77,12 +38,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::exception {
 /// * [ ] LoadLibconfigFile   ?
 /// * [ ] LoadLibconfigString ?
 /// * [ ] ToLibconfigString   ?
-/// * [ ] Date
-/// * [ ] Time
+/// * [x] Date
+/// * [x] Time
+/// * [ ] DateTime
 /// * [ ] NestedLists int & double (for "matrices")
 /// * [ ] If eigen3 is available, enable GetMatrix.
 ///       Static dimensions vs dynamic?
-/// * [ ] DateTime
 /// * [ ] Setters for ...Pair
 /// * [ ] Setters for ...List
 /// * [x] SetGroup
@@ -104,7 +65,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// @brief Loads a TOML configuration from the given file.
   /// @param filename Path to the `.toml` file.
-  static Configuration LoadTOMLFile(std::string_view toml_string);
+  static Configuration LoadTOMLFile(std::string_view filename);
 
   /// @brief Returns true if this configuration has no parameters set.
   bool Empty() const;
@@ -173,6 +134,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::optional<time> GetOptionalTime(std::string_view key) const;
   void SetTime(std::string_view key, const time &value);
 
+  date_time GetDateTime(std::string_view key) const;
+  date_time GetDateTimeOr(std::string_view key,
+                          const date_time &default_val) const;
+  std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
+  void SetDateTime(std::string_view key, const date_time &value);
   //---------------------------------------------------------------------------
   //  Lists/pairs of scalar data types
 

@@ -357,6 +357,7 @@ std::string Indent(std::string_view s, std::size_t n, char character) {
   return out;
 }
 
+// NOLINTNEXTLINE(misc-no-recursion)
 std::size_t LevenshteinDistance(std::string_view str1, std::string_view str2) {
   const std::size_t min_size = str1.size();
   const std::size_t max_size = str2.size();
