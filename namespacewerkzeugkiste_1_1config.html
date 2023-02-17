@@ -88,6 +88,14 @@
             </dt>
             <dd><span></span></dd>
             <dt>
+              class <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>
+            </dt>
+            <dd>Encapsulates configuration data.</dd>
+            <dt>
+              class <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">ParseError</a>
             </dt>
             <dd><span></span></dd>
@@ -100,11 +108,7 @@
             </dt>
             <dd><span></span></dd>
             <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>
-            </dt>
-            <dd>Encapsulates configuration data.</dd>
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>
+              class <a href="classwerkzeugkiste_1_1config_1_1ValueError.html" class="m-doc">ValueError</a>
             </dt>
             <dd><span></span></dd>
             <dt>
@@ -113,6 +117,14 @@
             <dd><span></span></dd>
             <dt>
               struct <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              struct <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_offset</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              struct <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_time</a>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -127,6 +139,7 @@
               <a href="#aa45c374d0d5c8db2ba494b4789867222a27118326006d3829667a400ad23d5d98" class="m-doc">String</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a44749712dbec183e983dcd78a7736c41" class="m-doc">Date</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530" class="m-doc">Time</a>,
+              <a href="#aa45c374d0d5c8db2ba494b4789867222a8cf10d2341ed01492506085688270c1e" class="m-doc">DateTime</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a4ee29ca12c7d126654bd0e5275de6135" class="m-doc">List</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0" class="m-doc">Group</a> }</span>
             </dt>
@@ -158,6 +171,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::string</span>
             </dt>
             <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#adcc3853bbac411c5ca64f5d3e7fdf171" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::ostream&amp;</span>
+            </dt>
+            <dd>Prints the string representation of a <code>ConfigType</code> out to the stream.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a45f2ad9a909269007a0bd927aa5da3fd" class="m-doc">TypeName</a>(</span><span class="m-doc-wrap">) -&gt; const char* <span class="m-label m-flat m-primary">constexpr</span></span>
@@ -227,6 +245,12 @@
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530">Time</a></td>
                   <td>
                   <p>A time.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aa45c374d0d5c8db2ba494b4789867222a8cf10d2341ed01492506085688270c1e" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a8cf10d2341ed01492506085688270c1e">DateTime</a></td>
+                  <td>
+                  <p>An RFC 3339 date time.</p>
                   </td>
                 </tr>
                 <tr>
@@ -309,6 +333,14 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
             </h3>
             <p><span></span></p>
+          </div></section>
+          <section class="m-doc-details" id="adcc3853bbac411c5ca64f5d3e7fdf171"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT std::ostream&amp; werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adcc3853bbac411c5ca64f5d3e7fdf171" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
+            </h3>
+            <p>Prints the string representation of a <code>ConfigType</code> out to the stream.</p>
           </div></section>
           <section class="m-doc-details" id="a45f2ad9a909269007a0bd927aa5da3fd"><div>
             <h3>

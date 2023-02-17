@@ -59,7 +59,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
@@ -68,15 +67,6 @@
             </li>
           </ul>
         </div>
-        <section id="pub-static-methods">
-          <h2><a href="#pub-static-methods">Public static functions</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">static auto <a href="#aa389308d7ab9f0c0175c2b961ab7fde7" class="m-doc">FromString</a>(</span><span class="m-doc-wrap">std::string_view str) -&gt; <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a></span>
-            </dt>
-            <dd></dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -84,11 +74,15 @@
               <span class="m-doc-wrap-bumper"><a href="#a0e61022da2a31afc55018c350b60cef4" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a5c3114d813d940163a8010a28e58daea">
-              <span class="m-doc-wrap-bumper"><a href="#a5c3114d813d940163a8010a28e58daea" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">uint8_t h,
-              uint8_t m,
-              uint8_t s = 0,
-              uint32_t ns = 0)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a href="#affe6d03eea7fff69eb30937112013a79" class="m-doc">time</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Parses a string representation.</dd>
+            <dt id="a399b11baafd1f6ea2a067e94b5b05ce9">
+              <span class="m-doc-wrap-bumper"><a href="#a399b11baafd1f6ea2a067e94b5b05ce9" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">uint_fast8_t h,
+              uint_fast8_t m,
+              uint_fast8_t s = 0,
+              uint_fast32_t ns = 0)</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -96,8 +90,8 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aabb247a8013d1857bd430f4dfeec153e">
-              <span class="m-doc-wrap-bumper">auto <a href="#aabb247a8013d1857bd430f4dfeec153e" class="m-doc-self">ToTuple</a>(</span><span class="m-doc-wrap">) const -&gt; std::tuple&lt;uint8_t, uint8_t, uint8_t, uint32_t&gt;</span>
+            <dt id="a970313174f8e038e9a78371ca4dfa418">
+              <span class="m-doc-wrap-bumper">auto <a href="#a970313174f8e038e9a78371ca4dfa418" class="m-doc-self">ToTuple</a>(</span><span class="m-doc-wrap">) const -&gt; std::tuple&lt;uint_fast8_t, uint_fast8_t, uint_fast8_t, uint_fast32_t&gt;</span>
             </dt>
             <dd><span></span></dd>
             <dt id="abde6efd2b2b0f631b3da38ba04a9fb43">
@@ -133,20 +127,20 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a204c1a293b1c2d56b4e6790fa6186fba">
-              uint8_t <a href="#a204c1a293b1c2d56b4e6790fa6186fba" class="m-doc-self">hour</a>
+            <dt id="a1b1f7a6fddfe9c990cbb542f5d4f6ac5">
+              uint_fast8_t <a href="#a1b1f7a6fddfe9c990cbb542f5d4f6ac5" class="m-doc-self">hour</a>
             </dt>
             <dd>The hour, from 0-23.</dd>
-            <dt id="a966c6a0e599c4b56a369fd688a6b0792">
-              uint8_t <a href="#a966c6a0e599c4b56a369fd688a6b0792" class="m-doc-self">minute</a>
+            <dt id="a2384476e41d30e3b243201421364e79e">
+              uint_fast8_t <a href="#a2384476e41d30e3b243201421364e79e" class="m-doc-self">minute</a>
             </dt>
             <dd>The minute, from 0-59.</dd>
-            <dt id="a1b190425f9544550d1d9fdbb2fc23de8">
-              uint8_t <a href="#a1b190425f9544550d1d9fdbb2fc23de8" class="m-doc-self">second</a>
+            <dt id="ad250048a93ff11e42d424e77cde848ff">
+              uint_fast8_t <a href="#ad250048a93ff11e42d424e77cde848ff" class="m-doc-self">second</a>
             </dt>
             <dd>The second, from 0-59.</dd>
-            <dt id="a4553f8c2a183c7f3a3ff8c94f1e0867a">
-              uint32_t <a href="#a4553f8c2a183c7f3a3ff8c94f1e0867a" class="m-doc-self">nanosecond</a>
+            <dt id="a23e348547ec9479a0cd8fd6136387da6">
+              uint_fast32_t <a href="#a23e348547ec9479a0cd8fd6136387da6" class="m-doc-self">nanosecond</a>
             </dt>
             <dd>The nanoseconds, from 0-999999999.</dd>
           </dl>
@@ -163,11 +157,12 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa389308d7ab9f0c0175c2b961ab7fde7"><div>
+          <section class="m-doc-details" id="affe6d03eea7fff69eb30937112013a79"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a> werkzeugkiste::<wbr />config::<wbr />time::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa389308d7ab9f0c0175c2b961ab7fde7" class="m-doc-self">FromString</a>(</span><span class="m-doc-wrap">std::string_view str)</span></span>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />time::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affe6d03eea7fff69eb30937112013a79" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
-<p>Parses a time.</p><p>Supported formats are:</p><ul><li>HH:MM</li><li>HH:MM:SS</li><li>HH:MM:SS.sss (for milliseconds)</li><li>HH:MM:SS.ssssss (for microseconds)</li><li>HH:MM:SS.sssssssss (for nanoseconds)</li></ul>
+            <p>Parses a string representation.</p>
+<p>Supported formats are:</p><ul><li>HH:MM</li><li>HH:MM:SS</li><li>HH:MM:SS.sss (for milliseconds)</li><li>HH:MM:SS.ssssss (for microseconds)</li><li>HH:MM:SS.sssssssss (for nanoseconds)</li></ul>
           </div></section>
         </section>
       </div>

@@ -66,7 +66,7 @@
             </li>
           </ul>
         </div>
-<p>TODO doc:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>I prefer explicit method names over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li></ul><p>TODOs:</p><ul><li>[x] Numeric casts. Implicitly cast if lossless conversion is possible.</li><li>[ ] Do we need double-precision points ?</li><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] LoadLibconfigFile ?</li><li>[ ] LoadLibconfigString ?</li><li>[ ] ToLibconfigString ?</li><li>[ ] Date</li><li>[ ] Time</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] DateTime</li><li>[ ] Setters for ...Pair</li><li>[ ] Setters for ...List</li><li>[x] SetGroup</li><li>[x] Return optional&lt;Scalar&gt;</li></ul>
+<p>TODO doc:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>I prefer explicit method names over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li></ul><p>TODOs:</p><ul><li>[x] Numeric casts. Implicitly cast if lossless conversion is possible.</li><li>[ ] Do we need double-precision points ?</li><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] LoadLibconfigFile ?</li><li>[ ] LoadLibconfigString ?</li><li>[ ] ToLibconfigString ?</li><li>[x] Date</li><li>[x] Time</li><li>[ ] DateTime</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] Setters for ...Pair</li><li>[ ] Setters for ...List</li><li>[x] SetGroup</li><li>[x] Return optional&lt;Scalar&gt;</li></ul>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -74,8 +74,8 @@
               <span class="m-doc-wrap-bumper">static auto <a href="#ae3e70e3f931babab7eec207220c1a060" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from a string.</dd>
-            <dt id="ae30743ea96dbff455b864000439baa3c">
-              <span class="m-doc-wrap-bumper">static auto <a href="#ae30743ea96dbff455b864000439baa3c" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#a91939c8dae00f9e8794b232b20a44302" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from the given file.</dd>
           </dl>
@@ -258,6 +258,24 @@
               const <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&amp; value)</span>
             </dt>
             <dd><span></span></dd>
+            <dt id="a73413ae7bd5f14a8fe2367f7faabc868">
+              <span class="m-doc-wrap-bumper">auto <a href="#a73413ae7bd5f14a8fe2367f7faabc868" class="m-doc-self">GetDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a1d6e146c8b6c6548d1e6a599db1822a6">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d6e146c8b6c6548d1e6a599db1822a6" class="m-doc-self">GetDateTimeOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&amp; default_val) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a2ff7bcbacf531ce672eb9cad42ca9860">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ff7bcbacf531ce672eb9cad42ca9860" class="m-doc-self">GetOptionalDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ad3f45c6beaf4052912d01044827ab4cc">
+              <span class="m-doc-wrap-bumper">void <a href="#ad3f45c6beaf4052912d01044827ab4cc" class="m-doc-self">SetDateTime</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&amp; value)</span>
+            </dt>
+            <dd><span></span></dd>
             <dt id="a243f7bdfcd6199343d1c5ff0e35bde31">
               <span class="m-doc-wrap-bumper">auto <a href="#a243f7bdfcd6199343d1c5ff0e35bde31" class="m-doc-self">GetInteger32Pair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;int32_t, int32_t&gt;</span>
             </dt>
@@ -341,6 +359,23 @@
                 <tr>
                   <td style="width: 1%">toml_string</td>
                   <td>String representation of the TOML config.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a91939c8dae00f9e8794b232b20a44302"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a91939c8dae00f9e8794b232b20a44302" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
+            </h3>
+            <p>Loads a TOML configuration from the given file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename</td>
+                  <td>Path to the <code>.toml</code> file.</td>
                 </tr>
               </tbody>
             </table>

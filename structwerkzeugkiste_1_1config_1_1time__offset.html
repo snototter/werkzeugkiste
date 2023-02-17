@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>werkzeugkiste::config::date struct | werkzeugkiste</title>
+  <title>werkzeugkiste::config::time_offset struct | werkzeugkiste</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -49,7 +49,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>date <span class="m-thin">struct</span>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>time_offset <span class="m-thin">struct</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;types.h&gt;</a></div>
         </h1>
         <p><span></span></p>
@@ -70,18 +70,21 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a27f4357965a62197bcc69a1d74a69a10">
-              <span class="m-doc-wrap-bumper"><a href="#a27f4357965a62197bcc69a1d74a69a10" class="m-doc-self">date</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a59171ee1329120646ce16eea946a724a">
+              <span class="m-doc-wrap-bumper"><a href="#a59171ee1329120646ce16eea946a724a" class="m-doc-self">time_offset</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a3065dbb3712b7bb8e6caa161087628cc">
+              <span class="m-doc-wrap-bumper"><a href="#a3065dbb3712b7bb8e6caa161087628cc" class="m-doc-self">time_offset</a>(</span><span class="m-doc-wrap">int_fast16_t m) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd><span></span></dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ae0db5ea937eda00f61a2d941bb8bbad5" class="m-doc">date</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a href="#a0af024bb9d2ad8f8c2eb9765ed0a504e" class="m-doc">time_offset</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Parses a string representation.</dd>
-            <dt id="ad3add6c8a015040891f215d12ba7e700">
-              <span class="m-doc-wrap-bumper"><a href="#ad3add6c8a015040891f215d12ba7e700" class="m-doc-self">date</a>(</span><span class="m-doc-wrap">uint_fast16_t y,
-              uint_fast8_t m,
-              uint_fast8_t d)</span>
+            <dt id="a4b62b20c11fdf16af004d30938c3d197">
+              <span class="m-doc-wrap-bumper"><a href="#a4b62b20c11fdf16af004d30938c3d197" class="m-doc-self">time_offset</a>(</span><span class="m-doc-wrap">int_fast8_t h,
+              int_fast8_t m)</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -89,44 +92,32 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a4c0257fd7bb88b6b960a020a9d3a743d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4c0257fd7bb88b6b960a020a9d3a743d" class="m-doc-self">ToTuple</a>(</span><span class="m-doc-wrap">) const -&gt; std::tuple&lt;uint_fast16_t, uint_fast8_t, uint_fast8_t&gt;</span>
+            <dt id="a40db84c998a7b2e6025404bc1b22f7c2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a40db84c998a7b2e6025404bc1b22f7c2" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
+            </dt>
+            <dd>Returns &quot;Z&quot; or &quot;+/-HH:MM&quot;.</dd>
+            <dt id="a0a6842c655a2554525d30dc80c9b2d1b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0a6842c655a2554525d30dc80c9b2d1b" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="af091bd4fc26ca44430979cc91f4e534d">
-              <span class="m-doc-wrap-bumper">auto <a href="#af091bd4fc26ca44430979cc91f4e534d" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
-            </dt>
-            <dd>Returns &quot;YYYY-mm-dd&quot;.</dd>
-            <dt id="acd6f4f3b00ea168c2503b5c365e76d38">
-              <span class="m-doc-wrap-bumper">auto <a href="#acd6f4f3b00ea168c2503b5c365e76d38" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; other) const -&gt; bool</span>
+            <dt id="aaf1e0b5c7412b6260ebee560a82107d6">
+              <span class="m-doc-wrap-bumper">auto <a href="#aaf1e0b5c7412b6260ebee560a82107d6" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a5e453a78fed6fccca8897af5ad4eb8b7">
-              <span class="m-doc-wrap-bumper">auto <a href="#a5e453a78fed6fccca8897af5ad4eb8b7" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; other) const -&gt; bool</span>
+            <dt id="a401462461d62004c8cd23060c96aa027">
+              <span class="m-doc-wrap-bumper">auto <a href="#a401462461d62004c8cd23060c96aa027" class="m-doc-self">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="af3038101a0c6d0fc31bba5f2eb044a45">
-              <span class="m-doc-wrap-bumper">auto <a href="#af3038101a0c6d0fc31bba5f2eb044a45" class="m-doc-self">operator&lt;</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; other) const -&gt; bool</span>
+            <dt id="add42201c9e29106acffa4c26f5308c32">
+              <span class="m-doc-wrap-bumper">auto <a href="#add42201c9e29106acffa4c26f5308c32" class="m-doc-self">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a0d4f6844b420393da8cc9f259a2c468d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0d4f6844b420393da8cc9f259a2c468d" class="m-doc-self">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; other) const -&gt; bool</span>
+            <dt id="ade8fc35874e0404afeba4ceaa2c66714">
+              <span class="m-doc-wrap-bumper">auto <a href="#ade8fc35874e0404afeba4ceaa2c66714" class="m-doc-self">operator&gt;</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="a03722ee5c65aca5a506c34e9e37b2281">
-              <span class="m-doc-wrap-bumper">auto <a href="#a03722ee5c65aca5a506c34e9e37b2281" class="m-doc-self">operator&gt;</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; other) const -&gt; bool</span>
-            </dt>
-            <dd><span></span></dd>
-            <dt id="a6983cfc101cac63df42d685636f4febd">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6983cfc101cac63df42d685636f4febd" class="m-doc-self">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; other) const -&gt; bool</span>
-            </dt>
-            <dd><span></span></dd>
-            <dt id="ad3f9f3b4e9a341e2e8a5436850cf3b2b">
-              <span class="m-doc-wrap-bumper">auto <a href="#ad3f9f3b4e9a341e2e8a5436850cf3b2b" class="m-doc-self">operator++</a>(</span><span class="m-doc-wrap">) -&gt; <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp;</span>
-            </dt>
-            <dd><span></span></dd>
-            <dt id="af78d324d456db5814c665428e18621c8">
-              <span class="m-doc-wrap-bumper">auto <a href="#af78d324d456db5814c665428e18621c8" class="m-doc-self">operator--</a>(</span><span class="m-doc-wrap">) -&gt; <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp;</span>
+            <dt id="aef45f98a8a47e347a600e2a30aed46e0">
+              <span class="m-doc-wrap-bumper">auto <a href="#aef45f98a8a47e347a600e2a30aed46e0" class="m-doc-self">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -134,38 +125,30 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a6a93e86f08072f2b85999392a86db1b3">
-              uint_fast16_t <a href="#a6a93e86f08072f2b85999392a86db1b3" class="m-doc-self">year</a>
+            <dt id="aff85be6f7756309ca65e636385a6c9ff">
+              int_fast16_t <a href="#aff85be6f7756309ca65e636385a6c9ff" class="m-doc-self">minutes</a>
             </dt>
-            <dd>The year.</dd>
-            <dt id="ad0322903d4dbaffe8f1c9f9366368b86">
-              uint_fast8_t <a href="#ad0322903d4dbaffe8f1c9f9366368b86" class="m-doc-self">month</a>
-            </dt>
-            <dd>The month, from 1-12.</dd>
-            <dt id="a233708f73635848d4071c13bbb173891">
-              uint_fast8_t <a href="#a233708f73635848d4071c13bbb173891" class="m-doc-self">day</a>
-            </dt>
-            <dd>The day, from 1-31.</dd>
+            <dd>The offset from UTC+0 in minutes.</dd>
           </dl>
         </section>
         <section id="friends">
           <h2><a href="#friends">Friends</a></h2>
           <dl class="m-doc">
-            <dt id="a70e6dc9fa16e9938d77c4f0d662a89b0">
-              <span class="m-doc-wrap-bumper">auto <a href="#a70e6dc9fa16e9938d77c4f0d662a89b0" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; d) -&gt; std::ostream&amp;</span>
+            <dt id="a754d445ba2aa15648bbb8349d1fab378">
+              <span class="m-doc-wrap-bumper">auto <a href="#a754d445ba2aa15648bbb8349d1fab378" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; t) -&gt; std::ostream&amp;</span>
             </dt>
             <dd>Overloaded stream operator.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ae0db5ea937eda00f61a2d941bb8bbad5"><div>
+          <section class="m-doc-details" id="a0af024bb9d2ad8f8c2eb9765ed0a504e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />date::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0db5ea937eda00f61a2d941bb8bbad5" class="m-doc-self">date</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />time_offset::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0af024bb9d2ad8f8c2eb9765ed0a504e" class="m-doc-self">time_offset</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Parses a string representation.</p>
-<p>Supported formats are:</p><ul><li>Y-m-d</li><li>d.m.Y</li></ul>
+<p>Supported formats are:</p><ul><li>Z</li><li>[+-]?HH:MM</li></ul>
           </div></section>
         </section>
       </div>
