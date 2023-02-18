@@ -112,12 +112,12 @@ bool IsNumeric(const std::string& s) {
     // Check long long
     char* pl_end{};
     // NOLINTNEXTLINE(*-magic-numbers)
-    int64_t dummyl = strtoll(s.c_str(), &pl_end, 10);
+    const int64_t dummyl = strtoll(s.c_str(), &pl_end, 10);
     WERKZEUGKISTE_UNUSED_VAR(dummyl);
 
     // Check double
     char* pd_end{};
-    double dummyd = strtod(s.c_str(), &pd_end);
+    const double dummyd = strtod(s.c_str(), &pd_end);
     WERKZEUGKISTE_UNUSED_VAR(dummyd);
 
     is_numeric = (*pd_end == 0) || (*pl_end == 0);
@@ -281,7 +281,7 @@ std::string Slug(std::string_view s, bool strip_dashes) {
   // Start with flag set to true, to return "-" if the string
   // contains exclusively non-alphanumeric characters
   bool prev_alphanum = true;
-  for (char c : replaced) {
+  for (const char c : replaced) {
     if (std::isalnum(c) != 0) {
       out << c;
       prev_alphanum = true;

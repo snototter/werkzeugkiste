@@ -122,7 +122,7 @@ T ParseDateTimeNumber(const std::string &str, int min_val, int max_val,
     // we need to make sure that only [+-][0-9] inputs are fed into it.
     // White space is not allowed.
     const auto pos = std::find_if(str.begin(), str.end(), [](char c) -> bool {
-      return !(std::isdigit(c) || (c == '-') || (c == '+'));
+      return !std::isdigit(c) && (c != '-') && (c != '+');
     });
     if (pos != str.end()) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, type_str);
@@ -278,7 +278,7 @@ time::time(std::string_view str) {
 
   if (hms_tokens.size() > 2) {
     // Delimiter between second and fraction component can be '.' or ','.
-    std::size_t pos = hms_tokens[2].find_first_of(".,");
+    const std::size_t pos = hms_tokens[2].find_first_of(".,");
     if (pos != std::string::npos) {
       second = ParseDateTimeNumber<uint_fast8_t>(hms_tokens[2].substr(0, pos),
                                                  0, 59, "time"sv);
@@ -365,7 +365,7 @@ time_offset::time_offset(std::string_view str) {
 
   std::size_t pos = str.find_first_of(':');
   if (pos == std::string::npos) {
-    if ((str.length() > 0) && !((str[0] == 'z') || (str[0] == 'Z'))) {
+    if ((str.length() > 0) && (str[0] != 'z') && (str[0] != 'Z')) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, time_offset);
     }
     minutes = 0;
