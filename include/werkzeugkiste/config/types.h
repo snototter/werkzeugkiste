@@ -30,12 +30,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::exception {
 class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
  public:
   // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-  explicit KeyError(std::string_view key) : msg_{"Key `"} {
-    msg_.append(key);
-    msg_.append("` does not exist!");
-  }
+  explicit KeyError(std::string msg) : msg_{std::move(msg)} {}
 
   const char *what() const noexcept override { return msg_.c_str(); }
+
+  static KeyError FromKey(std::string_view key) {
+    std::string msg{"Key `"};
+    msg.append(key);
+    msg.append("` does not exist!");
+    return KeyError(msg);
+  }
 
  private:
   std::string msg_{};
