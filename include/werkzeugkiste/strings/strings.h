@@ -72,6 +72,19 @@ inline std::string Upper(const std::string& s) {
   return tmp;
 }
 
+/// @brief Returns the absolute length difference of the two strings.
+/// @param str1 First string.
+/// @param str2 Second string.
+/// @return :math:`|len(str1) - len(str2)|`
+inline std::size_t LengthDifference(std::string_view str1, std::string_view str2)  {
+  const std::size_t l1 = str1.length();
+  const std::size_t l2 = str2.length();
+  if (l1 < l2) {
+    return l2 - l1;
+  }
+  return l1 - l2;
+}
+
 /// Returns a copy with leading & trailing
 /// white space removed.
 WERKZEUGKISTE_STRINGS_EXPORT
@@ -193,8 +206,11 @@ std::string Shorten(std::string_view s, std::size_t desired_length,
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Indent(std::string_view s, std::size_t n, char character = ' ');
 
-/// Returns the the minimum number of single-character edits (i.e. insertions,
+/// @brief Returns the the minimum number of single-character edits (i.e. insertions,
 /// deletions or substitutions) required to change one string into the other.
+/// @param str1 First string.
+/// @param str2 Second string.
+/// @return The edit distance >= 0.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::size_t LevenshteinDistance(std::string_view str1, std::string_view str2);
 

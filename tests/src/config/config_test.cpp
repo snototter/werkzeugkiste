@@ -105,6 +105,8 @@ TEST(ConfigTest, Integers) {
   EXPECT_EQ(17, config.GetInteger64Or("test"sv, 17));
   EXPECT_THROW(config.GetInteger64("test"sv), wkc::KeyError);
   EXPECT_FALSE(config.GetOptionalInteger64("test"sv).has_value());
+
+  config.GetInteger32("int32");
 }
 
 TEST(ConfigTest, FloatingPoint) {

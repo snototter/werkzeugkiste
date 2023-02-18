@@ -10,6 +10,7 @@
 #include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/logging.h>
 #include <werkzeugkiste/strings/strings.h>
+#include <werkzeugkiste/container/sort.h>
 
 #include <array>
 #include <functional>
@@ -119,6 +120,47 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
     }
   }
   return keys;
+}
+
+/// @brief Prepares a KeyError with an alternative key suggestion.
+/// @param tbl The configuration root node/table.
+/// @param key The key which could not be found.
+/// @return KeyError instance to be thrown.
+KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
+  using namespace std::string_view_literals;
+  std::string msg{"Key `"};
+  msg.append(key);
+  msg.append("` does not exist!");
+
+  const std::vector<std::string> keys = ListTableKeys(tbl, ""sv, /*include_array_entries=*/ true);
+  std::vector<std::pair<std::size_t, std::string_view>> candidates;
+  for (const auto &cand : keys) {
+    // The edit distance can't be less than the length difference between the
+    // two strings. So we can reject unsuitable keys earlier.
+    if (strings::LengthDifference(key, cand) < 5) {
+      const std::size_t edit_dist = strings::LevenshteinDistance(key, cand);
+      if (edit_dist < 3) {
+        candidates.emplace_back(edit_dist, cand);
+      }
+    }
+  }
+  if (!candidates.empty()) {
+    const std::vector<std::size_t> sorted_indices = container::GetSortedIndices(candidates, [](const std::pair<std::size_t, std::string_view> &a, const std::pair<std::size_t, std::string_view> &b) -> bool {
+      return a.first < b.first;
+    });
+    msg.append(" Did you mean: `");
+    const std::size_t num_to_include = std::min(sorted_indices.size(), static_cast<std::size_t>(3));
+    for (std::size_t idx = 0; idx < num_to_include; ++idx) {
+      const auto &cand = candidates[sorted_indices[idx]];
+      msg.append(cand.second);
+      if (idx < num_to_include - 1) {
+        msg.append("`, `");
+      }
+    }
+    msg.append("`?");
+  }
+
+  return KeyError{msg};
 }
 
 /// @brief Visits all child nodes of the given TOML configuration in a
@@ -319,7 +361,8 @@ T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
       return T{default_val};
     }
 
-    throw KeyError::FromKey(key);
+    // throw KeyError::FromKey(key); // TODO
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto node = tbl.at_path(key);
@@ -692,7 +735,8 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    throw KeyError::FromKey(key);
+    // throw KeyError::FromKey(key); // TODO
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto node = tbl.at_path(key);
@@ -734,7 +778,8 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    throw KeyError::FromKey(key);
+    // throw KeyError::FromKey(key); // TODO
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto &node = tbl.at_path(key);
@@ -774,7 +819,8 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    throw KeyError::FromKey(key);
+    // throw KeyError::FromKey(key); // TODO
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto &node = tbl.at_path(key);
@@ -906,7 +952,8 @@ ConfigType Configuration::Type(std::string_view key) const {
   const auto nv = pimpl_->config_root.at_path(key);
   switch (nv.type()) {
     case toml::node_type::none:
-      throw KeyError::FromKey(key);
+      // throw KeyError::FromKey(key); // TODO
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
 
     case toml::node_type::table:
       return ConfigType::Group;
@@ -1176,7 +1223,8 @@ std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetPoints3D(
 
 Configuration Configuration::GetGroup(std::string_view key) const {
   if (!Contains(key)) {
-    throw KeyError::FromKey(key);
+    // throw KeyError::FromKey(key); // TODO
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 
   Configuration cfg;
@@ -1342,7 +1390,8 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   // TODO refactor (TOML/JSON --> function handle)
 
   if (!detail::ConfigContainsKey(pimpl_->config_root, key)) {
-    throw KeyError::FromKey(key);
+    // throw KeyError::FromKey(key); // TODO
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 
   const auto &node = pimpl_->config_root.at_path(key);
