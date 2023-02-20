@@ -106,7 +106,13 @@ TEST(ConfigTest, Integers) {
   EXPECT_THROW(config.GetInteger64("test"sv), wkc::KeyError);
   EXPECT_FALSE(config.GetOptionalInteger64("test"sv).has_value());
 
-  config.GetInteger32("int32");
+  try {
+    config.GetInteger32("int32"sv);
+  } catch (const wkc::KeyError &e) {
+    const std::string exp_msg{
+        "Key `int32` does not exist! Did you mean: `int32_1`, `int32_2`?"};
+    EXPECT_EQ(exp_msg, std::string(e.what()));
+  }
 }
 
 TEST(ConfigTest, FloatingPoint) {
@@ -206,7 +212,9 @@ TEST(ConfigTest, QueryTypes) {
   try {
     config.Type("lst[3]"sv);
   } catch (const wkc::KeyError &e) {
-    const std::string exp_msg{"Key `lst[3]` does not exist!"};
+    const std::string exp_msg{
+        "Key `lst[3]` does not exist! Did you mean: `lst[0]`, `lst[1]`, "
+        "`lst[2]`?"};
     EXPECT_EQ(exp_msg, std::string(e.what()));
   }
 

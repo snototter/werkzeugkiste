@@ -16,23 +16,16 @@ namespace werkzeugkiste::config {
 //-----------------------------------------------------------------------------
 // Exceptions
 // TODO doc: parsing error (syntax, I/O)
-class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::exception {
+class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::runtime_error {
  public:
-  explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
+  explicit ParseError(const std::string &msg) : std::runtime_error{msg} {}
 };
 
 // TODO doc: config key/parameter name does not exist
-class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
+class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::invalid_argument {
  public:
   // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-  explicit KeyError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
+  explicit KeyError(std::string msg) : std::invalid_argument{msg} {}
 
   static KeyError FromKey(std::string_view key) {
     std::string msg{"Key `"};
@@ -40,25 +33,17 @@ class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
     msg.append("` does not exist!");
     return KeyError(msg);
   }
-
- private:
-  std::string msg_{};
 };
 
 // TODO doc: wrong type assumed for getter/setter
-class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::exception {
+class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::invalid_argument {
  public:
-  explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
+  explicit TypeError(const std::string &msg) : std::invalid_argument{msg} {}
 };
 
-class WERKZEUGKISTE_CONFIG_EXPORT ValueError : public std::domain_error {
+class WERKZEUGKISTE_CONFIG_EXPORT ValueError : public std::invalid_argument {
  public:
-  explicit ValueError(const std::string &msg) : std::domain_error{msg} {}
+  explicit ValueError(const std::string &msg) : std::invalid_argument{msg} {}
 };
 
 //-----------------------------------------------------------------------------
