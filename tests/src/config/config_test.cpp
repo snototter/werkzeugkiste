@@ -579,6 +579,11 @@ TEST(ConfigTest, SetScalarTypes2) {
   EXPECT_NO_THROW(config.SetDateTime("my-dt"sv, dt));
   EXPECT_EQ(dt, config.GetDateTime("my-dt"sv));
 
+  dt.offset = wkc::time_offset{90};
+  EXPECT_NE(dt, config.GetDateTime("my-dt"sv));
+  EXPECT_NO_THROW(config.SetDateTime("my-dt"sv, dt));
+  EXPECT_EQ(dt, config.GetDateTime("my-dt"sv));
+
   EXPECT_EQ(dt, config.GetDateTimeOr("no-such-key"sv, dt));
 
   EXPECT_THROW(config.SetDateTime("string"sv, dt), wkc::TypeError);
@@ -1210,6 +1215,8 @@ TEST(ConfigTest, SetGroup) {
   empty.SetInteger32("my-int32", 23);
   empty.SetString("my-str", "value");
   EXPECT_FALSE(empty.Empty());
+
+  // Insert group below an existing group
   EXPECT_NO_THROW(config.SetGroup("lvl1.grp3"sv, empty));
   EXPECT_TRUE(config.Contains("lvl1.grp3.my-bool"sv));
   EXPECT_TRUE(config.Contains("lvl1.grp3.my-int32"sv));
@@ -1220,6 +1227,12 @@ TEST(ConfigTest, SetGroup) {
 
   auto keys = group.ListParameterNames(true);
   CheckExpectedKeys({"my-bool", "my-int32", "my-str"}, keys);
+
+  // Insert group at root level
+  EXPECT_NO_THROW(config.SetGroup("my-grp"sv, empty));
+  EXPECT_TRUE(config.Contains("my-grp.my-bool"sv));
+  EXPECT_TRUE(config.Contains("my-grp.my-int32"sv));
+  EXPECT_TRUE(config.Contains("my-grp.my-str"sv));
 }
 
 TEST(ConfigTest, NestedTOML) {
