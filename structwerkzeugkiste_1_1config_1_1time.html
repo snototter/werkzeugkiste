@@ -52,7 +52,7 @@
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>time <span class="m-thin">struct</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;types.h&gt;</a></div>
         </h1>
-        <p><span></span></p>
+        <p>A local time.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -78,11 +78,11 @@
               <span class="m-doc-wrap-bumper"><a href="#affe6d03eea7fff69eb30937112013a79" class="m-doc">time</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Parses a string representation.</dd>
-            <dt id="a399b11baafd1f6ea2a067e94b5b05ce9">
-              <span class="m-doc-wrap-bumper"><a href="#a399b11baafd1f6ea2a067e94b5b05ce9" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">uint_fast8_t h,
-              uint_fast8_t m,
-              uint_fast8_t s = 0,
-              uint_fast32_t ns = 0)</span>
+            <dt id="a74ea381f93389a38931b28cebfbb3008">
+              <span class="m-doc-wrap-bumper"><a href="#a74ea381f93389a38931b28cebfbb3008" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">uint_least8_t h,
+              uint_least8_t m,
+              uint_least8_t s = 0,
+              uint_least32_t ns = 0)</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -90,10 +90,6 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a970313174f8e038e9a78371ca4dfa418">
-              <span class="m-doc-wrap-bumper">auto <a href="#a970313174f8e038e9a78371ca4dfa418" class="m-doc-self">ToTuple</a>(</span><span class="m-doc-wrap">) const -&gt; std::tuple&lt;uint_fast8_t, uint_fast8_t, uint_fast8_t, uint_fast32_t&gt;</span>
-            </dt>
-            <dd><span></span></dd>
             <dt id="abde6efd2b2b0f631b3da38ba04a9fb43">
               <span class="m-doc-wrap-bumper">auto <a href="#abde6efd2b2b0f631b3da38ba04a9fb43" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
@@ -127,20 +123,20 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a1b1f7a6fddfe9c990cbb542f5d4f6ac5">
-              uint_fast8_t <a href="#a1b1f7a6fddfe9c990cbb542f5d4f6ac5" class="m-doc-self">hour</a>
+            <dt id="a0cb53eaeb88c9fa46d1c72674b568aad">
+              uint_least8_t <a href="#a0cb53eaeb88c9fa46d1c72674b568aad" class="m-doc-self">hour</a>
             </dt>
             <dd>The hour, from 0-23.</dd>
-            <dt id="a2384476e41d30e3b243201421364e79e">
-              uint_fast8_t <a href="#a2384476e41d30e3b243201421364e79e" class="m-doc-self">minute</a>
+            <dt id="a3e3dce6b97586405fdeb96ae86b46f83">
+              uint_least8_t <a href="#a3e3dce6b97586405fdeb96ae86b46f83" class="m-doc-self">minute</a>
             </dt>
             <dd>The minute, from 0-59.</dd>
-            <dt id="ad250048a93ff11e42d424e77cde848ff">
-              uint_fast8_t <a href="#ad250048a93ff11e42d424e77cde848ff" class="m-doc-self">second</a>
+            <dt id="a7f82033eac68503a520efc1a9539bc05">
+              uint_least8_t <a href="#a7f82033eac68503a520efc1a9539bc05" class="m-doc-self">second</a>
             </dt>
             <dd>The second, from 0-59.</dd>
-            <dt id="a23e348547ec9479a0cd8fd6136387da6">
-              uint_fast32_t <a href="#a23e348547ec9479a0cd8fd6136387da6" class="m-doc-self">nanosecond</a>
+            <dt id="a310b529da02277cf6ee0b5a802119043">
+              uint_least32_t <a href="#a310b529da02277cf6ee0b5a802119043" class="m-doc-self">nanosecond</a>
             </dt>
             <dd>The nanoseconds, from 0-999999999.</dd>
           </dl>

@@ -52,7 +52,7 @@
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>date <span class="m-thin">struct</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;types.h&gt;</a></div>
         </h1>
-        <p><span></span></p>
+        <p>A local date.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -78,10 +78,10 @@
               <span class="m-doc-wrap-bumper"><a href="#ae0db5ea937eda00f61a2d941bb8bbad5" class="m-doc">date</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Parses a string representation.</dd>
-            <dt id="ad3add6c8a015040891f215d12ba7e700">
-              <span class="m-doc-wrap-bumper"><a href="#ad3add6c8a015040891f215d12ba7e700" class="m-doc-self">date</a>(</span><span class="m-doc-wrap">uint_fast16_t y,
-              uint_fast8_t m,
-              uint_fast8_t d)</span>
+            <dt id="ad697233c4fddb06beef23d42964a38fe">
+              <span class="m-doc-wrap-bumper"><a href="#ad697233c4fddb06beef23d42964a38fe" class="m-doc-self">date</a>(</span><span class="m-doc-wrap">uint_least16_t y,
+              uint_least8_t m,
+              uint_least8_t d)</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -89,10 +89,6 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a4c0257fd7bb88b6b960a020a9d3a743d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4c0257fd7bb88b6b960a020a9d3a743d" class="m-doc-self">ToTuple</a>(</span><span class="m-doc-wrap">) const -&gt; std::tuple&lt;uint_fast16_t, uint_fast8_t, uint_fast8_t&gt;</span>
-            </dt>
-            <dd><span></span></dd>
             <dt id="af091bd4fc26ca44430979cc91f4e534d">
               <span class="m-doc-wrap-bumper">auto <a href="#af091bd4fc26ca44430979cc91f4e534d" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
@@ -134,16 +130,16 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a6a93e86f08072f2b85999392a86db1b3">
-              uint_fast16_t <a href="#a6a93e86f08072f2b85999392a86db1b3" class="m-doc-self">year</a>
+            <dt id="a10d3216c8efdc2db369799f23148e04f">
+              uint_least16_t <a href="#a10d3216c8efdc2db369799f23148e04f" class="m-doc-self">year</a>
             </dt>
             <dd>The year.</dd>
-            <dt id="ad0322903d4dbaffe8f1c9f9366368b86">
-              uint_fast8_t <a href="#ad0322903d4dbaffe8f1c9f9366368b86" class="m-doc-self">month</a>
+            <dt id="a65463292d325ea877cbc81d4c1fcf799">
+              uint_least8_t <a href="#a65463292d325ea877cbc81d4c1fcf799" class="m-doc-self">month</a>
             </dt>
             <dd>The month, from 1-12.</dd>
-            <dt id="a233708f73635848d4071c13bbb173891">
-              uint_fast8_t <a href="#a233708f73635848d4071c13bbb173891" class="m-doc-self">day</a>
+            <dt id="a9cf67539661a6409bdb64c38113995a7">
+              uint_least8_t <a href="#a9cf67539661a6409bdb64c38113995a7" class="m-doc-self">day</a>
             </dt>
             <dd>The day, from 1-31.</dd>
           </dl>

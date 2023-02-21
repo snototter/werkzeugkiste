@@ -104,6 +104,11 @@
             </dt>
             <dd>Returns a copy, converted to upper case.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4177c509fec879e24d2fe226a0f13db0" class="m-doc">LengthDifference</a>(</span><span class="m-doc-wrap">std::string_view str1,
+              std::string_view str2) -&gt; std::size_t</span>
+            </dt>
+            <dd>Returns the absolute length difference of the two strings.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a45ea6e2bc65bebc56e424c811f012ab7" class="m-doc">Trim</a>(</span><span class="m-doc-wrap">std::string_view s) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
             <dd></dd>
@@ -193,11 +198,39 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ad5e15cccf24ab33c96f7485eecf61aba" class="m-doc">LevenshteinDistance</a>(</span><span class="m-doc-wrap">std::string_view str1,
               std::string_view str2) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::size_t</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the the minimum number of single-character edits (i.e. insertions, deletions or substitutions) required to change one string into the other.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a4177c509fec879e24d2fe226a0f13db0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::size_t werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4177c509fec879e24d2fe226a0f13db0" class="m-doc-self">LengthDifference</a>(</span><span class="m-doc-wrap">std::string_view str1,
+              std::string_view str2)</span></span>
+            </h3>
+            <p>Returns the absolute length difference of the two strings.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str1</td>
+                  <td>First string.</td>
+                </tr>
+                <tr>
+                  <td>str2</td>
+                  <td>Second string.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>:math:<code>|len(str1) - len(str2)|</code></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a45ea6e2bc65bebc56e424c811f012ab7"><div>
             <h3>
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::string werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45ea6e2bc65bebc56e424c811f012ab7" class="m-doc-self">Trim</a>(</span><span class="m-doc-wrap">std::string_view s)</span></span>
@@ -273,7 +306,28 @@
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::size_t werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad5e15cccf24ab33c96f7485eecf61aba" class="m-doc-self">LevenshteinDistance</a>(</span><span class="m-doc-wrap">std::string_view str1,
               std::string_view str2)</span></span>
             </h3>
-<p>Returns the the minimum number of single-character edits (i.e. insertions, deletions or substitutions) required to change one string into the other.</p>
+            <p>Returns the the minimum number of single-character edits (i.e. insertions, deletions or substitutions) required to change one string into the other.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">str1</td>
+                  <td>First string.</td>
+                </tr>
+                <tr>
+                  <td>str2</td>
+                  <td>Second string.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The edit distance &gt;= 0.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

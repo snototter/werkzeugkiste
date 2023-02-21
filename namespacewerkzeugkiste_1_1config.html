@@ -98,27 +98,27 @@
             <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">ParseError</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>Indicates a failure during parsing a configuration string/file.</dd>
             <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>Indicates that an invalid key was provided to access a parameter.</dd>
             <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>Indicates that an invalid type was used to query or set a parameter.</dd>
             <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1ValueError.html" class="m-doc">ValueError</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>Indicates invalid input values.</dd>
             <dt>
               struct <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>A local date.</dd>
             <dt>
               struct <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>A local time.</dd>
             <dt>
               struct <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_offset</a>
             </dt>
@@ -143,7 +143,7 @@
               <a href="#aa45c374d0d5c8db2ba494b4789867222a4ee29ca12c7d126654bd0e5275de6135" class="m-doc">List</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0" class="m-doc">Group</a> }</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Available configuration parameters.</dd>
           </dl>
         </section>
         <section id="func-members">
@@ -170,7 +170,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::string</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns the string representation.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adcc3853bbac411c5ca64f5d3e7fdf171" class="m-doc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::ostream&amp;</span>
@@ -205,14 +205,14 @@
               enum class werkzeugkiste::<wbr />config::<wbr /><a href="#aa45c374d0d5c8db2ba494b4789867222" class="m-doc-self">ConfigType</a>: unsigned char
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
             </h3>
-            <p><span></span></p>
+            <p>Available configuration parameters.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
                 <tr>
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222a27226c864bac7454a8504f8edb15d95b" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a27226c864bac7454a8504f8edb15d95b">Boolean</a></td>
                   <td>
-                  <p>Either true or false.</p>
+                  <p>A boolean flag.</p>
                   </td>
                 </tr>
                 <tr>
@@ -238,31 +238,31 @@
                 <tr>
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222a44749712dbec183e983dcd78a7736c41" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a44749712dbec183e983dcd78a7736c41">Date</a></td>
                   <td>
-                  <p>A date.</p>
+                  <p>A local date.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222aa76d4ef5f3f6a672bbfab2865563e530">Time</a></td>
                   <td>
-                  <p>A time.</p>
+                  <p>A local time.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222a8cf10d2341ed01492506085688270c1e" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a8cf10d2341ed01492506085688270c1e">DateTime</a></td>
                   <td>
-                  <p>An RFC 3339 date time.</p>
+                  <p>A date-time following RFC 3339.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222a4ee29ca12c7d126654bd0e5275de6135" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a4ee29ca12c7d126654bd0e5275de6135">List</a></td>
                   <td>
-                  <p>A list (vector) of unnamed parameters.</p>
+                  <p>A list/array of unnamed parameters.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a href="#aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0" class="m-doc-self" id="aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0">Group</a></td>
                   <td>
-                  <p>A group (dictionary) of named parameters.</p>
+                  <p>A group/collection of named parameters.</p>
                   </td>
                 </tr>
               </tbody>
@@ -332,7 +332,7 @@
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT std::string werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc-self">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
             </h3>
-            <p><span></span></p>
+            <p>Returns the string representation.</p>
           </div></section>
           <section class="m-doc-details" id="adcc3853bbac411c5ca64f5d3e7fdf171"><div>
             <h3>
