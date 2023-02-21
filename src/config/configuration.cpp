@@ -6,11 +6,11 @@
 #include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/config/keymatcher.h>
+#include <werkzeugkiste/container/sort.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/logging.h>
 #include <werkzeugkiste/strings/strings.h>
-#include <werkzeugkiste/container/sort.h>
 
 #include <array>
 #include <functional>
@@ -132,7 +132,8 @@ KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
   msg.append(key);
   msg.append("` does not exist!");
 
-  const std::vector<std::string> keys = ListTableKeys(tbl, ""sv, /*include_array_entries=*/ true);
+  const std::vector<std::string> keys =
+      ListTableKeys(tbl, ""sv, /*include_array_entries=*/true);
   std::vector<std::pair<std::size_t, std::string_view>> candidates;
   for (const auto &cand : keys) {
     // The edit distance can't be less than the length difference between the
@@ -145,11 +146,15 @@ KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
     }
   }
   if (!candidates.empty()) {
-    const std::vector<std::size_t> sorted_indices = container::GetSortedIndices(candidates, [](const std::pair<std::size_t, std::string_view> &a, const std::pair<std::size_t, std::string_view> &b) -> bool {
-      return a.first < b.first;
-    });
+    const std::vector<std::size_t> sorted_indices = container::GetSortedIndices(
+        candidates,
+        [](const std::pair<std::size_t, std::string_view> &a,
+           const std::pair<std::size_t, std::string_view> &b) -> bool {
+          return a.first < b.first;
+        });
     msg.append(" Did you mean: `");
-    const std::size_t num_to_include = std::min(sorted_indices.size(), static_cast<std::size_t>(3));
+    const std::size_t num_to_include =
+        std::min(sorted_indices.size(), static_cast<std::size_t>(3));
     for (std::size_t idx = 0; idx < num_to_include; ++idx) {
       const auto &cand = candidates[sorted_indices[idx]];
       msg.append(cand.second);
@@ -953,7 +958,7 @@ ConfigType Configuration::Type(std::string_view key) const {
   switch (nv.type()) {
     case toml::node_type::none:
       // throw KeyError::FromKey(key); // TODO
-    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
+      throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
 
     case toml::node_type::table:
       return ConfigType::Group;
