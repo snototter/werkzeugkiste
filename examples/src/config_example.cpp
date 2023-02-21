@@ -169,7 +169,8 @@ int main(int /* argc */, char ** /* argv */) {
 
   //---------------------------------------------------------------------------
   // Exemplary type casts
-  CastingCheck<int>(true);
+  CastingCheck<int>(/*val=*/true);
+  CastingCheck<char>(/*val=*/false);
   CastingCheck<bool>(0);
   CastingCheck<bool>(1);
   CastingCheck<bool>(2);

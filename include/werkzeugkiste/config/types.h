@@ -15,53 +15,37 @@
 namespace werkzeugkiste::config {
 //-----------------------------------------------------------------------------
 // Exceptions
-// TODO doc: parsing error (syntax, I/O)
-class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::exception {
+
+/// @brief Indicates a failure during parsing a configuration string/file.
+class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::runtime_error {
  public:
-  explicit ParseError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
+  explicit ParseError(const std::string &msg) : std::runtime_error{msg} {}
 };
 
-// TODO doc: config key/parameter name does not exist
-class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::exception {
+/// @brief Indicates that an invalid key was provided to access a parameter.
+class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::invalid_argument {
  public:
-  // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
-  explicit KeyError(std::string_view key) : msg_{"Key `"} {
-    msg_.append(key);
-    msg_.append("` does not exist!");
-  }
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
+  explicit KeyError(std::string msg) : std::invalid_argument{msg} {}
 };
 
-// TODO doc: wrong type assumed for getter/setter
-class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::exception {
+/// @brief Indicates that an invalid type was used to query or set a parameter.
+class WERKZEUGKISTE_CONFIG_EXPORT TypeError : public std::invalid_argument {
  public:
-  explicit TypeError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
+  explicit TypeError(const std::string &msg) : std::invalid_argument{msg} {}
 };
 
-class WERKZEUGKISTE_CONFIG_EXPORT ValueError : public std::domain_error {
+/// @brief Indicates invalid input values.
+class WERKZEUGKISTE_CONFIG_EXPORT ValueError : public std::invalid_argument {
  public:
-  explicit ValueError(const std::string &msg) : std::domain_error{msg} {}
+  explicit ValueError(const std::string &msg) : std::invalid_argument{msg} {}
 };
 
 //-----------------------------------------------------------------------------
 // Supported parameters
 
+/// @brief Available configuration parameters.
 enum class ConfigType : unsigned char {
-  /// @brief Either true or false.
+  /// @brief A boolean flag.
   Boolean,
 
   /// @brief A 32- or 64-bit integer.
@@ -77,43 +61,44 @@ enum class ConfigType : unsigned char {
   /// @brief A string.
   String,
 
-  /// @brief A date.
+  /// @brief A local date.
   Date,
 
-  /// @brief A time.
+  /// @brief A local time.
   Time,
 
-  /// @brief An RFC 3339 date time.
+  /// @brief A date-time following RFC 3339.
   DateTime,
 
-  /// @brief A list (vector) of unnamed parameters.
+  /// @brief A list/array of unnamed parameters.
   List,
 
-  /// @brief A group (dictionary) of named parameters.
+  /// @brief A group/collection of named parameters.
   Group
 };
 
-// TODO ostream/istream overloads for ConfigType
+/// @brief Returns the string representation.
 WERKZEUGKISTE_CONFIG_EXPORT
 std::string ConfigTypeToString(const ConfigType &ct);
 
-/// Prints the string representation of a `ConfigType` out to the stream.
+/// @brief Prints the string representation of a `ConfigType` out to the stream.
 WERKZEUGKISTE_CONFIG_EXPORT
 std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
 
 //-----------------------------------------------------------------------------
 // Date
 
+/// @brief A local date.
 struct WERKZEUGKISTE_CONFIG_EXPORT date {
  public:
   /// The year.
-  uint_fast16_t year{};
+  uint_least16_t year{};
 
   /// The month, from 1-12.
-  uint_fast8_t month{};
+  uint_least8_t month{};
 
   /// The day, from 1-31.
-  uint_fast8_t day{};
+  uint_least8_t day{};
 
   date() = default;
 
@@ -124,11 +109,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   /// * d.m.Y
   explicit date(std::string_view str);
 
-  date(uint_fast16_t y, uint_fast8_t m, uint_fast8_t d);
-
-  std::tuple<uint_fast16_t, uint_fast8_t, uint_fast8_t> ToTuple() const {
-    return std::make_tuple(year, month, day);
-  }
+  date(uint_least16_t y, uint_least8_t m, uint_least8_t d);
 
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
@@ -154,10 +135,10 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
 
  private:
   // NOLINTBEGIN(*-magic-numbers)
-  static constexpr uint_fast32_t Pack(const date &d) noexcept {
-    return (static_cast<uint_fast32_t>(d.year) << 16U) |
-           (static_cast<uint_fast32_t>(d.month) << 8U) |
-           static_cast<uint_fast32_t>(d.day);
+  static constexpr uint_least32_t Pack(const date &d) noexcept {
+    return (static_cast<uint_least32_t>(d.year) << 16U) |
+           (static_cast<uint_least32_t>(d.month) << 8U) |
+           static_cast<uint_least32_t>(d.day);
   }
   // NOLINTEND(*-magic-numbers)
 };
@@ -165,19 +146,20 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
 //-----------------------------------------------------------------------------
 // Time
 
+/// @brief A local time.
 struct WERKZEUGKISTE_CONFIG_EXPORT time {
  public:
   /// The hour, from 0-23.
-  uint_fast8_t hour{};
+  uint_least8_t hour{};
 
   /// The minute, from 0-59.
-  uint_fast8_t minute{};
+  uint_least8_t minute{};
 
   /// The second, from 0-59.
-  uint_fast8_t second{};
+  uint_least8_t second{};
 
   /// The nanoseconds, from 0-999999999.
-  uint_fast32_t nanosecond{};
+  uint_least32_t nanosecond{};
 
   time() = default;
 
@@ -191,15 +173,11 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   /// * HH:MM:SS.sssssssss (for nanoseconds)
   explicit time(std::string_view str);
 
-  time(uint_fast8_t h, uint_fast8_t m, uint_fast8_t s = 0, uint_fast32_t ns = 0)
+  time(uint_least8_t h, uint_least8_t m, uint_least8_t s = 0,
+       uint_least32_t ns = 0)
       : hour{h}, minute{m}, second{s}, nanosecond{ns} {}
 
-  std::tuple<uint_fast8_t, uint_fast8_t, uint_fast8_t, uint_fast32_t> ToTuple()
-      const {
-    return std::make_tuple(hour, minute, second, nanosecond);
-  }
-
-  /// Returns "HH:MM:SS.sssssssss".
+  /// @brief Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
 
   bool operator==(const time &other) const;
@@ -209,7 +187,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   bool operator>(const time &other) const;
   bool operator>=(const time &other) const;
 
-  /// Overloaded stream operator.
+  /// @brief Overloaded stream operator.
   friend std::ostream &operator<<(std::ostream &os, const time &t) {
     os << t.ToString();
     return os;
@@ -217,11 +195,11 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 
  private:
   // NOLINTBEGIN(*-magic-numbers)
-  static constexpr uint_fast64_t Pack(const time &t) noexcept {
-    return (static_cast<uint_fast64_t>(t.hour) << 48U) |
-           (static_cast<uint_fast64_t>(t.minute) << 40U) |
-           (static_cast<uint_fast64_t>(t.second) << 32U) |
-           static_cast<uint_fast64_t>(t.nanosecond);
+  static constexpr uint_least64_t Pack(const time &t) noexcept {
+    return (static_cast<uint_least64_t>(t.hour) << 48U) |
+           (static_cast<uint_least64_t>(t.minute) << 40U) |
+           (static_cast<uint_least64_t>(t.second) << 32U) |
+           static_cast<uint_least64_t>(t.nanosecond);
   }
   // NOLINTEND(*-magic-numbers)
 };
@@ -238,11 +216,11 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
  public:
   /// The offset from UTC+0 in minutes.
-  int_fast16_t minutes{};
+  int_least16_t minutes{};
 
   time_offset() = default;
 
-  explicit time_offset(int_fast16_t m) : minutes{m} {}
+  explicit time_offset(int_least16_t m) : minutes{m} {}
 
   /// @brief Parses a string representation.
   ///
@@ -253,7 +231,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
 
   // TODO doc + highlight that (-1, 30) is *not* equivalent to "-01:30", but
   // instead "-00:30".
-  time_offset(int_fast8_t h, int_fast8_t m);
+  time_offset(int_least8_t h, int_least8_t m);
 
   /// Returns "Z" or "+/-HH:MM".
   std::string ToString() const;

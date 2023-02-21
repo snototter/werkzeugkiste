@@ -105,6 +105,14 @@ TEST(ConfigTest, Integers) {
   EXPECT_EQ(17, config.GetInteger64Or("test"sv, 17));
   EXPECT_THROW(config.GetInteger64("test"sv), wkc::KeyError);
   EXPECT_FALSE(config.GetOptionalInteger64("test"sv).has_value());
+
+  try {
+    config.GetInteger32("int32"sv);
+  } catch (const wkc::KeyError &e) {
+    const std::string exp_msg{
+        "Key `int32` does not exist! Did you mean: `int32_1`, `int32_2`?"};
+    EXPECT_EQ(exp_msg, std::string(e.what()));
+  }
 }
 
 TEST(ConfigTest, FloatingPoint) {
@@ -204,7 +212,9 @@ TEST(ConfigTest, QueryTypes) {
   try {
     config.Type("lst[3]"sv);
   } catch (const wkc::KeyError &e) {
-    const std::string exp_msg{"Key `lst[3]` does not exist!"};
+    const std::string exp_msg{
+        "Key `lst[3]` does not exist! Did you mean: `lst[0]`, `lst[1]`, "
+        "`lst[2]`?"};
     EXPECT_EQ(exp_msg, std::string(e.what()));
   }
 
@@ -214,7 +224,11 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_TRUE(config.Contains("dates.day"sv));
   EXPECT_EQ(wkc::ConfigType::Date, config.Type("dates.day"sv));
 
-  // TODO test date types
+  EXPECT_TRUE(config.Contains("dates.time1"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, config.Type("dates.time1"sv));
+
+  EXPECT_TRUE(config.Contains("dates.date_time"sv));
+  EXPECT_EQ(wkc::ConfigType::DateTime, config.Type("dates.date_time"sv));
 
   EXPECT_THROW(config.GetBoolean("lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
@@ -245,7 +259,6 @@ TEST(ConfigTest, QueryTypes) {
 }
 
 TEST(ConfigTest, GetScalarTypes) {
-  // TODO test date types
   const auto config = wkc::LoadTOMLString(R"toml(
     bool = true
     int = 42
@@ -521,6 +534,11 @@ TEST(ConfigTest, SetScalarTypes2) {
   EXPECT_EQ(day, config.GetDate("my-day"sv));
   EXPECT_EQ(day, config.GetOptionalDate("my-day"sv).value());
 
+  ++day;
+  EXPECT_NE(day, config.GetDate("my-day"sv));
+  EXPECT_NO_THROW(config.SetDate("my-day"sv, day));
+  EXPECT_EQ(day, config.GetDate("my-day"sv));
+
   EXPECT_EQ(day, config.GetDateOr("no-such-key"sv, day));
 
   EXPECT_THROW(config.SetDate("string"sv, wkc::date{}), wkc::TypeError);
@@ -535,11 +553,42 @@ TEST(ConfigTest, SetScalarTypes2) {
   EXPECT_EQ(tm, config.GetTime("my-time"sv));
   EXPECT_EQ(tm, config.GetOptionalTime("my-time"sv).value());
 
+  tm.hour = 12;
+  EXPECT_NE(tm, config.GetTime("my-time"sv));
+  EXPECT_NO_THROW(config.SetTime("my-time"sv, tm));
+  EXPECT_EQ(tm, config.GetTime("my-time"sv));
+
   EXPECT_EQ(tm, config.GetTimeOr("no-such-key"sv, tm));
 
   EXPECT_THROW(config.SetTime("string"sv, wkc::time{}), wkc::TypeError);
 
-  // TODO set date_time
+  // Set a date_time
+  EXPECT_FALSE(config.Contains("my-dt"sv));
+  EXPECT_FALSE(config.GetOptionalTime("my-dt"sv).has_value());
+
+  wkc::date_time dt{day, tm};
+  EXPECT_THROW(config.SetDateTime("my-day"sv, dt), wkc::TypeError);
+  EXPECT_THROW(config.SetDateTime("my-time"sv, dt), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetDateTime("my-dt"sv, dt));
+  EXPECT_TRUE(config.Contains("my-dt"sv));
+  EXPECT_EQ(dt, config.GetDateTime("my-dt"sv));
+  EXPECT_EQ(dt, config.GetOptionalDateTime("my-dt"sv).value());
+
+  ++dt.date;
+  EXPECT_NE(dt, config.GetDateTime("my-dt"sv));
+  EXPECT_NO_THROW(config.SetDateTime("my-dt"sv, dt));
+  EXPECT_EQ(dt, config.GetDateTime("my-dt"sv));
+
+  dt.offset = wkc::time_offset{90};
+  EXPECT_NE(dt, config.GetDateTime("my-dt"sv));
+  EXPECT_NO_THROW(config.SetDateTime("my-dt"sv, dt));
+  EXPECT_EQ(dt, config.GetDateTime("my-dt"sv));
+
+  EXPECT_EQ(dt, config.GetDateTimeOr("no-such-key"sv, dt));
+
+  EXPECT_THROW(config.SetDateTime("string"sv, dt), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("my-day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("my-time"sv), wkc::TypeError);
 }
 
 TEST(ConfigTest, Keys1) {
@@ -1166,6 +1215,8 @@ TEST(ConfigTest, SetGroup) {
   empty.SetInteger32("my-int32", 23);
   empty.SetString("my-str", "value");
   EXPECT_FALSE(empty.Empty());
+
+  // Insert group below an existing group
   EXPECT_NO_THROW(config.SetGroup("lvl1.grp3"sv, empty));
   EXPECT_TRUE(config.Contains("lvl1.grp3.my-bool"sv));
   EXPECT_TRUE(config.Contains("lvl1.grp3.my-int32"sv));
@@ -1176,13 +1227,20 @@ TEST(ConfigTest, SetGroup) {
 
   auto keys = group.ListParameterNames(true);
   CheckExpectedKeys({"my-bool", "my-int32", "my-str"}, keys);
+
+  // Insert group at root level
+  EXPECT_NO_THROW(config.SetGroup("my-grp"sv, empty));
+  EXPECT_TRUE(config.Contains("my-grp.my-bool"sv));
+  EXPECT_TRUE(config.Contains("my-grp.my-int32"sv));
+  EXPECT_TRUE(config.Contains("my-grp.my-str"sv));
 }
 
 TEST(ConfigTest, NestedTOML) {
   const auto fname_invalid_toml =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml"sv);
   std::ostringstream toml_str;
-  toml_str << "integer = 3\n"
+  toml_str << "bool = true\ninteger = 3\nlst = [1, 2]\ndate = 2023-02-21\n"
+              "time = 08:30:00\ndatetime = 2023-02-21T11:11:11\n"
               "nested_config = \""sv
            << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
            << "\"\n"
@@ -1203,7 +1261,17 @@ TEST(ConfigTest, NestedTOML) {
   auto config = wkc::LoadTOMLString(toml_str.str());
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("no-such-key"sv),
                wkc::KeyError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("integer"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("float"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("date"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("time"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("datetime"sv),
+               wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1.lvl2"sv),
+               wkc::TypeError);
   config.LoadNestedTOMLConfiguration("nested_config"sv);
 
   EXPECT_EQ(1, config.GetInteger32("nested_config.value1"sv));

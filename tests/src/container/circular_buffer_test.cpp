@@ -160,7 +160,7 @@ TEST(ContainerUtilsTest, CircularBuffer) {
 // EXPECT_EQ(cb.size(), 1);
 // EXPECT_EQ(cb[0].id, 3);
 //}
-//#endif
+// #endif
 
 TEST(ContainerUtilsTest, Iterators) {
   using cb = wkc::circular_buffer<int>;

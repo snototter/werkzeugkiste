@@ -16,6 +16,7 @@ Checks: "*,\
   -modernize-use-trailing-return-type,\
   -modernize-loop-convert,\
   -cppcoreguidelines-pro-bounds-constant-array-index,\
+  -cppcoreguidelines-avoid-do-while,\
   -readability-identifier-length,\
   -readability-else-after-return,\
   -readability-use-anyofallof,\
