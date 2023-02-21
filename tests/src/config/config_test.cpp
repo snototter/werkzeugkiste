@@ -224,7 +224,11 @@ TEST(ConfigTest, QueryTypes) {
   EXPECT_TRUE(config.Contains("dates.day"sv));
   EXPECT_EQ(wkc::ConfigType::Date, config.Type("dates.day"sv));
 
-  // TODO test date types
+  EXPECT_TRUE(config.Contains("dates.time1"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, config.Type("dates.time1"sv));
+
+  EXPECT_TRUE(config.Contains("dates.date_time"sv));
+  EXPECT_EQ(wkc::ConfigType::DateTime, config.Type("dates.date_time"sv));
 
   EXPECT_THROW(config.GetBoolean("lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
@@ -255,7 +259,6 @@ TEST(ConfigTest, QueryTypes) {
 }
 
 TEST(ConfigTest, GetScalarTypes) {
-  // TODO test date types
   const auto config = wkc::LoadTOMLString(R"toml(
     bool = true
     int = 42
@@ -1192,7 +1195,8 @@ TEST(ConfigTest, NestedTOML) {
   const auto fname_invalid_toml =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.toml"sv);
   std::ostringstream toml_str;
-  toml_str << "integer = 3\n"
+  toml_str << "bool = true\ninteger = 3\nlst = [1, 2]\ndate = 2023-02-21\n"
+              "time = 08:30:00\ndatetime = 2023-02-21T11:11:11\n"
               "nested_config = \""sv
            << wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv)
            << "\"\n"
@@ -1213,7 +1217,17 @@ TEST(ConfigTest, NestedTOML) {
   auto config = wkc::LoadTOMLString(toml_str.str());
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("no-such-key"sv),
                wkc::KeyError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("integer"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("float"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("date"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("time"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("datetime"sv),
+               wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1.lvl2"sv),
+               wkc::TypeError);
   config.LoadNestedTOMLConfiguration("nested_config"sv);
 
   EXPECT_EQ(1, config.GetInteger32("nested_config.value1"sv));
