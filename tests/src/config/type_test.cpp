@@ -17,12 +17,6 @@ using namespace std::string_view_literals;
 // NOLINTBEGIN
 TEST(TypeTest, DateType) {
   // Check basic handling of the `date` type
-  auto date = wkc::date(2000, 11, 04);
-  auto tpl_date = date.ToTuple();
-  EXPECT_EQ(date.year, std::get<0>(tpl_date));
-  EXPECT_EQ(date.month, std::get<1>(tpl_date));
-  EXPECT_EQ(date.day, std::get<2>(tpl_date));
-
   EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2020, 1, 21));
   EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2000, 11, 21));
   EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2000, 10, 21));
@@ -61,6 +55,8 @@ TEST(TypeTest, DateType) {
 
   EXPECT_EQ(wkc::date(1999, 2, 1), --wkc::date(1999, 2, 2));
   EXPECT_EQ(wkc::date(1999, 1, 31), --wkc::date(1999, 2, 1));
+  EXPECT_EQ(wkc::date(1999, 1, 1), --wkc::date(1999, 1, 2));
+  EXPECT_EQ(wkc::date(1998, 12, 31), --wkc::date(1999, 1, 1));
 
   // Increment
   EXPECT_EQ(wkc::date(2000, 12, 1), ++wkc::date(2000, 11, 30));
@@ -140,11 +136,6 @@ TEST(TypeTest, DateParsing) {
 TEST(TypeTest, TimeType) {
   // Check basic handling of the `time` type
   wkc::time time{23, 49, 30, 987654321};
-  auto tpl_time = time.ToTuple();
-  EXPECT_EQ(time.hour, std::get<0>(tpl_time));
-  EXPECT_EQ(time.minute, std::get<1>(tpl_time));
-  EXPECT_EQ(time.second, std::get<2>(tpl_time));
-  EXPECT_EQ(time.nanosecond, std::get<3>(tpl_time));
 
   // Printing a time
   EXPECT_EQ("23:49:30.987654321", time.ToString());
@@ -307,6 +298,9 @@ TEST(TypeTest, TimeOffset) {
   EXPECT_EQ(0, wkc::time_offset(""sv).minutes);
   EXPECT_EQ(0, wkc::time_offset("Z"sv).minutes);
   EXPECT_EQ(0, wkc::time_offset("z"sv).minutes);
+  EXPECT_THROW(wkc::time_offset("A"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset("+23"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::time_offset("-42"sv), wkc::ParseError);
   EXPECT_EQ(0, wkc::time_offset("+00:00"sv).minutes);
   EXPECT_EQ(0, wkc::time_offset("-00:00"sv).minutes);
   EXPECT_EQ(62, wkc::time_offset("+01:02"sv).minutes);
@@ -334,10 +328,21 @@ TEST(TypeTest, DateTime) {
   EXPECT_EQ(dt, wkc::date_time(dt.ToString()));
   EXPECT_EQ("2000-11-04T08:10:32.123456789", dt.ToString());
 
-  dt.offset = wkc::time_offset{};
-  EXPECT_EQ(dt, wkc::date_time(dt.ToString()));
-  EXPECT_EQ("2000-11-04T08:10:32.123456789Z", dt.ToString());
+  dt = wkc::date_time{date, time, {}};
+  EXPECT_EQ(date, dt.date);
+  EXPECT_EQ(time, dt.time);
+  EXPECT_TRUE(dt.offset.has_value());
+  EXPECT_EQ(0, dt.offset.value().minutes);
 
+  std::ostringstream str;
+  str << dt;
+  EXPECT_EQ("2000-11-04T08:10:32.123456789Z", str.str());
+
+  dt.offset = wkc::time_offset{-30};
+  EXPECT_EQ(dt, wkc::date_time(dt.ToString()));
+  EXPECT_EQ("2000-11-04T08:10:32.123456789-00:30", dt.ToString());
+
+  dt.offset = wkc::time_offset{};
   dt.time.nanosecond = 0;
   EXPECT_EQ("2000-11-04T08:10:32Z", dt.ToString());
 
@@ -410,6 +415,9 @@ TEST(TypeTest, DateTime) {
   EXPECT_THROW(wkc::date_time("today"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date_time("tomorrow"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date_time("yesterday"sv), wkc::ParseError);
+
+  EXPECT_THROW(wkc::date_time("2023-02-14T22:30:03A"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date_time("2023-02-14T22:30:03wrong"sv), wkc::ParseError);
 
   // TODO Comparison operators
   // TODO EXPECT_LT(dt, wkc::date_time{"2023-02-14_21:08:23.880Z"sv});
