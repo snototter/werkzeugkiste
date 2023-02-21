@@ -366,7 +366,6 @@ T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
       return T{default_val};
     }
 
-    // throw KeyError::FromKey(key); // TODO
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
@@ -740,7 +739,6 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    // throw KeyError::FromKey(key); // TODO
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
@@ -824,7 +822,6 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    // throw KeyError::FromKey(key); // TODO
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
@@ -957,7 +954,6 @@ ConfigType Configuration::Type(std::string_view key) const {
   const auto nv = pimpl_->config_root.at_path(key);
   switch (nv.type()) {
     case toml::node_type::none:
-      // throw KeyError::FromKey(key); // TODO
       throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
 
     case toml::node_type::table:
@@ -1228,7 +1224,6 @@ std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetPoints3D(
 
 Configuration Configuration::GetGroup(std::string_view key) const {
   if (!Contains(key)) {
-    // throw KeyError::FromKey(key); // TODO
     throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 
@@ -1395,7 +1390,6 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   // TODO refactor (TOML/JSON --> function handle)
 
   if (!detail::ConfigContainsKey(pimpl_->config_root, key)) {
-    // throw KeyError::FromKey(key); // TODO
     throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 

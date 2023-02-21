@@ -24,15 +24,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::runtime_error {
 // TODO doc: config key/parameter name does not exist
 class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::invalid_argument {
  public:
-  // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
   explicit KeyError(std::string msg) : std::invalid_argument{msg} {}
-
-  static KeyError FromKey(std::string_view key) {
-    std::string msg{"Key `"};
-    msg.append(key);
-    msg.append("` does not exist!");
-    return KeyError(msg);
-  }
 };
 
 // TODO doc: wrong type assumed for getter/setter
