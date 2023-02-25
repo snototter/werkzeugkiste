@@ -178,7 +178,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   void SetDate(std::string_view key, const date &value);
 
-  std::vector<date> Configuration::GetDateList(std::string_view key) const;
+  std::vector<date> GetDateList(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Time
@@ -189,7 +189,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   void SetTime(std::string_view key, const time &value);
 
-  std::vector<time> Configuration::GetTimeList(std::string_view key) const;
+  std::vector<time> GetTimeList(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Date-time
@@ -201,8 +201,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   void SetDateTime(std::string_view key, const date_time &value);
 
-  std::vector<date_time> Configuration::GetDateTimeList(
-      std::string_view key) const;
+  std::vector<date_time> GetDateTimeList(std::string_view key) const;
 
   // TODO list setter
 
