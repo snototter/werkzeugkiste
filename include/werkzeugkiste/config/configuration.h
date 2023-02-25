@@ -101,7 +101,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   void SetBoolean(std::string_view key, bool value);
 
-  std::vector<int32_t> GetBooleanList(std::string_view key) const;
+  std::vector<bool> GetBooleanList(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Integers (32-bit)
@@ -114,6 +114,24 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
+
+  /// @brief Returns a list of 2D indices (integral x/y coordinates, e.g. a
+  ///   polyline).
+  ///
+  /// For the floating point counterpart, refer to `GetPoints2D`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<std::tuple<int32_t, int32_t>> GetIndices2D(
+      std::string_view key) const;
+
+  /// @brief Returns a list of 3D indices (integral x/y/z coordinates, e.g. a
+  ///   polyline).
+  ///
+  /// For the floating point counterpart, refer to `GetPoints3D`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetIndices3D(
+      std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Integers (64-bit)
@@ -160,7 +178,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   void SetDate(std::string_view key, const date &value);
 
-  // TODO do we need list/setlist? -> nice-to-have
+  std::vector<date> Configuration::GetDateList(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Time
@@ -171,7 +189,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   void SetTime(std::string_view key, const time &value);
 
-  // TODO do we need list/setlist? -> nice-to-have
+  std::vector<time> Configuration::GetTimeList(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Date-time
@@ -180,22 +198,13 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   date_time GetDateTimeOr(std::string_view key,
                           const date_time &default_val) const;
   std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
+
   void SetDateTime(std::string_view key, const date_time &value);
 
-  // TODO do we need list/setlist? -> nice-to-have
-  // TODO getboolean list
-  // TODO setter
-  // TODO list of date/time/datetime
-  // TODO list
-
-  //---------------------------------------------------------------------------
-  // Convenience getter: Points (e.g. to retrieve a polyline)
-
-  std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
+  std::vector<date_time> Configuration::GetDateTimeList(
       std::string_view key) const;
 
-  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
-      std::string_view key) const;
+  // TODO list setter
 
   //---------------------------------------------------------------------------
   // Group/"Sub-Configuration"

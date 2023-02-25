@@ -730,9 +730,11 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
   }
 }
 
-/// Extracts a list of points (a polyline) of integer or double.
+/// @brief Extracts a list of tuples: This can be used to query a list of
+/// "points" (e.g. a polyline), "pixels", or "indices". Each coordinate must
+/// be specified as integer or floating point.
 template <typename Tuple>
-std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
+std::vector<Tuple> GetTuples(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
@@ -995,7 +997,7 @@ std::vector<std::string> Configuration::ListParameterNames(
 }
 
 //---------------------------------------------------------------------------
-// Scalar data types
+// Boolean
 
 bool Configuration::GetBoolean(std::string_view key) const {
   return detail::ConfigLookupScalar<bool>(pimpl_->config_root, key,
@@ -1015,6 +1017,13 @@ std::optional<bool> Configuration::GetOptionalBoolean(
 void Configuration::SetBoolean(std::string_view key, bool value) {
   detail::ConfigSetScalar<bool>(pimpl_->config_root, key, value);
 }
+
+std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
+  return detail::GetScalarList<bool>(pimpl_->config_root, key);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Integer (32-bit)
 
 int32_t Configuration::GetInteger32(std::string_view key) const {
   return detail::ConfigLookupScalar<int32_t>(pimpl_->config_root, key,
@@ -1037,6 +1046,31 @@ void Configuration::SetInteger32(std::string_view key, int32_t value) {
                                             static_cast<int64_t>(value));
 }
 
+std::pair<int32_t, int32_t> Configuration::GetInteger32Pair(
+    std::string_view key) const {
+  return detail::GetScalarPair<int32_t>(pimpl_->config_root, key);
+}
+
+std::vector<int32_t> Configuration::GetInteger32List(
+    std::string_view key) const {
+  return detail::GetScalarList<int32_t>(pimpl_->config_root, key);
+}
+
+std::vector<std::tuple<int32_t, int32_t>> Configuration::GetIndices2D(
+    std::string_view key) const {
+  return detail::GetTuples<std::tuple<int32_t, int32_t>>(pimpl_->config_root,
+                                                         key);
+}
+
+std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetIndices3D(
+    std::string_view key) const {
+  return detail::GetTuples<std::tuple<int32_t, int32_t, int32_t>>(
+      pimpl_->config_root, key);
+}
+
+//---------------------------------------------------------------------------
+// Integer (64-bit)
+
 int64_t Configuration::GetInteger64(std::string_view key) const {
   return detail::ConfigLookupScalar<int64_t>(pimpl_->config_root, key,
                                              /*allow_default=*/false);
@@ -1056,6 +1090,19 @@ std::optional<int64_t> Configuration::GetOptionalInteger64(
 void Configuration::SetInteger64(std::string_view key, int64_t value) {
   detail::ConfigSetScalar<int64_t>(pimpl_->config_root, key, value);
 }
+
+std::pair<int64_t, int64_t> Configuration::GetInteger64Pair(
+    std::string_view key) const {
+  return detail::GetScalarPair<int64_t>(pimpl_->config_root, key);
+}
+
+std::vector<int64_t> Configuration::GetInteger64List(
+    std::string_view key) const {
+  return detail::GetScalarList<int64_t>(pimpl_->config_root, key);
+}
+
+//---------------------------------------------------------------------------
+// Floating Point
 
 double Configuration::GetDouble(std::string_view key) const {
   return detail::ConfigLookupScalar<double>(pimpl_->config_root, key,
@@ -1077,6 +1124,18 @@ std::optional<double> Configuration::GetOptionalDouble(
 void Configuration::SetDouble(std::string_view key, double value) {
   detail::ConfigSetScalar<double>(pimpl_->config_root, key, value);
 }
+
+std::pair<double, double> Configuration::GetDoublePair(
+    std::string_view key) const {
+  return detail::GetScalarPair<double>(pimpl_->config_root, key);
+}
+
+std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
+  return detail::GetScalarList<double>(pimpl_->config_root, key);
+}
+
+//---------------------------------------------------------------------------
+// Strings
 
 std::string Configuration::GetString(std::string_view key) const {
   using namespace std::string_view_literals;
@@ -1100,8 +1159,13 @@ void Configuration::SetString(std::string_view key, std::string_view value) {
       pimpl_->config_root, key, value);
 }
 
+std::vector<std::string> Configuration::GetStringList(
+    std::string_view key) const {
+  return detail::GetScalarList<std::string>(pimpl_->config_root, key);
+}
+
 //---------------------------------------------------------------------------
-// Date/time data types
+// Date
 
 date Configuration::GetDate(std::string_view key) const {
   return detail::ConfigLookupScalar<date>(pimpl_->config_root, key,
@@ -1124,6 +1188,13 @@ void Configuration::SetDate(std::string_view key, const date &value) {
                                               "date"sv);
 }
 
+std::vector<date> Configuration::GetDateList(std::string_view key) const {
+  return detail::GetScalarList<date>(pimpl_->config_root, key);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Time
+
 time Configuration::GetTime(std::string_view key) const {
   return detail::ConfigLookupScalar<time>(pimpl_->config_root, key,
                                           /*allow_default=*/false);
@@ -1144,6 +1215,13 @@ void Configuration::SetTime(std::string_view key, const time &value) {
   detail::ConfigSetDateTime<time, toml::time>(pimpl_->config_root, key, value,
                                               "time"sv);
 }
+
+std::vector<time> Configuration::GetTimeList(std::string_view key) const {
+  return detail::GetScalarList<time>(pimpl_->config_root, key);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Datetime
 
 date_time Configuration::GetDateTime(std::string_view key) const {
   return detail::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
@@ -1168,54 +1246,14 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
       pimpl_->config_root, key, value, "date_time"sv);
 }
 
+std::vector<date_time> Configuration::GetDateTimeList(
+    std::string_view key) const {
+  return detail::GetScalarList<date_time>(pimpl_->config_root,
+                                          key);  // TODO test
+}
+
 //---------------------------------------------------------------------------
-// Lists/pairs of scalar data types
-
-std::pair<double, double> Configuration::GetDoublePair(
-    std::string_view key) const {
-  return detail::GetScalarPair<double>(pimpl_->config_root, key);
-}
-
-std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
-  return detail::GetScalarList<double>(pimpl_->config_root, key);
-}
-
-std::pair<int32_t, int32_t> Configuration::GetInteger32Pair(
-    std::string_view key) const {
-  return detail::GetScalarPair<int32_t>(pimpl_->config_root, key);
-}
-
-std::vector<int32_t> Configuration::GetInteger32List(
-    std::string_view key) const {
-  return detail::GetScalarList<int32_t>(pimpl_->config_root, key);
-}
-
-std::pair<int64_t, int64_t> Configuration::GetInteger64Pair(
-    std::string_view key) const {
-  return detail::GetScalarPair<int64_t>(pimpl_->config_root, key);
-}
-
-std::vector<int64_t> Configuration::GetInteger64List(
-    std::string_view key) const {
-  return detail::GetScalarList<int64_t>(pimpl_->config_root, key);
-}
-
-std::vector<std::string> Configuration::GetStringList(
-    std::string_view key) const {
-  return detail::GetScalarList<std::string>(pimpl_->config_root, key);
-}
-
-std::vector<std::tuple<int32_t, int32_t>> Configuration::GetPoints2D(
-    std::string_view key) const {
-  return detail::GetPoints<std::tuple<int32_t, int32_t>>(pimpl_->config_root,
-                                                         key);
-}
-
-std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetPoints3D(
-    std::string_view key) const {
-  return detail::GetPoints<std::tuple<int32_t, int32_t, int32_t>>(
-      pimpl_->config_root, key);
-}
+// FIXME
 
 Configuration Configuration::GetGroup(std::string_view key) const {
   if (!Contains(key)) {
