@@ -486,109 +486,83 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   }
 }
 
-/// @brief Allows setting a TOML parameter to an int64, double, bool, or string.
-/// @tparam Ttoml Scalar TOML type to be set.
-/// @tparam Tmessage Only needed to avoid separate int32 specialization (as
-/// internally, all integers are stored as 64-bit: If there would be an error,
-/// we don't want to show a confusing "user provided 64-bit" error message).
-/// @param tbl The "root" table.
-/// @param key The fully-qualified "TOML path".
-/// @param value The value to be set.
-template <typename Ttoml, typename Tmessage = Ttoml, typename Tvalue>
-void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
-  const auto path = SplitTomlPath(key);
-  if (ContainsKey(tbl, key)) {
-    const auto node = tbl.at_path(key);
-    if (!node.is<Ttoml>()) {
-      std::string msg{"Changing the type is not allowed. Parameter `"};
-      msg += key;
-      msg += "` is `";
-      msg += TomlTypeName(node, key);
-      msg += "`, but scalar is of type `";
-      msg += TypeName<TMessage>();
-      msg += "`!";
-      throw TypeError{msg};
-    }
-
-    auto &ref = *node.as<Ttoml>();
-    ref = Ttoml{value};
-  } else {
-    EnsureContainerPathExists(tbl, path.first);
-    toml::table *parent =
-        path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
-    if (parent == nullptr) {
-      // LCOV_EXCL_START
-      WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(key, path.first);
-      // LCOV_EXCL_STOP
-    }
-
-    auto result = parent->insert_or_assign(path.second, value);
-    if (!ContainsKey(tbl, key)) {
-      // LCOV_EXCL_START
-      WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(key, result.second, path.first,
-                                               path.second);
-      // LCOV_EXCL_STOP
-    }
-  }
-}
-
-/// @brief Converts a date/time/date_time value to the corresponding TOML type.
-/// @tparam Tcfg Type used in the public API.
-/// @tparam Ttoml Corresponding TOML type.
-/// @param value The value to be converted.
+// -------------------------------------
+// TODO conversion test
+// TODO doc
 template <typename Ttoml, typename Tcfg>
-Ttoml ConvertDateTimeToToml(const Tcfg &value) {
-  Ttoml tval{};
+Ttoml ConvertConfigTypeToToml(const Tcfg &value) {
+  if constexpr (std::is_same_v<Tcfg, bool>) {
+    return value;
+  }
+
+  if constexpr (std::is_arithmetic_v<Tcfg>) {
+    return checked_numcast<Ttoml, Tcfg, TypeError>(value);
+  }
+
+  if constexpr (std::is_same_v<Tcfg, std::string> ||
+                std::is_same_v<Tcfg, std::string_view>) {
+    return std::string{value};
+  }
+
   if constexpr (std::is_same_v<Tcfg, date>) {
-    tval = toml::date{value.year, value.month, value.day};
-  } else if constexpr (std::is_same_v<Tcfg, time>) {
-    tval = toml::time{value.hour, value.minute, value.second, value.nanosecond};
-  } else if constexpr (std::is_same_v<Tcfg, date_time>) {
+    return toml::date{value.year, value.month, value.day};
+  }
+
+  if constexpr (std::is_same_v<Tcfg, time>) {
+    return toml::time{value.hour, value.minute, value.second, value.nanosecond};
+  }
+
+  if constexpr (std::is_same_v<Tcfg, date_time>) {
     if (value.IsLocal()) {
-      tval = toml::date_time{
+      return toml::date_time{
           toml::date{value.date.year, value.date.month, value.date.day},
           toml::time{value.time.hour, value.time.minute, value.time.second,
                      value.time.nanosecond}};
-    } else {
+    } else {  // NOLINT
       toml::time_offset offset{};
       offset.minutes = static_cast<int16_t>(value.offset.value().minutes);
-      tval = toml::date_time{
+      return toml::date_time{
           toml::date{value.date.year, value.date.month, value.date.day},
           toml::time{value.time.hour, value.time.minute, value.time.second,
                      value.time.nanosecond},
           offset};
     }
   }
-  return tval;
+
+  throw std::logic_error{"TODO Missing implementation - file bug report!"};
 }
 
-/// @brief Sets a date/time/date-time TOML parameter.
-/// @tparam Tcfg Type used in the public API.
-/// @tparam Ttoml Corresponding TOML type.
+/// @brief Allows setting a scalar TOML parameter.
+/// @tparam Ttoml Scalar TOML type to be set.
+/// @tparam Tmessage Type needed for error message to avoid separate int32_t
+/// specialization. Internally, all integers are stored as 64-bit: If there
+/// would be an error while setting a 32-bit value, we don't want to show a
+/// confusing "user provided 64-bit" error message.
 /// @param tbl The TOML root node.
-/// @param key Fully-qualified parameter name.
+/// @param key The fully-qualified parameter name.
 /// @param value The value to be set.
-/// @param tp_name_message Type name to be used for error messages.
-template <typename Tcfg, typename Ttoml>
-void SetDateTime(toml::table &tbl, std::string_view key, const Tcfg &value,
-                 std::string_view tp_name_message) {
+template <typename Ttoml, typename Tmessage = Ttoml, typename Tvalue>
+void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
   const auto path = SplitTomlPath(key);
-  Ttoml tval = ConvertDateTimeToToml<Ttoml>(value);
   if (ContainsKey(tbl, key)) {
     const auto node = tbl.at_path(key);
+
+    // TODO replace by "IsCompatible"
     if (!node.is<Ttoml>()) {
       std::string msg{"Changing the type is not allowed. Parameter `"};
       msg += key;
       msg += "` is `";
       msg += TomlTypeName(node, key);
-      msg += "`, but scalar is of type `";
-      msg += tp_name_message;
+      msg += "`, but replacement value is of type `";
+      msg += TypeName<Tmessage>();
       msg += "`!";
       throw TypeError{msg};
     }
 
     auto &ref = *node.as<Ttoml>();
-    ref = tval;
+    // ref = Ttoml{value};
+    //  FIXME
+    ref = ConvertConfigTypeToToml<Ttoml>(value);
   } else {
     EnsureContainerPathExists(tbl, path.first);
     toml::table *parent =
@@ -599,7 +573,10 @@ void SetDateTime(toml::table &tbl, std::string_view key, const Tcfg &value,
       // LCOV_EXCL_STOP
     }
 
-    auto result = parent->insert_or_assign(path.second, tval);
+    // auto result = parent->insert_or_assign(path.second, value);
+    // FIXME
+    auto result = parent->insert_or_assign(
+        path.second, ConvertConfigTypeToToml<Ttoml>(value));
     if (!ContainsKey(tbl, key)) {
       // LCOV_EXCL_START
       WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(key, result.second, path.first,
@@ -608,6 +585,86 @@ void SetDateTime(toml::table &tbl, std::string_view key, const Tcfg &value,
     }
   }
 }
+
+// /// @brief Converts a date/time/date_time value to the corresponding TOML
+// type.
+// /// @tparam Tcfg Type used in the public API.
+// /// @tparam Ttoml Corresponding TOML type.
+// /// @param value The value to be converted.
+// template <typename Ttoml, typename Tcfg>
+// Ttoml ConvertDateTimeToToml(const Tcfg &value) {
+//   Ttoml tval{};
+//   if constexpr (std::is_same_v<Tcfg, date>) {
+//     tval = toml::date{value.year, value.month, value.day};
+//   } else if constexpr (std::is_same_v<Tcfg, time>) {
+//     tval = toml::time{value.hour, value.minute, value.second,
+//     value.nanosecond};
+//   } else if constexpr (std::is_same_v<Tcfg, date_time>) {
+//     if (value.IsLocal()) {
+//       tval = toml::date_time{
+//           toml::date{value.date.year, value.date.month, value.date.day},
+//           toml::time{value.time.hour, value.time.minute, value.time.second,
+//                      value.time.nanosecond}};
+//     } else {
+//       toml::time_offset offset{};
+//       offset.minutes = static_cast<int16_t>(value.offset.value().minutes);
+//       tval = toml::date_time{
+//           toml::date{value.date.year, value.date.month, value.date.day},
+//           toml::time{value.time.hour, value.time.minute, value.time.second,
+//                      value.time.nanosecond},
+//           offset};
+//     }
+//   }
+//   return tval;
+// }
+
+// /// @brief Sets a date/time/date-time TOML parameter.
+// /// @tparam Tcfg Type used in the public API.
+// /// @tparam Ttoml Corresponding TOML type.
+// /// @param tbl The TOML root node.
+// /// @param key Fully-qualified parameter name.
+// /// @param value The value to be set.
+// /// @param tp_name_message Type name to be used for error messages.
+// template <typename Tcfg, typename Ttoml>
+// void SetDateTime(toml::table &tbl, std::string_view key, const Tcfg &value,
+//                  std::string_view tp_name_message) {
+//   const auto path = SplitTomlPath(key);
+//   Ttoml tval = ConvertDateTimeToToml<Ttoml>(value);
+//   if (ContainsKey(tbl, key)) {
+//     const auto node = tbl.at_path(key);
+//     if (!node.is<Ttoml>()) {
+//       std::string msg{"Changing the type is not allowed. Parameter `"};
+//       msg += key;
+//       msg += "` is `";
+//       msg += TomlTypeName(node, key);
+//       msg += "`, but scalar is of type `";
+//       msg += tp_name_message;
+//       msg += "`!";
+//       throw TypeError{msg};
+//     }
+
+//     auto &ref = *node.as<Ttoml>();
+//     ref = tval;
+//   } else {
+//     EnsureContainerPathExists(tbl, path.first);
+//     toml::table *parent =
+//         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
+//     if (parent == nullptr) {
+//       // LCOV_EXCL_START
+//       WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(key, path.first);
+//       // LCOV_EXCL_STOP
+//     }
+
+//     auto result = parent->insert_or_assign(path.second, tval);
+//     if (!ContainsKey(tbl, key)) {
+//       // LCOV_EXCL_START
+//       WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(key, result.second,
+//       path.first,
+//                                                path.second);
+//       // LCOV_EXCL_STOP
+//     }
+//   }
+// }
 
 // TODO doc
 template <typename T, typename TMessage = T, typename TValue>
@@ -1267,9 +1324,11 @@ std::optional<date> Configuration::GetOptionalDate(std::string_view key) const {
 }
 
 void Configuration::SetDate(std::string_view key, const date &value) {
-  using namespace std::string_view_literals;
-  detail::SetDateTime<date, toml::date>(pimpl_->config_root, key, value,
-                                        "date"sv);
+  // using namespace std::string_view_literals;
+  // FIXME
+  // detail::SetDateTime<date, toml::date>(pimpl_->config_root, key, value,
+  //                                       "date"sv);
+  detail::SetScalar<toml::date>(pimpl_->config_root, key, value);
 }
 
 std::vector<date> Configuration::GetDateList(std::string_view key) const {
@@ -1295,9 +1354,11 @@ std::optional<time> Configuration::GetOptionalTime(std::string_view key) const {
 }
 
 void Configuration::SetTime(std::string_view key, const time &value) {
-  using namespace std::string_view_literals;
-  detail::SetDateTime<time, toml::time>(pimpl_->config_root, key, value,
-                                        "time"sv);
+  // using namespace std::string_view_literals;
+  // detail::SetDateTime<time, toml::time>(pimpl_->config_root, key, value,
+  //                                       "time"sv);
+  // FIXME
+  detail::SetScalar<toml::time>(pimpl_->config_root, key, value);
 }
 
 std::vector<time> Configuration::GetTimeList(std::string_view key) const {
@@ -1324,9 +1385,11 @@ std::optional<date_time> Configuration::GetOptionalDateTime(
 }
 
 void Configuration::SetDateTime(std::string_view key, const date_time &value) {
-  using namespace std::string_view_literals;
-  detail::SetDateTime<date_time, toml::date_time>(pimpl_->config_root, key,
-                                                  value, "date_time"sv);
+  // using namespace std::string_view_literals;
+  // detail::SetDateTime<date_time, toml::date_time>(pimpl_->config_root, key,
+  //                                                 value, "date_time"sv);
+  // FIXME
+  detail::SetScalar<toml::date_time>(pimpl_->config_root, key, value);
 }
 
 std::vector<date_time> Configuration::GetDateTimeList(

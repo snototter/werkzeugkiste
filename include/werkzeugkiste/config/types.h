@@ -252,6 +252,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
 //-----------------------------------------------------------------------------
 // Date-time
 
+/// @brief A date-time specification following RFC 3339.
 struct date_time {
  public:
   config::date date{};
