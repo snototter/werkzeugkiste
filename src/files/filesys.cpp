@@ -9,7 +9,7 @@
 #ifdef WZK_HAS_FILESYSTEM
 #include <filesystem>
 // FIXME linking to std::filesystem will be a chore
-//#else // WZK_HAS_FILESYSTEM
+// #else // WZK_HAS_FILESYSTEM
 #endif  // WZK_HAS_FILESYSTEM
 
 namespace werkzeugkiste::files {

@@ -6,6 +6,7 @@
 #include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/config/keymatcher.h>
+#include <werkzeugkiste/container/sort.h>
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/logging.h>
@@ -119,6 +120,52 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
     }
   }
   return keys;
+}
+
+/// @brief Prepares a KeyError with an alternative key suggestion.
+/// @param tbl The configuration root node/table.
+/// @param key The key which could not be found.
+/// @return KeyError instance to be thrown.
+KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
+  using namespace std::string_view_literals;
+  std::string msg{"Key `"};
+  msg.append(key);
+  msg.append("` does not exist!");
+
+  const std::vector<std::string> keys =
+      ListTableKeys(tbl, ""sv, /*include_array_entries=*/true);
+  std::vector<std::pair<std::size_t, std::string_view>> candidates;
+  for (const auto &cand : keys) {
+    // The edit distance can't be less than the length difference between the
+    // two strings. So we can reject unsuitable keys earlier.
+    if (strings::LengthDifference(key, cand) < 5) {
+      const std::size_t edit_dist = strings::LevenshteinDistance(key, cand);
+      if (edit_dist < 3) {
+        candidates.emplace_back(edit_dist, cand);
+      }
+    }
+  }
+  if (!candidates.empty()) {
+    const std::vector<std::size_t> sorted_indices = container::GetSortedIndices(
+        candidates,
+        [](const std::pair<std::size_t, std::string_view> &a,
+           const std::pair<std::size_t, std::string_view> &b) -> bool {
+          return a.first < b.first;
+        });
+    msg.append(" Did you mean: `");
+    const std::size_t num_to_include =
+        std::min(sorted_indices.size(), static_cast<std::size_t>(3));
+    for (std::size_t idx = 0; idx < num_to_include; ++idx) {
+      const auto &cand = candidates[sorted_indices[idx]];
+      msg.append(cand.second);
+      if (idx < num_to_include - 1) {
+        msg.append("`, `");
+      }
+    }
+    msg.append("`?");
+  }
+
+  return KeyError{msg};
 }
 
 /// @brief Visits all child nodes of the given TOML configuration in a
@@ -251,11 +298,7 @@ inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
 /// is not correct.
 /// Tries converting numeric types if a lossless cast is feasible.
 template <typename T, typename NodeView>
-T CastScalar(const NodeView &node, std::string_view key) {
-  static_assert(std::is_arithmetic_v<bool>,
-                "Boolean must be a number type to use numeric casts for "
-                "parameter extraction!");
-
+T CastScalar(const NodeView &node, std::string_view fqn) {
   if constexpr (std::is_same_v<T, bool>) {
     if (node.is_boolean()) {
       return static_cast<bool>(*node.as_boolean());
@@ -300,10 +343,9 @@ T CastScalar(const NodeView &node, std::string_view key) {
       return tmp;
     }
   } else {
-    // TODO This method could be extended to handle date/time
     throw std::logic_error("Type not yet supported!");
   }
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(fqn, node, T);
 }
 
 /// Looks up the value at the given key (fully-qualified TOML path).
@@ -319,7 +361,7 @@ T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
       return T{default_val};
     }
 
-    throw werkzeugkiste::config::KeyError(key);
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto node = tbl.at_path(key);
@@ -347,7 +389,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
   // not an issue, because we don't allow creating array elements (as
   // there is no need to do so). If this requirement changes, make sure
   // to support "fancy" paths, such as "arr[3][0][1].internal.array[0]".
-  std::size_t pos = path.find_last_of('.');
+  const std::size_t pos = path.find_last_of('.');
   if (pos != std::string_view::npos) {
     return std::make_pair(path.substr(0, pos), path.substr(pos + 1));
   }
@@ -692,7 +734,7 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
 template <typename Tuple>
 std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    throw werkzeugkiste::config::KeyError(key);
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto node = tbl.at_path(key);
@@ -734,7 +776,8 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    throw werkzeugkiste::config::KeyError(key);
+    // throw KeyError::FromKey(key); // TODO
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto &node = tbl.at_path(key);
@@ -774,7 +817,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
 template <typename T>
 std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   if (!ConfigContainsKey(tbl, key)) {
-    throw werkzeugkiste::config::KeyError(key);
+    throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto &node = tbl.at_path(key);
@@ -906,7 +949,7 @@ ConfigType Configuration::Type(std::string_view key) const {
   const auto nv = pimpl_->config_root.at_path(key);
   switch (nv.type()) {
     case toml::node_type::none:
-      throw werkzeugkiste::config::KeyError(key);
+      throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
 
     case toml::node_type::table:
       return ConfigType::Group;
@@ -1176,7 +1219,7 @@ std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetPoints3D(
 
 Configuration Configuration::GetGroup(std::string_view key) const {
   if (!Contains(key)) {
-    throw werkzeugkiste::config::KeyError(key);
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 
   Configuration cfg;
@@ -1257,7 +1300,7 @@ bool Configuration::AdjustRelativePaths(
     std::string_view base_path,
     const std::vector<std::string_view> &parameters) {
   using namespace std::string_view_literals;
-  KeyMatcher matcher{parameters};
+  const KeyMatcher matcher{parameters};
   auto to_replace = [matcher](std::string_view fqn) -> bool {
     return matcher.Match(fqn);
   };
@@ -1282,7 +1325,7 @@ bool Configuration::AdjustRelativePaths(
       const std::string param_str = detail::CastScalar<std::string>(node, fqn);
       const bool is_file_url = strings::StartsWith(param_str, "file://");
       // NOLINTNEXTLINE(*magic-numbers)
-      std::string path = is_file_url ? param_str.substr(7) : param_str;
+      const std::string path = is_file_url ? param_str.substr(7) : param_str;
 
       if (!files::IsAbsolute(path)) {
         auto &str = *node.as_string();
@@ -1342,7 +1385,7 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   // TODO refactor (TOML/JSON --> function handle)
 
   if (!detail::ConfigContainsKey(pimpl_->config_root, key)) {
-    throw werkzeugkiste::config::KeyError(key);
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 
   const auto &node = pimpl_->config_root.at_path(key);
@@ -1356,7 +1399,7 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   }
 
   // To replace the node, we first have to remove it.
-  std::string fname = std::string(*node.as_string());
+  const std::string fname = std::string(*node.as_string());
 
   try {
     auto nested_tbl = toml::parse_file(fname);

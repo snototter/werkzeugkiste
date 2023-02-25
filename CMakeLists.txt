@@ -402,7 +402,7 @@ generate_export_header(
 # target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
 target_link_libraries(
   werkzeugkiste-config PRIVATE werkzeugkiste::logging werkzeugkiste::strings
-                               werkzeugkiste::files)
+                               werkzeugkiste::files werkzeugkiste::container)
 
 set_target_properties(
   werkzeugkiste-config

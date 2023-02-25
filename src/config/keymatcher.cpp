@@ -20,7 +20,7 @@ struct KeyMatcher::Impl {
   //  Impl &operator=(Impl &&) = default;
 
   void RegisterKey(std::string_view key) {
-    patterns_.emplace_back(std::make_pair(std::string(key), BuildRegex(key)));
+    patterns_.emplace_back(std::string(key), BuildRegex(key));
   }
 
   bool Match(std::string_view query) const {
@@ -58,7 +58,7 @@ struct KeyMatcher::Impl {
     }
 
     std::string re{"^"};
-    for (char c : key) {
+    for (const char c : key) {
       if (c == '*') {
         re += ".*";
       } else if ((c == '.') || (c == '[') || (c == ']')) {

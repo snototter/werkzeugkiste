@@ -93,71 +93,112 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::vector<std::string> ListParameterNames(bool include_array_entries) const;
 
   //---------------------------------------------------------------------------
-  // Scalar data types
+  // Booleans
 
   bool GetBoolean(std::string_view key) const;
   bool GetBooleanOr(std::string_view key, bool default_val) const;
   std::optional<bool> GetOptionalBoolean(std::string_view key) const;
+
   void SetBoolean(std::string_view key, bool value);
+
+  std::vector<int32_t> GetBooleanList(std::string_view key) const;
+
+  //---------------------------------------------------------------------------
+  // Integers (32-bit)
 
   int32_t GetInteger32(std::string_view key) const;
   int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
   std::optional<int32_t> GetOptionalInteger32(std::string_view key) const;
+
   void SetInteger32(std::string_view key, int32_t value);
+
+  std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
+  std::vector<int32_t> GetInteger32List(std::string_view key) const;
+
+  //---------------------------------------------------------------------------
+  // Integers (64-bit)
 
   int64_t GetInteger64(std::string_view key) const;
   int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
   std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
+
   void SetInteger64(std::string_view key, int64_t value);
+
+  std::pair<int64_t, int64_t> GetInteger64Pair(std::string_view key) const;
+  std::vector<int64_t> GetInteger64List(std::string_view key) const;
+
+  //---------------------------------------------------------------------------
+  // Floating Point
 
   double GetDouble(std::string_view key) const;
   double GetDoubleOr(std::string_view key, double default_val) const;
   std::optional<double> GetOptionalDouble(std::string_view key) const;
+
   void SetDouble(std::string_view key, double value);
+
+  std::pair<double, double> GetDoublePair(std::string_view key) const;
+  std::vector<double> GetDoubleList(std::string_view key) const;
+
+  //---------------------------------------------------------------------------
+  // Strings
 
   std::string GetString(std::string_view key) const;
   std::string GetStringOr(std::string_view key,
                           std::string_view default_val) const;
   std::optional<std::string> GetOptionalString(std::string_view key) const;
+
   void SetString(std::string_view key, std::string_view value);
 
+  std::vector<std::string> GetStringList(std::string_view key) const;
+
   //---------------------------------------------------------------------------
-  // Date/time data types
+  // Date
 
   date GetDate(std::string_view key) const;
   date GetDateOr(std::string_view key, const date &default_val) const;
   std::optional<date> GetOptionalDate(std::string_view key) const;
+
   void SetDate(std::string_view key, const date &value);
+
+  // TODO do we need list/setlist? -> nice-to-have
+
+  //---------------------------------------------------------------------------
+  // Time
 
   time GetTime(std::string_view key) const;
   time GetTimeOr(std::string_view key, const time &default_val) const;
   std::optional<time> GetOptionalTime(std::string_view key) const;
+
   void SetTime(std::string_view key, const time &value);
+
+  // TODO do we need list/setlist? -> nice-to-have
+
+  //---------------------------------------------------------------------------
+  // Date-time
 
   date_time GetDateTime(std::string_view key) const;
   date_time GetDateTimeOr(std::string_view key,
                           const date_time &default_val) const;
   std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
   void SetDateTime(std::string_view key, const date_time &value);
+
+  // TODO do we need list/setlist? -> nice-to-have
+  // TODO getboolean list
+  // TODO setter
+  // TODO list of date/time/datetime
+  // TODO list
+
   //---------------------------------------------------------------------------
-  //  Lists/pairs of scalar data types
-
-  std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
-  std::vector<int32_t> GetInteger32List(std::string_view key) const;
-
-  std::pair<int64_t, int64_t> GetInteger64Pair(std::string_view key) const;
-  std::vector<int64_t> GetInteger64List(std::string_view key) const;
-
-  std::pair<double, double> GetDoublePair(std::string_view key) const;
-  std::vector<double> GetDoubleList(std::string_view key) const;
-
-  std::vector<std::string> GetStringList(std::string_view key) const;
+  // Convenience getter: Points (e.g. to retrieve a polyline)
 
   std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
       std::string_view key) const;
 
   std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
       std::string_view key) const;
+
+  //---------------------------------------------------------------------------
+  // Group/"Sub-Configuration"
 
   /// @brief Returns a copy of the sub-group.
   /// @param key Fully-qualified name of the parameter (which must be a

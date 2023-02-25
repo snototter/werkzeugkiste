@@ -13,7 +13,12 @@
 // * When upgrading to C++20, we can easily support date/time
 //   checks: https://en.cppreference.com/w/cpp/chrono/year_month_day/ok
 // * Parsing was also introduced in C++20
-// * Replace intX_t by int_fastX_t everywhere
+// * Replace intX_t by int_leastX_t everywhere.
+//   Or change to int for simplicity - we're not targeting any special
+//   platform & these shorter types are promoted during arithmetic
+//   operations (and cause GCC warnings),
+//   https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int/39061103#39061103
+// * Use fixed width integer types
 
 // NOLINTBEGIN(*magic-numbers)
 namespace werkzeugkiste::config {
@@ -42,25 +47,25 @@ namespace werkzeugkiste::config {
 namespace detail {
 // Collection of low-level date algorithms, along with an excellent analysis
 // of their performance: http://howardhinnant.github.io/date_algorithms.html
-constexpr bool IsLeapYear(uint_fast16_t year) noexcept {
+constexpr bool IsLeapYear(uint_least16_t year) noexcept {
   return (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
 }
 
-constexpr uint_fast8_t LastDayOfMonthCommonYear(uint_fast8_t m) noexcept {
+constexpr uint_least8_t LastDayOfMonthCommonYear(uint_least8_t m) noexcept {
   // NOLINTNEXTLINE(*avoid-c-arrays)
-  constexpr uint_fast8_t days[] = {31, 28, 31, 30, 31, 30,
-                                   31, 31, 30, 31, 30, 31};
+  constexpr uint_least8_t days[] = {31, 28, 31, 30, 31, 30,
+                                    31, 31, 30, 31, 30, 31};
   return days[m - 1];
 }
 
-constexpr uint_fast8_t LastDayOfMonth(uint_fast16_t year,
-                                      uint_fast8_t month) noexcept {
+constexpr uint_least8_t LastDayOfMonth(uint_least16_t year,
+                                       uint_least8_t month) noexcept {
   return ((month != 2) || !IsLeapYear(year)) ? LastDayOfMonthCommonYear(month)
-                                             : static_cast<uint_fast8_t>(29);
+                                             : static_cast<uint_least8_t>(29);
 }
 
-constexpr bool IsValidDate(uint_fast16_t year, uint_fast8_t month,
-                           uint_fast8_t day) noexcept {
+constexpr bool IsValidDate(uint_least16_t year, uint_least8_t month,
+                           uint_least8_t day) noexcept {
   return ((month < 1) || (month > 12))
              ? false
              : ((day > 0) && (day <= LastDayOfMonth(year, month)));
@@ -128,7 +133,7 @@ T ParseDateTimeNumber(const std::string &str, int min_val, int max_val,
     // we need to make sure that only [+-][0-9] inputs are fed into it.
     // White space is not allowed.
     const auto pos = std::find_if(str.begin(), str.end(), [](char c) -> bool {
-      return !(std::isdigit(c) || (c == '-') || (c == '+'));
+      return !std::isdigit(c) && (c != '-') && (c != '+');
     });
     if (pos != str.end()) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, type_str);
@@ -160,10 +165,10 @@ date ParseDateString(std::string_view str) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
     parsed.year =
-        ParseDateTimeNumber<uint_fast16_t>(tokens[0], 0, 9999, "date"sv);
+        ParseDateTimeNumber<uint_least16_t>(tokens[0], 0, 9999, "date"sv);
     parsed.month =
-        ParseDateTimeNumber<uint_fast8_t>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<uint_fast8_t>(
+        ParseDateTimeNumber<uint_least8_t>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseDateTimeNumber<uint_least8_t>(
         tokens[2], 1, detail::LastDayOfMonth(parsed.year, parsed.month),
         "date"sv);
 
@@ -178,10 +183,10 @@ date ParseDateString(std::string_view str) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
     parsed.year =
-        ParseDateTimeNumber<uint_fast16_t>(tokens[2], 0, 9999, "date"sv);
+        ParseDateTimeNumber<uint_least16_t>(tokens[2], 0, 9999, "date"sv);
     parsed.month =
-        ParseDateTimeNumber<uint_fast8_t>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<uint_fast8_t>(
+        ParseDateTimeNumber<uint_least8_t>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseDateTimeNumber<uint_least8_t>(
         tokens[0], 1, detail::LastDayOfMonth(parsed.year, parsed.month),
         "date"sv);
 
@@ -198,7 +203,7 @@ date::date(std::string_view str) {
   day = other.day;
 }
 
-date::date(uint_fast16_t y, uint_fast8_t m, uint_fast8_t d)
+date::date(uint_least16_t y, uint_least8_t m, uint_least8_t d)
     : year{y}, month{m}, day{d} {
   if (!detail::IsValidDate(y, m, d)) {
     std::ostringstream msg;
@@ -279,15 +284,15 @@ time::time(std::string_view str) {
     WZK_RAISE_DATETIME_PARSE_ERROR(str, time);
   }
 
-  hour = ParseDateTimeNumber<uint_fast8_t>(hms_tokens[0], 0, 23, "time"sv);
-  minute = ParseDateTimeNumber<uint_fast8_t>(hms_tokens[1], 0, 59, "time"sv);
+  hour = ParseDateTimeNumber<uint_least8_t>(hms_tokens[0], 0, 23, "time"sv);
+  minute = ParseDateTimeNumber<uint_least8_t>(hms_tokens[1], 0, 59, "time"sv);
 
   if (hms_tokens.size() > 2) {
     // Delimiter between second and fraction component can be '.' or ','.
-    std::size_t pos = hms_tokens[2].find_first_of(".,");
+    const std::size_t pos = hms_tokens[2].find_first_of(".,");
     if (pos != std::string::npos) {
-      second = ParseDateTimeNumber<uint_fast8_t>(hms_tokens[2].substr(0, pos),
-                                                 0, 59, "time"sv);
+      second = ParseDateTimeNumber<uint_least8_t>(hms_tokens[2].substr(0, pos),
+                                                  0, 59, "time"sv);
 
       const auto subsec_str = hms_tokens[2].substr(pos + 1);
       if ((subsec_str.length() > 3) &&
@@ -299,7 +304,7 @@ time::time(std::string_view str) {
             "or 9 (ns) digits!";
         throw ParseError(msg);
       }
-      uint_fast32_t subsec_val = ParseDateTimeNumber<uint_fast32_t>(
+      uint_least32_t subsec_val = ParseDateTimeNumber<uint_least32_t>(
           subsec_str, 0, 999999999, "time"sv);
 
       if (subsec_str.length() == 1) {
@@ -315,12 +320,12 @@ time::time(std::string_view str) {
 
     } else {
       second =
-          ParseDateTimeNumber<uint_fast8_t>(hms_tokens[2], 0, 59, "time"sv);
+          ParseDateTimeNumber<uint_least8_t>(hms_tokens[2], 0, 59, "time"sv);
     }
   }
 }
 
-time::time(uint_fast8_t h, uint_fast8_t m, uint_fast8_t s, uint_fast32_t ns)
+time::time(uint_least8_t h, uint_least8_t m, uint_least8_t s, uint_least32_t ns)
     : hour{h}, minute{m}, second{s}, nanosecond{ns} {
   if (!detail::IsValidTime(h, m, s, ns)) {
     std::ostringstream msg;
@@ -338,10 +343,10 @@ std::string time::ToString() const {
     << +minute << ':' << std::setw(2) << +second;
   if (nanosecond > 0) {
     if ((nanosecond % 1000000) == 0) {
-      const uint_fast32_t ms = nanosecond / 1000000;
+      const uint_least32_t ms = nanosecond / 1000000;
       s << '.' << std::setw(3) << +ms;
     } else if ((nanosecond % 1000) == 0) {
-      const uint_fast32_t us = nanosecond / 1000;
+      const uint_least32_t us = nanosecond / 1000;
       s << '.' << std::setw(6) << +us;
     } else {
       s << '.' << std::setw(9) << +nanosecond;
@@ -381,28 +386,28 @@ time_offset::time_offset(std::string_view str) {
 
   std::size_t pos = str.find_first_of(':');
   if (pos == std::string::npos) {
-    if ((str.length() > 0) && !((str[0] == 'z') || (str[0] == 'Z'))) {
+    if ((str.length() > 0) && (str[0] != 'z') && (str[0] != 'Z')) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, time_offset);
     }
     minutes = 0;
   } else {
-    const int_fast16_t hrs = ParseDateTimeNumber<int_fast16_t>(
+    const int_least16_t hrs = ParseDateTimeNumber<int_least16_t>(
         std::string{str.substr(0, pos)}, -23, 23, "time_offset"sv);
-    const int_fast16_t mins = ParseDateTimeNumber<int_fast16_t>(
+    const int_least16_t mins = ParseDateTimeNumber<int_least16_t>(
         std::string{str.substr(pos + 1)}, 0, 59, "time_offset"sv);
     // Offset minutes in RFC 3339 format can only be positive. The
     // string "-01:23", however, corresponds to a total offset of
     // "-83 minutes". Thus, we need to adjust the parsed minutes accordingly.
-    minutes = static_cast<int_fast16_t>(hrs * 60);
+    minutes = static_cast<int_least16_t>(hrs * 60);
     if ((hrs < 0) || (str[0] == '-')) {
-      minutes -= mins;
+      minutes -= static_cast<int_least16_t>(mins);
     } else {
-      minutes += mins;
+      minutes += static_cast<int_least16_t>(mins);
     }
   }
 }
 
-time_offset::time_offset(int_fast8_t h, int_fast8_t m) {
+time_offset::time_offset(int_least8_t h, int_least8_t m) {
   if ((h < -23) || (h > 23) || (m < -59) || (m > 59)) {
     std::ostringstream msg;
     msg << "Invalid parameters h=" << +h << ", m=" << +m
@@ -410,7 +415,7 @@ time_offset::time_offset(int_fast8_t h, int_fast8_t m) {
            "-60 < m < 60!";
     throw TypeError(msg.str());
   }
-  minutes = static_cast<int_fast16_t>(h * 60 + m);
+  minutes = static_cast<int_least16_t>(h * 60 + m);
 }
 
 std::string time_offset::ToString() const {
@@ -418,8 +423,8 @@ std::string time_offset::ToString() const {
     return "Z";
   }
 
-  const int_fast16_t hrs = std::abs(minutes) / 60;
-  const int_fast16_t mins = std::abs(minutes) - hrs * 60;
+  const int_least16_t hrs = std::abs(minutes) / 60;
+  const int_least16_t mins = std::abs(minutes) - hrs * 60;
   // The unary operator+ ensures that uint8 values are
   // interpreted as numbers and not ASCII characters.
   std::ostringstream s;
@@ -477,10 +482,10 @@ date_time::date_time(std::string_view str) {
 
 date_time date_time::UTC() const {
   date_time utc{this->date, this->time};
-  constexpr int_fast16_t min_per_day = 1440;
+  constexpr int_least16_t min_per_day = 1440;
   if (this->offset.has_value()) {
-    int_fast16_t minutes = static_cast<int_fast16_t>(utc.time.hour) * 60 +
-                           utc.time.minute - offset.value().minutes;
+    int_least16_t minutes = static_cast<int_least16_t>(utc.time.hour) * 60 +
+                            utc.time.minute - offset.value().minutes;
     if (minutes >= min_per_day) {
       ++utc.date;
       minutes -= min_per_day;
@@ -490,8 +495,8 @@ date_time date_time::UTC() const {
       minutes += min_per_day;
     }
 
-    utc.time.hour = static_cast<uint_fast8_t>(minutes / 60);
-    utc.time.minute = static_cast<uint_fast8_t>(minutes % 60);
+    utc.time.hour = static_cast<uint_least8_t>(minutes / 60);
+    utc.time.minute = static_cast<uint_least8_t>(minutes % 60);
   }
 
   return utc;
