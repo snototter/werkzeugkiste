@@ -295,18 +295,23 @@ TEST(ConfigTest, GetScalarTypes) {
   EXPECT_TRUE(config.GetBooleanOr("no-such.bool"sv, true));
   EXPECT_FALSE(config.GetBooleanOr("no-such.bool"sv, false));
 
+  EXPECT_THROW(config.GetBooleanList("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32Or("bool"sv, 0), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInteger32("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64Or("bool"sv, 2), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInteger64("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleOr("bool"sv, 1.0), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalDouble("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringOr("bool"sv, "..."sv), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalString("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("bool"sv), wkc::TypeError);
 
   // Integer parameter
   EXPECT_EQ(42, config.GetInteger32("int"sv));
@@ -919,6 +924,8 @@ TEST(ConfigTest, PointLists) {
   // Sanity checks
   EXPECT_THROW(config.GetIndices2D("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBooleanList("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBooleanList("poly1"sv), wkc::TypeError);
 
   // Retrieve a polyline
   auto poly = config.GetIndices2D("poly1"sv);
@@ -986,8 +993,10 @@ TEST(ConfigTest, PointLists) {
   EXPECT_EQ(wkg::Vec3i(-9, 0, -3), vec3d[2]);
 }
 
-TEST(ConfigTest, ScalarLists) {
+TEST(ConfigTest, GetLists) {
   const auto config = wkc::LoadTOMLString(R"toml(
+    flags = [true, false, false]
+
     ints32 = [1, 2, 3, 4, 5, 6, -7, -8]
 
     ints64 = [0, 2147483647, 2147483648, -2147483648, -2147483649]
@@ -1029,6 +1038,8 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config.GetStringList("no-such-key"sv), wkc::KeyError);
 
   // Try to load a wrong data type as list:
+  EXPECT_THROW(config.GetBooleanList("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("flags"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("not-a-list.no-such-key"sv),
@@ -1110,6 +1121,45 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config.GetInteger32List("mixed_int_flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("mixed_int_flt"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetDoubleList("mixed_int_flt"sv));
+}
+
+TEST(ConfigTest, SetLists) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    flags = [true, false, false]
+
+    ints = [1, 2, 3, 4, 5, 6, -7, -8]
+
+    floats = [0.5, 1.0, 1.0e23]
+
+    strings = ["abc", "Foo", "Frobmorten", "Test String"]
+
+    mixed_int_flt = [1, 2, 3, 4.5, 5]
+
+    mixed_types = [1, 2, "framboozle"]
+
+    nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
+
+    an_int = 1234
+
+    [not-a-list]
+    name = "test"
+
+    [[products]]
+    value = 1
+
+    [[products]]
+    value = 2
+
+    [[products]]
+    value = 3
+    )toml"sv);
+
+  // Cannot change the type of a parameter:
+  EXPECT_THROW(config.SetBooleanList("ints"sv, {true, false}), wkc::TypeError);
+  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
+  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
+               wkc::TypeError);
+  EXPECT_THROW(config.SetStringList("floats"sv, {"abc"}), wkc::TypeError);
 }
 
 TEST(ConfigTest, Pairs) {
