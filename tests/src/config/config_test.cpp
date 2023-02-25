@@ -991,6 +991,15 @@ TEST(ConfigTest, ScalarLists) {
 
     [not-a-list]
     name = "test"
+
+    [[products]]
+    value = 1
+
+    [[products]]
+    value = 2
+
+    [[products]]
+    value = 3
     )toml"sv);
 
   // Key error:
@@ -1029,6 +1038,9 @@ TEST(ConfigTest, ScalarLists) {
   EXPECT_THROW(config.GetDoubleList("nested_lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("nested_lst"sv), wkc::TypeError);
 
+  // Cannot load a list of tables:
+  EXPECT_THROW(config.GetInteger32List("products"sv), wkc::TypeError);
+
   // Lists must consist of elements of the same type (unless an
   // implicit & lossless cast is available)
   auto list32 = config.GetInteger32List("ints32"sv);
@@ -1064,6 +1076,12 @@ TEST(ConfigTest, ScalarLists) {
   // But if an exact representation (i.e. a lossless cast) is
   // possible, we allow implicit type conversion:
   EXPECT_NO_THROW(config.GetInteger32List("floats_castable"sv));
+  list32 = config.GetInteger32List("floats_castable"sv);
+  EXPECT_EQ(4, list32.size());
+  EXPECT_EQ(0, list32[0]);
+  EXPECT_EQ(-2, list32[1]);
+  EXPECT_EQ(100, list32[2]);
+  EXPECT_EQ(12345, list32[3]);
   EXPECT_NO_THROW(config.GetInteger64List("floats_castable"sv));
   EXPECT_THROW(config.GetStringList("floats_castable"sv), wkc::TypeError);
 

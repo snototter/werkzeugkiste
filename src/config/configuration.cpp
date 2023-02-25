@@ -298,11 +298,7 @@ inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
 /// is not correct.
 /// Tries converting numeric types if a lossless cast is feasible.
 template <typename T, typename NodeView>
-T CastScalar(const NodeView &node, std::string_view key) {
-  static_assert(std::is_arithmetic_v<bool>,
-                "Boolean must be a number type to use numeric casts for "
-                "parameter extraction!");
-
+T CastScalar(const NodeView &node, std::string_view fqn) {
   if constexpr (std::is_same_v<T, bool>) {
     if (node.is_boolean()) {
       return static_cast<bool>(*node.as_boolean());
@@ -347,10 +343,9 @@ T CastScalar(const NodeView &node, std::string_view key) {
       return tmp;
     }
   } else {
-    // TODO This method could be extended to handle date/time
     throw std::logic_error("Type not yet supported!");
   }
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(fqn, node, T);
 }
 
 /// Looks up the value at the given key (fully-qualified TOML path).
