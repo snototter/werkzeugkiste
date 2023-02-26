@@ -1125,10 +1125,6 @@ TEST(ConfigTest, GetLists) {
 
 TEST(ConfigTest, SetLists) {
   auto config = wkc::LoadTOMLString(R"toml(
-    flags = [true, false, false]
-
-    ints = [1, 2, 3, 4, 5, 6, -7, -8]
-
     floats = [0.5, 1.0, 1.0e23]
 
     strings = ["abc", "Foo", "Frobmorten", "Test String"]
@@ -1154,9 +1150,62 @@ TEST(ConfigTest, SetLists) {
     value = 3
     )toml"sv);
 
+  // Create a boolean list
+  EXPECT_FALSE(config.Contains("flags"sv));
+  EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false, true}));
+  EXPECT_TRUE(config.Contains("flags"sv));
+  auto flags = config.GetBooleanList("flags"sv);
+  EXPECT_EQ(3, flags.size());
+  EXPECT_TRUE(flags[0]);
+  EXPECT_FALSE(flags[1]);
+  EXPECT_TRUE(flags[2]);
+
+  EXPECT_THROW(config.GetInteger32List("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTimeList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTimeList("flags"sv), wkc::TypeError);
+
+  // Update the boolean list
+  EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {false, true}));
+  flags = config.GetBooleanList("flags"sv);
+  EXPECT_EQ(2, flags.size());
+  EXPECT_FALSE(flags[0]);
+  EXPECT_TRUE(flags[1]);
+
+  // Create an integer list
+  EXPECT_FALSE(config.Contains("ints"sv));
+  EXPECT_NO_THROW(config.SetInteger32List("ints"sv, {-3, 0}));
+  EXPECT_TRUE(config.Contains("ints"sv));
+  auto ints32 = config.GetInteger32List("ints"sv);
+  EXPECT_EQ(2, ints32.size());
+  EXPECT_EQ(-3, ints32[0]);
+  EXPECT_EQ(0, ints32[1]);
+
+  // Update the integer list:
+  // (int32::max + 1; int32::min - 1) should throw as it cannot be represented
+  // by a 32-bit integer
+  EXPECT_THROW(config.SetInteger64List("ints"sv, {2147483648, -2147483649}),
+               wkc::TypeError);
+  // But int64 (1, 2, 3) can be exactly represented by 32-bit ints:
+  EXPECT_NO_THROW(config.SetInteger64List("ints"sv, {1, -42, 17}));
+  ints32 = config.GetInteger32List("ints"sv);
+  EXPECT_EQ(3, ints32.size());
+  EXPECT_EQ(1, ints32[0]);
+  EXPECT_EQ(-42, ints32[1]);
+  EXPECT_EQ(17, ints32[2]);
+
+  // TODO check after setting from double!
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
+
   // Cannot change the type of a parameter:
   EXPECT_THROW(config.SetBooleanList("ints"sv, {true, false}), wkc::TypeError);
   EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
+
+  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
+               wkc::TypeError);
   EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
                wkc::TypeError);
   EXPECT_THROW(config.SetStringList("floats"sv, {"abc"}), wkc::TypeError);
