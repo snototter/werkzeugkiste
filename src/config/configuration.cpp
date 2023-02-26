@@ -20,6 +20,8 @@
 #include <utility>
 #include <vector>
 
+// TODO / FIXME - remove Tmsg, simplify templates
+
 namespace werkzeugkiste::config {
 // NOLINTNEXTLINE(*macro-usage)
 #define WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(KEY, NODE, TYPE) \
@@ -531,32 +533,42 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
 /// Throws a type error upon invalid numeric conversion (i.e. the number is not
 /// exactly representable by the target type).
 /// @tparam Ttoml The TOML type.
+/// @tparam Tmessage Type needed for error message to avoid separate int32_t
+/// specialization. Internally, all integers are stored as 64-bit: If there
+/// would be an error while setting a 32-bit value, we don't want to show a
+/// confusing "user provided 64-bit" error message.
 /// @tparam Tcfg The type exposed via the werkzeugkiste::config API.
 /// @param value The value to be converted.
-template <typename Ttoml, typename Tcfg>
-Ttoml ConvertConfigTypeToToml(const Tcfg &value) {
-  if constexpr (std::is_same_v<Tcfg, bool>) {
+/// @param key The fully-qualified parameter name.
+template <typename Ttoml, typename Tmessage = Ttoml, typename Tcfg>
+Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
+  if constexpr (std::is_same_v<Tcfg, Ttoml>) {
     return value;
   }
 
-  if constexpr (std::is_arithmetic_v<Tcfg>) {
+  if constexpr (std::is_arithmetic_v<Tcfg> && !std::is_same_v<Tcfg, bool> &&
+                (std::is_same_v<Ttoml, int64_t> ||
+                 std::is_same_v<Ttoml, double>)) {
     return checked_numcast<Ttoml, Tcfg, TypeError>(value);
   }
 
-  if constexpr (std::is_same_v<Tcfg, std::string> ||
-                std::is_same_v<Tcfg, std::string_view>) {
+  if constexpr (std::is_same_v<Tcfg, std::string_view> &&
+                std::is_same_v<Ttoml, std::string>) {
     return std::string{value};
   }
 
-  if constexpr (std::is_same_v<Tcfg, date>) {
+  if constexpr (std::is_same_v<Tcfg, date> &&
+                std::is_same_v<Ttoml, toml::date>) {
     return toml::date{value.year, value.month, value.day};
   }
 
-  if constexpr (std::is_same_v<Tcfg, time>) {
+  if constexpr (std::is_same_v<Tcfg, time> &&
+                std::is_same_v<Ttoml, toml::time>) {
     return toml::time{value.hour, value.minute, value.second, value.nanosecond};
   }
 
-  if constexpr (std::is_same_v<Tcfg, date_time>) {
+  if constexpr (std::is_same_v<Tcfg, date_time> &&
+                std::is_same_v<Ttoml, toml::date_time>) {
     if (value.IsLocal()) {
       return toml::date_time{
           toml::date{value.date.year, value.date.month, value.date.day},
@@ -573,7 +585,14 @@ Ttoml ConvertConfigTypeToToml(const Tcfg &value) {
     }
   }
 
-  throw std::logic_error{"TODO Missing implementation - file bug report!"};
+  std::string msg{"Cannot convert an input value of type `"};
+  msg.append(TypeName<Tcfg>());
+  msg.append("` to parameter `");
+  msg.append(key);
+  msg.append("`, which is of type `");
+  msg.append(TomlTypeName<Tmessage>());
+  msg.append("`!");
+  throw TypeError{msg};
 }
 
 /// @brief Allows setting a scalar TOML parameter.
@@ -591,7 +610,6 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
   if (ContainsKey(tbl, key)) {
     const auto node = tbl.at_path(key);
 
-    // TODO replace by "IsCompatible"
     if (!node.is<Ttoml>()) {
       std::string msg{"Changing the type is not allowed. Parameter `"};
       msg += key;
@@ -604,9 +622,7 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
     }
 
     auto &ref = *node.as<Ttoml>();
-    // ref = Ttoml{value};
-    //  FIXME
-    ref = ConvertConfigTypeToToml<Ttoml>(value);
+    ref = ConvertConfigTypeToToml<Ttoml, Tmessage>(value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
     toml::table *parent =
@@ -617,10 +633,8 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
       // LCOV_EXCL_STOP
     }
 
-    // auto result = parent->insert_or_assign(path.second, value);
-    // FIXME
     auto result = parent->insert_or_assign(
-        path.second, ConvertConfigTypeToToml<Ttoml>(value));
+        path.second, ConvertConfigTypeToToml<Ttoml, Tmessage>(value, key));
     if (!ContainsKey(tbl, key)) {
       // LCOV_EXCL_START
       WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(key, result.second, path.first,
@@ -630,128 +644,12 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
   }
 }
 
-// template <typename Tto, typename Tfrom>
-// bool IsExactlyRepresentable(const std::vector<Tfrom> &values) {
-//   for (const Tfrom &val : values) {
-//     checked_numcast<Tto, Tfrom, TypeError>(val);
-//   }
-//   return true;
-// }
-
-// template<typename Tvalue>
-// bool IsCompatibleList(const toml::array &arr, const std::vector<Tvalue>
-// &values) {
-//   // Empty arrays and inhomogeneous arrays can be replaced by anything.
-//   if (arr.empty() || !arr.is_homogeneous()) {
-//     return true;
-//   }
-
-//   // Otherwise, the replacement values must be compatible to the existing
-//   // entries:
-//   if (arr[0].is_boolean()) {
-//     return std::is_same_v<Tvalue, bool>;
-//   }
-
-//   if (arr[0].is_integer()) {
-//     return IsExactlyRepresentable<int64_t>(values);
-//   }
-
-//   if (arr[0].is_floating_point()) {
-//     return IsExactlyRepresentable<double>(values);
-//   }
-
-//   if (arr[0].is_string()) {
-//     return std::is_same_v<Tvalue, std::string> || std::is_same_v<Tvalue,
-//     std::string_view>;
-//   }
-
-//   if (arr[0].is_date()) {
-//     return std::is_same_v<Tvalue, date>;
-//   }
-
-//   if (arr[0].is_time()) {
-//     return std::is_same_v<Tvalue, time>;
-//   }
-
-//   if (arr[0].is_date_time()) {
-//     return std::is_same_v<Tvalue, date_time>;
-//   }
-
-//   return false;
-// }
-
-// TODO doc
-// template <typename Ttoml, typename Tmessage = Ttoml, typename Tvalue>
-// void SetList(toml::table &tbl, std::string_view key,
-//              const std::vector<Tvalue> &values) {
-//   const auto path = SplitTomlPath(key);
-//   toml::array arr{};
-//   for (const auto &val : values) {
-//     arr.push_back(ConvertConfigTypeToToml<Ttoml>(val));
-//   }
-
-//   if (ContainsKey(tbl, key)) {
-//     auto node = tbl.at_path(key);
-//     toml::array &existing = *node.as_array();
-
-//     if (!IsCompatibleList(existing, values)) {
-//       throw TypeError{"TODO need list type for error message!"};
-//     //   std::string msg{"Changing the type is not allowed. Parameter `"};
-//     //   msg += key;
-//     //   msg += "` is `";
-//     //   msg += TomlTypeName(node, key);
-//     //   msg += "`, but scalar is of type `";
-//     //   msg += TypeName<TMessage>();
-//     //   msg += "`!";
-//     //   throw TypeError{msg};
-//     }
-
-//     // std::size_t index = 0;
-//     // for (auto &value : arr) {
-//     //   const std::string fqn = FullyQualifiedArrayElementPath(index, path);
-//     //   visit_func(value, fqn);
-
-//     //   if (value.is_array() || value.is_table()) {
-//     //     Traverse(value, fqn, visit_func);
-//     //   }
-//     //   ++index;
-//     // }
-
-//     // TODO if type is not compatible, throw exception --> Refactor
-//     // compatibility check into separate template (to be used within
-//     SetScalar,
-//     // too)
-//     // TODO For int<->double, try casting, similar to CastScalar/LookupScalar
-
-//     // auto &ref = *node.as<T>();
-//     // ref = T{value};
-//     throw std::logic_error{"Not yet implemented!"};
-//   } else {
-//     EnsureContainerPathExists(tbl, path.first);
-//     toml::table *parent =
-//         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
-//     if (parent == nullptr) {
-//       // LCOV_EXCL_START
-//       WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(key, path.first);
-//       // LCOV_EXCL_STOP
-//     }
-
-//     auto result = parent->insert_or_assign(path.second, arr);
-//     if (!ContainsKey(tbl, key)) {
-//       // LCOV_EXCL_START
-//       WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(
-//           key, result.second, path.first, path.second);
-//       // LCOV_EXCL_STOP
-//     }
-//   }
-// }
-
-template <typename Ttoml, typename Tvalue>
+template <typename Ttoml, typename Tmessage, typename Tvalue>
 void CreateArray(toml::table &tbl, std::string_view key,
                  const std::vector<Tvalue> &values) {
   toml::array arr{};
   for (const auto &val : values) {
-    arr.push_back(ConvertConfigTypeToToml<Ttoml>(val));
+    arr.push_back(ConvertConfigTypeToToml<Ttoml, Tmessage>(val, key));
   }
 
   const auto path = SplitTomlPath(key);
@@ -779,22 +677,12 @@ template <typename Ttoml, typename Tmessage, typename Tvalue,
           typename Texisting>
 void ReplaceHomogeneousArray(toml::array &arr, std::string_view key,
                              const std::vector<Tvalue> &values) {
-  toml::array tval{};
+  toml::array toml_arr{};
   for (const auto &val : values) {
-    tval.push_back(ConvertConfigTypeToToml<Ttoml>(val));
-    // TODO catch exception and rethrow with extended error message
+    toml_arr.push_back(ConvertConfigTypeToToml<Texisting, Texisting>(val, key));
+    // TODO catch exception and rethrow with extended error message?
   }
-
-  arr = tval;
-  // // TODO int/float checked_cast
-  // std::string msg{"Changing the type is not allowed. Parameter `"};
-  // msg.append(key);
-  // msg.append("` is a homogeneous list of `");
-  // msg.append(TomlTypeName<Texisting>());
-  // msg.append("`, but the replacement list holds `");
-  // msg.append(TypeName<Tvalue>());
-  // msg.append("`!");
-  // throw TypeError{msg};
+  arr = toml_arr;
 }
 
 template <typename Ttoml, typename Tmessage, typename Tvalue>
@@ -813,9 +701,15 @@ void ReplaceArray(toml::table &tbl, std::string_view key,
   // If it is inhomogeneous, we don't allow replacing it.
   // Otherwise, we need to check for compatible/convertible types.
   if (arr.empty()) {
-    CreateArray<Ttoml, Tvalue>(tbl, key, values);
+    CreateArray<Ttoml, Tmessage, Tvalue>(tbl, key, values);
   } else if (!arr.is_homogeneous()) {
-    throw ValueError{"TODO wrong exception"};
+    std::string msg{"Changing the type is not allowed. Parameter `"};
+    msg += key;
+    msg +=
+        "` is an inhomogeneous list/array, but replacement list is of type `";
+    msg += TypeName<Tvalue>();
+    msg += "`!";
+    throw TypeError{msg};
   } else if (arr[0].is_boolean()) {
     ReplaceHomogeneousArray<Ttoml, Tmessage, Tvalue, bool>(arr, key, values);
   } else if (arr[0].is_integer()) {

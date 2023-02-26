@@ -616,6 +616,30 @@ TEST(ConfigTest, SetOtherScalarTypes) {
   EXPECT_THROW(config.GetDateTime("my-time"sv), wkc::TypeError);
 }
 
+TEST(ConfigTest, ReplaceListElements) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    ints = [1, 2, 3, 4]
+    strs = ["This", "is", "a", "string"]
+    mixed = [1, 2.5, "three"]
+    )toml"sv);
+
+  // Replace a single element in the list
+  config.SetInteger32("ints[2]"sv, -2);
+  EXPECT_EQ(-2, config.GetInteger32("ints[2]"sv));
+
+  // A convertible value can be used
+  EXPECT_NO_THROW(config.SetDouble(
+      "ints[0]"sv, 5.0));  // TODO: throws - need to refactor template logic
+  EXPECT_EQ(5, config.GetInteger32("ints[0]"sv));
+
+  EXPECT_THROW(config.SetBoolean("strs[0]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetInteger32("strs[1]"sv, true), wkc::TypeError);
+
+  EXPECT_THROW(config.SetBoolean("mixed[0]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetString("mixed[1]"sv, "3/2"), wkc::TypeError);
+  EXPECT_THROW(config.SetDouble("mixed[2]"sv, 3.0), wkc::TypeError);
+}
+
 TEST(ConfigTest, Keys1) {
   const std::string toml_str = R"toml(
     key = "value"
@@ -1185,17 +1209,17 @@ TEST(ConfigTest, SetLists) {
   EXPECT_EQ(0, ints32[1]);
 
   // Update the integer list:
-  // (int32::max + 1; int32::min - 1) should throw as it cannot be represented
-  // by a 32-bit integer
-  EXPECT_THROW(config.SetInteger64List("ints"sv, {2147483648, -2147483649}),
-               wkc::TypeError);
-  // But int64 (1, 2, 3) can be exactly represented by 32-bit ints:
   EXPECT_NO_THROW(config.SetInteger64List("ints"sv, {1, -42, 17}));
   ints32 = config.GetInteger32List("ints"sv);
   EXPECT_EQ(3, ints32.size());
   EXPECT_EQ(1, ints32[0]);
   EXPECT_EQ(-42, ints32[1]);
   EXPECT_EQ(17, ints32[2]);
+  // Internally, integers are 64-bit, thus the following
+  // (int32::max + 1; int32::min - 1) will not throw.
+  EXPECT_NO_THROW(config.SetInteger64List("ints"sv, {2147483648, -2147483649}));
+  // But it can no longer be loaded as 32-bit integers.
+  EXPECT_THROW(config.GetInteger32List("ints"sv), wkc::TypeError);
 
   // TODO check after setting from double!
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
