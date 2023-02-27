@@ -1,21 +1,147 @@
-#include <werkzeugkiste/config/casts.h>
-#include <werkzeugkiste/strings/strings.h>
-
-#include <cmath>
-#include <exception>
-#include <limits>
-#include <sstream>
-#include <string>
-#include <string_view>
+#include <werkzeugkiste/config/configuration.h>
 
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::config;
-namespace wks = werkzeugkiste::strings;
 using namespace std::string_view_literals;
 
 // NOLINTBEGIN
-TEST(TypeTest, DateType) {
+
+template <typename T>
+void TypeNameTestUtil(std::string_view expected) {
+  EXPECT_TRUE(expected.compare(wkc::TypeName<T>()) == 0)
+      << "Expected `" << expected << "` but got `" << wkc::TypeName<T>()
+      << "`!";
+}
+
+TEST(ConfigTypeTest, TypeNames) {
+  TypeNameTestUtil<bool>("bool"sv);
+  TypeNameTestUtil<char>("char"sv);
+  TypeNameTestUtil<unsigned char>("unsigned char"sv);
+  TypeNameTestUtil<int16_t>("int16_t"sv);
+  TypeNameTestUtil<uint16_t>("uint16_t"sv);
+  TypeNameTestUtil<int32_t>("int32_t"sv);
+  TypeNameTestUtil<uint32_t>("uint32_t"sv);
+  TypeNameTestUtil<int64_t>("int64_t"sv);
+  TypeNameTestUtil<uint64_t>("uint64_t"sv);
+  TypeNameTestUtil<float>("float"sv);
+  TypeNameTestUtil<double>("double"sv);
+  TypeNameTestUtil<std::string>("string"sv);
+  TypeNameTestUtil<std::string_view>("string_view"sv);
+
+  TypeNameTestUtil<wkc::date>("date"sv);
+  TypeNameTestUtil<wkc::time>("time"sv);
+  TypeNameTestUtil<wkc::time_offset>("time_offset"sv);
+  TypeNameTestUtil<wkc::date_time>("date_time"sv);
+
+  EXPECT_NO_THROW(wkc::TypeName<void>());
+  EXPECT_NE("...", wkc::TypeName<void>());
+}
+
+TEST(ConfigTypeTest, TypeQueries) {
+  const auto config = wkc::LoadTOMLString(R"toml(
+    bool = true
+    int = 42
+    flt = 1.0
+    str = "A string"
+    lst = [1, 2, 3.5]
+
+    [dates]
+    day = 2023-01-01
+    time1 = 12:34:56
+    time2 = 00:01:02.123456
+    date_time = 1912-07-23T08:37:00-08:00
+
+    )toml"sv);
+
+  EXPECT_THROW(config.Type(""sv), wkc::KeyError);
+
+  // Bool, int, float, string
+  EXPECT_TRUE(config.Contains("bool"sv));
+  EXPECT_FALSE(config.Contains("bool1"sv));
+  EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("bool"sv));
+
+  EXPECT_TRUE(config.Contains("int"sv));
+  EXPECT_FALSE(config.Contains("in"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("int"sv));
+
+  EXPECT_TRUE(config.Contains("flt"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("flt"sv));
+
+  EXPECT_TRUE(config.Contains("str"sv));
+  EXPECT_EQ(wkc::ConfigType::String, config.Type("str"sv));
+
+  // List
+  EXPECT_TRUE(config.Contains("lst"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("lst"sv));
+
+  EXPECT_TRUE(config.Contains("lst[0]"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[0]"sv));
+  EXPECT_TRUE(config.Contains("lst[1]"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[1]"sv));
+  EXPECT_TRUE(config.Contains("lst[2]"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("lst[2]"sv));
+  EXPECT_FALSE(config.Contains("lst[3]"sv));
+
+  EXPECT_THROW(config.Type("lst[3]"sv), wkc::KeyError);
+  try {
+    config.Type("lst[3]"sv);
+  } catch (const wkc::KeyError &e) {
+    const std::string exp_msg{
+        "Key `lst[3]` does not exist! Did you mean: `lst[0]`, `lst[1]`, "
+        "`lst[2]`?"};
+    EXPECT_EQ(exp_msg, std::string(e.what()));
+  }
+
+  // Group/table
+  EXPECT_TRUE(config.Contains("dates"sv));
+  EXPECT_EQ(wkc::ConfigType::Group, config.Type("dates"sv));
+
+  // Date & time
+  EXPECT_TRUE(config.Contains("dates.day"sv));
+  EXPECT_EQ(wkc::ConfigType::Date, config.Type("dates.day"sv));
+
+  EXPECT_TRUE(config.Contains("dates.time1"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, config.Type("dates.time1"sv));
+  EXPECT_TRUE(config.Contains("dates.time2"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, config.Type("dates.time2"sv));
+
+  EXPECT_TRUE(config.Contains("dates.date_time"sv));
+  EXPECT_EQ(wkc::ConfigType::DateTime, config.Type("dates.date_time"sv));
+
+  EXPECT_TRUE(config.Contains("dates.date_time"sv));
+  EXPECT_EQ(wkc::ConfigType::DateTime, config.Type("dates.date_time"sv));
+
+  // Access invalid types
+  EXPECT_THROW(config.GetBoolean("lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.time1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.time2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolean("dates.date_time"sv), wkc::TypeError);
+
+  // Verify the string representation of the custom type enum:
+  EXPECT_EQ("boolean", wkc::ConfigTypeToString(wkc::ConfigType::Boolean));
+  EXPECT_EQ("integer", wkc::ConfigTypeToString(wkc::ConfigType::Integer));
+  EXPECT_EQ("floating_point",
+            wkc::ConfigTypeToString(wkc::ConfigType::FloatingPoint));
+  EXPECT_EQ("string", wkc::ConfigTypeToString(wkc::ConfigType::String));
+  EXPECT_EQ("date", wkc::ConfigTypeToString(wkc::ConfigType::Date));
+  EXPECT_EQ("time", wkc::ConfigTypeToString(wkc::ConfigType::Time));
+  EXPECT_EQ("date_time", wkc::ConfigTypeToString(wkc::ConfigType::DateTime));
+  EXPECT_EQ("list", wkc::ConfigTypeToString(wkc::ConfigType::List));
+  EXPECT_EQ("group", wkc::ConfigTypeToString(wkc::ConfigType::Group));
+
+  // Stream operator should be properly overloaded
+  std::ostringstream str;
+  str << wkc::ConfigType::Date;
+  EXPECT_EQ("date", str.str());
+  str << '!' << wkc::ConfigType::FloatingPoint;
+  EXPECT_EQ("date!floating_point", str.str());
+}
+
+TEST(ConfigTypeTest, DateType) {
   // Check basic handling of the `date` type
   EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2020, 1, 21));
   EXPECT_LT(wkc::date(2000, 10, 20), wkc::date(2000, 11, 21));
@@ -69,7 +195,7 @@ TEST(TypeTest, DateType) {
   EXPECT_EQ(wkc::date(2005, 3, 1), ++wkc::date(2005, 2, 28));
 }
 
-TEST(TypeTest, DateParsing) {
+TEST(ConfigTypeTest, DateParsing) {
   // Check date parsing in detail
   auto date = wkc::date(2000, 11, 04);
   auto parsed = wkc::date(date.ToString());
@@ -133,7 +259,7 @@ TEST(TypeTest, DateParsing) {
   EXPECT_THROW(wkc::date("32.2.1234"sv), wkc::ParseError);
 }
 
-TEST(TypeTest, TimeType) {
+TEST(ConfigTypeTest, TimeType) {
   // Check basic handling of the `time` type
   wkc::time time{23, 49, 30, 987654321};
 
@@ -200,7 +326,7 @@ TEST(TypeTest, TimeType) {
   EXPECT_GT(wkc::time(12, 10, 2, 1), wkc::time(12, 10, 2));
 }
 
-TEST(TypeTest, TimeParsing) {
+TEST(ConfigTypeTest, TimeParsing) {
   // Check time parsing in detail
   auto time = wkc::time{8, 10, 32, 123456789};
   auto parsed = wkc::time{time.ToString()};
@@ -264,7 +390,7 @@ TEST(TypeTest, TimeParsing) {
   EXPECT_THROW(wkc::time("yesterday"sv), wkc::ParseError);
 }
 
-TEST(TypeTest, TimeOffset) {
+TEST(ConfigTypeTest, TimeOffset) {
   // Check basic handling of the `time_offset` type
   wkc::time_offset offset{};
   EXPECT_EQ("Z", offset.ToString());
@@ -334,7 +460,7 @@ TEST(TypeTest, TimeOffset) {
   EXPECT_THROW(wkc::time_offset("+23:60"sv), wkc::ParseError);
 }
 
-TEST(TypeTest, DateTime) {
+TEST(ConfigTypeTest, DateTime) {
   // Check basic handling of the `date_time` type, which encapsulates
   // the separately tested date, time and offset types.
 

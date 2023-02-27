@@ -39,7 +39,12 @@ add_executable(
   werkzeugkiste-test
   src/test_utils.h
   src/test_utils.cpp
-  src/config/config_test.cpp
+  src/config/io_test.cpp
+  src/config/key_test.cpp
+  src/config/scalar_test.cpp
+  src/config/compound_test.cpp
+  src/config/list_test.cpp
+  src/config/utilities_test.cpp
   src/config/cast_test.cpp
   src/config/type_test.cpp
   src/geometry/utils_test.cpp
