@@ -408,8 +408,14 @@ Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
       return tmp;
     }
   } else {
-    // TODO link to issues
-    throw std::logic_error("Type not yet supported!");
+    // LCOV_EXCL_START
+    std::string msg{"Parameter lookup for type `"};
+    msg += TypeName<Tcfg>();
+    msg +=
+        "` is not supported. Please report at "
+        "https://github.com/snototter/werkzeugkiste/issues";
+    throw std::logic_error{msg};
+    // LCOV_EXCL_STOP
   }
 
   std::string msg{"Cannot query `"};
@@ -718,8 +724,8 @@ void ReplaceHomogeneousArray(toml::array &arr, std::string_view key,
   toml::array toml_arr{};
   for (const auto &value : vec) {
     toml_arr.push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
-    // TODO catch exception and rethrow with extended error message that
-    // includes the index into "vec"?
+    // TODO Nice-to-have: Catch exception and re-throw with extended error
+    // message that includes the index into "vec". (low-priority)
   }
   arr = toml_arr;
 }
@@ -1402,10 +1408,6 @@ std::optional<date> Configuration::GetOptionalDate(std::string_view key) const {
 }
 
 void Configuration::SetDate(std::string_view key, const date &value) {
-  // using namespace std::string_view_literals;
-  // FIXME
-  // detail::SetDateTime<date, toml::date>(pimpl_->config_root, key, value,
-  //                                       "date"sv);
   detail::SetScalar<toml::date>(pimpl_->config_root, key, value);
 }
 
@@ -1432,10 +1434,6 @@ std::optional<time> Configuration::GetOptionalTime(std::string_view key) const {
 }
 
 void Configuration::SetTime(std::string_view key, const time &value) {
-  // using namespace std::string_view_literals;
-  // detail::SetDateTime<time, toml::time>(pimpl_->config_root, key, value,
-  //                                       "time"sv);
-  // FIXME
   detail::SetScalar<toml::time>(pimpl_->config_root, key, value);
 }
 
@@ -1463,17 +1461,12 @@ std::optional<date_time> Configuration::GetOptionalDateTime(
 }
 
 void Configuration::SetDateTime(std::string_view key, const date_time &value) {
-  // using namespace std::string_view_literals;
-  // detail::SetDateTime<date_time, toml::date_time>(pimpl_->config_root, key,
-  //                                                 value, "date_time"sv);
-  // FIXME
   detail::SetScalar<toml::date_time>(pimpl_->config_root, key, value);
 }
 
 std::vector<date_time> Configuration::GetDateTimeList(
     std::string_view key) const {
-  return detail::GetList<date_time>(pimpl_->config_root,
-                                    key);  // TODO test
+  return detail::GetList<date_time>(pimpl_->config_root, key);  // TODO test
 }
 
 //---------------------------------------------------------------------------
@@ -1601,7 +1594,7 @@ bool Configuration::ReplaceStringPlaceholders(
   // Sanity check, search string can't be empty
   for (const auto &rep : replacements) {
     if (rep.first.empty()) {
-      throw std::runtime_error{
+      throw ValueError{
           "Search string within `ReplaceStrings()` must not be empty!"};
     }
   }
@@ -1679,7 +1672,7 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
       std::string msg{"Could not insert nested configuration at `"};
       msg += key;
       msg += "`!";
-      throw std::runtime_error{msg};
+      throw std::runtime_error{msg};  // TODO add to docstr
       // LCOV_EXCL_STOP
     }
   } catch (const toml::parse_error &err) {

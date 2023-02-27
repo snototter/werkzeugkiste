@@ -141,7 +141,7 @@ TEST(ConfigUtilsTest, StringReplacements) {
   EXPECT_FALSE(config.ReplaceStringPlaceholders({{"no-such-text"sv, "bar"sv}}));
   // Invalid search string
   EXPECT_THROW(config.ReplaceStringPlaceholders({{""sv, "replace"sv}}),
-               std::runtime_error);
+               wkc::ValueError);
 
   // Replace words
   EXPECT_TRUE(config.ReplaceStringPlaceholders(
