@@ -1,20 +1,13 @@
-#include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/filesys.h>
-#include <werkzeugkiste/geometry/vector.h>
 #include <werkzeugkiste/strings/strings.h>
 
-#include <cmath>
-#include <exception>
-#include <limits>
 #include <sstream>
-#include <string_view>
 
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::config;
 namespace wkf = werkzeugkiste::files;
-namespace wkg = werkzeugkiste::geometry;
 namespace wks = werkzeugkiste::strings;
 
 // NOLINTBEGIN

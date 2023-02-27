@@ -1,21 +1,8 @@
-#include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
-#include <werkzeugkiste/files/filesys.h>
-#include <werkzeugkiste/geometry/vector.h>
-#include <werkzeugkiste/strings/strings.h>
-
-#include <cmath>
-#include <exception>
-#include <limits>
-#include <sstream>
-#include <string_view>
 
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::config;
-namespace wkf = werkzeugkiste::files;
-namespace wkg = werkzeugkiste::geometry;
-namespace wks = werkzeugkiste::strings;
 
 using namespace std::string_view_literals;
 
@@ -229,18 +216,12 @@ TEST(ConfigListTest, SetLists) {
   EXPECT_EQ(2147483648L, ints64[0]);
   EXPECT_EQ(-2147483649L, ints64[1]);
 
-  // TODO check after setting from double!
+  // A list item can be replaced by a compatible/convertible value (see
+  // ConfigScalarTest.ReplaceListElements for more details).
+  EXPECT_THROW(config.SetDouble("ints[0]"sv, 32.8), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetDouble("ints[0]"sv, 32.0));
+  EXPECT_EQ(32, config.GetInteger32("ints[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
-
-  // Cannot change the type of a parameter:
-  EXPECT_THROW(config.SetBooleanList("ints"sv, {true, false}), wkc::TypeError);
-  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
-
-  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
-               wkc::TypeError);
-  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
-               wkc::TypeError);
-  EXPECT_THROW(config.SetStringList("floats"sv, {"abc"}), wkc::TypeError);
 
   // A mixed list that only contains numbers can be replaced by a homogeneous
   // list. Its type, however, will be floating point afterwards:
@@ -251,6 +232,17 @@ TEST(ConfigListTest, SetLists) {
   EXPECT_EQ(2, ints32[1]);
   EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[0]"sv));
   EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[1]"sv));
+
+  // ... but for all other types/mixtures, the type cannot be changed.
+  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
+               wkc::TypeError);
+
+  EXPECT_THROW(config.SetBooleanList("ints"sv, {true, false}), wkc::TypeError);
+  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
+
+  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
+               wkc::TypeError);
+  EXPECT_THROW(config.SetStringList("floats"sv, {"abc"}), wkc::TypeError);
 }
 
 // NOLINTEND

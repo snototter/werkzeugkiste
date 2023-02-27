@@ -1,14 +1,5 @@
-#include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/configuration.h>
-#include <werkzeugkiste/files/filesys.h>
 #include <werkzeugkiste/geometry/vector.h>
-#include <werkzeugkiste/strings/strings.h>
-
-#include <cmath>
-#include <exception>
-#include <limits>
-#include <sstream>
-#include <string_view>
 
 #include "../test_utils.h"
 
@@ -40,16 +31,6 @@ inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
   }
   return poly;
 }
-// template <typename VecType, typename... TupleTypes>
-// inline std::vector<typename std::enable_if<VecType::ndim ==
-// sizeof...(TupleTypes), VecType>::type> TuplesToVecs(const
-// std::vector<std::tuple<TupleTypes...>> &tuples) {
-//   std::vector<VecType> poly;
-//   for (const auto &tpl : tuples) {
-//     poly.emplace_back(std::make_from_tuple<VecType>(tpl));
-//   }
-//   return poly;
-// }
 
 TEST(ConfigCompoundTest, IndexLists) {
   const auto config = wkc::LoadTOMLString(R"toml(

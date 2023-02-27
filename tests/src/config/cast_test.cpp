@@ -1,10 +1,7 @@
 #include <werkzeugkiste/config/casts.h>
-#include <werkzeugkiste/strings/strings.h>
 
 #include <cmath>
-#include <exception>
 #include <limits>
-#include <sstream>
 
 #include "../test_utils.h"
 
