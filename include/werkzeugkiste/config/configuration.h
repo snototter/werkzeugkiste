@@ -193,14 +193,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO GetPairOr
   // TODO GetOptionalPair
 
-  /// @brief Alias for `GetInteger32Pair`. Can be used to retrieve a 2D
-  ///   size definition of a buffer, image, frame, etc.
-  /// @param key Fully-qualified parameter name.
-  inline std::pair<int32_t, int32_t> GetSize2D(std::string_view key) const {
-    return GetInteger32Pair(key);  // TODO test
-  }
-  // TODO GetSize2DOr
-  // TODO GetOptionalSize2D
+  // /// @brief Alias for `GetInteger32Pair`. Can be used to retrieve a 2D
+  // ///   size definition of a buffer, image, frame, etc.
+  // /// @param key Fully-qualified parameter name.
+  // inline std::pair<int32_t, int32_t> GetSize2D(std::string_view key) const {
+  //   return GetInteger32Pair(key);  // TODO test
+  // }
+  // // TODO GetSize2DOr
+  // // TODO GetOptionalSize2D
 
   // TODO doc
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
