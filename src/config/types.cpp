@@ -125,17 +125,35 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct) {
 //-----------------------------------------------------------------------------
 // Number parsing for date & time types
 
+/// @brief Returns true if the input string is a valid integer, i.e.
+///   "[+-]?[0-9]+".
+bool IsInteger(std::string_view str) {
+  if (str.empty()) {
+    return false;
+  }
+
+  const bool sign = (str[0] == '-' || str[0] == '+');
+  const auto begin = sign ? str.begin() + 1 : str.begin();
+  const auto pos = std::find_if(
+      begin, str.end(), [](char c) -> bool { return !std::isdigit(c); });
+  if (pos != str.end()) {
+    return false;
+  }
+
+  return sign ? (str.length() > 2) : true;
+}
+
 template <typename T>
 T ParseDateTimeNumber(const std::string &str, int min_val, int max_val,
                       std::string_view type_str) {
   try {
-    // stoi would accept (and truncate) floating point numbers. Thus,
-    // we need to make sure that only [+-][0-9] inputs are fed into it.
-    // White space is not allowed.
-    const auto pos = std::find_if(str.begin(), str.end(), [](char c) -> bool {
-      return !std::isdigit(c) && (c != '-') && (c != '+');
-    });
-    if (pos != str.end()) {
+    // We can't use stoi out of the box:
+    // * it accepts (and truncates) floating point numbers, and
+    // * it takes as many characters as possible (and won't throw an exception
+    //   if the "rest" of the string is invalid).
+    // Thus, we need to make sure that only [+-][0-9]+ inputs are provided as
+    // inputs to stoi. We do not allow white space.
+    if (!IsInteger(str)) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, type_str);
     }
 
@@ -145,8 +163,12 @@ T ParseDateTimeNumber(const std::string &str, int min_val, int max_val,
     }
     return checked_numcast<T, int, ParseError>(parsed);
   } catch (const std::logic_error &e) {
-    // All exceptions thrown within stoi are derived from logic_error
+    // LCOV_EXCL_START
+    // All exceptions thrown within stoi are derived from logic_error. This
+    // branch, however, is currently unreachable, as the "IsInteger" check
+    // already filters out anything that does not resemble "[+-][0-9]+".
     throw ParseError{e.what()};
+    // LCOV_EXCL_STOP
   }
 }
 
@@ -461,8 +483,8 @@ bool time_offset::operator>=(const time_offset &other) const {
 // Date-time
 
 date_time::date_time(std::string_view str) {
-  // TODO len(19) would be following the rfc (16 is missing the seconds
-  // component ":SS")
+  // len(19) would be following the rfc, len(16) is missing the seconds
+  // component ":SS". For usage convenience, we are lenient here.
   if (str.length() <= 16) {
     WZK_RAISE_DATETIME_PARSE_ERROR(str, date_time);
   }

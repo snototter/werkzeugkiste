@@ -160,14 +160,14 @@ TEST(ConfigTypeTest, DateType) {
   EXPECT_GE(wkc::date(2000, 10, 20), wkc::date(2000, 10, 20));
 
   EXPECT_GT(wkc::date(2000, 10, 21), wkc::date(2000, 10, 20));
-  EXPECT_GT(wkc::date(2000, 11, 04), wkc::date(2000, 10, 20));
-  EXPECT_GT(wkc::date(2001, 1, 01), wkc::date(2000, 10, 20));
-  EXPECT_GE(wkc::date(2001, 1, 01), wkc::date(2000, 10, 20));
+  EXPECT_GT(wkc::date(2000, 11, 4), wkc::date(2000, 10, 20));
+  EXPECT_GT(wkc::date(2001, 1, 1), wkc::date(2000, 10, 20));
+  EXPECT_GE(wkc::date(2001, 1, 1), wkc::date(2000, 10, 20));
 
-  EXPECT_EQ("2000-11-04", wkc::date(2000, 11, 04).ToString());
+  EXPECT_EQ("2000-11-04", wkc::date(2000, 11, 4).ToString());
 
   std::ostringstream str;
-  str << wkc::date{2000, 11, 04};
+  str << wkc::date{2000, 11, 4};
   EXPECT_EQ("2000-11-04", str.str());
 
   // Decrement
@@ -195,44 +195,58 @@ TEST(ConfigTypeTest, DateType) {
   EXPECT_EQ(wkc::date(2005, 3, 1), ++wkc::date(2005, 2, 28));
 }
 
-TEST(ConfigTypeTest, DateParsing) {
+TEST(ConfigTypeTest, DateParsingYMD) {
   // Check date parsing in detail
-  auto date = wkc::date(2000, 11, 04);
+  auto date = wkc::date(2000, 11, 4);
   auto parsed = wkc::date(date.ToString());
   EXPECT_EQ(date, parsed);
 
   // Most common format: Y-m-d
-  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date("2023-02-28"sv));
+  EXPECT_EQ(wkc::date(2023, 2, 28), wkc::date("2023-02-28"sv));
   // A trailing delimiter will be ignored
-  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date("2023-02-28-"sv));
+  EXPECT_EQ(wkc::date(2023, 2, 28), wkc::date("2023-02-28-"sv));
 
   EXPECT_THROW(wkc::date("2023-1"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("2023-1-"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1--"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1-+"), wkc::ParseError);
   EXPECT_THROW(wkc::date("2023-1-2--"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("-2023-1-2-"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("invalid"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("invalid-"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("Y-m-d"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-01-3+4"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-01-++4"), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1-4++"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1-4a"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("2023-1-+b"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("a-2-3"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("1+-2-3"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("++1-2-3"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::date("+-2-3"sv), wkc::ParseError);
 
   // Dates will be checked
   EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("1-2-3"sv));
 
-  EXPECT_THROW(wkc::date(2023, 02, 31), wkc::ValueError);
-  EXPECT_NO_THROW(wkc::date(2023, 02, 28));
-  EXPECT_THROW(wkc::date(2023, 02, 29), wkc::ValueError);
-  EXPECT_NO_THROW(wkc::date(2024, 02, 29));
+  EXPECT_THROW(wkc::date(2023, 2, 31), wkc::ValueError);
+  EXPECT_NO_THROW(wkc::date(2023, 2, 28));
+  EXPECT_THROW(wkc::date(2023, 2, 29), wkc::ValueError);
+  EXPECT_NO_THROW(wkc::date(2024, 2, 29));
 
   EXPECT_THROW(wkc::date("2023-02-31"sv), wkc::ParseError);
 
   EXPECT_THROW(wkc::date("2023-02-29"sv), wkc::ParseError);
   EXPECT_NO_THROW(wkc::date("2024-02-29"sv));
+  EXPECT_THROW(wkc::date("2023-02-30"sv), wkc::ParseError);
 
   EXPECT_THROW(wkc::date("2023-02-0"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("2023-02-32"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("2023-13-3"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("2023-0-3"sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("10000-1-3"sv), wkc::ParseError);
+}
 
+TEST(ConfigTypeTest, DateParsingDMY) {
   // We also commonly use: d.m.Y
   EXPECT_EQ(wkc::date(2020, 3, 1), wkc::date("01.03.2020"sv));
   // A trailing delimiter will be ignored
@@ -245,10 +259,10 @@ TEST(ConfigTypeTest, DateParsing) {
   EXPECT_THROW(wkc::date("invalid."sv), wkc::ParseError);
   EXPECT_THROW(wkc::date("d.m.Y"sv), wkc::ParseError);
 
-  EXPECT_THROW(wkc::date(2023, 02, 31), wkc::ValueError);
+  EXPECT_THROW(wkc::date(2023, 2, 31), wkc::ValueError);
   EXPECT_THROW(wkc::date("31.02.2023"), wkc::ParseError);
 
-  EXPECT_EQ(wkc::date(2023, 02, 28), wkc::date("28.02.2023"sv));
+  EXPECT_EQ(wkc::date(2023, 2, 28), wkc::date("28.02.2023"sv));
   EXPECT_EQ(wkc::date(2023, 12, 3), wkc::date("3.12.2023"sv));
   EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("3.2.1"sv));
 
@@ -333,6 +347,7 @@ TEST(ConfigTypeTest, TimeParsing) {
   EXPECT_EQ(time, parsed);
 
   EXPECT_EQ(wkc::time(10, 11), wkc::time("10:11"sv));
+  EXPECT_EQ(wkc::time(10, 11, 0), wkc::time("10:11"sv));
   EXPECT_EQ(wkc::time(10, 11, 12), wkc::time("10:11:12"sv));
 
   // White space is not allowed
@@ -465,7 +480,7 @@ TEST(ConfigTypeTest, DateTime) {
   // the separately tested date, time and offset types.
 
   wkc::time time{8, 10, 32, 123456789};
-  wkc::date date{2000, 11, 04};
+  wkc::date date{2000, 11, 4};
 
   wkc::date_time dt{date, time};
   EXPECT_EQ(date, dt.date);
