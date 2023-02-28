@@ -245,35 +245,6 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_EQ(wkc::date_time{"1998-02-14T22:08:23.880+01:00"sv}, dts[1]);
 }
 
-TEST(ConfigListTest, SetBooleanList) {
-  wkc::Configuration config{};
-
-  // Create a boolean list
-  EXPECT_FALSE(config.Contains("flags"sv));
-  EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false, true}));
-  EXPECT_TRUE(config.Contains("flags"sv));
-  auto flags = config.GetBooleanList("flags"sv);
-  EXPECT_EQ(3, flags.size());
-  EXPECT_TRUE(flags[0]);
-  EXPECT_FALSE(flags[1]);
-  EXPECT_TRUE(flags[2]);
-
-  EXPECT_THROW(config.GetInteger32List("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDoubleList("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetStringList("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDateList("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetTimeList("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDateTimeList("flags"sv), wkc::TypeError);
-
-  // Update the boolean list
-  EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {false, true}));
-  flags = config.GetBooleanList("flags"sv);
-  EXPECT_EQ(2, flags.size());
-  EXPECT_FALSE(flags[0]);
-  EXPECT_TRUE(flags[1]);
-}
-
 TEST(ConfigListTest, NumericList) {
   auto config = wkc::LoadTOMLString(R"toml(
     mixed_int_flt = [1, 2, 3, 4.5, 5]
@@ -356,10 +327,204 @@ TEST(ConfigListTest, NumericList) {
                wkc::TypeError);
 }
 
-TEST(ConfigListTest, StringList) {}
+TEST(ConfigListTest, SetBooleanList) {
+  wkc::Configuration config{};
 
-TEST(ConfigListTest, DateTimeLists) {}
+  // Create a boolean list
+  EXPECT_FALSE(config.Contains("flags"sv));
+  EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false, true}));
+  EXPECT_TRUE(config.Contains("flags"sv));
+  auto flags = config.GetBooleanList("flags"sv);
+  EXPECT_EQ(3, flags.size());
+  EXPECT_TRUE(flags[0]);
+  EXPECT_FALSE(flags[1]);
+  EXPECT_TRUE(flags[2]);
 
-TEST(ConfigListTest, MixedList) {}
+  EXPECT_THROW(config.GetInteger32List("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64List("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoubleList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTimeList("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTimeList("flags"sv), wkc::TypeError);
+
+  // Update the boolean list
+  EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {false, true}));
+  flags = config.GetBooleanList("flags"sv);
+  EXPECT_EQ(2, flags.size());
+  EXPECT_FALSE(flags[0]);
+  EXPECT_TRUE(flags[1]);
+}
+
+TEST(ConfigListTest, SetStringList) {
+  wkc::Configuration config{};
+
+  EXPECT_NO_THROW(config.SetStringList("strs"sv, {}));
+  EXPECT_TRUE(config.GetStringList("strs"sv).empty());
+
+  EXPECT_NO_THROW(config.SetStringList("strs"sv, {"Hello"}));
+  EXPECT_EQ(1, config.GetStringList("strs"sv).size());
+
+  EXPECT_NO_THROW(config.SetStringList("strs"sv, {"Hello", "World"}));
+  const auto strs = config.GetStringList("strs"sv);
+  EXPECT_EQ(2, strs.size());
+  EXPECT_EQ("Hello", strs[0]);
+  EXPECT_EQ("Hello", config.GetString("strs[0]"sv));
+  EXPECT_EQ("World", strs[1]);
+  EXPECT_EQ("World", config.GetString("strs[1]"sv));
+
+  EXPECT_THROW(config.GetBooleanList("strs"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("strs[0]"sv), wkc::TypeError);
+}
+
+TEST(ConfigListTest, SetDateList) {
+  wkc::Configuration config{};
+
+  // Empty list
+  EXPECT_NO_THROW(config.SetDateList("empty"sv, {}));
+  EXPECT_TRUE(config.GetDateList("empty"sv).empty());
+
+  // Set/get list
+  const std::vector<wkc::date> days = {
+      wkc::date{1900, 1, 3}, wkc::date{2000, 2, 29}, wkc::date{2023, 2, 28}};
+  EXPECT_NO_THROW(config.SetDateList("days"sv, days));
+  const auto lookup = config.GetDateList("days"sv);
+  EXPECT_EQ(days.size(), lookup.size());
+  for (std::size_t i = 0; i < days.size(); ++i) {
+    EXPECT_EQ(days[i], lookup[i]);
+  }
+  EXPECT_EQ(days[1], config.GetDate("days[1]"sv));
+
+  // Replace a single item
+  const wkc::date day{"1234-5-6"sv};
+  EXPECT_NO_THROW(config.SetDate("days[1]"sv, day));
+  EXPECT_EQ(day, config.GetDate("days[1]"sv));
+
+  // Invalid access
+  EXPECT_THROW(config.GetTimeList("days"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTimeList("days"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBooleanList("days"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("days[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTime("days[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("days[0]"sv), wkc::TypeError);
+}
+
+TEST(ConfigListTest, SetTimeList) {
+  wkc::Configuration config{};
+
+  // Empty list
+  EXPECT_NO_THROW(config.SetTimeList("empty"sv, {}));
+  EXPECT_TRUE(config.GetTimeList("empty"sv).empty());
+
+  // Set/get list
+  const std::vector<wkc::time> times = {wkc::time{0, 0}, wkc::time{12, 0},
+                                        wkc::time{23, 59, 59}};
+  EXPECT_NO_THROW(config.SetTimeList("times"sv, times));
+  const auto lookup = config.GetTimeList("times"sv);
+  EXPECT_EQ(times.size(), lookup.size());
+  for (std::size_t i = 0; i < times.size(); ++i) {
+    EXPECT_EQ(times[i], lookup[i]);
+  }
+  EXPECT_EQ(times[1], config.GetTime("times[1]"sv));
+
+  // Replace a single item
+  const wkc::time tm{"13:37"sv};
+  EXPECT_NO_THROW(config.SetTime("times[2]"sv, tm));
+  EXPECT_EQ(tm, config.GetTime("times[2]"sv));
+
+  // Invalid access
+  EXPECT_THROW(config.GetDateList("times"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTimeList("times"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBooleanList("times"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("times[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDate("times[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateTime("times[0]"sv), wkc::TypeError);
+}
+
+TEST(ConfigListTest, SetDateTimeList) {
+  wkc::Configuration config{};
+
+  // Empty list
+  EXPECT_NO_THROW(config.SetDateTimeList("empty"sv, {}));
+  EXPECT_TRUE(config.GetDateTimeList("empty"sv).empty());
+
+  // Set/get list
+  const std::vector<wkc::date_time> dts = {
+      wkc::date_time{"2023-02-14T21:08:23Z"sv},
+      wkc::date_time{"2023-02-14_21:08:23.880Z"sv},
+      wkc::date_time{"2024-02-29 00:45:12.123+01:00"sv},
+      wkc::date_time{"2024-02-28 23:45:12.123Z"sv}};
+  EXPECT_NO_THROW(config.SetDateTimeList("dts"sv, dts));
+  const auto lookup = config.GetDateTimeList("dts"sv);
+  EXPECT_EQ(dts.size(), lookup.size());
+  for (std::size_t i = 0; i < dts.size(); ++i) {
+    EXPECT_EQ(dts[i], lookup[i]);
+  }
+  EXPECT_EQ(dts[1], config.GetDateTime("dts[1]"sv));
+
+  // Replace a single item
+  EXPECT_NO_THROW(config.SetDateTime("dts[0]"sv, dts[3]));
+  EXPECT_EQ(dts[3], config.GetDateTime("dts[0]"sv));
+
+  // Invalid access
+  EXPECT_THROW(config.GetDateList("dts"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTimeList("dts"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBooleanList("dts"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDouble("dts[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDate("dts[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetTime("dts[0]"sv), wkc::TypeError);
+}
+
+TEST(ConfigListTest, MixedList) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    numbers = [1, 2.5]
+
+    types = [true, -42, 4.2, "foo", 2011-09-10]
+    )toml");
+
+  EXPECT_THROW(config.GetBooleanList("numbers"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateList("numbers"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("numbers"sv), wkc::TypeError);
+  const auto flts = config.GetDoubleList("numbers"sv);
+  EXPECT_EQ(2, flts.size());
+  EXPECT_DOUBLE_EQ(1.0, flts[0]);
+  EXPECT_DOUBLE_EQ(2.5, flts[1]);
+
+  // The mixed list cannot be loaded as a homogeneous type.
+  EXPECT_THROW(config.GetBooleanList("types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDateList("types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32List("types"sv), wkc::TypeError);
+
+  // But each element can be looked up individually.
+  EXPECT_TRUE(config.GetBoolean("types[0]"sv));
+  EXPECT_EQ(-42, config.GetInteger64("types[1]"sv));
+  EXPECT_DOUBLE_EQ(4.2, config.GetDouble("types[2]"sv));
+  EXPECT_EQ("foo", config.GetString("types[3]"sv));
+  EXPECT_EQ(wkc::date{"2011-09-10"sv}, config.GetDate("types[4]"sv));
+
+  // Individual elements can be replaced (but only by a compatible/convertible
+  // value)
+  EXPECT_THROW(config.SetString("types[0]"sv, ""sv), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetBoolean("types[0]"sv, false));
+  EXPECT_FALSE(config.GetBoolean("types[0]"sv));
+
+  EXPECT_THROW(config.SetDouble("types[1]"sv, 1.23), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetDouble("types[1]"sv, 17.0));
+  EXPECT_EQ(17, config.GetInteger32("types[1]"sv));
+
+  EXPECT_THROW(config.SetTime("types[4]"sv, wkc::time{"08:00"sv}),
+               wkc::TypeError);
+  const wkc::date day{"31.12.1234"};
+  EXPECT_NO_THROW(config.SetDate("types[4]"sv, day));
+  EXPECT_EQ(day, config.GetDate("types[4]"sv));
+
+  // The mixed list cannot be replaced by a homogeneous list.
+  EXPECT_THROW(config.SetBooleanList("types"sv, {true}), wkc::TypeError);
+  EXPECT_THROW(config.SetStringList("types"sv, {"test"}), wkc::TypeError);
+  // But it can be replaced by an empty list of any type.
+  EXPECT_NO_THROW(config.SetDateList("types"sv, {}));
+  EXPECT_TRUE(config.GetDateList("types"sv).empty());
+  EXPECT_TRUE(config.GetStringList("types"sv).empty());
+}
 
 // NOLINTEND
