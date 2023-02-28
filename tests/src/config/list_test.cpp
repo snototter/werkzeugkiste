@@ -81,6 +81,8 @@ TEST(ConfigListTest, SetEmptyLists) {
   // A mixed list cannot be restored programmatically. Thus, we can only
   // replace it once.
   EXPECT_NO_THROW(config.SetDateList("mixed"sv, {}));
+  EXPECT_TRUE(config.GetDateList("mixed"sv).empty());
+  EXPECT_TRUE(config.GetBooleanList("mixed"sv).empty());
 }
 
 TEST(ConfigListTest, GetLists) {
@@ -105,6 +107,15 @@ TEST(ConfigListTest, GetLists) {
     mixed_types = [1, 2, "framboozle"]
 
     nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
+
+    days = [1999-10-11, 2000-01-22]
+
+    times = [23:00:59, 08:30:10]
+
+    dts = [
+      2023-02-14T21:08:23,
+      1998-02-14T22:08:23.880+01:00,
+    ]
 
     an_int = 1234
 
@@ -148,11 +159,15 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_THROW(config.GetStringList("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("not-a-list.no-such-key"sv), wkc::KeyError);
 
-  // Cannot load inhomogeneous arrays:
+  // Cannot load inhomogeneous arrays (would need to load each element with its
+  // corresponding type separately):
   EXPECT_THROW(config.GetInteger32List("mixed_types"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("mixed_types"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleList("mixed_types"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("mixed_types"sv), wkc::TypeError);
+  EXPECT_EQ(1, config.GetInteger32("mixed_types[0]"sv));
+  EXPECT_EQ(2, config.GetInteger32("mixed_types[1]"sv));
+  EXPECT_EQ("framboozle", config.GetString("mixed_types[2]"sv));
 
   EXPECT_THROW(config.GetInteger32List("nested_lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("nested_lst"sv), wkc::TypeError);
@@ -211,34 +226,27 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_THROW(config.GetInteger32List("mixed_int_flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("mixed_int_flt"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetDoubleList("mixed_int_flt"sv));
+
+  // Load dates:
+  const auto days = config.GetDateList("days"sv);
+  EXPECT_EQ(2, days.size());
+  EXPECT_EQ(wkc::date(1999, 10, 11), days[0]);
+  EXPECT_EQ(wkc::date(2000, 1, 22), days[1]);
+
+  const auto times = config.GetTimeList("times"sv);
+  EXPECT_EQ(2, times.size());
+  EXPECT_EQ(wkc::time(23, 0, 59), times[0]);
+  EXPECT_EQ(wkc::time(8, 30, 10), times[1]);
+
+  const auto dts = config.GetDateTimeList("dts"sv);
+  EXPECT_EQ(2, dts.size());
+  EXPECT_EQ(wkc::date_time{"2023-02-14T21:08:23"sv}, dts[0]);
+  EXPECT_NE(wkc::date_time{"2023-02-14T21:08:23"sv}, dts[1]);
+  EXPECT_EQ(wkc::date_time{"1998-02-14T22:08:23.880+01:00"sv}, dts[1]);
 }
 
 TEST(ConfigListTest, SetBooleanList) {
-  auto config = wkc::LoadTOMLString(R"toml(
-    floats = [0.5, 1.0, 1.0e23]
-
-    strings = ["abc", "Foo", "Frobmorten", "Test String"]
-
-    mixed_int_flt = [1, 2, 3, 4.5, 5]
-
-    mixed_types = [1, 2, "framboozle"]
-
-    nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
-
-    an_int = 1234
-
-    [not-a-list]
-    name = "test"
-
-    [[products]]
-    value = 1
-
-    [[products]]
-    value = 2
-
-    [[products]]
-    value = 3
-    )toml"sv);
+  wkc::Configuration config{};
 
   // Create a boolean list
   EXPECT_FALSE(config.Contains("flags"sv));
@@ -264,30 +272,16 @@ TEST(ConfigListTest, SetBooleanList) {
   EXPECT_EQ(2, flags.size());
   EXPECT_FALSE(flags[0]);
   EXPECT_TRUE(flags[1]);
-
-  // A mixed list that only contains numbers can be replaced by a homogeneous
-  // list. Its type, however, will be floating point afterwards:
-  EXPECT_NO_THROW(config.SetInteger32List("mixed_int_flt"sv, {1, 2}));
-  const auto ints32 = config.GetInteger32List("mixed_int_flt"sv);
-  EXPECT_EQ(2, ints32.size());
-  EXPECT_EQ(1, ints32[0]);
-  EXPECT_EQ(2, ints32[1]);
-  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[0]"sv));
-  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[1]"sv));
-
-  // ... but for all other types/mixtures, the type cannot be changed.
-  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
-               wkc::TypeError);
-
-  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
-
-  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
-               wkc::TypeError);
-  EXPECT_THROW(config.SetStringList("floats"sv, {"abc"}), wkc::TypeError);
 }
 
 TEST(ConfigListTest, NumericList) {
-  wkc::Configuration config{};
+  auto config = wkc::LoadTOMLString(R"toml(
+    mixed_int_flt = [1, 2, 3, 4.5, 5]
+
+    mixed_types = [1, 2, "framboozle"]
+
+    nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
+    )toml");
 
   // Create an integer list
   EXPECT_FALSE(config.Contains("ints"sv));
@@ -339,6 +333,27 @@ TEST(ConfigListTest, NumericList) {
   // string list:
   EXPECT_THROW(config.SetBooleanList("ints"sv, {true, false}), wkc::TypeError);
   EXPECT_THROW(config.SetStringList("ints"sv, {"test"}), wkc::TypeError);
+
+  // A mixed list that only contains numbers can be replaced by a homogeneous
+  // list. Its type, however, will be floating point afterwards:
+  EXPECT_NO_THROW(config.SetInteger32List("mixed_int_flt"sv, {1, 2}));
+  ints32 = config.GetInteger32List("mixed_int_flt"sv);
+  EXPECT_EQ(2, ints32.size());
+  EXPECT_EQ(1, ints32[0]);
+  EXPECT_EQ(2, ints32[1]);
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[0]"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[1]"sv));
+
+  // ... but for all other types/mixtures, the type cannot be changed.
+  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
+               wkc::TypeError);
+
+  EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false}));
+  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
+  EXPECT_THROW(config.SetStringList("flags"sv, {"abc"}), wkc::TypeError);
+
+  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
+               wkc::TypeError);
 }
 
 TEST(ConfigListTest, StringList) {}
