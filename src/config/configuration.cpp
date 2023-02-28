@@ -647,24 +647,6 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
   if (ContainsKey(tbl, key)) {
     auto node = tbl.at_path(key);
     ReplaceScalar(node, value, key);
-    // const auto node = tbl.at_path(key);
-
-    // using NodeType = decltype(node.type);
-    // auto &ref = node.as<NodeType>()->get()
-    // ref = ConvertConfigTypeToToml<NodeType>(value, key);
-    // if (!node.is<Ttoml>()) {
-    //   std::string msg{"Changing the type is not allowed. Parameter `"};
-    //   msg += key;
-    //   msg += "` is `";
-    //   msg += TomlTypeName(node, key);
-    //   msg += "`, but replacement value is of type `";
-    //   msg += TypeName<Tmessage>();
-    //   msg += "`!";
-    //   throw TypeError{msg};
-    // }
-
-    // auto &ref = *node.as<Ttoml>();
-    // ref = ConvertConfigTypeToToml<Ttoml, Tmessage>(value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
     toml::table *parent =

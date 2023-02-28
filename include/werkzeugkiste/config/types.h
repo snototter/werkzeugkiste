@@ -50,7 +50,7 @@ enum class ConfigType : unsigned char {
 
   /// @brief A 32- or 64-bit integer.
   ///
-  /// Internally, integers are always handled as 64-bits.
+  /// Internally, integers are represented by 64-bit.
   Integer,
 
   /// @brief A single- or double-precision floating point number.
