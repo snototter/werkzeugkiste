@@ -8,6 +8,41 @@ using namespace std::string_view_literals;
 
 // NOLINTBEGIN
 
+TEST(ConfigListTest, EmptyLists) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    empty = []
+    )toml");
+
+  EXPECT_TRUE(config.GetBooleanList("empty"sv).empty());
+  EXPECT_TRUE(config.GetInteger32List("empty"sv).empty());
+  EXPECT_TRUE(config.GetInteger64List("empty"sv).empty());
+  EXPECT_TRUE(config.GetDoubleList("empty"sv).empty());
+  EXPECT_TRUE(config.GetStringList("empty"sv).empty());
+  EXPECT_TRUE(config.GetDateList("empty"sv).empty());
+  EXPECT_TRUE(config.GetTimeList("empty"sv).empty());
+  EXPECT_TRUE(config.GetDateTimeList("empty"sv).empty());
+
+  // TODO extend with nested lists
+
+  // An empty list can be set to any type.
+  EXPECT_NO_THROW(config.SetBooleanList("empty"sv, {}));
+  // It will still have no type.
+  EXPECT_TRUE(config.GetBooleanList("empty"sv).empty());
+  EXPECT_TRUE(config.GetDoubleList("empty"sv).empty());
+  EXPECT_TRUE(config.GetStringList("empty"sv).empty());
+
+  EXPECT_NO_THROW(config.SetStringList("empty"sv, {}));
+  EXPECT_TRUE(config.GetBooleanList("empty"sv).empty());
+  EXPECT_TRUE(config.GetDoubleList("empty"sv).empty());
+  EXPECT_TRUE(config.GetStringList("empty"sv).empty());
+
+  // But once elements are inserted, the list is typed.
+  EXPECT_NO_THROW(config.SetDoubleList("empty"sv, {1.5, 2.0}));
+  EXPECT_THROW(config.GetBooleanList("empty"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetStringList("empty"sv), wkc::TypeError);
+  EXPECT_EQ(2, config.GetDoubleList("empty"sv).size());
+}
+
 TEST(ConfigListTest, GetLists) {
   const auto config = wkc::LoadTOMLString(R"toml(
     flags = [true, false, false]
