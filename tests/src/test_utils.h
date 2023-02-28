@@ -5,8 +5,10 @@
 #include <werkzeugkiste/geometry/utils.h>
 #include <werkzeugkiste/geometry/vector.h>
 
+#include <algorithm>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <vector>
 
@@ -62,7 +64,7 @@ inline ::testing::AssertionResult CheckVectorEqual(
 }
 
 template <typename Container>
-inline std::string Stringify(const Container& v) {
+std::string Stringify(const Container& v) {
   std::ostringstream s;
   s << "{";
   for (std::size_t idx = 0; idx < v.size(); ++idx) {
@@ -73,6 +75,21 @@ inline std::string Stringify(const Container& v) {
   }
   s << "}";
   return s.str();
+}
+
+template <typename Container>
+void CheckMatchingContainers(const Container& expected,
+                             const Container& values) {
+  using namespace std::string_view_literals;
+  EXPECT_EQ(expected.size(), values.size())
+      << "Got values: " << Stringify(values)
+      << "\nExpected:  " << Stringify(expected) << "!";
+
+  for (const auto& e : expected) {
+    const auto pos = std::find(values.begin(), values.end(), e);
+    EXPECT_NE(values.end(), pos)
+        << "Expected value `"sv << e << "` was not found!"sv;
+  }
 }
 
 #endif  // WERKZEUGKISTE_TEST_UTILS_H

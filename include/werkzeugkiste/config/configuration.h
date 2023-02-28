@@ -24,14 +24,24 @@ namespace werkzeugkiste::config {
 ///
 /// TODO doc:
 /// * Internally, a TOML configuration is used to store the parameters.
-/// * I prefer explicit method names over a templated "Get<>".
+/// * Explicit method names are preferred over a templated "Get<>".
 /// * Get("unknown-key") throws a KeyError if the parameter does not exist.
 /// * GetOptional returns an optional scalar.
 /// * Get..Or returns a default value if the parameter does not exist.
+/// * Mixed lists:
+///   - All entries numeric -> can be looked up as floating point list.
+///   - Can not be created programmatically (only via loading a Configuration
+///     from a TOML/JSON/... string or file)
+///   - Can be replaced by an empty list, but cannot be replaced by a
+///     homogeneous list.
+///   - Individual elements can be looked up and set (via their corresponding
+///     GetTYPE/SetTYPE).
+/// * Integers & floating points will be implicitly converted if the value can
+///   be represented *exactly* by the target type. For example, double(2.0)
+///   can be looked up as int, but 2.5 cannot (will raise a `TypeError`).
 ///
 /// TODOs:
 /// * [x] Numeric casts. Implicitly cast if lossless conversion is possible.
-/// * [ ] Do we need double-precision points ?
 /// * [ ] LoadNestedJSONConfiguration
 /// * [ ] LoadJSONFile
 /// * [ ] LoadJSONString
@@ -40,23 +50,37 @@ namespace werkzeugkiste::config {
 /// * [ ] ToLibconfigString   ?
 /// * [x] Date
 /// * [x] Time
-/// * [ ] DateTime
+/// * [x] DateTime
 /// * [ ] NestedLists int & double (for "matrices")
 /// * [ ] If eigen3 is available, enable GetMatrix.
 ///       Static dimensions vs dynamic?
 /// * [ ] Setters for ...Pair
-/// * [ ] Setters for ...List
+/// * [ ] Optional & Default getters for ...Pair
+/// * [x] Setters for ...List
 /// * [x] SetGroup
 /// * [x] Return optional<Scalar>
+/// * [ ] Support get/set list of groups, i.e. vector<Configuration>
+/// * [ ] Convenience types: Point/Index/Rectangle
+/// * [ ] Consider renaming Integer32 to integer
+/// * [ ] Convenience type casts: uint32
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
+  /// @brief Constructs an empty configuration.
   Configuration();
+
+  /// @brief Destructor.
   ~Configuration();
 
+  /// @brief Copy constructor - creates a deep copy.
   Configuration(const Configuration &other);
+
+  /// @brief Copy assignment - creates a deep copy.
   Configuration &operator=(const Configuration &other);
 
+  /// @brief Move constructor.
   Configuration(Configuration &&other) noexcept;
+
+  /// @brief Move assignment.
   Configuration &operator=(Configuration &&other) noexcept;
 
   /// @brief Loads a TOML configuration from a string.
@@ -93,71 +117,351 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::vector<std::string> ListParameterNames(bool include_array_entries) const;
 
   //---------------------------------------------------------------------------
-  // Scalar data types
+  // Booleans
 
+  /// @brief Returns the boolean parameter.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   bool GetBoolean(std::string_view key) const;
+
+  /// @brief Returns the boolean parameter or the `default_val` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to return if the parameter does not exist.
   bool GetBooleanOr(std::string_view key, bool default_val) const;
+
+  // TODO doc
   std::optional<bool> GetOptionalBoolean(std::string_view key) const;
+
+  /// @brief Sets a boolean parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
   void SetBoolean(std::string_view key, bool value);
 
+  // TODO doc
+  std::vector<bool> GetBooleanList(std::string_view key) const;
+
+  // TODO doc
+  void SetBooleanList(std::string_view key, const std::vector<bool> &values);
+
+  //---------------------------------------------------------------------------
+  // Integers (32-bit)
+
+  /// @brief Returns the 32-bit integer parameter.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 32-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
   int32_t GetInteger32(std::string_view key) const;
+
+  // TODO doc
   int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
+
+  // TODO doc
   std::optional<int32_t> GetOptionalInteger32(std::string_view key) const;
+
+  /// @brief Sets a 32-bit signed integer parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type,
+  ///   unless the value is exactly representable by the existing type. For
+  ///   example, an integer value can usually be exactly represented as a
+  ///   floating point number, thus SetInteger32("my-float"sv, 2) will not
+  ///   raise an exception.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
   void SetInteger32(std::string_view key, int32_t value);
 
-  int64_t GetInteger64(std::string_view key) const;
-  int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
-  std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
-  void SetInteger64(std::string_view key, int64_t value);
-
-  double GetDouble(std::string_view key) const;
-  double GetDoubleOr(std::string_view key, double default_val) const;
-  std::optional<double> GetOptionalDouble(std::string_view key) const;
-  void SetDouble(std::string_view key, double value);
-
-  std::string GetString(std::string_view key) const;
-  std::string GetStringOr(std::string_view key,
-                          std::string_view default_val) const;
-  std::optional<std::string> GetOptionalString(std::string_view key) const;
-  void SetString(std::string_view key, std::string_view value);
-
-  //---------------------------------------------------------------------------
-  // Date/time data types
-
-  date GetDate(std::string_view key) const;
-  date GetDateOr(std::string_view key, const date &default_val) const;
-  std::optional<date> GetOptionalDate(std::string_view key) const;
-  void SetDate(std::string_view key, const date &value);
-
-  time GetTime(std::string_view key) const;
-  time GetTimeOr(std::string_view key, const time &default_val) const;
-  std::optional<time> GetOptionalTime(std::string_view key) const;
-  void SetTime(std::string_view key, const time &value);
-
-  date_time GetDateTime(std::string_view key) const;
-  date_time GetDateTimeOr(std::string_view key,
-                          const date_time &default_val) const;
-  std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
-  void SetDateTime(std::string_view key, const date_time &value);
-  //---------------------------------------------------------------------------
-  //  Lists/pairs of scalar data types
-
+  // TODO doc
   std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
+  // TODO GetPairOr
+  // TODO GetOptionalPair
+
+  // /// @brief Alias for `GetInteger32Pair`. Can be used to retrieve a 2D
+  // ///   size definition of a buffer, image, frame, etc.
+  // /// @param key Fully-qualified parameter name.
+  // inline std::pair<int32_t, int32_t> GetSize2D(std::string_view key) const {
+  //   return GetInteger32Pair(key);  // TODO test
+  // }
+  // // TODO GetSize2DOr
+  // // TODO GetOptionalSize2D
+
+  // TODO doc
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
 
+  // TODO doc
+  void SetInteger32List(std::string_view key,
+                        const std::vector<int32_t> &values);
+
+  /// @brief Returns a list of 2D indices (integral x/y coordinates, e.g. a
+  ///   polyline).
+  ///
+  /// For the floating point counterpart, refer to `GetPoints2D`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<std::tuple<int32_t, int32_t>> GetIndices2D(
+      std::string_view key) const;
+
+  /// @brief Returns a list of 3D indices (integral x/y/z coordinates, e.g. a
+  ///   polyline).
+  ///
+  /// For the floating point counterpart, refer to `GetPoints3D`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetIndices3D(
+      std::string_view key) const;
+
+  //---------------------------------------------------------------------------
+  // Integers (64-bit)
+
+  /// @brief Returns the 64-bit integer parameter.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 64-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
+  int64_t GetInteger64(std::string_view key) const;
+
+  // TODO doc
+  int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
+
+  // TODO doc
+  std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
+
+  // TODO doc
+  void SetInteger64(std::string_view key, int64_t value);
+
+  // TODO doc
   std::pair<int64_t, int64_t> GetInteger64Pair(std::string_view key) const;
+  // TODO GetPairOr
+  // TODO GetOptionalPair
+
+  // TODO doc
   std::vector<int64_t> GetInteger64List(std::string_view key) const;
 
+  // TODO doc
+  void SetInteger64List(std::string_view key,
+                        const std::vector<int64_t> &values);
+
+  //---------------------------------------------------------------------------
+  // Floating Point
+
+  /// @brief Returns the double-precision floating point parameter.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. integer values can usually be exactly
+  /// represented by a double).
+  ///
+  /// @param key Fully-qualified parameter name.
+  double GetDouble(std::string_view key) const;
+
+  // TODO doc
+  double GetDoubleOr(std::string_view key, double default_val) const;
+
+  // TODO doc
+  std::optional<double> GetOptionalDouble(std::string_view key) const;
+
+  // TODO doc
+  void SetDouble(std::string_view key, double value);
+
+  // TODO doc
   std::pair<double, double> GetDoublePair(std::string_view key) const;
+  // TODO GetPairOr
+  // TODO GetOptionalPair
+
+  // TODO doc
   std::vector<double> GetDoubleList(std::string_view key) const;
 
+  // TODO doc
+  void SetDoubleList(std::string_view key, const std::vector<double> &values);
+
+  // TODO getpoints2d
+  // TODO getpoints3d
+
+  //---------------------------------------------------------------------------
+  // Strings
+
+  /// @brief Returns the string parameter.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::string GetString(std::string_view key) const;
+
+  /// @brief Returns the string parameter or the `default_val` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to return if the parameter does not exist.
+  std::string GetStringOr(std::string_view key,
+                          std::string_view default_val) const;
+
+  // TODO doc
+  std::optional<std::string> GetOptionalString(std::string_view key) const;
+
+  /// @brief Sets a string parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
+  void SetString(std::string_view key, std::string_view value);
+
+  // TODO doc
   std::vector<std::string> GetStringList(std::string_view key) const;
 
-  std::vector<std::tuple<int32_t, int32_t>> GetPoints2D(
-      std::string_view key) const;
+  // TODO doc
+  void SetStringList(std::string_view key,
+                     const std::vector<std::string_view> &values);
 
-  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetPoints3D(
-      std::string_view key) const;
+  //---------------------------------------------------------------------------
+  // Date
+
+  /// @brief Returns the date parameter.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  date GetDate(std::string_view key) const;
+
+  /// @brief Returns the date parameter or the `default_val` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to return if the parameter does not exist.
+  date GetDateOr(std::string_view key, const date &default_val) const;
+
+  // TODO doc
+  std::optional<date> GetOptionalDate(std::string_view key) const;
+
+  /// @brief Sets a local date parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
+  void SetDate(std::string_view key, const date &value);
+
+  // TODO doc
+  std::vector<date> GetDateList(std::string_view key) const;
+
+  // TODO doc
+  void SetDateList(std::string_view key, const std::vector<date> &values);
+
+  //---------------------------------------------------------------------------
+  // Time
+
+  /// @brief Returns the time parameter.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  time GetTime(std::string_view key) const;
+
+  /// @brief Returns the time parameter or the `default_val` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to return if the parameter does not exist.
+  time GetTimeOr(std::string_view key, const time &default_val) const;
+
+  // TODO doc
+  std::optional<time> GetOptionalTime(std::string_view key) const;
+
+  /// @brief Sets a local time parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
+  void SetTime(std::string_view key, const time &value);
+
+  // TODO doc
+  std::vector<time> GetTimeList(std::string_view key) const;
+
+  // TODO doc
+  void SetTimeList(std::string_view key, const std::vector<time> &values);
+
+  //---------------------------------------------------------------------------
+  // Date-time
+
+  /// @brief Returns the date-time parameter with optional timezone offset.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  date_time GetDateTime(std::string_view key) const;
+
+  /// @brief Returns the date-time parameter or the `default_val` if it does
+  ///   not exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to return if the parameter does not exist.
+  date_time GetDateTimeOr(std::string_view key,
+                          const date_time &default_val) const;
+
+  // TODO doc
+  std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
+
+  /// @brief Sets a date-time parameter.
+  ///
+  /// A date-time consists of a date, a time and an optional timezone offset,
+  /// following RFC 3339, https://www.rfc-editor.org/rfc/rfc3339
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
+  void SetDateTime(std::string_view key, const date_time &value);
+
+  // TODO doc
+  std::vector<date_time> GetDateTimeList(std::string_view key) const;
+
+  // TODO doc
+  void SetDateTimeList(std::string_view key,
+                       const std::vector<date_time> &values);
+
+  //---------------------------------------------------------------------------
+  // Group/"Sub-Configuration"
 
   /// @brief Returns a copy of the sub-group.
   /// @param key Fully-qualified name of the parameter (which must be a
@@ -224,7 +528,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::string ToJSON() const;
 
  private:
+  /// Forward declaration of internal implementation struct.
   struct Impl;
+
+  /// Pointer to internal implementation.
   std::unique_ptr<Impl> pimpl_;
 };
 

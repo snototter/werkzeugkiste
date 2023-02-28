@@ -25,7 +25,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT ParseError : public std::runtime_error {
 /// @brief Indicates that an invalid key was provided to access a parameter.
 class WERKZEUGKISTE_CONFIG_EXPORT KeyError : public std::invalid_argument {
  public:
-  explicit KeyError(std::string msg) : std::invalid_argument{msg} {}
+  explicit KeyError(const std::string &msg) : std::invalid_argument{msg} {}
 };
 
 /// @brief Indicates that an invalid type was used to query or set a parameter.
@@ -50,7 +50,7 @@ enum class ConfigType : unsigned char {
 
   /// @brief A 32- or 64-bit integer.
   ///
-  /// Internally, integers are always handled as 64-bits.
+  /// Internally, integers are represented by 64-bit.
   Integer,
 
   /// @brief A single- or double-precision floating point number.
@@ -174,8 +174,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   explicit time(std::string_view str);
 
   time(uint_least8_t h, uint_least8_t m, uint_least8_t s = 0,
-       uint_least32_t ns = 0)
-      : hour{h}, minute{m}, second{s}, nanosecond{ns} {}
+       uint_least32_t ns = 0);
 
   /// @brief Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
@@ -253,6 +252,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
 //-----------------------------------------------------------------------------
 // Date-time
 
+/// @brief A date-time specification following RFC 3339.
 struct date_time {
  public:
   config::date date{};
@@ -314,17 +314,19 @@ constexpr const char *TypeName() {
 WZKREG_TNSPEC(bool)
 WZKREG_TNSPEC(char)
 WZKREG_TNSPEC(unsigned char)
-WZKREG_TNSPEC(short)
-WZKREG_TNSPEC(unsigned short)
-WZKREG_TNSPEC(int)
-WZKREG_TNSPEC(unsigned int)
-WZKREG_TNSPEC(long int)
-WZKREG_TNSPEC(unsigned long int)
+WZKREG_TNSPEC(int16_t)
+WZKREG_TNSPEC(uint16_t)
+WZKREG_TNSPEC(int32_t)
+WZKREG_TNSPEC(uint32_t)
+WZKREG_TNSPEC(int64_t)
+WZKREG_TNSPEC(uint64_t)
 WZKREG_TNSPEC(float)
 WZKREG_TNSPEC(double)
 
 WZKREG_TNSPEC(date)
 WZKREG_TNSPEC(time)
+WZKREG_TNSPEC(time_offset)
+WZKREG_TNSPEC(date_time)
 
 WZKREG_TNSPEC_STR(std::string, string)
 WZKREG_TNSPEC_STR(std::string_view, string_view)

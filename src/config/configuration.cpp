@@ -21,20 +21,34 @@
 #include <vector>
 
 namespace werkzeugkiste::config {
-namespace detail {
 // NOLINTNEXTLINE(*macro-usage)
-#define WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(KEY, NODE, TYPE) \
-  do {                                                           \
-    std::string msg{"Invalid type `"};                           \
-    msg += TypeName<TYPE>();                                     \
-    msg += "` used to query key `";                              \
-    msg += (KEY);                                                \
-    msg += "`, which is of type `";                              \
-    msg += TomlTypeName((NODE), (KEY));                          \
-    msg += "`!";                                                 \
-    throw TypeError{msg};                                        \
+#define WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(KEY, PARENT)          \
+  do {                                                                    \
+    std::ostringstream msg;                                               \
+    msg << "Creating the path hierarchy to insert parameter group at `"   \
+        << (KEY) << "` completed without failure, but the parent table `" \
+        << (PARENT)                                                       \
+        << "` is a nullptr. This must be a bug. Please report at "        \
+           "https://github.com/snototter/werkzeugkiste/issues";           \
+    throw std::logic_error{msg.str()};                                    \
   } while (false)
 
+// NOLINTNEXTLINE(*macro-usage)
+#define WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(KEY, INSERTED, PARENT, \
+                                                 CURRENT)               \
+  do {                                                                  \
+    std::ostringstream msg;                                             \
+    msg << "Assigning `" << (KEY)                                       \
+        << "` completed without failure, but the key cannot "           \
+           "be looked up. The value should have been "                  \
+        << ((INSERTED) ? "inserted" : "assigned") << " at parent(`"     \
+        << (PARENT) << "`), child(`" << (CURRENT)                       \
+        << "`). This must be a bug. Please report at "                  \
+           "https://github.com/snototter/werkzeugkiste/issues";         \
+    throw std::logic_error{msg.str()};                                  \
+  } while (false)
+
+namespace detail {
 /// Returns the "fully-qualified TOML path" for the given key and its parent
 /// path. For example, `key = param` & `parent_path = lvl1.lvl2` results
 /// in `lvl1.lvl2.param`.
@@ -129,8 +143,8 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
 KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
   using namespace std::string_view_literals;
   std::string msg{"Key `"};
-  msg.append(key);
-  msg.append("` does not exist!");
+  msg += key;
+  msg += "` does not exist!";
 
   const std::vector<std::string> keys =
       ListTableKeys(tbl, ""sv, /*include_array_entries=*/true);
@@ -152,17 +166,17 @@ KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
            const std::pair<std::size_t, std::string_view> &b) -> bool {
           return a.first < b.first;
         });
-    msg.append(" Did you mean: `");
+    msg += " Did you mean: `";
     const std::size_t num_to_include =
         std::min(sorted_indices.size(), static_cast<std::size_t>(3));
     for (std::size_t idx = 0; idx < num_to_include; ++idx) {
       const auto &cand = candidates[sorted_indices[idx]];
-      msg.append(cand.second);
+      msg += cand.second;
       if (idx < num_to_include - 1) {
-        msg.append("`, `");
+        msg += "`, `";
       }
     }
-    msg.append("`?");
+    msg += "`?";
   }
 
   return KeyError{msg};
@@ -236,43 +250,84 @@ inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
   return static_cast<int32_t>(value64);
 }
 
-/// Utility to print the type name of a toml::node/toml::node_view.
-template <typename NodeView>
-inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
-  if (node.is_table()) {
+template <typename T>
+constexpr const char *TomlTypeName() {
+  if constexpr (std::is_same_v<T, toml::table>) {
     return "group";
   }
 
-  if (node.is_array()) {
+  if constexpr (std::is_same_v<T, toml::array>) {
     return "list";
   }
 
-  if (node.is_integer()) {
+  if constexpr (std::is_same_v<T, int64_t>) {
     return "int";
   }
 
-  if (node.is_floating_point()) {
+  if constexpr (std::is_same_v<T, double>) {
     return "double";
   }
 
-  if (node.is_string()) {
+  if constexpr (std::is_same_v<T, std::string>) {
     return "string";
   }
 
-  if (node.is_boolean()) {
+  if constexpr (std::is_same_v<T, bool>) {
     return "bool";
   }
 
-  if (node.is_date()) {
+  if constexpr (std::is_same_v<T, toml::date>) {
     return "date";
   }
 
-  if (node.is_time()) {
+  if constexpr (std::is_same_v<T, toml::time>) {
     return "time";
   }
 
-  if (node.is_date_time()) {
+  if constexpr (std::is_same_v<T, toml::date_time>) {
     return "date_time";
+  }
+
+  return "unknown";
+}
+
+/// Utility to print the type name of a toml::node/toml::node_view.
+template <typename NodeView>
+inline const char *TomlTypeName(const NodeView &node, std::string_view key) {
+  if (node.is_table()) {
+    return TomlTypeName<toml::table>();
+  }
+
+  if (node.is_array()) {
+    return TomlTypeName<toml::array>();
+  }
+
+  if (node.is_integer()) {
+    return TomlTypeName<int64_t>();
+  }
+
+  if (node.is_floating_point()) {
+    return TomlTypeName<double>();
+  }
+
+  if (node.is_string()) {
+    return TomlTypeName<std::string>();
+  }
+
+  if (node.is_boolean()) {
+    return TomlTypeName<bool>();
+  }
+
+  if (node.is_date()) {
+    return TomlTypeName<toml::date>();
+  }
+
+  if (node.is_time()) {
+    return TomlTypeName<toml::time>();
+  }
+
+  if (node.is_date_time()) {
+    return TomlTypeName<toml::date_time>();
   }
 
   // LCOV_EXCL_START
@@ -288,7 +343,7 @@ inline std::string TomlTypeName(const NodeView &node, std::string_view key) {
 
 /// Returns true if the TOML table contains a valid node at the given,
 /// fully-qualified path/key.
-inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
+inline bool ContainsKey(const toml::table &tbl, std::string_view key) {
   // Needed, because `tbl.contains()` only checks the direct children.
   const auto node = tbl.at_path(key);
   return node.is_value() || node.is_table() || node.is_array();
@@ -297,44 +352,48 @@ inline bool ConfigContainsKey(const toml::table &tbl, std::string_view key) {
 /// Extracts the value from the toml::node or throws an error if the type
 /// is not correct.
 /// Tries converting numeric types if a lossless cast is feasible.
-template <typename T, typename NodeView>
-T CastScalar(const NodeView &node, std::string_view key) {
-  static_assert(std::is_arithmetic_v<bool>,
-                "Boolean must be a number type to use numeric casts for "
-                "parameter extraction!");
-
-  if constexpr (std::is_same_v<T, bool>) {
+template <typename Tcfg, typename NodeView>
+Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
+  if constexpr (std::is_same_v<Tcfg, bool>) {
     if (node.is_boolean()) {
       return static_cast<bool>(*node.as_boolean());
     }
-  } else if constexpr (std::is_arithmetic_v<T>) {
-    if (node.is_integer()) {
-      return checked_numcast<T, int64_t, TypeError>(
-          static_cast<int64_t>(*node.as_integer()));
-    } else if (node.is_floating_point()) {
-      return checked_numcast<T, double, TypeError>(
-          static_cast<double>(*node.as_floating_point()));
+  } else if constexpr (std::is_arithmetic_v<Tcfg>) {
+    try {
+      if (node.is_integer()) {
+        return checked_numcast<Tcfg, int64_t>(
+            static_cast<int64_t>(*node.as_integer()));
+      }
+
+      if (node.is_floating_point()) {
+        return checked_numcast<Tcfg, double>(
+            static_cast<double>(*node.as_floating_point()));
+      }
+    } catch (const std::domain_error &e) {
+      // Re-throw with extended error message.
+      std::string msg{"Cannot convert numeric parameter `"};
+      msg += key;
+      msg += "` to `";
+      msg += TypeName<Tcfg>();
+      msg += "`. ";
+      msg += e.what();
+      throw TypeError{msg};
     }
-  } else if constexpr (std::is_same_v<T, std::string>) {
+  } else if constexpr (std::is_same_v<Tcfg, std::string>) {
     if (node.is_string()) {
-      // return std::string{node.template value<std::string_view>().value()};
-      //      using namespace std::string_view_literals;
-      //      return std::string{node.value_or(""sv)};
       return std::string{*node.as_string()};
-      //      const auto &ref = *node.template as<std::string>();
-      //      return std::string{ref};
     }
-  } else if constexpr (std::is_same_v<T, date>) {
+  } else if constexpr (std::is_same_v<Tcfg, date>) {
     if (node.is_date()) {
       const toml::date &d = node.as_date()->get();
       return date{d.year, d.month, d.day};
     }
-  } else if constexpr (std::is_same_v<T, time>) {
+  } else if constexpr (std::is_same_v<Tcfg, time>) {
     if (node.is_time()) {
       const toml::time &t = node.as_time()->get();
       return time{t.hour, t.minute, t.second, t.nanosecond};
     }
-  } else if constexpr (std::is_same_v<T, date_time>) {
+  } else if constexpr (std::is_same_v<Tcfg, date_time>) {
     if (node.is_date_time()) {
       const toml::date_time &dt = node.as_date_time()->get();
       date_time tmp{};
@@ -347,21 +406,103 @@ T CastScalar(const NodeView &node, std::string_view key) {
       return tmp;
     }
   } else {
-    // TODO This method could be extended to handle date/time
-    throw std::logic_error("Type not yet supported!");
+    // LCOV_EXCL_START
+    std::string msg{"Parameter lookup for type `"};
+    msg += TypeName<Tcfg>();
+    msg +=
+        "` is not supported. Please report at "
+        "https://github.com/snototter/werkzeugkiste/issues";
+    throw std::logic_error{msg};
+    // LCOV_EXCL_STOP
   }
-  WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR(key, node, T);
+
+  std::string msg{"Cannot query `"};
+  msg += TomlTypeName(node, key);
+  msg += "` parameter `";
+  msg += key;
+  msg += "` as `";
+  msg += TypeName<Tcfg>();
+  msg += "`!";
+  throw TypeError{msg};
 }
 
-/// Looks up the value at the given key (fully-qualified TOML path).
+// TODO fix doc
+/// @brief Converts an interface-exposed type to a TOML type if possible.
+/// Throws a type error upon invalid numeric conversion (i.e. the number is not
+/// exactly representable by the target type).
+/// @tparam Ttoml The TOML type.
+/// @tparam Tmessage Type needed for error message to avoid separate int32_t
+/// specialization. Internally, all integers are stored as 64-bit: If there
+/// would be an error while setting a 32-bit value, we don't want to show a
+/// confusing "user provided 64-bit" error message.
+/// @tparam Tcfg The type exposed via the werkzeugkiste::config API.
+/// @param value The value to be converted.
+/// @param key The fully-qualified parameter name.
+template <typename Ttoml, typename Tcfg>
+Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
+  if constexpr (std::is_same_v<Tcfg, Ttoml>) {
+    return value;
+  }
+
+  if constexpr (std::is_arithmetic_v<Tcfg> && !std::is_same_v<Tcfg, bool> &&
+                (std::is_same_v<Ttoml, int64_t> ||
+                 std::is_same_v<Ttoml, double>)) {
+    return checked_numcast<Ttoml, Tcfg, TypeError>(value);
+  }
+
+  if constexpr (std::is_same_v<Tcfg, std::string_view> &&
+                std::is_same_v<Ttoml, std::string>) {
+    return std::string{value};
+  }
+
+  if constexpr (std::is_same_v<Tcfg, date> &&
+                std::is_same_v<Ttoml, toml::date>) {
+    return toml::date{value.year, value.month, value.day};
+  }
+
+  if constexpr (std::is_same_v<Tcfg, time> &&
+                std::is_same_v<Ttoml, toml::time>) {
+    return toml::time{value.hour, value.minute, value.second, value.nanosecond};
+  }
+
+  if constexpr (std::is_same_v<Tcfg, date_time> &&
+                std::is_same_v<Ttoml, toml::date_time>) {
+    if (value.IsLocal()) {
+      return toml::date_time{
+          toml::date{value.date.year, value.date.month, value.date.day},
+          toml::time{value.time.hour, value.time.minute, value.time.second,
+                     value.time.nanosecond}};
+    } else {  // NOLINT
+      toml::time_offset offset{};
+      offset.minutes = static_cast<int16_t>(value.offset.value().minutes);
+      return toml::date_time{
+          toml::date{value.date.year, value.date.month, value.date.day},
+          toml::time{value.time.hour, value.time.minute, value.time.second,
+                     value.time.nanosecond},
+          offset};
+    }
+  }
+
+  std::string msg{"Cannot convert input of type `"};
+  msg += TypeName<Tcfg>();
+  msg += "` to internal type `";
+  msg += TomlTypeName<Ttoml>();
+  msg += "` as needed for parameter `";
+  msg += key;
+  msg += "`!";
+  throw TypeError{msg};
+}
+
+/// @brief Looks up the value at the given key (fully-qualified TOML path).
+///
 /// If the key does not exist, a KeyError will be raised unless
 /// `allow_default` is true (in which case the `default_val` will be
 /// returned instead).
 template <typename T, typename DefaultType = T>
-T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
-                     bool allow_default = false,
-                     DefaultType default_val = DefaultType{}) {
-  if (!ConfigContainsKey(tbl, key)) {
+T LookupScalar(const toml::table &tbl, std::string_view key,
+               bool allow_default = false,
+               DefaultType default_val = DefaultType{}) {
+  if (!ContainsKey(tbl, key)) {
     if (allow_default) {
       return T{default_val};
     }
@@ -370,20 +511,21 @@ T ConfigLookupScalar(const toml::table &tbl, std::string_view key,
   }
 
   const auto node = tbl.at_path(key);
-  return CastScalar<T>(node, key);
+  return ConvertTomlToConfigType<T>(node, key);
 }
 
-/// Looks up the value at the given key (fully-qualified TOML path).
+/// @brief Looks up the value at the given key (fully-qualified TOML path).
+///
 /// If the key does not exist, a nullopt will be returned.
 template <typename T>
-std::optional<T> ConfigLookupOptional(const toml::table &tbl,
+std::optional<T> LookupOptionalScalar(const toml::table &tbl,
                                       std::string_view key) {
-  if (!ConfigContainsKey(tbl, key)) {
+  if (!ContainsKey(tbl, key)) {
     return std::nullopt;
   }
 
   const auto node = tbl.at_path(key);
-  return CastScalar<T>(node, key);
+  return ConvertTomlToConfigType<T>(node, key);
 }
 
 /// Splits a fully-qualified TOML path into <anchestor, child>.
@@ -466,154 +608,207 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   }
 }
 
-/// @brief Allows setting a TOML parameter to an int64, double, bool, or string.
-/// @tparam T Scalar TOML type to be set.
-/// @tparam TMessage Only needed to avoid separate int32 specialization (as
-/// internally, all integers are stored as 64-bit; if there would be an error,
-/// we don't want to show a confusing "user provided 64-bit" error message).
-/// @param tbl The "root" table.
-/// @param key The fully-qualified "TOML path".
+template <typename NodeView, typename Tcfg>
+void ReplaceScalar(NodeView &node, Tcfg value, std::string_view key) {
+  if (node.is_boolean()) {
+    *node.as_boolean() = ConvertConfigTypeToToml<bool>(value, key);
+  } else if (node.is_integer()) {
+    *node.as_integer() = ConvertConfigTypeToToml<int64_t>(value, key);
+  } else if (node.is_floating_point()) {
+    *node.as_floating_point() = ConvertConfigTypeToToml<double>(value, key);
+  } else if (node.is_string()) {
+    *node.as_string() = ConvertConfigTypeToToml<std::string>(value, key);
+  } else if (node.is_date()) {
+    *node.as_date() = ConvertConfigTypeToToml<toml::date>(value, key);
+  } else if (node.is_time()) {
+    *node.as_time() = ConvertConfigTypeToToml<toml::time>(value, key);
+  } else if (node.is_date_time()) {
+    *node.as_date_time() = ConvertConfigTypeToToml<toml::date_time>(value, key);
+  } else {
+    // LCOV_EXCL_START
+    // TODO link to issue
+    throw std::logic_error{"TODO"};
+    // LCOV_EXCL_STOP
+  }
+}
+
+/// @brief Allows setting a scalar TOML parameter.
+/// @tparam Ttoml Scalar TOML type to be set.
+/// @tparam Tmessage Type needed for error message to avoid separate int32_t
+/// specialization. Internally, all integers are stored as 64-bit: If there
+/// would be an error while setting a 32-bit value, we don't want to show a
+/// confusing "user provided 64-bit" error message.
+/// @param tbl The TOML root node.
+/// @param key The fully-qualified parameter name.
 /// @param value The value to be set.
-template <typename T, typename TMessage = T, typename TValue>
-void ConfigSetScalar(toml::table &tbl, std::string_view key, TValue value) {
+template <typename Ttoml, typename Tvalue>
+void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
   const auto path = SplitTomlPath(key);
-  if (ConfigContainsKey(tbl, key)) {
-    const auto node = tbl.at_path(key);
-
-    // TODO For int<->double, try casting, similar to CastScalar/LookupScalar
-
-    if (!node.is<T>()) {
-      std::string msg{"Changing the type is not allowed. Parameter `"};
-      msg += key;
-      msg += "` is `";
-      msg += TomlTypeName(node, key);
-      msg += "`, but scalar is of type `";
-      msg += TypeName<TMessage>();
-      msg += "`!";
-      throw TypeError{msg};
-    }
-
-    auto &ref = *node.as<T>();
-    ref = T{value};
+  if (ContainsKey(tbl, key)) {
+    auto node = tbl.at_path(key);
+    ReplaceScalar(node, value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
     toml::table *parent =
         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
     if (parent == nullptr) {
       // LCOV_EXCL_START
-      std::ostringstream msg;
-      msg << "Creating the path hierarchy for `" << key
-          << "` completed without failure, but the parent table `" << path.first
-          << "` is a nullptr. This must be a bug. Please report at"
-             " https://github.com/snototter/werkzeugkiste/issues";
-      throw std::logic_error{msg.str()};
+      WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(key, path.first);
       // LCOV_EXCL_STOP
     }
 
-    auto result = parent->insert_or_assign(path.second, value);
-    if (!ConfigContainsKey(tbl, key)) {
+    auto result = parent->insert_or_assign(
+        path.second, ConvertConfigTypeToToml<Ttoml>(value, key));
+    if (!ContainsKey(tbl, key)) {
       // LCOV_EXCL_START
-      std::ostringstream msg;
-      msg << "Assigning `" << key << "` = `" << value
-          << "` completed without failure, but the key cannot be looked up. "
-             "The value should have been "
-          << (result.second ? "inserted" : "assigned") << " at parent{`"
-          << path.first << "`}, current{`" << path.second
-          << "`}. This must be a bug. Please report at "
-             "https://github.com/snototter/werkzeugkiste/issues";
-      throw std::logic_error{msg.str()};
+      WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(key, result.second, path.first,
+                                               path.second);
       // LCOV_EXCL_STOP
     }
   }
 }
 
-template <typename Tcfg, typename Ttoml>
-void ConfigSetDateTime(toml::table &tbl, std::string_view key,
-                       const Tcfg &value, std::string_view tp_name_message) {
+template <typename Ttoml, typename Tcfg>
+void CreateArray(toml::table &tbl, std::string_view key,
+                 const std::vector<Tcfg> &vec) {
+  toml::array arr{};
+  for (const auto &value : vec) {
+    arr.push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
+  }
+
   const auto path = SplitTomlPath(key);
-  Ttoml tval{};
-  if constexpr (std::is_same_v<Tcfg, date>) {
-    tval = toml::date{value.year, value.month, value.day};
-  } else if constexpr (std::is_same_v<Tcfg, time>) {
-    tval = toml::time{value.hour, value.minute, value.second, value.nanosecond};
-  } else if constexpr (std::is_same_v<Tcfg, date_time>) {
-    if (value.IsLocal()) {
-      tval = toml::date_time{
-          toml::date{value.date.year, value.date.month, value.date.day},
-          toml::time{value.time.hour, value.time.minute, value.time.second,
-                     value.time.nanosecond}};
+  EnsureContainerPathExists(tbl, path.first);
+
+  toml::table *parent =
+      path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
+  if (parent == nullptr) {
+    // LCOV_EXCL_START
+    WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(key, path.first);
+    // LCOV_EXCL_STOP
+  }
+
+  auto result = parent->insert_or_assign(path.second, arr);
+  if (!ContainsKey(tbl, key)) {
+    // LCOV_EXCL_START
+    WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(key, result.second, path.first,
+                                             path.second);
+    // LCOV_EXCL_STOP
+  }
+}
+
+// TODO doc 1) Ttoml is TOML type of the *existing* parameter
+// 2) internal helper - no sanity checks
+template <typename Ttoml, typename Tcfg>
+void ReplaceHomogeneousArray(toml::array &arr, std::string_view key,
+                             const std::vector<Tcfg> &vec) {
+  toml::array toml_arr{};
+  for (const auto &value : vec) {
+    toml_arr.push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
+    // TODO Nice-to-have: Catch exception and re-throw with extended error
+    // message that includes the index into "vec". (low-priority)
+  }
+  arr = toml_arr;
+}
+
+bool IsNumericArray(const toml::array &arr) {
+  for (auto &&value : arr) {
+    if (!value.is_number()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename Ttoml, typename Tcfg>
+void ReplaceArray(toml::table &tbl, std::string_view key,
+                  const std::vector<Tcfg> &vec) {
+  auto node = tbl.at_path(key);
+  if (!node.is_array()) {
+    // TODO error message
+    throw TypeError{"TODO"};
+  }
+
+  toml::array &arr = *node.as_array();
+
+  // * A list can be replaced by an empty list of any type (after saving, we
+  //   can't dinstinguish an empty list of strings from an empty list of
+  //   floats).
+  // * If the existing array is empty, we can simply replace it by inserting
+  //   the given values as is.
+  // * If the existing array is inhomogeneous, we don't allow replacing it -
+  //   unless it holds only numeric values (double <-> ints are interchangable
+  //   if they can be exactly represented...)
+  // * Otherwise, we need to check for compatible/convertible types.
+  if (vec.empty()) {
+    arr = toml::array{};
+  } else if (arr.empty()) {
+    CreateArray<Ttoml, Tcfg>(tbl, key, vec);
+  } else if (!arr.is_homogeneous()) {
+    if (IsNumericArray(arr)) {
+      // If all elements are numbers, we have only int64 and double elements.
+      // Thus, we can try to convert all inputs to double precision:
+      ReplaceHomogeneousArray<double>(arr, key, vec);
     } else {
-      toml::time_offset offset{};
-      offset.minutes = static_cast<int16_t>(value.offset.value().minutes);
-      tval = toml::date_time{
-          toml::date{value.date.year, value.date.month, value.date.day},
-          toml::time{value.time.hour, value.time.minute, value.time.second,
-                     value.time.nanosecond},
-          offset};
-    }
-  }
-
-  if (ConfigContainsKey(tbl, key)) {
-    const auto node = tbl.at_path(key);
-    if (!node.is<Ttoml>()) {
       std::string msg{"Changing the type is not allowed. Parameter `"};
       msg += key;
-      msg += "` is `";
-      msg += TomlTypeName(node, key);
-      msg += "`, but scalar is of type `";
-      msg += tp_name_message;
+      msg +=
+          "` is an inhomogeneous list/array, but replacement list is of type `";
+      msg += TypeName<Tcfg>();
       msg += "`!";
       throw TypeError{msg};
     }
-
-    auto &ref = *node.as<Ttoml>();
-    ref = tval;
+  } else if (arr[0].is_boolean()) {
+    ReplaceHomogeneousArray<bool>(arr, key, vec);
+  } else if (arr[0].is_integer()) {
+    ReplaceHomogeneousArray<int64_t>(arr, key, vec);
+  } else if (arr[0].is_floating_point()) {
+    ReplaceHomogeneousArray<double>(arr, key, vec);
+  } else if (arr[0].is_string()) {
+    ReplaceHomogeneousArray<std::string>(arr, key, vec);
+  } else if (arr[0].is_date()) {
+    ReplaceHomogeneousArray<toml::date>(arr, key, vec);
+  } else if (arr[0].is_time()) {
+    ReplaceHomogeneousArray<toml::time>(arr, key, vec);
+  } else if (arr[0].is_date_time()) {
+    ReplaceHomogeneousArray<toml::date_time>(arr, key, vec);
   } else {
-    EnsureContainerPathExists(tbl, path.first);
-    toml::table *parent =
-        path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
-    if (parent == nullptr) {
-      // LCOV_EXCL_START
-      std::ostringstream msg;
-      msg << "Creating the path hierarchy for `" << key
-          << "` completed without failure, but the parent table `" << path.first
-          << "` is a nullptr. This must be a bug. Please report at"
-             " https://github.com/snototter/werkzeugkiste/issues";
-      throw std::logic_error{msg.str()};
-      // LCOV_EXCL_STOP
-    }
-
-    auto result = parent->insert_or_assign(path.second, tval);
-    if (!ConfigContainsKey(tbl, key)) {
-      // LCOV_EXCL_START
-      std::ostringstream msg;
-      msg << "Assigning `" << key << "` = `" << value
-          << "` completed without failure, but the key cannot be looked up. "
-             "The value should have been "
-          << (result.second ? "inserted" : "assigned") << " at parent{`"
-          << path.first << "`}, current{`" << path.second
-          << "`}. This must be a bug. Please report at "
-             "https://github.com/snototter/werkzeugkiste/issues";
-      throw std::logic_error{msg.str()};
-      // LCOV_EXCL_STOP
-    }
+    // LCOV_EXCL_START
+    std::string msg{"Configuration parameter `"};
+    msg += key;
+    msg += "` is a list of `";
+    msg += TomlTypeName(arr[0], key);
+    msg +=
+        "`, but this type is not yet supported! Please report at "
+        "https://github.com/snototter/werkzeugkiste/issues";
+    throw std::logic_error{msg};
+    // LCOV_EXCL_STOP
   }
 }
 
-/// Utility to turn a std::array into a std::tuple.
+template <typename Ttoml, typename Tcfg>
+void SetList(toml::table &tbl, std::string_view key,
+             const std::vector<Tcfg> &vec) {
+  if (ContainsKey(tbl, key)) {
+    ReplaceArray<Ttoml>(tbl, key, vec);
+  } else {
+    CreateArray<Ttoml>(tbl, key, vec);
+  }
+}
+
+/// @brief Utility to turn a std::array into a std::tuple.
 template <typename Array, std::size_t... Idx>
 inline auto ArrayToTuple(const Array &arr,
                          std::index_sequence<Idx...> /* indices */) {
   return std::make_tuple(arr[Idx]...);
 }
 
-/// Utility to turn a std::array into a std::tuple.
+/// @brief Utility to turn a std::array into a std::tuple.
 template <typename Type, std::size_t Num>
 inline auto ArrayToTuple(const std::array<Type, Num> &arr) {
   return ArrayToTuple(arr, std::make_index_sequence<Num>{});
 }
 
-/// Extracts a single Dim-dimensional point from the given
+/// @brief Extracts a single Dim-dimensional point from the given
 /// toml::array into the `point` std::array.
 template <typename Type, std::size_t Dim>
 inline void ExtractPointFromTOMLArray(const toml::array &arr,
@@ -644,8 +839,8 @@ inline void ExtractPointFromTOMLArray(const toml::array &arr,
   }
 }
 
-/// Extracts a single Dim-dimensional point as std::tuple from the given
-/// toml::array.
+/// @brief Extracts a single Dim-dimensional point as std::tuple from the
+/// given toml::array.
 template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
 inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
   using CoordType = std::tuple_element_t<0, Tuple>;
@@ -672,7 +867,7 @@ inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
   }
 }
 
-/// Extracts a single Dim-dimensional point from the given
+/// @brief Extracts a single Dim-dimensional point from the given
 /// toml::table into the `point` std::array. The table must
 /// have "x", "y", ... entries which are used to look up the
 /// corresponding point coordinates.
@@ -707,8 +902,8 @@ inline void ExtractPointFromTOMLTable(const toml::table &tbl,
   }
 }
 
-/// Extracts a single Dim-dimensional point as std::tuple from the given
-/// toml::table.
+/// @brief Extracts a single Dim-dimensional point as std::tuple from the
+/// given toml::table.
 template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
 inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
   using CoordType = std::tuple_element_t<0, Tuple>;
@@ -735,10 +930,12 @@ inline Tuple ExtractPoint(const toml::table &tbl, std::string_view key) {
   }
 }
 
-/// Extracts a list of points (a polyline) of integer or double.
+/// @brief Extracts a list of tuples: This can be used to query a list of
+/// "points" (e.g. a polyline), "pixels", or "indices". Each coordinate must
+/// be specified as integer or floating point.
 template <typename Tuple>
-std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
-  if (!ConfigContainsKey(tbl, key)) {
+std::vector<Tuple> GetTuples(const toml::table &tbl, std::string_view key) {
+  if (!ContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
@@ -776,12 +973,9 @@ std::vector<Tuple> GetPoints(const toml::table &tbl, std::string_view key) {
   return poly;
 }
 
-/// Extracts a list of built-in scalar types (integer, double, bool).
-/// This is *not suitable* for TOML++-specific types (date, time, ...)
-template <typename T>
-std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
-  if (!ConfigContainsKey(tbl, key)) {
-    // throw KeyError::FromKey(key); // TODO
+template <typename Tcfg>
+std::vector<Tcfg> GetList(const toml::table &tbl, std::string_view key) {
+  if (!ContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
@@ -789,7 +983,7 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   if (!node.is_array()) {
     std::string msg{"Invalid list configuration: Parameter `"};
     msg += key;
-    msg += "` must be an array, but is `";
+    msg += "` must be a list, but is `";
     msg += TomlTypeName(node, key);
     msg += "`!";
     throw TypeError{msg};
@@ -797,19 +991,21 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
 
   const toml::array &arr = *node.as_array();
   std::size_t arr_index = 0;
-  std::vector<T> scalars{};
+  std::vector<Tcfg> scalars{};
   for (auto &&value : arr) {
     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
     if (value.is_value()) {
-      scalars.push_back(CastScalar<T>(value, fqn));
+      scalars.push_back(ConvertTomlToConfigType<Tcfg>(value, fqn));
     } else {
       std::string msg{"Invalid list configuration `"};
       msg += key;
       msg += "`: All entries must be of scalar type `";
-      msg += TypeName<T>();
+      msg += TypeName<Tcfg>();
       msg += "`, but `";
       msg += fqn;
-      msg += "` is not!";
+      msg += "` is `";
+      msg += TomlTypeName(value, fqn);
+      msg += "`!";
       throw TypeError{msg};
     }
     ++arr_index;
@@ -817,11 +1013,11 @@ std::vector<T> GetScalarList(const toml::table &tbl, std::string_view key) {
   return scalars;
 }
 
-/// Extracts a pair of built-in scalar types (integer, double, bool).
+/// @brief Extracts a pair of built-in scalar types (integer, double, bool).
 /// This is *not suitable* for TOML++-specific types (date, time, ...)
 template <typename T>
 std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
-  if (!ConfigContainsKey(tbl, key)) {
+  if (!ContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
@@ -850,7 +1046,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   for (auto &&value : arr) {
     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
     if (value.is_value()) {
-      scalars[arr_index] = CastScalar<T>(value, fqn);
+      scalars[arr_index] = ConvertTomlToConfigType<T>(value, fqn);
     } else {
       std::string msg{"Invalid pair configuration `"};
       msg += key;
@@ -865,8 +1061,6 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   }
   return std::make_pair(scalars[0], scalars[1]);
 }
-
-#undef WZK_CONFIG_LOOKUP_RAISE_TOML_TYPE_ERROR
 }  // namespace detail
 
 // Abusing the PImpl idiom to hide the internally used TOML table.
@@ -947,7 +1141,7 @@ bool Configuration::Equals(const Configuration &other) const {
 }
 
 bool Configuration::Contains(std::string_view key) const {
-  return detail::ConfigContainsKey(pimpl_->config_root, key);
+  return detail::ContainsKey(pimpl_->config_root, key);
 }
 
 ConfigType Configuration::Type(std::string_view key) const {
@@ -1000,189 +1194,58 @@ std::vector<std::string> Configuration::ListParameterNames(
 }
 
 //---------------------------------------------------------------------------
-// Scalar data types
+// Boolean
 
 bool Configuration::GetBoolean(std::string_view key) const {
-  return detail::ConfigLookupScalar<bool>(pimpl_->config_root, key,
-                                          /*allow_default=*/false);
+  return detail::LookupScalar<bool>(pimpl_->config_root, key,
+                                    /*allow_default=*/false);
 }
 
 bool Configuration::GetBooleanOr(std::string_view key, bool default_val) const {
-  return detail::ConfigLookupScalar<bool>(pimpl_->config_root, key,
-                                          /*allow_default=*/true, default_val);
+  return detail::LookupScalar<bool>(pimpl_->config_root, key,
+                                    /*allow_default=*/true, default_val);
 }
 
 std::optional<bool> Configuration::GetOptionalBoolean(
     std::string_view key) const {
-  return detail::ConfigLookupOptional<bool>(pimpl_->config_root, key);
+  return detail::LookupOptionalScalar<bool>(pimpl_->config_root, key);
 }
 
 void Configuration::SetBoolean(std::string_view key, bool value) {
-  detail::ConfigSetScalar<bool>(pimpl_->config_root, key, value);
+  detail::SetScalar<bool>(pimpl_->config_root, key, value);
 }
 
+std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
+  return detail::GetList<bool>(pimpl_->config_root, key);
+}
+
+void Configuration::SetBooleanList(std::string_view key,
+                                   const std::vector<bool> &values) {
+  detail::SetList<bool>(pimpl_->config_root, key, values);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Integer (32-bit)
+
 int32_t Configuration::GetInteger32(std::string_view key) const {
-  return detail::ConfigLookupScalar<int32_t>(pimpl_->config_root, key,
-                                             /*allow_default=*/false);
+  return detail::LookupScalar<int32_t>(pimpl_->config_root, key,
+                                       /*allow_default=*/false);
 }
 
 int32_t Configuration::GetInteger32Or(std::string_view key,
                                       int32_t default_val) const {
-  return detail::ConfigLookupScalar<int32_t>(
-      pimpl_->config_root, key, /*allow_default=*/true, default_val);
+  return detail::LookupScalar<int32_t>(pimpl_->config_root, key,
+                                       /*allow_default=*/true, default_val);
 }
 
 std::optional<int32_t> Configuration::GetOptionalInteger32(
     std::string_view key) const {
-  return detail::ConfigLookupOptional<int32_t>(pimpl_->config_root, key);
+  return detail::LookupOptionalScalar<int32_t>(pimpl_->config_root, key);
 }
 
 void Configuration::SetInteger32(std::string_view key, int32_t value) {
-  detail::ConfigSetScalar<int64_t, int32_t>(pimpl_->config_root, key,
-                                            static_cast<int64_t>(value));
-}
-
-int64_t Configuration::GetInteger64(std::string_view key) const {
-  return detail::ConfigLookupScalar<int64_t>(pimpl_->config_root, key,
-                                             /*allow_default=*/false);
-}
-
-int64_t Configuration::GetInteger64Or(std::string_view key,
-                                      int64_t default_val) const {
-  return detail::ConfigLookupScalar<int64_t>(
-      pimpl_->config_root, key, /*allow_default=*/true, default_val);
-}
-
-std::optional<int64_t> Configuration::GetOptionalInteger64(
-    std::string_view key) const {
-  return detail::ConfigLookupOptional<int64_t>(pimpl_->config_root, key);
-}
-
-void Configuration::SetInteger64(std::string_view key, int64_t value) {
-  detail::ConfigSetScalar<int64_t>(pimpl_->config_root, key, value);
-}
-
-double Configuration::GetDouble(std::string_view key) const {
-  return detail::ConfigLookupScalar<double>(pimpl_->config_root, key,
-                                            /*allow_default=*/false);
-}
-
-double Configuration::GetDoubleOr(std::string_view key,
-                                  double default_val) const {
-  return detail::ConfigLookupScalar<double>(pimpl_->config_root, key,
-                                            /*allow_default=*/true,
-                                            default_val);
-}
-
-std::optional<double> Configuration::GetOptionalDouble(
-    std::string_view key) const {
-  return detail::ConfigLookupOptional<double>(pimpl_->config_root, key);
-}
-
-void Configuration::SetDouble(std::string_view key, double value) {
-  detail::ConfigSetScalar<double>(pimpl_->config_root, key, value);
-}
-
-std::string Configuration::GetString(std::string_view key) const {
-  using namespace std::string_view_literals;
-  return detail::ConfigLookupScalar<std::string, std::string_view>(
-      pimpl_->config_root, key, /*allow_default=*/false, ""sv);
-}
-
-std::string Configuration::GetStringOr(std::string_view key,
-                                       std::string_view default_val) const {
-  return detail::ConfigLookupScalar<std::string, std::string_view>(
-      pimpl_->config_root, key, /*allow_default=*/true, default_val);
-}
-
-std::optional<std::string> Configuration::GetOptionalString(
-    std::string_view key) const {
-  return detail::ConfigLookupOptional<std::string>(pimpl_->config_root, key);
-}
-
-void Configuration::SetString(std::string_view key, std::string_view value) {
-  detail::ConfigSetScalar<std::string, std::string, std::string_view>(
-      pimpl_->config_root, key, value);
-}
-
-//---------------------------------------------------------------------------
-// Date/time data types
-
-date Configuration::GetDate(std::string_view key) const {
-  return detail::ConfigLookupScalar<date>(pimpl_->config_root, key,
-                                          /*allow_default=*/false);
-}
-
-date Configuration::GetDateOr(std::string_view key,
-                              const date &default_val) const {
-  return detail::ConfigLookupScalar<date>(pimpl_->config_root, key,
-                                          /*allow_default=*/true, default_val);
-}
-
-std::optional<date> Configuration::GetOptionalDate(std::string_view key) const {
-  return detail::ConfigLookupOptional<date>(pimpl_->config_root, key);
-}
-
-void Configuration::SetDate(std::string_view key, const date &value) {
-  using namespace std::string_view_literals;
-  detail::ConfigSetDateTime<date, toml::date>(pimpl_->config_root, key, value,
-                                              "date"sv);
-}
-
-time Configuration::GetTime(std::string_view key) const {
-  return detail::ConfigLookupScalar<time>(pimpl_->config_root, key,
-                                          /*allow_default=*/false);
-}
-
-time Configuration::GetTimeOr(std::string_view key,
-                              const time &default_val) const {
-  return detail::ConfigLookupScalar<time>(pimpl_->config_root, key,
-                                          /*allow_default=*/true, default_val);
-}
-
-std::optional<time> Configuration::GetOptionalTime(std::string_view key) const {
-  return detail::ConfigLookupOptional<time>(pimpl_->config_root, key);
-}
-
-void Configuration::SetTime(std::string_view key, const time &value) {
-  using namespace std::string_view_literals;
-  detail::ConfigSetDateTime<time, toml::time>(pimpl_->config_root, key, value,
-                                              "time"sv);
-}
-
-date_time Configuration::GetDateTime(std::string_view key) const {
-  return detail::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
-                                               /*allow_default=*/false);
-}
-
-date_time Configuration::GetDateTimeOr(std::string_view key,
-                                       const date_time &default_val) const {
-  return detail::ConfigLookupScalar<date_time>(pimpl_->config_root, key,
-                                               /*allow_default=*/true,
-                                               default_val);
-}
-
-std::optional<date_time> Configuration::GetOptionalDateTime(
-    std::string_view key) const {
-  return detail::ConfigLookupOptional<date_time>(pimpl_->config_root, key);
-}
-
-void Configuration::SetDateTime(std::string_view key, const date_time &value) {
-  using namespace std::string_view_literals;
-  detail::ConfigSetDateTime<date_time, toml::date_time>(
-      pimpl_->config_root, key, value, "date_time"sv);
-}
-
-//---------------------------------------------------------------------------
-// Lists/pairs of scalar data types
-
-std::pair<double, double> Configuration::GetDoublePair(
-    std::string_view key) const {
-  return detail::GetScalarPair<double>(pimpl_->config_root, key);
-}
-
-std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
-  return detail::GetScalarList<double>(pimpl_->config_root, key);
+  detail::SetScalar<int64_t>(pimpl_->config_root, key,
+                             static_cast<int64_t>(value));
 }
 
 std::pair<int32_t, int32_t> Configuration::GetInteger32Pair(
@@ -1192,7 +1255,48 @@ std::pair<int32_t, int32_t> Configuration::GetInteger32Pair(
 
 std::vector<int32_t> Configuration::GetInteger32List(
     std::string_view key) const {
-  return detail::GetScalarList<int32_t>(pimpl_->config_root, key);
+  return detail::GetList<int32_t>(pimpl_->config_root, key);
+}
+
+void Configuration::SetInteger32List(std::string_view key,
+                                     const std::vector<int32_t> &values) {
+  detail::SetList<int64_t>(pimpl_->config_root, key,
+                           values);  // TODO test
+}
+
+std::vector<std::tuple<int32_t, int32_t>> Configuration::GetIndices2D(
+    std::string_view key) const {
+  return detail::GetTuples<std::tuple<int32_t, int32_t>>(pimpl_->config_root,
+                                                         key);
+}
+
+std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetIndices3D(
+    std::string_view key) const {
+  return detail::GetTuples<std::tuple<int32_t, int32_t, int32_t>>(
+      pimpl_->config_root, key);
+}
+
+//---------------------------------------------------------------------------
+// Integer (64-bit)
+
+int64_t Configuration::GetInteger64(std::string_view key) const {
+  return detail::LookupScalar<int64_t>(pimpl_->config_root, key,
+                                       /*allow_default=*/false);
+}
+
+int64_t Configuration::GetInteger64Or(std::string_view key,
+                                      int64_t default_val) const {
+  return detail::LookupScalar<int64_t>(pimpl_->config_root, key,
+                                       /*allow_default=*/true, default_val);
+}
+
+std::optional<int64_t> Configuration::GetOptionalInteger64(
+    std::string_view key) const {
+  return detail::LookupOptionalScalar<int64_t>(pimpl_->config_root, key);
+}
+
+void Configuration::SetInteger64(std::string_view key, int64_t value) {
+  detail::SetScalar<int64_t>(pimpl_->config_root, key, value);
 }
 
 std::pair<int64_t, int64_t> Configuration::GetInteger64Pair(
@@ -1202,25 +1306,183 @@ std::pair<int64_t, int64_t> Configuration::GetInteger64Pair(
 
 std::vector<int64_t> Configuration::GetInteger64List(
     std::string_view key) const {
-  return detail::GetScalarList<int64_t>(pimpl_->config_root, key);
+  return detail::GetList<int64_t>(pimpl_->config_root, key);
+}
+
+void Configuration::SetInteger64List(std::string_view key,
+                                     const std::vector<int64_t> &values) {
+  detail::SetList<int64_t>(pimpl_->config_root, key, values);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Floating Point
+
+double Configuration::GetDouble(std::string_view key) const {
+  return detail::LookupScalar<double>(pimpl_->config_root, key,
+                                      /*allow_default=*/false);
+}
+
+double Configuration::GetDoubleOr(std::string_view key,
+                                  double default_val) const {
+  return detail::LookupScalar<double>(pimpl_->config_root, key,
+                                      /*allow_default=*/true, default_val);
+}
+
+std::optional<double> Configuration::GetOptionalDouble(
+    std::string_view key) const {
+  return detail::LookupOptionalScalar<double>(pimpl_->config_root, key);
+}
+
+void Configuration::SetDouble(std::string_view key, double value) {
+  detail::SetScalar<double>(pimpl_->config_root, key, value);
+}
+
+std::pair<double, double> Configuration::GetDoublePair(
+    std::string_view key) const {
+  return detail::GetScalarPair<double>(pimpl_->config_root, key);
+}
+
+std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
+  return detail::GetList<double>(pimpl_->config_root, key);
+}
+
+void Configuration::SetDoubleList(std::string_view key,
+                                  const std::vector<double> &values) {
+  detail::SetList<double>(pimpl_->config_root, key, values);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Strings
+
+std::string Configuration::GetString(std::string_view key) const {
+  using namespace std::string_view_literals;
+  return detail::LookupScalar<std::string, std::string_view>(
+      pimpl_->config_root, key, /*allow_default=*/false, ""sv);
+}
+
+std::string Configuration::GetStringOr(std::string_view key,
+                                       std::string_view default_val) const {
+  return detail::LookupScalar<std::string, std::string_view>(
+      pimpl_->config_root, key, /*allow_default=*/true, default_val);
+}
+
+std::optional<std::string> Configuration::GetOptionalString(
+    std::string_view key) const {
+  return detail::LookupOptionalScalar<std::string>(pimpl_->config_root, key);
+}
+
+void Configuration::SetString(std::string_view key, std::string_view value) {
+  detail::SetScalar<std::string>(pimpl_->config_root, key, value);
 }
 
 std::vector<std::string> Configuration::GetStringList(
     std::string_view key) const {
-  return detail::GetScalarList<std::string>(pimpl_->config_root, key);
+  return detail::GetList<std::string>(pimpl_->config_root, key);
 }
 
-std::vector<std::tuple<int32_t, int32_t>> Configuration::GetPoints2D(
-    std::string_view key) const {
-  return detail::GetPoints<std::tuple<int32_t, int32_t>>(pimpl_->config_root,
-                                                         key);
+void Configuration::SetStringList(std::string_view key,
+                                  const std::vector<std::string_view> &values) {
+  detail::SetList<std::string>(pimpl_->config_root, key, values);  // TODO test
 }
 
-std::vector<std::tuple<int32_t, int32_t, int32_t>> Configuration::GetPoints3D(
-    std::string_view key) const {
-  return detail::GetPoints<std::tuple<int32_t, int32_t, int32_t>>(
-      pimpl_->config_root, key);
+//---------------------------------------------------------------------------
+// Date
+
+date Configuration::GetDate(std::string_view key) const {
+  return detail::LookupScalar<date>(pimpl_->config_root, key,
+                                    /*allow_default=*/false);
 }
+
+date Configuration::GetDateOr(std::string_view key,
+                              const date &default_val) const {
+  return detail::LookupScalar<date>(pimpl_->config_root, key,
+                                    /*allow_default=*/true, default_val);
+}
+
+std::optional<date> Configuration::GetOptionalDate(std::string_view key) const {
+  return detail::LookupOptionalScalar<date>(pimpl_->config_root, key);
+}
+
+void Configuration::SetDate(std::string_view key, const date &value) {
+  detail::SetScalar<toml::date>(pimpl_->config_root, key, value);
+}
+
+std::vector<date> Configuration::GetDateList(std::string_view key) const {
+  return detail::GetList<date>(pimpl_->config_root, key);  // TODO test
+}
+
+void Configuration::SetDateList(std::string_view key,
+                                const std::vector<date> &values) {
+  detail::SetList<toml::date>(pimpl_->config_root, key, values);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Time
+
+time Configuration::GetTime(std::string_view key) const {
+  return detail::LookupScalar<time>(pimpl_->config_root, key,
+                                    /*allow_default=*/false);
+}
+
+time Configuration::GetTimeOr(std::string_view key,
+                              const time &default_val) const {
+  return detail::LookupScalar<time>(pimpl_->config_root, key,
+                                    /*allow_default=*/true, default_val);
+}
+
+std::optional<time> Configuration::GetOptionalTime(std::string_view key) const {
+  return detail::LookupOptionalScalar<time>(pimpl_->config_root, key);
+}
+
+void Configuration::SetTime(std::string_view key, const time &value) {
+  detail::SetScalar<toml::time>(pimpl_->config_root, key, value);
+}
+
+std::vector<time> Configuration::GetTimeList(std::string_view key) const {
+  return detail::GetList<time>(pimpl_->config_root, key);  // TODO test
+}
+
+void Configuration::SetTimeList(std::string_view key,
+                                const std::vector<time> &values) {
+  detail::SetList<toml::time>(pimpl_->config_root, key, values);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Date-time
+
+date_time Configuration::GetDateTime(std::string_view key) const {
+  return detail::LookupScalar<date_time>(pimpl_->config_root, key,
+                                         /*allow_default=*/false);
+}
+
+date_time Configuration::GetDateTimeOr(std::string_view key,
+                                       const date_time &default_val) const {
+  return detail::LookupScalar<date_time>(pimpl_->config_root, key,
+                                         /*allow_default=*/true, default_val);
+}
+
+std::optional<date_time> Configuration::GetOptionalDateTime(
+    std::string_view key) const {
+  return detail::LookupOptionalScalar<date_time>(pimpl_->config_root, key);
+}
+
+void Configuration::SetDateTime(std::string_view key, const date_time &value) {
+  detail::SetScalar<toml::date_time>(pimpl_->config_root, key, value);
+}
+
+std::vector<date_time> Configuration::GetDateTimeList(
+    std::string_view key) const {
+  return detail::GetList<date_time>(pimpl_->config_root, key);  // TODO test
+}
+
+void Configuration::SetDateTimeList(std::string_view key,
+                                    const std::vector<date_time> &values) {
+  detail::SetList<toml::date_time>(pimpl_->config_root, key,
+                                   values);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+// Group/"Sub-Configuration"
 
 Configuration Configuration::GetGroup(std::string_view key) const {
   if (!Contains(key)) {
@@ -1252,7 +1514,7 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
   }
 
   const auto path = detail::SplitTomlPath(key);
-  if (detail::ConfigContainsKey(pimpl_->config_root, key)) {
+  if (detail::ContainsKey(pimpl_->config_root, key)) {
     const auto node = pimpl_->config_root.at_path(key);
     if (!node.is_table()) {
       std::string msg{"Cannot insert parameter group at `"};
@@ -1272,27 +1534,16 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
                            : pimpl_->config_root.at_path(path.first).as_table();
     if (parent == nullptr) {
       // LCOV_EXCL_START
-      std::ostringstream msg;
-      msg << "Creating the path hierarchy to insert parameter group at `" << key
-          << "` completed without failure, but the parent table `" << path.first
-          << "` is a nullptr. This must be a bug. Please report at"
-             " https://github.com/snototter/werkzeugkiste/issues";
-      throw std::logic_error{msg.str()};
+      WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(key, path.first);
       // LCOV_EXCL_STOP
     }
 
     auto result =
         parent->insert_or_assign(path.second, group.pimpl_->config_root);
-    if (!detail::ConfigContainsKey(pimpl_->config_root, key)) {
+    if (!detail::ContainsKey(pimpl_->config_root, key)) {
       // LCOV_EXCL_START
-      std::ostringstream msg;
-      msg << "Assigning parameter group to `" << key
-          << "` completed without failure, but the key cannot be looked up. "
-             "The value should have been "
-          << (result.second ? "inserted" : "assigned")
-          << ". This must be a bug. Please report at "
-             "https://github.com/snototter/werkzeugkiste/issues";
-      throw std::logic_error{msg.str()};
+      WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR(key, result.second, path.first,
+                                               path.second);
       // LCOV_EXCL_STOP
     }
   }
@@ -1327,7 +1578,8 @@ bool Configuration::AdjustRelativePaths(
       }
 
       // Check if the path is relative
-      const std::string param_str = detail::CastScalar<std::string>(node, fqn);
+      const std::string param_str =
+          detail::ConvertTomlToConfigType<std::string>(node, fqn);
       const bool is_file_url = strings::StartsWith(param_str, "file://");
       // NOLINTNEXTLINE(*magic-numbers)
       const std::string path = is_file_url ? param_str.substr(7) : param_str;
@@ -1354,7 +1606,7 @@ bool Configuration::ReplaceStringPlaceholders(
   // Sanity check, search string can't be empty
   for (const auto &rep : replacements) {
     if (rep.first.empty()) {
-      throw std::runtime_error{
+      throw ValueError{
           "Search string within `ReplaceStrings()` must not be empty!"};
     }
   }
@@ -1365,7 +1617,8 @@ bool Configuration::ReplaceStringPlaceholders(
   auto func = [rep_ptr, replacements](toml::node &node,
                                       std::string_view fqn) -> void {
     if (node.is_string()) {
-      std::string param_str = detail::CastScalar<std::string>(node, fqn);
+      std::string param_str =
+          detail::ConvertTomlToConfigType<std::string>(node, fqn);
       bool matched{false};
       for (const auto &rep : replacements) {
         std::size_t pos{0};
@@ -1389,7 +1642,7 @@ bool Configuration::ReplaceStringPlaceholders(
 void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   // TODO refactor (TOML/JSON --> function handle)
 
-  if (!detail::ConfigContainsKey(pimpl_->config_root, key)) {
+  if (!detail::ContainsKey(pimpl_->config_root, key)) {
     throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 
@@ -1431,7 +1684,7 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
       std::string msg{"Could not insert nested configuration at `"};
       msg += key;
       msg += "`!";
-      throw std::runtime_error{msg};
+      throw std::runtime_error{msg};  // TODO add to docstr
       // LCOV_EXCL_STOP
     }
   } catch (const toml::parse_error &err) {
@@ -1454,4 +1707,6 @@ std::string Configuration::ToJSON() const {
   return repr.str();
 }
 
+#undef WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR
+#undef WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR
 }  // namespace werkzeugkiste::config

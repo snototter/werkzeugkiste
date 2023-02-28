@@ -18,6 +18,7 @@
 //   platform & these shorter types are promoted during arithmetic
 //   operations (and cause GCC warnings),
 //   https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int/39061103#39061103
+// * Use fixed width integer types
 
 // NOLINTBEGIN(*magic-numbers)
 namespace werkzeugkiste::config {
@@ -63,11 +64,17 @@ constexpr uint_least8_t LastDayOfMonth(uint_least16_t year,
                                              : static_cast<uint_least8_t>(29);
 }
 
-constexpr bool IsValid(uint_least16_t year, uint_least8_t month,
-                       uint_least8_t day) noexcept {
+constexpr bool IsValidDate(uint_least16_t year, uint_least8_t month,
+                           uint_least8_t day) noexcept {
   return ((month < 1) || (month > 12))
              ? false
              : ((day > 0) && (day <= LastDayOfMonth(year, month)));
+}
+
+constexpr bool IsValidTime(uint_fast8_t hour, uint_fast8_t minute,
+                           uint_fast8_t second, uint_fast32_t nanosecond) {
+  return (hour < 24) && (minute < 60) && (second < 60) &&
+         (nanosecond < 1000000000);
 }
 }  // namespace detail
 
@@ -118,17 +125,35 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct) {
 //-----------------------------------------------------------------------------
 // Number parsing for date & time types
 
+/// @brief Returns true if the input string is a valid integer, i.e.
+///   "[+-]?[0-9]+".
+bool IsInteger(std::string_view str) {
+  if (str.empty()) {
+    return false;
+  }
+
+  const bool sign = (str[0] == '-' || str[0] == '+');
+  const auto begin = sign ? str.begin() + 1 : str.begin();
+  const auto pos = std::find_if(
+      begin, str.end(), [](char c) -> bool { return !std::isdigit(c); });
+  if (pos != str.end()) {
+    return false;
+  }
+
+  return sign ? (str.length() > 2) : true;
+}
+
 template <typename T>
 T ParseDateTimeNumber(const std::string &str, int min_val, int max_val,
                       std::string_view type_str) {
   try {
-    // stoi would accept (and truncate) floating point numbers. Thus,
-    // we need to make sure that only [+-][0-9] inputs are fed into it.
-    // White space is not allowed.
-    const auto pos = std::find_if(str.begin(), str.end(), [](char c) -> bool {
-      return !std::isdigit(c) && (c != '-') && (c != '+');
-    });
-    if (pos != str.end()) {
+    // We can't use stoi out of the box:
+    // * it accepts (and truncates) floating point numbers, and
+    // * it takes as many characters as possible (and won't throw an exception
+    //   if the "rest" of the string is invalid).
+    // Thus, we need to make sure that only [+-][0-9]+ inputs are provided as
+    // inputs to stoi. We do not allow white space.
+    if (!IsInteger(str)) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, type_str);
     }
 
@@ -138,8 +163,12 @@ T ParseDateTimeNumber(const std::string &str, int min_val, int max_val,
     }
     return checked_numcast<T, int, ParseError>(parsed);
   } catch (const std::logic_error &e) {
-    // All exceptions thrown within stoi are derived from logic_error
+    // LCOV_EXCL_START
+    // All exceptions thrown within stoi are derived from logic_error. This
+    // branch, however, is currently unreachable, as the "IsInteger" check
+    // already filters out anything that does not resemble "[+-][0-9]+".
     throw ParseError{e.what()};
+    // LCOV_EXCL_STOP
   }
 }
 
@@ -198,7 +227,7 @@ date::date(std::string_view str) {
 
 date::date(uint_least16_t y, uint_least8_t m, uint_least8_t d)
     : year{y}, month{m}, day{d} {
-  if (!detail::IsValid(y, m, d)) {
+  if (!detail::IsValidDate(y, m, d)) {
     std::ostringstream msg;
     msg << "Cannot create a valid `date` from " << +y << ", " << +m << ", "
         << +d << '!';
@@ -315,6 +344,16 @@ time::time(std::string_view str) {
       second =
           ParseDateTimeNumber<uint_least8_t>(hms_tokens[2], 0, 59, "time"sv);
     }
+  }
+}
+
+time::time(uint_least8_t h, uint_least8_t m, uint_least8_t s, uint_least32_t ns)
+    : hour{h}, minute{m}, second{s}, nanosecond{ns} {
+  if (!detail::IsValidTime(h, m, s, ns)) {
+    std::ostringstream msg;
+    msg << "Cannot create a valid `time` from " << +h << ':' << +m << ':' << +s
+        << '.' << +ns << '!';
+    throw ValueError(msg.str());
   }
 }
 
@@ -444,8 +483,8 @@ bool time_offset::operator>=(const time_offset &other) const {
 // Date-time
 
 date_time::date_time(std::string_view str) {
-  // TODO len(19) would be following the rfc (16 is missing the seconds
-  // component ":SS")
+  // len(19) would be following the rfc, len(16) is missing the seconds
+  // component ":SS". For usage convenience, we are lenient here.
   if (str.length() <= 16) {
     WZK_RAISE_DATETIME_PARSE_ERROR(str, date_time);
   }

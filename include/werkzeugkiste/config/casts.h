@@ -12,31 +12,31 @@
 #include <utility>
 
 // NOLINTNEXTLINE(*macro-usage)
-#define WZK_CASTS_THROW_OVERFLOW(EXC, SRC, TGT, VAL)                   \
-  do {                                                                 \
-    std::ostringstream msg;                                            \
-    msg << "Overflow when casting " << std::to_string(VAL) << " from " \
-        << TypeName<SRC>() << " to " << TypeName<TGT>() << '!';        \
-    throw EXC(msg.str());                                              \
+#define WZK_CASTS_THROW_OVERFLOW(EXC, SRC, TGT, VAL)                      \
+  do {                                                                    \
+    std::ostringstream msg;                                               \
+    msg << "Overflow when casting `" << std::to_string(VAL) << "` from `" \
+        << TypeName<SRC>() << "` to `" << TypeName<TGT>() << "`!";        \
+    throw EXC(msg.str());                                                 \
   } while (false);
 
 // NOLINTNEXTLINE(*macro-usage)
-#define WZK_CASTS_THROW_UNDERFLOW(EXC, SRC, TGT, VAL)                   \
+#define WZK_CASTS_THROW_UNDERFLOW(EXC, SRC, TGT, VAL)                      \
+  do {                                                                     \
+    std::ostringstream msg;                                                \
+    msg << "Underflow when casting `" << std::to_string(VAL) << "` from `" \
+        << TypeName<SRC>() << "` to `" << TypeName<TGT>() << "`!";         \
+    throw EXC(msg.str());                                                  \
+  } while (false);
+
+// NOLINTNEXTLINE(*macro-usage)
+#define WZK_CASTS_THROW_NOT_REPRESENTABLE(EXC, SRC, TGT, VAL)           \
   do {                                                                  \
     std::ostringstream msg;                                             \
-    msg << "Underflow when casting " << std::to_string(VAL) << " from " \
-        << TypeName<SRC>() << " to " << TypeName<TGT>() << '!';         \
+    msg << "Error while casting `" << std::to_string(VAL) << "` from `" \
+        << TypeName<SRC>() << "` to `" << TypeName<TGT>()               \
+        << "`. Value is not exactly representable in target type!";     \
     throw EXC(msg.str());                                               \
-  } while (false);
-
-// NOLINTNEXTLINE(*macro-usage)
-#define WZK_CASTS_THROW_NOT_REPRESENTABLE(EXC, SRC, TGT, VAL)        \
-  do {                                                               \
-    std::ostringstream msg;                                          \
-    msg << "Error while casting " << std::to_string(VAL) << " from " \
-        << TypeName<SRC>() << " to " << TypeName<TGT>()              \
-        << ". Value is not exactly representable in target type!";   \
-    throw EXC(msg.str());                                            \
   } while (false);
 
 /// Utilities to handle configurations.
