@@ -20,8 +20,6 @@
 #include <utility>
 #include <vector>
 
-// TODO / FIXME - remove Tmsg, simplify templates
-
 namespace werkzeugkiste::config {
 // NOLINTNEXTLINE(*macro-usage)
 #define WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR(KEY, PARENT)          \
@@ -750,11 +748,18 @@ void ReplaceArray(toml::table &tbl, std::string_view key,
 
   toml::array &arr = *node.as_array();
 
-  // If the existing array is empty, we can simply replace it by inserting
-  // the given values as is.
-  // If it is inhomogeneous, we don't allow replacing it.
-  // Otherwise, we need to check for compatible/convertible types.
-  if (arr.empty()) {
+  // * A list can be replaced by an empty list of any type (after saving, we
+  //   can't dinstinguish an empty list of strings from an empty list of
+  //   floats).
+  // * If the existing array is empty, we can simply replace it by inserting
+  //   the given values as is.
+  // * If the existing array is inhomogeneous, we don't allow replacing it -
+  //   unless it holds only numeric values (double <-> ints are interchangable
+  //   if they can be exactly represented...)
+  // * Otherwise, we need to check for compatible/convertible types.
+  if (vec.empty()) {
+    arr = toml::array{};
+  } else if (arr.empty()) {
     CreateArray<Ttoml, Tcfg>(tbl, key, vec);
   } else if (!arr.is_homogeneous()) {
     if (IsNumericArray(arr)) {
@@ -785,7 +790,16 @@ void ReplaceArray(toml::table &tbl, std::string_view key,
   } else if (arr[0].is_date_time()) {
     ReplaceHomogeneousArray<toml::date_time>(arr, key, vec);
   } else {
-    throw std::logic_error{"TODO"};
+    // LCOV_EXCL_START
+    std::string msg{"Configuration parameter `"};
+    msg += key;
+    msg += "` is a list of `";
+    msg += TomlTypeName(arr[0], key);
+    msg +=
+        "`, but this type is not yet supported! Please report at "
+        "https://github.com/snototter/werkzeugkiste/issues";
+    throw std::logic_error{msg};
+    // LCOV_EXCL_STOP
   }
 }
 
@@ -977,8 +991,8 @@ std::vector<Tuple> GetTuples(const toml::table &tbl, std::string_view key) {
   return poly;
 }
 
-template <typename T>
-std::vector<T> GetList(const toml::table &tbl, std::string_view key) {
+template <typename Tcfg>
+std::vector<Tcfg> GetList(const toml::table &tbl, std::string_view key) {
   if (!ContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
@@ -995,16 +1009,16 @@ std::vector<T> GetList(const toml::table &tbl, std::string_view key) {
 
   const toml::array &arr = *node.as_array();
   std::size_t arr_index = 0;
-  std::vector<T> scalars{};
+  std::vector<Tcfg> scalars{};
   for (auto &&value : arr) {
     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
     if (value.is_value()) {
-      scalars.push_back(ConvertTomlToConfigType<T>(value, fqn));
+      scalars.push_back(ConvertTomlToConfigType<Tcfg>(value, fqn));
     } else {
       std::string msg{"Invalid list configuration `"};
       msg += key;
       msg += "`: All entries must be of scalar type `";
-      msg += TypeName<T>();
+      msg += TypeName<Tcfg>();
       msg += "`, but `";
       msg += fqn;
       msg += "` is `";
@@ -1415,6 +1429,11 @@ std::vector<date> Configuration::GetDateList(std::string_view key) const {
   return detail::GetList<date>(pimpl_->config_root, key);  // TODO test
 }
 
+void Configuration::SetDateList(std::string_view key,
+                                const std::vector<date> &values) {
+  detail::SetList<toml::date>(pimpl_->config_root, key, values);  // TODO test
+}
+
 //---------------------------------------------------------------------------
 // Time
 
@@ -1439,6 +1458,11 @@ void Configuration::SetTime(std::string_view key, const time &value) {
 
 std::vector<time> Configuration::GetTimeList(std::string_view key) const {
   return detail::GetList<time>(pimpl_->config_root, key);  // TODO test
+}
+
+void Configuration::SetTimeList(std::string_view key,
+                                const std::vector<time> &values) {
+  detail::SetList<toml::time>(pimpl_->config_root, key, values);  // TODO test
 }
 
 //---------------------------------------------------------------------------
@@ -1467,6 +1491,12 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
 std::vector<date_time> Configuration::GetDateTimeList(
     std::string_view key) const {
   return detail::GetList<date_time>(pimpl_->config_root, key);  // TODO test
+}
+
+void Configuration::SetDateTimeList(std::string_view key,
+                                    const std::vector<date_time> &values) {
+  detail::SetList<toml::date_time>(pimpl_->config_root, key,
+                                   values);  // TODO test
 }
 
 //---------------------------------------------------------------------------

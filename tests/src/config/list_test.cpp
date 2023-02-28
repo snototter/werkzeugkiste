@@ -8,7 +8,7 @@ using namespace std::string_view_literals;
 
 // NOLINTBEGIN
 
-TEST(ConfigListTest, EmptyLists) {
+TEST(ConfigListTest, GetEmptyLists) {
   auto config = wkc::LoadTOMLString(R"toml(
     empty = []
     )toml");
@@ -24,9 +24,8 @@ TEST(ConfigListTest, EmptyLists) {
 
   // TODO extend with nested lists
 
-  // An empty list can be set to any type.
+  // An empty list can be set to any type -> it will still have no type.
   EXPECT_NO_THROW(config.SetBooleanList("empty"sv, {}));
-  // It will still have no type.
   EXPECT_TRUE(config.GetBooleanList("empty"sv).empty());
   EXPECT_TRUE(config.GetDoubleList("empty"sv).empty());
   EXPECT_TRUE(config.GetStringList("empty"sv).empty());
@@ -41,6 +40,47 @@ TEST(ConfigListTest, EmptyLists) {
   EXPECT_THROW(config.GetBooleanList("empty"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("empty"sv), wkc::TypeError);
   EXPECT_EQ(2, config.GetDoubleList("empty"sv).size());
+}
+
+TEST(ConfigListTest, SetEmptyLists) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    empty = []
+    ints = [1, 2]
+    mixed = [1, "two", 3.5]
+    )toml");
+
+  // An empty list can be set to any type.
+  EXPECT_NO_THROW(config.SetBooleanList("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetInteger32List("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetInteger64List("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetDoubleList("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetStringList("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetDateList("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetTimeList("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetDateTimeList("empty"sv, {}));
+
+  // An existing list can be replaced by an empty list of another type,
+  // because we assume that an empty list "doesn't have a type". After
+  // saving such a configuration to disk, there is no way to distinguish
+  // an empty string list from an empty list of dates...
+  EXPECT_NO_THROW(config.SetBooleanList("ints"sv, {}));
+  EXPECT_TRUE(config.GetBooleanList("ints"sv).empty());
+  EXPECT_TRUE(config.GetInteger32List("ints"sv).empty());
+  // Restore the integer list to check replacing it by other empty lists.
+  config.SetInteger32List("ints"sv, {1, 2});
+  EXPECT_NO_THROW(config.SetDoubleList("ints"sv, {}));
+  config.SetInteger32List("ints"sv, {1, 2});
+  EXPECT_NO_THROW(config.SetStringList("ints"sv, {}));
+  config.SetInteger32List("ints"sv, {1, 2});
+  EXPECT_NO_THROW(config.SetDateList("ints"sv, {}));
+  config.SetInteger32List("ints"sv, {1, 2});
+  EXPECT_NO_THROW(config.SetTimeList("ints"sv, {}));
+  config.SetInteger32List("ints"sv, {1, 2});
+  EXPECT_NO_THROW(config.SetDateTimeList("ints"sv, {}));
+
+  // A mixed list cannot be restored programmatically. Thus, we can only
+  // replace it once.
+  EXPECT_NO_THROW(config.SetDateList("mixed"sv, {}));
 }
 
 TEST(ConfigListTest, GetLists) {
@@ -173,7 +213,7 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_NO_THROW(config.GetDoubleList("mixed_int_flt"sv));
 }
 
-TEST(ConfigListTest, SetLists) {
+TEST(ConfigListTest, SetBooleanList) {
   auto config = wkc::LoadTOMLString(R"toml(
     floats = [0.5, 1.0, 1.0e23]
 
@@ -225,6 +265,30 @@ TEST(ConfigListTest, SetLists) {
   EXPECT_FALSE(flags[0]);
   EXPECT_TRUE(flags[1]);
 
+  // A mixed list that only contains numbers can be replaced by a homogeneous
+  // list. Its type, however, will be floating point afterwards:
+  EXPECT_NO_THROW(config.SetInteger32List("mixed_int_flt"sv, {1, 2}));
+  const auto ints32 = config.GetInteger32List("mixed_int_flt"sv);
+  EXPECT_EQ(2, ints32.size());
+  EXPECT_EQ(1, ints32[0]);
+  EXPECT_EQ(2, ints32[1]);
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[0]"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[1]"sv));
+
+  // ... but for all other types/mixtures, the type cannot be changed.
+  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
+               wkc::TypeError);
+
+  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
+
+  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
+               wkc::TypeError);
+  EXPECT_THROW(config.SetStringList("floats"sv, {"abc"}), wkc::TypeError);
+}
+
+TEST(ConfigListTest, NumericList) {
+  wkc::Configuration config{};
+
   // Create an integer list
   EXPECT_FALSE(config.Contains("ints"sv));
   EXPECT_NO_THROW(config.SetInteger32List("ints"sv, {-3, 0}));
@@ -251,33 +315,36 @@ TEST(ConfigListTest, SetLists) {
   EXPECT_EQ(2147483648L, ints64[0]);
   EXPECT_EQ(-2147483649L, ints64[1]);
 
-  // A list item can be replaced by a compatible/convertible value (see
+  // A list *item* can be replaced by a compatible/convertible value (see
   // ConfigScalarTest.ReplaceListElements for more details).
   EXPECT_THROW(config.SetDouble("ints[0]"sv, 32.8), wkc::TypeError);
   EXPECT_NO_THROW(config.SetDouble("ints[0]"sv, 32.0));
   EXPECT_EQ(32, config.GetInteger32("ints[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
 
-  // A mixed list that only contains numbers can be replaced by a homogeneous
-  // list. Its type, however, will be floating point afterwards:
-  EXPECT_NO_THROW(config.SetInteger32List("mixed_int_flt"sv, {1, 2}));
-  ints32 = config.GetInteger32List("mixed_int_flt"sv);
-  EXPECT_EQ(2, ints32.size());
-  EXPECT_EQ(1, ints32[0]);
-  EXPECT_EQ(2, ints32[1]);
-  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[0]"sv));
-  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[1]"sv));
+  // A list of integers can be replaced by a list of compatible/convertible
+  // floating point values...
+  EXPECT_NO_THROW(config.SetDoubleList("ints"sv, {1.0, 5.0}));
+  ints64 = config.GetInteger64List("ints"sv);
+  EXPECT_EQ(2, ints64.size());
+  EXPECT_EQ(1, ints64[0]);
+  EXPECT_EQ(5, ints64[1]);
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
+  // ... but it cannot be replaced by a list of "real" floating points (which
+  // are not representable by an int64, as this would require changing the
+  // type of the whole list.
+  EXPECT_THROW(config.SetDoubleList("ints"sv, {1.5, 5.0}), wkc::TypeError);
 
-  // ... but for all other types/mixtures, the type cannot be changed.
-  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
-               wkc::TypeError);
-
+  // Sanity checks: can't replace an integer list by bool/string/empty
+  // string list:
   EXPECT_THROW(config.SetBooleanList("ints"sv, {true, false}), wkc::TypeError);
-  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
-
-  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
-               wkc::TypeError);
-  EXPECT_THROW(config.SetStringList("floats"sv, {"abc"}), wkc::TypeError);
+  EXPECT_THROW(config.SetStringList("ints"sv, {"test"}), wkc::TypeError);
 }
+
+TEST(ConfigListTest, StringList) {}
+
+TEST(ConfigListTest, DateTimeLists) {}
+
+TEST(ConfigListTest, MixedList) {}
 
 // NOLINTEND

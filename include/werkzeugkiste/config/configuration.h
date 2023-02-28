@@ -48,6 +48,10 @@ namespace werkzeugkiste::config {
 /// * [ ] Setters for ...List
 /// * [x] SetGroup
 /// * [x] Return optional<Scalar>
+/// * [ ] Support get/set list of groups, i.e. vector<Configuration>
+/// * [ ] Convenience types: Point/Index/Rectangle
+/// * [ ] Consider renaming Integer32 to integer
+/// * [ ] Convenience type casts: uint32
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -309,7 +313,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO doc
   std::vector<date> GetDateList(std::string_view key) const;
 
-  // TODO setdatelist
+  // TODO doc
+  void SetDateList(std::string_view key, const std::vector<date> &values);
 
   //---------------------------------------------------------------------------
   // Time
@@ -334,7 +339,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO doc
   std::vector<time> GetTimeList(std::string_view key) const;
 
-  // TODO settimelist
+  // TODO doc
+  void SetTimeList(std::string_view key, const std::vector<time> &values);
 
   //---------------------------------------------------------------------------
   // Date-time
@@ -360,7 +366,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO doc
   std::vector<date_time> GetDateTimeList(std::string_view key) const;
 
-  // TODO setdatetimelist
+  // TODO doc
+  void SetDateTimeList(std::string_view key,
+                       const std::vector<date_time> &values);
 
   //---------------------------------------------------------------------------
   // Group/"Sub-Configuration"
