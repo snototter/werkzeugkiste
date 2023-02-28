@@ -143,8 +143,8 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
 KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
   using namespace std::string_view_literals;
   std::string msg{"Key `"};
-  msg.append(key);
-  msg.append("` does not exist!");
+  msg += key;
+  msg += "` does not exist!";
 
   const std::vector<std::string> keys =
       ListTableKeys(tbl, ""sv, /*include_array_entries=*/true);
@@ -166,17 +166,17 @@ KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
            const std::pair<std::size_t, std::string_view> &b) -> bool {
           return a.first < b.first;
         });
-    msg.append(" Did you mean: `");
+    msg += " Did you mean: `";
     const std::size_t num_to_include =
         std::min(sorted_indices.size(), static_cast<std::size_t>(3));
     for (std::size_t idx = 0; idx < num_to_include; ++idx) {
       const auto &cand = candidates[sorted_indices[idx]];
-      msg.append(cand.second);
+      msg += cand.second;
       if (idx < num_to_include - 1) {
-        msg.append("`, `");
+        msg += "`, `";
       }
     }
-    msg.append("`?");
+    msg += "`?";
   }
 
   return KeyError{msg};
