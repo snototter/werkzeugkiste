@@ -74,6 +74,10 @@ TEST(ConfigKeyTest, ParameterNames2) {
     )toml";
   const auto config = wkc::LoadTOMLString(toml_str);
 
+  EXPECT_EQ(3, config.Size());
+  EXPECT_EQ(3, config.GetGroup("lvl-1"sv).Size());
+  EXPECT_EQ(2, config.GetGroup("lvl-1.lvl-2"sv).Size());
+
   // First, check without extracting the array keys.
   std::vector<std::string> expected_keys{"arr1",
                                          "arr1[1].first",

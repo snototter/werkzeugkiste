@@ -101,9 +101,21 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified identifier of the parameter.
   bool Contains(std::string_view key) const;
 
+  /// @brief Returns the number of parameters (key-value pairs) in this
+  /// configuration.
+  std::size_t Size() const;
+
+  /// @brief Returns the length of the list `key`.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is not a list.
+  ///
+  /// @param key Fully-qualified identifier of the parameter.
+  std::size_t ListSize(std::string_view key) const;
+
   /// @brief Returns the type of the parameter at the given key.
   ///
-  /// Throws an exception if the key is not found.
+  /// Raises a `KeyError` if the parameter does not exist.
   ///
   /// @param key Fully-qualified identifier of the parameter.
   ConfigType Type(std::string_view key) const;

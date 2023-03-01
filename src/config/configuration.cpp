@@ -575,12 +575,12 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
 
   // Parent does not exist. We now have to recursively create the
   // parent path, then create a table here.
-  // But first, ensure that we are not asked to create an array:
+  // But first, ensure that we are not asked to create a list:
   const auto path = SplitTomlPath(key);
   if (path.second.find('[') != std::string_view::npos) {
     std::string msg{
-        "Cannot create the requested configuration hierarchy. Creating an "
-        "array at `"};
+        "Cannot create the requested configuration hierarchy. Creating a "
+        "list at `"};
     msg += key;
     msg += "` is not supported!";
     throw TypeError{msg};
@@ -599,7 +599,7 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
       // Would need to parse the array element index from the key.
       // node.as_array()->emplace(path.second, toml::table{});
       std::string msg{
-          "Creating a table as a child of an array is not supported! Check "
+          "Creating a table as a child of a list is not supported! Check "
           "configuration parameter `"};
       msg += key;
       msg += "`!";
@@ -943,7 +943,7 @@ std::vector<Tuple> GetTuples(const toml::table &tbl, std::string_view key) {
   if (!node.is_array()) {
     std::string msg{"Invalid point list configuration: `"};
     msg += key;
-    msg += "` must be an array, but is of type `";
+    msg += "` must be a list, but is of type `";
     msg += TomlTypeName(node, key);
     msg += "`!";
     throw TypeError{msg};
@@ -1025,7 +1025,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   if (!node.is_array()) {
     std::string msg{"Invalid pair configuration: Parameter `"};
     msg += key;
-    msg += "` must be an array, but is `";
+    msg += "` must be a list, but is `";
     msg += TomlTypeName(node, key);
     msg += "`!";
     throw TypeError{msg};
@@ -1035,7 +1035,7 @@ std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
   if (arr.size() != 2) {
     std::string msg{"Invalid pair configuration: Parameter `"};
     msg += key;
-    msg += "` must be a 2-element array, but has ";
+    msg += "` must be a 2-element list, but has ";
     msg += std::to_string(arr.size());
     msg += ((arr.size() == 1) ? " element!" : " elements!");
     throw TypeError{msg};
@@ -1142,6 +1142,27 @@ bool Configuration::Equals(const Configuration &other) const {
 
 bool Configuration::Contains(std::string_view key) const {
   return detail::ContainsKey(pimpl_->config_root, key);
+}
+
+std::size_t Configuration::Size() const { return pimpl_->config_root.size(); }
+
+std::size_t Configuration::ListSize(std::string_view key) const {
+  const auto nv = pimpl_->config_root.at_path(key);
+
+  if (nv.type() == toml::node_type::none) {
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
+  }
+
+  if (nv.type() != toml::node_type::array) {
+    std::string msg{"Invalid point list configuration: `"};
+    msg += key;
+    msg += "` must be a list, but is of type `";
+    msg += detail::TomlTypeName(nv, key);
+    msg += "`!";
+    throw TypeError{msg};
+  }
+
+  return nv.as_array()->size();
 }
 
 ConfigType Configuration::Type(std::string_view key) const {
