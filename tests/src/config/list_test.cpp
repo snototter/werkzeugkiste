@@ -351,7 +351,7 @@ TEST(ConfigListTest, SetBooleanList) {
   // Update the boolean list
   EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {false, true}));
   flags = config.GetBooleanList("flags"sv);
-  EXPECT_EQ(2, config.ListSize("flags"sv));
+  EXPECT_EQ(2, config.Size("flags"sv));
   EXPECT_EQ(2, flags.size());
   EXPECT_FALSE(flags[0]);
   EXPECT_TRUE(flags[1]);
@@ -369,7 +369,7 @@ TEST(ConfigListTest, SetStringList) {
   EXPECT_NO_THROW(config.SetStringList("strs"sv, {"Hello", "World"}));
   const auto strs = config.GetStringList("strs"sv);
   EXPECT_EQ(2, strs.size());
-  EXPECT_EQ(2, config.ListSize("strs"sv));
+  EXPECT_EQ(2, config.Size("strs"sv));
   EXPECT_EQ("Hello", strs[0]);
   EXPECT_EQ("Hello", config.GetString("strs[0]"sv));
   EXPECT_EQ("World", strs[1]);
@@ -392,7 +392,7 @@ TEST(ConfigListTest, SetDateList) {
   EXPECT_NO_THROW(config.SetDateList("days"sv, days));
   const auto lookup = config.GetDateList("days"sv);
   EXPECT_EQ(days.size(), lookup.size());
-  EXPECT_EQ(days.size(), config.ListSize("days"sv));
+  EXPECT_EQ(days.size(), config.Size("days"sv));
   for (std::size_t i = 0; i < days.size(); ++i) {
     EXPECT_EQ(days[i], lookup[i]);
   }
@@ -425,7 +425,7 @@ TEST(ConfigListTest, SetTimeList) {
   EXPECT_NO_THROW(config.SetTimeList("times"sv, times));
   const auto lookup = config.GetTimeList("times"sv);
   EXPECT_EQ(times.size(), lookup.size());
-  EXPECT_EQ(times.size(), config.ListSize("times"sv));
+  EXPECT_EQ(times.size(), config.Size("times"sv));
   for (std::size_t i = 0; i < times.size(); ++i) {
     EXPECT_EQ(times[i], lookup[i]);
   }
@@ -461,7 +461,7 @@ TEST(ConfigListTest, SetDateTimeList) {
   EXPECT_NO_THROW(config.SetDateTimeList("dts"sv, dts));
   const auto lookup = config.GetDateTimeList("dts"sv);
   EXPECT_EQ(dts.size(), lookup.size());
-  EXPECT_EQ(dts.size(), config.ListSize("dts"sv));
+  EXPECT_EQ(dts.size(), config.Size("dts"sv));
   for (std::size_t i = 0; i < dts.size(); ++i) {
     EXPECT_EQ(dts[i], lookup[i]);
   }
@@ -487,8 +487,8 @@ TEST(ConfigListTest, MixedList) {
     types = [true, -42, 4.2, "foo", 2011-09-10]
     )toml");
 
-  EXPECT_EQ(2, config.ListSize("numbers"sv));
-  EXPECT_EQ(5, config.ListSize("types"sv));
+  EXPECT_EQ(2, config.Size("numbers"sv));
+  EXPECT_EQ(5, config.Size("types"sv));
 
   EXPECT_THROW(config.GetBooleanList("numbers"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDateList("numbers"sv), wkc::TypeError);
@@ -535,7 +535,7 @@ TEST(ConfigListTest, MixedList) {
   EXPECT_TRUE(config.GetStringList("types"sv).empty());
 }
 
-TEST(ConfigListTest, ListSize) {
+TEST(ConfigListTest, Size) {
   const auto config = wkc::LoadTOMLString(R"toml(
     mixed_int_flt = [1, 2, 3, 4.5, 5]
 
@@ -544,17 +544,24 @@ TEST(ConfigListTest, ListSize) {
     nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
 
     str = "value"
+
+    [scalars]
+    flt1 = 1.0
+    flt2 = 2.0
     )toml");
 
-  EXPECT_EQ(5, config.ListSize("mixed_int_flt"sv));
-  EXPECT_EQ(3, config.ListSize("mixed_types"sv));
-  EXPECT_EQ(5, config.ListSize("nested_lst"sv));
+  EXPECT_EQ(5, config.Size());
+  EXPECT_EQ(2, config.Size("scalars"sv));
 
-  EXPECT_THROW(config.ListSize("no-such-key"sv), wkc::KeyError);
-  EXPECT_THROW(config.ListSize("str"sv), wkc::TypeError);
+  EXPECT_EQ(5, config.Size("mixed_int_flt"sv));
+  EXPECT_EQ(3, config.Size("mixed_types"sv));
+  EXPECT_EQ(5, config.Size("nested_lst"sv));
 
-  EXPECT_THROW(config.ListSize("nested_lst[0]"sv), wkc::TypeError);
-  EXPECT_EQ(2, config.ListSize("nested_lst[2]"sv));
-  EXPECT_EQ(1, config.ListSize("nested_lst[4]"sv));
+  EXPECT_THROW(config.Size("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.Size("str"sv), wkc::TypeError);
+
+  EXPECT_THROW(config.Size("nested_lst[0]"sv), wkc::TypeError);
+  EXPECT_EQ(2, config.Size("nested_lst[2]"sv));
+  EXPECT_EQ(1, config.Size("nested_lst[4]"sv));
 }
 // NOLINTEND

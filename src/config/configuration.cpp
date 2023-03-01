@@ -1144,25 +1144,31 @@ bool Configuration::Contains(std::string_view key) const {
   return detail::ContainsKey(pimpl_->config_root, key);
 }
 
-std::size_t Configuration::Size() const { return pimpl_->config_root.size(); }
+std::size_t Configuration::Size(std::string_view key) const {
+  if (key.empty()) {
+    return pimpl_->config_root.size();
+  }
 
-std::size_t Configuration::ListSize(std::string_view key) const {
   const auto nv = pimpl_->config_root.at_path(key);
 
   if (nv.type() == toml::node_type::none) {
     throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
 
-  if (nv.type() != toml::node_type::array) {
-    std::string msg{"Invalid point list configuration: `"};
-    msg += key;
-    msg += "` must be a list, but is of type `";
-    msg += detail::TomlTypeName(nv, key);
-    msg += "`!";
-    throw TypeError{msg};
+  if (nv.type() == toml::node_type::array) {
+    return nv.as_array()->size();
   }
 
-  return nv.as_array()->size();
+  if (nv.type() == toml::node_type::table) {
+    return nv.as_table()->size();
+  }
+
+  std::string msg{"To query its size, the parameter `"};
+  msg += key;
+  msg += "` must be a list or a group, but it is of type `";
+  msg += detail::TomlTypeName(nv, key);
+  msg += "`!";
+  throw TypeError{msg};
 }
 
 ConfigType Configuration::Type(std::string_view key) const {
