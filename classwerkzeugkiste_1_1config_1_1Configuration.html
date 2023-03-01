@@ -125,6 +125,14 @@
             </dt>
             <dd>Checks if the given key exists in this configuration.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7a9571100f0ec2cc5832e5ffa37d10fa" class="m-doc">Size</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::size_t</span>
+            </dt>
+            <dd>Returns the length of the list <code>key</code>.</dd>
+            <dt id="a8604d653af982ee557df80bc2b147a59">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8604d653af982ee557df80bc2b147a59" class="m-doc-self">Size</a>(</span><span class="m-doc-wrap">) const -&gt; std::size_t</span>
+            </dt>
+            <dd>Returns the number of parameters (key-value pairs) in this configuration.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a84c5a32b850c9caf85dcc12d30791589" class="m-doc">Type</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a></span>
             </dt>
             <dd>Returns the type of the parameter at the given key.</dd>
@@ -453,6 +461,24 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="a7a9571100f0ec2cc5832e5ffa37d10fa"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::size_t werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7a9571100f0ec2cc5832e5ffa37d10fa" class="m-doc-self">Size</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns the length of the list <code>key</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified identifier of the parameter.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is not a list.</p>
+          </div></section>
           <section class="m-doc-details" id="a84c5a32b850c9caf85dcc12d30791589"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a84c5a32b850c9caf85dcc12d30791589" class="m-doc-self">Type</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
@@ -469,7 +495,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Throws an exception if the key is not found.</p>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist.</p>
           </div></section>
           <section class="m-doc-details" id="a30b4d2443c9807379b6e623f8eb95049"><div>
             <h3>
