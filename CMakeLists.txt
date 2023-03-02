@@ -366,6 +366,8 @@ FetchContent_Declare(
   GIT_TAG v3.2.0)
 FetchContent_MakeAvailable(tomlplusplus)
 
+option(WZK_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
+
 # Header files
 set(wzkgconfig_HEADER_FILES
     include/werkzeugkiste/config/configuration.h
@@ -376,8 +378,10 @@ set(wzkgconfig_HEADER_FILES
     ${tomlplusplus_SOURCE_DIR}/include/toml++/toml.h
     ${werkzeugkiste_VERSION_HEADER})
 # Source files
-set(wzkgconfig_SOURCE_FILES src/config/configuration.cpp
-                            src/config/keymatcher.cpp src/config/types.cpp)
+set(wzkgconfig_SOURCE_FILES
+    src/config/configuration.cpp src/config/keymatcher.cpp src/config/types.cpp
+    src/config/libconfig.cpp)
+
 # Library
 add_library(werkzeugkiste-config ${wzkgconfig_HEADER_FILES}
                                  ${wzkgconfig_SOURCE_FILES})
@@ -387,6 +391,18 @@ add_library(werkzeugkiste::config ALIAS werkzeugkiste-config)
 if(NOT BUILD_SHARED_LIBS)
   target_compile_definitions(werkzeugkiste-config
                              PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
+endif()
+
+if(WZK_WITH_LIBCONFIG)
+  # TODO find portable way (mac, win)
+  find_path(LIB_LIBCFG_INCDIR libconfig.hh)
+  find_library(LIB_LIBCFG_LIBRARY NAMES config++)
+
+  target_include_directories(werkzeugkiste-config PRIVATE ${LIB_LIBCFG_INCDIR})
+  target_link_libraries(werkzeugkiste-config PRIVATE ${LIB_LIBCFG_LIBRARY})
+
+  target_compile_definitions(werkzeugkiste-config
+                             PRIVATE WERKZEUGKISTE_WITH_LIBCONFIG)
 endif()
 
 generate_export_header(

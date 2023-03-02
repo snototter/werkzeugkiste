@@ -559,6 +559,13 @@ inline Configuration LoadTOMLString(std::string_view toml_string) {
   return Configuration::LoadTOMLString(toml_string);
 }
 
+// TODO doc
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadLibconfigFile(std::string_view filename);
+
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadLibconfigString(std::string_view lcfg_string);
+
 }  // namespace werkzeugkiste::config
 
 #endif  // WERKZEUGKISTE_CONFIG_CONFIGURATION_H

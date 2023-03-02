@@ -254,4 +254,59 @@ TEST(ConfigIOTest, LoadingJson) {
   EXPECT_TRUE(config.ToJSON().length() > 0);
 }
 
+TEST(ConfigIOTest, ParseLibconfigStrings) {
+  // TODO enable if compiled with libconfig
+  const auto config = wkc::LoadLibconfigString(R"lcfg(
+    int_pos = +987654
+    int_neg = -123456
+    int32_max = 2147483647
+    int32_max_overflow = 2147483648
+    int32_min = -2147483648
+    int32_min_underflow = -2147483649
+    flt = -1e3;
+    flag = false;
+
+    ints = [1, 2, 3];
+    flts = [1.2, 2.0];
+
+    strings = ["foo", "bar"];
+
+    group = {
+      flag = true;
+      count = 123;
+
+      subgroup = {
+        flag = false;
+        threshold = 1e-6;
+      }
+    };
+    )lcfg");
+
+  EXPECT_EQ(987654, config.GetInteger32("int_pos"sv));
+  EXPECT_EQ(-123456, config.GetInteger32("int_neg"sv));
+  EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
+  EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
+  EXPECT_THROW(config.GetInteger32("int32_min_underflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_underflow"sv));
+  EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
+
+  EXPECT_DOUBLE_EQ(-1000.0, config.GetDouble("flt"sv));
+  EXPECT_TRUE(config.GetBoolean("flag"sv));
+
+  // TODO ints, flts, strings, group
+
+  const auto invalid_str = R"lcfg(
+    valid = true;
+    invalid = [1, 2.5];
+    )lcfg"sv;
+  EXPECT_THROW(wkc::LoadLibconfigString(invalid_str), wkc::ParseError);
+  try {
+    wkc::LoadLibconfigString(invalid_str);
+  } catch (const wkc::ParseError &e) {
+    EXPECT_TRUE(wks::StartsWith(e.what(), "FAIL!!!"))
+        << "Actual exception message: " << e.what();
+  }
+}
+
 // NOLINTEND
