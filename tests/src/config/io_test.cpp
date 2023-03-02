@@ -257,14 +257,16 @@ TEST(ConfigIOTest, LoadingJson) {
 TEST(ConfigIOTest, ParseLibconfigStrings) {
   // TODO enable if compiled with libconfig
   const auto config = wkc::LoadLibconfigString(R"lcfg(
-    int_pos = +987654
-    int_neg = -123456
-    int32_max = 2147483647
-    int32_max_overflow = 2147483648
-    int32_min = -2147483648
-    int32_min_underflow = -2147483649
+    int_pos = +987654;
+    int_neg = -123456;
+    int32_max = 2147483647;
+    int32_min = -2147483648;
+    // Previous libconfig versions require explicit ..L suffix for long ints:
+    int32_max_overflow = 2147483648L;
+    int32_min_underflow = -2147483649L;
     flt = -1e3;
     flag = false;
+    str = "value";
 
     ints = [1, 2, 3];
     flts = [1.2, 2.0];
@@ -292,19 +294,33 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
 
   EXPECT_DOUBLE_EQ(-1000.0, config.GetDouble("flt"sv));
-  EXPECT_TRUE(config.GetBoolean("flag"sv));
+  EXPECT_FALSE(config.GetBoolean("flag"sv));
+  EXPECT_EQ("value", config.GetString("str"sv));
 
-  // TODO ints, flts, strings, group
+  EXPECT_EQ(3, config.GetInteger32List("ints"sv).size());
+  // TODO check elements
+  EXPECT_EQ(2, config.GetDoubleList("flts"sv).size());
+  // TODO check elements
+  EXPECT_EQ(2, config.GetStringList("strings"sv).size());
+  // TODO check elements
 
-  const auto invalid_str = R"lcfg(
-    valid = true;
+  EXPECT_TRUE(config.GetBoolean("group.flag"sv));
+  EXPECT_EQ(123, config.GetInteger32("group.count"sv));
+
+  EXPECT_FALSE(config.GetBoolean("group.subgroup.flag"sv));
+  EXPECT_DOUBLE_EQ(1e-6, config.GetDouble("group.subgroup.threshold"sv));
+
+  // Try parsing an invalid configuration string.
+  const auto invalid_str = R"lcfg(valid = true;
     invalid = [1, 2.5];
     )lcfg"sv;
   EXPECT_THROW(wkc::LoadLibconfigString(invalid_str), wkc::ParseError);
   try {
     wkc::LoadLibconfigString(invalid_str);
   } catch (const wkc::ParseError &e) {
-    EXPECT_TRUE(wks::StartsWith(e.what(), "FAIL!!!"))
+    EXPECT_TRUE(wks::StartsWith(e.what(),
+                                "Parsing libconfig string failed at line `2`: "
+                                "mismatched element type in array"))
         << "Actual exception message: " << e.what();
   }
 }
