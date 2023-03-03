@@ -219,7 +219,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   // TODO doc
   void SetInteger32List(std::string_view key,
-                        const std::vector<int32_t> &values);
+      const std::vector<int32_t> &values);
 
   /// @brief Returns a list of 2D indices (integral x/y coordinates, e.g. a
   ///   polyline).
@@ -271,7 +271,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   // TODO doc
   void SetInteger64List(std::string_view key,
-                        const std::vector<int64_t> &values);
+      const std::vector<int64_t> &values);
 
   //---------------------------------------------------------------------------
   // Floating Point
@@ -328,7 +328,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
   std::string GetStringOr(std::string_view key,
-                          std::string_view default_val) const;
+      std::string_view default_val) const;
 
   // TODO doc
   std::optional<std::string> GetOptionalString(std::string_view key) const;
@@ -348,7 +348,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   // TODO doc
   void SetStringList(std::string_view key,
-                     const std::vector<std::string_view> &values);
+      const std::vector<std::string_view> &values);
 
   //---------------------------------------------------------------------------
   // Date
@@ -447,7 +447,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
   date_time GetDateTimeOr(std::string_view key,
-                          const date_time &default_val) const;
+      const date_time &default_val) const;
 
   // TODO doc
   std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
@@ -470,7 +470,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   // TODO doc
   void SetDateTimeList(std::string_view key,
-                       const std::vector<date_time> &values);
+      const std::vector<date_time> &values);
 
   //---------------------------------------------------------------------------
   // TODO doc
@@ -518,7 +518,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// "some.nested.*.filename", etc.
   /// @return True if any parameter has been adjusted.
   bool AdjustRelativePaths(std::string_view base_path,
-                           const std::vector<std::string_view> &parameters);
+      const std::vector<std::string_view> &parameters);
 
   /// @brief Visits all string parameters and replaces any occurrence of the
   /// given needle/replacement pairs.

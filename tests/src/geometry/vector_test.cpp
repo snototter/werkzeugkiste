@@ -249,7 +249,8 @@ void TestVectorAddSub(wkg::Vec<Tp, Dim> vec) {
 
 template <typename Tp, std::size_t Dim>
 ::testing::AssertionResult CheckDivisionResult(
-    const wkg::Vec<Tp, Dim>& dividend, const wkg::Vec<Tp, Dim>& divisor,
+    const wkg::Vec<Tp, Dim>& dividend,
+    const wkg::Vec<Tp, Dim>& divisor,
     const wkg::Vec<Tp, Dim>& expected_non_special,
     const wkg::Vec<Tp, Dim>& value) {
   std::ostringstream msg;
@@ -432,8 +433,8 @@ void TestVec3dGeometry(wkg::Vec<Tp, 3> vec) {
   // Actual cross product
   auto cross = vec.Cross(other);
   wkg::Vec<Tp, 3> expected{vec.Y() * other.Z() - vec.Z() * other.Y(),
-                           vec.Z() * other.X() - vec.X() * other.Z(),
-                           vec.X() * other.Y() - vec.Y() * other.X()};
+      vec.Z() * other.X() - vec.X() * other.Z(),
+      vec.X() * other.Y() - vec.Y() * other.X()};
 
   EXPECT_TRUE(CheckVectorEqual(expected, cross));
 
@@ -442,8 +443,8 @@ void TestVec3dGeometry(wkg::Vec<Tp, 3> vec) {
 
   // (A + B) x C = A x C + B x C
   wkg::Vec<Tp, 3> another{47, -23, -1023};
-  EXPECT_TRUE(CheckVectorEqual((vec + other).Cross(another),
-                               vec.Cross(another) + other.Cross(another)));
+  EXPECT_TRUE(CheckVectorEqual(
+      (vec + other).Cross(another), vec.Cross(another) + other.Cross(another)));
 }
 
 template <typename Tp, std::size_t Dim>
@@ -721,9 +722,13 @@ TEST(VectorTest, All) {
 }
 
 TEST(VectorTest, EpsEqual) {
-  std::vector<wkg::Vec2d> data{{1, 0},         {10, -3},    {-15, 1},
-                               {17, 42},       {0.1, 17.0}, {0.001, -0.005},
-                               {1e-5, -(1e-7)}};
+  std::vector<wkg::Vec2d> data{{1, 0},
+      {10, -3},
+      {-15, 1},
+      {17, 42},
+      {0.1, 17.0},
+      {0.001, -0.005},
+      {1e-5, -(1e-7)}};
 
   for (const auto& vec : data) {
     EXPECT_EQ(vec, vec);
@@ -733,7 +738,7 @@ TEST(VectorTest, EpsEqual) {
     // the IsClose/ApproximatelyEqual tests will succeed (because of the
     // default relative tolerance of 1e-9).
     for (auto offset :
-         {0.1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 0.5, 1.5, 100.0}) {
+        {0.1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 0.5, 1.5, 100.0}) {
       auto copy = vec.ToDouble();
       EXPECT_TRUE(CheckVectorEqual(vec, copy));
 

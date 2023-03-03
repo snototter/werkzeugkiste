@@ -143,13 +143,13 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_THROW(config.GetInteger32List("flags"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger32List("not-a-list"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("not-a-list.no-such-key"sv),
-               wkc::KeyError);
+  EXPECT_THROW(
+      config.GetInteger32List("not-a-list.no-such-key"sv), wkc::KeyError);
 
   EXPECT_THROW(config.GetInteger64List("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("not-a-list"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("not-a-list.no-such-key"sv),
-               wkc::KeyError);
+  EXPECT_THROW(
+      config.GetInteger64List("not-a-list.no-such-key"sv), wkc::KeyError);
 
   EXPECT_THROW(config.GetDoubleList("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleList("not-a-list"sv), wkc::TypeError);
@@ -316,15 +316,15 @@ TEST(ConfigListTest, NumericList) {
   EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed_int_flt[1]"sv));
 
   // ... but for all other types/mixtures, the type cannot be changed.
-  EXPECT_THROW(config.SetInteger64List("mixed_types"sv, {1, 3, -17}),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.SetInteger64List("mixed_types"sv, {1, 3, -17}), wkc::TypeError);
 
   EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false}));
   EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
   EXPECT_THROW(config.SetStringList("flags"sv, {"abc"}), wkc::TypeError);
 
-  EXPECT_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.SetDoubleList("nested_lst"sv, {1.0, -0.5}), wkc::TypeError);
 }
 
 TEST(ConfigListTest, SetBooleanList) {
@@ -420,8 +420,8 @@ TEST(ConfigListTest, SetTimeList) {
   EXPECT_TRUE(config.GetTimeList("empty"sv).empty());
 
   // Set/get list
-  const std::vector<wkc::time> times = {wkc::time{0, 0}, wkc::time{12, 0},
-                                        wkc::time{23, 59, 59}};
+  const std::vector<wkc::time> times = {
+      wkc::time{0, 0}, wkc::time{12, 0}, wkc::time{23, 59, 59}};
   EXPECT_NO_THROW(config.SetTimeList("times"sv, times));
   const auto lookup = config.GetTimeList("times"sv);
   EXPECT_EQ(times.size(), lookup.size());
@@ -520,8 +520,8 @@ TEST(ConfigListTest, MixedList) {
   EXPECT_NO_THROW(config.SetDouble("types[1]"sv, 17.0));
   EXPECT_EQ(17, config.GetInteger32("types[1]"sv));
 
-  EXPECT_THROW(config.SetTime("types[4]"sv, wkc::time{"08:00"sv}),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.SetTime("types[4]"sv, wkc::time{"08:00"sv}), wkc::TypeError);
   const wkc::date day{"31.12.1234"};
   EXPECT_NO_THROW(config.SetDate("types[4]"sv, day));
   EXPECT_EQ(day, config.GetDate("types[4]"sv));

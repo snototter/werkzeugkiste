@@ -50,9 +50,10 @@ TEST(ContainerUtilsTest, Smooth) {
   EXPECT_EQ(smooth[5], (buffer[4] + buffer[5] + buffer[6]) / 3.0);
 
   for (std::size_t i = 2; i < 5; ++i) {
-    EXPECT_EQ(smooth[i], (buffer[i - 2] + buffer[i - 1] + buffer[i] +
-                          buffer[i + 1] + +buffer[i + 2]) /
-                             5.0);
+    EXPECT_EQ(smooth[i],
+        (buffer[i - 2] + buffer[i - 1] + buffer[i] + buffer[i + 1] +
+            +buffer[i + 2]) /
+            5.0);
   }
 }
 

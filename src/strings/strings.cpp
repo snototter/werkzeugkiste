@@ -89,17 +89,18 @@ void ToUpper(std::string& s) {
 
 std::string LTrim(std::string_view totrim) {
   std::string s(totrim);
-  s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-                                  [](int c) { return std::isspace(c) == 0; }));
+  s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int c) {
+    return std::isspace(c) == 0;
+  }));
   return s;
 }
 
 std::string RTrim(std::string_view totrim) {
   std::string s(totrim);
-  s.erase(std::find_if(s.rbegin(), s.rend(),
-                       [](int c) { return std::isspace(c) == 0; })
+  s.erase(std::find_if(
+              s.rbegin(), s.rend(), [](int c) { return std::isspace(c) == 0; })
               .base(),
-          s.end());
+      s.end());
   return s;
 }
 
@@ -136,7 +137,7 @@ std::vector<std::string> Split(std::string_view s, char delim) {
 }
 
 std::vector<std::string_view> Tokenize(std::string_view s,
-                                       std::string_view delim) {
+    std::string_view delim) {
   std::vector<std::string_view> tokens;
   const auto* first = s.begin();
 
@@ -161,8 +162,9 @@ std::vector<std::string_view> Tokenize(std::string_view s,
   return tokens;
 }
 
-std::string Replace(std::string_view haystack, std::string_view needle,
-                    std::string_view replacement) {
+std::string Replace(std::string_view haystack,
+    std::string_view needle,
+    std::string_view replacement) {
   std::string result{haystack};
   if ((haystack.length() == 0) || (needle.length() == 0)) {
     return result;
@@ -184,8 +186,9 @@ std::string Replace(std::string_view haystack, char needle, char replacement) {
 }
 
 // TODO continue string_view replacements below
-bool GetUrlProtocol(const std::string& url, std::string& protocol,
-                    std::string& remainder) {
+bool GetUrlProtocol(const std::string& url,
+    std::string& protocol,
+    std::string& remainder) {
   const std::size_t protocol_pos = url.find("://");
   if (protocol_pos == std::string::npos) {
     protocol = "";
@@ -306,8 +309,10 @@ std::string Slug(std::string_view s, bool strip_dashes) {
   return out.str();
 }
 
-std::string Shorten(std::string_view s, std::size_t desired_length,
-                    int ellipsis_position, std::string_view ellipsis) {
+std::string Shorten(std::string_view s,
+    std::size_t desired_length,
+    int ellipsis_position,
+    std::string_view ellipsis) {
   if (s.empty() || (desired_length >= s.length())) {
     return std::string(s);
   }

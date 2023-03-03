@@ -13,7 +13,7 @@ using namespace std::string_view_literals;
 template <typename VecType, typename Tuples>
 inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
   static_assert(VecType::ndim == 2 || VecType::ndim == 3,
-                "This test util is only supported for 2D or 3D vectors.");
+      "This test util is only supported for 2D or 3D vectors.");
 
   std::vector<VecType> poly;
   for (const auto &tpl : tuples) {
@@ -239,9 +239,16 @@ TEST(ConfigCompoundTest, GetGroup) {
   sub = config.GetGroup("lvl1"sv);
   EXPECT_FALSE(sub.Empty());
   keys = sub.ListParameterNames(true);
-  const std::vector<std::string> expected{
-      "flt",         "grp1", "grp1.str", "grp1.lst", "grp1.lst[0]",
-      "grp1.lst[1]", "grp2", "grp2.str", "grp2.val", "grp3"};
+  const std::vector<std::string> expected{"flt",
+      "grp1",
+      "grp1.str",
+      "grp1.lst",
+      "grp1.lst[0]",
+      "grp1.lst[1]",
+      "grp2",
+      "grp2.str",
+      "grp2.val",
+      "grp3"};
   CheckMatchingContainers(expected, keys);
 
   // Empty sub-group

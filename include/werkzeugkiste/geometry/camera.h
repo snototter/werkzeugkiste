@@ -19,19 +19,19 @@ namespace werkzeugkiste::geometry {
 /// Returns the pinhole projection matrix `P = K * [R | t] = K * Rt`.
 template <typename Tp>
 inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
-                                                const Matrix<Tp, 3, 4>& Rt) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 4>& Rt) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   return K * Rt;
 }
 
 /// Returns the pinhole projection matrix `P = K * [R | t]`.
 template <typename Tp>
 inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
-                                                const Matrix<Tp, 3, 3>& R,
-                                                const Matrix<Tp, 3, 1>& t) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 3>& R,
+    const Matrix<Tp, 3, 1>& t) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   Matrix<Tp, 3, 4> Rt;
   Rt << R, t;
   return ProjectionMatrixFromKRt(K, Rt);
@@ -40,10 +40,10 @@ inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
 /// Returns the projection matrix `P = K * [R | t]`.
 template <typename Tp>
 inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
-                                                const Matrix<Tp, 3, 3>& R,
-                                                const Vec<Tp, 3>& t) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 3>& R,
+    const Vec<Tp, 3>& t) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   return ProjectionMatrixFromKRt(K, R, VecToEigenMat<3>(t));
 }
 
@@ -53,28 +53,28 @@ inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
 /// Returns the optical center C = -R' * t.
 template <typename Tp>
 inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 3>& R,
-                                     const Matrix<Tp, 3, 1>& t) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 1>& t) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   return EigenColToVec<Tp, 3, 1>(-R.transpose() * t, 0);
 }
 
 /// Returns the optical center C = -R' * t.
 template <typename Tp>
 inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 3>& R,
-                                     const Vec<Tp, 3>& t) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Vec<Tp, 3>& t) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   return CameraCenterFromRt(R, VecToEigenMat<3>(t));
 }
 
 /// Returns the optical center C = -R' * t.
 template <typename Tp>
 inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 4>& Rt) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
-  return EigenColToVec<Tp, 3, 1>(-Rt.block(0, 0, 3, 3).transpose() * Rt.col(3),
-                                 0);
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
+  return EigenColToVec<Tp, 3, 1>(
+      -Rt.block(0, 0, 3, 3).transpose() * Rt.col(3), 0);
 }
 
 //-----------------------------------------------------------------------------
@@ -87,8 +87,8 @@ inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 4>& Rt) {
 template <typename Tp>
 inline Matrix<Tp, 3, 3> GroundplaneToImageHomography(
     const Matrix<Tp, 3, 4>& P) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   Matrix<Tp, 3, 3> H;
   H << P.col(0), P.col(1), P.col(3);
   return H;
@@ -100,8 +100,8 @@ inline Matrix<Tp, 3, 3> GroundplaneToImageHomography(
 template <typename Tp>
 inline Matrix<Tp, 3, 3> ImageToGroundplaneHomography(
     const Matrix<Tp, 3, 4>& P) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   Matrix<Tp, 3, 3> H_gp2img = GroundplaneToImageHomography(P);
   return H_gp2img.inverse();
 }
@@ -121,9 +121,9 @@ inline Plane_<Tp> ImagePlaneInCameraCoordinateSystem() {
 /// extrinsic parameters.
 template <typename Tp>
 inline Plane_<Tp> ImagePlaneInWorldCoordinateSystem(const Matrix<Tp, 3, 3>& R,
-                                                    const Vec<Tp, 3>& t) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Vec<Tp, 3>& t) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
 
   // Rotate the image plane normal to express it in the world reference frame:
   const Plane_<Tp> img_plane_cam = ImagePlaneInCameraCoordinateSystem<Tp>();
@@ -140,9 +140,9 @@ inline Plane_<Tp> ImagePlaneInWorldCoordinateSystem(const Matrix<Tp, 3, 3>& R,
 /// Returns true if the world point lies in front of the image plane.
 template <typename Tp>
 inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
-                                  const Matrix<Tp, 3, 4>& Rt) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 4>& Rt) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   Vec<Tp, 3> pt_cam;
   std::tie(pt_cam) = TransformToVecs(Rt, pt_world);
 
@@ -153,10 +153,10 @@ inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
 /// Returns true if the world point lies in front of the image plane.
 template <typename Tp>
 inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
-                                  const Matrix<Tp, 3, 3>& R,
-                                  const Vec<Tp, 3>& t) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 3>& R,
+    const Vec<Tp, 3>& t) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   Matrix<Tp, 3, 4> Rt;
   Rt << R, t;
   return IsInFrontOfImagePlane(pt_world, Rt);
@@ -171,11 +171,11 @@ inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
 /// outside of the image.
 template <typename Tp>
 inline Line2d GetProjectionOfHorizon(const Matrix<Tp, 3, 3>& K,
-                                     const Matrix<Tp, 3, 3>& R,
-                                     const Vec<Tp, 3>& t,
-                                     const Vec2i& image_size = {0, 0}) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 3>& R,
+    const Vec<Tp, 3>& t,
+    const Vec2i& image_size = {0, 0}) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   // Get a vector pointing along the camera's optical axis, which is orthogonal
   // to the ground plane normal:
   const Vec<Tp, 3> img_plane_normal =
@@ -198,9 +198,9 @@ inline Line2d GetProjectionOfHorizon(const Matrix<Tp, 3, 3>& K,
 
   const Matrix<Tp, 3, 4> P = ProjectionMatrixFromKRt(K, R, t);
   Vec<Tp, 2> prj1, prj2;
-  std::tie(prj1, prj2) =
-      ProjectToVecs(P, Vec<Tp, 3>(pt1[0], pt1[1], camera_center3d[2]),
-                    Vec<Tp, 3>(pt2[0], pt2[1], camera_center3d[2]));
+  std::tie(prj1, prj2) = ProjectToVecs(P,
+      Vec<Tp, 3>(pt1[0], pt1[1], camera_center3d[2]),
+      Vec<Tp, 3>(pt2[0], pt2[1], camera_center3d[2]));
 
   Line2d horizon{prj1, prj2};
   if ((image_size.Width() > 0) && (image_size.Height() > 0)) {
@@ -216,10 +216,10 @@ inline Line2d GetProjectionOfHorizon(const Matrix<Tp, 3, 3>& K,
 // Field-of-View
 template <typename Tp>
 inline bool IsPointInsideImage(const Vec<Tp, 2>& pt, const Vec2i& img_size) {
-  return IsPointInsideRectangle<Tp>(
-      pt, Vec<Tp, 2>{0.0, 0.0},
+  return IsPointInsideRectangle<Tp>(pt,
+      Vec<Tp, 2>{0.0, 0.0},
       Vec<Tp, 2>{static_cast<Tp>(img_size.Width()),
-                 static_cast<Tp>(img_size.Height())});
+          static_cast<Tp>(img_size.Height())});
 }
 
 /// Returns true if the given world point would be visible if projected into
@@ -227,11 +227,11 @@ inline bool IsPointInsideImage(const Vec<Tp, 2>& pt, const Vec2i& img_size) {
 /// the projected image coordinates.
 template <typename Tp>
 inline bool ProjectsPointOntoImage(const Vec<Tp, 3>& pt_world,
-                                   const Matrix<Tp, 3, 4>& P,
-                                   const Vec2i& img_size,
-                                   Vec<Tp, 2>* projected) {
-  static_assert(std::is_floating_point_v<Tp>,
-                "Template type must be float or double!");
+    const Matrix<Tp, 3, 4>& P,
+    const Vec2i& img_size,
+    Vec<Tp, 2>* projected) {
+  static_assert(
+      std::is_floating_point_v<Tp>, "Template type must be float or double!");
   Vec<Tp, 2> pt_img;
   std::tie(pt_img) = ProjectToVecs(P, pt_world);
   if (projected) {

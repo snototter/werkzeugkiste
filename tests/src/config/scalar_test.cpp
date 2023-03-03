@@ -36,8 +36,7 @@ TEST(ConfigScalarTest, Integer) {
   try {
     config.GetInteger32("int32_min_underflow"sv);
   } catch (const wkc::TypeError &e) {
-    EXPECT_TRUE(wks::StartsWith(
-        e.what(),
+    EXPECT_TRUE(wks::StartsWith(e.what(),
         "Cannot convert numeric parameter `int32_min_underflow` to `int32_t`. Underflow"sv))
         << "Actual exception message: " << e.what();
   }
@@ -46,16 +45,15 @@ TEST(ConfigScalarTest, Integer) {
   try {
     config.GetInteger32("int32_max_overflow"sv);
   } catch (const wkc::TypeError &e) {
-    EXPECT_TRUE(wks::StartsWith(
-        e.what(),
+    EXPECT_TRUE(wks::StartsWith(e.what(),
         "Cannot convert numeric parameter `int32_max_overflow` to `int32_t`. Overflow"sv))
         << "Actual exception message: " << e.what();
   }
 
-  EXPECT_THROW(config.GetOptionalInteger32("int32_min_underflow"sv),
-               wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalInteger32("int32_max_overflow"sv),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.GetOptionalInteger32("int32_min_underflow"sv), wkc::TypeError);
+  EXPECT_THROW(
+      config.GetOptionalInteger32("int32_max_overflow"sv), wkc::TypeError);
 
   EXPECT_EQ(-1, config.GetInteger32Or("test"sv, -1));
   EXPECT_EQ(17, config.GetInteger32Or("test"sv, 17));
@@ -70,11 +68,11 @@ TEST(ConfigScalarTest, Integer) {
 
   EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_underflow"sv));
   EXPECT_EQ(-2147483649,
-            config.GetOptionalInteger64("int32_min_underflow"sv).value());
+      config.GetOptionalInteger64("int32_min_underflow"sv).value());
 
   EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
-  EXPECT_EQ(+2147483648,
-            config.GetOptionalInteger64("int32_max_overflow"sv).value());
+  EXPECT_EQ(
+      +2147483648, config.GetOptionalInteger64("int32_max_overflow"sv).value());
 
   EXPECT_EQ(-1, config.GetInteger64Or("test"sv, -1));
   EXPECT_EQ(17, config.GetInteger64Or("test"sv, 17));
@@ -229,15 +227,15 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_NE(wkc::date(2022, 01, 02), config.GetDate("dates.day"sv));
 
   EXPECT_TRUE(config.GetOptionalDate("dates.day"sv).has_value());
-  EXPECT_EQ(wkc::date(2023, 01, 02),
-            config.GetOptionalDate("dates.day"sv).value());
+  EXPECT_EQ(
+      wkc::date(2023, 01, 02), config.GetOptionalDate("dates.day"sv).value());
 
   EXPECT_THROW(config.GetDate("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDateOr("str"sv, wkc::date{1234, 12, 30}),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.GetDateOr("str"sv, wkc::date{1234, 12, 30}), wkc::TypeError);
   EXPECT_THROW(config.GetDate("no-such-key"sv), wkc::KeyError);
   EXPECT_EQ(wkc::date(1234, 12, 30),
-            config.GetDateOr("no-such-key"sv, wkc::date{1234, 12, 30}));
+      config.GetDateOr("no-such-key"sv, wkc::date{1234, 12, 30}));
 
   // The fractional seconds ".123" will be parsed according to the TOML
   // specification into "123000000" nanoseconds.
@@ -356,8 +354,8 @@ TEST(ConfigScalarTest, SetBoolean) {
   EXPECT_THROW(config.SetBoolean("no_such_array[3]"sv, true), wkc::KeyError);
   // Creating a table within an existing array is also not supported:
   EXPECT_THROW(config.SetBoolean("array[3].bool"sv, true), wkc::KeyError);
-  EXPECT_THROW(config.SetBoolean("array[4].another_table.value"sv, true),
-               wkc::KeyError);
+  EXPECT_THROW(
+      config.SetBoolean("array[4].another_table.value"sv, true), wkc::KeyError);
 
   // Changing the type of an existing array item is also not supported:
   EXPECT_THROW(config.SetBoolean("array[2]"sv, true), wkc::TypeError);

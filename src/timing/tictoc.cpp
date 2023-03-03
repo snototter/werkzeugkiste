@@ -96,8 +96,9 @@ void TocTemplate(const std::string& label) {
 }
 }  // namespace tictoc_internals
 
-void SetTocFormat(bool print_labels_aligned, int fixed_number_width,
-                  int number_precision) {
+void SetTocFormat(bool print_labels_aligned,
+    int fixed_number_width,
+    int number_precision) {
   tictoc_internals::print_labels_aligned = print_labels_aligned;
   tictoc_internals::number_width = fixed_number_width;
   tictoc_internals::number_precision = number_precision;

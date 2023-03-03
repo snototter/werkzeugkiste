@@ -38,30 +38,30 @@ TEST(ConfigIOTest, NestedTOML) {
            << "\" }]"sv;
 
   auto config = wkc::LoadTOMLString(toml_str.str());
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("no-such-key"sv),
-               wkc::KeyError);
+  EXPECT_THROW(
+      config.LoadNestedTOMLConfiguration("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("integer"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("float"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("lst"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("date"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("time"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("datetime"sv),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.LoadNestedTOMLConfiguration("datetime"sv), wkc::TypeError);
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1.lvl2"sv),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.LoadNestedTOMLConfiguration("lvl1.lvl2"sv), wkc::TypeError);
   config.LoadNestedTOMLConfiguration("nested_config"sv);
 
   EXPECT_EQ(1, config.GetInteger32("nested_config.value1"sv));
   EXPECT_DOUBLE_EQ(2.3, config.GetDouble("nested_config.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
-            config.GetString("nested_config.section1.rel_path"sv));
+      config.GetString("nested_config.section1.rel_path"sv));
 
   // When trying to load an invalid TOML file, an exception should be thrown,
   // and the parameter should not change.
   EXPECT_THROW(config.LoadNestedTOMLConfiguration("invalid_nested_config"sv),
-               wkc::ParseError);
+      wkc::ParseError);
   EXPECT_EQ(fname_invalid_toml, config.GetString("invalid_nested_config"sv));
 
   // Ensure that loading a nested configuration also works at deeper
@@ -70,20 +70,20 @@ TEST(ConfigIOTest, NestedTOML) {
       config.LoadNestedTOMLConfiguration("lvl1.lvl2.lvl3.nested"sv));
   EXPECT_DOUBLE_EQ(2.3, config.GetDouble("lvl1.lvl2.lvl3.nested.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
-            config.GetString("lvl1.lvl2.lvl3.nested.section1.rel_path"sv));
+      config.GetString("lvl1.lvl2.lvl3.nested.section1.rel_path"sv));
 
   // It is not allowed to load a nested configuration directly into an array:
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1.arr[2]"sv),
-               wkc::TypeError);
+  EXPECT_THROW(
+      config.LoadNestedTOMLConfiguration("lvl1.arr[2]"sv), wkc::TypeError);
 
   // One could abuse it, however, to load a nested configuration into a table
   // that is inside an array... Just because you can doesn't mean you should...
   EXPECT_NO_THROW(
       config.LoadNestedTOMLConfiguration("lvl1.another_arr[1].nested"sv));
-  EXPECT_DOUBLE_EQ(2.3,
-                   config.GetDouble("lvl1.another_arr[1].nested.value2"sv));
+  EXPECT_DOUBLE_EQ(
+      2.3, config.GetDouble("lvl1.another_arr[1].nested.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
-            config.GetString("lvl1.another_arr[1].nested.section1.rel_path"sv));
+      config.GetString("lvl1.another_arr[1].nested.section1.rel_path"sv));
 }
 
 TEST(ConfigIOTest, ConfigConstruction) {
@@ -204,8 +204,8 @@ TEST(ConfigIOTest, LoadingToml) {
   EXPECT_TRUE(empty.Equals(def));
 
   // Edge cases for TOML loading:
-  EXPECT_THROW(wkc::LoadTOMLFile("this-does-not-exist.toml"sv),
-               wkc::ParseError);
+  EXPECT_THROW(
+      wkc::LoadTOMLFile("this-does-not-exist.toml"sv), wkc::ParseError);
   try {
     wkc::LoadTOMLFile("this-does-not-exist.toml"sv);
   } catch (const wkc::ParseError &e) {
@@ -228,10 +228,10 @@ TEST(ConfigIOTest, LoadingToml) {
 
 TEST(ConfigIOTest, ParsingInvalidDateTimes) {
   // Leap seconds are not supported.
-  EXPECT_THROW(wkc::LoadTOMLString("dt = 1990-12-31T23:59:60Z"),
-               wkc::ParseError);
-  EXPECT_THROW(wkc::LoadTOMLString("dt = 1990-12-31T15:59:60-08:00"),
-               wkc::ParseError);
+  EXPECT_THROW(
+      wkc::LoadTOMLString("dt = 1990-12-31T23:59:60Z"), wkc::ParseError);
+  EXPECT_THROW(
+      wkc::LoadTOMLString("dt = 1990-12-31T15:59:60-08:00"), wkc::ParseError);
 
   // Leap seconds are not supported.
   EXPECT_THROW(wkc::date_time({1990, 12, 31}, {23, 59, 60}), wkc::ValueError);
@@ -243,7 +243,7 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
   EXPECT_NO_THROW(wkc::date_time{"1990-12-31T23:59:59-00:00"sv});
   EXPECT_NO_THROW(wkc::date_time{"1990-12-31T23:59:59+00:00"sv});
   EXPECT_EQ(wkc::date_time{"1990-12-31T23:59:59-00:00"sv},
-            wkc::date_time{"1990-12-31T23:59:59+00:00"sv});
+      wkc::date_time{"1990-12-31T23:59:59+00:00"sv});
 }
 
 // TODO Can be properly tested once we have LoadJSONString()
@@ -379,8 +379,8 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
     wkc::LoadLibconfigString(invalid_str);
   } catch (const wkc::ParseError &e) {
     EXPECT_TRUE(wks::StartsWith(e.what(),
-                                "Parsing libconfig string failed at line `2`: "
-                                "mismatched element type in array"))
+        "Parsing libconfig string failed at line `2`: "
+        "mismatched element type in array"))
         << "Actual exception message: " << e.what();
   }
 }

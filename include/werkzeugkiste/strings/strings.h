@@ -15,7 +15,7 @@ namespace werkzeugkiste::strings {
 
 /// Returns true if the string ends with the given suffix.
 inline constexpr bool EndsWith(std::string_view s,
-                               std::string_view suffix) noexcept {
+    std::string_view suffix) noexcept {
   bool result{false};
   if ((s.length() > 0) && (suffix.length() > 0) &&
       (s.length() >= suffix.length())) {
@@ -36,7 +36,7 @@ inline constexpr bool EndsWith(std::string_view s, char end) noexcept {
 
 /// Returns true if the given string starts with the prefix.
 inline constexpr bool StartsWith(std::string_view s,
-                                 std::string_view prefix) noexcept {
+    std::string_view prefix) noexcept {
   bool result{false};
   if ((s.length() > 0) && (prefix.length() > 0) &&
       (s.length() >= prefix.length())) {
@@ -77,7 +77,7 @@ inline std::string Upper(const std::string& s) {
 /// @param str2 Second string.
 /// @return :math:`|len(str1) - len(str2)|`
 inline std::size_t LengthDifference(std::string_view str1,
-                                    std::string_view str2) {
+    std::string_view str2) {
   const std::size_t l1 = str1.length();
   const std::size_t l2 = str2.length();
   if (l1 < l2) {
@@ -120,12 +120,12 @@ std::vector<std::string> Split(std::string_view s, char delim);
 /// "a", "b" and "c") as Tokenize("a-b-c-", "-") and also "-a-b-c--".
 WERKZEUGKISTE_STRINGS_EXPORT
 std::vector<std::string_view> Tokenize(std::string_view s,
-                                       std::string_view delim);
+    std::string_view delim);
 
-template <typename Container, typename Tp = std::decay_t<
-                                  decltype(*begin(std::declval<Container>()))>>
+template <typename Container,
+    typename Tp = std::decay_t<decltype(*begin(std::declval<Container>()))>>
 inline std::string Concatenate(const Container& container,
-                               std::string_view delimiter = "") {
+    std::string_view delimiter = "") {
   std::ostringstream concat;
   bool preprend_delimiter = false;
   for (const auto& str : container) {
@@ -142,8 +142,9 @@ inline std::string Concatenate(const Container& container,
 /// Replaces all occurrences of the given search
 /// string `needle` within the `haystack`.
 WERKZEUGKISTE_STRINGS_EXPORT
-std::string Replace(std::string_view haystack, std::string_view needle,
-                    std::string_view replacement);
+std::string Replace(std::string_view haystack,
+    std::string_view needle,
+    std::string_view replacement);
 
 /// Replaces all occurrences of the given character.
 WERKZEUGKISTE_STRINGS_EXPORT
@@ -161,8 +162,8 @@ std::string ClipUrl(const std::string& url);
 /// protocol part.
 WERKZEUGKISTE_STRINGS_EXPORT
 bool GetUrlProtocol(const std::string& url,
-                    std::string& protocol,    // NOLINT
-                    std::string& remainder);  // NOLINT
+    std::string& protocol,    // NOLINT
+    std::string& remainder);  // NOLINT
 
 /// Returns the URL after replacing any plaintext
 /// authentication data by the text `<auth>`.
@@ -199,9 +200,10 @@ std::string Slug(std::string_view s, bool strip_dashes = false);
 /// * `0`: Centered
 /// * `> 0`: Right
 WERKZEUGKISTE_STRINGS_EXPORT
-std::string Shorten(std::string_view s, std::size_t desired_length,
-                    int ellipsis_position = -1,
-                    std::string_view ellipsis = "...");
+std::string Shorten(std::string_view s,
+    std::size_t desired_length,
+    int ellipsis_position = -1,
+    std::string_view ellipsis = "...");
 
 /// Returns the string indented by n-times the given character.
 WERKZEUGKISTE_STRINGS_EXPORT

@@ -24,8 +24,8 @@ namespace werkzeugkiste::geometry {
 /// Returns true if the given point is within the rectangle.
 template <typename T>
 inline bool IsPointInsideRectangle(const Vec<T, 2>& pt,
-                                   const Vec<T, 2>& top_left,
-                                   const Vec<T, 2>& size) {
+    const Vec<T, 2>& top_left,
+    const Vec<T, 2>& size) {
   return (pt.X() >= top_left.X()) && (pt.X() < (top_left.X() + size.Width())) &&
          (pt.Y() >= top_left.Y()) && (pt.Y() < (top_left.Y() + size.Height()));
 }
@@ -41,7 +41,7 @@ template <typename T>
 class Circle_ {  // NOLINT(readability-identifier-naming)
  public:
   static_assert(std::is_floating_point<T>::value,
-                "Circle type must be float or double!");
+      "Circle type must be float or double!");
 
   using vec_type = Vec<T, 2>;  // NOLINT(readability-identifier-naming)
 
@@ -81,15 +81,16 @@ class Circle_ {  // NOLINT(readability-identifier-naming)
 
   /// Returns the number of points of tangency (i.e. 0, 1, or 2) between this
   /// circle and the given point. Optionally sets the points of tangency.
-  int PointsOfTangency(const vec_type& pt, vec_type* pot1 = nullptr,
-                       vec_type* pot2 = nullptr) const;
+  int PointsOfTangency(const vec_type& pt,
+      vec_type* pot1 = nullptr,
+      vec_type* pot2 = nullptr) const;
 
   /// Returns the number of direct common tangents (German "aeussere
   /// Tangenten") between the two circles.
   /// Optionally sets the tangent lines.
   int DirectCommonTangents(const Circle_<T>& other,
-                           Line2d_<T>* tangent1 = nullptr,
-                           Line2d_<T>* tangent2 = nullptr) const;
+      Line2d_<T>* tangent1 = nullptr,
+      Line2d_<T>* tangent2 = nullptr) const;
 
   /// Returns the number of transverse common tangents (German "innere
   /// Tangenten") between the two circles. These are 0 if the circles
@@ -97,28 +98,28 @@ class Circle_ {  // NOLINT(readability-identifier-naming)
   /// circles do not touch.
   /// Optionally sets the tangent lines.
   int TransverseCommonTangents(const Circle_<T>& other,
-                               Line2d_<T>* tangent1 = nullptr,
-                               Line2d_<T>* tangent2 = nullptr) const;
+      Line2d_<T>* tangent1 = nullptr,
+      Line2d_<T>* tangent2 = nullptr) const;
 
   /// Returns the number of intersections (0, 1, or 2) of the two circles.
   /// Returns -1 if the circles are equal and thus every point on the circles
   /// is an intersection point.
   /// Optionally sets the intersection points.
   int IntersectionCircleCircle(const Circle_<T>& other,
-                               vec_type* intersection1 = nullptr,
-                               vec_type* intersection2 = nullptr) const;
+      vec_type* intersection1 = nullptr,
+      vec_type* intersection2 = nullptr) const;
 
   /// Returns the number of intersections (0, 1, or 2) of this circle and the
   /// line. Optionally sets the intersection points.
   int IntersectionCircleLine(const Line2d_<T>& line,
-                             vec_type* intersection1 = nullptr,
-                             vec_type* intersection2 = nullptr) const;
+      vec_type* intersection1 = nullptr,
+      vec_type* intersection2 = nullptr) const;
 
   /// Returns the number of intersections (0, 1, or 2) of this circle and the
   /// line segment(!). Optionally sets the intersection points.
   int IntersectionCircleLineSegment(const Line2d_<T>& segment,
-                                    vec_type* intersection1 = nullptr,
-                                    vec_type* intersection2 = nullptr) const;
+      vec_type* intersection1 = nullptr,
+      vec_type* intersection2 = nullptr) const;
 
  private:
   vec_type center_{0, 0};
@@ -137,7 +138,7 @@ template <typename T>
 class Line2d_ {  // NOLINT(readability-identifier-naming)
  public:
   static_assert(std::is_floating_point<T>::value,
-                "2D line type must be float or double!");
+      "2D line type must be float or double!");
 
   using vec_type = Vec<T, 2>;   // NOLINT(readability-identifier-naming)
   using vec3_type = Vec<T, 3>;  // NOLINT(readability-identifier-naming)
@@ -202,9 +203,9 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
     // Clamp the dot product to avoid numerical issues. Although unlikely,
     // these can occur (and they are a pain to debug, thus I prefer to err
     // on the safe side).
-    return std::acos(std::max(
-        -1.0, std::min(1.0, static_cast<double>(
-                                UnitDirection().Dot(v.UnitVector())))));
+    return std::acos(std::max(-1.0,
+        std::min(
+            1.0, static_cast<double>(UnitDirection().Dot(v.UnitVector())))));
   }
 
   /// Returns the angle between the line and the given directional vector.
@@ -260,44 +261,44 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
   /// pt_from_ --> pt_to_. If you need to distinguish left-of vs. exactly on
   /// the line, pass a valid pointer `is_on_line`.
   bool IsPointLeftOfLine(const vec_type& point,
-                         bool* is_on_line = nullptr) const;
+      bool* is_on_line = nullptr) const;
 
   /// Returns true if this line intersects the other line and optionally sets
   /// the `intersection_point`.
   bool IntersectionLineLine(const Line2d_& other,
-                            vec_type* intersection_point = nullptr) const;
+      vec_type* intersection_point = nullptr) const;
 
   /// Returns true if this line(!) intersects the other line segment(!) and
   /// optionally sets the `intersection_point`.
-  bool IntersectionLineLineSegment(
-      const Line2d_& segment, vec_type* intersection_point = nullptr) const;
+  bool IntersectionLineLineSegment(const Line2d_& segment,
+      vec_type* intersection_point = nullptr) const;
 
   /// Returns true if this line segment(!) intersects the other line segment(!)
   /// and optionally sets the `intersection_point`.
-  bool IntersectionLineSegmentLineSegment(
-      const Line2d_& segment, vec_type* intersection_point = nullptr) const;
+  bool IntersectionLineSegmentLineSegment(const Line2d_& segment,
+      vec_type* intersection_point = nullptr) const;
 
   /// Returns the number of intersections (0, 1, or 2) of this line and
   /// the circle. Optionally sets the intersection points.
   int IntersectionLineCircle(const Circle_<T>& circle,
-                             vec_type* intersection1 = nullptr,
-                             vec_type* intersection2 = nullptr) const;
+      vec_type* intersection1 = nullptr,
+      vec_type* intersection2 = nullptr) const;
 
   /// Returns the number of intersections (0, 1, or 2) of this line segment(!)
   /// and the circle. Optionally sets the intersection points.
   int IntersectionLineSegmentCircle(const Circle_<T>& circle,
-                                    vec_type* intersection1 = nullptr,
-                                    vec_type* intersection2 = nullptr) const;
+      vec_type* intersection1 = nullptr,
+      vec_type* intersection2 = nullptr) const;
 
   /// Clips this line(!) such that only the part within the rectangle
   /// remains, check via `IsValid()` afterwards.
   Line2d_<T> ClipLineByRectangle(const vec_type& top_left,
-                                 const vec_type& size) const;
+      const vec_type& size) const;
 
   /// Clips this line segment(!) such that only the part within the rectangle
   /// remains, check via `IsValid()` afterwards.
   Line2d_<T> ClipLineSegmentByRectangle(const vec_type& top_left,
-                                        const vec_type& size) const;
+      const vec_type& size) const;
 
   /// Overloaded output stream operator.
   friend std::ostream& operator<<(std::ostream& stream, const Line2d_& line) {
@@ -332,7 +333,7 @@ template <typename T>
 class Line3d_ {  // NOLINT(readability-identifier-naming)
  public:
   static_assert(std::is_floating_point<T>::value,
-                "3D line type must be float or double!");
+      "3D line type must be float or double!");
 
   using vec_type = Vec<T, 3>;  // NOLINT(readability-identifier-naming)
 
@@ -389,9 +390,9 @@ class Line3d_ {  // NOLINT(readability-identifier-naming)
   /// Returns the angle between the line and the given directional vector.
   /// The angle will be between 0 and Pi.
   inline double AngleRad(const vec_type& v) const {
-    return std::acos(std::max(
-        -1.0, std::min(1.0, static_cast<double>(
-                                UnitDirection().Dot(v.UnitVector())))));
+    return std::acos(std::max(-1.0,
+        std::min(
+            1.0, static_cast<double>(UnitDirection().Dot(v.UnitVector())))));
   }
 
   /// Returns the angle between the line and the given directional vector.
@@ -403,9 +404,9 @@ class Line3d_ {  // NOLINT(readability-identifier-naming)
   /// Returns the angle between the line and the plane.
   /// The angle will be between -Pi/2 and Pi/2.
   inline double AngleRad(const Plane_<T>& plane) const {
-    return std::asin(std::max(
-        -1.0, std::min(1.0, static_cast<double>(
-                                UnitDirection().Dot(plane.Normal())))));
+    return std::asin(std::max(-1.0,
+        std::min(
+            1.0, static_cast<double>(UnitDirection().Dot(plane.Normal())))));
   }
 
   /// Returns the angle between the line and the plane.
@@ -480,7 +481,7 @@ template <typename T>
 class Plane_ {  // NOLINT(readability-identifier-naming)
  public:
   static_assert(std::is_floating_point<T>::value,
-                "Plane type must be float or double!");
+      "Plane type must be float or double!");
 
   using vec_type = Vec<T, 3>;  // NOLINT(readability-identifier-naming)
 
@@ -556,10 +557,10 @@ class Plane_ {  // NOLINT(readability-identifier-naming)
   inline vec_type XYZIntercepts() const {
     return vec_type{IsEpsZero(normal_.X()) ? std::numeric_limits<T>::infinity()
                                            : (-offset_ / normal_.X()),
-                    IsEpsZero(normal_.Y()) ? std::numeric_limits<T>::infinity()
-                                           : (-offset_ / normal_.Y()),
-                    IsEpsZero(normal_.Z()) ? std::numeric_limits<T>::infinity()
-                                           : (-offset_ / normal_.Z())};
+        IsEpsZero(normal_.Y()) ? std::numeric_limits<T>::infinity()
+                               : (-offset_ / normal_.Y()),
+        IsEpsZero(normal_.Z()) ? std::numeric_limits<T>::infinity()
+                               : (-offset_ / normal_.Z())};
   }
 
   /// Overloaded output stream operator.

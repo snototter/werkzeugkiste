@@ -80,21 +80,21 @@ TEST(ConfigKeyTest, ParameterNames2) {
 
   // First, check without extracting the array keys.
   std::vector<std::string> expected_keys{"arr1",
-                                         "arr1[1].first",
-                                         "arr1[1].second",
-                                         "lvl-1",
-                                         "lvl-1.arr2",
-                                         "lvl-1.arr3",
-                                         "lvl-1.arr3[2].name",
-                                         "lvl-1.arr3[2].age",
-                                         "lvl-1.arr3[3][2].type",
-                                         "lvl-1.arr3[3][2].value",
-                                         "lvl-1.lvl-2",
-                                         "lvl-1.lvl-2.param1",
-                                         "lvl-1.lvl-2.param2",
-                                         "tests",
-                                         "tests[0].name",
-                                         "tests[2].param"};
+      "arr1[1].first",
+      "arr1[1].second",
+      "lvl-1",
+      "lvl-1.arr2",
+      "lvl-1.arr3",
+      "lvl-1.arr3[2].name",
+      "lvl-1.arr3[2].age",
+      "lvl-1.arr3[3][2].type",
+      "lvl-1.arr3[3][2].value",
+      "lvl-1.lvl-2",
+      "lvl-1.lvl-2.param1",
+      "lvl-1.lvl-2.param2",
+      "tests",
+      "tests[0].name",
+      "tests[2].param"};
   auto keys = config.ListParameterNames(false);
 
   CheckMatchingContainers(expected_keys, keys);

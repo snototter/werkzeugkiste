@@ -11,8 +11,9 @@
 namespace werkzeugkiste::container {
 
 /// Templated STL compatible iterator for the circular_buffer.
-template <typename T, typename T_nonconst,
-          typename elem_type = typename T::value_type>
+template <typename T,
+    typename T_nonconst,
+    typename elem_type = typename T::value_type>
 class circular_buffer_iterator {
  public:
   // STL requested typedefs
@@ -38,9 +39,9 @@ class circular_buffer_iterator {
 
   // Provides an explicit cast from iterator to const_iterator to
   // enable `const_iterator = buffer.begin();`
-  circular_buffer_iterator(
-      const circular_buffer_iterator<T_nonconst, T_nonconst,
-                                     typename T_nonconst::value_type>& other)
+  circular_buffer_iterator(const circular_buffer_iterator<T_nonconst,
+      T_nonconst,
+      typename T_nonconst::value_type>& other)
       : buf_(other.buf_), pos_(other.pos_) {}
 
   friend class circular_buffer_iterator<const T, T, const elem_type>;
@@ -150,8 +151,9 @@ circular_buffer_iterator_t operator-(
 //--------------------------------------------------------------------------------
 
 /// STL-like circular buffer
-template <typename T, int DefaultCapacity = 100,
-          typename Alloc = std::allocator<T> >
+template <typename T,
+    int DefaultCapacity = 100,
+    typename Alloc = std::allocator<T> >
 class circular_buffer {
  public:
   // STL requested typedefs.

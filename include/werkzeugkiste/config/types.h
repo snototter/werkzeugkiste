@@ -173,8 +173,10 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   /// * HH:MM:SS.sssssssss (for nanoseconds)
   explicit time(std::string_view str);
 
-  time(uint_least8_t h, uint_least8_t m, uint_least8_t s = 0,
-       uint_least32_t ns = 0);
+  time(uint_least8_t h,
+      uint_least8_t m,
+      uint_least8_t s = 0,
+      uint_least32_t ns = 0);
 
   /// @brief Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
