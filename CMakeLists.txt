@@ -394,7 +394,7 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 if(werkzeugkiste_WITH_LIBCONFIG)
-  # TODO find portable way (mac, win)
+  # TODO find portable way (mac, win?)
   find_path(LIB_LIBCFG_INCDIR libconfig.h++)
   find_library(LIB_LIBCFG_LIBRARY NAMES config++)
 

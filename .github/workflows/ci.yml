@@ -81,7 +81,7 @@ jobs:
       uses: MarkusJx/googletest-installer@v1.1.1
 
     - name: Install werkzeugkiste requirements
-      run: sudo apt-get install libeigen3-dev -q -y
+      run: sudo apt-get install libeigen3-dev libconfig++-dev -q -y
 
     - name: Configure
       env: { CXX: clang++-14 }
@@ -134,7 +134,7 @@ jobs:
       uses: jrl-umi3218/github-actions/install-dependencies@master
       with:
         ubuntu: |
-          apt: libeigen3-dev
+          apt: libeigen3-dev libconfig++-dev
         macos: |
           brew: eigen
         windows: |
