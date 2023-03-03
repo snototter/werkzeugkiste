@@ -395,7 +395,7 @@ endif()
 
 if(werkzeugkiste_WITH_LIBCONFIG)
   # TODO find portable way (mac, win)
-  find_path(LIB_LIBCFG_INCDIR libconfig.hh)
+  find_path(LIB_LIBCFG_INCDIR libconfig.h++)
   find_library(LIB_LIBCFG_LIBRARY NAMES config++)
 
   target_include_directories(werkzeugkiste-config PRIVATE ${LIB_LIBCFG_INCDIR})
