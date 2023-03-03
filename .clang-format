@@ -1,3 +1,11 @@
 ---
 Language: Cpp
 BasedOnStyle: Google
+
+AllowShortIfStatementsOnASingleLine: Never
+
+BinPackArguments: false
+BinPackParameters: false
+
+IndentWidth: 2
+ContinuationIndentWidth: 4
