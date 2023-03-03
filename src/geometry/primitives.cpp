@@ -61,8 +61,9 @@ bool Circle_<T>::IsPointInCircle(const vec_type& pt, bool* is_on_circle) const {
 }
 
 template <typename T>
-int Circle_<T>::PointsOfTangency(const vec_type& pt, vec_type* pot1,
-                                 vec_type* pot2) const {
+int Circle_<T>::PointsOfTangency(const vec_type& pt,
+    vec_type* pot1,
+    vec_type* pot2) const {
   bool is_on_circle{false};
   if (IsPointInCircle(pt, &is_on_circle)) {
     return 0;
@@ -134,8 +135,8 @@ int Circle_<T>::PointsOfTangency(const vec_type& pt, vec_type* pot1,
 
 template <typename T>
 int Circle_<T>::DirectCommonTangents(const Circle_<T>& other,
-                                     Line2d_<T>* tangent1,
-                                     Line2d_<T>* tangent2) const {
+    Line2d_<T>* tangent1,
+    Line2d_<T>* tangent2) const {
   // Tangents (transverse and/or direct) depending on distance between
   // the circles:
   // * r1 + r2 < center_dist:  4 tangents (2 direct, 2 transverse)
@@ -220,8 +221,8 @@ int Circle_<T>::DirectCommonTangents(const Circle_<T>& other,
 
 template <typename T>
 int Circle_<T>::TransverseCommonTangents(const Circle_<T>& other,
-                                         Line2d_<T>* tangent1,
-                                         Line2d_<T>* tangent2) const {
+    Line2d_<T>* tangent1,
+    Line2d_<T>* tangent2) const {
   const double distance = center_.DistanceEuclidean(other.center_);
   const double sum_radii = radius_ + other.radius_;
 
@@ -301,8 +302,8 @@ int Circle_<T>::TransverseCommonTangents(const Circle_<T>& other,
 
 template <typename T>
 int Circle_<T>::IntersectionCircleCircle(const Circle_<T>& other,
-                                         vec_type* intersection1,
-                                         vec_type* intersection2) const {
+    vec_type* intersection1,
+    vec_type* intersection2) const {
   const double distance = center_.DistanceEuclidean(other.center_);
 
   // Are the circles the same?
@@ -356,17 +357,17 @@ int Circle_<T>::IntersectionCircleCircle(const Circle_<T>& other,
 
 template <typename T>
 int Circle_<T>::IntersectionCircleLine(const Line2d_<T>& line,
-                                       vec_type* intersection1,
-                                       vec_type* intersection2) const {
+    vec_type* intersection1,
+    vec_type* intersection2) const {
   return line.IntersectionLineCircle(*this, intersection1, intersection2);
 }
 
 template <typename T>
 int Circle_<T>::IntersectionCircleLineSegment(const Line2d_<T>& segment,
-                                              vec_type* intersection1,
-                                              vec_type* intersection2) const {
-  return segment.IntersectionLineSegmentCircle(*this, intersection1,
-                                               intersection2);
+    vec_type* intersection1,
+    vec_type* intersection2) const {
+  return segment.IntersectionLineSegmentCircle(
+      *this, intersection1, intersection2);
 }
 
 // Explicit instantiation:
@@ -380,8 +381,6 @@ Line2d_<T> Line2d_<T>::LeftToRight() const {
   if (!IsValid()) {
     return Line2d_<T>{};
   }
-
-  // NOLINTBEGIN(llvm-else-after-return)
 
   if (IsEpsEqual(pt_from_.X(), pt_to_.X())) {
     // A vertical line will be sorted top-to-bottom:
@@ -398,8 +397,6 @@ Line2d_<T> Line2d_<T>::LeftToRight() const {
       return Line2d_<T>{pt_to_, pt_from_};
     }
   }
-
-  // NOLINTEND(llvm-else-after-return)
 }
 
 template <typename T>
@@ -444,7 +441,7 @@ bool Line2d_<T>::IsCollinear(const Line2d_& other) const {
 
 template <typename T>
 bool Line2d_<T>::IsPointLeftOfLine(const vec_type& point,
-                                   bool* is_on_line) const {
+    bool* is_on_line) const {
   const T det = Direction().Determinant(point - pt_to_);
 
   // If the "2d cross product" (i.e. determinant) is 0, the points are
@@ -464,7 +461,7 @@ bool Line2d_<T>::IsPointLeftOfLine(const vec_type& point,
 
 template <typename T>
 bool Line2d_<T>::IntersectionLineLine(const Line2d_& other,
-                                      vec_type* intersection_point) const {
+    vec_type* intersection_point) const {
   const vec3_type ip = HomogeneousForm().Cross(other.HomogeneousForm());
   if (IsEpsZero(ip[2])) {
     // Intersection point is at infinity
@@ -479,8 +476,8 @@ bool Line2d_<T>::IntersectionLineLine(const Line2d_& other,
 }
 
 template <typename T>
-bool Line2d_<T>::IntersectionLineLineSegment(
-    const Line2d_& segment, vec_type* intersection_point) const {
+bool Line2d_<T>::IntersectionLineLineSegment(const Line2d_& segment,
+    vec_type* intersection_point) const {
   // Line 1 passes through p and (p + r)
   const vec_type p = pt_from_;
   const vec_type r = Direction();
@@ -518,8 +515,8 @@ bool Line2d_<T>::IntersectionLineLineSegment(
 }
 
 template <typename T>
-bool Line2d_<T>::IntersectionLineSegmentLineSegment(
-    const Line2d_& segment, vec_type* intersection_point) const {
+bool Line2d_<T>::IntersectionLineSegmentLineSegment(const Line2d_& segment,
+    vec_type* intersection_point) const {
   // Based on https://stackoverflow.com/a/565282/400948
   // Line 1 goes from p to p + r
   const vec_type p = pt_from_;
@@ -576,8 +573,8 @@ bool Line2d_<T>::IntersectionLineSegmentLineSegment(
 
 template <typename T>
 int Line2d_<T>::IntersectionLineCircle(const Circle_<T>& circle,
-                                       vec_type* intersection1,
-                                       vec_type* intersection2) const {
+    vec_type* intersection1,
+    vec_type* intersection2) const {
   // Interesting further read on collision detection via projections:
   // https://stackoverflow.com/a/1084899/400948
   // This implementation is based on:
@@ -606,29 +603,29 @@ int Line2d_<T>::IntersectionLineCircle(const Circle_<T>& circle,
     if (intersection1 != nullptr) {
       intersection1->SetX(((D * dy) + (sgn * dx * discriminant_sqrt)) / dr_sqr +
                           circle.CenterX());
-      intersection1->SetY(((-D * dx) + (std::fabs(dy) * discriminant_sqrt)) /
-                              dr_sqr +
-                          circle.CenterY());
+      intersection1->SetY(
+          ((-D * dx) + (std::fabs(dy) * discriminant_sqrt)) / dr_sqr +
+          circle.CenterY());
     }
     num_poi = 1;
   } else {
     if (Sign(discriminant) > 0) {
       // 2 intersection points
       if (intersection1 != nullptr) {
-        intersection1->SetX(((D * dy) + (sgn * dx * discriminant_sqrt)) /
-                                dr_sqr +
-                            circle.CenterX());
-        intersection1->SetY(((-D * dx) + (std::fabs(dy) * discriminant_sqrt)) /
-                                dr_sqr +
-                            circle.CenterY());
+        intersection1->SetX(
+            ((D * dy) + (sgn * dx * discriminant_sqrt)) / dr_sqr +
+            circle.CenterX());
+        intersection1->SetY(
+            ((-D * dx) + (std::fabs(dy) * discriminant_sqrt)) / dr_sqr +
+            circle.CenterY());
       }
       if (intersection2 != nullptr) {
-        intersection2->SetX(((D * dy) - (sgn * dx * discriminant_sqrt)) /
-                                dr_sqr +
-                            circle.CenterX());
-        intersection2->SetY(((-D * dx) - (std::fabs(dy) * discriminant_sqrt)) /
-                                dr_sqr +
-                            circle.CenterY());
+        intersection2->SetX(
+            ((D * dy) - (sgn * dx * discriminant_sqrt)) / dr_sqr +
+            circle.CenterX());
+        intersection2->SetY(
+            ((-D * dx) - (std::fabs(dy) * discriminant_sqrt)) / dr_sqr +
+            circle.CenterY());
       }
       num_poi = 2;
     } else {
@@ -641,8 +638,8 @@ int Line2d_<T>::IntersectionLineCircle(const Circle_<T>& circle,
 
 template <typename T>
 int Line2d_<T>::IntersectionLineSegmentCircle(const Circle_<T>& circle,
-                                              vec_type* intersection1,
-                                              vec_type* intersection2) const {
+    vec_type* intersection1,
+    vec_type* intersection2) const {
   // Compute intersection points with the line(!) and then check if they're
   // on the segment.
   vec_type line_intersect1;
@@ -702,14 +699,15 @@ int Line2d_<T>::IntersectionLineSegmentCircle(const Circle_<T>& circle,
 
 template <typename T>
 Line2d_<T> Line2d_<T>::ClipLineByRectangle(const vec_type& top_left,
-                                           const vec_type& size) const {
+    const vec_type& size) const {
   const vec_type top_right{top_left.X() + size.Width(), top_left.Y()};
   const vec_type bottom_right{top_right.X(), top_left.Y() + size.Height()};
   const vec_type bottom_left{top_left.X(), bottom_right.Y()};
 
-  const std::vector<Line2d_> edges{
-      Line2d_<T>{top_left, top_right}, Line2d_<T>{top_right, bottom_right},
-      Line2d_<T>{bottom_right, bottom_left}, Line2d_<T>{bottom_left, top_left}};
+  const std::vector<Line2d_> edges{Line2d_<T>{top_left, top_right},
+      Line2d_<T>{top_right, bottom_right},
+      Line2d_<T>{bottom_right, bottom_left},
+      Line2d_<T>{bottom_left, top_left}};
 
   std::vector<vec_type> int_points;
   for (std::size_t i = 0; i < 4; ++i) {
@@ -741,7 +739,7 @@ Line2d_<T> Line2d_<T>::ClipLineByRectangle(const vec_type& top_left,
 
 template <typename T>
 Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
-                                                  const vec_type& size) const {
+    const vec_type& size) const {
   const bool is_from_inside = IsPointInsideRectangle(pt_from_, top_left, size);
   const bool is_to_inside = IsPointInsideRectangle(pt_to_, top_left, size);
 
@@ -753,9 +751,10 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
   const vec_type bottom_right{top_right.X(), top_left.Y() + size.Height()};
   const vec_type bottom_left{top_left.X(), bottom_right.Y()};
 
-  const std::vector<Line2d_> edges{
-      Line2d_<T>{top_left, top_right}, Line2d_<T>{top_right, bottom_right},
-      Line2d_<T>{bottom_right, bottom_left}, Line2d_<T>{bottom_left, top_left}};
+  const std::vector<Line2d_> edges{Line2d_<T>{top_left, top_right},
+      Line2d_<T>{top_right, bottom_right},
+      Line2d_<T>{bottom_right, bottom_left},
+      Line2d_<T>{bottom_left, top_left}};
 
   std::vector<vec_type> int_points;
   for (std::size_t i = 0; i < 4; ++i) {
@@ -836,7 +835,9 @@ Plane_<T>::Plane_(const vec_type& p, const vec_type& q, const vec_type& r)
     WZKLOG_WARN(
         "Cannot create a valid plane from 3 collinear points! Inputs were "
         "p={:s}, q={:s}, r={:s}.",
-        p, q, r);
+        p,
+        q,
+        r);
   }
 }
 

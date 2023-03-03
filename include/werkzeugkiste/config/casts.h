@@ -44,17 +44,16 @@ namespace werkzeugkiste::config {
 
 // NOLINTBEGIN(readability-identifier-naming)
 template <class A, class B>
-struct are_integral
-    : public std::integral_constant<bool, std::is_integral_v<A> &&
-                                              std::is_integral_v<B>> {};
+struct are_integral : public std::integral_constant<bool,
+                          std::is_integral_v<A> && std::is_integral_v<B>> {};
 
 template <class A, class B>
 inline constexpr bool are_integral_v = are_integral<A, B>::value;
 
 template <class A, class B>
 struct are_floating_point
-    : public std::integral_constant<bool, std::is_floating_point_v<A> &&
-                                              std::is_floating_point_v<B>> {};
+    : public std::integral_constant<bool,
+          std::is_floating_point_v<A> && std::is_floating_point_v<B>> {};
 
 template <class A, class B>
 inline constexpr bool are_floating_point_v = are_floating_point<A, B>::value;
@@ -85,8 +84,9 @@ namespace detail {
 
 /// Helper to cast from a SIGNED to an UNSIGNED integral value.
 template <typename T, typename S, typename E>
-T sign_aware_integral_cast(const S value, std::false_type /* same_sign */,
-                           std::true_type /* src_is_signed */) {
+T sign_aware_integral_cast(const S value,
+    std::false_type /* same_sign */,
+    std::true_type /* src_is_signed */) {
   if (value < static_cast<S>(0)) {
     WZK_CASTS_THROW_UNDERFLOW(E, S, T, value);
   }
@@ -98,8 +98,8 @@ T sign_aware_integral_cast(const S value, std::false_type /* same_sign */,
 
   // Get the wider unsigned type.
   using tgt_limits = std::numeric_limits<T>;
-  using wider = std::conditional_t<(us_limits::digits > tgt_limits::digits),
-                                   unsigned_src, T>;
+  using wider = std::
+      conditional_t<(us_limits::digits > tgt_limits::digits), unsigned_src, T>;
 
   if (static_cast<wider>(value) > static_cast<wider>(tgt_limits::max())) {
     WZK_CASTS_THROW_OVERFLOW(E, S, T, value);
@@ -110,8 +110,9 @@ T sign_aware_integral_cast(const S value, std::false_type /* same_sign */,
 
 /// Helper to cast from an UNSIGNED to a SIGNED integral value.
 template <typename T, typename S, typename E>
-T sign_aware_integral_cast(const S value, std::false_type /* same_sign */,
-                           std::false_type /* src_is_signed */) {
+T sign_aware_integral_cast(const S value,
+    std::false_type /* same_sign */,
+    std::false_type /* src_is_signed */) {
   // Casting from unsigned to signed.
   // First, get the maximum target domain value as unsigned.
   using unsigned_tgt = std::make_unsigned_t<T>;
@@ -119,8 +120,8 @@ T sign_aware_integral_cast(const S value, std::false_type /* same_sign */,
 
   // Use the wider (unsigned) type for the range check (because of promotion).
   using src_limits = std::numeric_limits<S>;
-  using wider = std::conditional_t<(ut_limits::digits > src_limits::digits),
-                                   unsigned_tgt, S>;
+  using wider = std::
+      conditional_t<(ut_limits::digits > src_limits::digits), unsigned_tgt, S>;
 
   // The (signed) target limits can now be safely cast to the wider unsigned
   // type for comparison.
@@ -139,8 +140,8 @@ T integral_cast(const S value, std::false_type /* same_sign */) {
   using tgt_limits = std::numeric_limits<T>;
   static_assert(src_limits::is_signed != tgt_limits::is_signed);
 
-  return sign_aware_integral_cast<T, S, E>(
-      value, std::false_type{},
+  return sign_aware_integral_cast<T, S, E>(value,
+      std::false_type{},
       std::integral_constant<bool, src_limits::is_signed>{});
 }
 
@@ -170,14 +171,14 @@ constexpr T int_to_int(const S value) {
   using src_limits = std::numeric_limits<S>;
   using tgt_limits = std::numeric_limits<T>;
   constexpr bool same_sign = src_limits::is_signed == tgt_limits::is_signed;
-  return integral_cast<T, S, E>(value,
-                                std::integral_constant<bool, same_sign>{});
+  return integral_cast<T, S, E>(
+      value, std::integral_constant<bool, same_sign>{});
 }
 
 template <typename T, typename S, typename E>
 T float_to_float(S value) {
   static_assert(are_floating_point_v<T, S>,
-                "Template parameters must be floating point types!");
+      "Template parameters must be floating point types!");
 
   using src_limits = std::numeric_limits<S>;
   using tgt_limits = std::numeric_limits<T>;
@@ -185,8 +186,7 @@ T float_to_float(S value) {
   // Currently, only IEEE 754 (= IEC559) is supported.
   static_assert(src_limits::is_iec559 && tgt_limits::is_iec559);
 
-  static_assert(
-      src_limits::digits > tgt_limits::digits,
+  static_assert(src_limits::digits > tgt_limits::digits,
       "Invalid template parameters (not a narrowing floating point cast)!");
 
   // Handle special floating point values.
@@ -357,7 +357,6 @@ constexpr T checked_numcast(const S value) {
     return value;
   }
 
-  // NOLINTBEGIN(llvm-else-after-return)
   if constexpr (std::is_same_v<T, bool>) {
     // Allow C-style cast to boolean, i.e. if a number is (close to) 0,
     // it is interpreted as `false`. Otherwise, it will be cast to `true`.
@@ -398,7 +397,6 @@ constexpr T checked_numcast(const S value) {
       return detail::float_to_int<T, S, E>(value);
     }
   }
-  // NOLINTEND(llvm-else-after-return)
 
   throw std::logic_error("The requested cast is not supported!");
 }
