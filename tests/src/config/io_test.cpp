@@ -254,6 +254,12 @@ TEST(ConfigIOTest, LoadingJson) {
   EXPECT_TRUE(config.ToJSON().length() > 0);
 }
 
+#ifdef WERKZEUGKISTE_WITH_LIBCONFIG
+TEST(ConfigIOTest, ParseLibconfigFiles) {
+  EXPECT_THROW(wkc::LoadLibconfigFile("no-such-file"sv), wkc::ParseError);
+  // TODO
+}
+
 TEST(ConfigIOTest, ParseLibconfigStrings) {
   // TODO enable if compiled with libconfig
   const auto config = wkc::LoadLibconfigString(R"lcfg(
@@ -272,6 +278,13 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
     flts = [1.2, 2.0];
 
     strings = ["foo", "bar"];
+
+    mixed = (1, true, "string");
+
+    nested = (
+      "foo",
+      { age = 3; name = "bar"; },
+      [-1, 23])
 
     group = {
       flag = true;
@@ -297,16 +310,63 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_FALSE(config.GetBoolean("flag"sv));
   EXPECT_EQ("value", config.GetString("str"sv));
 
-  EXPECT_EQ(3, config.GetInteger32List("ints"sv).size());
-  // TODO check elements
-  EXPECT_EQ(2, config.GetDoubleList("flts"sv).size());
-  // TODO check elements
-  EXPECT_EQ(2, config.GetStringList("strings"sv).size());
-  // TODO check elements
+  // List of integers
+  auto ints = config.GetInteger32List("ints"sv);
+  EXPECT_EQ(3, ints.size());
+  EXPECT_EQ(1, ints[0]);
+  EXPECT_EQ(2, ints[1]);
+  EXPECT_EQ(3, ints[2]);
 
+  // List of floating points
+  const auto flts = config.GetDoubleList("flts"sv);
+  EXPECT_EQ(2, flts.size());
+  EXPECT_DOUBLE_EQ(1.2, flts[0]);
+  EXPECT_DOUBLE_EQ(2.0, flts[1]);
+
+  // String list
+  const auto strings = config.GetStringList("strings"sv);
+  EXPECT_EQ(2, strings.size());
+  EXPECT_EQ("foo", strings[0]);
+  EXPECT_EQ("bar", strings[1]);
+
+  // Mixed list
+  EXPECT_EQ(3, config.Size("mixed"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("mixed"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("mixed[0]"sv));
+  EXPECT_EQ(1, config.GetInteger32("mixed[0]"sv));
+  EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("mixed[1]"sv));
+  EXPECT_TRUE(config.GetBoolean("mixed[1]"sv));
+  EXPECT_EQ(wkc::ConfigType::String, config.Type("mixed[2]"sv));
+  EXPECT_EQ("string", config.GetString("mixed[2]"sv));
+
+  // Mixed & nested list
+  EXPECT_EQ(3, config.Size("nested"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("nested"sv));
+
+  EXPECT_EQ(wkc::ConfigType::String, config.Type("nested[0]"sv));
+  EXPECT_EQ("foo", config.GetString("nested[0]"sv));
+
+  EXPECT_EQ(wkc::ConfigType::Group, config.Type("nested[1]"sv));
+  auto subgroup = config.GetGroup("nested[1]"sv);
+  EXPECT_EQ(2, subgroup.Size());
+  EXPECT_EQ(3, subgroup.GetInteger32("age"sv));
+  EXPECT_EQ(3, config.GetInteger32("nested[1].age"sv));
+  EXPECT_EQ("bar", subgroup.GetString("name"sv));
+  EXPECT_EQ("bar", config.GetString("nested[1].name"sv));
+
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("nested[2]"sv));
+  ints = config.GetInteger32List("nested[2]"sv);
+  EXPECT_EQ(2, ints.size());
+  EXPECT_EQ(-1, ints[0]);
+  EXPECT_EQ(23, ints[1]);
+
+  // Subgroup/Table
+  EXPECT_EQ(wkc::ConfigType::Group, config.Type("group"sv));
+  EXPECT_EQ(3, config.Size("group"sv));
   EXPECT_TRUE(config.GetBoolean("group.flag"sv));
   EXPECT_EQ(123, config.GetInteger32("group.count"sv));
 
+  EXPECT_EQ(wkc::ConfigType::Group, config.Type("group.subgroup"sv));
   EXPECT_FALSE(config.GetBoolean("group.subgroup.flag"sv));
   EXPECT_DOUBLE_EQ(1e-6, config.GetDouble("group.subgroup.threshold"sv));
 
@@ -324,5 +384,12 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
         << "Actual exception message: " << e.what();
   }
 }
+
+#else   // WERKZEUGKISTE_WITH_LIBCONFIG
+TEST(ConfigIOTest, MissingLibconfigSupport) {
+  EXPECT_THROW(wkc::LoadLibconfigFile("no-such-file"sv), std::logic_error);
+  EXPECT_THROW(wkc::LoadLibconfigString("foo = 3"sv), std::logic_error);
+}
+#endif  // WERKZEUGKISTE_WITH_LIBCONFIG
 
 // NOLINTEND

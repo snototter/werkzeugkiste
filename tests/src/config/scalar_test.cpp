@@ -345,23 +345,22 @@ TEST(ConfigScalarTest, SetBoolean) {
   EXPECT_NO_THROW(config.GetBoolean("a.deeper.hierarchy.bool"sv));
   EXPECT_EQ(false, config.GetBoolean("a.deeper.hierarchy.bool"sv));
 
-  // Cannot create a path below a scalar type
-  EXPECT_THROW(config.SetBoolean("a.string.below.bool"sv, true),
-               wkc::TypeError);
+  // We can't add another parameter as a "child" of a scalar value
+  EXPECT_THROW(config.SetBoolean("a.string.below.bool"sv, true), wkc::KeyError);
 
-  // Creating an array is also not supported
-  EXPECT_THROW(config.SetBoolean("an_array[3].bool"sv, true), wkc::TypeError);
-
+  // Similarly, automatically creating an array as (one of the) parent(s) is
+  // also not supported (how should we initialize array elements up to the
+  // requested index, anyhow?). Instead, we would have to first create a
+  // list, and then fill it by ourselves. For this, refer to the
+  // `ConfigListTest` test suite (list_test.cpp).
+  EXPECT_THROW(config.SetBoolean("no_such_array[3]"sv, true), wkc::KeyError);
   // Creating a table within an existing array is also not supported:
-  EXPECT_THROW(config.SetBoolean("array[3].bool"sv, true), wkc::TypeError);
-
-  // Currently, we don't support replacing/inserting array elements:
-  EXPECT_THROW(config.SetBoolean("array[3]"sv, true), std::logic_error);
-
-  // Creating a table as a child of an array is also not supported. There's
-  // currently no need for such exotic use cases.
+  EXPECT_THROW(config.SetBoolean("array[3].bool"sv, true), wkc::KeyError);
   EXPECT_THROW(config.SetBoolean("array[4].another_table.value"sv, true),
-               wkc::TypeError);
+               wkc::KeyError);
+
+  // Changing the type of an existing array item is also not supported:
+  EXPECT_THROW(config.SetBoolean("array[2]"sv, true), wkc::TypeError);
 
   // But setting an existing array element is supported:
   EXPECT_NO_THROW(config.SetBoolean("booleans[1]"sv, true));

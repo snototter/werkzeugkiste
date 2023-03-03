@@ -366,7 +366,7 @@ FetchContent_Declare(
   GIT_TAG v3.2.0)
 FetchContent_MakeAvailable(tomlplusplus)
 
-option(WZK_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
+option(werkzeugkiste_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
 
 # Header files
 set(wzkgconfig_HEADER_FILES
@@ -393,7 +393,7 @@ if(NOT BUILD_SHARED_LIBS)
                              PUBLIC WERKZEUGKISTE_STATIC_DEFINE)
 endif()
 
-if(WZK_WITH_LIBCONFIG)
+if(werkzeugkiste_WITH_LIBCONFIG)
   # TODO find portable way (mac, win)
   find_path(LIB_LIBCFG_INCDIR libconfig.hh)
   find_library(LIB_LIBCFG_LIBRARY NAMES config++)

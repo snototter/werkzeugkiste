@@ -473,6 +473,17 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
                        const std::vector<date_time> &values);
 
   //---------------------------------------------------------------------------
+  // TODO doc
+  void CreateList(std::string_view key);
+  void AppendNestedList(std::string_view key);
+  void Append(std::string_view key, bool value);
+  void Append(std::string_view key, int32_t value);
+  void Append(std::string_view key, int64_t value);
+  void Append(std::string_view key, double value);
+  void Append(std::string_view key, std::string_view value);
+  void Append(std::string_view key, const Configuration &group);
+
+  //---------------------------------------------------------------------------
   // Group/"Sub-Configuration"
 
   /// @brief Returns a copy of the sub-group.

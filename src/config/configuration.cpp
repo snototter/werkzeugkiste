@@ -294,42 +294,42 @@ constexpr const char *TomlTypeName() {
 /// Utility to print the type name of a toml::node/toml::node_view.
 template <typename NodeView>
 inline const char *TomlTypeName(const NodeView &node, std::string_view key) {
-  if (node.is_table()) {
-    return TomlTypeName<toml::table>();
-  }
+  switch (node.type()) {
+    case toml::node_type::array:
+      return TomlTypeName<toml::array>();
 
-  if (node.is_array()) {
-    return TomlTypeName<toml::array>();
-  }
+    case toml::node_type::none: {
+      std::string msg{"Internal node type for parameter `"};
+      msg += key;
+      msg += "` is `none` (not-a-node)!";
+      throw std::logic_error{msg};
+      // or return "none"?
+    }
 
-  if (node.is_integer()) {
-    return TomlTypeName<int64_t>();
-  }
+    case toml::node_type::table:
+      return TomlTypeName<toml::table>();
 
-  if (node.is_floating_point()) {
-    return TomlTypeName<double>();
-  }
+    case toml::node_type::string:
+      return TomlTypeName<std::string>();
 
-  if (node.is_string()) {
-    return TomlTypeName<std::string>();
-  }
+    case toml::node_type::integer:
+      return TomlTypeName<int64_t>();
 
-  if (node.is_boolean()) {
-    return TomlTypeName<bool>();
-  }
+    case toml::node_type::floating_point:
+      return TomlTypeName<double>();
 
-  if (node.is_date()) {
-    return TomlTypeName<toml::date>();
-  }
+    case toml::node_type::boolean:
+      return TomlTypeName<bool>();
 
-  if (node.is_time()) {
-    return TomlTypeName<toml::time>();
-  }
+    case toml::node_type::date:
+      return TomlTypeName<toml::date>();
 
-  if (node.is_date_time()) {
-    return TomlTypeName<toml::date_time>();
-  }
+    case toml::node_type::time:
+      return TomlTypeName<toml::time>();
 
+    case toml::node_type::date_time:
+      return TomlTypeName<toml::date_time>();
+  }
   // LCOV_EXCL_START
   std::string msg{"TOML node type for key `"};
   msg += key;
@@ -532,16 +532,32 @@ std::optional<T> LookupOptionalScalar(const toml::table &tbl,
 /// This does *not* handle arrays!
 inline std::pair<std::string_view, std::string_view> SplitTomlPath(
     std::string_view path) {
-  // TODO This doesn't work for array elements. Currently, this is
-  // not an issue, because we don't allow creating array elements (as
-  // there is no need to do so). If this requirement changes, make sure
-  // to support "fancy" paths, such as "arr[3][0][1].internal.array[0]".
+  // Path splitting for nested arrays is not supported. Currently, this is
+  // not an issue: We don't allow creating array elements. For example,
+  // think of the complexity of handling "fancy" paths such as
+  // "arr[3][0][1].table.array[0]".
+  // Instead, users can create a list (`CreateList`) and then
+  // append scalars, lists and groups/tables (`Append`).
   const std::size_t pos = path.find_last_of('.');
   if (pos != std::string_view::npos) {
     return std::make_pair(path.substr(0, pos), path.substr(pos + 1));
   }
 
   return std::make_pair(std::string_view{}, path);
+}
+
+void EnsureParameterIsCreatable(const toml::table &tbl, std::string_view key) {
+  // Sanity checks are missing on purpose:
+  // 1) empty string or 2) if key exists
+
+  if (key[key.length() - 1] == ']') {
+    std::string msg{
+        "List elements can only be \"set\" (replaced) or \"appended\", but "
+        "not \"created\". Check parameter `"};
+    msg += key;
+    msg += "`!";
+    throw KeyError{msg};
+  }
 }
 
 /// Creates all missing nodes (tables).
@@ -563,28 +579,19 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
 
   if (node.is_value()) {
     // Node exists, but is a scalar value.
-    std::string msg{
-        "Invalid key: The path anchestors must consist of tables/arrays, but "
-        "`"};
+    std::string msg{"The path anchestors must consist of tables/arrays, but `"};
     msg += key;
     msg += "` is of type `";
     msg += TomlTypeName(node, key);
     msg += "`!";
-    throw TypeError{msg};
+    throw KeyError{msg};
   }
 
   // Parent does not exist. We now have to recursively create the
   // parent path, then create a table here.
   // But first, ensure that we are not asked to create a list:
   const auto path = SplitTomlPath(key);
-  if (path.second.find('[') != std::string_view::npos) {
-    std::string msg{
-        "Cannot create the requested configuration hierarchy. Creating a "
-        "list at `"};
-    msg += key;
-    msg += "` is not supported!";
-    throw TypeError{msg};
-  }
+  EnsureParameterIsCreatable(tbl, path.second);
 
   if (path.first.empty()) {
     // Create table at root level.
@@ -596,14 +603,12 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
     if (parent.is_table()) {
       parent.as_table()->emplace(path.second, toml::table{});
     } else {
-      // Would need to parse the array element index from the key.
-      // node.as_array()->emplace(path.second, toml::table{});
       std::string msg{
           "Creating a table as a child of a list is not supported! Check "
           "configuration parameter `"};
       msg += key;
       msg += "`!";
-      throw TypeError{msg};
+      throw KeyError{msg};
     }
   }
 }
@@ -624,10 +629,23 @@ void ReplaceScalar(NodeView &node, Tcfg value, std::string_view key) {
     *node.as_time() = ConvertConfigTypeToToml<toml::time>(value, key);
   } else if (node.is_date_time()) {
     *node.as_date_time() = ConvertConfigTypeToToml<toml::date_time>(value, key);
+  } else if (node.is_array() || node.is_table()) {
+    std::string msg{"Changing the type is not allowed: Cannot replace the "};
+    msg += TomlTypeName(node, key);
+    msg += " `";
+    msg += key;
+    msg += "` by a `";
+    msg += TypeName<Tcfg>();
+    msg += "` scalar!";
+    throw TypeError{msg};
   } else {
     // LCOV_EXCL_START
-    // TODO link to issue
-    throw std::logic_error{"TODO"};
+    std::string msg{"`ReplaceScalar` invoked with unhandled TOML type `"};
+    msg += TomlTypeName(node, key);
+    msg += "`. Check parameter `";
+    msg += key;
+    msg += "`!";
+    throw std::logic_error{msg};
     // LCOV_EXCL_STOP
   }
 }
@@ -649,6 +667,8 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
     ReplaceScalar(node, value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
+    EnsureParameterIsCreatable(tbl, path.second);
+
     toml::table *parent =
         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
     if (parent == nullptr) {
@@ -668,16 +688,19 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
   }
 }
 
+/// @brief Internal helper (no sanity check) to create an array (list of
+///   homogeneous elements).
 template <typename Ttoml, typename Tcfg>
-void CreateArray(toml::table &tbl, std::string_view key,
-                 const std::vector<Tcfg> &vec) {
+void CreateList(toml::table &tbl, std::string_view key,
+                const std::vector<Tcfg> &vec) {
+  const auto path = SplitTomlPath(key);
+  EnsureContainerPathExists(tbl, path.first);
+  EnsureParameterIsCreatable(tbl, path.second);
+
   toml::array arr{};
   for (const auto &value : vec) {
     arr.push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
   }
-
-  const auto path = SplitTomlPath(key);
-  EnsureContainerPathExists(tbl, path.first);
 
   toml::table *parent =
       path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
@@ -699,8 +722,8 @@ void CreateArray(toml::table &tbl, std::string_view key,
 // TODO doc 1) Ttoml is TOML type of the *existing* parameter
 // 2) internal helper - no sanity checks
 template <typename Ttoml, typename Tcfg>
-void ReplaceHomogeneousArray(toml::array &arr, std::string_view key,
-                             const std::vector<Tcfg> &vec) {
+void ReplaceHomogeneousList(toml::array &arr, std::string_view key,
+                            const std::vector<Tcfg> &vec) {
   toml::array toml_arr{};
   for (const auto &value : vec) {
     toml_arr.push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
@@ -720,12 +743,17 @@ bool IsNumericArray(const toml::array &arr) {
 }
 
 template <typename Ttoml, typename Tcfg>
-void ReplaceArray(toml::table &tbl, std::string_view key,
-                  const std::vector<Tcfg> &vec) {
+void ReplaceList(toml::table &tbl, std::string_view key,
+                 const std::vector<Tcfg> &vec) {
   auto node = tbl.at_path(key);
   if (!node.is_array()) {
     // TODO error message
-    throw TypeError{"TODO"};
+    std::string msg{"Cannot replace `"};
+    msg += key;
+    msg += "` by a list, because it is of incompatible type `";
+    msg += TomlTypeName(node, key);
+    msg += "`!";
+    throw TypeError{msg};
   }
 
   toml::array &arr = *node.as_array();
@@ -742,12 +770,12 @@ void ReplaceArray(toml::table &tbl, std::string_view key,
   if (vec.empty()) {
     arr = toml::array{};
   } else if (arr.empty()) {
-    CreateArray<Ttoml, Tcfg>(tbl, key, vec);
+    CreateList<Ttoml, Tcfg>(tbl, key, vec);
   } else if (!arr.is_homogeneous()) {
     if (IsNumericArray(arr)) {
       // If all elements are numbers, we have only int64 and double elements.
       // Thus, we can try to convert all inputs to double precision:
-      ReplaceHomogeneousArray<double>(arr, key, vec);
+      ReplaceHomogeneousList<double>(arr, key, vec);
     } else {
       std::string msg{"Changing the type is not allowed. Parameter `"};
       msg += key;
@@ -758,19 +786,19 @@ void ReplaceArray(toml::table &tbl, std::string_view key,
       throw TypeError{msg};
     }
   } else if (arr[0].is_boolean()) {
-    ReplaceHomogeneousArray<bool>(arr, key, vec);
+    ReplaceHomogeneousList<bool>(arr, key, vec);
   } else if (arr[0].is_integer()) {
-    ReplaceHomogeneousArray<int64_t>(arr, key, vec);
+    ReplaceHomogeneousList<int64_t>(arr, key, vec);
   } else if (arr[0].is_floating_point()) {
-    ReplaceHomogeneousArray<double>(arr, key, vec);
+    ReplaceHomogeneousList<double>(arr, key, vec);
   } else if (arr[0].is_string()) {
-    ReplaceHomogeneousArray<std::string>(arr, key, vec);
+    ReplaceHomogeneousList<std::string>(arr, key, vec);
   } else if (arr[0].is_date()) {
-    ReplaceHomogeneousArray<toml::date>(arr, key, vec);
+    ReplaceHomogeneousList<toml::date>(arr, key, vec);
   } else if (arr[0].is_time()) {
-    ReplaceHomogeneousArray<toml::time>(arr, key, vec);
+    ReplaceHomogeneousList<toml::time>(arr, key, vec);
   } else if (arr[0].is_date_time()) {
-    ReplaceHomogeneousArray<toml::date_time>(arr, key, vec);
+    ReplaceHomogeneousList<toml::date_time>(arr, key, vec);
   } else {
     // LCOV_EXCL_START
     std::string msg{"Configuration parameter `"};
@@ -789,10 +817,35 @@ template <typename Ttoml, typename Tcfg>
 void SetList(toml::table &tbl, std::string_view key,
              const std::vector<Tcfg> &vec) {
   if (ContainsKey(tbl, key)) {
-    ReplaceArray<Ttoml>(tbl, key, vec);
+    ReplaceList<Ttoml>(tbl, key, vec);
   } else {
-    CreateArray<Ttoml>(tbl, key, vec);
+    CreateList<Ttoml>(tbl, key, vec);
   }
+}
+
+toml::array *GetExistingList(toml::table &tbl, std::string_view key) {
+  if (!ContainsKey(tbl, key)) {
+    throw KeyErrorWithSimilarKeys(tbl, key);
+  }
+
+  auto node = tbl.at_path(key);
+  if (!node.is_array()) {
+    std::string msg{"Cannot look up element `"};
+    msg += key;
+    msg += "` as a list, because it is of type `";
+    msg += TomlTypeName(node, key);
+    msg += "`!";
+    throw KeyError{msg};
+  }
+
+  return node.as_array();
+}
+
+template <typename Ttoml, typename Tcfg>
+void AppendScalarListElement(toml::table &tbl, std::string_view key,
+                             Tcfg value) {
+  toml::array *arr = GetExistingList(tbl, key);
+  arr->push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
 }
 
 /// @brief Utility to turn a std::array into a std::tuple.
@@ -1506,6 +1559,48 @@ void Configuration::SetDateTimeList(std::string_view key,
                                     const std::vector<date_time> &values) {
   detail::SetList<toml::date_time>(pimpl_->config_root, key,
                                    values);  // TODO test
+}
+
+//---------------------------------------------------------------------------
+void Configuration::CreateList(std::string_view key) {
+  if (detail::ContainsKey(pimpl_->config_root, key)) {
+    std::string msg{"Cannot create an empty list because parameter `"};
+    msg += key;
+    msg += "` already exists!";
+    throw KeyError{msg};
+  }
+
+  detail::CreateList<bool, bool>(pimpl_->config_root, key, {});
+}
+
+void Configuration::AppendNestedList(std::string_view key) {
+  toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
+  arr->push_back(toml::array{});
+}
+
+void Configuration::Append(std::string_view key, bool value) {
+  detail::AppendScalarListElement<bool>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, int32_t value) {
+  detail::AppendScalarListElement<int64_t>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, int64_t value) {
+  detail::AppendScalarListElement<int64_t>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, double value) {
+  detail::AppendScalarListElement<double>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, std::string_view value) {
+  detail::AppendScalarListElement<std::string>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, const Configuration &group) {
+  toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
+  arr->push_back(group.pimpl_->config_root);
 }
 
 //---------------------------------------------------------------------------

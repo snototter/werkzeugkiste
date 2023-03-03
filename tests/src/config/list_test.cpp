@@ -564,4 +564,89 @@ TEST(ConfigListTest, Size) {
   EXPECT_EQ(2, config.Size("nested_lst[2]"sv));
   EXPECT_EQ(1, config.Size("nested_lst[4]"sv));
 }
+
+TEST(ConfigListTest, CreateMixedList) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    empty = []
+    mixed = [1, "two", 3.5]
+    str = "value"
+    )toml");
+
+  // "CreateList" cannot replace an existing parameter
+  EXPECT_THROW(config.CreateList("empty"sv), wkc::KeyError);
+  EXPECT_THROW(config.CreateList("mixed"sv), wkc::KeyError);
+
+  // We cannot "create" an element of a list, only "append"
+  EXPECT_THROW(config.SetBoolean("empty[0]"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetDouble("empty[5]"sv, 1.0), wkc::KeyError);
+
+  EXPECT_THROW(config.Append("empty[0]"sv, 1.0), wkc::KeyError);
+  EXPECT_NO_THROW(config.Append("empty"sv, true));
+  EXPECT_EQ(1, config.Size("empty"sv));
+
+  // But we can append any item to an existing list
+  // TODO
+
+  // Create a new mixed type list programmatically
+  // TODO adjust docs - this is now supported
+  EXPECT_NO_THROW(config.CreateList("lst"sv));
+  EXPECT_TRUE(config.Contains("lst"sv));
+  EXPECT_EQ(0, config.Size("lst"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("lst"sv));
+
+  EXPECT_THROW(config.Append("str"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBoolean("lst[0]"sv, true), wkc::KeyError);
+
+  EXPECT_NO_THROW(config.Append("lst"sv, true));
+  EXPECT_EQ(1, config.Size("lst"sv));
+  EXPECT_TRUE(config.GetBoolean("lst[0]"sv));
+  EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("lst[0]"sv));
+
+  EXPECT_THROW(config.Append("str"sv, 42), wkc::KeyError);
+  EXPECT_NO_THROW(config.Append("lst"sv, 42));
+  EXPECT_EQ(2, config.Size("lst"sv));
+  EXPECT_EQ(42, config.GetInteger32("lst[1]"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[1]"sv));
+
+  EXPECT_THROW(config.Append("str"sv, 17L), wkc::KeyError);
+  EXPECT_NO_THROW(config.Append("lst"sv, 17L));
+  EXPECT_EQ(3, config.Size("lst"sv));
+  EXPECT_EQ(17, config.GetInteger32("lst[2]"sv));
+  EXPECT_EQ(17L, config.GetInteger64("lst[2]"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[2]"sv));
+
+  EXPECT_THROW(config.Append("str"sv, 1e-3), wkc::KeyError);
+  EXPECT_NO_THROW(config.Append("lst"sv, 1e-3));
+  EXPECT_EQ(4, config.Size("lst"sv));
+  EXPECT_DOUBLE_EQ(1e-3, config.GetDouble("lst[3]"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("lst[3]"sv));
+
+  EXPECT_THROW(config.Append("str"sv, "invalid"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.Append("lst"sv, "valid"sv));
+  EXPECT_EQ(5, config.Size("lst"sv));
+  EXPECT_EQ("valid", config.GetString("lst[4]"sv));
+  EXPECT_EQ(wkc::ConfigType::String, config.Type("lst[4]"sv));
+
+  // TODO Append/Create a sublist
+  // List already exists: instead of creating a separate/new list, we need
+  // to append a nested list:
+  EXPECT_THROW(config.CreateList("lst[5]"sv), wkc::KeyError);
+  EXPECT_THROW(config.AppendNestedList("str"sv), wkc::KeyError);
+  EXPECT_THROW(config.AppendNestedList("lst[4]"sv), wkc::KeyError);
+  EXPECT_THROW(config.AppendNestedList("lst[5]"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.AppendNestedList("lst"sv));
+  EXPECT_EQ(6, config.Size("lst"sv));
+  EXPECT_NO_THROW(config.Append("lst[5]"sv, 1));
+  EXPECT_NO_THROW(config.Append("lst[5]"sv, -2));
+  EXPECT_EQ(6, config.Size("lst"sv));
+  EXPECT_EQ(2, config.Size("lst[5]"sv));
+  EXPECT_EQ(1, config.GetInteger32("lst[5][0]"sv));
+  EXPECT_EQ(-2, config.GetInteger32("lst[5][1]"sv));
+  EXPECT_NO_THROW(config.GetInteger32List("lst[5]"sv));
+  EXPECT_NO_THROW(config.Append("lst[5]"sv, "three"sv));
+  EXPECT_EQ(6, config.Size("lst"sv));
+  EXPECT_EQ(3, config.Size("lst[5]"sv));
+  EXPECT_EQ("three", config.GetString("lst[5][2]"sv));
+  EXPECT_THROW(config.GetInteger32List("lst[5]"sv), wkc::TypeError);
+}
 // NOLINTEND

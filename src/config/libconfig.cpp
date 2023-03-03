@@ -16,23 +16,36 @@
 #include <libconfig.h++>
 #else
 #error \
-    "WZK_WITH_LIBCONFIG was enabled, but libconfig header file cannot be found!"
+    "werkzeugkiste_WITH_LIBCONFIG was enabled, but libconfig++ header file cannot be found!"
 #endif  // has_include
 #endif  // WERKZEUGKISTE_WITH_LIBCONFIG
 
 namespace werkzeugkiste::config {
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
 namespace detail {
-// Forward declarations
+// Forward declaration
 Configuration FromLibconfigGroup(const libconfig::Setting &node);
-void AppendList(Configuration &cfg, const libconfig::Setting &node);
+
+void ThrowImplementationError(std::string_view description,
+                              const char *node_name) {
+  std::string msg{description};
+  if (node_name != nullptr) {
+    msg += " Node name was `";
+    msg += node_name;
+    msg += ".";
+  }
+  msg +=
+      " Please report at "
+      "https://github.com/snototter/werkzeugkiste/issues";
+  throw std::logic_error{msg};
+}
 
 template <typename Tcfg, typename Tlibcfg = Tcfg>
 Tcfg CastSetting(const libconfig::Setting &value) {
   try {
     if constexpr (std::is_same_v<Tcfg, Tlibcfg>) {
       return static_cast<Tcfg>(value);
-    } else {  // NOLINT
+    } else {
       const Tlibcfg val = static_cast<Tlibcfg>(value);
       return static_cast<Tcfg>(val);
     }
@@ -47,68 +60,115 @@ Tcfg CastSetting(const libconfig::Setting &value) {
   }
 }
 
-void AppendSetting(Configuration &cfg, const libconfig::Setting &node) {
-  const char *name = node.getName();
+void AppendListSetting(std::string_view lst_key, Configuration &cfg,
+                       const libconfig::Setting &node) {
   switch (node.getType()) {
     case libconfig::Setting::TypeInt:
       // NOLINTNEXTLINE(google-runtime-int)
-      cfg.SetInteger64(name, CastSetting<int64_t, int>(node));
+      cfg.Append(lst_key, CastSetting<int64_t, int>(node));
       break;
 
     case libconfig::Setting::TypeInt64:
       // NOLINTNEXTLINE(google-runtime-int)
-      cfg.SetInteger64(name, CastSetting<int64_t, long long>(node));
+      cfg.Append(lst_key, CastSetting<int64_t, long long>(node));
       break;
 
     case libconfig::Setting::TypeFloat:
-      cfg.SetDouble(name, CastSetting<double>(node));
+      cfg.Append(lst_key, CastSetting<double>(node));
       break;
 
     case libconfig::Setting::TypeString:
-      cfg.SetString(name, CastSetting<std::string>(node));
+      cfg.Append(lst_key, CastSetting<std::string>(node));
       break;
 
     case libconfig::Setting::TypeBoolean:
-      cfg.SetBoolean(name, CastSetting<bool>(node));
+      cfg.Append(lst_key, CastSetting<bool>(node));
       break;
 
     case libconfig::Setting::TypeGroup:
-      cfg.SetGroup(name, FromLibconfigGroup(node));
+      cfg.Append(lst_key, FromLibconfigGroup(node));
       break;
 
     case libconfig::Setting::TypeArray:
-    case libconfig::Setting::TypeList:
-      AppendList(cfg, node);
-      break;
+    case libconfig::Setting::TypeList: {
+      std::size_t sz = cfg.Size(lst_key);
+      cfg.AppendNestedList(lst_key);
+      std::string elem_key{lst_key};
+      elem_key += '[';
+      elem_key += std::to_string(sz);
+      elem_key += ']';
 
-      // TODO TypeNone / default, throw
+      for (int i = 0; i < node.getLength(); ++i) {
+        AppendListSetting(elem_key, cfg, node[i]);
+      }
+      break;
+    }
+
+    case libconfig::Setting::TypeNone:
+      ThrowImplementationError(
+          "Internal util `AppendNamedSetting` called with node type `none`!",
+          node.getName());
+      break;
   }
 }
 
-void AppendList(Configuration &cfg, const libconfig::Setting &node) {
-  if (!node.isArray() && !node.isList()) {
-    // TODO throw logic_error (should be unreachable, though)
-  }
+void AppendNamedSetting(Configuration &cfg, const libconfig::Setting &node) {
+  std::string_view key{node.getName()};
+  switch (node.getType()) {
+    case libconfig::Setting::TypeInt:
+      // NOLINTNEXTLINE(google-runtime-int)
+      cfg.SetInteger64(key, CastSetting<int64_t, int>(node));
+      break;
 
-  // TODO Configuration needs to be refactored:
-  // * Allow appending any type to an existing list
-  // Workflow would be 1) create empty list, 2) append the children of this
-  // array/list
-  WZKLOG_CRITICAL("TODO need to extract an array/a list: {}", node.getName());
+    case libconfig::Setting::TypeInt64:
+      // NOLINTNEXTLINE(google-runtime-int)
+      cfg.SetInteger64(key, CastSetting<int64_t, long long>(node));
+      break;
+
+    case libconfig::Setting::TypeFloat:
+      cfg.SetDouble(key, CastSetting<double>(node));
+      break;
+
+    case libconfig::Setting::TypeString:
+      cfg.SetString(key, CastSetting<std::string>(node));
+      break;
+
+    case libconfig::Setting::TypeBoolean:
+      cfg.SetBoolean(key, CastSetting<bool>(node));
+      break;
+
+    case libconfig::Setting::TypeGroup:
+      cfg.SetGroup(key, FromLibconfigGroup(node));
+      break;
+
+    case libconfig::Setting::TypeArray:
+    case libconfig::Setting::TypeList: {
+      cfg.CreateList(key);
+      for (int i = 0; i < node.getLength(); ++i) {
+        AppendListSetting(key, cfg, node[i]);
+      }
+      break;
+    }
+
+    case libconfig::Setting::TypeNone:
+      ThrowImplementationError(
+          "Internal util `AppendNamedSetting` called with node type `none`!",
+          node.getName());
+      break;
+  }
 }
 
 Configuration FromLibconfigGroup(const libconfig::Setting &node) {
   if (!node.isGroup()) {
-    // TODO throw logic_error (should be unreachable, though)
+    // This branch should be unreachable.
+    ThrowImplementationError(
+        "Internal util `FromLibconfigGroup` invoked with non-group node!",
+        node.getName());
   }
-
-  const char *name = node.getName();
-  WZKLOG_CRITICAL("TODO need to extract a group: `{}`",
-                  (name != nullptr) ? name : "ROOT");
 
   Configuration grp{};
   for (int i = 0; i < node.getLength(); ++i) {
-    AppendSetting(grp, node[i]);
+    AppendNamedSetting(grp, node[i]);
   }
   return grp;
 }
@@ -144,7 +204,10 @@ Configuration LoadLibconfigFile(std::string_view filename) {
     msg += e.getError();
     throw ParseError{msg};
   } catch (const libconfig::FileIOException &e) {
-    throw ParseError(e.what());  // TODO do we need getError instead?
+    std::string msg{"I/O error while loading libconfig file `"};
+    msg += filename;
+    msg += "`!";
+    throw ParseError{msg};
   }
 }
 
@@ -153,7 +216,7 @@ Configuration Configuration::LoadLibconfigString(std::string_view toml_string) {
   throw std::logic_error{
       "werkzeugkiste::config has been built without libconfig support. "
       "Please install libconfig++ and rebuilt the library with "
-      "`WZK_WITH_LIBCONFIG` enabled"};
+      "`werkzeugkiste_WITH_LIBCONFIG` enabled"};
 }
 
 Configuration Configuration::LoadLibconfigFile(std::string_view filename) {
