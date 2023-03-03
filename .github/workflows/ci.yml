@@ -44,7 +44,7 @@ jobs:
       uses: MarkusJx/googletest-installer@v1.1.1
 
     - name: Install werkzeugkiste requirements
-      run: sudo apt-get install libeigen3-dev -q -y
+      run: sudo apt-get install libeigen3-dev libconfig++-dev -q -y
 
     - name: Install LCov
       run: sudo apt-get update -q
