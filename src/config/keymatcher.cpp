@@ -9,16 +9,6 @@
 namespace werkzeugkiste::config {
 struct KeyMatcher::Impl {
  public:
-  //  Impl() = default;
-
-  //  // Copyable
-  //  Impl(const Impl &) = default;
-  //  Impl &operator=(const Impl &) = default;
-
-  //  // Moveable
-  //  Impl(Impl &&) = default;
-  //  Impl &operator=(Impl &&) = default;
-
   void RegisterKey(std::string_view key) {
     patterns_.emplace_back(std::string(key), BuildRegex(key));
   }
@@ -32,8 +22,8 @@ struct KeyMatcher::Impl {
       }
 
       if (pattern.second.has_value() &&
-          std::regex_match(query.begin(), query.end(), pattern.second.value(),
-                           re_flags)) {
+          std::regex_match(
+              query.begin(), query.end(), pattern.second.value(), re_flags)) {
         return true;
       }
     }

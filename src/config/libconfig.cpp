@@ -27,7 +27,7 @@ namespace detail {
 Configuration FromLibconfigGroup(const libconfig::Setting &node);
 
 void ThrowImplementationError(std::string_view description,
-                              const char *node_name) {
+    const char *node_name) {
   std::string msg{description};
   if (node_name != nullptr) {
     msg += " Node name was `";
@@ -60,8 +60,9 @@ Tcfg CastSetting(const libconfig::Setting &value) {
   }
 }
 
-void AppendListSetting(std::string_view lst_key, Configuration &cfg,
-                       const libconfig::Setting &node) {
+void AppendListSetting(std::string_view lst_key,
+    Configuration &cfg,
+    const libconfig::Setting &node) {
   switch (node.getType()) {
     case libconfig::Setting::TypeInt:
       // NOLINTNEXTLINE(google-runtime-int)
