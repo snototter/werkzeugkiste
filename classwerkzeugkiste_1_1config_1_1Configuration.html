@@ -120,6 +120,14 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aa170a607389ed71d0b66eeafb180ba84" class="m-doc-self">Equals</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd>Returns true if all configuration keys and values match exactly.</dd>
+            <dt id="a9d3a8b64e7025f1fadc750de03d7afa9">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9d3a8b64e7025f1fadc750de03d7afa9" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; other) const -&gt; bool</span>
+            </dt>
+            <dd>Returns true if all configuration keys and values match exactly.</dd>
+            <dt id="af4e76316894327e089b069d65d0ce695">
+              <span class="m-doc-wrap-bumper">auto <a href="#af4e76316894327e089b069d65d0ce695" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; other) const -&gt; bool</span>
+            </dt>
+            <dd>Returns true if any configuration key or value differs.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a9457f9510a75a6a245277a683b02177a" class="m-doc">Contains</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
             </dt>
@@ -374,6 +382,44 @@
             <dt id="aef122d26f1f6ccddaf3fd7c48a16f997">
               <span class="m-doc-wrap-bumper">void <a href="#aef122d26f1f6ccddaf3fd7c48a16f997" class="m-doc-self">SetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;&amp; values)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="afa87b18dd0a7c101e118004da78e533d">
+              <span class="m-doc-wrap-bumper">void <a href="#afa87b18dd0a7c101e118004da78e533d" class="m-doc-self">CreateList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a5ffaa4ee8e01f91c879c1a97481e4f52">
+              <span class="m-doc-wrap-bumper">void <a href="#a5ffaa4ee8e01f91c879c1a97481e4f52" class="m-doc-self">AppendNestedList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a4707dbf4e7bb21cc3729eb8b5247ddcc">
+              <span class="m-doc-wrap-bumper">void <a href="#a4707dbf4e7bb21cc3729eb8b5247ddcc" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a4a8e3860a03933055c89bc6e56167771">
+              <span class="m-doc-wrap-bumper">void <a href="#a4a8e3860a03933055c89bc6e56167771" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int32_t value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a41f1953e9b92d4555447ff8e488e546f">
+              <span class="m-doc-wrap-bumper">void <a href="#a41f1953e9b92d4555447ff8e488e546f" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int64_t value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ad7999cc8f6cad7351dfb09733db06f55">
+              <span class="m-doc-wrap-bumper">void <a href="#ad7999cc8f6cad7351dfb09733db06f55" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              double value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="afcf630079145069ac2ee5eb1ef626514">
+              <span class="m-doc-wrap-bumper">void <a href="#afcf630079145069ac2ee5eb1ef626514" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::string_view value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a16d48a8bfc4c26d406c36c30ee001a5e">
+              <span class="m-doc-wrap-bumper">void <a href="#a16d48a8bfc4c26d406c36c30ee001a5e" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
             </dt>
             <dd><span></span></dd>
             <dt>
