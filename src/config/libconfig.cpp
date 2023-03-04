@@ -210,14 +210,14 @@ Configuration LoadLibconfigFile(std::string_view filename) {
 }
 
 #else   // WERKZEUGKISTE_WITH_LIBCONFIG
-Configuration Configuration::LoadLibconfigString(std::string_view toml_string) {
+Configuration LoadLibconfigString(std::string_view toml_string) {
   throw std::logic_error{
       "werkzeugkiste::config has been built without libconfig support. "
       "Please install libconfig++ and rebuilt the library with "
       "`werkzeugkiste_WITH_LIBCONFIG` enabled"};
 }
 
-Configuration Configuration::LoadLibconfigFile(std::string_view filename) {
+Configuration LoadLibconfigFile(std::string_view filename) {
   return LoadLibconfigString("");
 }
 #endif  // WERKZEUGKISTE_WITH_LIBCONFIG
