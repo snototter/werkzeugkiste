@@ -6,9 +6,6 @@
 #include <string_view>
 #include <type_traits>
 
-// TODO remove
-#define WERKZEUGKISTE_WITH_LIBCONFIG
-
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
 #if __has_include(<libconfig.hh>)
 #include <libconfig.hh>
