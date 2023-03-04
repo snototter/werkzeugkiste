@@ -47,6 +47,8 @@ TEST(ConfigListTest, SetEmptyLists) {
     empty = []
     ints = [1, 2]
     mixed = [1, "two", 3.5]
+
+    str = "value"
     )toml");
 
   // An empty list can be set to any type.
@@ -83,6 +85,15 @@ TEST(ConfigListTest, SetEmptyLists) {
   EXPECT_NO_THROW(config.SetDateList("mixed"sv, {}));
   EXPECT_TRUE(config.GetDateList("mixed"sv).empty());
   EXPECT_TRUE(config.GetBooleanList("mixed"sv).empty());
+
+  // A list cannot replace an existing scalar parameter
+  EXPECT_THROW(config.SetBooleanList("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetInteger32List("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetInteger64List("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetDoubleList("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetDateList("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetTimeList("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetDateTimeList("str"sv, {}), wkc::TypeError);
 }
 
 TEST(ConfigListTest, GetLists) {
@@ -381,13 +392,14 @@ TEST(ConfigListTest, SetStringList) {
 
 TEST(ConfigListTest, SetDateList) {
   wkc::Configuration config{};
+  config.SetBoolean("a-flag"sv, true);
 
   // Empty list
   EXPECT_NO_THROW(config.SetDateList("empty"sv, {}));
   EXPECT_TRUE(config.GetDateList("empty"sv).empty());
 
   // Set/get list
-  const std::vector<wkc::date> days = {
+  std::vector<wkc::date> days = {
       wkc::date{1900, 1, 3}, wkc::date{2000, 2, 29}, wkc::date{2023, 2, 28}};
   EXPECT_NO_THROW(config.SetDateList("days"sv, days));
   const auto lookup = config.GetDateList("days"sv);
@@ -397,6 +409,11 @@ TEST(ConfigListTest, SetDateList) {
     EXPECT_EQ(days[i], lookup[i]);
   }
   EXPECT_EQ(days[1], config.GetDate("days[1]"sv));
+
+  // Replace existing list
+  days.push_back(wkc::date{1234, 5, 12});
+  EXPECT_THROW(config.SetDateList("a-flag"sv, days), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetDateList("days"sv, days));
 
   // Replace a single item
   const wkc::date day{"1234-5-6"sv};
@@ -414,13 +431,14 @@ TEST(ConfigListTest, SetDateList) {
 
 TEST(ConfigListTest, SetTimeList) {
   wkc::Configuration config{};
+  config.SetBoolean("a-flag"sv, true);
 
   // Empty list
   EXPECT_NO_THROW(config.SetTimeList("empty"sv, {}));
   EXPECT_TRUE(config.GetTimeList("empty"sv).empty());
 
   // Set/get list
-  const std::vector<wkc::time> times = {
+  std::vector<wkc::time> times = {
       wkc::time{0, 0}, wkc::time{12, 0}, wkc::time{23, 59, 59}};
   EXPECT_NO_THROW(config.SetTimeList("times"sv, times));
   const auto lookup = config.GetTimeList("times"sv);
@@ -430,6 +448,14 @@ TEST(ConfigListTest, SetTimeList) {
     EXPECT_EQ(times[i], lookup[i]);
   }
   EXPECT_EQ(times[1], config.GetTime("times[1]"sv));
+
+  // Replace the list
+  times.push_back(wkc::time{1, 2});
+  EXPECT_THROW(config.SetTimeList("a-flag"sv, times), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetTimeList("times"sv, times));
+  EXPECT_EQ(4, config.Size("times"sv));
+  EXPECT_EQ(times.size(), config.Size("times"sv));
+  EXPECT_EQ(times[times.size() - 1], config.GetTime("times[3]"));
 
   // Replace a single item
   const wkc::time tm{"13:37"sv};
@@ -447,17 +473,18 @@ TEST(ConfigListTest, SetTimeList) {
 
 TEST(ConfigListTest, SetDateTimeList) {
   wkc::Configuration config{};
+  config.SetBoolean("a-flag"sv, true);
 
   // Empty list
   EXPECT_NO_THROW(config.SetDateTimeList("empty"sv, {}));
   EXPECT_TRUE(config.GetDateTimeList("empty"sv).empty());
 
   // Set/get list
-  const std::vector<wkc::date_time> dts = {
-      wkc::date_time{"2023-02-14T21:08:23Z"sv},
+  std::vector<wkc::date_time> dts = {wkc::date_time{"2023-02-14T21:08:23Z"sv},
       wkc::date_time{"2023-02-14_21:08:23.880Z"sv},
       wkc::date_time{"2024-02-29 00:45:12.123+01:00"sv},
-      wkc::date_time{"2024-02-28 23:45:12.123Z"sv}};
+      wkc::date_time{"2024-02-28 23:45:12.123Z"sv},
+      wkc::date_time{"1234-05-06 07:08:09"sv}};
   EXPECT_NO_THROW(config.SetDateTimeList("dts"sv, dts));
   const auto lookup = config.GetDateTimeList("dts"sv);
   EXPECT_EQ(dts.size(), lookup.size());
@@ -466,6 +493,12 @@ TEST(ConfigListTest, SetDateTimeList) {
     EXPECT_EQ(dts[i], lookup[i]);
   }
   EXPECT_EQ(dts[1], config.GetDateTime("dts[1]"sv));
+
+  // Replace list
+  dts.pop_back();
+  EXPECT_THROW(config.SetDateTimeList("a-flag"sv, dts), wkc::TypeError);
+  EXPECT_NO_THROW(config.SetDateTimeList("dts"sv, dts));
+  EXPECT_EQ(dts.size(), config.Size("dts"sv));
 
   // Replace a single item
   EXPECT_NO_THROW(config.SetDateTime("dts[0]"sv, dts[3]));

@@ -257,11 +257,100 @@ TEST(ConfigIOTest, LoadingJson) {
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
 TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_THROW(wkc::LoadLibconfigFile("no-such-file"sv), wkc::ParseError);
-  // TODO
+
+  const auto fname_invalid_cfg =
+      wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.cfg"sv);
+  EXPECT_THROW(wkc::LoadLibconfigFile(fname_invalid_cfg), wkc::ParseError);
+
+  const auto fname_valid_cfg =
+      wkf::FullFile(wkf::DirName(__FILE__), "test-valid.cfg"sv);
+  auto config = wkc::LoadLibconfigFile(fname_valid_cfg);
+
+  EXPECT_EQ(4, config.Size());
+
+  // Check the "empty" group
+  EXPECT_EQ(0, config.Size("empty_group"sv));
+  EXPECT_TRUE(config.GetGroup("empty_group"sv).Empty());
+
+  // Check the "group" group
+  EXPECT_EQ(5, config.Size("group"sv));
+  EXPECT_EQ(6, config.Size("group.subgroup"sv));
+
+  const auto group = config.GetGroup("group"sv);
+  EXPECT_EQ(5, group.Size());
+  const auto subgroup = group.GetGroup("subgroup"sv);
+  EXPECT_EQ(6, subgroup.Size());
+
+  EXPECT_EQ(subgroup, config.GetGroup("group.subgroup"sv));
+  EXPECT_EQ("Value", subgroup.GetString("str"sv));
+  EXPECT_EQ(2, subgroup.Size("size"sv));
+  EXPECT_EQ(640, subgroup.GetInteger32("size.width"sv));
+  EXPECT_EQ(480, subgroup.GetInteger32("size.height"sv));
+
+  EXPECT_EQ(3, subgroup.Size("ints"sv));
+  EXPECT_EQ(10, subgroup.GetInteger32("ints[0]"sv));
+  EXPECT_EQ(11, subgroup.GetInteger32("ints[1]"sv));
+  EXPECT_EQ(-12, subgroup.GetInteger32("ints[2]"sv));
+
+  EXPECT_EQ(3, subgroup.Size("flts"sv));
+  EXPECT_DOUBLE_EQ(1e-3, subgroup.GetDouble("flts[0]"sv));
+  EXPECT_DOUBLE_EQ(0.0, subgroup.GetDouble("flts[1]"sv));
+  EXPECT_DOUBLE_EQ(2.0, subgroup.GetDouble("flts[2]"sv));
+
+  EXPECT_TRUE(subgroup.GetBoolean("flag"sv));
+  EXPECT_TRUE(config.GetBoolean("group.subgroup.flag"sv));
+
+  EXPECT_EQ(1, subgroup.Size("another-group"sv));
+  auto str = subgroup.GetString("another-group.long-string"sv);
+  EXPECT_TRUE(wks::StartsWith(str, "A very long string that spans"sv));
+  str = subgroup.GetString("another-group.long-string"sv);
+  EXPECT_TRUE(wks::EndsWith(str, "automatically concatenated."sv));
+
+  EXPECT_FALSE(config.GetBoolean("group.flag"sv));
+  EXPECT_EQ(-54321, config.GetInteger32("group.int"sv));
+  EXPECT_DOUBLE_EQ(1e6, config.GetDouble("group.flt"sv));
+  EXPECT_EQ("Another String", config.GetString("group.str"sv));
+
+  // Check the "list" list
+  EXPECT_EQ(6, config.Size("list"sv));
+
+  EXPECT_EQ(3, config.Size("list[0]"sv));
+  EXPECT_EQ("abc", config.GetString("list[0][0]"sv));
+  EXPECT_EQ(123, config.GetInteger32("list[0][1]"sv));
+  EXPECT_TRUE(config.GetBoolean("list[0][2]"sv));
+
+  EXPECT_DOUBLE_EQ(1.234, config.GetDouble("list[1]"sv));
+
+  EXPECT_EQ(0, config.Size("list[2]"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("list[2]"sv));
+
+  EXPECT_EQ(3, config.Size("list[3]"sv));
+  const auto ints = config.GetInteger32List("list[3]"sv);
+  EXPECT_EQ(1, ints[0]);
+  EXPECT_EQ(2, ints[1]);
+  EXPECT_EQ(3, ints[2]);
+
+  EXPECT_EQ(1, config.Size("list[4]"sv));
+  EXPECT_TRUE(config.Contains("list[4].a"sv));
+  EXPECT_EQ(3, config.Size("list[4].a"sv));
+  EXPECT_EQ(1, config.GetInteger32("list[4].a[0]"sv));
+  EXPECT_EQ(2, config.GetInteger32("list[4].a[1]"sv));
+  EXPECT_TRUE(config.GetBoolean("list[4].a[2]"sv));
+
+  EXPECT_EQ(0, config.Size("list[5]"sv));
+  EXPECT_TRUE(config.GetGroup("list[5]"sv).Empty());
+
+  // Check the "bigints" group
+  const auto bigints = config.GetGroup("bigints"sv);
+  EXPECT_THROW(bigints.GetInteger32("int"sv), wkc::TypeError);
+  EXPECT_EQ(9223372036854775807L, bigints.GetInteger64("int"sv));
+  EXPECT_EQ(9223372036854775807L, config.GetInteger64("bigints.int"sv));
+  EXPECT_THROW(bigints.GetInteger32("hex"sv), wkc::TypeError);
+  EXPECT_EQ(0x1122334455667788L, bigints.GetInteger64("hex"sv));
+  EXPECT_EQ(0x1122334455667788L, config.GetInteger64("bigints.hex"sv));
 }
 
 TEST(ConfigIOTest, ParseLibconfigStrings) {
-  // TODO enable if compiled with libconfig
   const auto config = wkc::LoadLibconfigString(R"lcfg(
     int_pos = +987654;
     int_neg = -123456;

@@ -316,6 +316,9 @@ TEST(ConfigTypeTest, TimeType) {
   EXPECT_NO_THROW(wkc::time(8, 10, 59));
   EXPECT_THROW(wkc::time(8, 10, 60), wkc::ValueError);
 
+  EXPECT_NO_THROW(wkc::time(8, 10, 59, 999999999));
+  EXPECT_THROW(wkc::time(8, 10, 60, 1000000000), wkc::ValueError);
+
   // Overloaded operators.
   EXPECT_LE(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
   EXPECT_LT(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));

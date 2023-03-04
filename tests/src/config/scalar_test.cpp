@@ -428,6 +428,7 @@ TEST(ConfigScalarTest, SetNonBooleanScalars) {
   EXPECT_EQ(day, config.GetDate("my-day"sv));
   EXPECT_EQ(day, config.GetOptionalDate("my-day"sv).value());
 
+  // Update date
   ++day;
   EXPECT_NE(day, config.GetDate("my-day"sv));
   EXPECT_NO_THROW(config.SetDate("my-day"sv, day));
