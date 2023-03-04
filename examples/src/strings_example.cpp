@@ -36,11 +36,18 @@ int main(int /* argc */, char** /* argv */) {
             << wks::Shorten("0123456789", 5, 0, "*!*") << std::endl
             << std::endl;
 
-  std::vector<std::string> examples{
-      "This",      "is",          "a",
-      "LiSt",      "oF",          "\"ExAmPlE\"",
-      " Strings ", "with_some_",  "special characters",
-      ", e.g.",    "-_1,2;3:'#!", "öÖ#Üß\\-_\t\\"};
+  std::vector<std::string> examples{"This",
+      "is",
+      "a",
+      "LiSt",
+      "oF",
+      "\"ExAmPlE\"",
+      " Strings ",
+      "with_some_",
+      "special characters",
+      ", e.g.",
+      "-_1,2;3:'#!",
+      "öÖ#Üß\\-_\t\\"};
   for (const auto& s : examples) {
     std::cout << "Input: " << s << "\n"
               << "+ Upper: " << wks::Upper(s) << "\n+ Lower: " << wks::Lower(s)

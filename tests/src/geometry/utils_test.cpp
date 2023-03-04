@@ -220,7 +220,7 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
   // compare against 0, as the next representable would be really small,
   // e.g. 1e-324!)
   for (double value :
-       {0.1, 0.01, 0.01, 1.0, 10.0, 12.0, 1e3, 1.17e16, 1.23e45, 4.5e98}) {
+      {0.1, 0.01, 0.01, 1.0, 10.0, 12.0, 1e3, 1.17e16, 1.23e45, 4.5e98}) {
     auto next = std::nextafter(value, value + 1);
     EXPECT_TRUE(wkg::IsEpsEqual(value, next))
         << "    " << value << " should equal " << next
@@ -260,7 +260,7 @@ TEST(GeometryUtilsTest, FloatingPointEquality2) {
   // Similar to the double-precision loop above, we also
   // conduct additional single-precision checks:
   for (float value :
-       {0.1F, 0.01F, 0.01F, 1.0F, 10.0F, 12.0F, 1000.0F, 1234.56F, 0.001234F}) {
+      {0.1F, 0.01F, 0.01F, 1.0F, 10.0F, 12.0F, 1000.0F, 1234.56F, 0.001234F}) {
     auto next = std::nextafter(value, value + 1);
     EXPECT_TRUE(wkg::IsEpsEqual(value, next))
         << "    Value " << value << " should equal " << next

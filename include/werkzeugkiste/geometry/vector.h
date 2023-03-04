@@ -36,7 +36,7 @@ template <typename T, std::size_t Dim>
 class Vec {
  public:
   static_assert(std::is_signed<T>::value,
-                "Only signed arithmetic types are supported!");
+      "Only signed arithmetic types are supported!");
 
   static_assert(Dim > 0, "Dimension of Vec type must be > 0!");
 
@@ -76,7 +76,9 @@ class Vec {
 
   /// Convenience (x, y, z, w) constructor for 4D vector.
   template <typename Tp = T>
-  Vec(typename std::enable_if<(Dim == 4), Tp>::type x, Tp y, Tp z,
+  Vec(typename std::enable_if<(Dim == 4), Tp>::type x,
+      Tp y,
+      Tp z,
       Tp w) noexcept {
     val[0] = x;
     val[1] = y;
@@ -355,7 +357,8 @@ class Vec {
       const Vec<
           typename std::enable_if<std::is_floating_point<Tp>::value, Tp>::type,
           Dim>& other,
-      Tp relative_tolerance, Tp absolute_tolerance) const {
+      Tp relative_tolerance,
+      Tp absolute_tolerance) const {
     for (index_type i = 0; i < Dim; ++i) {
       if (!werkzeugkiste::geometry::IsClose(
               val[i], other.val[i], relative_tolerance, absolute_tolerance)) {
@@ -369,7 +372,7 @@ class Vec {
   template <typename Tp = T>
   bool IsEqual(
       const Vec<typename std::enable_if<std::is_integral<Tp>::value, Tp>::type,
-                Dim>& other) const {
+          Dim>& other) const {
     for (index_type i = 0; i < Dim; ++i) {
       if (val[i] != other.val[i]) {
         return false;
@@ -565,7 +568,8 @@ class Vec {
   /// Only supported for floating point-based vector specializations.
   template <typename Tp = T>
   friend Vec<
-      typename std::enable_if<std::is_floating_point<Tp>::value, Tp>::type, Dim>
+      typename std::enable_if<std::is_floating_point<Tp>::value, Tp>::type,
+      Dim>
   operator/(Vec<T, Dim> lhs, double divisor) {
     lhs /= divisor;
     return lhs;
@@ -598,7 +602,8 @@ class Vec {
   /// floating point-based vector specializations.
   template <typename Tp = T>
   friend Vec<
-      typename std::enable_if<std::is_floating_point<Tp>::value, Tp>::type, Dim>
+      typename std::enable_if<std::is_floating_point<Tp>::value, Tp>::type,
+      Dim>
   operator/(Vec<T, Dim> lhs, const Vec<Tp, Dim>& divisor) {
     lhs /= divisor;
     return lhs;
@@ -609,7 +614,8 @@ class Vec {
   /// floating point-based vector specializations.
   template <typename Tp = T>
   friend Vec<
-      typename std::enable_if<std::is_floating_point<Tp>::value, Tp>::type, Dim>
+      typename std::enable_if<std::is_floating_point<Tp>::value, Tp>::type,
+      Dim>
   operator/(Tp scalar, Vec<T, Dim> vec) {
     for (index_type idx = 0; idx < Dim; ++idx) {
       vec.val[idx] = scalar / vec.val[idx];
@@ -648,8 +654,9 @@ class Vec {
   /// Returns the determinant of the two 2d vectors, i.e.
   /// the "2d cross product".
   template <typename Tp = T>
-  inline Tp Determinant(const Vec<typename std::enable_if<(Dim == 2), Tp>::type,
-                                  Dim>& other) const {
+  inline Tp Determinant(
+      const Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim>& other)
+      const {
     return (X() * other.Y()) - (other.X() * Y());
   }
 
@@ -658,8 +665,8 @@ class Vec {
   Vec<typename std::enable_if<(Dim == 3), Tp>::type, Dim> Cross(
       const Vec<T, Dim>& other) const {
     return Vec<T, Dim>{Y() * other.Z() - Z() * other.Y(),
-                       Z() * other.X() - X() * other.Z(),
-                       X() * other.Y() - Y() * other.X()};
+        Z() * other.X() - X() * other.Z(),
+        X() * other.Y() - Y() * other.X()};
   }
 
   /// Returns the squared vector's length.
@@ -811,7 +818,7 @@ class Vec {
   /// maximum precision if fixed_precision <= 0. If a positive fixed_precision
   /// is provided, the output format will be adjusted.
   std::string ToString(bool include_type = true,
-                       int fixed_precision = 0) const {
+      int fixed_precision = 0) const {
     std::ostringstream s;
     if (include_type) {
       s << Vec<T, Dim>::TypeName();
@@ -843,29 +850,26 @@ class Vec {
     return os;
   }
 
-  template <
-      typename Tp = T,
+  template <typename Tp = T,
       typename std::enable_if<std::is_same<Tp, int16_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() {
     return 's';
   }
 
-  template <
-      typename Tp = T,
+  template <typename Tp = T,
       typename std::enable_if<std::is_same<Tp, int32_t>::value, int>::type = 0>
   inline static char TypeAbbreviation() {
     return 'i';
   }
 
-  template <
-      typename Tp = T,
+  template <typename Tp = T,
       typename std::enable_if<std::is_same<Tp, double>::value, int>::type = 0>
   inline static char TypeAbbreviation() {
     return 'd';
   }
 
-  template <typename Tp = T, typename std::enable_if<
-                                 std::is_same<Tp, float>::value, int>::type = 0>
+  template <typename Tp = T,
+      typename std::enable_if<std::is_same<Tp, float>::value, int>::type = 0>
   inline static char TypeAbbreviation() {
     return 'f';
   }
@@ -957,8 +961,8 @@ inline double LengthPolygon(const std::vector<Vec<T, Dim>>& points) {
 /// See also: https://en.wikipedia.org/wiki/Vector_projection
 template <typename T, std::size_t Dim>
 inline T ScalarProjection(const Vec<T, Dim>& a, const Vec<T, Dim>& b) {
-  static_assert(std::is_floating_point<T>::value,
-                "Vector type must be float or double!");
+  static_assert(
+      std::is_floating_point<T>::value, "Vector type must be float or double!");
   return a.Dot(b.UnitVector());
 }
 
@@ -968,9 +972,9 @@ inline T ScalarProjection(const Vec<T, Dim>& a, const Vec<T, Dim>& b) {
 /// See also: https://en.wikipedia.org/wiki/Vector_projection
 template <typename T, std::size_t Dim>
 inline Vec<T, Dim> VectorProjection(const Vec<T, Dim>& a,
-                                    const Vec<T, Dim>& b) {
-  static_assert(std::is_floating_point<T>::value,
-                "Vector type must be float or double!");
+    const Vec<T, Dim>& b) {
+  static_assert(
+      std::is_floating_point<T>::value, "Vector type must be float or double!");
   // Alternative formulation would be ScalarProjection(a, b) * b.UnitVector(),
   // but we can save some computation via:
   return (a.Dot(b) / b.LengthSquared()) * b;
@@ -999,8 +1003,7 @@ inline double AngleDegFromDirectionVec(const Vec<T, 2>& vec) {
 /// Returns the unit direction vector given its angle (in
 /// radians) w.r.t. the positive X axis.
 inline Vec2d DirectionVecFromAngleRad(double rad) {
-  return Vec2d{
-      std::cos(rad),
+  return Vec2d{std::cos(rad),
       std::sin(
           rad)};  // TODO test case to ensure numerical stability at edge cases
 }
@@ -1023,10 +1026,12 @@ inline Vec2d DirectionVecFromAngleDeg(double deg) {
 ///
 /// Useful to get axis-aligned bounding boxes, a starting
 /// point for hull computations, etc.
-template <typename T, std::size_t Dim,
-          template <typename...> class Container = std::vector>
-void MinMaxCoordinates(const Container<Vec<T, Dim>>& values, Vec<T, Dim>& min,
-                       Vec<T, Dim>& max) {
+template <typename T,
+    std::size_t Dim,
+    template <typename...> class Container = std::vector>
+void MinMaxCoordinates(const Container<Vec<T, Dim>>& values,
+    Vec<T, Dim>& min,
+    Vec<T, Dim>& max) {
   using VecType = Vec<T, Dim>;
   if (values.empty()) {
     return;

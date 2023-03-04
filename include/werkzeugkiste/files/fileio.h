@@ -22,8 +22,8 @@ class IOError : public std::exception {
 };
 
 /// Reads all lines of the plain text file.
-std::vector<std::string> WERKZEUGKISTE_FILES_EXPORT
-ReadAsciiFile(std::string_view filename);
+std::vector<std::string> WERKZEUGKISTE_FILES_EXPORT ReadAsciiFile(
+    std::string_view filename);
 
 /// Reads the plain text file into a single string.
 std::string WERKZEUGKISTE_FILES_EXPORT CatAsciiFile(std::string_view filename);

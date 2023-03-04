@@ -91,9 +91,10 @@ std::enable_if_t<std::is_arithmetic_v<T>, double> Mean(
 /// comparisons via `operator<`.
 template <class Container>
 void MinMax(const Container& values,
-            typename Container::value_type* val_min = nullptr,
-            typename Container::value_type* val_max = nullptr,
-            std::size_t* idx_min = nullptr, std::size_t* idx_max = nullptr) {
+    typename Container::value_type* val_min = nullptr,
+    typename Container::value_type* val_max = nullptr,
+    std::size_t* idx_min = nullptr,
+    std::size_t* idx_max = nullptr) {
   if (values.empty()) {
     return;
   }

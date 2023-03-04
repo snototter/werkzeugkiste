@@ -41,31 +41,31 @@ TEST(StringUtilsTest, Prefix) {
 }
 
 TEST(StringUtilsTest, CaseConversion) {
-  EXPECT_EQ("ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            wks::Upper("abcdefghijklmnopqrstuvwxyz"));
-  EXPECT_EQ("ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-            wks::Upper("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+  EXPECT_EQ(
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ", wks::Upper("abcdefghijklmnopqrstuvwxyz"));
+  EXPECT_EQ(
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ", wks::Upper("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
   EXPECT_EQ("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>",
-            wks::Upper("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"));
+      wks::Upper("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"));
 
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz",
-            wks::Lower("abcdefghijklmnopqrstuvwxyz"));
-  EXPECT_EQ("abcdefghijklmnopqrstuvwxyz",
-            wks::Lower("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+  EXPECT_EQ(
+      "abcdefghijklmnopqrstuvwxyz", wks::Lower("abcdefghijklmnopqrstuvwxyz"));
+  EXPECT_EQ(
+      "abcdefghijklmnopqrstuvwxyz", wks::Lower("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
   EXPECT_EQ("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>",
-            wks::Lower("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"));
+      wks::Lower("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>"));
 }
 
 TEST(StringUtilsTest, Trimming) {
   // Tab \t, Line feed \n, vertical tab \v, form feed \f, space, ...
   EXPECT_EQ("abc \t\r\n\v\f123",
-            wks::Trim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
+      wks::Trim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
 
   EXPECT_EQ("abc \t\r\n\v\f123 \t\r\n\v\f",
-            wks::LTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
+      wks::LTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
 
   EXPECT_EQ(" \t\r\n\v\fabc \t\r\n\v\f123",
-            wks::RTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
+      wks::RTrim(" \t\r\n\v\fabc \t\r\n\v\f123 \t\r\n\v\f"));
 }
 
 TEST(StringUtilsTest, IsNumeric) {
@@ -193,7 +193,7 @@ TEST(StringUtilsTest, Replace) {
 
   // All occurrences should be replaced
   EXPECT_EQ("A..123abc123A..123abc123",
-            wks::Replace("ABC123abc123ABC123abc123", "BC", ".."));
+      wks::Replace("ABC123abc123ABC123abc123", "BC", ".."));
 
   // Use 'Replace' to 'Remove' a substring
   EXPECT_EQ("ABC123a;:_", wks::Replace("ABC123abc;:_", "bc", ""));
@@ -205,14 +205,13 @@ TEST(StringUtilsTest, Replace) {
 }
 
 TEST(StringUtilsTest, Remove) {
-  EXPECT_EQ(
-      "1234567890+*~#'-_.:,;´`?}=])[({/&%$§3!^°@<|>",
+  EXPECT_EQ("1234567890+*~#'-_.:,;´`?}=])[({/&%$§3!^°@<|>",
       wks::Remove("1234567890+*~#'-_.:,;´`\\?}=])[({/&%$§3!^°@<|>", '\\'));
 
   EXPECT_EQ("bcDEFghiABCdefGHIbc", wks::Remove("abcDEFghiABCdefGHIabc", 'a'));
 
   EXPECT_EQ("cDEFghiABdefGHIc",
-            wks::Remove("abcDEFghiABCdefGHIabc", {'a', 'b', 'C'}));
+      wks::Remove("abcDEFghiABCdefGHIabc", {'a', 'b', 'C'}));
 }
 
 TEST(StringUtilsTest, URL) {
@@ -224,8 +223,8 @@ TEST(StringUtilsTest, URL) {
   EXPECT_EQ("file://", protocol);
   EXPECT_EQ("foo.txt", remainder);
 
-  EXPECT_TRUE(wks::GetUrlProtocol("UnChecked://SomeU.R.I:?asdf=foo", protocol,
-                                  remainder));
+  EXPECT_TRUE(wks::GetUrlProtocol(
+      "UnChecked://SomeU.R.I:?asdf=foo", protocol, remainder));
   EXPECT_EQ("UnChecked://", protocol);
   EXPECT_EQ("SomeU.R.I:?asdf=foo", remainder);
 
@@ -239,34 +238,33 @@ TEST(StringUtilsTest, URL) {
   EXPECT_EQ("file://foobar", wks::ObscureUrlAuthentication("file://foobar"));
 
   EXPECT_EQ("http://<auth>@foo.bar",
-            wks::ObscureUrlAuthentication("http://user:pass@foo.bar"));
+      wks::ObscureUrlAuthentication("http://user:pass@foo.bar"));
 
   EXPECT_EQ("rtsp://<auth>@foo.bar:12345",
-            wks::ObscureUrlAuthentication("rtsp://user:pass@foo.bar:12345"));
+      wks::ObscureUrlAuthentication("rtsp://user:pass@foo.bar:12345"));
 
-  EXPECT_EQ(
-      "https://<auth>@192.168.0.1:8080/cam.cgi",
+  EXPECT_EQ("https://<auth>@192.168.0.1:8080/cam.cgi",
       wks::ObscureUrlAuthentication("https://user@192.168.0.1:8080/cam.cgi"));
 
   EXPECT_EQ("<auth>@some.thing:12345",
-            wks::ObscureUrlAuthentication("user:pass@some.thing:12345"));
+      wks::ObscureUrlAuthentication("user:pass@some.thing:12345"));
 
   // If we want to strip the subpaths and parameters of a URL:
   EXPECT_EQ("https://<auth>@192.168.0.1:8080",
-            wks::ClipUrl("https://root@192.168.0.1:8080/cam.cgi"));
+      wks::ClipUrl("https://root@192.168.0.1:8080/cam.cgi"));
 
   EXPECT_EQ("https://192.168.0.1:8080",
-            wks::ClipUrl("https://192.168.0.1:8080?image=still&overlay=off"));
+      wks::ClipUrl("https://192.168.0.1:8080?image=still&overlay=off"));
 
   EXPECT_EQ("file:///a/file/needs/special/handling.txt",
-            wks::ClipUrl("file:///a/file/needs/special/handling.txt"));
+      wks::ClipUrl("file:///a/file/needs/special/handling.txt"));
 }
 
 TEST(StringUtilsTest, Slug) {
   EXPECT_EQ("nothing-to-be-slugged", wks::Slug("nothing-to-be-slugged"));
 
   EXPECT_EQ("replace-some-spaces-and-underscores",
-            wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "));
+      wks::Slug(" replace:\tsome_spaces  and UNDERSCORES  _- "));
 
   EXPECT_EQ("", wks::Slug(" \r\n\t\v\f"));
   EXPECT_EQ("a", wks::Slug("a \r\n\t\v\f"));
@@ -293,8 +291,8 @@ TEST(StringUtilsTest, Shorten) {
 
   // Desired length shorter than (custom) ellipsis
   EXPECT_THROW(wks::Shorten("abc", 2), std::invalid_argument);
-  EXPECT_THROW(wks::Shorten("0123456789", 3, -1, "abcd"),
-               std::invalid_argument);
+  EXPECT_THROW(
+      wks::Shorten("0123456789", 3, -1, "abcd"), std::invalid_argument);
 
   // Ellipsis left
   EXPECT_EQ("...", wks::Shorten("0123456789", 3, -1));

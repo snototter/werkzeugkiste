@@ -18,8 +18,8 @@
 
 template <typename Vector>
 std::string PrettyPrint(std::initializer_list<Vector> vecs,
-                        std::size_t indent_first_row = 0,
-                        std::size_t indent_others = 0) {
+    std::size_t indent_first_row = 0,
+    std::size_t indent_others = 0) {
   std::ostringstream s;
   s << "[ ";
 

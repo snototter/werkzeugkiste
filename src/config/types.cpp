@@ -13,12 +13,11 @@
 // * When upgrading to C++20, we can easily support date/time
 //   checks: https://en.cppreference.com/w/cpp/chrono/year_month_day/ok
 // * Parsing was also introduced in C++20
-// * Replace intX_t by int_leastX_t everywhere.
-//   Or change to int for simplicity - we're not targeting any special
-//   platform & these shorter types are promoted during arithmetic
-//   operations (and cause GCC warnings),
+// * Use fixed width integer types - switch back to intX_t instead of
+//   least/fast, or change to int for simplicity (requires additional error
+//   handling). We're not targeting any special platform & the fixed width
+//   types are promoted during arithmetic operations (causing GCC warnings),
 //   https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int/39061103#39061103
-// * Use fixed width integer types
 
 // NOLINTBEGIN(*magic-numbers)
 namespace werkzeugkiste::config {
@@ -53,26 +52,29 @@ constexpr bool IsLeapYear(uint_least16_t year) noexcept {
 
 constexpr uint_least8_t LastDayOfMonthCommonYear(uint_least8_t m) noexcept {
   // NOLINTNEXTLINE(*avoid-c-arrays)
-  constexpr uint_least8_t days[] = {31, 28, 31, 30, 31, 30,
-                                    31, 31, 30, 31, 30, 31};
+  constexpr uint_least8_t days[] = {
+      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   return days[m - 1];
 }
 
 constexpr uint_least8_t LastDayOfMonth(uint_least16_t year,
-                                       uint_least8_t month) noexcept {
+    uint_least8_t month) noexcept {
   return ((month != 2) || !IsLeapYear(year)) ? LastDayOfMonthCommonYear(month)
                                              : static_cast<uint_least8_t>(29);
 }
 
-constexpr bool IsValidDate(uint_least16_t year, uint_least8_t month,
-                           uint_least8_t day) noexcept {
+constexpr bool IsValidDate(uint_least16_t year,
+    uint_least8_t month,
+    uint_least8_t day) noexcept {
   return ((month < 1) || (month > 12))
-             ? false
-             : ((day > 0) && (day <= LastDayOfMonth(year, month)));
+           ? false
+           : ((day > 0) && (day <= LastDayOfMonth(year, month)));
 }
 
-constexpr bool IsValidTime(uint_fast8_t hour, uint_fast8_t minute,
-                           uint_fast8_t second, uint_fast32_t nanosecond) {
+constexpr bool IsValidTime(uint_fast8_t hour,
+    uint_fast8_t minute,
+    uint_fast8_t second,
+    uint_fast32_t nanosecond) {
   return (hour < 24) && (minute < 60) && (second < 60) &&
          (nanosecond < 1000000000);
 }
@@ -144,8 +146,10 @@ bool IsInteger(std::string_view str) {
 }
 
 template <typename T>
-T ParseDateTimeNumber(const std::string &str, int min_val, int max_val,
-                      std::string_view type_str) {
+T ParseDateTimeNumber(const std::string &str,
+    int min_val,
+    int max_val,
+    std::string_view type_str) {
   try {
     // We can't use stoi out of the box:
     // * it accepts (and truncates) floating point numbers, and
@@ -190,8 +194,9 @@ date ParseDateString(std::string_view str) {
         ParseDateTimeNumber<uint_least16_t>(tokens[0], 0, 9999, "date"sv);
     parsed.month =
         ParseDateTimeNumber<uint_least8_t>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<uint_least8_t>(
-        tokens[2], 1, detail::LastDayOfMonth(parsed.year, parsed.month),
+    parsed.day = ParseDateTimeNumber<uint_least8_t>(tokens[2],
+        1,
+        detail::LastDayOfMonth(parsed.year, parsed.month),
         "date"sv);
 
     return parsed;
@@ -208,8 +213,9 @@ date ParseDateString(std::string_view str) {
         ParseDateTimeNumber<uint_least16_t>(tokens[2], 0, 9999, "date"sv);
     parsed.month =
         ParseDateTimeNumber<uint_least8_t>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<uint_least8_t>(
-        tokens[0], 1, detail::LastDayOfMonth(parsed.year, parsed.month),
+    parsed.day = ParseDateTimeNumber<uint_least8_t>(tokens[0],
+        1,
+        detail::LastDayOfMonth(parsed.year, parsed.month),
         "date"sv);
 
     return parsed;
@@ -313,8 +319,8 @@ time::time(std::string_view str) {
     // Delimiter between second and fraction component can be '.' or ','.
     const std::size_t pos = hms_tokens[2].find_first_of(".,");
     if (pos != std::string::npos) {
-      second = ParseDateTimeNumber<uint_least8_t>(hms_tokens[2].substr(0, pos),
-                                                  0, 59, "time"sv);
+      second = ParseDateTimeNumber<uint_least8_t>(
+          hms_tokens[2].substr(0, pos), 0, 59, "time"sv);
 
       const auto subsec_str = hms_tokens[2].substr(pos + 1);
       if ((subsec_str.length() > 3) &&

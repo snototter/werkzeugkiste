@@ -86,7 +86,7 @@ inline constexpr float Rad2Deg(float rad) {
 template <typename T>
 inline constexpr bool IsEpsZero(T x) {
   static_assert(std::is_arithmetic_v<T>,
-                "Non-arithmetic input type provided for IsEpsZero().");
+      "Non-arithmetic input type provided for IsEpsZero().");
   if constexpr (std::is_floating_point_v<T>) {
     return std::fabs(x) <= std::numeric_limits<T>::epsilon();
   } else {
@@ -102,10 +102,12 @@ inline constexpr bool IsEpsZero(T x) {
 ///   or (|x-y| <= rel_tol * |y|)
 ///   or (|x-y| <= abs_tol)
 template <typename TVal, typename TTol = double>
-inline constexpr bool IsClose(TVal x, TVal y, TTol relative_tolerance = 1e-9,
-                              TTol absolute_tolerance = 0.0) {
+inline constexpr bool IsClose(TVal x,
+    TVal y,
+    TTol relative_tolerance = 1e-9,
+    TTol absolute_tolerance = 0.0) {
   static_assert(std::is_floating_point_v<TVal>,
-                "Approximately equal check requires floating point types!");
+      "Approximately equal check requires floating point types!");
 
   if (std::isinf(x) || std::isinf(y)) {
     return false;
@@ -119,7 +121,7 @@ inline constexpr bool IsClose(TVal x, TVal y, TTol relative_tolerance = 1e-9,
 
   return (diff <=
           std::max(relative_tolerance * std::max(std::fabs(x), std::fabs(y)),
-                   absolute_tolerance));
+              absolute_tolerance));
 }
 
 /// Checks if two floating point numbers are "approximately" equal,
@@ -167,7 +169,7 @@ inline constexpr int _util_sign(T x, std::true_type /*is_signed*/) {
 template <typename T>
 inline constexpr int Sign(T x) {
   static_assert(std::is_arithmetic_v<T>,
-                "Non-arithmetic input type provided for Sign().");
+      "Non-arithmetic input type provided for Sign().");
   return _util_sign(x, std::is_signed<T>());
 }
 
@@ -175,7 +177,7 @@ inline constexpr int Sign(T x) {
 // Rounding
 template <typename T>
 inline std::enable_if_t<std::is_floating_point_v<T>, T> RoundBase(T value,
-                                                                  T base) {
+    T base) {
   return base * std::round(value / base);
 }
 

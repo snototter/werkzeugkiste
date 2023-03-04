@@ -70,6 +70,11 @@ target_link_libraries(
           # werkzeugkiste::timing) std::filesystem)
 )
 
+if(werkzeugkiste_WITH_LIBCONFIG)
+  target_compile_definitions(werkzeugkiste-test
+                             PRIVATE WERKZEUGKISTE_WITH_LIBCONFIG)
+endif()
+
 target_compile_features(werkzeugkiste-test PRIVATE cxx_std_17)
 
 add_test(NAME werkzeugkiste-test COMMAND werkzeugkiste-test)

@@ -136,31 +136,31 @@ TEST(CastTest, Integral) {
   EXPECT_EQ(static_cast<int8_t>(0), wkc::checked_numcast<int8_t>(0));
 
   const auto int8_min = std::numeric_limits<int8_t>::min();
-  EXPECT_EQ(int8_min,
-            wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_min)));
+  EXPECT_EQ(
+      int8_min, wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_min)));
   EXPECT_EQ(int8_min + 1,
-            wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_min) + 1));
+      wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_min) + 1));
   EXPECT_THROW(wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_min) - 1),
-               std::domain_error);
+      std::domain_error);
 
   const auto int8_max = std::numeric_limits<int8_t>::max();
-  EXPECT_EQ(int8_max,
-            wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_max)));
+  EXPECT_EQ(
+      int8_max, wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_max)));
   EXPECT_EQ(int8_max - 1,
-            wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_max) - 1));
+      wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_max) - 1));
   EXPECT_THROW(wkc::checked_numcast<int8_t>(static_cast<int32_t>(int8_max) + 1),
-               std::domain_error);
+      std::domain_error);
 
   // (2) From signed to signed, widening/promotion:
   EXPECT_EQ(0L, wkc::checked_numcast<int64_t>(0));
 
   const auto int32_min = std::numeric_limits<int32_t>::min();
   EXPECT_EQ(static_cast<int64_t>(int32_min),
-            wkc::checked_numcast<int64_t>(int32_min));
+      wkc::checked_numcast<int64_t>(int32_min));
 
   const auto int32_max = std::numeric_limits<int32_t>::max();
   EXPECT_EQ(static_cast<int64_t>(int32_max),
-            wkc::checked_numcast<int64_t>(int32_max));
+      wkc::checked_numcast<int64_t>(int32_max));
 
   // (3) From signed to unsigned, narrowing:
   EXPECT_EQ(0, wkc::checked_numcast<uint8_t>(0L));
@@ -173,7 +173,7 @@ TEST(CastTest, Integral) {
 
   // (4) From signed to unsigned, widening/promotion:
   EXPECT_THROW(wkc::checked_numcast<uint16_t>(static_cast<int8_t>(-1)),
-               std::domain_error);
+      std::domain_error);
   EXPECT_EQ(0, wkc::checked_numcast<uint16_t>(static_cast<int8_t>(0)));
   EXPECT_EQ(127, wkc::checked_numcast<uint16_t>(static_cast<int8_t>(127)));
 
@@ -182,11 +182,11 @@ TEST(CastTest, Integral) {
   EXPECT_EQ(127, wkc::checked_numcast<int8_t>(static_cast<uint16_t>(127)));
   EXPECT_EQ(0, wkc::checked_numcast<int8_t>(static_cast<uint16_t>(0)));
   EXPECT_THROW(wkc::checked_numcast<int8_t>(static_cast<uint8_t>(255)),
-               std::domain_error);
+      std::domain_error);
   EXPECT_THROW(wkc::checked_numcast<int8_t>(static_cast<uint32_t>(1000)),
-               std::domain_error);
+      std::domain_error);
   EXPECT_THROW(wkc::checked_numcast<int16_t>(static_cast<uint32_t>(100000)),
-               std::domain_error);
+      std::domain_error);
 
   // (6) From unsigned to signed, widening/promotion:
   EXPECT_EQ(127, wkc::checked_numcast<int16_t>(static_cast<uint16_t>(127)));
@@ -205,7 +205,7 @@ TEST(CastTest, Integral) {
   EXPECT_EQ(100L, wkc::checked_numcast<uint64_t>(100));
   const auto uint32_max = std::numeric_limits<uint32_t>::max();
   EXPECT_EQ(static_cast<uint64_t>(uint32_max),
-            wkc::checked_numcast<uint64_t>(uint32_max));
+      wkc::checked_numcast<uint64_t>(uint32_max));
 }
 
 TEST(CastTest, FloatingPoint) {
@@ -231,10 +231,10 @@ TEST(CastTest, FloatingPoint) {
   dbl_val = static_cast<double>(flt_val);
   EXPECT_DOUBLE_EQ(flt_val, wkc::checked_numcast<float>(dbl_val));
 
-  EXPECT_THROW(wkc::checked_numcast<float>(dbl_limits::max()),
-               std::domain_error);
-  EXPECT_THROW(wkc::checked_numcast<float>(dbl_limits::lowest()),
-               std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<float>(dbl_limits::max()), std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<float>(dbl_limits::lowest()), std::domain_error);
 }
 
 TEST(CastTest, FloatingToIntegral) {
@@ -244,10 +244,10 @@ TEST(CastTest, FloatingToIntegral) {
   // * integral unsigned
   // * cast would require truncating the number
   using limits_dbl = std::numeric_limits<double>;
-  EXPECT_THROW(wkc::checked_numcast<int>(limits_dbl::quiet_NaN()),
-               std::domain_error);
-  EXPECT_THROW(wkc::checked_numcast<int>(limits_dbl::infinity()),
-               std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<int>(limits_dbl::quiet_NaN()), std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<int>(limits_dbl::infinity()), std::domain_error);
 
   EXPECT_THROW(wkc::checked_numcast<int8_t>(312.0), std::domain_error);
   EXPECT_EQ(312, wkc::checked_numcast<int16_t>(312.0));
@@ -256,10 +256,10 @@ TEST(CastTest, FloatingToIntegral) {
   EXPECT_EQ(1, wkc::checked_numcast<int8_t>(1.0));
   EXPECT_EQ(-2, wkc::checked_numcast<int8_t>(-2.0));
 
-  EXPECT_THROW(wkc::checked_numcast<int32_t>(limits_dbl::max()),
-               std::domain_error);
-  EXPECT_THROW(wkc::checked_numcast<int32_t>(limits_dbl::lowest()),
-               std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<int32_t>(limits_dbl::max()), std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<int32_t>(limits_dbl::lowest()), std::domain_error);
 
   EXPECT_THROW(wkc::checked_numcast<uint32_t>(0.2), std::domain_error);
   EXPECT_THROW(wkc::checked_numcast<uint32_t>(1e-5), std::domain_error);
@@ -267,16 +267,16 @@ TEST(CastTest, FloatingToIntegral) {
 
   int64_t value = 1L << 40;
   EXPECT_THROW(wkc::checked_numcast<int32_t>(static_cast<double>(value)),
-               std::domain_error);
+      std::domain_error);
   EXPECT_EQ(value, wkc::checked_numcast<int64_t>(static_cast<double>(value)));
 
   value = 1L << (std::numeric_limits<uint32_t>::digits - 1);
   EXPECT_THROW(wkc::checked_numcast<int16_t>(static_cast<double>(value)),
-               std::domain_error);
+      std::domain_error);
   EXPECT_THROW(wkc::checked_numcast<uint16_t>(static_cast<double>(value)),
-               std::domain_error);
+      std::domain_error);
   EXPECT_THROW(wkc::checked_numcast<int32_t>(static_cast<double>(value)),
-               std::domain_error);
+      std::domain_error);
   EXPECT_EQ(value, wkc::checked_numcast<uint32_t>(static_cast<double>(value)));
   EXPECT_EQ(value, wkc::checked_numcast<int64_t>(static_cast<double>(value)));
   EXPECT_EQ(value, wkc::checked_numcast<uint64_t>(static_cast<double>(value)));
@@ -285,33 +285,33 @@ TEST(CastTest, FloatingToIntegral) {
 TEST(CastTest, IntegralToFloating) {
   EXPECT_DOUBLE_EQ(5.0, wkc::checked_numcast<double>(5));
   EXPECT_DOUBLE_EQ(-27.0F, wkc::checked_numcast<float>(-27));
-  EXPECT_DOUBLE_EQ(-27.0F,
-                   wkc::checked_numcast<float>(static_cast<int8_t>(-27)));
+  EXPECT_DOUBLE_EQ(
+      -27.0F, wkc::checked_numcast<float>(static_cast<int8_t>(-27)));
 
   using lng_limits = std::numeric_limits<int64_t>;
-  EXPECT_THROW(wkc::checked_numcast<float>(lng_limits::max()),
-               std::domain_error);
-  EXPECT_THROW(wkc::checked_numcast<float>(lng_limits::max() - 1),
-               std::domain_error);
-  EXPECT_THROW(wkc::checked_numcast<float>(lng_limits::min() + 1),
-               std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<float>(lng_limits::max()), std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<float>(lng_limits::max() - 1), std::domain_error);
+  EXPECT_THROW(
+      wkc::checked_numcast<float>(lng_limits::min() + 1), std::domain_error);
   // Powers of two can be exactly represented:
   EXPECT_EQ(lng_limits::min(),
-            wkc::checked_numcast<int64_t>(
-                wkc::checked_numcast<float>(lng_limits::min())));
+      wkc::checked_numcast<int64_t>(
+          wkc::checked_numcast<float>(lng_limits::min())));
 
-  EXPECT_EQ(1 << 31, wkc::checked_numcast<int32_t>(
-                         wkc::checked_numcast<float>(1 << 31)));
-  EXPECT_EQ(1L << 40, wkc::checked_numcast<int64_t>(
-                          wkc::checked_numcast<float>(1L << 40)));
-  EXPECT_EQ(1L << 50, wkc::checked_numcast<int64_t>(
-                          wkc::checked_numcast<float>(1L << 50)));
-  EXPECT_EQ(1L << 60, wkc::checked_numcast<int64_t>(
-                          wkc::checked_numcast<float>(1L << 60)));
-  EXPECT_EQ(1L << 62, wkc::checked_numcast<int64_t>(
-                          wkc::checked_numcast<float>(1L << 62)));
-  EXPECT_EQ(1L << 63, wkc::checked_numcast<int64_t>(
-                          wkc::checked_numcast<float>(1L << 63)));
+  EXPECT_EQ(1 << 31,
+      wkc::checked_numcast<int32_t>(wkc::checked_numcast<float>(1 << 31)));
+  EXPECT_EQ(1L << 40,
+      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 40)));
+  EXPECT_EQ(1L << 50,
+      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 50)));
+  EXPECT_EQ(1L << 60,
+      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 60)));
+  EXPECT_EQ(1L << 62,
+      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 62)));
+  EXPECT_EQ(1L << 63,
+      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 63)));
 }
 
 // NOLINTEND

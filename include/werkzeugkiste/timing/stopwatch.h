@@ -12,8 +12,6 @@
 /// some of its template boilerplate).
 namespace werkzeugkiste::timing {
 
-// NOLINTBEGIN(*-else-after-return)
-
 /// Returns the abbreviation for the given
 /// duration type, e.g. std::chrono::hours --> "hrs".
 // TODO change all these checks to constexpr!
@@ -120,8 +118,6 @@ std::string PrecisionTypeName() {
     << "\" has not been mapped yet.";
   throw std::runtime_error(s.str());
 }
-
-// NOLINTEND(*-else-after-return)
 
 /// Returns the number of ticks for the given
 /// std::chrono::duration with a different precision.

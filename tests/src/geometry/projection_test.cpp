@@ -20,8 +20,8 @@ TEST(ProjectionTest, Transformations) {
   wkg::Matrix<double, 4, 2> M;
   M << 1, 2, 3, 4, 5, 6, 7, 8;
 
-  const wkg::Vec4d exp1{(17 + 84), (3 * 17 + 4 * 42), (5 * 17 + 6 * 42),
-                        (7 * 17 + 8 * 42)};
+  const wkg::Vec4d exp1{
+      (17 + 84), (3 * 17 + 4 * 42), (5 * 17 + 6 * 42), (7 * 17 + 8 * 42)};
   const wkg::Vec4d exp2{(-3 + 1), (-3 * 3 + 2), (-5 * 3 + 3), (-7 * 3 + 4)};
 
   wkg::Vec4d a, b;
@@ -41,10 +41,12 @@ TEST(ProjectionTest, Transformations) {
   wkg::Matrix<double, 4, 3> N;
   N << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
   std::tie(a, b) = wkg::TransformToVecs(N, v1, v2);
-  const wkg::Vec4d exp3{(17 + 84 + 3), (4 * 17 + 5 * 42 + 6),
-                        (7 * 17 + 8 * 42 + 9), (10 * 17 + 11 * 42 + 12)};
-  const wkg::Vec4d exp4{(-3 + 1 + 3), (-3 * 4 + 2.5 + 6), (-7 * 3 + 4 + 9),
-                        (-10 * 3 + 5.5 + 12)};
+  const wkg::Vec4d exp3{(17 + 84 + 3),
+      (4 * 17 + 5 * 42 + 6),
+      (7 * 17 + 8 * 42 + 9),
+      (10 * 17 + 11 * 42 + 12)};
+  const wkg::Vec4d exp4{
+      (-3 + 1 + 3), (-3 * 4 + 2.5 + 6), (-7 * 3 + 4 + 9), (-10 * 3 + 5.5 + 12)};
   EXPECT_EQ(a, exp3);
   EXPECT_EQ(b, exp4);
 }  // NOLINT

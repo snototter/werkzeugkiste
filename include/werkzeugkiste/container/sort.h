@@ -44,8 +44,8 @@ class Ordering {
   Ordering() = delete;
 
   Ordering(const Container& data,
-           bool (*cmp)(const typename Container::value_type&,
-                       const typename Container::value_type&))
+      bool (*cmp)(const typename Container::value_type&,
+          const typename Container::value_type&))
       : data_(data), cmp_(cmp) {}
 
   explicit Ordering(const Container& data)
@@ -65,7 +65,7 @@ class Ordering {
   const Container& data_;
   std::vector<std::size_t> indices_;
   bool (*cmp_)(const typename Container::value_type&,
-               const typename Container::value_type&);
+      const typename Container::value_type&);
 
   void InitIndices() {
     indices_.clear();
@@ -78,10 +78,10 @@ class Ordering {
 
 /// Returns the indices which correspond to a sorted `data` vector.
 template <class Container>
-std::vector<std::size_t> GetSortedIndices(
-    const Container& data, bool (*cmp)(const typename Container::value_type&,
-                                       const typename Container::value_type&) =
-                               CmpAsc<typename Container::value_type>) {
+std::vector<std::size_t> GetSortedIndices(const Container& data,
+    bool (*cmp)(const typename Container::value_type&,
+        const typename Container::value_type&) =
+        CmpAsc<typename Container::value_type>) {
   Ordering<Container> ordering(data, cmp);
   return ordering.GetSortedIndices();
 }
@@ -93,7 +93,7 @@ std::vector<std::size_t> GetSortedIndices(
 /// i.e. it must provide `push_back`.
 template <class Container>
 Container ApplyIndexLookup(const Container& data,
-                           const std::vector<std::size_t>& indices) {
+    const std::vector<std::size_t>& indices) {
   Container remapped;
   // TODO For a more generic template, I need to dig deeper
   // into container types and maybe SFINAE: `reserve` is not
@@ -108,9 +108,8 @@ Container ApplyIndexLookup(const Container& data,
 /// Returns the data vector sorted by the given external keys.
 template <typename TData, typename TKey>
 std::vector<TData> SortByExternalKeys(const std::vector<TData>& data,
-                                      const std::vector<TKey>& keys,
-                                      bool (*cmp)(const TData&,
-                                                  const TKey&) = CmpAsc<TKey>) {
+    const std::vector<TKey>& keys,
+    bool (*cmp)(const TData&, const TKey&) = CmpAsc<TKey>) {
   if (data.empty()) {
     return std::vector<TData>{};
   }
@@ -131,8 +130,8 @@ std::vector<TData> SortByExternalKeys(const std::vector<TData>& data,
 
 /// Returns a map containing all duplicate entries in 'data' along
 /// with their their frequencies.
-template <typename Container, typename Tp = std::decay_t<
-                                  decltype(*begin(std::declval<Container>()))>>
+template <typename Container,
+    typename Tp = std::decay_t<decltype(*begin(std::declval<Container>()))>>
 std::map<Tp, std::size_t> FindDuplicates(const Container& container) {
   std::map<Tp, std::size_t> item_count;
   std::map<Tp, std::size_t> item_count_tmp;
@@ -157,8 +156,8 @@ std::map<Tp, std::size_t> FindDuplicates(const Container& container) {
 
 /// Returns true if there are no duplicates in the given
 /// sequence container.
-template <typename Container, typename Tp = std::decay_t<
-                                  decltype(*begin(std::declval<Container>()))>>
+template <typename Container,
+    typename Tp = std::decay_t<decltype(*begin(std::declval<Container>()))>>
 bool HasUniqueItems(const Container& container) {
   auto duplicates = FindDuplicates(container);
   return duplicates.empty();
@@ -171,8 +170,8 @@ inline bool ContainsKey(const std::map<Ts...>& container, const Tv& key) {
 }
 
 /// Returns true if the given element exists within the container.
-template <typename Container, typename Tp = std::decay_t<
-                                  decltype(*begin(std::declval<Container>()))>>
+template <typename Container,
+    typename Tp = std::decay_t<decltype(*begin(std::declval<Container>()))>>
 bool ContainsValue(const Container& container, const Tp& value) {
   return std::find(container.begin(), container.end(), value) !=
          container.end();

@@ -125,7 +125,7 @@ TEST(ConfigTypeTest, TypeQueries) {
   EXPECT_EQ("boolean", wkc::ConfigTypeToString(wkc::ConfigType::Boolean));
   EXPECT_EQ("integer", wkc::ConfigTypeToString(wkc::ConfigType::Integer));
   EXPECT_EQ("floating_point",
-            wkc::ConfigTypeToString(wkc::ConfigType::FloatingPoint));
+      wkc::ConfigTypeToString(wkc::ConfigType::FloatingPoint));
   EXPECT_EQ("string", wkc::ConfigTypeToString(wkc::ConfigType::String));
   EXPECT_EQ("date", wkc::ConfigTypeToString(wkc::ConfigType::Date));
   EXPECT_EQ("time", wkc::ConfigTypeToString(wkc::ConfigType::Time));
@@ -316,6 +316,9 @@ TEST(ConfigTypeTest, TimeType) {
   EXPECT_NO_THROW(wkc::time(8, 10, 59));
   EXPECT_THROW(wkc::time(8, 10, 60), wkc::ValueError);
 
+  EXPECT_NO_THROW(wkc::time(8, 10, 59, 999999999));
+  EXPECT_THROW(wkc::time(8, 10, 60, 1000000000), wkc::ValueError);
+
   // Overloaded operators.
   EXPECT_LE(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
   EXPECT_LT(wkc::time(8, 10, 22), wkc::time(8, 10, 22, 1));
@@ -330,12 +333,12 @@ TEST(ConfigTypeTest, TimeType) {
   EXPECT_LE(wkc::time(10, 11, 12, 999888777), wkc::time(10, 11, 12, 999888777));
   EXPECT_GE(wkc::time(10, 11, 12, 999888777), wkc::time(10, 11, 12, 999888777));
 
-  EXPECT_FALSE(wkc::time(10, 11, 12, 999888777) <
-               wkc::time(10, 11, 12, 999888777));
-  EXPECT_FALSE(wkc::time(10, 11, 12, 999888777) >
-               wkc::time(10, 11, 12, 999888777));
-  EXPECT_FALSE(wkc::time(10, 11, 12, 999888777) !=
-               wkc::time(10, 11, 12, 999888777));
+  EXPECT_FALSE(
+      wkc::time(10, 11, 12, 999888777) < wkc::time(10, 11, 12, 999888777));
+  EXPECT_FALSE(
+      wkc::time(10, 11, 12, 999888777) > wkc::time(10, 11, 12, 999888777));
+  EXPECT_FALSE(
+      wkc::time(10, 11, 12, 999888777) != wkc::time(10, 11, 12, 999888777));
 
   EXPECT_GT(wkc::time(12, 10, 2, 1), wkc::time(12, 10, 2));
 }
@@ -371,8 +374,8 @@ TEST(ConfigTypeTest, TimeParsing) {
   EXPECT_EQ(wkc::time(10, 11, 12, 123456000), wkc::time("10:11:12.123456"sv));
   EXPECT_THROW(wkc::time("10:11:12.1234567"sv), wkc::ParseError);
   EXPECT_THROW(wkc::time("10:11:12.12345678"sv), wkc::ParseError);
-  EXPECT_EQ(wkc::time(10, 11, 12, 123456789),
-            wkc::time("10:11:12.123456789"sv));
+  EXPECT_EQ(
+      wkc::time(10, 11, 12, 123456789), wkc::time("10:11:12.123456789"sv));
 
   // Second/fraction delimiter can be '.' or ','
   EXPECT_EQ(wkc::time(10, 11, 12, 1000000), wkc::time("10:11:12.001"sv));
@@ -553,9 +556,9 @@ TEST(ConfigTypeTest, DateTime) {
   EXPECT_NE(dt, wkc::date_time{"2023-02-14T22:08:23+01:00"sv});  // ns differ
 
   EXPECT_EQ(wkc::date_time{"2024-02-29 00:45:12.123+01:00"sv},
-            wkc::date_time{"2024-02-28 23:45:12.123Z"sv});
+      wkc::date_time{"2024-02-28 23:45:12.123Z"sv});
   EXPECT_EQ(wkc::date_time("2024-02-29 00:45:12.123+01:00"sv).UTC(),
-            wkc::date_time("2024-02-28 23:45:12.123Z"sv).UTC());
+      wkc::date_time("2024-02-28 23:45:12.123Z"sv).UTC());
 
   EXPECT_NE(dt, wkc::date_time{"2023-02-14T21:08:23"sv});
 

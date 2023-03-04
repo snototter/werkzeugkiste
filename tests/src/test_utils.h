@@ -14,8 +14,9 @@
 
 /// Check if an elapsed time "tick value" is within the
 /// range [expected-pm, expected+pm].
-::testing::AssertionResult CheckElapsedTime(double val, double expected,
-                                            double pm);
+::testing::AssertionResult CheckElapsedTime(double val,
+    double expected,
+    double pm);
 
 template <typename T>
 inline bool IsApproximatelyEqual(T x, T y) {
@@ -40,8 +41,7 @@ inline ::testing::AssertionResult CheckVectorEqual(
     }
 
     return ::testing::AssertionFailure()
-           << value.ToString() << " differs from expected "
-           << expected.ToString();
+        << value.ToString() << " differs from expected " << expected.ToString();
   } else {
     bool is_close{true};
 
@@ -79,7 +79,7 @@ std::string Stringify(const Container& v) {
 
 template <typename Container>
 void CheckMatchingContainers(const Container& expected,
-                             const Container& values) {
+    const Container& values) {
   using namespace std::string_view_literals;
   EXPECT_EQ(expected.size(), values.size())
       << "Got values: " << Stringify(values)

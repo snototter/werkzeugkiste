@@ -20,8 +20,9 @@ namespace werkzeugkiste::timing {
 /// @param number_precision If > 0, defines the decimal
 ///            precision for displaying time measurements.
 WERKZEUGKISTE_TIMING_EXPORT
-void SetTocFormat(bool print_labels_aligned = false, int fixed_number_width = 0,
-                  int number_precision = 0);
+void SetTocFormat(bool print_labels_aligned = false,
+    int fixed_number_width = 0,
+    int number_precision = 0);
 
 /// @brief Mute future toc_xxx calls, i.e. no output will be displayed.
 ///
