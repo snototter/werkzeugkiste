@@ -13,12 +13,11 @@
 // * When upgrading to C++20, we can easily support date/time
 //   checks: https://en.cppreference.com/w/cpp/chrono/year_month_day/ok
 // * Parsing was also introduced in C++20
-// * Replace intX_t by int_leastX_t everywhere.
-//   Or change to int for simplicity - we're not targeting any special
-//   platform & these shorter types are promoted during arithmetic
-//   operations (and cause GCC warnings),
+// * Use fixed width integer types - switch back to intX_t instead of
+//   least/fast, or change to int for simplicity (requires additional error
+//   handling). We're not targeting any special platform & the fixed width
+//   types are promoted during arithmetic operations (causing GCC warnings),
 //   https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int/39061103#39061103
-// * Use fixed width integer types
 
 // NOLINTBEGIN(*magic-numbers)
 namespace werkzeugkiste::config {

@@ -97,6 +97,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Returns true if all configuration keys and values match exactly.
   bool Equals(const Configuration &other) const;
 
+  /// @brief Returns true if all configuration keys and values match exactly.
+  bool operator==(const Configuration &other) const;
+
+  /// @brief Returns true if any configuration key or value differs.
+  bool operator!=(const Configuration &other) const;
+
   /// @brief Checks if the given key exists in this configuration.
   /// @param key Fully-qualified identifier of the parameter.
   bool Contains(std::string_view key) const;

@@ -298,14 +298,6 @@ inline const char *TomlTypeName(const NodeView &node, std::string_view key) {
     case toml::node_type::array:
       return TomlTypeName<toml::array>();
 
-    case toml::node_type::none: {
-      std::string msg{"Internal node type for parameter `"};
-      msg += key;
-      msg += "` is `none` (not-a-node)!";
-      throw std::logic_error{msg};
-      // or return "none"?
-    }
-
     case toml::node_type::table:
       return TomlTypeName<toml::table>();
 
@@ -329,6 +321,18 @@ inline const char *TomlTypeName(const NodeView &node, std::string_view key) {
 
     case toml::node_type::date_time:
       return TomlTypeName<toml::date_time>();
+
+    // LCOV_EXCL_START
+    case toml::node_type::none: {
+      std::string msg{"Internal node type for parameter `"};
+      msg += key;
+      msg +=
+          "` is `none` (not-a-node)! Please report at "
+          "https://github.com/snototter/werkzeugkiste/issues";
+      throw std::logic_error{msg};
+      // or return "none"?
+    }
+      // LCOV_EXCL_STOP
   }
   // LCOV_EXCL_START
   std::string msg{"TOML node type for key `"};
@@ -551,10 +555,13 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
   return std::make_pair(std::string_view{}, path);
 }
 
-void EnsureParameterIsCreatable(const toml::table &tbl, std::string_view key) {
+/// @brief Throws a KeyError if the given key cannot be created, i.e. if it
+///   refers to an array element.
+/// @param tbl The TOML root node.
+/// @param key The fully-qualified parameter name.
+void EnsureKeyIsCreatable(const toml::table &tbl, std::string_view key) {
   // Sanity checks are missing on purpose:
   // 1) empty string or 2) if key exists
-
   if (key[key.length() - 1] == ']') {
     std::string msg{
         "List elements can only be \"set\" (replaced) or \"appended\", but "
@@ -596,7 +603,7 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   // parent path, then create a table here.
   // But first, ensure that we are not asked to create a list:
   const auto path = SplitTomlPath(key);
-  EnsureParameterIsCreatable(tbl, path.second);
+  EnsureKeyIsCreatable(tbl, path.second);
 
   if (path.first.empty()) {
     // Create table at root level.
@@ -672,7 +679,7 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
     ReplaceScalar(node, value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
-    EnsureParameterIsCreatable(tbl, path.second);
+    EnsureKeyIsCreatable(tbl, path.second);
 
     toml::table *parent =
         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
@@ -701,7 +708,7 @@ void CreateList(toml::table &tbl,
     const std::vector<Tcfg> &vec) {
   const auto path = SplitTomlPath(key);
   EnsureContainerPathExists(tbl, path.first);
-  EnsureParameterIsCreatable(tbl, path.second);
+  EnsureKeyIsCreatable(tbl, path.second);
 
   toml::array arr{};
   for (const auto &value : vec) {
@@ -725,8 +732,13 @@ void CreateList(toml::table &tbl,
   }
 }
 
-// TODO doc 1) Ttoml is TOML type of the *existing* parameter
-// 2) internal helper - no sanity checks
+/// @brief Internal helper for `ReplaceList`. Sanity checks are omitted on
+///   purpose (they're part of `SetList > ReplaceList`).
+/// @tparam Ttoml Element type of existing TOML array.
+/// @tparam Tcfg Element type of replacement vector.
+/// @param arr List to be replaced.
+/// @param key Fully-qualified parameter name.
+/// @param vec List of replacement values.
 template <typename Ttoml, typename Tcfg>
 void ReplaceHomogeneousList(toml::array &arr,
     std::string_view key,
@@ -740,6 +752,8 @@ void ReplaceHomogeneousList(toml::array &arr,
   arr = toml_arr;
 }
 
+/// @brief Returns true if all elements of this TOML array are either integer
+///   or floating point.
 bool IsNumericArray(const toml::array &arr) {
   for (auto &&value : arr) {
     if (!value.is_number()) {
@@ -755,7 +769,6 @@ void ReplaceList(toml::table &tbl,
     const std::vector<Tcfg> &vec) {
   auto node = tbl.at_path(key);
   if (!node.is_array()) {
-    // TODO error message
     std::string msg{"Cannot replace `"};
     msg += key;
     msg += "` by a list, because it is of incompatible type `";
@@ -1204,6 +1217,14 @@ bool Configuration::Equals(const Configuration &other) const {
   return true;
 }
 
+bool Configuration::operator==(const Configuration &other) const {
+  return Equals(other);
+}
+
+bool Configuration::operator!=(const Configuration &other) const {
+  return !(*this == other);
+}
+
 bool Configuration::Contains(std::string_view key) const {
   return detail::ContainsKey(pimpl_->config_root, key);
 }
@@ -1315,7 +1336,7 @@ std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
 
 void Configuration::SetBooleanList(std::string_view key,
     const std::vector<bool> &values) {
-  detail::SetList<bool>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<bool>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
