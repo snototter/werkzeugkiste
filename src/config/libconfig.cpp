@@ -23,6 +23,13 @@ namespace detail {
 // Forward declaration
 Configuration FromLibconfigGroup(const libconfig::Setting &node);
 
+// LCOV_EXCL_START
+
+/// @brief Throws a std::logic_error indicating an implementation error, i.e.
+///   that we miss-used the libconfig++ API.
+/// @param description Error description.
+/// @param node_name Name of the libconfig::Setting / node in the configuration
+///   file at which this error occured. Can be NULL/nullptr.
 void ThrowImplementationError(std::string_view description,
     const char *node_name) {
   std::string msg{description};
@@ -36,6 +43,7 @@ void ThrowImplementationError(std::string_view description,
       "https://github.com/snototter/werkzeugkiste/issues";
   throw std::logic_error{msg};
 }
+// LCOV_EXCL_STOP
 
 template <typename Tcfg, typename Tlibcfg = Tcfg>
 Tcfg CastSetting(const libconfig::Setting &value) {
@@ -47,6 +55,8 @@ Tcfg CastSetting(const libconfig::Setting &value) {
       return static_cast<Tcfg>(val);
     }
   } catch (const libconfig::SettingTypeException &e) {
+    // LCOV_EXCL_START
+    // This branch should be unreachable.
     std::string msg{"Cannot convert libconfig setting `"};
     msg += value.getName();
     msg += "` to type `";
@@ -54,6 +64,7 @@ Tcfg CastSetting(const libconfig::Setting &value) {
     msg += "`: ";
     msg += e.what();
     throw TypeError{msg};
+    // LCOV_EXCL_STOP
   }
 }
 
@@ -103,10 +114,13 @@ void AppendListSetting(std::string_view lst_key,
     }
 
     case libconfig::Setting::TypeNone:
+      // LCOV_EXCL_START
+      // This branch should be unreachable.
       ThrowImplementationError(
           "Internal util `AppendNamedSetting` called with node type `none`!",
           node.getName());
       break;
+      // LCOV_EXCL_STOP
   }
 }
 
@@ -149,19 +163,24 @@ void AppendNamedSetting(Configuration &cfg, const libconfig::Setting &node) {
     }
 
     case libconfig::Setting::TypeNone:
+      // LCOV_EXCL_START
+      // This branch should be unreachable.
       ThrowImplementationError(
           "Internal util `AppendNamedSetting` called with node type `none`!",
           node.getName());
       break;
+      // LCOV_EXCL_STOP
   }
 }
 
 Configuration FromLibconfigGroup(const libconfig::Setting &node) {
   if (!node.isGroup()) {
+    // LCOV_EXCL_START
     // This branch should be unreachable.
     ThrowImplementationError(
         "Internal util `FromLibconfigGroup` invoked with non-group node!",
         node.getName());
+    // LCOV_EXCL_STOP
   }
 
   Configuration grp{};
