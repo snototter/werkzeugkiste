@@ -189,6 +189,11 @@ Configuration FromLibconfigGroup(const libconfig::Setting &node) {
   }
   return grp;
 }
+
+// void Serialize(const Configuration &cfg, std::ostream &out, std::size_t
+// indent) {
+
+// }
 }  // namespace detail
 
 Configuration LoadLibconfigString(std::string_view lcfg_string) {
@@ -228,16 +233,32 @@ Configuration LoadLibconfigFile(std::string_view filename) {
   }
 }
 
-#else   // WERKZEUGKISTE_WITH_LIBCONFIG
-Configuration LoadLibconfigString(std::string_view toml_string) {
-  throw std::logic_error{
-      "werkzeugkiste::config has been built without libconfig support. "
-      "Please install libconfig++ and rebuilt the library with "
-      "`werkzeugkiste_WITH_LIBCONFIG` enabled"};
+std::string DumpLibconfigString(const Configuration &cfg) {
+  // TODO add iteration capabilities or retrieve only lvl 1 children
+  return "TODO";
 }
 
-Configuration LoadLibconfigFile(std::string_view filename) {
-  return LoadLibconfigString("");
+#else  // WERKZEUGKISTE_WITH_LIBCONFIG
+#define WZK_THROW_LIBCONFIG_MISSING                                        \
+  do {                                                                     \
+    throw std::logic_error{                                                \
+        "werkzeugkiste::config has been built without libconfig support. " \
+        "Please install libconfig++ and rebuilt the library with "         \
+        "`werkzeugkiste_WITH_LIBCONFIG` enabled"};                         \
+  } while (false)
+
+Configuration LoadLibconfigString(std::string_view /*lcfg_string*/) {
+  WZK_THROW_LIBCONFIG_MISSING;
 }
+
+Configuration LoadLibconfigFile(std::string_view /*filename*/) {
+  WZK_THROW_LIBCONFIG_MISSING;
+}
+
+std::string DumpLibconfigString(const Configuration& /*cfg*/) {
+  WZK_THROW_LIBCONFIG_MISSING;
+}
+
+#undef WZK_THROW_LIBCONFIG_MISSING
 #endif  // WERKZEUGKISTE_WITH_LIBCONFIG
 }  // namespace werkzeugkiste::config

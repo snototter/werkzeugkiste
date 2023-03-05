@@ -516,7 +516,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetGroup(std::string_view key, const Configuration &group);
 
   //---------------------------------------------------------------------------
-  // Special utilities
+  // Convenience utilities
 
   /// @brief Adjusts the given parameters to hold either an absolute file path,
   /// or the result of "base_path / <param>" if they initially held a relative
@@ -554,11 +554,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///     string)
   void LoadNestedTOMLConfiguration(std::string_view key);
 
+  //---------------------------------------------------------------------------
+  // Serialization
+
   /// @brief Returns a TOML-formatted string of this configuration.
   std::string ToTOML() const;
 
   /// @brief Returns a JSON-formatted string of this configuration.
   std::string ToJSON() const;
+
+  /// @brief Returns a YAML-formatted string of this configuration.
+  std::string ToYAML() const;
+
+  /// @brief Returns a libconfig-formatted string of this configuration.
+  std::string ToLibconfig() const;
 
  private:
   /// Forward declaration of internal implementation struct.
@@ -580,12 +589,32 @@ inline Configuration LoadTOMLString(std::string_view toml_string) {
   return Configuration::LoadTOMLString(toml_string);
 }
 
+// TODO test
 // TODO doc
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadLibconfigFile(std::string_view filename);
 
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadLibconfigString(std::string_view lcfg_string);
+
+/// @brief Returns a libconfig-formatted string.
+WERKZEUGKISTE_CONFIG_EXPORT
+std::string DumpLibconfigString(const Configuration &cfg);
+
+/// @brief Returns a TOML-formatted string.
+inline std::string DumpTOMLString(const Configuration &cfg) {
+  return cfg.ToTOML();
+}
+
+/// @brief Returns a JSON-formatted string.
+inline std::string DumpJSONString(const Configuration &cfg) {
+  return cfg.ToJSON();
+}
+
+/// @brief Returns a YAML-formatted string.
+inline std::string DumpYAMLString(const Configuration &cfg) {
+  return cfg.ToYAML();
+}
 
 }  // namespace werkzeugkiste::config
 

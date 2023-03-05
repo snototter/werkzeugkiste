@@ -1776,7 +1776,7 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
 }
 
 //---------------------------------------------------------------------------
-// Special utilities
+// Convenience utilities
 
 bool Configuration::AdjustRelativePaths(std::string_view base_path,
     const std::vector<std::string_view> &parameters) {
@@ -1920,6 +1920,9 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   }
 }
 
+//---------------------------------------------------------------------------
+// Serialization
+
 std::string Configuration::ToTOML() const {
   std::ostringstream repr;
   repr << toml::toml_formatter{pimpl_->config_root};
@@ -1930,6 +1933,16 @@ std::string Configuration::ToJSON() const {
   std::ostringstream repr;
   repr << toml::json_formatter{pimpl_->config_root};
   return repr.str();
+}
+
+std::string Configuration::ToYAML() const {
+  std::ostringstream repr;
+  repr << toml::yaml_formatter{pimpl_->config_root};
+  return repr.str();
+}
+
+std::string Configuration::ToLibconfig() const {
+  return DumpLibconfigString(*this);
 }
 
 #undef WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR
