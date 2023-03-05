@@ -22,6 +22,8 @@ TEST(ConfigListTest, GetEmptyLists) {
   EXPECT_TRUE(config.GetTimeList("empty"sv).empty());
   EXPECT_TRUE(config.GetDateTimeList("empty"sv).empty());
 
+  EXPECT_TRUE(config.IsHomogeneousScalarList("empty"sv));
+
   // TODO extend with nested lists
 
   // An empty list can be set to any type -> it will still have no type.
@@ -40,6 +42,8 @@ TEST(ConfigListTest, GetEmptyLists) {
   EXPECT_THROW(config.GetBooleanList("empty"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("empty"sv), wkc::TypeError);
   EXPECT_EQ(2, config.GetDoubleList("empty"sv).size());
+
+  EXPECT_TRUE(config.IsHomogeneousScalarList("empty"sv));
 }
 
 TEST(ConfigListTest, SetEmptyLists) {
@@ -79,6 +83,8 @@ TEST(ConfigListTest, SetEmptyLists) {
   EXPECT_NO_THROW(config.SetTimeList("ints"sv, {}));
   config.SetInteger32List("ints"sv, {1, 2});
   EXPECT_NO_THROW(config.SetDateTimeList("ints"sv, {}));
+
+  EXPECT_TRUE(config.IsHomogeneousScalarList("ints"sv));
 
   // A mixed list cannot be restored programmatically. Thus, we can only
   // replace it once.
@@ -148,6 +154,7 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_THROW(config.GetInteger64List("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetDoubleList("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetStringList("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.IsHomogeneousScalarList("no-such-key"sv), wkc::KeyError);
 
   // Try to load a wrong data type as list:
   EXPECT_THROW(config.GetBooleanList("an_int"sv), wkc::TypeError);
@@ -158,6 +165,8 @@ TEST(ConfigListTest, GetLists) {
       config.GetInteger32List("not-a-list.no-such-key"sv), wkc::KeyError);
 
   EXPECT_THROW(config.GetInteger64List("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.IsHomogeneousScalarList("an_int"sv), wkc::TypeError);
+
   EXPECT_THROW(config.GetInteger64List("not-a-list"sv), wkc::TypeError);
   EXPECT_THROW(
       config.GetInteger64List("not-a-list.no-such-key"sv), wkc::KeyError);
@@ -180,6 +189,9 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_EQ(2, config.GetInteger32("mixed_types[1]"sv));
   EXPECT_EQ("framboozle", config.GetString("mixed_types[2]"sv));
 
+  EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_types"sv));
+
+  EXPECT_FALSE(config.IsHomogeneousScalarList("nested_lst"sv));
   EXPECT_THROW(config.GetInteger32List("nested_lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("nested_lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleList("nested_lst"sv), wkc::TypeError);
@@ -190,6 +202,7 @@ TEST(ConfigListTest, GetLists) {
 
   // Lists must consist of elements of the same type (unless an
   // implicit & lossless cast is available)
+  EXPECT_TRUE(config.IsHomogeneousScalarList("ints32"sv));
   auto list32 = config.GetInteger32List("ints32"sv);
   EXPECT_EQ(8, list32.size());
   auto list64 = config.GetInteger64List("ints32"sv);
@@ -203,12 +216,14 @@ TEST(ConfigListTest, GetLists) {
   EXPECT_THROW(config.GetStringList("ints32"sv), wkc::TypeError);
 
   // Implicit type conversion:
+  EXPECT_TRUE(config.IsHomogeneousScalarList("ints64"sv));
   EXPECT_THROW(config.GetInteger32List("ints64"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetInteger32List("ints64_castable"sv));
 
   list64 = config.GetInteger64List("ints64"sv);
   EXPECT_EQ(5, list64.size());
 
+  EXPECT_TRUE(config.IsHomogeneousScalarList("floats"sv));
   auto list_dbl = config.GetDoubleList("floats"sv);
   EXPECT_EQ(3, list_dbl.size());
   EXPECT_DOUBLE_EQ(0.5, list_dbl[0]);
@@ -234,21 +249,25 @@ TEST(ConfigListTest, GetLists) {
 
   // Implicit conversion to integers fails for fractional numbers,
   // such as "4.5" in mixed_int_flt:
+  EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_int_flt"sv));
   EXPECT_THROW(config.GetInteger32List("mixed_int_flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInteger64List("mixed_int_flt"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetDoubleList("mixed_int_flt"sv));
 
   // Load dates:
+  EXPECT_TRUE(config.IsHomogeneousScalarList("days"sv));
   const auto days = config.GetDateList("days"sv);
   EXPECT_EQ(2, days.size());
   EXPECT_EQ(wkc::date(1999, 10, 11), days[0]);
   EXPECT_EQ(wkc::date(2000, 1, 22), days[1]);
 
+  EXPECT_TRUE(config.IsHomogeneousScalarList("times"sv));
   const auto times = config.GetTimeList("times"sv);
   EXPECT_EQ(2, times.size());
   EXPECT_EQ(wkc::time(23, 0, 59), times[0]);
   EXPECT_EQ(wkc::time(8, 30, 10), times[1]);
 
+  EXPECT_TRUE(config.IsHomogeneousScalarList("dts"sv));
   const auto dts = config.GetDateTimeList("dts"sv);
   EXPECT_EQ(2, dts.size());
   EXPECT_EQ(wkc::date_time{"2023-02-14T21:08:23"sv}, dts[0]);
@@ -269,6 +288,7 @@ TEST(ConfigListTest, NumericList) {
   EXPECT_FALSE(config.Contains("ints"sv));
   EXPECT_NO_THROW(config.SetInteger32List("ints"sv, {-3, 0}));
   EXPECT_TRUE(config.Contains("ints"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("ints"sv));
   auto ints32 = config.GetInteger32List("ints"sv);
   EXPECT_EQ(2, ints32.size());
   EXPECT_EQ(-3, ints32[0]);
@@ -276,6 +296,7 @@ TEST(ConfigListTest, NumericList) {
 
   // Update the integer list:
   EXPECT_NO_THROW(config.SetInteger64List("ints"sv, {1, -42, 17}));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("ints"sv));
   ints32 = config.GetInteger32List("ints"sv);
   EXPECT_EQ(3, ints32.size());
   EXPECT_EQ(1, ints32[0]);
@@ -318,7 +339,9 @@ TEST(ConfigListTest, NumericList) {
 
   // A mixed list that only contains numbers can be replaced by a homogeneous
   // list. Its type, however, will be floating point afterwards:
+  EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_int_flt"sv));
   EXPECT_NO_THROW(config.SetInteger32List("mixed_int_flt"sv, {1, 2}));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("mixed_int_flt"sv));
   ints32 = config.GetInteger32List("mixed_int_flt"sv);
   EXPECT_EQ(2, ints32.size());
   EXPECT_EQ(1, ints32[0]);
@@ -331,6 +354,7 @@ TEST(ConfigListTest, NumericList) {
       config.SetInteger64List("mixed_types"sv, {1, 3, -17}), wkc::TypeError);
 
   EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false}));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("flags"sv));
   EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
   EXPECT_THROW(config.SetStringList("flags"sv, {"abc"}), wkc::TypeError);
 
@@ -345,6 +369,7 @@ TEST(ConfigListTest, SetBooleanList) {
   EXPECT_FALSE(config.Contains("flags"sv));
   EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false, true}));
   EXPECT_TRUE(config.Contains("flags"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("flags"sv));
   auto flags = config.GetBooleanList("flags"sv);
   EXPECT_EQ(3, flags.size());
   EXPECT_TRUE(flags[0]);
@@ -376,8 +401,10 @@ TEST(ConfigListTest, SetStringList) {
 
   EXPECT_NO_THROW(config.SetStringList("strs"sv, {"Hello"}));
   EXPECT_EQ(1, config.GetStringList("strs"sv).size());
+  EXPECT_TRUE(config.IsHomogeneousScalarList("strs"sv));
 
   EXPECT_NO_THROW(config.SetStringList("strs"sv, {"Hello", "World"}));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("strs"sv));
   const auto strs = config.GetStringList("strs"sv);
   EXPECT_EQ(2, strs.size());
   EXPECT_EQ(2, config.Size("strs"sv));
@@ -402,6 +429,7 @@ TEST(ConfigListTest, SetDateList) {
   std::vector<wkc::date> days = {
       wkc::date{1900, 1, 3}, wkc::date{2000, 2, 29}, wkc::date{2023, 2, 28}};
   EXPECT_NO_THROW(config.SetDateList("days"sv, days));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("days"sv));
   const auto lookup = config.GetDateList("days"sv);
   EXPECT_EQ(days.size(), lookup.size());
   EXPECT_EQ(days.size(), config.Size("days"sv));
@@ -441,6 +469,7 @@ TEST(ConfigListTest, SetTimeList) {
   std::vector<wkc::time> times = {
       wkc::time{0, 0}, wkc::time{12, 0}, wkc::time{23, 59, 59}};
   EXPECT_NO_THROW(config.SetTimeList("times"sv, times));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("times"sv));
   const auto lookup = config.GetTimeList("times"sv);
   EXPECT_EQ(times.size(), lookup.size());
   EXPECT_EQ(times.size(), config.Size("times"sv));
@@ -486,6 +515,7 @@ TEST(ConfigListTest, SetDateTimeList) {
       wkc::date_time{"2024-02-28 23:45:12.123Z"sv},
       wkc::date_time{"1234-05-06 07:08:09"sv}};
   EXPECT_NO_THROW(config.SetDateTimeList("dts"sv, dts));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("dts"sv));
   const auto lookup = config.GetDateTimeList("dts"sv);
   EXPECT_EQ(dts.size(), lookup.size());
   EXPECT_EQ(dts.size(), config.Size("dts"sv));
@@ -517,11 +547,14 @@ TEST(ConfigListTest, MixedList) {
   auto config = wkc::LoadTOMLString(R"toml(
     numbers = [1, 2.5]
 
-    types = [true, -42, 4.2, "foo", 2011-09-10]
+    types = [true, -42, 4.2, "foo", 2011-09-10, 08:30:01, 2020-10-11T12:31:59.123]
     )toml");
 
   EXPECT_EQ(2, config.Size("numbers"sv));
-  EXPECT_EQ(5, config.Size("types"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("numbers"sv));
+
+  EXPECT_EQ(7, config.Size("types"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("types"sv));
 
   EXPECT_THROW(config.GetBooleanList("numbers"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDateList("numbers"sv), wkc::TypeError);
@@ -542,6 +575,9 @@ TEST(ConfigListTest, MixedList) {
   EXPECT_DOUBLE_EQ(4.2, config.GetDouble("types[2]"sv));
   EXPECT_EQ("foo", config.GetString("types[3]"sv));
   EXPECT_EQ(wkc::date{"2011-09-10"sv}, config.GetDate("types[4]"sv));
+  EXPECT_EQ(wkc::time{"08:30:01"sv}, config.GetTime("types[5]"sv));
+  EXPECT_EQ(wkc::date_time{"2020-10-11_12:31:59.123"sv},
+      config.GetDateTime("types[6]"sv));
 
   // Individual elements can be replaced (but only by a compatible/convertible
   // value)
@@ -558,6 +594,12 @@ TEST(ConfigListTest, MixedList) {
   const wkc::date day{"31.12.1234"};
   EXPECT_NO_THROW(config.SetDate("types[4]"sv, day));
   EXPECT_EQ(day, config.GetDate("types[4]"sv));
+  const wkc::time tm{"01:02:03.123456"sv};
+  EXPECT_NO_THROW(config.SetTime("types[5]"sv, tm));
+  EXPECT_EQ(tm, config.GetTime("types[5]"sv));
+  const wkc::date_time dt{"2023-03-05T12:14:16+03:00"sv};
+  EXPECT_NO_THROW(config.SetDateTime("types[6]"sv, dt));
+  EXPECT_EQ(dt, config.GetDateTime("types[6]"sv));
 
   // The mixed list cannot be replaced by a homogeneous list.
   EXPECT_THROW(config.SetBooleanList("types"sv, {true}), wkc::TypeError);
@@ -576,6 +618,8 @@ TEST(ConfigListTest, Size) {
 
     nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
 
+    poly = [[1, 2], [3, 4], [5, 6]]
+
     str = "value"
 
     [scalars]
@@ -583,12 +627,26 @@ TEST(ConfigListTest, Size) {
     flt2 = 2.0
     )toml");
 
-  EXPECT_EQ(5, config.Size());
+  EXPECT_EQ(6, config.Size());
   EXPECT_EQ(2, config.Size("scalars"sv));
+  EXPECT_THROW(config.IsHomogeneousScalarList("scalars"sv), wkc::TypeError);
+  EXPECT_THROW(
+      config.IsHomogeneousScalarList("scalars.flt1"sv), wkc::TypeError);
 
   EXPECT_EQ(5, config.Size("mixed_int_flt"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_int_flt"sv));
+
   EXPECT_EQ(3, config.Size("mixed_types"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_types"sv));
+
   EXPECT_EQ(5, config.Size("nested_lst"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("nested_lst"sv));
+
+  EXPECT_EQ(3, config.Size("poly"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("poly"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("poly[0]"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("poly[1]"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("poly[2]"sv));
 
   EXPECT_THROW(config.Size("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.Size("str"sv), wkc::TypeError);

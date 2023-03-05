@@ -353,6 +353,31 @@ inline bool ContainsKey(const toml::table &tbl, std::string_view key) {
   return node.is_value() || node.is_table() || node.is_array();
 }
 
+bool IsScalar(toml::node_type tp) {
+  switch (tp) {
+    case toml::node_type::none:
+    case toml::node_type::table:
+    case toml::node_type::array:
+      return false;
+
+    case toml::node_type::string:
+    case toml::node_type::integer:
+    case toml::node_type::floating_point:
+    case toml::node_type::boolean:
+    case toml::node_type::date:
+    case toml::node_type::time:
+    case toml::node_type::date_time:
+      return true;
+  }
+
+  // LCOV_EXCL_START
+  std::string msg{"Unhandled TOML node type `"};
+  msg += std::to_string(static_cast<int32_t>(tp));
+  msg += "` is not yet handled in `IsScalar`!";
+  throw std::logic_error(msg);
+  // LCOV_EXCL_STOP
+}
+
 /// Extracts the value from the toml::node or throws an error if the type
 /// is not correct.
 /// Tries converting numeric types if a lossless cast is feasible.
@@ -562,6 +587,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 void EnsureKeyIsCreatable(const toml::table &tbl, std::string_view key) {
   // Sanity checks are missing on purpose:
   // 1) empty string or 2) if key exists
+
   if (key[key.length() - 1] == ']') {
     std::string msg{
         "List elements can only be \"set\" (replaced) or \"appended\", but "
@@ -938,7 +964,7 @@ inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
       cast[idx] = SafeInteger32Cast(point[idx], key);
     }
     return ArrayToTuple(cast);
-  } else {  // NOLINT(*else-after-return)
+  } else {
     return ArrayToTuple(point);
   }
 }
@@ -1296,6 +1322,30 @@ ConfigType Configuration::Type(std::string_view key) const {
   msg += "` is not yet handled in `Configuration::Type`!";
   throw std::logic_error(msg);
   // LCOV_EXCL_STOP
+}
+
+bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
+  if (!detail::ContainsKey(pimpl_->config_root, key)) {
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
+  }
+
+  auto node = pimpl_->config_root.at_path(key);
+  if (!node.is_array()) {
+    std::string msg{"Cannot check if `"};
+    msg += key;
+    msg += "` is homogeneous, because it is of type `";
+    msg += detail::TomlTypeName(node, key);
+    msg += "` instead of a list!";
+    throw TypeError{msg};
+  }
+
+  const toml::array &arr = *node.as_array();
+  for (const auto &value : arr) {
+    if (!detail::IsScalar(value.type()) || (value.type() != arr[0].type())) {
+      return false;
+    }
+  }
+  return true;
 }
 
 std::vector<std::string> Configuration::ListParameterNames(

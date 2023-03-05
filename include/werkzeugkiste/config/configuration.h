@@ -126,6 +126,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified identifier of the parameter.
   ConfigType Type(std::string_view key) const;
 
+  // TODO doc
+  //  KeyError, TypeError
+  bool IsHomogeneousScalarList(std::string_view key) const;
+
   /// @brief Returns a list of all (fully-qualified) parameter names.
   ///
   /// @param include_array_entries If true, the name of each parameter will
