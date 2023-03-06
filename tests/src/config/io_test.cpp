@@ -492,11 +492,14 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
 
 TEST(ConfigIOTest, SerializeLibconfigStrings) {
   const std::string fname =
-      wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
+      wkf::FullFile(wkf::DirName(__FILE__), "test-libconfig.toml");
   const auto toml_config = wkc::LoadTOMLFile(fname);
-  const auto libconfig_config =
-      wkc::LoadLibconfigString(toml_config.ToLibconfig());
-  EXPECT_EQ(toml_config, libconfig_config);
+  const auto lcs = toml_config.ToLibconfig();
+  EXPECT_NO_THROW(wkc::LoadLibconfigString(lcs)) << lcs;
+  const auto libconfig_config = wkc::LoadLibconfigString(lcs);
+  EXPECT_EQ(toml_config, libconfig_config)
+      << "TOML: " << toml_config.ToTOML()
+      << "\nLibconfig: " << libconfig_config.ToTOML();
 }
 
 #else   // WERKZEUGKISTE_WITH_LIBCONFIG

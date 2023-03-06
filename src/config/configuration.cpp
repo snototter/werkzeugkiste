@@ -78,14 +78,16 @@ inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
 // Forward declaration.
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
     std::string_view path,
-    bool include_array_entries);
+    bool include_array_entries,
+    bool recursive);
 
 /// Returns all fully-qualified paths for named parameters within
 /// the given TOML array.
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListArrayKeys(const toml::array &arr,
     std::string_view path,
-    bool include_array_entries) {
+    bool include_array_entries,
+    bool recursive) {
   std::vector<std::string> keys;
   std::size_t array_index = 0;
   for (auto &&value : arr) {
@@ -93,16 +95,19 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
     if (include_array_entries) {
       keys.push_back(fqn);
     }
-    if (value.is_table()) {
-      const toml::table &tbl = *value.as_table();
-      const auto subkeys = ListTableKeys(tbl, fqn, include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
-    }
-    if (value.is_array()) {
-      const toml::array &nested_arr = *value.as_array();
-      const auto subkeys =
-          ListArrayKeys(nested_arr, fqn, include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+    if (recursive) {
+      if (value.is_table()) {
+        const toml::table &tbl = *value.as_table();
+        const auto subkeys =
+            ListTableKeys(tbl, fqn, include_array_entries, recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
+      if (value.is_array()) {
+        const toml::array &nested_arr = *value.as_array();
+        const auto subkeys =
+            ListArrayKeys(nested_arr, fqn, include_array_entries, recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
     }
     ++array_index;
   }
@@ -114,23 +119,28 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
     std::string_view path,
-    bool include_array_entries) {
+    bool include_array_entries,
+    bool recursive) {
   std::vector<std::string> keys;
   for (auto &&[key, value] : tbl) {
     // Each parameter within a table is a "named parameter", i.e. it has
     // a separate name that should always be included.
-    keys.emplace_back(FullyQualifiedPath(key, path));
-    if (value.is_array()) {
-      const auto subkeys = ListArrayKeys(*value.as_array(),
-          FullyQualifiedPath(key, path),
-          include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
-    }
-    if (value.is_table()) {
-      const auto subkeys = ListTableKeys(*value.as_table(),
-          FullyQualifiedPath(key, path),
-          include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+    keys.push_back(FullyQualifiedPath(key, path));
+    if (recursive) {
+      if (value.is_array()) {
+        const auto subkeys = ListArrayKeys(*value.as_array(),
+            FullyQualifiedPath(key, path),
+            include_array_entries,
+            recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
+      if (value.is_table()) {
+        const auto subkeys = ListTableKeys(*value.as_table(),
+            FullyQualifiedPath(key, path),
+            include_array_entries,
+            recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
     }
   }
   return keys;
@@ -146,8 +156,8 @@ KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
   msg += key;
   msg += "` does not exist!";
 
-  const std::vector<std::string> keys =
-      ListTableKeys(tbl, ""sv, /*include_array_entries=*/true);
+  const std::vector<std::string> keys = ListTableKeys(
+      tbl, ""sv, /*include_array_entries=*/true, /*recursive=*/true);
   std::vector<std::pair<std::size_t, std::string_view>> candidates;
   for (const auto &cand : keys) {
     // The edit distance can't be less than the length difference between the
@@ -1223,10 +1233,12 @@ bool Configuration::Equals(const Configuration &other) const {
   using namespace std::string_view_literals;
   const auto keys_this = detail::ListTableKeys(pimpl_->config_root,
       ""sv,
-      /*include_array_entries=*/true);
+      /*include_array_entries=*/true,
+      /*recursive=*/true);
   const auto keys_other = detail::ListTableKeys(other.pimpl_->config_root,
       ""sv,
-      /*include_array_entries=*/true);
+      /*include_array_entries=*/true,
+      /*recursive=*/true);
 
   if (keys_this.size() != keys_other.size()) {
     return false;
@@ -1349,10 +1361,11 @@ bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
 }
 
 std::vector<std::string> Configuration::ListParameterNames(
-    bool include_array_entries) const {
+    bool include_array_entries,
+    bool recursive) const {
   using namespace std::string_view_literals;
   return detail::ListTableKeys(
-      pimpl_->config_root, ""sv, include_array_entries);
+      pimpl_->config_root, ""sv, include_array_entries, recursive);
 }
 
 //---------------------------------------------------------------------------

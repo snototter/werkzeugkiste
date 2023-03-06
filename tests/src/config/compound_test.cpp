@@ -228,17 +228,21 @@ TEST(ConfigCompoundTest, GetGroup) {
 
   auto sub = config.GetGroup("lvl1.grp1"sv);
   EXPECT_FALSE(sub.Empty());
-  auto keys = sub.ListParameterNames(true);
+  auto keys = sub.ListParameterNames(true, false);
+  CheckMatchingContainers({"str", "lst"}, keys);
+  keys = sub.ListParameterNames(true, true);
   CheckMatchingContainers({"str", "lst", "lst[0]", "lst[1]"}, keys);
 
   sub = config.GetGroup("lvl1.grp2"sv);
   EXPECT_FALSE(sub.Empty());
-  keys = sub.ListParameterNames(false);
+  keys = sub.ListParameterNames(false, false);
+  CheckMatchingContainers({"str", "val"}, keys);
+  keys = sub.ListParameterNames(false, true);
   CheckMatchingContainers({"str", "val"}, keys);
 
   sub = config.GetGroup("lvl1"sv);
   EXPECT_FALSE(sub.Empty());
-  keys = sub.ListParameterNames(true);
+  keys = sub.ListParameterNames(true, true);
   const std::vector<std::string> expected{"flt",
       "grp1",
       "grp1.str",
@@ -254,7 +258,9 @@ TEST(ConfigCompoundTest, GetGroup) {
   // Empty sub-group
   sub = config.GetGroup("lvl1.grp3"sv);
   EXPECT_TRUE(sub.Empty());
-  keys = sub.ListParameterNames(false);
+  keys = sub.ListParameterNames(false, false);
+  EXPECT_EQ(0, keys.size());
+  keys = sub.ListParameterNames(false, true);
   EXPECT_EQ(0, keys.size());
 }
 
@@ -303,7 +309,7 @@ TEST(ConfigCompoundTest, SetGroup) {
   group = config.GetGroup("lvl1.grp3"sv);
   EXPECT_FALSE(group.Empty());
 
-  auto keys = group.ListParameterNames(true);
+  auto keys = group.ListParameterNames(true, true);
   CheckMatchingContainers({"my-bool", "my-int32", "my-str"}, keys);
 
   // Insert group at root level

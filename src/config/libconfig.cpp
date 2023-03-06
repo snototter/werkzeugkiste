@@ -3,6 +3,8 @@
 #include <werkzeugkiste/logging.h>
 
 #include <cstdint>
+#include <iomanip>
+#include <sstream>
 #include <string_view>
 #include <type_traits>
 
@@ -20,8 +22,12 @@
 namespace werkzeugkiste::config {
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
 namespace detail {
-// Forward declaration
+// Forward declarations
 Configuration FromLibconfigGroup(const libconfig::Setting &node);
+void SerializeGroup(const Configuration &cfg,
+    std::ostream &out,
+    std::size_t indent,
+    bool is_standalone);
 
 // LCOV_EXCL_START
 
@@ -190,10 +196,143 @@ Configuration FromLibconfigGroup(const libconfig::Setting &node) {
   return grp;
 }
 
-// void Serialize(const Configuration &cfg, std::ostream &out, std::size_t
-// indent) {
+std::string EscapeString(std::string_view str) {
+  const auto pos = str.find_first_of("\"");
+  if (pos == std::string_view::npos) {
+    std::string quoted{'"'};
+    quoted += str;
+    quoted += '"';
+    return quoted;
+  } else {
+    // TODO escape quote
+    // TODO do we need to escape backslashes?
+    return "\"TODO\"";
+  }
+}
 
-// }
+void PrintScalar(const Configuration &cfg,
+    std::ostream &out,
+    std::string_view key) {
+  switch (cfg.Type(key)) {
+    case ConfigType::Boolean:
+      out << std::boolalpha << cfg.GetBoolean(key);
+      break;
+
+    case ConfigType::Integer:
+      out << cfg.GetInteger64(key);
+      break;
+
+    case ConfigType::FloatingPoint:
+      // TODO check if it would be representable by an integer
+      // if so, we need to print with fixed precision
+      // otherwise, std::defaultfloat is fine
+      out << cfg.GetDouble(key);
+      break;
+
+    case ConfigType::String:
+      out << EscapeString(cfg.GetString(key));
+      break;
+
+    case ConfigType::Date:
+      out << EscapeString(cfg.GetDate(key).ToString());
+      break;
+
+    case ConfigType::Time:
+      out << EscapeString(cfg.GetTime(key).ToString());
+      break;
+
+    case ConfigType::DateTime:
+      out << EscapeString(cfg.GetDateTime(key).ToString());
+      break;
+
+    default:
+      // TODO throw (unreachable)
+      break;
+  }
+}
+
+void PrintIndent(std::ostream &out, std::size_t indent) {
+  for (std::size_t i = 0; i < indent; ++i) {
+    out << "    ";
+  }
+}
+
+void SerializeList(const Configuration &cfg,
+    std::ostream &out,
+    std::string_view key,
+    std::size_t indent) {
+  if (cfg.IsHomogeneousScalarList(key)) {
+    out << '[';
+  } else {
+    out << '(';
+  }
+
+  for (std::size_t i = 0; i < cfg.Size(key); ++i) {
+    if (i > 0) {
+      out << ", ";
+    }
+    std::ostringstream elem_key;
+    elem_key << key << '[' << i << ']';
+
+    switch (cfg.Type(elem_key.str())) {
+      case ConfigType::Group:
+        SerializeGroup(cfg.GetGroup(elem_key.str()), out, indent + 1, false);
+        break;
+
+      case ConfigType::List:
+        SerializeList(cfg, out, elem_key.str(), indent + 1);
+        break;
+
+      default:
+        PrintScalar(cfg, out, elem_key.str());
+        break;
+    }
+  }
+
+  if (cfg.IsHomogeneousScalarList(key)) {
+    out << ']';
+  } else {
+    out << ')';
+  }
+}
+
+void SerializeGroup(const Configuration &cfg,
+    std::ostream &out,
+    std::size_t indent,
+    bool is_standalone) {
+  const std::vector<std::string> keys = cfg.ListParameterNames(
+      /*include_array_entries=*/false, /*recursive=*/false);
+  for (const auto &key : keys) {
+    PrintIndent(out, indent);
+    out << key << " = ";
+
+    switch (cfg.Type(key)) {
+      case ConfigType::Group: {
+        if (cfg.Size(key) > 0) {
+          out << "{\n";
+          SerializeGroup(cfg.GetGroup(key), out, indent + 1, true);
+          PrintIndent(out, indent);
+          out << '}';
+        } else {
+          out << "{}";
+        }
+        break;
+      }
+
+      case ConfigType::List:
+        SerializeList(cfg, out, key, indent);
+        break;
+
+      default:
+        PrintScalar(cfg, out, key);
+        break;
+    }
+
+    if (is_standalone) {
+      out << ";\n";
+    }
+  }
+}
 }  // namespace detail
 
 Configuration LoadLibconfigString(std::string_view lcfg_string) {
@@ -234,8 +373,9 @@ Configuration LoadLibconfigFile(std::string_view filename) {
 }
 
 std::string DumpLibconfigString(const Configuration &cfg) {
-  // TODO add iteration capabilities or retrieve only lvl 1 children
-  return "TODO";
+  std::ostringstream str;
+  detail::SerializeGroup(cfg, str, 0, true);
+  return str.str();
 }
 
 #else  // WERKZEUGKISTE_WITH_LIBCONFIG

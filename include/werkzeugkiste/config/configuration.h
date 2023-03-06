@@ -130,13 +130,17 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //  KeyError, TypeError
   bool IsHomogeneousScalarList(std::string_view key) const;
 
-  /// @brief Returns a list of all (fully-qualified) parameter names.
+  /// @brief Returns a list of (fully-qualified) parameter names.
   ///
   /// @param include_array_entries If true, the name of each parameter will
   /// be returned, *i.e.* each array element will be included. Otherwise,
   /// only named parameters (*e.g.* a dictionary/table within an array, such
   /// as `arr[3].name`) will be included.
-  std::vector<std::string> ListParameterNames(bool include_array_entries) const;
+  /// @param recursive If true, the names of all parameters "below" this
+  /// configuration/group will be returned. Otherwise, only the first-level
+  /// child parameters will be returned.
+  std::vector<std::string> ListParameterNames(bool include_array_entries,
+      bool recursive) const;
 
   //---------------------------------------------------------------------------
   // Booleans

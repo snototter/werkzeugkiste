@@ -1,0 +1,30 @@
+# Libconfig types
+
+list = [
+    ["abc", 123, true],
+    1.234,
+    [],
+    [ 1, 2, 3 ],
+    { a = [1, 2, true] },
+    {}
+]
+
+[bigints]
+int = 9223372036854775807
+hex = 0x1122334455667788
+
+[empty_group]
+
+[group.subgroup]
+str = "Value"
+size = { width = 640, height = 480 }
+ints = [10, 11, -12]
+flts = [1e-3, 0.0, 2.0]
+flag = true
+
+[group.subgroup.another-group]
+long-string = """A string that 'contains' "quotes"..."""
+flag = false
+int = -54321
+flt = 1e6
+str = "Another String"
