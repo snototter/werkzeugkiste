@@ -143,6 +143,7 @@ TEST(ConfigIOTest, LoadingTOML) {
   // Also the string representations should be equal
   EXPECT_EQ(wkc::DumpTOMLString(config1), wkc::DumpTOMLString(reloaded));
   EXPECT_EQ(config1.ToTOML(), reloaded.ToTOML());
+  EXPECT_EQ(config1.ToTOML(), wkc::DumpTOMLString(config1));
 
   // Load a different configuration:
   const auto config2 = wkc::LoadTOMLString(R"toml(
@@ -253,6 +254,7 @@ TEST(ConfigIOTest, LoadingJSON) {
     param1 = "value"
     )toml"sv);
   EXPECT_TRUE(config.ToJSON().length() > 0);
+  EXPECT_EQ(config.ToJSON(), wkc::DumpJSONString(config));
 
   // TODO
   // EXPECT_EQ(wkc::DumpJSONString(config1), wkc::DumpJSONString(reloaded));
@@ -498,6 +500,8 @@ TEST(ConfigIOTest, SerializeLibconfigStrings) {
   EXPECT_NO_THROW(wkc::LoadLibconfigString(lcs)) << lcs;
   auto libconfig_config = wkc::LoadLibconfigString(lcs);
   EXPECT_EQ(toml_config, libconfig_config);
+
+  EXPECT_EQ(toml_config.ToLibconfig(), wkc::DumpLibconfigString(toml_config));
 
   // Libconfig doesn't support date/time types
   toml_config = wkc::LoadTOMLString(R"toml(

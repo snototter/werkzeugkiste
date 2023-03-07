@@ -10,31 +10,88 @@ namespace wkc = werkzeugkiste::config;
 // NOLINTBEGIN
 TEST(CastTest, Static) {
   static_assert(wkc::are_integral_v<int, int16_t>);
+  bool flag = wkc::are_integral_v<int, int16_t>;
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::are_integral_v<unsigned int, int16_t>);
+  flag = wkc::are_integral_v<unsigned int, int16_t>;
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::are_integral_v<int, bool>);
+  flag = wkc::are_integral_v<int, bool>;
+  EXPECT_TRUE(flag);
 
   static_assert(!wkc::are_integral_v<float, bool>);
+  flag = wkc::are_integral_v<float, bool>;
+  EXPECT_FALSE(flag);
+
   static_assert(!wkc::are_integral_v<int, float>);
+  flag = wkc::are_integral_v<int, float>;
+  EXPECT_FALSE(flag);
+
   static_assert(!wkc::are_integral_v<int, double>);
+  flag = wkc::are_integral_v<int, double>;
+  EXPECT_FALSE(flag);
+
   static_assert(!wkc::are_integral_v<std::string, short>);
+  flag = wkc::are_integral_v<std::string, short>;
+  EXPECT_FALSE(flag);
 
   static_assert(wkc::are_floating_point_v<float, float>);
+  flag = wkc::are_floating_point_v<float, float>;
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::are_floating_point_v<float, double>);
+  flag = wkc::are_floating_point_v<float, double>;
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::are_floating_point_v<double, long double>);
+  flag = wkc::are_floating_point_v<double, long double>;
+  EXPECT_TRUE(flag);
 
   static_assert(!wkc::are_floating_point_v<float, int>);
+  flag = wkc::are_floating_point_v<float, int>;
+  EXPECT_FALSE(flag);
+
   static_assert(!wkc::are_floating_point_v<int, float>);
+  flag = wkc::are_floating_point_v<int, float>;
+  EXPECT_FALSE(flag);
+
   static_assert(!wkc::are_floating_point_v<std::string, float>);
+  flag = wkc::are_floating_point_v<std::string, float>;
+  EXPECT_FALSE(flag);
 
   static_assert(wkc::is_promotable<int, long>());
+  flag = wkc::is_promotable<int, long>();
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::is_promotable<char, int>());
+  flag = wkc::is_promotable<char, int>();
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::is_promotable<float, double>());
+  flag = wkc::is_promotable<float, double>();
+  EXPECT_TRUE(flag);
+
   static_assert(!wkc::is_promotable<int, char>());
+  flag = wkc::is_promotable<int, char>();
+  EXPECT_FALSE(flag);
+
   static_assert(!wkc::is_promotable<uint, int>());
+  flag = wkc::is_promotable<uint, int>();
+  EXPECT_FALSE(flag);
 
   static_assert(wkc::is_promotable<int_fast8_t, int_fast16_t>());
+  flag = wkc::is_promotable<int_fast8_t, int_fast16_t>();
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::is_promotable<int_fast8_t, int_fast8_t>());
+  flag = wkc::is_promotable<int_fast8_t, int_fast8_t>();
+  EXPECT_TRUE(flag);
+
   static_assert(wkc::is_promotable<int_fast16_t, int_fast16_t>());
+  flag = wkc::is_promotable<int_fast16_t, int_fast16_t>();
+  EXPECT_TRUE(flag);
 
   EXPECT_DOUBLE_EQ(1.0F, wkc::detail::exp2<float>(0));
   EXPECT_DOUBLE_EQ(8.0F, wkc::detail::exp2<float>(3));
