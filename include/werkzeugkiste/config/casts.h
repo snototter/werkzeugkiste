@@ -343,6 +343,52 @@ T float_to_int(S value) {
 }
 }  // namespace detail
 
+// template <typename T, typename S>
+// constexpr bool is_representable(const S value) {
+//   static_assert(std::is_arithmetic_v<S>);
+//   static_assert(std::is_arithmetic_v<T>);
+
+//   if constexpr (std::is_same_v<S, T>) {
+//     return true;
+//   }
+
+//   if constexpr (std::is_same_v<T, bool>) {
+//     // We allow C-style cast to boolean, i.e. if a number is (close to) 0,
+//     // it is interpreted as `false`. Otherwise, it will be cast to `true`.
+//     return true;
+//   } else if constexpr (std::is_same_v<S, bool>) {
+//     return true;
+//   } else {
+//     if constexpr (is_promotable<S, T>()) {
+//       return true;
+//     }
+
+//     // int -> int
+//     if constexpr (!is_promotable<S, T>() && are_integral_v<S, T>) {
+//       return detail::int_to_int<T, S, E>(value); // TODO
+//     }
+
+//     // float -> float
+//     if constexpr (!is_promotable<S, T>() && are_floating_point_v<S, T>) {
+//       return detail::float_to_float<T, S, E>(value); // TODO
+//     }
+
+//     // int -> float
+//     if constexpr (std::is_integral_v<S> && std::is_floating_point_v<T>) {
+//       return detail::int_to_float<T, S, E>(value); // TODO
+//     }
+
+//     // float -> int
+//     if constexpr (std::is_floating_point_v<S> && std::is_integral_v<T>) {
+//       return detail::float_to_int<T, S, E>(value); // TODO
+//     }
+//   }
+
+//   // LCOV_EXCL_START
+//   throw std::logic_error("The requested cast is not supported!");
+//   // LCOV_EXCL_STOP
+// }
+
 /// Returns the T value if S is exactly representable in the target
 /// type. Otherwise, an exception will be thrown. Supports casts
 /// between numeric types.
@@ -398,7 +444,9 @@ constexpr T checked_numcast(const S value) {
     }
   }
 
+  // LCOV_EXCL_START
   throw std::logic_error("The requested cast is not supported!");
+  // LCOV_EXCL_STOP
 }
 // NOLINTEND(readability-identifier-naming)
 }  // namespace werkzeugkiste::config
