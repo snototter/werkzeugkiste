@@ -60,7 +60,7 @@ inline std::string FullyQualifiedPath(const toml::key &key,
     fqn += key.str();
     return fqn;
   }
-  return std::string{key.str()};
+  return std::string(key.str());
 }
 
 /// Returns the "fully-qualified TOML path" for the given array index.
@@ -491,7 +491,7 @@ Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
 
   if constexpr (std::is_same_v<Tcfg, std::string_view> &&
                 std::is_same_v<Ttoml, std::string>) {
-    return std::string{value};
+    return std::string(value);
   }
 
   if constexpr (std::is_same_v<Tcfg, date> &&
@@ -893,7 +893,7 @@ toml::array *GetExistingList(toml::table &tbl, std::string_view key) {
     msg += "` as a list, because it is of type `";
     msg += TomlTypeName(node, key);
     msg += "`!";
-    throw KeyError{msg};
+    throw TypeError{msg};
   }
 
   return node.as_array();
@@ -1690,7 +1690,7 @@ void Configuration::CreateList(std::string_view key) {
   detail::CreateList<bool, bool>(pimpl_->config_root, key, {});
 }
 
-void Configuration::AppendNestedList(std::string_view key) {
+void Configuration::AppendList(std::string_view key) {
   toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
   arr->push_back(toml::array{});
 }

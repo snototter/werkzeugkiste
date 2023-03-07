@@ -685,7 +685,8 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_EQ(0, config.Size("lst"sv));
   EXPECT_EQ(wkc::ConfigType::List, config.Type("lst"sv));
 
-  EXPECT_THROW(config.Append("str"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.Append("str"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.Append("no-such-key"sv, true), wkc::KeyError);
   EXPECT_THROW(config.SetBoolean("lst[0]"sv, true), wkc::KeyError);
 
   EXPECT_NO_THROW(config.Append("lst"sv, true));
@@ -693,40 +694,47 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_TRUE(config.GetBoolean("lst[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("lst[0]"sv));
 
-  EXPECT_THROW(config.Append("str"sv, 42), wkc::KeyError);
+  EXPECT_THROW(config.Append("str"sv, 42), wkc::TypeError);
+  EXPECT_THROW(config.Append("no-such-key"sv, 42), wkc::KeyError);
   EXPECT_NO_THROW(config.Append("lst"sv, 42));
   EXPECT_EQ(2, config.Size("lst"sv));
   EXPECT_EQ(42, config.GetInteger32("lst[1]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[1]"sv));
 
-  EXPECT_THROW(config.Append("str"sv, 17L), wkc::KeyError);
+  EXPECT_THROW(config.Append("str"sv, 17L), wkc::TypeError);
+  EXPECT_THROW(config.Append("no-such-key"sv, 17L), wkc::KeyError);
   EXPECT_NO_THROW(config.Append("lst"sv, 17L));
   EXPECT_EQ(3, config.Size("lst"sv));
   EXPECT_EQ(17, config.GetInteger32("lst[2]"sv));
   EXPECT_EQ(17L, config.GetInteger64("lst[2]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[2]"sv));
 
-  EXPECT_THROW(config.Append("str"sv, 1e-3), wkc::KeyError);
+  EXPECT_THROW(config.Append("str"sv, 1e-3), wkc::TypeError);
+  EXPECT_THROW(config.Append("no-such-key"sv, 1e-3), wkc::KeyError);
   EXPECT_NO_THROW(config.Append("lst"sv, 1e-3));
   EXPECT_EQ(4, config.Size("lst"sv));
   EXPECT_DOUBLE_EQ(1e-3, config.GetDouble("lst[3]"sv));
   EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("lst[3]"sv));
 
-  EXPECT_THROW(config.Append("str"sv, "invalid"sv), wkc::KeyError);
+  EXPECT_THROW(config.Append("str"sv, "invalid"sv), wkc::TypeError);
+  EXPECT_THROW(config.Append("no-such-key"sv, "invalid"sv), wkc::KeyError);
   EXPECT_NO_THROW(config.Append("lst"sv, "valid"sv));
   EXPECT_EQ(5, config.Size("lst"sv));
   EXPECT_EQ("valid", config.GetString("lst[4]"sv));
   EXPECT_EQ(wkc::ConfigType::String, config.Type("lst[4]"sv));
 
-  // TODO Append/Create a sublist
+  // TODO Append/Create a sublist, e.g. make a copy of `config`
   // List already exists: instead of creating a separate/new list, we need
   // to append a nested list:
   EXPECT_THROW(config.CreateList("lst[5]"sv), wkc::KeyError);
-  EXPECT_THROW(config.AppendNestedList("str"sv), wkc::KeyError);
-  EXPECT_THROW(config.AppendNestedList("lst[4]"sv), wkc::KeyError);
-  EXPECT_THROW(config.AppendNestedList("lst[5]"sv), wkc::KeyError);
-  EXPECT_NO_THROW(config.AppendNestedList("lst"sv));
+  EXPECT_THROW(config.AppendList("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.AppendList("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.AppendList("lst[4]"sv), wkc::TypeError);
+  EXPECT_THROW(config.AppendList("lst[5]"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.AppendList("lst"sv));
   EXPECT_EQ(6, config.Size("lst"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("lst[5]"sv));
+  EXPECT_EQ(0, config.Size("lst[5]"sv));
   EXPECT_NO_THROW(config.Append("lst[5]"sv, 1));
   EXPECT_NO_THROW(config.Append("lst[5]"sv, -2));
   EXPECT_EQ(6, config.Size("lst"sv));

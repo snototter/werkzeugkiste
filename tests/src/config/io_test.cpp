@@ -131,7 +131,7 @@ TEST(ConfigIOTest, ConfigConstruction) {
   EXPECT_FALSE(moved.Contains("value1"sv));  // Previously contained
 }
 
-TEST(ConfigIOTest, LoadingToml) {
+TEST(ConfigIOTest, LoadingTOML) {
   const std::string fname =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
 
@@ -493,13 +493,35 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
 TEST(ConfigIOTest, SerializeLibconfigStrings) {
   const std::string fname =
       wkf::FullFile(wkf::DirName(__FILE__), "test-libconfig.toml");
-  const auto toml_config = wkc::LoadTOMLFile(fname);
-  const auto lcs = toml_config.ToLibconfig();
+  auto toml_config = wkc::LoadTOMLFile(fname);
+  auto lcs = toml_config.ToLibconfig();
   EXPECT_NO_THROW(wkc::LoadLibconfigString(lcs)) << lcs;
-  const auto libconfig_config = wkc::LoadLibconfigString(lcs);
-  EXPECT_EQ(toml_config, libconfig_config)
-      << "TOML: " << toml_config.ToTOML()
-      << "\nLibconfig: " << libconfig_config.ToTOML();
+  auto libconfig_config = wkc::LoadLibconfigString(lcs);
+  EXPECT_EQ(toml_config, libconfig_config);
+
+  // Libconfig doesn't support date/time types
+  toml_config = wkc::LoadTOMLString(R"toml(
+    day = 2023-01-02
+    time = 01:02:03.123456
+    dt = 2004-02-28T23:59:59.999888-01:00
+    )toml"sv);
+  lcs = toml_config.ToLibconfig();
+  EXPECT_NO_THROW(wkc::LoadLibconfigString(lcs)) << lcs;
+  libconfig_config = wkc::LoadLibconfigString(lcs);
+  EXPECT_NE(toml_config, libconfig_config);
+  EXPECT_EQ(3, libconfig_config.Size());
+
+  EXPECT_EQ(wkc::ConfigType::String, libconfig_config.Type("day"sv));
+  EXPECT_EQ(toml_config.GetDate("day"sv).ToString(),
+      libconfig_config.GetString("day"sv));
+
+  EXPECT_EQ(wkc::ConfigType::String, libconfig_config.Type("time"sv));
+  EXPECT_EQ(toml_config.GetTime("time"sv).ToString(),
+      libconfig_config.GetString("time"sv));
+
+  EXPECT_EQ(wkc::ConfigType::String, libconfig_config.Type("dt"sv));
+  EXPECT_EQ(toml_config.GetDateTime("dt"sv).ToString(),
+      libconfig_config.GetString("dt"sv));
 }
 
 #else   // WERKZEUGKISTE_WITH_LIBCONFIG
