@@ -10,7 +10,7 @@
 
 namespace werkzeugkiste::strings {
 
-namespace slug_utils {
+namespace detail {
 // TODO should we use char32_t instead?
 // TODO # -- nr
 const std::unordered_map<std::string, std::string>& Replacements() {
@@ -77,7 +77,7 @@ const std::unordered_map<std::string, std::string>& Replacements() {
   };
   return replacements;
 }
-}  // namespace slug_utils
+}  // namespace detail
 
 void ToLower(std::string& s) {
   std::transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -124,6 +124,22 @@ bool IsNumeric(const std::string& s) {
     is_numeric = (*pd_end == 0) || (*pl_end == 0);
   }
   return is_numeric;
+}
+
+bool IsInteger(std::string_view str) {
+  if (str.empty()) {
+    return false;
+  }
+
+  const bool has_sign = (str[0] == '-' || str[0] == '+');
+  const auto begin = has_sign ? str.begin() + 1 : str.begin();
+  const auto pos = std::find_if(
+      begin, str.end(), [](char c) -> bool { return std::isdigit(c) == 0; });
+  if (pos != str.end()) {
+    return false;
+  }
+
+  return has_sign ? (str.length() > 1) : true;
 }
 
 std::vector<std::string> Split(std::string_view s, char delim) {
@@ -173,7 +189,7 @@ std::string Replace(std::string_view haystack,
   std::size_t start_pos = result.find(needle);
   while (start_pos != std::string::npos) {
     result.replace(start_pos, needle.length(), replacement);
-    start_pos = result.find(needle);
+    start_pos = result.find(needle, start_pos + replacement.length());
   }
 
   return result;
@@ -269,7 +285,7 @@ std::string Remove(std::string_view s, std::initializer_list<char> chars) {
 
 std::string ReplaceSpecialCharacters(std::string_view s) {
   std::string replaced(s);
-  for (const auto& replacement : slug_utils::Replacements()) {
+  for (const auto& replacement : detail::Replacements()) {
     replaced = Replace(replaced, replacement.first, replacement.second);
   }
   return replaced;

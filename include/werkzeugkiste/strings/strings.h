@@ -104,6 +104,11 @@ std::string RTrim(std::string_view totrim);
 WERKZEUGKISTE_STRINGS_EXPORT
 bool IsNumeric(const std::string& s);
 
+/// @brief Returns true if the input string is a valid integer, i.e.
+///   "[+-]?[0-9]+".
+WERKZEUGKISTE_STRINGS_EXPORT
+bool IsInteger(std::string_view str);
+
 /// Tokenizes the string by the given delimiter.
 ///
 /// Note that an empty trailing token will be skipped.

@@ -95,6 +95,33 @@ TEST(StringUtilsTest, IsNumeric) {
   EXPECT_TRUE(wks::IsNumeric("1e-7"));
 }
 
+TEST(StringUtilsTest, IsInteger) {
+  EXPECT_TRUE(wks::IsInteger("1"sv));
+  EXPECT_TRUE(wks::IsInteger("+1"sv));
+  EXPECT_TRUE(wks::IsInteger("-1"sv));
+  EXPECT_TRUE(wks::IsInteger("0"sv));
+  EXPECT_TRUE(wks::IsInteger("+0"sv));
+  EXPECT_TRUE(wks::IsInteger("-0"sv));
+
+  EXPECT_TRUE(wks::IsInteger("+123456789"sv));
+  EXPECT_TRUE(wks::IsInteger("-123456789"sv));
+
+  EXPECT_FALSE(wks::IsInteger("0."));
+  EXPECT_FALSE(wks::IsInteger(".0"));
+  EXPECT_FALSE(wks::IsInteger("0.0"));
+  EXPECT_FALSE(wks::IsInteger("+0.0"));
+  EXPECT_FALSE(wks::IsInteger("-0.0"));
+
+  EXPECT_FALSE(wks::IsInteger("1.2"));
+  EXPECT_FALSE(wks::IsInteger("-1.2"));
+  EXPECT_FALSE(wks::IsInteger("1e3"));
+  EXPECT_FALSE(wks::IsInteger("+1e3"));
+
+  EXPECT_FALSE(wks::IsInteger("test"));
+  EXPECT_FALSE(wks::IsInteger("a1"));
+  EXPECT_FALSE(wks::IsInteger("!3"));
+}
+
 TEST(StringUtilsTest, Tokenize) {
   auto tokens = wks::Split("A;Line ;\tto;be;split ;;", ';');
   EXPECT_EQ(6, tokens.size());
@@ -190,6 +217,11 @@ TEST(StringUtilsTest, Replace) {
   EXPECT_EQ("ABC123abc;:_", wks::Replace("ABC123abc;:_", "abcdef", "!!"));
 
   EXPECT_EQ("A123abc;:_", wks::Replace("ABC123abc;:_", "BC", ""));
+
+  // Nothing changes if replacement string is search string
+  EXPECT_EQ("abacad", wks::Replace("abacad", 'a', 'a'));
+  EXPECT_EQ("abacad", wks::Replace("abacad", "a", "a"));
+  EXPECT_EQ("\\\"quotes\\\"", wks::Replace("\"quotes\"", "\"", "\\\""));
 
   // All occurrences should be replaced
   EXPECT_EQ("A..123abc123A..123abc123",
