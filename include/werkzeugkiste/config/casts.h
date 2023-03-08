@@ -341,6 +341,41 @@ std::optional<T> int_to_float(S value, bool may_throw) {
   static_assert(std::is_floating_point_v<T>);
 
   // TODO perform range check first
+  using flt_limits = std::numeric_limits<S>;
+  using int_limits = std::numeric_limits<T>;
+
+  // Check how many bits we have in the exponent to
+  // get the representable powers of 2.
+  // This will only work for numbers based on the
+  // binary representation (i.e. all the standard
+  // float/int implementations).
+  static_assert(int_limits::radix == 2);
+  constexpr int int_exp_bits = int_limits::digits;
+
+  static_assert(flt_limits::radix == 2);
+  static_assert(flt_limits::is_iec559);
+  constexpr int flt_exp_bits = flt_limits::max_exponent - 1;
+
+  if constexpr (int_exp_bits > flt_exp_bits) {
+    // The integer type can represent a larger range than the floating point
+    // type.
+    constexpr S min_val = int_limits::is_signed ? -pow2<S>(flt_exp_bits) : 0;
+    constexpr S max_val = pow2<S>(flt_exp_bits);
+
+    if (value < min_val) {
+      if (may_throw) {
+        throw E{"TODO underflow"};
+      }
+      return std::nullopt;
+    }
+
+    if (value > max_val) {
+      if (may_throw) {
+        throw E{"TODO overflow"};
+      }
+      return std::nullopt;
+    }
+  }
 
   // Check if cast is lossless
   T cast = static_cast<T>(value);
