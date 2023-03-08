@@ -600,7 +600,8 @@ TEST(CastTest, SafeIntegralToFloating) {
       -27.0F, wkc::safe_numcast<float>(static_cast<int8_t>(-27)).value());
 
   using lng_limits = std::numeric_limits<int64_t>;
-  EXPECT_FALSE(wkc::safe_numcast<float>(lng_limits::max()).has_value());
+  EXPECT_FALSE(wkc::safe_numcast<float>(lng_limits::max()).has_value())
+      << "Sizeof float/int64: " << sizeof(float) << "/" << sizeof(int64_t);
   EXPECT_FALSE(wkc::safe_numcast<float>(lng_limits::max() - 1).has_value());
   EXPECT_FALSE(wkc::safe_numcast<float>(lng_limits::min() + 1).has_value());
   // Powers of two can be exactly represented:
