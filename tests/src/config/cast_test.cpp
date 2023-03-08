@@ -576,16 +576,21 @@ TEST(CastTest, CheckedIntegralToFloating) {
 
   EXPECT_EQ(1 << 31,
       wkc::checked_numcast<int32_t>(wkc::checked_numcast<float>(1 << 31)));
-  EXPECT_EQ(1L << 40,
-      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 40)));
-  EXPECT_EQ(1L << 50,
-      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 50)));
-  EXPECT_EQ(1L << 60,
-      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 60)));
-  EXPECT_EQ(1L << 62,
-      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 62)));
-  EXPECT_EQ(1L << 63,
-      wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(1L << 63)));
+  int64_t val = 1L << 40;
+  EXPECT_EQ(
+      val, wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(val)));
+  val = 1L << 50;
+  EXPECT_EQ(
+      val, wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(val)));
+  val = 1L << 60;
+  EXPECT_EQ(
+      val, wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(val)));
+  val = 1L << 62;
+  EXPECT_EQ(
+      val, wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(val)));
+  val = 1L << 63;
+  EXPECT_EQ(
+      val, wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(val)));
 }
 
 TEST(CastTest, SafeIntegralToFloating) {
@@ -607,20 +612,25 @@ TEST(CastTest, SafeIntegralToFloating) {
   EXPECT_EQ(1 << 31,
       wkc::safe_numcast<int32_t>(wkc::safe_numcast<float>(1 << 31).value())
           .value());
-  EXPECT_EQ(1L << 40,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(1L << 40).value())
+  int64_t val = 1L << 40;
+  EXPECT_EQ(val,
+      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
           .value());
-  EXPECT_EQ(1L << 50,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(1L << 50).value())
+  val = 1L << 50;
+  EXPECT_EQ(val,
+      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
           .value());
-  EXPECT_EQ(1L << 60,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(1L << 60).value())
+  val = 1L << 60;
+  EXPECT_EQ(val,
+      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
           .value());
-  EXPECT_EQ(1L << 62,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(1L << 62).value())
+  val = 1L << 62;
+  EXPECT_EQ(val,
+      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
           .value());
-  EXPECT_EQ(1L << 63,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(1L << 63).value())
+  val = 1L << 63;
+  EXPECT_EQ(val,
+      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
           .value());
 }
 
