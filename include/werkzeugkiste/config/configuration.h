@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-/// Utilities to handle configurations.
+/// @brief Utilities to handle configurations.
 namespace werkzeugkiste::config {
 
 /// @brief Encapsulates configuration data.
