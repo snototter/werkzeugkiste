@@ -341,8 +341,8 @@ std::optional<T> int_to_float(S value, bool may_throw) {
   static_assert(std::is_floating_point_v<T>);
 
   // TODO perform range check first
-  using flt_limits = std::numeric_limits<S>;
-  using int_limits = std::numeric_limits<T>;
+  using flt_limits = std::numeric_limits<T>;
+  using int_limits = std::numeric_limits<S>;
 
   // Check how many bits we have in the exponent to
   // get the representable powers of 2.
