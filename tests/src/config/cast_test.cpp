@@ -9,7 +9,10 @@ namespace wkc = werkzeugkiste::config;
 
 // NOLINTBEGIN
 
-// TODO use CheckSafeCast to simplify remaining test cases.
+// TODO FIXME
+// [ ] Check coverage:
+//   https://stackoverflow.com/questions/9666800/getting-useful-gcov-results-for-header-only-libraries
+// [ ] Use CheckSafeCast to simplify remaining test cases.
 
 template <typename T, typename S>
 void CheckSafeCast(std::string_view lbl,
@@ -30,7 +33,13 @@ void CheckSafeCast(std::string_view lbl,
         << "Cannot cast " << wkc::TypeName<T>() << ' ' << opt_tgt.value()
         << " back to " << wkc::TypeName<S>() << ". Test: " << lbl;
     if (opt_src.has_value()) {
-      EXPECT_EQ(value, opt_src.value());
+      if constexpr (std::is_same_v<S, float>) {
+        EXPECT_FLOAT_EQ(value, opt_src.value());
+      } else if constexpr (std::is_floating_point_v<S>) {
+        EXPECT_DOUBLE_EQ(value, opt_src.value());
+      } else {
+        EXPECT_EQ(value, opt_src.value());
+      }
     }
   }
 
@@ -38,6 +47,17 @@ void CheckSafeCast(std::string_view lbl,
       << "safe_numcast didn't work as expected for " << wkc::TypeName<S>()
       << ' ' << value << " to " << wkc::TypeName<T>() << ". Test: " << lbl;
 }
+
+// template <typename T, typename S>
+// void CheckCheckedCast(S value, bool should_be_representable) {
+//   if (should_be_representable) {
+//     // TODO
+//   } else {
+//     EXPECT_THROW(wkc::checked_numcast<T>(value), std::domain_error)
+//       << "checked_numcast didn't throw for " << wkc::TypeName<S>()
+//       << ' ' << value << " to " << wkc::TypeName<T>();
+//   }
+// }
 
 TEST(CastTest, Static) {
   static_assert(wkc::are_integral_v<int, int16_t>);
@@ -206,30 +226,31 @@ TEST(CastTest, CheckedBoolean) {
 
 TEST(CastTest, SafeBoolean) {
   // From bool to integral (signed/unsigned):
-  EXPECT_EQ(1, wkc::safe_numcast<int>(true).value());
-  EXPECT_EQ(1, wkc::safe_numcast<int8_t>(true).value());
-  EXPECT_EQ(1, wkc::safe_numcast<uint8_t>(true).value());
-  EXPECT_EQ(1, wkc::safe_numcast<int16_t>(true).value());
+  CheckSafeCast<int8_t>("b2int", true, true);
+  CheckSafeCast<int8_t>("b2int", true, true);
+  CheckSafeCast<int16_t>("b2int", true, true);
+  CheckSafeCast<uint16_t>("b2int", true, true);
+  CheckSafeCast<int32_t>("b2int", true, true);
 
-  EXPECT_EQ(0, wkc::safe_numcast<int>(false).value());
-  EXPECT_EQ(0, wkc::safe_numcast<int8_t>(false).value());
-  EXPECT_EQ(0, wkc::safe_numcast<uint8_t>(false).value());
-  EXPECT_EQ(0, wkc::safe_numcast<int16_t>(false).value());
+  CheckSafeCast<int8_t>("b2int", false, true);
+  CheckSafeCast<int8_t>("b2int", false, true);
+  CheckSafeCast<int16_t>("b2int", false, true);
+  CheckSafeCast<uint16_t>("b2int", false, true);
+  CheckSafeCast<int32_t>("b2int", false, true);
 
   // From bool to float:
-  EXPECT_FLOAT_EQ(1.0F, wkc::safe_numcast<float>(true).value());
-  EXPECT_DOUBLE_EQ(1.0, wkc::safe_numcast<double>(true).value());
-
-  EXPECT_FLOAT_EQ(0.0F, wkc::safe_numcast<float>(false).value());
-  EXPECT_DOUBLE_EQ(0.0, wkc::safe_numcast<double>(false).value());
+  CheckSafeCast<float>("b2flt", true, true);
+  CheckSafeCast<double>("b2flt", true, true);
+  CheckSafeCast<float>("b2flt", false, true);
+  CheckSafeCast<double>("b2flt", false, true);
 
   // From bool to bool:
-  EXPECT_EQ(false, wkc::safe_numcast<bool>(false).value());
-  EXPECT_EQ(true, wkc::safe_numcast<bool>(true).value());
+  CheckSafeCast<bool>("b2b", true, true);
+  CheckSafeCast<bool>("b2b", false, true);
 
   // From integral (signed/unsigned) to bool:
-  EXPECT_EQ(false, wkc::safe_numcast<bool>(0).value());
-  EXPECT_EQ(true, wkc::safe_numcast<bool>(1).value());
+  CheckSafeCast<bool>("int2b", 0, true);
+  CheckSafeCast<bool>("int2b", 1, true);
   EXPECT_EQ(true, wkc::safe_numcast<bool>(2).value());
   EXPECT_EQ(true, wkc::safe_numcast<bool>(-1).value());
   EXPECT_EQ(true, wkc::safe_numcast<bool>(-42).value());
@@ -580,12 +601,6 @@ TEST(CastTest, SafeFloatingToIntegral) {
   EXPECT_EQ(
       value, wkc::safe_numcast<uint64_t>(static_cast<double>(value)).value());
 }
-
-// TODO FIXME FIXME FIXME
-// [ ] Finish tests
-// [ ] Check coverage:
-//   https://stackoverflow.com/questions/9666800/getting-useful-gcov-results-for-header-only-libraries
-// [ ] Document header
 
 TEST(CastTest, CheckedIntegralToFloating) {
   EXPECT_DOUBLE_EQ(5.0, wkc::checked_numcast<double>(5));
