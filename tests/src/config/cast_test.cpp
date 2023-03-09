@@ -593,6 +593,34 @@ TEST(CastTest, CheckedIntegralToFloating) {
       val, wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(val)));
 }
 
+template <typename T, typename S>
+void CheckSafeCast(std::string_view lbl,
+    S value,
+    bool should_be_representable) {
+  EXPECT_NO_THROW(wkc::safe_numcast<T>(value))
+      << "Cannot cast " << wkc::TypeName<S>() << ' ' << value << " to "
+      << wkc::TypeName<T>() << ". Test: " << lbl;
+
+  const auto opt_tgt = wkc::safe_numcast<T>(value);
+  if (opt_tgt.has_value()) {
+    EXPECT_NO_THROW(wkc::safe_numcast<S>(opt_tgt.value()))
+        << "Cannot cast " << wkc::TypeName<T>() << ' ' << opt_tgt.value()
+        << " back to " << wkc::TypeName<S>()
+        << " as it would throw! Test: " << lbl;
+    const auto opt_src = wkc::safe_numcast<S>(opt_tgt.value());
+    EXPECT_TRUE(opt_src.has_value())
+        << "Cannot cast " << wkc::TypeName<T>() << ' ' << opt_tgt.value()
+        << " back to " << wkc::TypeName<S>() << ". Test: " << lbl;
+    if (opt_src.has_value()) {
+      EXPECT_EQ(value, opt_src.value());
+    }
+  }
+
+  EXPECT_EQ(should_be_representable, opt_tgt.has_value())
+      << "safe_numcast didn't work as expected for " << wkc::TypeName<S>()
+      << ' ' << value << " to " << wkc::TypeName<T>() << ". Test: " << lbl;
+}
+
 TEST(CastTest, SafeIntegralToFloating) {
   EXPECT_DOUBLE_EQ(5.0, wkc::safe_numcast<double>(5).value());
   EXPECT_FLOAT_EQ(-27.0F, wkc::safe_numcast<float>(-27).value());
@@ -600,39 +628,52 @@ TEST(CastTest, SafeIntegralToFloating) {
       -27.0F, wkc::safe_numcast<float>(static_cast<int8_t>(-27)).value());
 
   using lng_limits = std::numeric_limits<int64_t>;
-  EXPECT_FALSE(wkc::safe_numcast<float>(lng_limits::max()).has_value())
-      << "Sizeof float/int64: " << sizeof(float) << "/" << sizeof(int64_t);
-  EXPECT_FALSE(wkc::safe_numcast<float>(lng_limits::max() - 1).has_value());
-  EXPECT_FALSE(wkc::safe_numcast<float>(lng_limits::min() + 1).has_value());
-  // Powers of two can be exactly represented:
-  EXPECT_EQ(lng_limits::min(),
-      wkc::safe_numcast<int64_t>(
-          wkc::safe_numcast<float>(lng_limits::min()).value())
-          .value());
+  CheckSafeCast<float>("lng::max", lng_limits::max(), false);
+  CheckSafeCast<double>("lng::max", lng_limits::max(), false);
 
-  EXPECT_EQ(1 << 31,
-      wkc::safe_numcast<int32_t>(wkc::safe_numcast<float>(1 << 31).value())
-          .value());
+  CheckSafeCast<float>("lng::max-1", lng_limits::max() - 1, false);
+  CheckSafeCast<double>("lng::max-1", lng_limits::max() - 1, false);
+
+  CheckSafeCast<float>("lng::min+1", lng_limits::min() + 1, false);
+  CheckSafeCast<double>("lng::min+1", lng_limits::min() + 1, false);
+
+  // Powers of two can be exactly represented:
+  CheckSafeCast<float>("lng::min", lng_limits::min(), true);
+  CheckSafeCast<double>("lng::min", lng_limits::min(), true);
+
+  CheckSafeCast<float>("lng::min<<2", lng_limits::min() << 2, true);
+  CheckSafeCast<double>("lng::min<<2", lng_limits::min() << 2, true);
+
+  CheckSafeCast<float>("1UL<<63", 1UL << 63, true);
+  CheckSafeCast<double>("1UL<<63", 1UL << 63, true);
+
+  uint32_t u32 = 1U << 31;
+  CheckSafeCast<float>("1U<<31", u32, true);
+  CheckSafeCast<double>("1U<<31", u32, true);
+
+  int32_t i32 = 1 << 31;
+  CheckSafeCast<float>("1<<31", i32, true);
+  CheckSafeCast<double>("1<<31", i32, true);
+
   int64_t val = 1L << 40;
-  EXPECT_EQ(val,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
-          .value());
+  CheckSafeCast<float>("1L<<40", val, true);
+  CheckSafeCast<double>("1L<<40", val, true);
+
   val = 1L << 50;
-  EXPECT_EQ(val,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
-          .value());
+  CheckSafeCast<float>("1L<<50", val, true);
+  CheckSafeCast<double>("1L<<50", val, true);
+
   val = 1L << 60;
-  EXPECT_EQ(val,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
-          .value());
+  CheckSafeCast<float>("1L<<60", val, true);
+  CheckSafeCast<double>("1L<<60", val, true);
+
   val = 1L << 62;
-  EXPECT_EQ(val,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
-          .value());
+  CheckSafeCast<float>("1L<<62", val, true);
+  CheckSafeCast<double>("1L<<62", val, true);
+
   val = 1L << 63;
-  EXPECT_EQ(val,
-      wkc::safe_numcast<int64_t>(wkc::safe_numcast<float>(val).value())
-          .value());
+  CheckSafeCast<float>("1L<<63", val, true);
+  CheckSafeCast<double>("1L<<63", val, true);
 }
 
 // NOLINTEND
