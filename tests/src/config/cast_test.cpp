@@ -8,6 +8,37 @@
 namespace wkc = werkzeugkiste::config;
 
 // NOLINTBEGIN
+
+// TODO use CheckSafeCast to simplify remaining test cases.
+
+template <typename T, typename S>
+void CheckSafeCast(std::string_view lbl,
+    S value,
+    bool should_be_representable) {
+  EXPECT_NO_THROW(wkc::safe_numcast<T>(value))
+      << "Cannot cast " << wkc::TypeName<S>() << ' ' << value << " to "
+      << wkc::TypeName<T>() << ". Test: " << lbl;
+
+  const auto opt_tgt = wkc::safe_numcast<T>(value);
+  if (opt_tgt.has_value()) {
+    EXPECT_NO_THROW(wkc::safe_numcast<S>(opt_tgt.value()))
+        << "Cannot cast " << wkc::TypeName<T>() << ' ' << opt_tgt.value()
+        << " back to " << wkc::TypeName<S>()
+        << " as it would throw! Test: " << lbl;
+    const auto opt_src = wkc::safe_numcast<S>(opt_tgt.value());
+    EXPECT_TRUE(opt_src.has_value())
+        << "Cannot cast " << wkc::TypeName<T>() << ' ' << opt_tgt.value()
+        << " back to " << wkc::TypeName<S>() << ". Test: " << lbl;
+    if (opt_src.has_value()) {
+      EXPECT_EQ(value, opt_src.value());
+    }
+  }
+
+  EXPECT_EQ(should_be_representable, opt_tgt.has_value())
+      << "safe_numcast didn't work as expected for " << wkc::TypeName<S>()
+      << ' ' << value << " to " << wkc::TypeName<T>() << ". Test: " << lbl;
+}
+
 TEST(CastTest, Static) {
   static_assert(wkc::are_integral_v<int, int16_t>);
   bool flag = wkc::are_integral_v<int, int16_t>;
@@ -325,82 +356,82 @@ TEST(CastTest, SafeIntegral) {
   // (8) U -> U, widening/promoting
 
   // (1) From signed to signed, narrowing:
-  EXPECT_EQ(static_cast<int8_t>(0), wkc::safe_numcast<int8_t>(0).value());
+  CheckSafeCast<int8_t>("0", int8_t{0}, true);
+  CheckSafeCast<int8_t>("0", int16_t{0}, true);
+  CheckSafeCast<int8_t>("0", int32_t{0}, true);
+  CheckSafeCast<int8_t>("0", int64_t{0}, true);
 
   const auto int8_min = std::numeric_limits<int8_t>::min();
   auto val_i32 = static_cast<int32_t>(int8_min);
-  EXPECT_EQ(int8_min, wkc::safe_numcast<int8_t>(val_i32).value());
-  val_i32 = static_cast<int32_t>(int8_min) + 1;
-  EXPECT_EQ(int8_min + 1, wkc::safe_numcast<int8_t>(val_i32).value());
-  val_i32 = static_cast<int32_t>(int8_min) - 1;
-  EXPECT_FALSE(wkc::safe_numcast<int8_t>(val_i32).has_value());
+  CheckSafeCast<int8_t>("int8::min", val_i32, true);
+  ++val_i32;
+  CheckSafeCast<int8_t>("int8::min+1", val_i32, true);
+  val_i32 -= 2;
+  CheckSafeCast<int8_t>("int8::min-1", val_i32, false);
 
   const auto int8_max = std::numeric_limits<int8_t>::max();
   val_i32 = static_cast<int32_t>(int8_max);
-  EXPECT_EQ(int8_max, wkc::safe_numcast<int8_t>(val_i32).value());
-  val_i32 = static_cast<int32_t>(int8_max) - 1;
-  EXPECT_EQ(int8_max - 1, wkc::safe_numcast<int8_t>(val_i32).value());
-  val_i32 = static_cast<int32_t>(int8_max) + 1;
-  EXPECT_FALSE(wkc::safe_numcast<int8_t>(val_i32).has_value());
+  CheckSafeCast<int8_t>("int8::max", val_i32, true);
+  --val_i32;
+  CheckSafeCast<int8_t>("int8::max-1", val_i32, true);
+  val_i32 += 2;
+  CheckSafeCast<int8_t>("int8::max+1", val_i32, false);
 
   // (2) From signed to signed, widening/promotion:
-  EXPECT_EQ(0L, wkc::safe_numcast<int64_t>(0).value());
+  CheckSafeCast<int64_t>("0", int8_t{0}, true);
+  CheckSafeCast<int64_t>("0", int16_t{0}, true);
+  CheckSafeCast<int64_t>("0", int32_t{0}, true);
+  CheckSafeCast<int64_t>("0", int64_t{0}, true);
 
   const auto int32_min = std::numeric_limits<int32_t>::min();
-  EXPECT_EQ(static_cast<int64_t>(int32_min),
-      wkc::safe_numcast<int64_t>(int32_min).value());
+  CheckSafeCast<int64_t>("int32::min", int32_min, true);
 
   const auto int32_max = std::numeric_limits<int32_t>::max();
-  EXPECT_EQ(static_cast<int64_t>(int32_max),
-      wkc::safe_numcast<int64_t>(int32_max).value());
+  CheckSafeCast<int64_t>("int32::max", int32_max, true);
 
   // (3) From signed to unsigned, narrowing:
-  EXPECT_EQ(0, wkc::safe_numcast<uint8_t>(0L).value());
+  CheckSafeCast<uint8_t>("narrow 0L", 0L, true);
+  CheckSafeCast<uint8_t>("narrow 100L", 100L, true);
+  CheckSafeCast<uint8_t>("narrow 255L", 255L, true);
 
-  EXPECT_EQ(100, wkc::safe_numcast<uint8_t>(100L).value());
-  EXPECT_EQ(255, wkc::safe_numcast<uint8_t>(255L).value());
-
-  EXPECT_FALSE(wkc::safe_numcast<uint8_t>(-1).has_value());
-  EXPECT_FALSE(wkc::safe_numcast<uint8_t>(256L).has_value());
+  CheckSafeCast<uint8_t>("narrow -1", -1, false);
+  CheckSafeCast<uint8_t>("narrow 256", 256, false);
+  CheckSafeCast<uint8_t>("narrow 256L", 256L, false);
 
   // (4) From signed to unsigned, widening/promotion:
-  EXPECT_FALSE(
-      wkc::safe_numcast<uint16_t>(static_cast<int8_t>(-1)).has_value());
-  EXPECT_EQ(0, wkc::safe_numcast<uint16_t>(static_cast<int8_t>(0)).value());
-  EXPECT_EQ(127, wkc::safe_numcast<uint16_t>(static_cast<int8_t>(127)).value());
+  CheckSafeCast<uint16_t>("widen -1", int8_t{-1}, false);
+  CheckSafeCast<uint16_t>("widen 0", int8_t{0}, true);
+  CheckSafeCast<uint16_t>("widen 127", int8_t{127}, true);
 
   // (5) From unsigned to signed, narrowing:
-  EXPECT_EQ(127, wkc::safe_numcast<int8_t>(static_cast<uint8_t>(127)).value());
-  EXPECT_EQ(127, wkc::safe_numcast<int8_t>(static_cast<uint16_t>(127)).value());
-  EXPECT_EQ(0, wkc::safe_numcast<int8_t>(static_cast<uint16_t>(0)).value());
-  EXPECT_FALSE(
-      wkc::safe_numcast<int8_t>(static_cast<uint8_t>(255)).has_value());
-  EXPECT_FALSE(
-      wkc::safe_numcast<int8_t>(static_cast<uint32_t>(1000)).has_value());
-  EXPECT_FALSE(
-      wkc::safe_numcast<int16_t>(static_cast<uint32_t>(100000)).has_value());
+  CheckSafeCast<int8_t>("narrow 127", uint8_t{127}, true);
+  CheckSafeCast<int8_t>("narrow 127", uint16_t{127}, true);
+  CheckSafeCast<int8_t>("narrow 0", uint16_t{0}, true);
+  CheckSafeCast<int8_t>("narrow 255", uint8_t{255}, false);
+  CheckSafeCast<int8_t>("narrow 1000", uint32_t{1000}, false);
+  CheckSafeCast<int16_t>("narrow 255", uint16_t{255}, true);
+  CheckSafeCast<int16_t>("narrow 255", uint32_t{255}, true);
+  CheckSafeCast<int16_t>("narrow 1000", uint16_t{1000}, true);
+  CheckSafeCast<int16_t>("narrow 100000", uint32_t{100000}, false);
 
   // (6) From unsigned to signed, widening/promotion:
-  EXPECT_EQ(
-      127, wkc::safe_numcast<int16_t>(static_cast<uint16_t>(127)).value());
-  EXPECT_EQ(
-      1000, wkc::safe_numcast<int32_t>(static_cast<uint16_t>(1000)).value());
-  EXPECT_EQ(0, wkc::safe_numcast<int32_t>(static_cast<uint16_t>(0)).value());
-  EXPECT_EQ(
-      12345L, wkc::safe_numcast<long>(static_cast<uint16_t>(12345)).value());
+  CheckSafeCast<int16_t>("widen 127", uint16_t{127}, true);
+  CheckSafeCast<int32_t>("widen 0", uint16_t{0}, true);
+  CheckSafeCast<int32_t>("widen 1000", uint16_t{1000}, true);
+  CheckSafeCast<int64_t>("widen 12345", uint16_t{12345}, true);
 
   // (7) From unsigned to unsigned, narrowing cast:
-  EXPECT_EQ(0, wkc::safe_numcast<uint8_t>(0UL).value());
-  EXPECT_EQ(100, wkc::safe_numcast<uint8_t>(100UL).value());
-  EXPECT_EQ(255, wkc::safe_numcast<uint8_t>(255UL).value());
-  EXPECT_FALSE(wkc::safe_numcast<uint8_t>(256UL).has_value());
+  CheckSafeCast<uint8_t>("narrow 0", 0UL, true);
+  CheckSafeCast<uint8_t>("narrow 100", 100UL, true);
+  CheckSafeCast<uint8_t>("narrow 255", 255UL, true);
+  CheckSafeCast<uint8_t>("narrow 256", 256UL, false);
 
   // (8) From unsigned to unsigned, widening cast:
-  EXPECT_EQ(0L, wkc::safe_numcast<uint64_t>(0).value());
-  EXPECT_EQ(100L, wkc::safe_numcast<uint64_t>(100).value());
+  CheckSafeCast<uint64_t>("widen 0", 0U, true);
+  CheckSafeCast<uint64_t>("widen 100", 100U, true);
   const auto uint32_max = std::numeric_limits<uint32_t>::max();
-  EXPECT_EQ(static_cast<uint64_t>(uint32_max),
-      wkc::safe_numcast<uint64_t>(uint32_max).value());
+  CheckSafeCast<uint64_t>("widen uint32::max", uint32_max, true);
+  CheckSafeCast<uint32_t>("widen uint32::max", uint32_max, true);
 }
 
 TEST(CastTest, CheckedFloatingPoint) {
@@ -593,34 +624,6 @@ TEST(CastTest, CheckedIntegralToFloating) {
       val, wkc::checked_numcast<int64_t>(wkc::checked_numcast<float>(val)));
 }
 
-template <typename T, typename S>
-void CheckSafeCast(std::string_view lbl,
-    S value,
-    bool should_be_representable) {
-  EXPECT_NO_THROW(wkc::safe_numcast<T>(value))
-      << "Cannot cast " << wkc::TypeName<S>() << ' ' << value << " to "
-      << wkc::TypeName<T>() << ". Test: " << lbl;
-
-  const auto opt_tgt = wkc::safe_numcast<T>(value);
-  if (opt_tgt.has_value()) {
-    EXPECT_NO_THROW(wkc::safe_numcast<S>(opt_tgt.value()))
-        << "Cannot cast " << wkc::TypeName<T>() << ' ' << opt_tgt.value()
-        << " back to " << wkc::TypeName<S>()
-        << " as it would throw! Test: " << lbl;
-    const auto opt_src = wkc::safe_numcast<S>(opt_tgt.value());
-    EXPECT_TRUE(opt_src.has_value())
-        << "Cannot cast " << wkc::TypeName<T>() << ' ' << opt_tgt.value()
-        << " back to " << wkc::TypeName<S>() << ". Test: " << lbl;
-    if (opt_src.has_value()) {
-      EXPECT_EQ(value, opt_src.value());
-    }
-  }
-
-  EXPECT_EQ(should_be_representable, opt_tgt.has_value())
-      << "safe_numcast didn't work as expected for " << wkc::TypeName<S>()
-      << ' ' << value << " to " << wkc::TypeName<T>() << ". Test: " << lbl;
-}
-
 TEST(CastTest, SafeIntegralToFloating) {
   EXPECT_DOUBLE_EQ(5.0, wkc::safe_numcast<double>(5).value());
   EXPECT_FLOAT_EQ(-27.0F, wkc::safe_numcast<float>(-27).value());
@@ -640,9 +643,6 @@ TEST(CastTest, SafeIntegralToFloating) {
   // Powers of two can be exactly represented:
   CheckSafeCast<float>("lng::min", lng_limits::min(), true);
   CheckSafeCast<double>("lng::min", lng_limits::min(), true);
-
-  CheckSafeCast<float>("lng::min<<2", lng_limits::min() << 2, true);
-  CheckSafeCast<double>("lng::min<<2", lng_limits::min() << 2, true);
 
   CheckSafeCast<float>("1UL<<63", 1UL << 63, true);
   CheckSafeCast<double>("1UL<<63", 1UL << 63, true);
@@ -674,6 +674,10 @@ TEST(CastTest, SafeIntegralToFloating) {
   val = 1L << 63;
   CheckSafeCast<float>("1L<<63", val, true);
   CheckSafeCast<double>("1L<<63", val, true);
+
+  --val;
+  CheckSafeCast<float>("(1L<<63)-1", val, false);
+  CheckSafeCast<double>("(1L<<63)-1", val, false);
 }
 
 // NOLINTEND

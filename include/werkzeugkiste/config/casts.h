@@ -2,7 +2,6 @@
 #define WERKZEUGKISTE_CONFIG_CASTS_H
 
 #include <werkzeugkiste/config/configuration.h>
-#include <werkzeugkiste/logging.h>
 
 #include <cmath>
 #include <limits>
@@ -546,7 +545,7 @@ constexpr std::optional<T> safe_numcast(const S value) noexcept {
 /// @tparam E Exception which will be thrown if the cast is not feasible.
 /// @param value The value to be casted.
 template <typename T, typename S, typename E = std::domain_error>
-constexpr T checked_numcast(const S value) {
+T checked_numcast(const S value) {
   constexpr bool may_throw = true;
 
   const auto opt = detail::numcast<T, S, E>(value, may_throw);
@@ -556,7 +555,12 @@ constexpr T checked_numcast(const S value) {
   }
 
   // LCOV_EXCL_START
-  throw std::logic_error("The requested cast is not supported!");
+  std::string msg{"The requested cast from `"};
+  msg += TypeName<S>();
+  msg += "` to `";
+  msg += TypeName<T>();
+  msg += "` is not supported!";
+  throw std::logic_error{msg};
   // LCOV_EXCL_STOP
 }
 
