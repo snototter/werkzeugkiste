@@ -431,7 +431,8 @@ std::optional<T> int_to_float(S value, bool may_throw) {
 
   // Check if cast is lossless
   const T cast = static_cast<T>(value);
-  const std::optional<S> check = float_to_int<S, T, E>(cast, false);
+  const std::optional<S> check =
+      float_to_int<S, T, E>(cast, /*may_throw=*/false);
 
   if (!check.has_value() || (check.value() != value)) {
     if (may_throw) {
@@ -442,9 +443,8 @@ std::optional<T> int_to_float(S value, bool may_throw) {
         msg << " Result would be " << check.value() << '.';
       }
       throw E{msg.str()};
-    } else {
-      return std::nullopt;
     }
+    return std::nullopt;
   }
   return std::make_optional(cast);
 }
@@ -528,9 +528,13 @@ constexpr std::optional<T> numcast(const S value, const bool may_throw) {
 /// @tparam S The input type.
 /// @param value The value to be casted.
 template <typename T, typename S>
-constexpr std::optional<T> safe_numcast(const S value) noexcept {
+std::optional<T> safe_numcast(const S value) noexcept {
   constexpr bool may_throw = false;
-  return detail::numcast<T, S>(value, may_throw);
+  try {
+    return detail::numcast<T, S>(value, may_throw);
+  } catch (...) {
+    return std::nullopt;
+  }
 }
 
 /// @brief Returns the value as type T iff it can be exactly represented in the
