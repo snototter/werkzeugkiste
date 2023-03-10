@@ -31,6 +31,11 @@ TEST(ConfigKeyTest, ParameterNames1) {
   keys = config.ListParameterNames(false, true);
   EXPECT_EQ(9, keys.size());
 
+  EXPECT_TRUE(config.Contains("key"sv));
+  EXPECT_FALSE(config.Contains("ke y"sv));
+  EXPECT_FALSE(config.Contains("key "sv));
+  EXPECT_FALSE(config.Contains(" key"));
+
   std::istringstream iss(toml_str);
   std::string line;
   while (std::getline(iss, line)) {

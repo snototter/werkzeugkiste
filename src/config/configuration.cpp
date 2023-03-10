@@ -594,7 +594,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 ///   refers to an array element.
 /// @param tbl The TOML root node.
 /// @param key The fully-qualified parameter name.
-void EnsureKeyIsCreatable(const toml::table &tbl, std::string_view key) {
+void EnsureKeyIsCreatable(std::string_view key) {
   // Sanity checks are missing on purpose:
   // 1) empty string or 2) if key exists
 
@@ -639,7 +639,7 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   // parent path, then create a table here.
   // But first, ensure that we are not asked to create a list:
   const auto path = SplitTomlPath(key);
-  EnsureKeyIsCreatable(tbl, path.second);
+  EnsureKeyIsCreatable(path.second);
 
   if (path.first.empty()) {
     // Create table at root level.
@@ -715,7 +715,7 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
     ReplaceScalar(node, value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
-    EnsureKeyIsCreatable(tbl, path.second);
+    EnsureKeyIsCreatable(path.second);
 
     toml::table *parent =
         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
@@ -744,7 +744,7 @@ void CreateList(toml::table &tbl,
     const std::vector<Tcfg> &vec) {
   const auto path = SplitTomlPath(key);
   EnsureContainerPathExists(tbl, path.first);
-  EnsureKeyIsCreatable(tbl, path.second);
+  EnsureKeyIsCreatable(path.second);
 
   toml::array arr{};
   for (const auto &value : vec) {

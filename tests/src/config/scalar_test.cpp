@@ -29,6 +29,10 @@ TEST(ConfigScalarTest, Integer) {
   EXPECT_EQ(-123456, config.GetInteger32("int32_1"sv));
   EXPECT_EQ(987654, config.GetInteger32("int32_2"sv));
 
+  EXPECT_THROW(config.GetInteger32(" int32_1"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32(" int32_1 "sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32(" int32_1 "sv), wkc::KeyError);
+
   EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
   EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
 
