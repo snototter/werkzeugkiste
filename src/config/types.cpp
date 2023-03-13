@@ -126,25 +126,6 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct) {
 
 //-----------------------------------------------------------------------------
 // Number parsing for date & time types
-
-/// @brief Returns true if the input string is a valid integer, i.e.
-///   "[+-]?[0-9]+".
-bool IsInteger(std::string_view str) {
-  if (str.empty()) {
-    return false;
-  }
-
-  const bool sign = (str[0] == '-' || str[0] == '+');
-  const auto begin = sign ? str.begin() + 1 : str.begin();
-  const auto pos = std::find_if(
-      begin, str.end(), [](char c) -> bool { return std::isdigit(c) == 0; });
-  if (pos != str.end()) {
-    return false;
-  }
-
-  return sign ? (str.length() > 2) : true;
-}
-
 template <typename T>
 T ParseDateTimeNumber(const std::string &str,
     int min_val,
@@ -157,7 +138,7 @@ T ParseDateTimeNumber(const std::string &str,
     //   if the "rest" of the string is invalid).
     // Thus, we need to make sure that only [+-][0-9]+ inputs are provided as
     // inputs to stoi. We do not allow white space.
-    if (!IsInteger(str)) {
+    if (!strings::IsInteger(str)) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, type_str);
     }
 

@@ -60,7 +60,7 @@ inline std::string FullyQualifiedPath(const toml::key &key,
     fqn += key.str();
     return fqn;
   }
-  return std::string{key.str()};
+  return std::string(key.str());
 }
 
 /// Returns the "fully-qualified TOML path" for the given array index.
@@ -78,14 +78,16 @@ inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
 // Forward declaration.
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
     std::string_view path,
-    bool include_array_entries);
+    bool include_array_entries,
+    bool recursive);
 
 /// Returns all fully-qualified paths for named parameters within
 /// the given TOML array.
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListArrayKeys(const toml::array &arr,
     std::string_view path,
-    bool include_array_entries) {
+    bool include_array_entries,
+    bool recursive) {
   std::vector<std::string> keys;
   std::size_t array_index = 0;
   for (auto &&value : arr) {
@@ -93,16 +95,19 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
     if (include_array_entries) {
       keys.push_back(fqn);
     }
-    if (value.is_table()) {
-      const toml::table &tbl = *value.as_table();
-      const auto subkeys = ListTableKeys(tbl, fqn, include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
-    }
-    if (value.is_array()) {
-      const toml::array &nested_arr = *value.as_array();
-      const auto subkeys =
-          ListArrayKeys(nested_arr, fqn, include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+    if (recursive) {
+      if (value.is_table()) {
+        const toml::table &tbl = *value.as_table();
+        const auto subkeys =
+            ListTableKeys(tbl, fqn, include_array_entries, recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
+      if (value.is_array()) {
+        const toml::array &nested_arr = *value.as_array();
+        const auto subkeys =
+            ListArrayKeys(nested_arr, fqn, include_array_entries, recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
     }
     ++array_index;
   }
@@ -114,23 +119,28 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
     std::string_view path,
-    bool include_array_entries) {
+    bool include_array_entries,
+    bool recursive) {
   std::vector<std::string> keys;
   for (auto &&[key, value] : tbl) {
     // Each parameter within a table is a "named parameter", i.e. it has
     // a separate name that should always be included.
-    keys.emplace_back(FullyQualifiedPath(key, path));
-    if (value.is_array()) {
-      const auto subkeys = ListArrayKeys(*value.as_array(),
-          FullyQualifiedPath(key, path),
-          include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
-    }
-    if (value.is_table()) {
-      const auto subkeys = ListTableKeys(*value.as_table(),
-          FullyQualifiedPath(key, path),
-          include_array_entries);
-      keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+    keys.push_back(FullyQualifiedPath(key, path));
+    if (recursive) {
+      if (value.is_array()) {
+        const auto subkeys = ListArrayKeys(*value.as_array(),
+            FullyQualifiedPath(key, path),
+            include_array_entries,
+            recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
+      if (value.is_table()) {
+        const auto subkeys = ListTableKeys(*value.as_table(),
+            FullyQualifiedPath(key, path),
+            include_array_entries,
+            recursive);
+        keys.insert(keys.end(), subkeys.begin(), subkeys.end());
+      }
     }
   }
   return keys;
@@ -146,8 +156,8 @@ KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
   msg += key;
   msg += "` does not exist!";
 
-  const std::vector<std::string> keys =
-      ListTableKeys(tbl, ""sv, /*include_array_entries=*/true);
+  const std::vector<std::string> keys = ListTableKeys(
+      tbl, ""sv, /*include_array_entries=*/true, /*recursive=*/true);
   std::vector<std::pair<std::size_t, std::string_view>> candidates;
   for (const auto &cand : keys) {
     // The edit distance can't be less than the length difference between the
@@ -353,6 +363,31 @@ inline bool ContainsKey(const toml::table &tbl, std::string_view key) {
   return node.is_value() || node.is_table() || node.is_array();
 }
 
+bool IsScalar(toml::node_type tp) {
+  switch (tp) {
+    case toml::node_type::none:
+    case toml::node_type::table:
+    case toml::node_type::array:
+      return false;
+
+    case toml::node_type::string:
+    case toml::node_type::integer:
+    case toml::node_type::floating_point:
+    case toml::node_type::boolean:
+    case toml::node_type::date:
+    case toml::node_type::time:
+    case toml::node_type::date_time:
+      return true;
+  }
+
+  // LCOV_EXCL_START
+  std::string msg{"Unhandled TOML node type `"};
+  msg += std::to_string(static_cast<int32_t>(tp));
+  msg += "` is not yet handled in `IsScalar`!";
+  throw std::logic_error(msg);
+  // LCOV_EXCL_STOP
+}
+
 /// Extracts the value from the toml::node or throws an error if the type
 /// is not correct.
 /// Tries converting numeric types if a lossless cast is feasible.
@@ -385,7 +420,7 @@ Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
     }
   } else if constexpr (std::is_same_v<Tcfg, std::string>) {
     if (node.is_string()) {
-      return std::string{*node.as_string()};
+      return std::string(*node.as_string());
     }
   } else if constexpr (std::is_same_v<Tcfg, date>) {
     if (node.is_date()) {
@@ -456,7 +491,7 @@ Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
 
   if constexpr (std::is_same_v<Tcfg, std::string_view> &&
                 std::is_same_v<Ttoml, std::string>) {
-    return std::string{value};
+    return std::string(value);
   }
 
   if constexpr (std::is_same_v<Tcfg, date> &&
@@ -555,17 +590,22 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
   return std::make_pair(std::string_view{}, path);
 }
 
-/// @brief Throws a KeyError if the given key cannot be created, i.e. if it
-///   refers to an array element.
-/// @param tbl The TOML root node.
-/// @param key The fully-qualified parameter name.
-void EnsureKeyIsCreatable(const toml::table &tbl, std::string_view key) {
-  // Sanity checks are missing on purpose:
-  // 1) empty string or 2) if key exists
-  if (key[key.length() - 1] == ']') {
+/// @brief Throws a KeyError if the given key cannot be created, e.g. if it
+///   refers to an array element or contains unsupported characters (a quoted
+///   key or whitespace, etc.)
+/// @param key The bare key or the fully-qualified parameter name (dotted key).
+void EnsureDottedOrBareKey(std::string_view key) {
+  if (key.empty()) {
+    throw KeyError{"Parameter name cannot be empty!"};
+  }
+
+  const auto *const pos =
+      std::find_if_not(key.begin(), key.end(), [](char c) -> bool {
+        return (std::isalnum(c) != 0) || (c == '-') || (c == '_') || (c == '.');
+      });
+  if (pos != key.end()) {
     std::string msg{
-        "List elements can only be \"set\" (replaced) or \"appended\", but "
-        "not \"created\". Check parameter `"};
+        "Expected a bare key/path (alphanumeric, '-', '_', '.'), but got `"};
     msg += key;
     msg += "`!";
     throw KeyError{msg};
@@ -603,7 +643,7 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   // parent path, then create a table here.
   // But first, ensure that we are not asked to create a list:
   const auto path = SplitTomlPath(key);
-  EnsureKeyIsCreatable(tbl, path.second);
+  EnsureDottedOrBareKey(path.second);
 
   if (path.first.empty()) {
     // Create table at root level.
@@ -679,7 +719,7 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
     ReplaceScalar(node, value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
-    EnsureKeyIsCreatable(tbl, path.second);
+    EnsureDottedOrBareKey(path.second);
 
     toml::table *parent =
         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
@@ -708,7 +748,7 @@ void CreateList(toml::table &tbl,
     const std::vector<Tcfg> &vec) {
   const auto path = SplitTomlPath(key);
   EnsureContainerPathExists(tbl, path.first);
-  EnsureKeyIsCreatable(tbl, path.second);
+  EnsureDottedOrBareKey(path.second);
 
   toml::array arr{};
   for (const auto &value : vec) {
@@ -857,7 +897,7 @@ toml::array *GetExistingList(toml::table &tbl, std::string_view key) {
     msg += "` as a list, because it is of type `";
     msg += TomlTypeName(node, key);
     msg += "`!";
-    throw KeyError{msg};
+    throw TypeError{msg};
   }
 
   return node.as_array();
@@ -938,7 +978,7 @@ inline Tuple ExtractPoint(const toml::array &arr, std::string_view key) {
       cast[idx] = SafeInteger32Cast(point[idx], key);
     }
     return ArrayToTuple(cast);
-  } else {  // NOLINT(*else-after-return)
+  } else {
     return ArrayToTuple(point);
   }
 }
@@ -1197,10 +1237,12 @@ bool Configuration::Equals(const Configuration &other) const {
   using namespace std::string_view_literals;
   const auto keys_this = detail::ListTableKeys(pimpl_->config_root,
       ""sv,
-      /*include_array_entries=*/true);
+      /*include_array_entries=*/true,
+      /*recursive=*/true);
   const auto keys_other = detail::ListTableKeys(other.pimpl_->config_root,
       ""sv,
-      /*include_array_entries=*/true);
+      /*include_array_entries=*/true,
+      /*recursive=*/true);
 
   if (keys_this.size() != keys_other.size()) {
     return false;
@@ -1298,11 +1340,71 @@ ConfigType Configuration::Type(std::string_view key) const {
   // LCOV_EXCL_STOP
 }
 
+void Configuration::Delete(std::string_view key) {
+  if (!detail::ContainsKey(pimpl_->config_root, key)) {
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
+  }
+
+  detail::EnsureDottedOrBareKey(key);
+
+  const auto path = detail::SplitTomlPath(key);
+  toml::table *parent = path.first.empty()
+                          ? &pimpl_->config_root
+                          : pimpl_->config_root.at_path(path.first).as_table();
+  if (parent == nullptr) {
+    // LCOV_EXCL_START
+    // Should be unreachable due to the previous dotted/bare key check.
+    std::string msg{"Cannot delete parameter `"};
+    msg += key;
+    msg += "`! Parent must be either a subgroup or the root node.";
+    throw KeyError{msg};
+    // LCOV_EXCL_STOP
+  }
+
+  const std::size_t erased = parent->erase(path.second);
+  if (erased == 0) {
+    // LCOV_EXCL_START
+    // Should be unreachable.
+    std::string msg{"Unknown error while deleting parameter `"};
+    msg += key;
+    msg +=
+        "`! Please report at"
+        "https://github.com/snototter/werkzeugkiste/issues";
+    throw std::runtime_error{msg};
+    // LCOV_EXCL_STOP
+  }
+}
+
+bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
+  if (!detail::ContainsKey(pimpl_->config_root, key)) {
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
+  }
+
+  auto node = pimpl_->config_root.at_path(key);
+  if (!node.is_array()) {
+    std::string msg{"Cannot check if `"};
+    msg += key;
+    msg += "` is homogeneous, because it is of type `";
+    msg += detail::TomlTypeName(node, key);
+    msg += "` instead of a list!";
+    throw TypeError{msg};
+  }
+
+  const toml::array &arr = *node.as_array();
+  for (const auto &value : arr) {
+    if (!detail::IsScalar(value.type()) || (value.type() != arr[0].type())) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::vector<std::string> Configuration::ListParameterNames(
-    bool include_array_entries) const {
+    bool include_array_entries,
+    bool recursive) const {
   using namespace std::string_view_literals;
   return detail::ListTableKeys(
-      pimpl_->config_root, ""sv, include_array_entries);
+      pimpl_->config_root, ""sv, include_array_entries, recursive);
 }
 
 //---------------------------------------------------------------------------
@@ -1432,7 +1534,7 @@ std::vector<int64_t> Configuration::GetInteger64List(
 
 void Configuration::SetInteger64List(std::string_view key,
     const std::vector<int64_t> &values) {
-  detail::SetList<int64_t>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1472,7 +1574,7 @@ std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
 
 void Configuration::SetDoubleList(std::string_view key,
     const std::vector<double> &values) {
-  detail::SetList<double>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<double>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1506,7 +1608,7 @@ std::vector<std::string> Configuration::GetStringList(
 
 void Configuration::SetStringList(std::string_view key,
     const std::vector<std::string_view> &values) {
-  detail::SetList<std::string>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<std::string>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1535,12 +1637,12 @@ void Configuration::SetDate(std::string_view key, const date &value) {
 }
 
 std::vector<date> Configuration::GetDateList(std::string_view key) const {
-  return detail::GetList<date>(pimpl_->config_root, key);  // TODO test
+  return detail::GetList<date>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDateList(std::string_view key,
     const std::vector<date> &values) {
-  detail::SetList<toml::date>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<toml::date>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1569,12 +1671,12 @@ void Configuration::SetTime(std::string_view key, const time &value) {
 }
 
 std::vector<time> Configuration::GetTimeList(std::string_view key) const {
-  return detail::GetList<time>(pimpl_->config_root, key);  // TODO test
+  return detail::GetList<time>(pimpl_->config_root, key);
 }
 
 void Configuration::SetTimeList(std::string_view key,
     const std::vector<time> &values) {
-  detail::SetList<toml::time>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<toml::time>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1605,14 +1707,12 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
 
 std::vector<date_time> Configuration::GetDateTimeList(
     std::string_view key) const {
-  return detail::GetList<date_time>(pimpl_->config_root, key);  // TODO test
+  return detail::GetList<date_time>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDateTimeList(std::string_view key,
     const std::vector<date_time> &values) {
-  detail::SetList<toml::date_time>(pimpl_->config_root,
-      key,
-      values);  // TODO test
+  detail::SetList<toml::date_time>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1627,7 +1727,7 @@ void Configuration::CreateList(std::string_view key) {
   detail::CreateList<bool, bool>(pimpl_->config_root, key, {});
 }
 
-void Configuration::AppendNestedList(std::string_view key) {
+void Configuration::AppendList(std::string_view key) {
   toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
   arr->push_back(toml::array{});
 }
@@ -1726,7 +1826,7 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
 }
 
 //---------------------------------------------------------------------------
-// Special utilities
+// Convenience utilities
 
 bool Configuration::AdjustRelativePaths(std::string_view base_path,
     const std::vector<std::string_view> &parameters) {
@@ -1870,6 +1970,9 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
   }
 }
 
+//---------------------------------------------------------------------------
+// Serialization
+
 std::string Configuration::ToTOML() const {
   std::ostringstream repr;
   repr << toml::toml_formatter{pimpl_->config_root};
@@ -1880,6 +1983,16 @@ std::string Configuration::ToJSON() const {
   std::ostringstream repr;
   repr << toml::json_formatter{pimpl_->config_root};
   return repr.str();
+}
+
+std::string Configuration::ToYAML() const {
+  std::ostringstream repr;
+  repr << toml::yaml_formatter{pimpl_->config_root};
+  return repr.str();
+}
+
+std::string Configuration::ToLibconfig() const {
+  return DumpLibconfigString(*this);
 }
 
 #undef WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR

@@ -85,7 +85,7 @@ int main(int /* argc */, char ** /* argv */) {
 
   config =
       wkc::LoadTOMLFile(wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
-  const auto params = config.ListParameterNames(false);
+  const auto params = config.ListParameterNames(false, true);
   std::cout << "Parameter names:\n";
   for (const auto &name : params) {
     std::cout << "  " << name << std::endl;

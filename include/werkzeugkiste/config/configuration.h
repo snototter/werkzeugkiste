@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-/// Utilities to handle configurations.
+/// @brief Utilities to handle configurations.
 namespace werkzeugkiste::config {
 
 /// @brief Encapsulates configuration data.
@@ -30,8 +30,8 @@ namespace werkzeugkiste::config {
 /// * Get..Or returns a default value if the parameter does not exist.
 /// * Mixed lists:
 ///   - All entries numeric -> can be looked up as floating point list.
-///   - Can not be created programmatically (only via loading a Configuration
-///     from a TOML/JSON/... string or file)
+///   - Can be created programmatically via CreateList + Append, as well as by
+///     loading a mixed list from a TOML/JSON/... string or file
 ///   - Can be replaced by an empty list, but cannot be replaced by a
 ///     homogeneous list.
 ///   - Individual elements can be looked up and set (via their corresponding
@@ -41,27 +41,16 @@ namespace werkzeugkiste::config {
 ///   can be looked up as int, but 2.5 cannot (will raise a `TypeError`).
 ///
 /// TODOs:
-/// * [x] Numeric casts. Implicitly cast if lossless conversion is possible.
 /// * [ ] LoadNestedJSONConfiguration
 /// * [ ] LoadJSONFile
 /// * [ ] LoadJSONString
-/// * [ ] LoadLibconfigFile   ?
-/// * [ ] LoadLibconfigString ?
-/// * [ ] ToLibconfigString   ?
-/// * [x] Date
-/// * [x] Time
-/// * [x] DateTime
 /// * [ ] NestedLists int & double (for "matrices")
 /// * [ ] If eigen3 is available, enable GetMatrix.
 ///       Static dimensions vs dynamic?
 /// * [ ] Setters for ...Pair
 /// * [ ] Optional & Default getters for ...Pair
-/// * [x] Setters for ...List
-/// * [x] SetGroup
-/// * [x] Return optional<Scalar>
 /// * [ ] Support get/set list of groups, i.e. vector<Configuration>
 /// * [ ] Convenience types: Point/Index/Rectangle
-/// * [ ] Consider renaming Integer32 to integer
 /// * [ ] Convenience type casts: uint32
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
@@ -126,13 +115,39 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified identifier of the parameter.
   ConfigType Type(std::string_view key) const;
 
-  /// @brief Returns a list of all (fully-qualified) parameter names.
+  /// @brief Deletes the parameter with the given key.
+  ///
+  /// Can be used to delete a scalar, list or (sub-)group of the configuration.
+  /// Cannot be used to delete a specific element of a list (`arr[0]`). For the
+  /// latter, you need to delete (then recreate) the whole list.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist or refers to an
+  /// element of a list.
+  ///
+  /// @param key Fully-qualified parameter name.
+  void Delete(std::string_view key);
+
+  /// @brief Checks if a list parameter contains only scalars of the same type.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is not a list.
+  ///
+  /// @param key Fully-qualified name of the parameter.
+  /// @return True if the list is empty or contains only scalars of the same
+  ///   type. False otherwise.
+  bool IsHomogeneousScalarList(std::string_view key) const;
+
+  /// @brief Returns a list of (fully-qualified) parameter names.
   ///
   /// @param include_array_entries If true, the name of each parameter will
   /// be returned, *i.e.* each array element will be included. Otherwise,
   /// only named parameters (*e.g.* a dictionary/table within an array, such
   /// as `arr[3].name`) will be included.
-  std::vector<std::string> ListParameterNames(bool include_array_entries) const;
+  /// @param recursive If true, the names of all parameters "below" this
+  /// configuration/group will be returned. Otherwise, only the first-level
+  /// child parameters will be returned.
+  std::vector<std::string> ListParameterNames(bool include_array_entries,
+      bool recursive) const;
 
   //---------------------------------------------------------------------------
   // Booleans
@@ -154,7 +169,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param default_val Value to return if the parameter does not exist.
   bool GetBooleanOr(std::string_view key, bool default_val) const;
 
-  // TODO doc
+  /// @brief Returns an optional boolean or `std::nullopt` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<bool> GetOptionalBoolean(std::string_view key) const;
 
   /// @brief Sets a boolean parameter.
@@ -167,7 +187,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetBoolean(std::string_view key, bool value);
 
-  // TODO doc
+  /// @brief Returns a list of boolean flags.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<bool> GetBooleanList(std::string_view key) const;
 
   // TODO doc
@@ -336,7 +361,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::string GetStringOr(std::string_view key,
       std::string_view default_val) const;
 
-  // TODO doc
+  /// @brief Returns an optional string or `std::nullopt` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<std::string> GetOptionalString(std::string_view key) const;
 
   /// @brief Sets a string parameter.
@@ -349,7 +379,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetString(std::string_view key, std::string_view value);
 
-  // TODO doc
+  /// @brief Returns a list of strings.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<std::string> GetStringList(std::string_view key) const;
 
   // TODO doc
@@ -376,7 +411,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param default_val Value to return if the parameter does not exist.
   date GetDateOr(std::string_view key, const date &default_val) const;
 
-  // TODO doc
+  /// @brief Returns an optional date or `std::nullopt` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<date> GetOptionalDate(std::string_view key) const;
 
   /// @brief Sets a local date parameter.
@@ -389,7 +429,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetDate(std::string_view key, const date &value);
 
-  // TODO doc
+  /// @brief Returns a list of date parameters.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<date> GetDateList(std::string_view key) const;
 
   // TODO doc
@@ -415,7 +460,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param default_val Value to return if the parameter does not exist.
   time GetTimeOr(std::string_view key, const time &default_val) const;
 
-  // TODO doc
+  /// @brief Returns an optional time or `std::nullopt` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<time> GetOptionalTime(std::string_view key) const;
 
   /// @brief Sets a local time parameter.
@@ -428,7 +478,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetTime(std::string_view key, const time &value);
 
-  // TODO doc
+  /// @brief Returns a list of time parameters.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<time> GetTimeList(std::string_view key) const;
 
   // TODO doc
@@ -455,7 +510,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   date_time GetDateTimeOr(std::string_view key,
       const date_time &default_val) const;
 
-  // TODO doc
+  /// @brief Returns an optional date_time or `std::nullopt` if it does not
+  ///   exist.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
 
   /// @brief Sets a date-time parameter.
@@ -471,7 +531,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetDateTime(std::string_view key, const date_time &value);
 
-  // TODO doc
+  /// @brief Returns a list of date-time parameters.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<date_time> GetDateTimeList(std::string_view key) const;
 
   // TODO doc
@@ -479,14 +544,79 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
       const std::vector<date_time> &values);
 
   //---------------------------------------------------------------------------
-  // TODO doc
+  // Mixed list support
+
+  /// @brief Creates an empty list with the given name.
+  ///
+  /// After successful creation, any values can be `Append`ed.
+  ///
+  /// Raises a `KeyError` if the key already exists or if a "parent" could
+  /// not be created.
+  ///
+  /// @param key Fully-qualified name of the parameter.
   void CreateList(std::string_view key);
-  void AppendNestedList(std::string_view key);
+
+  /// @brief Appends an empty list to an existing list in order to supported
+  ///   creating nested lists programmatically.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  void AppendList(std::string_view key);
+
+  /// @brief Appends a boolean flag to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
   void Append(std::string_view key, bool value);
+
+  /// @brief Appends a 32-bit integer to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
   void Append(std::string_view key, int32_t value);
+
+  /// @brief Appends a 64-bit integer to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
   void Append(std::string_view key, int64_t value);
+
+  /// @brief Appends a floating point value to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
   void Append(std::string_view key, double value);
+
+  /// @brief Appends a string to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
   void Append(std::string_view key, std::string_view value);
+
+  /// @brief Appends a group/sub-configuration to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param group Group/"Sub-Configuration" to be appended.
   void Append(std::string_view key, const Configuration &group);
 
   //---------------------------------------------------------------------------
@@ -500,7 +630,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Inserts (or replaces) the given configuration group.
   ///
   /// If the `key` already exists, it must be a group. Otherwise, the
-  /// parameter will be newly created, along with all "parent" in the
+  /// parameter will be newly created, along with all "parents" in the
   /// fully-qualified name (which defines a "path" through the configuration
   /// table/tree).
   ///
@@ -512,7 +642,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetGroup(std::string_view key, const Configuration &group);
 
   //---------------------------------------------------------------------------
-  // Special utilities
+  // Convenience utilities
 
   /// @brief Adjusts the given parameters to hold either an absolute file path,
   /// or the result of "base_path / <param>" if they initially held a relative
@@ -550,11 +680,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///     string)
   void LoadNestedTOMLConfiguration(std::string_view key);
 
+  //---------------------------------------------------------------------------
+  // Serialization
+
   /// @brief Returns a TOML-formatted string of this configuration.
   std::string ToTOML() const;
 
   /// @brief Returns a JSON-formatted string of this configuration.
   std::string ToJSON() const;
+
+  /// @brief Returns a YAML-formatted string of this configuration.
+  std::string ToYAML() const;
+
+  /// @brief Returns a libconfig-formatted string of this configuration.
+  std::string ToLibconfig() const;
 
  private:
   /// Forward declaration of internal implementation struct.
@@ -576,12 +715,34 @@ inline Configuration LoadTOMLString(std::string_view toml_string) {
   return Configuration::LoadTOMLString(toml_string);
 }
 
-// TODO doc
+/// @brief Loads a libconfig configuration from the given file.
+/// @param filename Path to the `.cfg` file.
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadLibconfigFile(std::string_view filename);
 
+/// @brief Loads a libconfig configuration from a string.
+/// @param lcfg_string String representation of the libconfig configuration.
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadLibconfigString(std::string_view lcfg_string);
+
+/// @brief Returns a libconfig-formatted string.
+WERKZEUGKISTE_CONFIG_EXPORT
+std::string DumpLibconfigString(const Configuration &cfg);
+
+/// @brief Returns a TOML-formatted string.
+inline std::string DumpTOMLString(const Configuration &cfg) {
+  return cfg.ToTOML();
+}
+
+/// @brief Returns a JSON-formatted string.
+inline std::string DumpJSONString(const Configuration &cfg) {
+  return cfg.ToJSON();
+}
+
+/// @brief Returns a YAML-formatted string.
+inline std::string DumpYAMLString(const Configuration &cfg) {
+  return cfg.ToYAML();
+}
 
 }  // namespace werkzeugkiste::config
 

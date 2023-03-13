@@ -26,7 +26,15 @@ TEST(ConfigKeyTest, ParameterNames1) {
     )toml";
 
   const auto config = wkc::LoadTOMLString(toml_str);
-  const auto keys = config.ListParameterNames(false);
+  auto keys = config.ListParameterNames(false, false);
+  EXPECT_EQ(6, keys.size());
+  keys = config.ListParameterNames(false, true);
+  EXPECT_EQ(9, keys.size());
+
+  EXPECT_TRUE(config.Contains("key"sv));
+  EXPECT_FALSE(config.Contains("ke y"sv));
+  EXPECT_FALSE(config.Contains("key "sv));
+  EXPECT_FALSE(config.Contains(" key"));
 
   std::istringstream iss(toml_str);
   std::string line;
@@ -95,7 +103,7 @@ TEST(ConfigKeyTest, ParameterNames2) {
       "tests",
       "tests[0].name",
       "tests[2].param"};
-  auto keys = config.ListParameterNames(false);
+  auto keys = config.ListParameterNames(false, true);
 
   CheckMatchingContainers(expected_keys, keys);
 
@@ -117,7 +125,7 @@ TEST(ConfigKeyTest, ParameterNames2) {
   expected_keys.push_back("tests[1]");
   expected_keys.push_back("tests[2]");
 
-  keys = config.ListParameterNames(true);
+  keys = config.ListParameterNames(true, true);
 
   EXPECT_EQ(expected_keys.size(), keys.size())
       << "Extracted keys: "sv << Stringify(keys) << "\nExpected keys:  "sv

@@ -29,6 +29,10 @@ TEST(ConfigScalarTest, Integer) {
   EXPECT_EQ(-123456, config.GetInteger32("int32_1"sv));
   EXPECT_EQ(987654, config.GetInteger32("int32_2"sv));
 
+  EXPECT_THROW(config.GetInteger32(" int32_1"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32(" int32_1 "sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32(" int32_1 "sv), wkc::KeyError);
+
   EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
   EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
 
@@ -322,6 +326,12 @@ TEST(ConfigScalarTest, SetBoolean) {
   EXPECT_NO_THROW(config.SetBoolean("bool"sv, false));
   EXPECT_EQ(false, config.GetBoolean("bool"sv));
 
+  // White space in keys is not allowed when setting a value
+  EXPECT_THROW(config.SetBoolean(""sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBoolean(" invalid-key"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBoolean("invalid-key "sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBoolean("invalid key"sv, true), wkc::KeyError);
+
   // Cannot change the type of an existing parameter
   EXPECT_THROW(config.SetBoolean("int"sv, true), wkc::TypeError);
 
@@ -391,6 +401,27 @@ TEST(ConfigScalarTest, SetNonBooleanScalars) {
   EXPECT_NO_THROW(config.SetInteger64("integer"sv, -2147483649));
   EXPECT_EQ(-2147483649, config.GetInteger64("integer"sv));
 
+  // White space in keys is not allowed when setting a value
+  EXPECT_THROW(config.SetInteger32(""sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger32(" invalid-key"sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger32("invalid-key "sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger32("invalid key"sv, 1), wkc::KeyError);
+
+  EXPECT_THROW(config.SetInteger64(""sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger64(" invalid-key"sv, 17), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger64("invalid-key "sv, 17), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger64("invalid key"sv, 17), wkc::KeyError);
+
+  EXPECT_THROW(config.SetDouble(""sv, 1.0), wkc::KeyError);
+  EXPECT_THROW(config.SetDouble(" invalid-key"sv, 0.1), wkc::KeyError);
+  EXPECT_THROW(config.SetDouble("invalid-key "sv, 0.1), wkc::KeyError);
+  EXPECT_THROW(config.SetDouble("invalid key"sv, 0.1), wkc::KeyError);
+
+  EXPECT_THROW(config.SetString(""sv, "value"sv), wkc::KeyError);
+  EXPECT_THROW(config.SetString(" invalid-key"sv, "value"sv), wkc::KeyError);
+  EXPECT_THROW(config.SetString("invalid-key "sv, "value"sv), wkc::KeyError);
+  EXPECT_THROW(config.SetString("invalid key"sv, "value"sv), wkc::KeyError);
+
   // Change a double
   EXPECT_DOUBLE_EQ(1.5, config.GetDouble("section.float"sv));
   EXPECT_NO_THROW(config.SetDouble("section.float"sv, 0.01));
@@ -398,11 +429,16 @@ TEST(ConfigScalarTest, SetNonBooleanScalars) {
 
   // We cannot change the type of an existing parameter
   EXPECT_THROW(config.SetDouble("integer"sv, 1.5), wkc::TypeError);
+  // But it can be set if the value is convertible
+  EXPECT_NO_THROW(config.SetDouble("integer"sv, 3.0));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("integer"sv));
+  EXPECT_EQ(3, config.GetInteger32("integer"sv));
 
   // Set a string:
   EXPECT_EQ("value", config.GetString("section.string"sv));
   EXPECT_NO_THROW(config.SetString("section.string"sv, "frobmorten"sv));
   EXPECT_EQ("frobmorten", config.GetString("section.string"sv));
+  EXPECT_THROW(config.SetString("section."sv, "value"sv), wkc::KeyError);
 
   // Change a string within an array:
   EXPECT_EQ("a string", config.GetString("section.array[2]"sv));
@@ -484,6 +520,11 @@ TEST(ConfigScalarTest, SetNonBooleanScalars) {
   EXPECT_THROW(config.SetDateTime("string"sv, dt), wkc::TypeError);
   EXPECT_THROW(config.GetDateTime("my-day"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDateTime("my-time"sv), wkc::TypeError);
+
+  // White space in keys is not allowed when setting a value
+  EXPECT_THROW(config.SetDate(" invalid-key"sv, day), wkc::KeyError);
+  EXPECT_THROW(config.SetTime("invalid-key "sv, tm), wkc::KeyError);
+  EXPECT_THROW(config.SetDateTime("invalid key"sv, dt), wkc::KeyError);
 }
 
 TEST(ConfigScalarTest, ReplaceListElements) {
@@ -500,10 +541,14 @@ TEST(ConfigScalarTest, ReplaceListElements) {
   EXPECT_NO_THROW(config.SetInteger32("ints[2]"sv, -2));
   EXPECT_EQ(-2, config.GetInteger32("ints[2]"sv));
 
+  EXPECT_THROW(config.SetInteger32("ints [2]"sv, -2), wkc::KeyError);
+
   // A compatible/convertible value can also be used:
   EXPECT_NO_THROW(config.SetDouble("ints[0]"sv, 5.0));
   EXPECT_EQ(5, config.GetInteger32("ints[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
+
+  EXPECT_THROW(config.SetDouble("ints [0] "sv, 5.0), wkc::KeyError);
 
   EXPECT_THROW(config.SetBoolean("ints[0]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetString("ints[1]"sv, "test"sv), wkc::TypeError);
@@ -546,4 +591,43 @@ TEST(ConfigScalarTest, ReplaceListElements) {
   EXPECT_EQ(wkc::ConfigType::String, config.Type("mixed[2]"sv));
 }
 
+TEST(ConfigScalarTest, Delete) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    int = 12345
+    str = "This is a string"
+
+    [section]
+    flt = 1.5
+    arr = [1, 2, 3]
+    lst = [1, true, "a string"]
+    )toml"sv);
+
+  EXPECT_THROW(config.Delete(""sv), wkc::KeyError);
+  EXPECT_THROW(config.Delete("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.Delete("section."sv), wkc::KeyError);
+  EXPECT_THROW(config.Delete("section.\"\""sv), wkc::KeyError);
+
+  EXPECT_TRUE(config.Contains("int"sv));
+  EXPECT_NO_THROW(config.Delete("int"sv));
+  EXPECT_FALSE(config.Contains("int"sv));
+
+  EXPECT_TRUE(config.Contains("str"sv));
+  EXPECT_NO_THROW(config.Delete("str"sv));
+  EXPECT_FALSE(config.Contains("str"sv));
+
+  EXPECT_TRUE(config.Contains("section.flt"sv));
+  EXPECT_NO_THROW(config.Delete("section.flt"sv));
+  EXPECT_FALSE(config.Contains("section.flt"sv));
+
+  EXPECT_THROW(config.Delete("section.arr[0]"sv), wkc::KeyError);
+  EXPECT_EQ(3, config.Size("section.arr"sv));
+
+  EXPECT_NO_THROW(config.Delete("section.arr"sv));
+  EXPECT_FALSE(config.Contains("section.arr"sv));
+
+  EXPECT_EQ(1, config.Size("section"sv));
+  EXPECT_NO_THROW(config.Delete("section"sv));
+  EXPECT_FALSE(config.Contains("section"sv));
+  EXPECT_TRUE(config.Empty());
+}
 // NOLINTEND

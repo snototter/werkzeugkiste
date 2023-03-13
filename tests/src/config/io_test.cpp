@@ -131,7 +131,7 @@ TEST(ConfigIOTest, ConfigConstruction) {
   EXPECT_FALSE(moved.Contains("value1"sv));  // Previously contained
 }
 
-TEST(ConfigIOTest, LoadingToml) {
+TEST(ConfigIOTest, LoadingTOML) {
   const std::string fname =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
 
@@ -141,7 +141,9 @@ TEST(ConfigIOTest, LoadingToml) {
   EXPECT_TRUE(config1.Equals(reloaded));
   EXPECT_TRUE(reloaded.Equals(config1));
   // Also the string representations should be equal
+  EXPECT_EQ(wkc::DumpTOMLString(config1), wkc::DumpTOMLString(reloaded));
   EXPECT_EQ(config1.ToTOML(), reloaded.ToTOML());
+  EXPECT_EQ(config1.ToTOML(), wkc::DumpTOMLString(config1));
 
   // Load a different configuration:
   const auto config2 = wkc::LoadTOMLString(R"toml(
@@ -247,11 +249,27 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
 }
 
 // TODO Can be properly tested once we have LoadJSONString()
-TEST(ConfigIOTest, LoadingJson) {
+TEST(ConfigIOTest, LoadingJSON) {
   const auto config = wkc::LoadTOMLString(R"toml(
     param1 = "value"
     )toml"sv);
   EXPECT_TRUE(config.ToJSON().length() > 0);
+  EXPECT_EQ(config.ToJSON(), wkc::DumpJSONString(config));
+
+  // TODO
+  // EXPECT_EQ(wkc::DumpJSONString(config1), wkc::DumpJSONString(reloaded));
+}
+
+TEST(ConfigIOTest, DumpYAML) {
+  // TODO mixed lsit/nested lists/groups
+  const auto cfg = wkc::LoadTOMLString(R"toml(
+    flag = true
+    int = 42
+    flt = 1e6
+    str = "value"
+    )toml");
+
+  const std::string yaml = wkc::DumpYAMLString(cfg);
 }
 
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
@@ -474,10 +492,48 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   }
 }
 
+TEST(ConfigIOTest, SerializeLibconfigStrings) {
+  const std::string fname =
+      wkf::FullFile(wkf::DirName(__FILE__), "test-libconfig.toml");
+  auto toml_config = wkc::LoadTOMLFile(fname);
+  auto lcs = toml_config.ToLibconfig();
+  EXPECT_NO_THROW(wkc::LoadLibconfigString(lcs)) << lcs;
+  auto libconfig_config = wkc::LoadLibconfigString(lcs);
+  EXPECT_EQ(toml_config, libconfig_config);
+
+  EXPECT_EQ(toml_config.ToLibconfig(), wkc::DumpLibconfigString(toml_config));
+
+  // Libconfig doesn't support date/time types
+  toml_config = wkc::LoadTOMLString(R"toml(
+    day = 2023-01-02
+    time = 01:02:03.123456
+    dt = 2004-02-28T23:59:59.999888-01:00
+    )toml"sv);
+  lcs = toml_config.ToLibconfig();
+  EXPECT_NO_THROW(wkc::LoadLibconfigString(lcs)) << lcs;
+  libconfig_config = wkc::LoadLibconfigString(lcs);
+  EXPECT_NE(toml_config, libconfig_config);
+  EXPECT_EQ(3, libconfig_config.Size());
+
+  EXPECT_EQ(wkc::ConfigType::String, libconfig_config.Type("day"sv));
+  EXPECT_EQ(toml_config.GetDate("day"sv).ToString(),
+      libconfig_config.GetString("day"sv));
+
+  EXPECT_EQ(wkc::ConfigType::String, libconfig_config.Type("time"sv));
+  EXPECT_EQ(toml_config.GetTime("time"sv).ToString(),
+      libconfig_config.GetString("time"sv));
+
+  EXPECT_EQ(wkc::ConfigType::String, libconfig_config.Type("dt"sv));
+  EXPECT_EQ(toml_config.GetDateTime("dt"sv).ToString(),
+      libconfig_config.GetString("dt"sv));
+}
+
 #else   // WERKZEUGKISTE_WITH_LIBCONFIG
 TEST(ConfigIOTest, MissingLibconfigSupport) {
   EXPECT_THROW(wkc::LoadLibconfigFile("no-such-file"sv), std::logic_error);
   EXPECT_THROW(wkc::LoadLibconfigString("foo = 3"sv), std::logic_error);
+  wkc::Configuration cfg{};
+  EXPECT_THROW(wkc::DumpLibconfigString(cfg), std::logic_error);
 }
 #endif  // WERKZEUGKISTE_WITH_LIBCONFIG
 

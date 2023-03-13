@@ -10,7 +10,6 @@
 #include <string_view>
 #include <vector>
 
-/// Utilities to handle configurations.
 namespace werkzeugkiste::config {
 //-----------------------------------------------------------------------------
 // Key (parameter name) matching to support access via wildcards
