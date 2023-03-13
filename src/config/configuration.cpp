@@ -1352,21 +1352,25 @@ void Configuration::Delete(std::string_view key) {
                           ? &pimpl_->config_root
                           : pimpl_->config_root.at_path(path.first).as_table();
   if (parent == nullptr) {
+    // LCOV_EXCL_START
+    // Should be unreachable due to the previous dotted/bare key check.
     std::string msg{"Cannot delete parameter `"};
     msg += key;
     msg += "`! Parent must be either a subgroup or the root node.";
     throw KeyError{msg};
+    // LCOV_EXCL_STOP
   }
 
   const std::size_t erased = parent->erase(path.second);
   if (erased == 0) {
     // LCOV_EXCL_START
+    // Should be unreachable.
     std::string msg{"Unknown error while deleting parameter `"};
     msg += key;
     msg +=
         "`! Please report at"
         "https://github.com/snototter/werkzeugkiste/issues";
-    throw std::logic_error{msg};
+    throw std::runtime_error{msg};
     // LCOV_EXCL_STOP
   }
 }
