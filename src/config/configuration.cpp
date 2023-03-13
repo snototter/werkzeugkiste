@@ -420,7 +420,7 @@ Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
     }
   } else if constexpr (std::is_same_v<Tcfg, std::string>) {
     if (node.is_string()) {
-      return std::string{*node.as_string()};
+      return std::string(*node.as_string());
     }
   } else if constexpr (std::is_same_v<Tcfg, date>) {
     if (node.is_date()) {
@@ -590,18 +590,21 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
   return std::make_pair(std::string_view{}, path);
 }
 
-/// @brief Throws a KeyError if the given key cannot be created, i.e. if it
-///   refers to an array element.
-/// @param tbl The TOML root node.
-/// @param key The fully-qualified parameter name.
+/// @brief Throws a KeyError if the given key cannot be created, e.g. if it
+///   refers to an array element or contains unsupported characters (a quoted
+///   key or whitespace, etc.)
+/// @param key The bare key or the fully-qualified parameter name (dotted key).
 void EnsureKeyIsCreatable(std::string_view key) {
-  // Sanity checks are missing on purpose:
-  // 1) empty string or 2) if key exists
+  if (key.empty()) {
+    throw KeyError{"Cannot create a parameter with an empty name!"};
+  }
 
-  if (key[key.length() - 1] == ']') {
-    std::string msg{
-        "List elements can only be \"set\" (replaced) or \"appended\", but "
-        "not \"created\". Check parameter `"};
+  const auto *const pos =
+      std::find_if_not(key.begin(), key.end(), [](char c) -> bool {
+        return (std::isalnum(c) != 0) || (c == '-') || (c == '_') || (c == '.');
+      });
+  if (pos != key.end()) {
+    std::string msg{"Cannot create a parameter with name `"};
     msg += key;
     msg += "`!";
     throw KeyError{msg};
@@ -1495,7 +1498,7 @@ std::vector<int64_t> Configuration::GetInteger64List(
 
 void Configuration::SetInteger64List(std::string_view key,
     const std::vector<int64_t> &values) {
-  detail::SetList<int64_t>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1535,7 +1538,7 @@ std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
 
 void Configuration::SetDoubleList(std::string_view key,
     const std::vector<double> &values) {
-  detail::SetList<double>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<double>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1569,7 +1572,7 @@ std::vector<std::string> Configuration::GetStringList(
 
 void Configuration::SetStringList(std::string_view key,
     const std::vector<std::string_view> &values) {
-  detail::SetList<std::string>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<std::string>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1598,12 +1601,12 @@ void Configuration::SetDate(std::string_view key, const date &value) {
 }
 
 std::vector<date> Configuration::GetDateList(std::string_view key) const {
-  return detail::GetList<date>(pimpl_->config_root, key);  // TODO test
+  return detail::GetList<date>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDateList(std::string_view key,
     const std::vector<date> &values) {
-  detail::SetList<toml::date>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<toml::date>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1632,12 +1635,12 @@ void Configuration::SetTime(std::string_view key, const time &value) {
 }
 
 std::vector<time> Configuration::GetTimeList(std::string_view key) const {
-  return detail::GetList<time>(pimpl_->config_root, key);  // TODO test
+  return detail::GetList<time>(pimpl_->config_root, key);
 }
 
 void Configuration::SetTimeList(std::string_view key,
     const std::vector<time> &values) {
-  detail::SetList<toml::time>(pimpl_->config_root, key, values);  // TODO test
+  detail::SetList<toml::time>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------
@@ -1668,14 +1671,12 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
 
 std::vector<date_time> Configuration::GetDateTimeList(
     std::string_view key) const {
-  return detail::GetList<date_time>(pimpl_->config_root, key);  // TODO test
+  return detail::GetList<date_time>(pimpl_->config_root, key);
 }
 
 void Configuration::SetDateTimeList(std::string_view key,
     const std::vector<date_time> &values) {
-  detail::SetList<toml::date_time>(pimpl_->config_root,
-      key,
-      values);  // TODO test
+  detail::SetList<toml::date_time>(pimpl_->config_root, key, values);
 }
 
 //---------------------------------------------------------------------------

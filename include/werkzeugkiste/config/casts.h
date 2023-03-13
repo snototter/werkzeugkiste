@@ -346,9 +346,8 @@ std::optional<T> float_to_int(S value, bool may_throw) {
       msg << "Cannot represent " << (std::isinf(value) ? "inf" : "NaN")
           << " by " << TypeName<T>() << '!';
       throw E{msg.str()};
-    } else {
-      return std::nullopt;
     }
+    return std::nullopt;
   }
 
   constexpr std::pair<S, S> range = float_to_int_range<T, S>();
