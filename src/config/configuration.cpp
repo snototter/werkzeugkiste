@@ -594,9 +594,9 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 ///   refers to an array element or contains unsupported characters (a quoted
 ///   key or whitespace, etc.)
 /// @param key The bare key or the fully-qualified parameter name (dotted key).
-void EnsureKeyIsCreatable(std::string_view key) {
+void EnsureDottedOrBareKey(std::string_view key) {
   if (key.empty()) {
-    throw KeyError{"Cannot create a parameter with an empty name!"};
+    throw KeyError{"Parameter name cannot be empty!"};
   }
 
   const auto *const pos =
@@ -604,7 +604,8 @@ void EnsureKeyIsCreatable(std::string_view key) {
         return (std::isalnum(c) != 0) || (c == '-') || (c == '_') || (c == '.');
       });
   if (pos != key.end()) {
-    std::string msg{"Cannot create a parameter with name `"};
+    std::string msg{
+        "Expected a bare key/path (alphanumeric, '-', '_', '.'), but got `"};
     msg += key;
     msg += "`!";
     throw KeyError{msg};
@@ -642,7 +643,7 @@ void EnsureContainerPathExists(toml::table &tbl, std::string_view key) {
   // parent path, then create a table here.
   // But first, ensure that we are not asked to create a list:
   const auto path = SplitTomlPath(key);
-  EnsureKeyIsCreatable(path.second);
+  EnsureDottedOrBareKey(path.second);
 
   if (path.first.empty()) {
     // Create table at root level.
@@ -718,7 +719,7 @@ void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
     ReplaceScalar(node, value, key);
   } else {
     EnsureContainerPathExists(tbl, path.first);
-    EnsureKeyIsCreatable(path.second);
+    EnsureDottedOrBareKey(path.second);
 
     toml::table *parent =
         path.first.empty() ? &tbl : tbl.at_path(path.first).as_table();
@@ -747,7 +748,7 @@ void CreateList(toml::table &tbl,
     const std::vector<Tcfg> &vec) {
   const auto path = SplitTomlPath(key);
   EnsureContainerPathExists(tbl, path.first);
-  EnsureKeyIsCreatable(path.second);
+  EnsureDottedOrBareKey(path.second);
 
   toml::array arr{};
   for (const auto &value : vec) {
@@ -1337,6 +1338,37 @@ ConfigType Configuration::Type(std::string_view key) const {
   msg += "` is not yet handled in `Configuration::Type`!";
   throw std::logic_error(msg);
   // LCOV_EXCL_STOP
+}
+
+void Configuration::Delete(std::string_view key) {
+  if (!detail::ContainsKey(pimpl_->config_root, key)) {
+    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
+  }
+
+  detail::EnsureDottedOrBareKey(key);
+
+  const auto path = detail::SplitTomlPath(key);
+  toml::table *parent = path.first.empty()
+                          ? &pimpl_->config_root
+                          : pimpl_->config_root.at_path(path.first).as_table();
+  if (parent == nullptr) {
+    std::string msg{"Cannot delete parameter `"};
+    msg += key;
+    msg += "`! Parent must be either a subgroup or the root node.";
+    throw KeyError{msg};
+  }
+
+  const std::size_t erased = parent->erase(path.second);
+  if (erased == 0) {
+    // LCOV_EXCL_START
+    std::string msg{"Unknown error while deleting parameter `"};
+    msg += key;
+    msg +=
+        "`! Please report at"
+        "https://github.com/snototter/werkzeugkiste/issues";
+    throw std::logic_error{msg};
+    // LCOV_EXCL_STOP
+  }
 }
 
 bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
