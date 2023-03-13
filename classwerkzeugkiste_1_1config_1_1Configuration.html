@@ -66,7 +66,7 @@
             </li>
           </ul>
         </div>
-<p>TODO doc:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>Explicit method names are preferred over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li><li>Mixed lists:<ul><li>All entries numeric -&gt; can be looked up as floating point list.</li><li>Can not be created programmatically (only via loading a <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> from a TOML/JSON/... string or file)</li><li>Can be replaced by an empty list, but cannot be replaced by a homogeneous list.</li><li>Individual elements can be looked up and set (via their corresponding GetTYPE/SetTYPE).</li></ul></li><li>Integers &amp; floating points will be implicitly converted if the value can be represented <em>exactly</em> by the target type. For example, double(2.0) can be looked up as int, but 2.5 cannot (will raise a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code>).</li></ul><p>TODOs:</p><ul><li>[x] Numeric casts. Implicitly cast if lossless conversion is possible.</li><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] LoadLibconfigFile ?</li><li>[ ] LoadLibconfigString ?</li><li>[ ] ToLibconfigString ?</li><li>[x] Date</li><li>[x] Time</li><li>[x] DateTime</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] Setters for ...Pair</li><li>[ ] Optional &amp; Default getters for ...Pair</li><li>[x] Setters for ...List</li><li>[x] SetGroup</li><li>[x] Return optional&lt;Scalar&gt;</li><li>[ ] Support get/set list of groups, i.e. vector&lt;Configuration&gt;</li><li>[ ] Convenience types: Point/Index/Rectangle</li><li>[ ] Consider renaming Integer32 to integer</li><li>[ ] Convenience type casts: uint32</li></ul>
+<p>TODO doc:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>Explicit method names are preferred over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li><li>Mixed lists:<ul><li>All entries numeric -&gt; can be looked up as floating point list.</li><li>Can be created programmatically via CreateList + Append, as well as by loading a mixed list from a TOML/JSON/... string or file</li><li>Can be replaced by an empty list, but cannot be replaced by a homogeneous list.</li><li>Individual elements can be looked up and set (via their corresponding GetTYPE/SetTYPE).</li></ul></li><li>Integers &amp; floating points will be implicitly converted if the value can be represented <em>exactly</em> by the target type. For example, double(2.0) can be looked up as int, but 2.5 cannot (will raise a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code>).</li></ul><p>TODOs:</p><ul><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] Setters for ...Pair</li><li>[ ] Optional &amp; Default getters for ...Pair</li><li>[ ] Support get/set list of groups, i.e. vector&lt;Configuration&gt;</li><li>[ ] Convenience types: Point/Index/Rectangle</li><li>[ ] Convenience type casts: uint32</li></ul>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -145,9 +145,18 @@
             </dt>
             <dd>Returns the type of the parameter at the given key.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a30b4d2443c9807379b6e623f8eb95049" class="m-doc">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const -&gt; std::vector&lt;std::string&gt;</span>
+              <span class="m-doc-wrap-bumper">void <a href="#a049e447a18563f55fc00b3467c7eaf17" class="m-doc">Delete</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
-            <dd>Returns a list of all (fully-qualified) parameter names.</dd>
+            <dd>Deletes the parameter with the given key.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a87ad9442e3fc9bb7dad15ff8aafbeb45" class="m-doc">IsHomogeneousScalarList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
+            </dt>
+            <dd>Checks if a list parameter contains only scalars of the same type.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6b9614bf426432f91bc0eac031711dcb" class="m-doc">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries,
+              bool recursive) const -&gt; std::vector&lt;std::string&gt;</span>
+            </dt>
+            <dd>Returns a list of (fully-qualified) parameter names.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a95296db8058e86db55350c4ba94107cd" class="m-doc">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
             </dt>
@@ -157,19 +166,19 @@
               bool default_val) const -&gt; bool</span>
             </dt>
             <dd>Returns the boolean parameter or the <code>default_val</code> if it does not exist.</dd>
-            <dt id="a141877639ace7b745753da10ad1b8a93">
-              <span class="m-doc-wrap-bumper">auto <a href="#a141877639ace7b745753da10ad1b8a93" class="m-doc-self">GetOptionalBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;bool&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a141877639ace7b745753da10ad1b8a93" class="m-doc">GetOptionalBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;bool&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns an optional boolean or <code>std::nullopt</code> if it does not exist.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ab00f7367e393073156bbc990338ced55" class="m-doc">SetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool value)</span>
             </dt>
             <dd>Sets a boolean parameter.</dd>
-            <dt id="ab197d2481a56782e58b6c78ce20b68e9">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab197d2481a56782e58b6c78ce20b68e9" class="m-doc-self">GetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;bool&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab197d2481a56782e58b6c78ce20b68e9" class="m-doc">GetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;bool&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns a list of boolean flags.</dd>
             <dt id="ace35bfc16f7c0353332c03e002dee5a0">
               <span class="m-doc-wrap-bumper">void <a href="#ace35bfc16f7c0353332c03e002dee5a0" class="m-doc-self">SetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;bool&gt;&amp; values)</span>
@@ -285,19 +294,19 @@
               std::string_view default_val) const -&gt; std::string</span>
             </dt>
             <dd>Returns the string parameter or the <code>default_val</code> if it does not exist.</dd>
-            <dt id="afdf0238e6f6acdb89c28918f4929d720">
-              <span class="m-doc-wrap-bumper">auto <a href="#afdf0238e6f6acdb89c28918f4929d720" class="m-doc-self">GetOptionalString</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;std::string&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#afdf0238e6f6acdb89c28918f4929d720" class="m-doc">GetOptionalString</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;std::string&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns an optional string or <code>std::nullopt</code> if it does not exist.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a0ac5d89d24217d481ee7f003d6e6d836" class="m-doc">SetString</a>(</span><span class="m-doc-wrap">std::string_view key,
               std::string_view value)</span>
             </dt>
             <dd>Sets a string parameter.</dd>
-            <dt id="ab85a411c339a43deda45b4abdaf321d9">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab85a411c339a43deda45b4abdaf321d9" class="m-doc-self">GetStringList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::string&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab85a411c339a43deda45b4abdaf321d9" class="m-doc">GetStringList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::string&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns a list of strings.</dd>
             <dt id="af70764e7fa1efee7c97730b634ae450d">
               <span class="m-doc-wrap-bumper">void <a href="#af70764e7fa1efee7c97730b634ae450d" class="m-doc-self">SetStringList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;std::string_view&gt;&amp; values)</span>
@@ -312,19 +321,19 @@
               const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; default_val) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a></span>
             </dt>
             <dd>Returns the date parameter or the <code>default_val</code> if it does not exist.</dd>
-            <dt id="a0f1c315db9ae31652eb243cf758afdb4">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0f1c315db9ae31652eb243cf758afdb4" class="m-doc-self">GetOptionalDate</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0f1c315db9ae31652eb243cf758afdb4" class="m-doc">GetOptionalDate</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns an optional date or <code>std::nullopt</code> if it does not exist.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a2b4912bc7097781398aebe667facc6c6" class="m-doc">SetDate</a>(</span><span class="m-doc-wrap">std::string_view key,
               const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; value)</span>
             </dt>
             <dd>Sets a local date parameter.</dd>
-            <dt id="af45d804e1c8de97180c8a015ed1005ba">
-              <span class="m-doc-wrap-bumper">auto <a href="#af45d804e1c8de97180c8a015ed1005ba" class="m-doc-self">GetDateList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af45d804e1c8de97180c8a015ed1005ba" class="m-doc">GetDateList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns a list of date parameters.</dd>
             <dt id="aa853aaa2f2dea317b2dff1321998f7ef">
               <span class="m-doc-wrap-bumper">void <a href="#aa853aaa2f2dea317b2dff1321998f7ef" class="m-doc-self">SetDateList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;&amp; values)</span>
@@ -339,19 +348,19 @@
               const <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&amp; default_val) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a></span>
             </dt>
             <dd>Returns the time parameter or the <code>default_val</code> if it does not exist.</dd>
-            <dt id="a39de0bfde306a86775dd4fd45986289e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a39de0bfde306a86775dd4fd45986289e" class="m-doc-self">GetOptionalTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a39de0bfde306a86775dd4fd45986289e" class="m-doc">GetOptionalTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns an optional time or <code>std::nullopt</code> if it does not exist.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a3f3fe0582df967fc5fc42af9cc1aee19" class="m-doc">SetTime</a>(</span><span class="m-doc-wrap">std::string_view key,
               const <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&amp; value)</span>
             </dt>
             <dd>Sets a local time parameter.</dd>
-            <dt id="af06f099e872ed322638e82136a7c0f69">
-              <span class="m-doc-wrap-bumper">auto <a href="#af06f099e872ed322638e82136a7c0f69" class="m-doc-self">GetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af06f099e872ed322638e82136a7c0f69" class="m-doc">GetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns a list of time parameters.</dd>
             <dt id="a49df9b696f557a4d8dd8faf822e0b03c">
               <span class="m-doc-wrap-bumper">void <a href="#a49df9b696f557a4d8dd8faf822e0b03c" class="m-doc-self">SetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;&amp; values)</span>
@@ -366,62 +375,62 @@
               const <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&amp; default_val) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a></span>
             </dt>
             <dd>Returns the date-time parameter or the <code>default_val</code> if it does not exist.</dd>
-            <dt id="a2ff7bcbacf531ce672eb9cad42ca9860">
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ff7bcbacf531ce672eb9cad42ca9860" class="m-doc-self">GetOptionalDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ff7bcbacf531ce672eb9cad42ca9860" class="m-doc">GetOptionalDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns an optional <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a> or <code>std::nullopt</code> if it does not exist.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ad3f45c6beaf4052912d01044827ab4cc" class="m-doc">SetDateTime</a>(</span><span class="m-doc-wrap">std::string_view key,
               const <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&amp; value)</span>
             </dt>
             <dd>Sets a date-time parameter.</dd>
-            <dt id="a62dc913da41e8483d4bb507c7efbe68b">
-              <span class="m-doc-wrap-bumper">auto <a href="#a62dc913da41e8483d4bb507c7efbe68b" class="m-doc-self">GetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a62dc913da41e8483d4bb507c7efbe68b" class="m-doc">GetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns a list of date-time parameters.</dd>
             <dt id="aef122d26f1f6ccddaf3fd7c48a16f997">
               <span class="m-doc-wrap-bumper">void <a href="#aef122d26f1f6ccddaf3fd7c48a16f997" class="m-doc-self">SetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;&amp; values)</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="afa87b18dd0a7c101e118004da78e533d">
-              <span class="m-doc-wrap-bumper">void <a href="#afa87b18dd0a7c101e118004da78e533d" class="m-doc-self">CreateList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#afa87b18dd0a7c101e118004da78e533d" class="m-doc">CreateList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a5ffaa4ee8e01f91c879c1a97481e4f52">
-              <span class="m-doc-wrap-bumper">void <a href="#a5ffaa4ee8e01f91c879c1a97481e4f52" class="m-doc-self">AppendNestedList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+            <dd>Creates an empty list with the given name.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a218674832d63c0fb515d56c2d66b59dc" class="m-doc">AppendList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a4707dbf4e7bb21cc3729eb8b5247ddcc">
-              <span class="m-doc-wrap-bumper">void <a href="#a4707dbf4e7bb21cc3729eb8b5247ddcc" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Appends an empty list to an existing list in order to supported creating nested lists programmatically.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4707dbf4e7bb21cc3729eb8b5247ddcc" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool value)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a4a8e3860a03933055c89bc6e56167771">
-              <span class="m-doc-wrap-bumper">void <a href="#a4a8e3860a03933055c89bc6e56167771" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Appends a boolean flag to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a4a8e3860a03933055c89bc6e56167771" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
               int32_t value)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a41f1953e9b92d4555447ff8e488e546f">
-              <span class="m-doc-wrap-bumper">void <a href="#a41f1953e9b92d4555447ff8e488e546f" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Appends a 32-bit integer to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a41f1953e9b92d4555447ff8e488e546f" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
               int64_t value)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="ad7999cc8f6cad7351dfb09733db06f55">
-              <span class="m-doc-wrap-bumper">void <a href="#ad7999cc8f6cad7351dfb09733db06f55" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Appends a 64-bit integer to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ad7999cc8f6cad7351dfb09733db06f55" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
               double value)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="afcf630079145069ac2ee5eb1ef626514">
-              <span class="m-doc-wrap-bumper">void <a href="#afcf630079145069ac2ee5eb1ef626514" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Appends a floating point value to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#afcf630079145069ac2ee5eb1ef626514" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
               std::string_view value)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a16d48a8bfc4c26d406c36c30ee001a5e">
-              <span class="m-doc-wrap-bumper">void <a href="#a16d48a8bfc4c26d406c36c30ee001a5e" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Appends a string to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a16d48a8bfc4c26d406c36c30ee001a5e" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
               const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Appends a group/sub-configuration to an existing list.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab0678e52fff3e9c871bb0480702a1c34" class="m-doc">GetGroup</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
@@ -452,6 +461,14 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a92d2c7908b1ef29d8ac143e131cdbe7f" class="m-doc-self">ToJSON</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
             <dd>Returns a JSON-formatted string of this configuration.</dd>
+            <dt id="a78617ec9cc8366c0813c75d3b47af2f4">
+              <span class="m-doc-wrap-bumper">auto <a href="#a78617ec9cc8366c0813c75d3b47af2f4" class="m-doc-self">ToYAML</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
+            </dt>
+            <dd>Returns a YAML-formatted string of this configuration.</dd>
+            <dt id="aeda742eda00c701bb503d99057cb74fb">
+              <span class="m-doc-wrap-bumper">auto <a href="#aeda742eda00c701bb503d99057cb74fb" class="m-doc-self">ToLibconfig</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
+            </dt>
+            <dd>Returns a libconfig-formatted string of this configuration.</dd>
           </dl>
         </section>
         <section>
@@ -543,11 +560,54 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist.</p>
           </div></section>
-          <section class="m-doc-details" id="a30b4d2443c9807379b6e623f8eb95049"><div>
+          <section class="m-doc-details" id="a049e447a18563f55fc00b3467c7eaf17"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a30b4d2443c9807379b6e623f8eb95049" class="m-doc-self">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries) const</span></span>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a049e447a18563f55fc00b3467c7eaf17" class="m-doc-self">Delete</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
             </h3>
-            <p>Returns a list of all (fully-qualified) parameter names.</p>
+            <p>Deletes the parameter with the given key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Can be used to delete a scalar, list or (sub-)group of the configuration. Cannot be used to delete a specific element of a list (<code>arr[0]</code>). For the latter, you need to delete (then recreate) the whole list.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist or refers to an element of a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a87ad9442e3fc9bb7dad15ff8aafbeb45"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a87ad9442e3fc9bb7dad15ff8aafbeb45" class="m-doc-self">IsHomogeneousScalarList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Checks if a list parameter contains only scalars of the same type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the parameter.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the list is empty or contains only scalars of the same type. False otherwise.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6b9614bf426432f91bc0eac031711dcb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b9614bf426432f91bc0eac031711dcb" class="m-doc-self">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries,
+              bool recursive) const</span></span>
+            </h3>
+            <p>Returns a list of (fully-qualified) parameter names.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -556,6 +616,10 @@
                 <tr>
                   <td style="width: 1%">include_array_entries</td>
                   <td>If true, the name of each parameter will be returned, <em>i.e.</em> each array element will be included. Otherwise, only named parameters (<em>e.g.</em> a dictionary/table within an array, such as <code>arr[3].name</code>) will be included.</td>
+                </tr>
+                <tr>
+                  <td>recursive</td>
+                  <td>If true, the names of all parameters &quot;below&quot; this configuration/group will be returned. Otherwise, only the first-level child parameters will be returned.</td>
                 </tr>
               </tbody>
             </table>
@@ -601,6 +665,24 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="a141877639ace7b745753da10ad1b8a93"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;bool&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a141877639ace7b745753da10ad1b8a93" class="m-doc-self">GetOptionalBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns an optional boolean or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
+          </div></section>
           <section class="m-doc-details" id="ab00f7367e393073156bbc990338ced55"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab00f7367e393073156bbc990338ced55" class="m-doc-self">SetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key,
@@ -623,6 +705,24 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab197d2481a56782e58b6c78ce20b68e9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;bool&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab197d2481a56782e58b6c78ce20b68e9" class="m-doc-self">GetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of boolean flags.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
           <section class="m-doc-details" id="a0e62d33cadd8243ed0131c9d6a761067"><div>
             <h3>
@@ -778,6 +878,24 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="afdf0238e6f6acdb89c28918f4929d720"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afdf0238e6f6acdb89c28918f4929d720" class="m-doc-self">GetOptionalString</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns an optional string or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
+          </div></section>
           <section class="m-doc-details" id="a0ac5d89d24217d481ee7f003d6e6d836"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ac5d89d24217d481ee7f003d6e6d836" class="m-doc-self">SetString</a>(</span><span class="m-doc-wrap">std::string_view key,
@@ -800,6 +918,24 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab85a411c339a43deda45b4abdaf321d9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab85a411c339a43deda45b4abdaf321d9" class="m-doc-self">GetStringList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of strings.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
           <section class="m-doc-details" id="a0b19984d96199fc0d40b6a2111d46132"><div>
             <h3>
@@ -842,6 +978,24 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="a0f1c315db9ae31652eb243cf758afdb4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0f1c315db9ae31652eb243cf758afdb4" class="m-doc-self">GetOptionalDate</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns an optional date or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
+          </div></section>
           <section class="m-doc-details" id="a2b4912bc7097781398aebe667facc6c6"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2b4912bc7097781398aebe667facc6c6" class="m-doc-self">SetDate</a>(</span><span class="m-doc-wrap">std::string_view key,
@@ -864,6 +1018,24 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="af45d804e1c8de97180c8a015ed1005ba"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af45d804e1c8de97180c8a015ed1005ba" class="m-doc-self">GetDateList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of date parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
           <section class="m-doc-details" id="a249009878cfff298d08dd4bcf3ca1c66"><div>
             <h3>
@@ -906,6 +1078,24 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="a39de0bfde306a86775dd4fd45986289e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a39de0bfde306a86775dd4fd45986289e" class="m-doc-self">GetOptionalTime</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns an optional time or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
+          </div></section>
           <section class="m-doc-details" id="a3f3fe0582df967fc5fc42af9cc1aee19"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f3fe0582df967fc5fc42af9cc1aee19" class="m-doc-self">SetTime</a>(</span><span class="m-doc-wrap">std::string_view key,
@@ -928,6 +1118,24 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="af06f099e872ed322638e82136a7c0f69"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af06f099e872ed322638e82136a7c0f69" class="m-doc-self">GetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of time parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
           <section class="m-doc-details" id="a73413ae7bd5f14a8fe2367f7faabc868"><div>
             <h3>
@@ -970,6 +1178,24 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="a2ff7bcbacf531ce672eb9cad42ca9860"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ff7bcbacf531ce672eb9cad42ca9860" class="m-doc-self">GetOptionalDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns an optional <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a> or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
+          </div></section>
           <section class="m-doc-details" id="ad3f45c6beaf4052912d01044827ab4cc"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad3f45c6beaf4052912d01044827ab4cc" class="m-doc-self">SetDateTime</a>(</span><span class="m-doc-wrap">std::string_view key,
@@ -992,6 +1218,198 @@
               </tbody>
             </table>
 <p>A date-time consists of a date, a time and an optional timezone offset, following RFC 3339, <a href="https://www.rfc-editor.org/rfc/rfc3339">https:/<wbr />/<wbr />www.rfc-editor.org/<wbr />rfc/<wbr />rfc3339</a></p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="a62dc913da41e8483d4bb507c7efbe68b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a62dc913da41e8483d4bb507c7efbe68b" class="m-doc-self">GetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of date-time parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
+          </div></section>
+          <section class="m-doc-details" id="afa87b18dd0a7c101e118004da78e533d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afa87b18dd0a7c101e118004da78e533d" class="m-doc-self">CreateList</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
+            </h3>
+            <p>Creates an empty list with the given name.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the parameter.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>After successful creation, any values can be <code>Append</code>ed.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key already exists or if a &quot;parent&quot; could not be created.</p>
+          </div></section>
+          <section class="m-doc-details" id="a218674832d63c0fb515d56c2d66b59dc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a218674832d63c0fb515d56c2d66b59dc" class="m-doc-self">AppendList</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
+            </h3>
+            <p>Appends an empty list to an existing list in order to supported creating nested lists programmatically.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4707dbf4e7bb21cc3729eb8b5247ddcc"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4707dbf4e7bb21cc3729eb8b5247ddcc" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool value)</span></span>
+            </h3>
+            <p>Appends a boolean flag to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4a8e3860a03933055c89bc6e56167771"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4a8e3860a03933055c89bc6e56167771" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int32_t value)</span></span>
+            </h3>
+            <p>Appends a 32-bit integer to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a41f1953e9b92d4555447ff8e488e546f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41f1953e9b92d4555447ff8e488e546f" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int64_t value)</span></span>
+            </h3>
+            <p>Appends a 64-bit integer to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="ad7999cc8f6cad7351dfb09733db06f55"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad7999cc8f6cad7351dfb09733db06f55" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              double value)</span></span>
+            </h3>
+            <p>Appends a floating point value to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="afcf630079145069ac2ee5eb1ef626514"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#afcf630079145069ac2ee5eb1ef626514" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::string_view value)</span></span>
+            </h3>
+            <p>Appends a string to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a16d48a8bfc4c26d406c36c30ee001a5e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16d48a8bfc4c26d406c36c30ee001a5e" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span></span>
+            </h3>
+            <p>Appends a group/sub-configuration to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>group</td>
+                  <td>Group/&quot;Sub-Configuration&quot; to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
           </div></section>
           <section class="m-doc-details" id="ab0678e52fff3e9c871bb0480702a1c34"><div>
             <h3>
@@ -1031,7 +1449,7 @@
                 </tr>
               </tbody>
             </table>
-<p>If the <code>key</code> already exists, it must be a group. Otherwise, the parameter will be newly created, along with all &quot;parent&quot; in the fully-qualified name (which defines a &quot;path&quot; through the configuration table/tree).</p>
+<p>If the <code>key</code> already exists, it must be a group. Otherwise, the parameter will be newly created, along with all &quot;parents&quot; in the fully-qualified name (which defines a &quot;path&quot; through the configuration table/tree).</p>
           </div></section>
           <section class="m-doc-details" id="a390d1627ce2261f9111cd5295e5b0450"><div>
             <h3>

@@ -52,7 +52,7 @@
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>detail <span class="m-thin">namespace</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="casts_8h.html">&lt;werkzeugkiste/config/casts.h&gt;</a></div>
         </h1>
-        <p><span></span></p>
+        <p>Implementation namespace.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -67,62 +67,76 @@
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
-            <dt id="ab935ad55793d38d24f8067c660e787dd">
+            <dt id="a1fc5e36cc7e0d04e98cbdfa3d571cc78">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab935ad55793d38d24f8067c660e787dd" class="m-doc-self">sign_aware_integral_cast</a>(</span><span class="m-doc-wrap">const S value,
+              <span class="m-doc-wrap-bumper">auto <a href="#a1fc5e36cc7e0d04e98cbdfa3d571cc78" class="m-doc-self">sign_aware_integral_cast</a>(</span><span class="m-doc-wrap">const S value,
               std::false_type,
-              std::true_type) -&gt; T</span>
+              std::true_type,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
             <dd>Helper to cast from a SIGNED to an UNSIGNED integral value.</dd>
-            <dt id="a05c0878aa4d4915bca4e980c15bd54eb">
+            <dt id="ad3498dc1ef5550ffb6cb509aecba4951">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a05c0878aa4d4915bca4e980c15bd54eb" class="m-doc-self">sign_aware_integral_cast</a>(</span><span class="m-doc-wrap">const S value,
+              <span class="m-doc-wrap-bumper">auto <a href="#ad3498dc1ef5550ffb6cb509aecba4951" class="m-doc-self">sign_aware_integral_cast</a>(</span><span class="m-doc-wrap">const S value,
               std::false_type,
-              std::false_type) -&gt; T</span>
+              std::false_type,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
             <dd>Helper to cast from an UNSIGNED to a SIGNED integral value.</dd>
-            <dt id="a0c98d3429499d9985fa4bbcfb1c5eba5">
+            <dt id="addfbe3508fb187a4462afe5a460a095a">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0c98d3429499d9985fa4bbcfb1c5eba5" class="m-doc-self">integral_cast</a>(</span><span class="m-doc-wrap">const S value,
-              std::false_type) -&gt; T</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#addfbe3508fb187a4462afe5a460a095a" class="m-doc-self">integral_cast</a>(</span><span class="m-doc-wrap">const S value,
+              std::false_type,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
-            <dd>Helper/dispatcher to cast between DIFFERENTLY SIGNED integral types.</dd>
-            <dt id="af7b1130be31237e71cee2fe83e727b3c">
+            <dd>Helper/dispatcher to cast between integral types of DIFFERENT SIGNS.</dd>
+            <dt id="a5bbab79c601caea1fc51bb6a41c2a7f7">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#af7b1130be31237e71cee2fe83e727b3c" class="m-doc-self">integral_cast</a>(</span><span class="m-doc-wrap">const S value,
-              std::true_type) -&gt; T</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5bbab79c601caea1fc51bb6a41c2a7f7" class="m-doc-self">integral_cast</a>(</span><span class="m-doc-wrap">const S value,
+              std::true_type,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
             <dd>Helper to cast between integral types of the SAME SIGN.</dd>
-            <dt id="a2439fedca33807d793f3966862535828">
+            <dt id="a8944f83f72692d7ea609d967c5f7a0bf">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2439fedca33807d793f3966862535828" class="m-doc-self">int_to_int</a>(</span><span class="m-doc-wrap">const S value) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8944f83f72692d7ea609d967c5f7a0bf" class="m-doc-self">int_to_int</a>(</span><span class="m-doc-wrap">const S value,
+              bool may_throw) -&gt; std::optional&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Dispatcher to cast between integral types.</dd>
-            <dt id="abfb7743eb3c9594a66b9d030fea682bb">
+            <dt id="a9a28d79072b44fbeceee332f2ab4e8e0">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#abfb7743eb3c9594a66b9d030fea682bb" class="m-doc-self">float_to_float</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a28d79072b44fbeceee332f2ab4e8e0" class="m-doc-self">float_to_float</a>(</span><span class="m-doc-wrap">S value,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a6c5f6dfde11d6c6a0fec4421ab2e6976">
+            <dd>Helper to cast between floating point types.</dd>
+            <dt id="ac1725bc005316d69b1f091c1df091065">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6c5f6dfde11d6c6a0fec4421ab2e6976" class="m-doc-self">exp2</a>(</span><span class="m-doc-wrap">int exp) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac1725bc005316d69b1f091c1df091065" class="m-doc-self">pow2</a>(</span><span class="m-doc-wrap">int exp) -&gt; T <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd><span></span></dd>
+            <dd>A constexpr-compatible computation of $2^exp$.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T, typename S&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a16ea10626fbcd108ed68a04ad93d57a4" class="m-doc">float_to_int_range</a>(</span><span class="m-doc-wrap">) -&gt; std::pair&lt;S, S&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
-            <dt id="ab1ef920337da5cad8d3b24a2135eba6b">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab1ef920337da5cad8d3b24a2135eba6b" class="m-doc-self">int_to_float</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+            <dd>Returns the value range for the floating point to integer cast.</dd>
+            <dt id="a8981a14221243c2ca6e98abaedb9bba9">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a8981a14221243c2ca6e98abaedb9bba9" class="m-doc-self">float_to_int</a>(</span><span class="m-doc-wrap">S value,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a753cc50c6a694c32d7eaacb62a0cd8a7">
-              <div class="m-doc-template">template&lt;typename T, typename S, typename Exc&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a753cc50c6a694c32d7eaacb62a0cd8a7" class="m-doc-self">float_to_int</a>(</span><span class="m-doc-wrap">S value) -&gt; T</span>
+            <dd>Helper to cast from floating point to integral types.</dd>
+            <dt id="a27e522fab1560259ed81b0fda61b5a10">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a27e522fab1560259ed81b0fda61b5a10" class="m-doc-self">int_to_float</a>(</span><span class="m-doc-wrap">S value,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Helper to cast from integral to floating point types.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E = std::domain_error&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a96846309c2182f229725902f3eeb7476" class="m-doc">numcast</a>(</span><span class="m-doc-wrap">const S value,
+              const bool may_throw) -&gt; std::optional&lt;T&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            </dt>
+            <dd>Dispatcher to cast a number from source type S to target type T.</dd>
           </dl>
         </section>
         <section>
@@ -134,7 +148,57 @@
               </div>
               <span class="m-doc-wrap-bumper">std::pair&lt;S, S&gt; werkzeugkiste::<wbr />config::<wbr />detail::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a16ea10626fbcd108ed68a04ad93d57a4" class="m-doc-self">float_to_int_range</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Returns the &lt;min,max&gt; pair, such that:</p><ul><li><code>min</code> is the lowest floating point value which <em>will not</em> underflow when converted to T (integral).</li><li><code>max</code> is the lowest floating point value which <em>will</em> overflow when converted to T (integral).</li></ul>
+            <p>Returns the value range for the floating point to integer cast.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><p>Returns the &lt;min,max&gt; pair, such that:</p><ul><li><code>min</code> is the lowest floating point value which <em>will not</em> underflow when converted to T (integral).</li><li><code>max</code> is the lowest floating point value which <em>will</em> overflow when converted to T (integral).</li></ul></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a96846309c2182f229725902f3eeb7476"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T, typename S, typename E = std::domain_error&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">std::optional&lt;T&gt; werkzeugkiste::<wbr />config::<wbr />detail::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96846309c2182f229725902f3eeb7476" class="m-doc-self">numcast</a>(</span><span class="m-doc-wrap">const S value,
+              const bool may_throw) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p>Dispatcher to cast a number from source type S to target type T.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>Target type.</td>
+                </tr>
+                <tr>
+                  <td>S</td>
+                  <td>Source type.</td>
+                </tr>
+                <tr>
+                  <td>E</td>
+                  <td>Exception type to be thrown if <code>may_throw</code> is true.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>value</td>
+                  <td>The value to be cast.</td>
+                </tr>
+                <tr>
+                  <td>may_throw</td>
+                  <td>If true, an exception E will be thrown for invalid casts, i.e. for values which are not exactly representable by the target type. If false, no exception will be thrown and the validity of the cast can be checked via the optional return value.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
         </section>
       </div>
