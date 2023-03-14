@@ -26,6 +26,16 @@ TEST(ConfigListTest, GetEmptyLists) {
 
   // TODO extend with nested lists
 
+  // White space and non-alphanum/dash/underscore characters are not allowed
+  // in keys.
+  EXPECT_THROW(config.SetBooleanList(" invalid-key"sv, {}), wkc::KeyError);
+  EXPECT_THROW(config.SetBooleanList("invalid!key"sv, {}), wkc::KeyError);
+  EXPECT_THROW(config.SetBooleanList("invalid key"sv, {}), wkc::KeyError);
+
+  EXPECT_THROW(config.SetInteger32List("invalidkey?"sv, {}), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger32List("invalid'key"sv, {}), wkc::KeyError);
+  EXPECT_THROW(config.SetInteger32List("invalid*key"sv, {}), wkc::KeyError);
+
   // An empty list can be set to any type -> it will still have no type.
   EXPECT_NO_THROW(config.SetBooleanList("empty"sv, {}));
   EXPECT_TRUE(config.GetBooleanList("empty"sv).empty());

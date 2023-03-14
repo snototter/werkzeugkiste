@@ -115,6 +115,18 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified identifier of the parameter.
   ConfigType Type(std::string_view key) const;
 
+  /// @brief Deletes the parameter with the given key.
+  ///
+  /// Can be used to delete a scalar, list or (sub-)group of the configuration.
+  /// Cannot be used to delete a specific element of a list (`arr[0]`). For the
+  /// latter, you need to delete (then recreate) the whole list.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist or refers to an
+  /// element of a list.
+  ///
+  /// @param key Fully-qualified parameter name.
+  void Delete(std::string_view key);
+
   /// @brief Checks if a list parameter contains only scalars of the same type.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
