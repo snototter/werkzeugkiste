@@ -366,6 +366,16 @@ FetchContent_Declare(
   GIT_TAG v3.2.0)
 FetchContent_MakeAvailable(tomlplusplus)
 
+# Requires nlohmann json for JSON support Avoid warning about
+# DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24: if (CMAKE_VERSION
+# VERSION_GREATER_EQUAL "3.24.0") cmake_policy(SET CMP0135 NEW) endif()
+# set(JSON_SystemInclude ON) set(JSON_Install ON) if(NOT CMAKE_MODULE_PATH)
+# set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake") endif()
+# FetchContent_Declare( json URL
+# https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
+# GIT_REPOSITORY https://github.com/nlohmann/json GIT_TAG v3.11.2)
+# FetchContent_MakeAvailable(json)
+
 option(werkzeugkiste_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
 
 # Header files
@@ -380,7 +390,7 @@ set(wzkgconfig_HEADER_FILES
 # Source files
 set(wzkgconfig_SOURCE_FILES
     src/config/configuration.cpp src/config/keymatcher.cpp src/config/types.cpp
-    src/config/libconfig.cpp)
+    src/config/json.cpp src/config/libconfig.cpp)
 
 # Library
 add_library(werkzeugkiste-config ${wzkgconfig_HEADER_FILES}
@@ -419,6 +429,7 @@ generate_export_header(
 target_link_libraries(
   werkzeugkiste-config PRIVATE werkzeugkiste::logging werkzeugkiste::strings
                                werkzeugkiste::files werkzeugkiste::container)
+# nlohmann_json::nlohmann_json)
 
 set_target_properties(
   werkzeugkiste-config
