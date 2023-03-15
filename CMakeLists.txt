@@ -366,16 +366,6 @@ FetchContent_Declare(
   GIT_TAG v3.2.0)
 FetchContent_MakeAvailable(tomlplusplus)
 
-# Requires nlohmann json for JSON support Avoid warning about
-# DOWNLOAD_EXTRACT_TIMESTAMP in CMake 3.24: if (CMAKE_VERSION
-# VERSION_GREATER_EQUAL "3.24.0") cmake_policy(SET CMP0135 NEW) endif()
-# set(JSON_SystemInclude ON) set(JSON_Install ON) if(NOT CMAKE_MODULE_PATH)
-# set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake") endif()
-# FetchContent_Declare( json URL
-# https://github.com/nlohmann/json/releases/download/v3.11.2/json.tar.xz)
-# GIT_REPOSITORY https://github.com/nlohmann/json GIT_TAG v3.11.2)
-# FetchContent_MakeAvailable(json)
-
 option(werkzeugkiste_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
 
 # Header files
@@ -429,7 +419,6 @@ generate_export_header(
 target_link_libraries(
   werkzeugkiste-config PRIVATE werkzeugkiste::logging werkzeugkiste::strings
                                werkzeugkiste::files werkzeugkiste::container)
-# nlohmann_json::nlohmann_json)
 
 set_target_properties(
   werkzeugkiste-config
@@ -447,7 +436,11 @@ target_include_directories(
 
 target_include_directories(
   werkzeugkiste-config ${warning_guard}
-  PRIVATE "$<BUILD_INTERFACE:${tomlplusplus_SOURCE_DIR}/include>")
+  PRIVATE "$<BUILD_INTERFACE:${tomlplusplus_SOURCE_DIR}/include>"
+          "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/libs>")
+# Including JSON via FetchContent failed in dev mode (due to several
+# uninitialized variables). The simplest workaround was to include the single
+# json.hpp header in this repository.
 
 target_include_directories(
   werkzeugkiste-config SYSTEM
