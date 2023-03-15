@@ -725,6 +725,30 @@ Configuration LoadLibconfigFile(std::string_view filename);
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadLibconfigString(std::string_view lcfg_string);
 
+/// @brief How to handle JSON None values.
+enum class JSONNoneHandling : unsigned char {
+  /// @brief None values will be skipped, i.e. not loaded into the
+  ///   configuration.
+  Skip,
+
+  /// @brief None values will be replaced by the string "null".
+  NullString
+};
+
+/// @brief Loads a JSON configuration from a string.
+/// @param filename Path to the `.json` file.
+/// @param none_handling How to deal with None values.
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadJSONFile(std::string_view filename,
+    JSONNoneHandling none_handling = JSONNoneHandling::Skip);
+
+/// @brief Loads a JSON configuration from a string.
+/// @param json_string String representation of the JSON configuration.
+/// @param none_handling How to deal with None values.
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadJSONString(std::string_view json_string,
+    JSONNoneHandling none_handling = JSONNoneHandling::Skip);
+
 /// @brief Returns a libconfig-formatted string.
 WERKZEUGKISTE_CONFIG_EXPORT
 std::string DumpLibconfigString(const Configuration &cfg);

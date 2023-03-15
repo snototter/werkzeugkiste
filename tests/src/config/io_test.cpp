@@ -250,13 +250,25 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
 
 // TODO Can be properly tested once we have LoadJSONString()
 TEST(ConfigIOTest, LoadingJSON) {
-  const auto config = wkc::LoadTOMLString(R"toml(
-    param1 = "value"
-    )toml"sv);
-  EXPECT_TRUE(config.ToJSON().length() > 0);
-  EXPECT_EQ(config.ToJSON(), wkc::DumpJSONString(config));
+  EXPECT_THROW(wkc::LoadJSONString(""sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadJSONString("invalid;"sv), wkc::ParseError);
 
-  // TODO
+  // TODO invalid file
+
+  const auto config1 = wkc::LoadTOMLString(R"toml(
+    str = "value"
+    int = 123456789
+    flt = 3.5
+
+    [person]
+    name = "value"
+    age = 30
+    )toml"sv);
+  EXPECT_EQ(config1.ToJSON(), wkc::DumpJSONString(config1));
+
+  const auto config2 = wkc::LoadJSONString(config1.ToJSON());
+  EXPECT_EQ(config1, config2);
+
   // EXPECT_EQ(wkc::DumpJSONString(config1), wkc::DumpJSONString(reloaded));
 }
 
