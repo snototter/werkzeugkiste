@@ -294,7 +294,7 @@ TEST(StringUtilsTest, URL) {
   EXPECT_EQ(
       "<auth>@192.168.0.1:8080", wks::ClipUrl("root@192.168.0.1:8080/cam.cgi"));
 
-  EXPECT_EQ("smb://<auth>@192.168.0.1/some/share",
+  EXPECT_EQ("smb://<auth>@192.168.0.1",
       wks::ClipUrl("smb://root@192.168.0.1/some/share"));
 }
 
