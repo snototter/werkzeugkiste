@@ -250,11 +250,105 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
 
 // TODO Can be properly tested once we have LoadJSONString()
 TEST(ConfigIOTest, LoadingJSON) {
+  // Invalid file inputs:
+  EXPECT_THROW(wkc::LoadJSONFile("no-such-file"sv), wkc::ParseError);
+
+  const std::string fname_toml =
+      wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
+  EXPECT_THROW(wkc::LoadJSONFile(fname_toml), wkc::ParseError);
+
   EXPECT_THROW(wkc::LoadJSONString(""sv), wkc::ParseError);
   EXPECT_THROW(wkc::LoadJSONString("invalid;"sv), wkc::ParseError);
 
   // TODO invalid file
 
+  // EXPECT_EQ(wkc::DumpJSONString(config1), wkc::DumpJSONString(reloaded));
+
+  auto config = wkc::LoadJSONString(R"json({
+    "int": 1,
+    "flt": 2.5,
+    "arr1": [1, 2.5, 3.9],
+    "arr2": [1.0, 2, 4.0],
+    "grp": {
+      "str": "value",
+      "flag": true
+    },
+    "nested": [
+      [1, 2],
+      [3.5, 4.2],
+      ["foo", "bar", 3],
+      [[1], [], 3, ["four", "value"]]
+    ]
+    })json"sv);
+  EXPECT_EQ(6, config.Size());
+  EXPECT_EQ(1, config.GetInteger32("int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("flt"sv));
+
+  EXPECT_FALSE(config.IsHomogeneousScalarList("arr1"sv));
+  EXPECT_EQ(3, config.Size("arr1"sv));
+  EXPECT_THROW(config.GetInteger32List("arr1"sv), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetDoubleList("arr1"sv));
+
+  EXPECT_FALSE(config.IsHomogeneousScalarList("arr2"sv));
+  EXPECT_EQ(3, config.Size("arr2"sv));
+  EXPECT_NO_THROW(config.GetInteger32List("arr2"sv));
+  EXPECT_NO_THROW(config.GetDoubleList("arr2"sv));
+
+  EXPECT_EQ(2, config.Size("grp"sv));
+  EXPECT_EQ("value", config.GetString("grp.str"sv));
+  EXPECT_TRUE(config.GetBoolean("grp.flag"sv));
+
+  EXPECT_EQ(4, config.Size("nested"sv));
+
+  EXPECT_EQ(2, config.Size("nested[0]"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("nested[0]"sv));
+
+  EXPECT_EQ(2, config.Size("nested[1]"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("nested[1]"sv));
+
+  EXPECT_EQ(3, config.Size("nested[2]"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("nested[2]"sv));
+
+  EXPECT_EQ(4, config.Size("nested[3]"sv));
+  EXPECT_EQ(1, config.Size("nested[3][0]"sv));
+  EXPECT_EQ(1, config.GetInteger32("nested[3][0][0]"sv));
+
+  EXPECT_EQ(0, config.Size("nested[3][1]"sv));
+
+  EXPECT_THROW(config.Size("nested[3][2]"sv), wkc::TypeError);
+  EXPECT_EQ(3, config.GetInteger32("nested[3][2]"sv));
+
+  EXPECT_EQ(2, config.Size("nested[3][3]"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("nested[3][3]"sv));
+  EXPECT_EQ("four", config.GetString("nested[3][3][0]"sv));
+  EXPECT_EQ("value", config.GetString("nested[3][3][1]"sv));
+}
+
+TEST(ConfigIOTest, NullValuePolicy) {
+  const std::string_view jstr{R"json({
+    "val": null,
+    "arr": [1, 2, null, 4]
+    })json"sv};
+  // Skip loading null/none values
+  auto config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::Skip);
+  EXPECT_EQ(1, config.Size());
+  EXPECT_FALSE(config.Contains("val"sv));
+
+  EXPECT_EQ(3, config.Size("arr"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("arr"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, config.Type("arr[0]"sv));
+
+  // Replace null/none values by the string "null"
+  config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::NullString);
+  EXPECT_EQ(2, config.Size());
+  EXPECT_TRUE(config.Contains("val"sv));
+  EXPECT_EQ("null", config.GetString("val"sv));
+
+  EXPECT_EQ(4, config.Size("arr"sv));
+  EXPECT_EQ("null", config.GetString("arr[2]"sv));
+}
+
+TEST(ConfigIOTest, SerializeJSONStrings) {
   const auto config1 = wkc::LoadTOMLString(R"toml(
     str = "value"
     int = 123456789
@@ -268,8 +362,6 @@ TEST(ConfigIOTest, LoadingJSON) {
 
   const auto config2 = wkc::LoadJSONString(config1.ToJSON());
   EXPECT_EQ(config1, config2);
-
-  // EXPECT_EQ(wkc::DumpJSONString(config1), wkc::DumpJSONString(reloaded));
 }
 
 TEST(ConfigIOTest, DumpYAML) {
