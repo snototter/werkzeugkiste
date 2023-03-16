@@ -257,13 +257,16 @@ TEST(ConfigIOTest, LoadingJSON) {
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
   EXPECT_THROW(wkc::LoadJSONFile(fname_toml), wkc::ParseError);
 
+  // Valid file:
+  const std::string fname_json =
+      wkf::FullFile(wkf::DirName(__FILE__), "test-valid.json");
+  const auto from_file = wkc::LoadJSONFile(fname_json);
+
+  // Parse invalid JSON strings
   EXPECT_THROW(wkc::LoadJSONString(""sv), wkc::ParseError);
   EXPECT_THROW(wkc::LoadJSONString("invalid;"sv), wkc::ParseError);
 
-  // TODO invalid file
-
-  // EXPECT_EQ(wkc::DumpJSONString(config1), wkc::DumpJSONString(reloaded));
-
+  // Parse valid JSON string
   auto config = wkc::LoadJSONString(R"json({
     "int": 1,
     "flt": 2.5,
@@ -280,6 +283,8 @@ TEST(ConfigIOTest, LoadingJSON) {
       [[1], [], 3, ["four", "value"]]
     ]
     })json"sv);
+  EXPECT_EQ(from_file, config);
+
   EXPECT_EQ(6, config.Size());
   EXPECT_EQ(1, config.GetInteger32("int"sv));
   EXPECT_DOUBLE_EQ(2.5, config.GetDouble("flt"sv));
