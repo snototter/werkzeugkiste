@@ -1,6 +1,5 @@
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
-#include <werkzeugkiste/logging.h>
 #include <werkzeugkiste/strings/strings.h>
 
 #include <cstdint>
@@ -84,6 +83,7 @@ Tcfg CastSetting(const libconfig::Setting &value) {
 /// @param lst_key Fully-qualified parameter name of the list.
 /// @param cfg werkzeugkiste configuration.
 /// @param node Node/Setting holding the libconfig value.
+// NOLINTNEXTLINE(misc-no-recursion)
 void AppendListValue(std::string_view lst_key,
     Configuration &cfg,
     const libconfig::Setting &node) {
@@ -143,6 +143,7 @@ void AppendListValue(std::string_view lst_key,
 /// @brief Appends a key/value pair to the werkzeugkiste configuration.
 /// @param cfg The werkzeugkiste configuration.
 /// @param node Node/setting holding the libconfig value & parameter name.
+// NOLINTNEXTLINE(misc-no-recursion)
 void AppendKeyValue(Configuration &cfg, const libconfig::Setting &node) {
   std::string_view key{node.getName()};
   switch (node.getType()) {
@@ -194,6 +195,7 @@ void AppendKeyValue(Configuration &cfg, const libconfig::Setting &node) {
 
 /// @brief Converts a libconfig node to a werkzeugkiste configuration group.
 /// @param node The libconfig group to be converted.
+// NOLINTNEXTLINE(misc-no-recursion)
 Configuration FromLibconfigGroup(const libconfig::Setting &node) {
   if (!node.isGroup()) {
     // LCOV_EXCL_START
@@ -213,7 +215,7 @@ Configuration FromLibconfigGroup(const libconfig::Setting &node) {
 
 /// @brief Returns a libconfig-compatible string representation.
 std::string EscapeString(std::string_view str) {
-  const auto pos = str.find_first_of("\"");
+  const auto pos = str.find_first_of('\"');
   std::string quoted{'"'};
   if (pos == std::string_view::npos) {
     quoted += str;
@@ -245,9 +247,9 @@ std::string FloatingPointString(double val) {
 /// type suffix, if the value exceeds the 32-bit range.
 std::string IntegerString(int64_t val) {
   std::string str{std::to_string(val)};
-  using limits = std::numeric_limits<int32_t>;
-  if ((val < static_cast<int64_t>(limits::min())) ||
-      (val > static_cast<int64_t>(limits::max()))) {
+  using Limits = std::numeric_limits<int32_t>;
+  if ((val < static_cast<int64_t>(Limits::min())) ||
+      (val > static_cast<int64_t>(Limits::max()))) {
     str += 'L';
   }
   return str;
@@ -320,6 +322,7 @@ void PrintIndent(std::ostream &out, std::size_t indentation_level) {
 /// @param out The output stream.
 /// @param key Fully-qualified parameter name of the list.
 /// @param indent Indentation level.
+// NOLINTNEXTLINE(misc-no-recursion)
 void PrintList(const Configuration &cfg,
     std::ostream &out,
     std::string_view key,
@@ -348,7 +351,10 @@ void PrintList(const Configuration &cfg,
 
     switch (cfg.Type(elem_key.str())) {
       case ConfigType::Group:
-        PrintGroup(cfg.GetGroup(elem_key.str()), out, indent, true);
+        PrintGroup(cfg.GetGroup(elem_key.str()),
+            out,
+            indent,
+            /*include_brackets=*/true);
         break;
 
       case ConfigType::List:
@@ -385,6 +391,7 @@ void PrintList(const Configuration &cfg,
 /// @param indent Indentation level.
 /// @param include_brackets If set to true, the enclosing curly brackets will
 ///   also be printed.
+// NOLINTNEXTLINE(misc-no-recursion)
 void PrintGroup(const Configuration &cfg,
     std::ostream &out,
     std::size_t indent,
@@ -409,7 +416,7 @@ void PrintGroup(const Configuration &cfg,
 
     switch (cfg.Type(key)) {
       case ConfigType::Group:
-        PrintGroup(cfg.GetGroup(key), out, indent, true);
+        PrintGroup(cfg.GetGroup(key), out, indent, /*include_brackets=*/true);
         break;
 
       case ConfigType::List:
@@ -473,7 +480,7 @@ Configuration LoadLibconfigFile(std::string_view filename) {
 
 std::string DumpLibconfigString(const Configuration &cfg) {
   std::ostringstream str;
-  detail::PrintGroup(cfg, str, 0, false);
+  detail::PrintGroup(cfg, str, 0, /*include_brackets=*/false);
   return str.str();
 }
 

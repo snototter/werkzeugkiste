@@ -368,11 +368,11 @@ std::string Indent(std::string_view s, std::size_t n, char character) {
   std::string out;
   out.reserve(s.length() + n);
   for (std::size_t idx = 0; idx < n; ++idx) {
-    out[idx] = character;
+    out.push_back(character);
   }
 
   for (std::size_t idx = 0; idx < s.length(); ++idx) {
-    out[idx + n] = s[idx];
+    out.push_back(s[idx]);
   }
 
   return out;

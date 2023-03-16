@@ -334,6 +334,28 @@ constexpr std::pair<S, S> float_to_int_range() {
   return std::make_pair(min_val, max_val);
 }
 
+/// @brief Helper that converts a floating point to integral and back in order
+///   to check if the conversion is lossless. Performs no additional sanity
+///   checks.
+template <typename T, typename S, typename E>
+std::optional<T> float_to_int_unchecked(S value, bool may_throw) {
+  // It is within the range, but it could still be a fractional
+  // number. Thus, we convert and check the result.
+  const T cast = static_cast<T>(value);
+  const S check = static_cast<S>(cast);
+
+  const S diff = std::fabs(value - check);
+  if (diff > std::numeric_limits<S>::epsilon()) {
+    if (may_throw) {
+      WZK_CASTS_THROW_NOT_REPRESENTABLE(E, S, T, value);
+    } else {
+      return std::nullopt;
+    }
+  }
+
+  return std::make_optional(cast);
+}
+
 /// @brief Helper to cast from floating point to integral types.
 template <typename T, typename S, typename E>
 std::optional<T> float_to_int(S value, bool may_throw) {
@@ -368,20 +390,31 @@ std::optional<T> float_to_int(S value, bool may_throw) {
     }
   }
 
-  // It is within the range, but it could still be a fractional
-  // number. Thus, we convert and check the result.
+  return float_to_int_unchecked<T, S, E>(value, may_throw);
+}
+
+/// @brief Internal helper to convert an integer to floating point and back in
+///   order to check if the cast is lossless. Performs no additional sanity
+///   checks.
+template <typename T, typename S, typename E>
+std::optional<T> int_to_float_unchecked(S value, bool may_throw) {
+  // Check if cast is lossless
   const T cast = static_cast<T>(value);
-  const S check = static_cast<S>(cast);
+  const std::optional<S> check =
+      float_to_int<S, T, E>(cast, /*may_throw=*/false);
 
-  const S diff = std::fabs(value - check);
-  if (diff > std::numeric_limits<S>::epsilon()) {
+  if (!check.has_value() || (check.value() != value)) {
     if (may_throw) {
-      WZK_CASTS_THROW_NOT_REPRESENTABLE(E, S, T, value);
-    } else {
-      return std::nullopt;
+      std::ostringstream msg;
+      msg << "Cannot perform lossless cast from " << TypeName<S>() << " value "
+          << value << " to " << TypeName<T>() << '!';
+      if (check.has_value()) {
+        msg << " Result would be " << check.value() << '.';
+      }
+      throw E{msg.str()};
     }
+    return std::nullopt;
   }
-
   return std::make_optional(cast);
 }
 
@@ -428,24 +461,7 @@ std::optional<T> int_to_float(S value, bool may_throw) {
     }
   }
 
-  // Check if cast is lossless
-  const T cast = static_cast<T>(value);
-  const std::optional<S> check =
-      float_to_int<S, T, E>(cast, /*may_throw=*/false);
-
-  if (!check.has_value() || (check.value() != value)) {
-    if (may_throw) {
-      std::ostringstream msg;
-      msg << "Cannot perform lossless cast from " << TypeName<S>() << " value "
-          << value << " to " << TypeName<T>() << '!';
-      if (check.has_value()) {
-        msg << " Result would be " << check.value() << '.';
-      }
-      throw E{msg.str()};
-    }
-    return std::nullopt;
-  }
-  return std::make_optional(cast);
+  return int_to_float_unchecked<T, S, E>(value, may_throw);
 }
 
 /// @brief Dispatcher to cast a number from source type S to target type T.

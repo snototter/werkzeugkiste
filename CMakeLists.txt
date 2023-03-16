@@ -380,7 +380,7 @@ set(wzkgconfig_HEADER_FILES
 # Source files
 set(wzkgconfig_SOURCE_FILES
     src/config/configuration.cpp src/config/keymatcher.cpp src/config/types.cpp
-    src/config/libconfig.cpp)
+    src/config/json.cpp src/config/libconfig.cpp)
 
 # Library
 add_library(werkzeugkiste-config ${wzkgconfig_HEADER_FILES}
@@ -436,7 +436,11 @@ target_include_directories(
 
 target_include_directories(
   werkzeugkiste-config ${warning_guard}
-  PRIVATE "$<BUILD_INTERFACE:${tomlplusplus_SOURCE_DIR}/include>")
+  PRIVATE "$<BUILD_INTERFACE:${tomlplusplus_SOURCE_DIR}/include>"
+          "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/libs>")
+# Including JSON via FetchContent failed in dev mode (due to several
+# uninitialized variables). The simplest workaround was to include the single
+# json.hpp header in this repository.
 
 target_include_directories(
   werkzeugkiste-config SYSTEM

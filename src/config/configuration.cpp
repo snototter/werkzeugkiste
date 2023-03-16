@@ -151,6 +151,9 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
 /// @param key The key which could not be found.
 /// @return KeyError instance to be thrown.
 KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
+  constexpr std::size_t max_length_difference{5};
+  constexpr std::size_t max_levenshtein_distance{3};
+
   using namespace std::string_view_literals;
   std::string msg{"Key `"};
   msg += key;
@@ -162,9 +165,9 @@ KeyError KeyErrorWithSimilarKeys(const toml::table &tbl, std::string_view key) {
   for (const auto &cand : keys) {
     // The edit distance can't be less than the length difference between the
     // two strings. So we can reject unsuitable keys earlier.
-    if (strings::LengthDifference(key, cand) < 5) {
+    if (strings::LengthDifference(key, cand) < max_length_difference) {
       const std::size_t edit_dist = strings::LevenshteinDistance(key, cand);
-      if (edit_dist < 3) {
+      if (edit_dist < max_levenshtein_distance) {
         candidates.emplace_back(edit_dist, cand);
       }
     }
@@ -1981,13 +1984,15 @@ std::string Configuration::ToTOML() const {
 
 std::string Configuration::ToJSON() const {
   std::ostringstream repr;
-  repr << toml::json_formatter{pimpl_->config_root};
+  repr << toml::json_formatter{
+      pimpl_->config_root, toml::json_formatter::default_flags};
   return repr.str();
 }
 
 std::string Configuration::ToYAML() const {
   std::ostringstream repr;
-  repr << toml::yaml_formatter{pimpl_->config_root};
+  repr << toml::yaml_formatter{
+      pimpl_->config_root, toml::yaml_formatter::default_flags};
   return repr.str();
 }
 
