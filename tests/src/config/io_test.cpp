@@ -280,7 +280,11 @@ TEST(ConfigIOTest, LoadingJSON) {
       [1, 2],
       [3.5, 4.2],
       ["foo", "bar", 3],
-      [[1], [], 3, ["four", "value"]]
+      [[1], [], 3, ["four", "value"], false],
+      {
+        "foo": "bar",
+        "int": 42
+      }
     ]
     })json"sv);
   EXPECT_EQ(from_file, config);
@@ -303,7 +307,7 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ("value", config.GetString("grp.str"sv));
   EXPECT_TRUE(config.GetBoolean("grp.flag"sv));
 
-  EXPECT_EQ(4, config.Size("nested"sv));
+  EXPECT_EQ(5, config.Size("nested"sv));
 
   EXPECT_EQ(2, config.Size("nested[0]"sv));
   EXPECT_TRUE(config.IsHomogeneousScalarList("nested[0]"sv));
@@ -314,7 +318,8 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ(3, config.Size("nested[2]"sv));
   EXPECT_FALSE(config.IsHomogeneousScalarList("nested[2]"sv));
 
-  EXPECT_EQ(4, config.Size("nested[3]"sv));
+  EXPECT_EQ(5, config.Size("nested[3]"sv));
+
   EXPECT_EQ(1, config.Size("nested[3][0]"sv));
   EXPECT_EQ(1, config.GetInteger32("nested[3][0][0]"sv));
 
@@ -327,6 +332,16 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_TRUE(config.IsHomogeneousScalarList("nested[3][3]"sv));
   EXPECT_EQ("four", config.GetString("nested[3][3][0]"sv));
   EXPECT_EQ("value", config.GetString("nested[3][3][1]"sv));
+
+  EXPECT_THROW(config.Size("nested[3][4]"sv), wkc::TypeError);
+  EXPECT_FALSE(config.GetBoolean("nested[3][4]"sv));
+
+  EXPECT_EQ(wkc::ConfigType::Group, config.Type("nested[4]"sv));
+  EXPECT_EQ(2, config.Size("nested[4]"sv));
+  EXPECT_EQ("bar", config.GetString("nested[4].foo"sv));
+  EXPECT_EQ(42, config.GetInteger32("nested[4].int"sv));
+  EXPECT_NO_THROW(config.SetDouble("nested[4].flt"sv, 1.2));
+  EXPECT_DOUBLE_EQ(1.2, config.GetDouble("nested[4].flt"sv));
 }
 
 TEST(ConfigIOTest, NullValuePolicy) {

@@ -61,10 +61,12 @@ void AppendListValue(std::string_view lst_key,
   } else if (value.is_object()) {
     cfg.Append(lst_key, FromJSONObject(value, none_policy));
   } else if (value.is_binary()) {
+    // LCOV_EXCL_START
     std::string msg{"Cannot load the binary JSON value for parameter `"};
     msg += lst_key;
     msg += "`!";
     throw ValueError{msg};
+    // LCOV_EXCL_STOP
   }
 }
 
@@ -110,14 +112,15 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
       for (const json &element : value) {
         AppendListValue(key, grp, element, none_policy);
       }
-
     } else if (value.is_object()) {
       grp.SetGroup(key, FromJSONObject(value, none_policy));
     } else if (value.is_binary()) {
+      // LCOV_EXCL_START
       std::string msg{"Cannot load the binary JSON value for parameter `"};
       msg += key;
       msg += "`!";
       throw ValueError{msg};
+      // LCOV_EXCL_STOP
     }
   }
   return grp;
