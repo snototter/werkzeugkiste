@@ -7,22 +7,22 @@
 
 namespace wkf = werkzeugkiste::files;
 
-using namespace std::string_view_literals;
-
 // NOLINTBEGIN
 
 TEST(FileSystemTest, Exists) {
   EXPECT_TRUE(wkf::Exists(__FILE__));
-  EXPECT_FALSE(wkf::Exists("no-such-file"sv));
+  EXPECT_FALSE(wkf::Exists("no-such-file"));
 
   EXPECT_FALSE(wkf::IsDir(__FILE__));
 
   const std::string dirname = wkf::DirName(__FILE__);
+  EXPECT_EQ(dirname, wkf::DirName(dirname));
   EXPECT_TRUE(wkf::Exists(dirname));
   EXPECT_TRUE(wkf::IsDir(dirname));
 }
 
 TEST(FileSystemTest, Paths) {
+  using namespace std::string_view_literals;
   const std::string fullpath1 = wkf::FullFile({"foo"sv, "bar"sv, "f.ext"sv});
   const std::string fullpath2 = wkf::FullFile(
       {std::string("foo"), std::string("bar"), std::string("f.ext")});
