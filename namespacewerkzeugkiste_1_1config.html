@@ -133,6 +133,11 @@
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a>: unsigned char { </span><span class="m-doc-wrap"><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">Skip</a>,
+              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc">NullString</a> }</span>
+            </dt>
+            <dd>How to handle Null/None values (e.g. when loading JSON).</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>: unsigned char { </span><span class="m-doc-wrap"><a href="#aa45c374d0d5c8db2ba494b4789867222a27226c864bac7454a8504f8edb15d95b" class="m-doc">Boolean</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222aa0faef0851b4294c06f2b94bb1cb2044" class="m-doc">Integer</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a072f02cab92dcb89792657037629ac66" class="m-doc">FloatingPoint</a>,
@@ -180,6 +185,16 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a76796c89410173fb184f53233dcbf021" class="m-doc">LoadLibconfigString</a>(</span><span class="m-doc-wrap">std::string_view lcfg_string) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a libconfig configuration from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f77b468fea0a3d9536e3d0f8a682839" class="m-doc">LoadJSONFile</a>(</span><span class="m-doc-wrap">std::string_view filename,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a JSON configuration from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ced5b61209169a632c5c952912fdf71" class="m-doc">LoadJSONString</a>(</span><span class="m-doc-wrap">std::string_view json_string,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a JSON configuration from a string.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a3510019f455b434e44b60cfa2675bd80" class="m-doc">DumpLibconfigString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::string</span>
             </dt>
@@ -229,6 +244,30 @@
         </section>
         <section>
           <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="aec7bf4e4f6a02d709ee919dcb56d0b1f"><div>
+            <h3>
+              enum class werkzeugkiste::<wbr />config::<wbr /><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc-self">NullValuePolicy</a>: unsigned char
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+            </h3>
+            <p>How to handle Null/None values (e.g. when loading JSON).</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c">Skip</a></td>
+                  <td>
+                  <p>Null values will be skipped, i.e. not loaded into the configuration.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf">NullString</a></td>
+                  <td>
+                  <p>Null values will be <strong>replaced</strong> by the string &quot;null&quot;.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="aa45c374d0d5c8db2ba494b4789867222"><div>
             <h3>
               enum class werkzeugkiste::<wbr />config::<wbr /><a href="#aa45c374d0d5c8db2ba494b4789867222" class="m-doc-self">ConfigType</a>: unsigned char
@@ -452,6 +491,52 @@
                 <tr>
                   <td style="width: 1%">lcfg_string</td>
                   <td>String representation of the libconfig configuration.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a3f77b468fea0a3d9536e3d0f8a682839"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3f77b468fea0a3d9536e3d0f8a682839" class="m-doc-self">LoadJSONFile</a>(</span><span class="m-doc-wrap">std::string_view filename,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+            </h3>
+            <p>Loads a JSON configuration from a string.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename</td>
+                  <td>Path to the <code>.json</code> file.</td>
+                </tr>
+                <tr>
+                  <td>none_policy</td>
+                  <td>How to deal with None values.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a9ced5b61209169a632c5c952912fdf71"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9ced5b61209169a632c5c952912fdf71" class="m-doc-self">LoadJSONString</a>(</span><span class="m-doc-wrap">std::string_view json_string,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+            </h3>
+            <p>Loads a JSON configuration from a string.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">json_string</td>
+                  <td>String representation of the JSON configuration.</td>
+                </tr>
+                <tr>
+                  <td>none_policy</td>
+                  <td>How to deal with None values.</td>
                 </tr>
               </tbody>
             </table>

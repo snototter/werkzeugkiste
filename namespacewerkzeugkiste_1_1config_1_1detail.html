@@ -119,12 +119,24 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a16ea10626fbcd108ed68a04ad93d57a4" class="m-doc">float_to_int_range</a>(</span><span class="m-doc-wrap">) -&gt; std::pair&lt;S, S&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
             <dd>Returns the value range for the floating point to integer cast.</dd>
+            <dt id="a2e064917eb182acc661df8e32ef643d0">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2e064917eb182acc661df8e32ef643d0" class="m-doc-self">float_to_int_unchecked</a>(</span><span class="m-doc-wrap">S value,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
+            </dt>
+            <dd>Helper that converts a floating point to integral and back in order to check if the conversion is lossless. Performs no additional sanity checks.</dd>
             <dt id="a8981a14221243c2ca6e98abaedb9bba9">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a8981a14221243c2ca6e98abaedb9bba9" class="m-doc-self">float_to_int</a>(</span><span class="m-doc-wrap">S value,
               bool may_throw) -&gt; std::optional&lt;T&gt;</span>
             </dt>
             <dd>Helper to cast from floating point to integral types.</dd>
+            <dt id="a4b48f26cb69282fffe7e976847c6b0c0">
+              <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4b48f26cb69282fffe7e976847c6b0c0" class="m-doc-self">int_to_float_unchecked</a>(</span><span class="m-doc-wrap">S value,
+              bool may_throw) -&gt; std::optional&lt;T&gt;</span>
+            </dt>
+            <dd>Internal helper to convert an integer to floating point and back in order to check if the cast is lossless. Performs no additional sanity checks.</dd>
             <dt id="a27e522fab1560259ed81b0fda61b5a10">
               <div class="m-doc-template">template&lt;typename T, typename S, typename E&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a27e522fab1560259ed81b0fda61b5a10" class="m-doc-self">int_to_float</a>(</span><span class="m-doc-wrap">S value,
