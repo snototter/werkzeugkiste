@@ -4,9 +4,14 @@
 #include <werkzeugkiste/strings/strings.h>
 
 #include <fstream>
-#include <nlohmann/json.hpp>
 #include <string>
 #include <string_view>
+
+// Ensure that nlohmann/json doesn't include conversions from std::filesystem,
+// because they will lead to linkage errors in the CI runners.
+#define JSON_HAS_FILESYSTEM 0
+#define JSON_HAS_EXPERIMENTAL_FILESYSTEM 0
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 namespace werkzeugkiste::config {
