@@ -290,6 +290,20 @@ TEST(StringUtilsTest, URL) {
 
   EXPECT_EQ("file:///a/file/needs/special/handling.txt",
       wks::ClipUrl("file:///a/file/needs/special/handling.txt"));
+
+  EXPECT_EQ(
+      "<auth>@192.168.0.1:8080", wks::ClipUrl("root@192.168.0.1:8080/cam.cgi"));
+
+  EXPECT_EQ("smb://<auth>@192.168.0.1/some/share",
+      wks::ClipUrl("smb://root@192.168.0.1/some/share"));
+}
+
+TEST(StringUtilsTest, Indent) {
+  EXPECT_EQ("   ", wks::Indent(""sv, 3, ' '));
+  EXPECT_EQ("", wks::Indent(""sv, 0, ' '));
+
+  EXPECT_EQ(" Foo", wks::Indent("Foo"sv, 1, ' '));
+  EXPECT_EQ("**Foo", wks::Indent("Foo"sv, 2, '*'));
 }
 
 TEST(StringUtilsTest, Slug) {
