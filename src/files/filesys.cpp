@@ -6,11 +6,11 @@
 #include <exception>
 #include <fstream>
 #include <sstream>
-#ifdef WZK_HAS_FILESYSTEM
-#include <filesystem>
-// FIXME linking to std::filesystem will be a chore
-// #else // WZK_HAS_FILESYSTEM
-#endif  // WZK_HAS_FILESYSTEM
+// #ifdef WZK_HAS_FILESYSTEM
+// #include <filesystem>
+// // FIXME linking to std::filesystem will be a chore
+// // #else // WZK_HAS_FILESYSTEM
+// #endif  // WZK_HAS_FILESYSTEM
 
 namespace werkzeugkiste::files {
 
@@ -29,15 +29,15 @@ const char k_file_separator = '/';
 #endif  // WIN32
 
 bool Exists(const std::string& name) {
-#ifdef WZK_HAS_FILESYSTEM
-  std::filesystem::path pth{name};
-  return std::filesystem::exists(pth);
-#else
+  // #ifdef WZK_HAS_FILESYSTEM
+  //   std::filesystem::path pth{name};
+  //   return std::filesystem::exists(pth);
+  // #else
   std::ifstream f(name.c_str());
   const bool status = f.good();
   f.close();
   return status;
-#endif  // WZK_HAS_FILESYSTEM
+  // #endif  // WZK_HAS_FILESYSTEM
 }
 
 // taken from
