@@ -145,6 +145,10 @@ TEST(ConfigIOTest, LoadingTOML) {
   EXPECT_EQ(config1.ToTOML(), reloaded.ToTOML());
   EXPECT_EQ(config1.ToTOML(), wkc::DumpTOMLString(config1));
 
+  // Test configuration type deduction from file extension:
+  const auto tmp = wkc::LoadFile(fname);
+  EXPECT_EQ(config1, tmp);
+
   // Load a different configuration:
   const auto config2 = wkc::LoadTOMLString(R"toml(
     param1 = "value"
@@ -252,6 +256,8 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
 TEST(ConfigIOTest, LoadingJSON) {
   // Invalid file inputs:
   EXPECT_THROW(wkc::LoadJSONFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file.json"sv), wkc::ParseError);
 
   const std::string fname_toml =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
@@ -261,6 +267,8 @@ TEST(ConfigIOTest, LoadingJSON) {
   const std::string fname_json =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid.json");
   const auto from_file = wkc::LoadJSONFile(fname_json);
+  const auto tmp = wkc::LoadFile(fname_json);
+  EXPECT_EQ(from_file, tmp);
 
   // Parse invalid JSON strings
   EXPECT_THROW(wkc::LoadJSONString(""sv), wkc::ParseError);
@@ -412,16 +420,22 @@ TEST(ConfigIOTest, DumpYAML) {
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
 TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_THROW(wkc::LoadLibconfigFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file.cfg"sv), wkc::ParseError);
 
   const auto fname_invalid_cfg =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.cfg"sv);
   EXPECT_THROW(wkc::LoadLibconfigFile(fname_invalid_cfg), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile(fname_invalid_cfg), wkc::ParseError);
 
   const auto fname_valid_cfg =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid.cfg"sv);
   auto config = wkc::LoadLibconfigFile(fname_valid_cfg);
-
   EXPECT_EQ(4, config.Size());
+
+  // Test configuration type deduction from file extension:
+  const auto tmp = wkc::LoadFile(fname_valid_cfg);
+  EXPECT_EQ(config, tmp);
 
   // Check the "empty" group
   EXPECT_EQ(0, config.Size("empty_group"sv));

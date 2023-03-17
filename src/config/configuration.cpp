@@ -2000,6 +2000,26 @@ std::string Configuration::ToLibconfig() const {
   return DumpLibconfigString(*this);
 }
 
+//---------------------------------------------------------------------------
+// Generic loading from file
+Configuration LoadFile(std::string_view filename) {
+  const std::optional<std::string> ext = files::Extension(filename);
+  const std::string lower =
+      (ext.has_value()) ? strings::Lower(ext.value()) : "";
+  if (lower.compare(".toml") == 0) {
+    return LoadTOMLFile(filename);
+  } else if (lower.compare(".json") == 0) {
+    return LoadJSONFile(filename);
+  } else if (lower.compare(".cfg") == 0) {
+    return LoadLibconfigFile(filename);
+  } else {
+    std::string msg{"Cannot deduce configuration type from file name `"};
+    msg += filename;
+    msg += "`!";
+    throw ParseError{msg};
+  }
+}
+
 #undef WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR
 #undef WZK_CONFIG_LOOKUP_RAISE_ASSIGNMENT_ERROR
 }  // namespace werkzeugkiste::config

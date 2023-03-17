@@ -703,6 +703,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::unique_ptr<Impl> pimpl_;
 };
 
+/// @brief Loads a configuration file.
+///
+/// The configuration type will be deduced from the file extension, *i.e.*
+/// `.toml`, `.json`, or `.cfg`.
+/// For JSON files, the default `NullValuePolicy` will be used, see
+/// `LoadJSONFile`.
+///
+/// @param filename Path to the configuration file.
+Configuration LoadFile(std::string_view filename);
+
 /// @brief Loads a TOML configuration from the given file.
 /// @param filename Path to the `.toml` file.
 inline Configuration LoadTOMLFile(std::string_view filename) {
