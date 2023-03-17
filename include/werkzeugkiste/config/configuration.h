@@ -743,6 +743,12 @@ Configuration LoadJSONFile(std::string_view filename,
     NullValuePolicy none_policy = NullValuePolicy::Skip);
 
 /// @brief Loads a JSON configuration from a string.
+///
+/// Because a configuration must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
+/// configuration would have 1 element, and you need to access it via its key.
+/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+///
 /// @param json_string String representation of the JSON configuration.
 /// @param none_policy How to deal with None values.
 WERKZEUGKISTE_CONFIG_EXPORT

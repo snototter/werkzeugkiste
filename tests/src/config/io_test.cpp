@@ -342,6 +342,19 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ(42, config.GetInteger32("nested[4].int"sv));
   EXPECT_NO_THROW(config.SetDouble("nested[4].flt"sv, 1.2));
   EXPECT_DOUBLE_EQ(1.2, config.GetDouble("nested[4].flt"sv));
+
+  // Parse valid JSON string which consists of a top-level array
+  const std::string_view js{R"json(
+    [1, 2, { "int": 1, "flt": 2.5}, 4, null]
+    )json"sv};
+  config = wkc::LoadJSONString(js, wkc::NullValuePolicy::Skip);
+  EXPECT_EQ(1, config.Size());
+  EXPECT_EQ(4, config.Size("json"sv));
+  EXPECT_EQ(2, config.Size("json[2]"sv));
+
+  config = wkc::LoadJSONString(js, wkc::NullValuePolicy::NullString);
+  EXPECT_EQ(1, config.Size());
+  EXPECT_EQ(5, config.Size("json"sv));
 }
 
 TEST(ConfigIOTest, NullValuePolicy) {
