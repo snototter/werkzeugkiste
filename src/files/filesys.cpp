@@ -55,6 +55,31 @@ bool IsDir(const std::string& path) {
   return false;
 }
 
+std::optional<std::string> Basename(std::string_view path) {
+  const std::string_view separator{&k_file_separator, 1};
+  const std::vector<std::string_view> parts =
+      strings::Tokenize(path, separator);
+  if (parts.empty()) {
+    return std::nullopt;
+  }
+
+  return std::make_optional(std::string{parts[parts.size() - 1]});
+}
+
+std::optional<std::string> Extension(std::string_view path) {
+  const auto bname = Basename(path);
+  if (!bname.has_value()) {
+    return std::nullopt;
+  }
+
+  const std::size_t pos = bname.value().find_last_of('.');
+  if (pos == std::string::npos) {
+    return std::nullopt;
+  }
+
+  return std::make_optional(bname.value().substr(pos));
+}
+
 std::string FullFile(std::string_view p1, std::string_view p2) {
   std::string path{p1};
   if (!strings::EndsWith(p1, k_file_separator) &&

@@ -4,6 +4,7 @@
 #include <werkzeugkiste/files/files_export.h>
 
 #include <initializer_list>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -16,6 +17,12 @@ bool Exists(const std::string &name);
 
 WERKZEUGKISTE_FILES_EXPORT
 bool IsDir(const std::string &path);
+
+WERKZEUGKISTE_FILES_EXPORT
+std::optional<std::string> Basename(std::string_view path);
+
+WERKZEUGKISTE_FILES_EXPORT
+std::optional<std::string> Extension(std::string_view path);
 
 WERKZEUGKISTE_FILES_EXPORT
 std::string FullFile(std::string_view p1, std::string_view p2);

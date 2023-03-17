@@ -36,4 +36,39 @@ TEST(FileSystemTest, Paths) {
 #endif
 }
 
+TEST(FileSystemTest, FileParts) {
+  using namespace std::string_view_literals;
+  auto bname = wkf::Basename(""sv);
+  EXPECT_FALSE(bname.has_value());
+
+  auto ext = wkf::Extension(""sv);
+  EXPECT_FALSE(ext.has_value());
+
+  bname = wkf::Basename("foo"sv);
+  EXPECT_TRUE(bname.has_value());
+  EXPECT_EQ("foo", bname.value());
+
+  ext = wkf::Extension("foo"sv);
+  EXPECT_FALSE(ext.has_value());
+
+  ext = wkf::Extension("archive.tar.gz"sv);
+  EXPECT_TRUE(ext.has_value());
+  EXPECT_EQ(".gz", ext.value());
+
+#if defined(__linux__) || defined(__unix__)
+  bname = wkf::Basename("/foo/bar"sv);
+  EXPECT_EQ("bar", bname.value());
+
+  ext = wkf::Extension("/foo/bar"sv);
+  EXPECT_FALSE(ext.has_value());
+
+  bname = wkf::Basename("/foo/bar/test.txt"sv);
+  EXPECT_EQ("test.txt", bname.value());
+
+  ext = wkf::Extension("/foo/bar/test.txt"sv);
+  EXPECT_TRUE(ext.has_value());
+  EXPECT_EQ(".txt", ext.value());
+#endif
+}
+
 // NOLINTEND
