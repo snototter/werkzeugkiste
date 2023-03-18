@@ -678,8 +678,11 @@ TEST(ConfigIOTest, SerializeLibconfigStrings) {
 TEST(ConfigIOTest, MissingLibconfigSupport) {
   EXPECT_THROW(wkc::LoadLibconfigFile("no-such-file"sv), std::logic_error);
   EXPECT_THROW(wkc::LoadLibconfigString("foo = 3"sv), std::logic_error);
+
+  // Serializing to libconfig should always be supported:
   wkc::Configuration cfg{};
-  EXPECT_THROW(wkc::DumpLibconfigString(cfg), std::logic_error);
+  cfg.SetDouble("flt"sv, 1.5);
+  EXPECT_NO_THROW(wkc::DumpLibconfigString(cfg));
 }
 #endif  // WERKZEUGKISTE_WITH_LIBCONFIG
 

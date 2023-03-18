@@ -1760,6 +1760,19 @@ void Configuration::Append(std::string_view key, std::string_view value) {
   detail::AppendScalarListElement<std::string>(pimpl_->config_root, key, value);
 }
 
+void Configuration::Append(std::string_view key, const date &value) {
+  detail::AppendScalarListElement<toml::date>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, const time &value) {
+  detail::AppendScalarListElement<toml::time>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, const date_time &value) {
+  detail::AppendScalarListElement<toml::date_time>(
+      pimpl_->config_root, key, value);
+}
+
 void Configuration::Append(std::string_view key, const Configuration &group) {
   toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
   arr->push_back(group.pimpl_->config_root);
@@ -1945,38 +1958,31 @@ void Configuration::LoadNestedConfiguration(std::string_view key) {
   const std::string fname = std::string(*node.as_string());
   Configuration loaded = LoadFile(fname);
 
-  try {
-    const auto path = detail::SplitTomlPath(key);
+  const auto path = detail::SplitTomlPath(key);
 
-    toml::table *parent =
-        path.first.empty() ? &pimpl_->config_root
-                           : pimpl_->config_root.at_path(path.first).as_table();
-    if ((parent == nullptr) || (path.second[path.second.length() - 1] == ']')) {
-      std::string msg{"The parent of parameter `"};
-      msg += key;
-      msg +=
-          "` to load a nested configuration must be the root or a table "
-          "node!";
-      throw TypeError{msg};
-    }
+  toml::table *parent = path.first.empty()
+                          ? &pimpl_->config_root
+                          : pimpl_->config_root.at_path(path.first).as_table();
+  if ((parent == nullptr) || (path.second[path.second.length() - 1] == ']')) {
+    std::string msg{"The parent of parameter `"};
+    msg += key;
+    msg +=
+        "` to load a nested configuration must be the root or a table "
+        "node!";
+    throw TypeError{msg};
+  }
 
-    parent->erase(path.second);
+  parent->erase(path.second);
 
-    const auto result = parent->insert(path.second, loaded.pimpl_->config_root);
+  const auto result = parent->insert(path.second, loaded.pimpl_->config_root);
 
-    if (!result.second) {
-      // LCOV_EXCL_START
-      std::string msg{"Could not insert nested configuration at `"};
-      msg += key;
-      msg += "`!";
-      throw std::runtime_error{msg};  // TODO add to docstr
-      // LCOV_EXCL_STOP
-    }
-  } catch (const toml::parse_error &err) {
-    std::ostringstream msg;
-    msg << "Error parsing TOML from \"" << fname << "\": " << err.description()
-        << " (" << err.source().begin << ")!";
-    throw ParseError{msg.str()};
+  if (!result.second) {
+    // LCOV_EXCL_START
+    std::string msg{"Could not insert nested configuration at `"};
+    msg += key;
+    msg += "`!";
+    throw std::runtime_error{msg};  // TODO add to docstr
+    // LCOV_EXCL_STOP
   }
 }
 

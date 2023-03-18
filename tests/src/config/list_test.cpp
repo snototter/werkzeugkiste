@@ -765,8 +765,8 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_EQ("valid", config.GetString("lst[4]"sv));
   EXPECT_EQ(wkc::ConfigType::String, config.Type("lst[4]"sv));
 
-  // Nested lists. This cannot be done via CreateList (as we don't create
-  // a new parameter), but via AppendList:
+  // Nested lists. Currently, this cannot be done via CreateList (as we don't
+  // create a new parameter), but via AppendList.
   EXPECT_THROW(config.CreateList("lst[5]"sv), wkc::KeyError);
   EXPECT_THROW(config.AppendList("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.AppendList("str"sv), wkc::TypeError);
@@ -788,5 +788,12 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_EQ(3, config.Size("lst[5]"sv));
   EXPECT_EQ("three", config.GetString("lst[5][2]"sv));
   EXPECT_THROW(config.GetInteger32List("lst[5]"sv), wkc::TypeError);
+
+  // Append date/time-related types
+  EXPECT_NO_THROW(config.Append("lst"sv, wkc::date{"2023-03-18"sv}));
+  EXPECT_NO_THROW(config.Append("lst"sv, wkc::time{"08:00"sv}));
+  EXPECT_NO_THROW(
+      config.Append("lst"sv, wkc::date_time{"2023-03-18 09:12:00"sv}));
+  EXPECT_EQ(9, config.Size("lst"sv));
 }
 // NOLINTEND
