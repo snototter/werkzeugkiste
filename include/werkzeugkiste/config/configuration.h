@@ -671,7 +671,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
       const std::vector<std::pair<std::string_view, std::string_view>>
           &replacements);
 
-  /// @brief Loads a nested TOML configuration.
+  /// @brief Loads a nested configuration.
   ///
   /// For example, if your configuration had a field "storage", which
   /// should be defined in a separate (e.g. machine-dependent) configuration
@@ -682,10 +682,13 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Then, after loading, you can access these as `"storage.location"` and
   /// `"storage.duration"`.
   ///
+  /// This method deduces the type of the configuration from the file
+  /// extension, similar to `LoadFile`.
+  ///
   /// @param key Parameter name (fully-qualified TOML path) which holds the
-  ///     file name of the nested TOML configuration (must be of type
-  ///     string)
-  void LoadNestedTOMLConfiguration(std::string_view key);
+  ///     file name of the nested configuration file. The file name must be
+  ///     given as string.
+  void LoadNestedConfiguration(std::string_view key);
 
   //---------------------------------------------------------------------------
   // Serialization

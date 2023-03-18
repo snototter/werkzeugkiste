@@ -1917,9 +1917,7 @@ bool Configuration::ReplaceStringPlaceholders(
   return replaced;
 }
 
-void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
-  // TODO refactor (TOML/JSON --> function handle)
-
+void Configuration::LoadNestedConfiguration(std::string_view key) {
   if (!detail::ContainsKey(pimpl_->config_root, key)) {
     throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
   }
@@ -1934,12 +1932,15 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
     throw TypeError{msg};
   }
 
-  // To replace the node, we first have to remove it.
+  // Overview:
+  // * Load the configuration.
+  // * Replace the filename parameter by the loaded configuration (for this,
+  //   we first have to remove the parameter).
+
   const std::string fname = std::string(*node.as_string());
+  Configuration loaded = LoadFile(fname);
 
   try {
-    auto nested_tbl = toml::parse_file(fname);
-
     const auto path = detail::SplitTomlPath(key);
 
     toml::table *parent =
@@ -1955,7 +1956,8 @@ void Configuration::LoadNestedTOMLConfiguration(std::string_view key) {
     }
 
     parent->erase(path.second);
-    const auto result = parent->emplace(path.second, std::move(nested_tbl));
+
+    const auto result = parent->insert(path.second, loaded.pimpl_->config_root);
 
     if (!result.second) {
       // LCOV_EXCL_START
