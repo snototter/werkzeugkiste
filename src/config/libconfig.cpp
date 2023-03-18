@@ -22,13 +22,9 @@
 
 namespace werkzeugkiste::config {
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
-namespace detail {
+namespace detail::parsing {
 // Forward declarations
 Configuration FromLibconfigGroup(const libconfig::Setting &node);
-void PrintGroup(const Configuration &cfg,
-    std::ostream &out,
-    std::size_t indent,
-    bool include_brackets);
 
 // LCOV_EXCL_START
 
@@ -212,6 +208,72 @@ Configuration FromLibconfigGroup(const libconfig::Setting &node) {
   }
   return grp;
 }
+}  // namespace detail::parsing
+
+Configuration LoadLibconfigString(std::string_view lcfg_string) {
+  try {
+    const std::string str{lcfg_string};
+    libconfig::Config lcfg;
+    lcfg.readString(str);
+    return detail::parsing::FromLibconfigGroup(lcfg.getRoot());
+  } catch (const libconfig::ParseException &e) {
+    std::string msg{"Parsing libconfig string failed at line `"};
+    msg += std::to_string(e.getLine());
+    msg += "`: ";
+    msg += e.getError();
+    throw ParseError{msg};
+  }
+}
+
+Configuration LoadLibconfigFile(std::string_view filename) {
+  try {
+    const std::string sfn{filename};
+    libconfig::Config lcfg;
+    lcfg.readFile(sfn.c_str());
+    return detail::parsing::FromLibconfigGroup(lcfg.getRoot());
+  } catch (const libconfig::ParseException &e) {
+    std::string msg{"Cannot load libconfig file `"};
+    msg += filename;
+    msg += "`, error at line ";
+    msg += std::to_string(e.getLine());
+    msg += "`: ";
+    msg += e.getError();
+    throw ParseError{msg};
+  } catch (const libconfig::FileIOException &e) {
+    std::string msg{"I/O error while loading libconfig file `"};
+    msg += filename;
+    msg += "`!";
+    throw ParseError{msg};
+  }
+}
+
+#else  // WERKZEUGKISTE_WITH_LIBCONFIG
+#define WZK_THROW_LIBCONFIG_MISSING                                        \
+  do {                                                                     \
+    throw std::logic_error{                                                \
+        "werkzeugkiste::config has been built without libconfig support. " \
+        "Please install libconfig++ and rebuilt the library with "         \
+        "`werkzeugkiste_WITH_LIBCONFIG` enabled"};                         \
+  } while (false)
+
+Configuration LoadLibconfigString(std::string_view /*lcfg_string*/) {
+  WZK_THROW_LIBCONFIG_MISSING;
+}
+
+Configuration LoadLibconfigFile(std::string_view /*filename*/) {
+  WZK_THROW_LIBCONFIG_MISSING;
+}
+
+#undef WZK_THROW_LIBCONFIG_MISSING
+#endif  // WERKZEUGKISTE_WITH_LIBCONFIG
+
+/// @brief Custom formatter
+namespace detail::formatter {
+// Forward declaration.
+void PrintGroup(const Configuration &cfg,
+    std::ostream &out,
+    std::size_t indent,
+    bool include_brackets);
 
 /// @brief Returns a libconfig-compatible string representation.
 std::string EscapeString(std::string_view str) {
@@ -439,72 +501,11 @@ void PrintGroup(const Configuration &cfg,
     out << '}';
   }
 }
-}  // namespace detail
-
-Configuration LoadLibconfigString(std::string_view lcfg_string) {
-  try {
-    const std::string str{lcfg_string};
-    libconfig::Config lcfg;
-    lcfg.readString(str);
-    return detail::FromLibconfigGroup(lcfg.getRoot());
-  } catch (const libconfig::ParseException &e) {
-    std::string msg{"Parsing libconfig string failed at line `"};
-    msg += std::to_string(e.getLine());
-    msg += "`: ";
-    msg += e.getError();
-    throw ParseError{msg};
-  }
-}
-
-Configuration LoadLibconfigFile(std::string_view filename) {
-  try {
-    const std::string sfn{filename};
-    libconfig::Config lcfg;
-    lcfg.readFile(sfn.c_str());
-    return detail::FromLibconfigGroup(lcfg.getRoot());
-  } catch (const libconfig::ParseException &e) {
-    std::string msg{"Cannot load libconfig file `"};
-    msg += filename;
-    msg += "`, error at line ";
-    msg += std::to_string(e.getLine());
-    msg += "`: ";
-    msg += e.getError();
-    throw ParseError{msg};
-  } catch (const libconfig::FileIOException &e) {
-    std::string msg{"I/O error while loading libconfig file `"};
-    msg += filename;
-    msg += "`!";
-    throw ParseError{msg};
-  }
-}
+}  // namespace detail::formatter
 
 std::string DumpLibconfigString(const Configuration &cfg) {
   std::ostringstream str;
-  detail::PrintGroup(cfg, str, 0, /*include_brackets=*/false);
+  detail::formatter::PrintGroup(cfg, str, 0, /*include_brackets=*/false);
   return str.str();
 }
-
-#else  // WERKZEUGKISTE_WITH_LIBCONFIG
-#define WZK_THROW_LIBCONFIG_MISSING                                        \
-  do {                                                                     \
-    throw std::logic_error{                                                \
-        "werkzeugkiste::config has been built without libconfig support. " \
-        "Please install libconfig++ and rebuilt the library with "         \
-        "`werkzeugkiste_WITH_LIBCONFIG` enabled"};                         \
-  } while (false)
-
-Configuration LoadLibconfigString(std::string_view /*lcfg_string*/) {
-  WZK_THROW_LIBCONFIG_MISSING;
-}
-
-Configuration LoadLibconfigFile(std::string_view /*filename*/) {
-  WZK_THROW_LIBCONFIG_MISSING;
-}
-
-std::string DumpLibconfigString(const Configuration& /*cfg*/) {
-  WZK_THROW_LIBCONFIG_MISSING;
-}
-
-#undef WZK_THROW_LIBCONFIG_MISSING
-#endif  // WERKZEUGKISTE_WITH_LIBCONFIG
 }  // namespace werkzeugkiste::config
