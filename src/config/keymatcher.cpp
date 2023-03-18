@@ -113,4 +113,21 @@ bool KeyMatcher::Empty() const {
   return (pimpl_ == nullptr) || (pimpl_->Empty());
 }
 
+bool IsValidKey(std::string_view key, bool allow_dots) {
+  if (key.empty()) {
+    return false;
+  }
+
+  const auto *const pos =
+      std::find_if_not(key.begin(), key.end(), [allow_dots](char c) -> bool {
+        return (std::isalnum(c) != 0) || (c == '-') || (c == '_') ||
+               (allow_dots ? (c == '.') : false);
+      });
+  if (pos != key.end()) {
+    return false;
+  }
+
+  return true;
+}
+
 }  // namespace werkzeugkiste::config

@@ -39,6 +39,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT KeyMatcher {
   std::unique_ptr<Impl> pimpl_;
 };
 
+WERKZEUGKISTE_CONFIG_EXPORT
+bool IsValidKey(std::string_view key, bool allow_dots);
+
 }  // namespace werkzeugkiste::config
 
 #endif  // WERKZEUGKISTE_CONFIG_KEYMATCHER_H
