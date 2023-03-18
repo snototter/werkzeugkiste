@@ -627,6 +627,33 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value Value to be appended.
   void Append(std::string_view key, std::string_view value);
 
+  /// @brief Appends a date to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
+  void Append(std::string_view key, const date &value);
+
+  /// @brief Appends a local time to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
+  void Append(std::string_view key, const time &value);
+
+  /// @brief Appends a date-time to an existing list.
+  ///
+  /// Raises a `KeyError` if the key does not exist.
+  /// Raises a `TypeError` if the key exists, but is not a list.
+  ///
+  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param value Value to be appended.
+  void Append(std::string_view key, const date_time &value);
+
   /// @brief Appends a group/sub-configuration to an existing list.
   ///
   /// Raises a `KeyError` if the key does not exist.

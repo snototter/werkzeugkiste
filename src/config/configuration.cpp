@@ -1760,6 +1760,19 @@ void Configuration::Append(std::string_view key, std::string_view value) {
   detail::AppendScalarListElement<std::string>(pimpl_->config_root, key, value);
 }
 
+void Configuration::Append(std::string_view key, const date &value) {
+  detail::AppendScalarListElement<toml::date>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, const time &value) {
+  detail::AppendScalarListElement<toml::time>(pimpl_->config_root, key, value);
+}
+
+void Configuration::Append(std::string_view key, const date_time &value) {
+  detail::AppendScalarListElement<toml::date_time>(
+      pimpl_->config_root, key, value);
+}
+
 void Configuration::Append(std::string_view key, const Configuration &group) {
   toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
   arr->push_back(group.pimpl_->config_root);
