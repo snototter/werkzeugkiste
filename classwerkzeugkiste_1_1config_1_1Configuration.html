@@ -398,6 +398,10 @@
             </dt>
             <dd>Creates an empty list with the given name.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a96c19e987b34690511d9495096abd929" class="m-doc">ClearList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+            </dt>
+            <dd>Clears an existing list.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a218674832d63c0fb515d56c2d66b59dc" class="m-doc">AppendList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
             <dd>Appends an empty list to an existing list in order to supported creating nested lists programmatically.</dd>
@@ -426,6 +430,21 @@
               std::string_view value)</span>
             </dt>
             <dd>Appends a string to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a494e3ae7f733651c316e55ec2543eeba" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; value)</span>
+            </dt>
+            <dd>Appends a date to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ab3b1839c3f3d98c96d8728106ce4dcb5" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&amp; value)</span>
+            </dt>
+            <dd>Appends a local time to an existing list.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a11dd15473468f5808b45d264f6ea5e27" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&amp; value)</span>
+            </dt>
+            <dd>Appends a date-time to an existing list.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a16d48a8bfc4c26d406c36c30ee001a5e" class="m-doc">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
               const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
@@ -1301,6 +1320,24 @@
             </table>
 <p>After successful creation, any values can be <code>Append</code>ed.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key already exists or if a &quot;parent&quot; could not be created.</p>
           </div></section>
+          <section class="m-doc-details" id="a96c19e987b34690511d9495096abd929"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a96c19e987b34690511d9495096abd929" class="m-doc-self">ClearList</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
+            </h3>
+            <p>Clears an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the parameter.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Afterwards, any values can be <code>Append</code>ed.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is not a list.</p>
+          </div></section>
           <section class="m-doc-details" id="a218674832d63c0fb515d56c2d66b59dc"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a218674832d63c0fb515d56c2d66b59dc" class="m-doc-self">AppendList</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
@@ -1417,6 +1454,75 @@
               std::string_view value)</span></span>
             </h3>
             <p>Appends a string to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a494e3ae7f733651c316e55ec2543eeba"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a494e3ae7f733651c316e55ec2543eeba" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; value)</span></span>
+            </h3>
+            <p>Appends a date to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="ab3b1839c3f3d98c96d8728106ce4dcb5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3b1839c3f3d98c96d8728106ce4dcb5" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&amp; value)</span></span>
+            </h3>
+            <p>Appends a local time to an existing list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the existing list parameter.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>Value to be appended.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the key does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the key exists, but is not a list.</p>
+          </div></section>
+          <section class="m-doc-details" id="a11dd15473468f5808b45d264f6ea5e27"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11dd15473468f5808b45d264f6ea5e27" class="m-doc-self">Append</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&amp; value)</span></span>
+            </h3>
+            <p>Appends a date-time to an existing list.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
