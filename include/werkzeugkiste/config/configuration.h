@@ -563,6 +563,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified name of the parameter.
   void CreateList(std::string_view key);
 
+  /// @brief Clears an existing list.
+  ///
+  /// Afterwards, any values can be `Append`ed.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is not a list.
+  ///
+  /// @param key Fully-qualified name of the parameter.
+  void ClearList(std::string_view key);
+
   /// @brief Appends an empty list to an existing list in order to supported
   ///   creating nested lists programmatically.
   ///

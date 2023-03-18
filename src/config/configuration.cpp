@@ -1730,6 +1730,11 @@ void Configuration::CreateList(std::string_view key) {
   detail::CreateList<bool, bool>(pimpl_->config_root, key, {});
 }
 
+void Configuration::ClearList(std::string_view key) {
+  toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
+  arr->clear();
+}
+
 void Configuration::AppendList(std::string_view key) {
   toml::array *arr = detail::GetExistingList(pimpl_->config_root, key);
   arr->push_back(toml::array{});

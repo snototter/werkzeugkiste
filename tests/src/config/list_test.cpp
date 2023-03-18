@@ -292,6 +292,8 @@ TEST(ConfigListTest, NumericList) {
     mixed_types = [1, 2, "framboozle"]
 
     nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
+
+    scalar = 'value'
     )toml");
 
   // Create an integer list
@@ -370,6 +372,20 @@ TEST(ConfigListTest, NumericList) {
 
   EXPECT_THROW(
       config.SetDoubleList("nested_lst"sv, {1.0, -0.5}), wkc::TypeError);
+
+  // We can, however, replace it (by either deleting it first, or by clearing
+  // it)
+  EXPECT_NO_THROW(config.ClearList("nested_lst"sv));
+  EXPECT_EQ(0, config.Size("nested_lst"sv));
+  EXPECT_NO_THROW(config.SetDoubleList("nested_lst"sv, {1.0, -0.5}));
+  EXPECT_EQ(2, config.Size("nested_lst"sv));
+  EXPECT_TRUE(config.IsHomogeneousScalarList("nested_lst"sv));
+  EXPECT_NO_THROW(config.Append("nested_lst"sv, "str"));
+  EXPECT_EQ(3, config.Size("nested_lst"sv));
+  EXPECT_FALSE(config.IsHomogeneousScalarList("nested_lst"sv));
+
+  EXPECT_THROW(config.ClearList("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.ClearList("scalar"sv), wkc::TypeError);
 }
 
 TEST(ConfigListTest, SetBooleanList) {
