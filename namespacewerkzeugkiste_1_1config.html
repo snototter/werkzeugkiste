@@ -170,6 +170,10 @@
             </dt>
             <dd>Returns the value as type T iff it can be exactly represented in the target type.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4cf1b57b8f84da2e32f9afa2f1d642c1" class="m-doc">LoadFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a configuration file.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a94407362a42c1ce626bfb1e9ca747296" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from the given file.</dd>
@@ -423,6 +427,25 @@
             </table>
 <p>If the value is not exactly representable in the target type (i.e. the cast is not possible without losing precision/information), an exception of type E will be thrown.</p>
           </div></section>
+          <section class="m-doc-details" id="a4cf1b57b8f84da2e32f9afa2f1d642c1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cf1b57b8f84da2e32f9afa2f1d642c1" class="m-doc-self">LoadFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+            </h3>
+            <p>Loads a configuration file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename</td>
+                  <td>Path to the configuration file.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>The configuration type will be deduced from the file extension, <em>i.e.</em> <code>.toml</code>, <code>.json</code>, or <code>.cfg</code>. For JSON files, the default <code>NullValuePolicy</code> will be used, see <code>LoadJSONFile</code>.</p>
+          </div></section>
           <section class="m-doc-details" id="a94407362a42c1ce626bfb1e9ca747296"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a94407362a42c1ce626bfb1e9ca747296" class="m-doc-self">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
@@ -517,6 +540,7 @@
                 </tr>
               </tbody>
             </table>
+<p>Because a configuration must consist of key/value pairs, a plain JSON array (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>json</code>. Thus, the configuration would have 1 element, and you need to access it via its key. For example, cfg.Size(&quot;json&quot;), cfg.GetDouble(&quot;json[0]&quot;), etc.</p>
           </div></section>
           <section class="m-doc-details" id="a9ced5b61209169a632c5c952912fdf71"><div>
             <h3>
@@ -540,6 +564,7 @@
                 </tr>
               </tbody>
             </table>
+<p>Because a configuration must consist of key/value pairs, a plain JSON array (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>json</code>. Thus, the configuration would have 1 element, and you need to access it via its key. For example, cfg.Size(&quot;json&quot;), cfg.GetDouble(&quot;json[0]&quot;), etc.</p>
           </div></section>
           <section class="m-doc-details" id="a3510019f455b434e44b60cfa2675bd80"><div>
             <h3>

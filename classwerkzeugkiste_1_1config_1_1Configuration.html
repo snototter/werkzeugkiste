@@ -66,7 +66,7 @@
             </li>
           </ul>
         </div>
-<p>TODO doc:</p><ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>Explicit method names are preferred over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li><li>Mixed lists:<ul><li>All entries numeric -&gt; can be looked up as floating point list.</li><li>Can be created programmatically via CreateList + Append, as well as by loading a mixed list from a TOML/JSON/... string or file</li><li>Can be replaced by an empty list, but cannot be replaced by a homogeneous list.</li><li>Individual elements can be looked up and set (via their corresponding GetTYPE/SetTYPE).</li></ul></li><li>Integers &amp; floating points will be implicitly converted if the value can be represented <em>exactly</em> by the target type. For example, double(2.0) can be looked up as int, but 2.5 cannot (will raise a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code>).</li></ul><p>TODOs:</p><ul><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] LoadJSONFile</li><li>[ ] LoadJSONString</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] Setters for ...Pair</li><li>[ ] Optional &amp; Default getters for ...Pair</li><li>[ ] Support get/set list of groups, i.e. vector&lt;Configuration&gt;</li><li>[ ] Convenience types: Point/Index/Rectangle</li><li>[ ] Convenience type casts: uint32</li></ul>
+<ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>Explicit method names are preferred over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li><li>Mixed lists:<ul><li>All entries numeric -&gt; can be looked up as floating point list.</li><li>Can be created programmatically via CreateList + Append, as well as by loading a mixed list from a TOML/JSON/... string or file</li><li>Can be replaced by an empty list, but cannot be replaced by a homogeneous list.</li><li>Individual elements can be looked up and set (via their corresponding GetTYPE/SetTYPE).</li></ul></li><li>Integers &amp; floating points will be implicitly converted if the value can be represented <em>exactly</em> by the target type. For example, double(2.0) can be looked up as int, but 2.5 cannot (will raise a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code>).</li></ul><p>TODOs:</p><ul><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] Setters for ...Pair</li><li>[ ] Optional &amp; Default getters for ...Pair</li><li>[ ] Convenience types: Point/Index/Rectangle</li><li>[ ] Convenience type casts: unsigned integer</li></ul>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -179,11 +179,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab197d2481a56782e58b6c78ce20b68e9" class="m-doc">GetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;bool&gt;</span>
             </dt>
             <dd>Returns a list of boolean flags.</dd>
-            <dt id="ace35bfc16f7c0353332c03e002dee5a0">
-              <span class="m-doc-wrap-bumper">void <a href="#ace35bfc16f7c0353332c03e002dee5a0" class="m-doc-self">SetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#ace35bfc16f7c0353332c03e002dee5a0" class="m-doc">SetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;bool&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Sets or replaces a list of boolean flags.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0e62d33cadd8243ed0131c9d6a761067" class="m-doc">GetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int32_t</span>
             </dt>
@@ -210,11 +210,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a0b276bb9b1f95e1019099048091ed179" class="m-doc-self">GetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int32_t&gt;</span>
             </dt>
             <dd><span></span></dd>
-            <dt id="adb03b853199630cebefbe043ad6e74d8">
-              <span class="m-doc-wrap-bumper">void <a href="#adb03b853199630cebefbe043ad6e74d8" class="m-doc-self">SetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#adb03b853199630cebefbe043ad6e74d8" class="m-doc">SetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;int32_t&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Sets or replaces a list of 32-bit integers.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a2bb4ffa8a50cf913a723539d28ea86ca" class="m-doc">GetIndices2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::tuple&lt;int32_t, int32_t&gt;&gt;</span>
             </dt>
@@ -450,9 +450,9 @@
             </dt>
             <dd>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a296192c4fff7988e7a2f70a6e3b3a365" class="m-doc">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
+              <span class="m-doc-wrap-bumper">void <a href="#ad74771f215027f596925374fa6045ff8" class="m-doc">LoadNestedConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
-            <dd>Loads a nested TOML configuration.</dd>
+            <dd>Loads a nested configuration.</dd>
             <dt id="a6f1f7c117ca9cf128abfe64e2b279f9f">
               <span class="m-doc-wrap-bumper">auto <a href="#a6f1f7c117ca9cf128abfe64e2b279f9f" class="m-doc-self">ToTOML</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
@@ -724,6 +724,29 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="ace35bfc16f7c0353332c03e002dee5a0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace35bfc16f7c0353332c03e002dee5a0" class="m-doc-self">SetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;bool&gt;&amp; values)</span></span>
+            </h3>
+            <p>Sets or replaces a list of boolean flags.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of flags.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
+          </div></section>
           <section class="m-doc-details" id="a0e62d33cadd8243ed0131c9d6a761067"><div>
             <h3>
               <span class="m-doc-wrap-bumper">int32_t werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0e62d33cadd8243ed0131c9d6a761067" class="m-doc-self">GetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
@@ -764,6 +787,29 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type, unless the value is exactly representable by the existing type. For example, an integer value can usually be exactly represented as a floating point number, thus SetInteger32(&quot;my-float&quot;sv, 2) will not raise an exception. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="adb03b853199630cebefbe043ad6e74d8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adb03b853199630cebefbe043ad6e74d8" class="m-doc-self">SetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;int32_t&gt;&amp; values)</span></span>
+            </h3>
+            <p>Sets or replaces a list of 32-bit integers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of flags.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type, unless it is a mixed list of only numbers (integers will be TODO) All entries numeric -&gt; can be looked up as floating point list.</p>
           </div></section>
           <section class="m-doc-details" id="a2bb4ffa8a50cf913a723539d28ea86ca"><div>
             <h3>
@@ -1502,11 +1548,11 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a296192c4fff7988e7a2f70a6e3b3a365"><div>
+          <section class="m-doc-details" id="ad74771f215027f596925374fa6045ff8"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a296192c4fff7988e7a2f70a6e3b3a365" class="m-doc-self">LoadNestedTOMLConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad74771f215027f596925374fa6045ff8" class="m-doc-self">LoadNestedConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span></span>
             </h3>
-            <p>Loads a nested TOML configuration.</p>
+            <p>Loads a nested configuration.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -1514,11 +1560,11 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">key</td>
-                  <td>Parameter name (fully-qualified TOML path) which holds the file name of the nested TOML configuration (must be of type string)</td>
+                  <td>Parameter name (fully-qualified TOML path) which holds the file name of the nested configuration file. The file name must be given as string.</td>
                 </tr>
               </tbody>
             </table>
-<p>For example, if your configuration had a field &quot;storage&quot;, which should be defined in a separate (e.g. machine-dependent) configuration file, the &quot;main&quot; config could define it as <code>storage = &quot;path/to/conf.toml&quot;</code> This function will then load this TOML and replace <code>storage</code> by the loaded configuration. Suppose that <code>conf.toml</code> defines <code>location = ...</code> and <code>duration = ...</code>. Then, after loading, you can access these as <code>&quot;storage.location&quot;</code> and <code>&quot;storage.duration&quot;</code>.</p>
+<p>For example, if your configuration had a field &quot;storage&quot;, which should be defined in a separate (e.g. machine-dependent) configuration file, the &quot;main&quot; config could define it as <code>storage = &quot;path/to/conf.toml&quot;</code> This function will then load this TOML and replace <code>storage</code> by the loaded configuration. Suppose that <code>conf.toml</code> defines <code>location = ...</code> and <code>duration = ...</code>. Then, after loading, you can access these as <code>&quot;storage.location&quot;</code> and <code>&quot;storage.duration&quot;</code>.</p><p>This method deduces the type of the configuration from the file extension, similar to <code>LoadFile</code>.</p>
           </div></section>
         </section>
       </div>
