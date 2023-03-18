@@ -685,11 +685,27 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_NO_THROW(config.Append("empty"sv, true));
   EXPECT_EQ(1, config.Size("empty"sv));
 
-  // But we can append any item to an existing list
-  // TODO
+  // By appending, we can make it a mixed-type list:
+  EXPECT_NO_THROW(config.Append("empty"sv, 42));
+  EXPECT_NO_THROW(config.Append("empty"sv, 1.3));
+  EXPECT_EQ(3, config.Size("empty"sv));
+
+  // But this list cannot be replaced by a homogeneous list, as this would
+  // change the type of the boolean element
+  const std::vector<int32_t> ints{1, 17, 42};
+  EXPECT_THROW(config.SetInteger32List("empty"sv, ints), wkc::TypeError);
+
+  // A mixed-type, numeric-only list, however, can be replaced by a numeric
+  // list:
+  config.CreateList("numbers"sv);
+  config.Append("numbers"sv, 0);
+  config.Append("numbers"sv, -3);
+  config.Append("numbers"sv, 3.5);
+  EXPECT_EQ(3, config.Size("numbers"sv));
+  EXPECT_NO_THROW(config.SetInteger32List("numbers"sv, ints));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("numbers[2]"sv));
 
   // Create a new mixed type list programmatically
-  // TODO adjust docs - this is now supported
   EXPECT_NO_THROW(config.CreateList("lst"sv));
   EXPECT_TRUE(config.Contains("lst"sv));
   EXPECT_EQ(0, config.Size("lst"sv));
@@ -733,9 +749,8 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_EQ("valid", config.GetString("lst[4]"sv));
   EXPECT_EQ(wkc::ConfigType::String, config.Type("lst[4]"sv));
 
-  // TODO Append/Create a sublist, e.g. make a copy of `config`
-  // List already exists: instead of creating a separate/new list, we need
-  // to append a nested list:
+  // Nested lists. This cannot be done via CreateList (as we don't create
+  // a new parameter), but via AppendList:
   EXPECT_THROW(config.CreateList("lst[5]"sv), wkc::KeyError);
   EXPECT_THROW(config.AppendList("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.AppendList("str"sv), wkc::TypeError);

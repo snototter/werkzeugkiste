@@ -22,7 +22,6 @@ namespace werkzeugkiste::config {
 
 /// @brief Encapsulates configuration data.
 ///
-/// TODO doc:
 /// * Internally, a TOML configuration is used to store the parameters.
 /// * Explicit method names are preferred over a templated "Get<>".
 /// * Get("unknown-key") throws a KeyError if the parameter does not exist.
@@ -195,7 +194,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<bool> GetBooleanList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of boolean flags.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetBooleanList(std::string_view key, const std::vector<bool> &values);
 
   //---------------------------------------------------------------------------
@@ -248,7 +252,13 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO doc
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of 32-bit integers.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type,
+  /// unless it is a mixed list of only numbers (integers will be TODO)
+  /// All entries numeric -> can be looked up as floating point list.
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
 
@@ -746,6 +756,12 @@ enum class NullValuePolicy : unsigned char {
 };
 
 /// @brief Loads a JSON configuration from a string.
+///
+/// Because a configuration must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
+/// configuration would have 1 element, and you need to access it via its key.
+/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+///
 /// @param filename Path to the `.json` file.
 /// @param none_policy How to deal with None values.
 WERKZEUGKISTE_CONFIG_EXPORT
