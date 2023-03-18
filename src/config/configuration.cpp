@@ -598,15 +598,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 ///   key or whitespace, etc.)
 /// @param key The bare key or the fully-qualified parameter name (dotted key).
 void EnsureDottedOrBareKey(std::string_view key) {
-  if (key.empty()) {
-    throw KeyError{"Parameter name cannot be empty!"};
-  }
-
-  const auto *const pos =
-      std::find_if_not(key.begin(), key.end(), [](char c) -> bool {
-        return (std::isalnum(c) != 0) || (c == '-') || (c == '_') || (c == '.');
-      });
-  if (pos != key.end()) {
+  if (!IsValidKey(key, /*allow_dots=*/true)) {
     std::string msg{
         "Expected a bare key/path (alphanumeric, '-', '_', '.'), but got `"};
     msg += key;
