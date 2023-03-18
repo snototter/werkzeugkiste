@@ -17,7 +17,7 @@ This toolbox will only receive sporadic updates, basically whenever I have to
 reuse (and modernize) some of my older code.
 Currently, it provides the following functionality. Note that the namespace
 name also equals the corresponding CMake target to be linked against:
-* `werkzeugkiste::config`: Utilitity to interact with TOML configurations.
+* `werkzeugkiste::config`: Utilitity to interact with TOML/JSON/libconfig configurations.
 * `werkzeugkiste::container`: Sorting/lookup utilities and a custom
   circular buffer.
 * `werkzeugkiste::files`: Basic file I/O and filesystem utilities.  
