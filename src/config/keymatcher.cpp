@@ -113,7 +113,10 @@ bool KeyMatcher::Empty() const {
   return (pimpl_ == nullptr) || (pimpl_->Empty());
 }
 
-bool IsValidKey(std::string_view key, bool allow_dots) {
+bool IsValidKey(std::string_view key, bool allow_dots) noexcept {
+  // TODO consider adding separate test suite & extending logic
+  // Currently, "...123-.." would be a valid key
+  // We could tokenize and validate each "key path" part separately
   if (key.empty()) {
     return false;
   }
