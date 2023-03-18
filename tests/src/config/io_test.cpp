@@ -38,20 +38,17 @@ TEST(ConfigIOTest, NestedTOML) {
            << "\" }]"sv;
 
   auto config = wkc::LoadTOMLString(toml_str.str());
-  EXPECT_THROW(
-      config.LoadNestedTOMLConfiguration("no-such-key"sv), wkc::KeyError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("integer"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("float"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lst"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("date"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("time"sv), wkc::TypeError);
-  EXPECT_THROW(
-      config.LoadNestedTOMLConfiguration("datetime"sv), wkc::TypeError);
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("lvl1"sv), wkc::TypeError);
-  EXPECT_THROW(
-      config.LoadNestedTOMLConfiguration("lvl1.lvl2"sv), wkc::TypeError);
-  config.LoadNestedTOMLConfiguration("nested_config"sv);
+  EXPECT_THROW(config.LoadNestedConfiguration("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.LoadNestedConfiguration("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("integer"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("float"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("date"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("time"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("datetime"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("lvl1"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("lvl1.lvl2"sv), wkc::TypeError);
+  config.LoadNestedConfiguration("nested_config"sv);
 
   EXPECT_EQ(1, config.GetInteger32("nested_config.value1"sv));
   EXPECT_DOUBLE_EQ(2.3, config.GetDouble("nested_config.value2"sv));
@@ -60,26 +57,24 @@ TEST(ConfigIOTest, NestedTOML) {
 
   // When trying to load an invalid TOML file, an exception should be thrown,
   // and the parameter should not change.
-  EXPECT_THROW(config.LoadNestedTOMLConfiguration("invalid_nested_config"sv),
+  EXPECT_THROW(config.LoadNestedConfiguration("invalid_nested_config"sv),
       wkc::ParseError);
   EXPECT_EQ(fname_invalid_toml, config.GetString("invalid_nested_config"sv));
 
   // Ensure that loading a nested configuration also works at deeper
   // hierarchy levels.
-  EXPECT_NO_THROW(
-      config.LoadNestedTOMLConfiguration("lvl1.lvl2.lvl3.nested"sv));
+  EXPECT_NO_THROW(config.LoadNestedConfiguration("lvl1.lvl2.lvl3.nested"sv));
   EXPECT_DOUBLE_EQ(2.3, config.GetDouble("lvl1.lvl2.lvl3.nested.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
       config.GetString("lvl1.lvl2.lvl3.nested.section1.rel_path"sv));
 
   // It is not allowed to load a nested configuration directly into an array:
-  EXPECT_THROW(
-      config.LoadNestedTOMLConfiguration("lvl1.arr[2]"sv), wkc::TypeError);
+  EXPECT_THROW(config.LoadNestedConfiguration("lvl1.arr[2]"sv), wkc::TypeError);
 
   // One could abuse it, however, to load a nested configuration into a table
   // that is inside an array... Just because you can doesn't mean you should...
   EXPECT_NO_THROW(
-      config.LoadNestedTOMLConfiguration("lvl1.another_arr[1].nested"sv));
+      config.LoadNestedConfiguration("lvl1.another_arr[1].nested"sv));
   EXPECT_DOUBLE_EQ(
       2.3, config.GetDouble("lvl1.another_arr[1].nested.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
@@ -144,6 +139,10 @@ TEST(ConfigIOTest, LoadingTOML) {
   EXPECT_EQ(wkc::DumpTOMLString(config1), wkc::DumpTOMLString(reloaded));
   EXPECT_EQ(config1.ToTOML(), reloaded.ToTOML());
   EXPECT_EQ(config1.ToTOML(), wkc::DumpTOMLString(config1));
+
+  // Test configuration type deduction from file extension:
+  const auto tmp = wkc::LoadFile(fname);
+  EXPECT_EQ(config1, tmp);
 
   // Load a different configuration:
   const auto config2 = wkc::LoadTOMLString(R"toml(
@@ -252,6 +251,8 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
 TEST(ConfigIOTest, LoadingJSON) {
   // Invalid file inputs:
   EXPECT_THROW(wkc::LoadJSONFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file.json"sv), wkc::ParseError);
 
   const std::string fname_toml =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml");
@@ -261,6 +262,8 @@ TEST(ConfigIOTest, LoadingJSON) {
   const std::string fname_json =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid.json");
   const auto from_file = wkc::LoadJSONFile(fname_json);
+  const auto tmp = wkc::LoadFile(fname_json);
+  EXPECT_EQ(from_file, tmp);
 
   // Parse invalid JSON strings
   EXPECT_THROW(wkc::LoadJSONString(""sv), wkc::ParseError);
@@ -342,6 +345,19 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ(42, config.GetInteger32("nested[4].int"sv));
   EXPECT_NO_THROW(config.SetDouble("nested[4].flt"sv, 1.2));
   EXPECT_DOUBLE_EQ(1.2, config.GetDouble("nested[4].flt"sv));
+
+  // Parse valid JSON string which consists of a top-level array
+  const std::string_view js{R"json(
+    [1, 2, { "int": 1, "flt": 2.5}, 4, null]
+    )json"sv};
+  config = wkc::LoadJSONString(js, wkc::NullValuePolicy::Skip);
+  EXPECT_EQ(1, config.Size());
+  EXPECT_EQ(4, config.Size("json"sv));
+  EXPECT_EQ(2, config.Size("json[2]"sv));
+
+  config = wkc::LoadJSONString(js, wkc::NullValuePolicy::NullString);
+  EXPECT_EQ(1, config.Size());
+  EXPECT_EQ(5, config.Size("json"sv));
 }
 
 TEST(ConfigIOTest, NullValuePolicy) {
@@ -399,16 +415,22 @@ TEST(ConfigIOTest, DumpYAML) {
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
 TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_THROW(wkc::LoadLibconfigFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file"sv), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile("no-such-file.cfg"sv), wkc::ParseError);
 
   const auto fname_invalid_cfg =
       wkf::FullFile(wkf::DirName(__FILE__), "test-invalid.cfg"sv);
   EXPECT_THROW(wkc::LoadLibconfigFile(fname_invalid_cfg), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadFile(fname_invalid_cfg), wkc::ParseError);
 
   const auto fname_valid_cfg =
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid.cfg"sv);
   auto config = wkc::LoadLibconfigFile(fname_valid_cfg);
-
   EXPECT_EQ(4, config.Size());
+
+  // Test configuration type deduction from file extension:
+  const auto tmp = wkc::LoadFile(fname_valid_cfg);
+  EXPECT_EQ(config, tmp);
 
   // Check the "empty" group
   EXPECT_EQ(0, config.Size("empty_group"sv));

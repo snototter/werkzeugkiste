@@ -75,14 +75,6 @@ void AppendListValue(std::string_view lst_key,
 /// @param none_policy How to deal with null/none values.
 // NOLINTNEXTLINE(misc-no-recursion)
 Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
-  if (!object.is_object()) {
-    // LCOV_EXCL_START
-    // This branch should be unreachable.
-    throw std::logic_error{
-        "Internal util `FromJSONObject` invoked with non-JSON object! Please "
-        "report at https://github.com/snototter/werkzeugkiste/issues"};
-    // LCOV_EXCL_STOP
-  }
   using namespace std::string_view_literals;
   Configuration grp{};
   for (json::const_iterator it = object.begin(); it != object.end(); ++it) {
@@ -125,12 +117,34 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
   }
   return grp;
 }
+
+Configuration FromJSONRoot(const json &object, NullValuePolicy none_policy) {
+  if (object.is_object()) {
+    return FromJSONObject(object, none_policy);
+  } else if (object.is_array()) {
+    Configuration cfg{};
+    const std::string_view key{"json"};
+    cfg.CreateList(key);
+    for (const json &element : object) {
+      AppendListValue(key, cfg, element, none_policy);
+    }
+    return cfg;
+  } else {
+    // LCOV_EXCL_START
+    // This branch should be unreachable.
+    throw std::logic_error{
+        "Internal util `FromJSONRoot` invoked with neither JSON object nor "
+        "array! Please "
+        "report at https://github.com/snototter/werkzeugkiste/issues"};
+    // LCOV_EXCL_STOP
+  }
+}
 }  // namespace detail
 
 Configuration LoadJSONString(std::string_view json_string,
     NullValuePolicy none_policy) {
   try {
-    return detail::FromJSONObject(json::parse(json_string), none_policy);
+    return detail::FromJSONRoot(json::parse(json_string), none_policy);
   } catch (const json::parse_error &e) {
     std::string msg{"Parsing JSON input failed! "};
     msg += e.what();

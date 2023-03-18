@@ -22,7 +22,6 @@ namespace werkzeugkiste::config {
 
 /// @brief Encapsulates configuration data.
 ///
-/// TODO doc:
 /// * Internally, a TOML configuration is used to store the parameters.
 /// * Explicit method names are preferred over a templated "Get<>".
 /// * Get("unknown-key") throws a KeyError if the parameter does not exist.
@@ -42,16 +41,13 @@ namespace werkzeugkiste::config {
 ///
 /// TODOs:
 /// * [ ] LoadNestedJSONConfiguration
-/// * [ ] LoadJSONFile
-/// * [ ] LoadJSONString
 /// * [ ] NestedLists int & double (for "matrices")
 /// * [ ] If eigen3 is available, enable GetMatrix.
 ///       Static dimensions vs dynamic?
 /// * [ ] Setters for ...Pair
 /// * [ ] Optional & Default getters for ...Pair
-/// * [ ] Support get/set list of groups, i.e. vector<Configuration>
 /// * [ ] Convenience types: Point/Index/Rectangle
-/// * [ ] Convenience type casts: uint32
+/// * [ ] Convenience type casts: unsigned integer
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -195,7 +191,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<bool> GetBooleanList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of boolean flags.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetBooleanList(std::string_view key, const std::vector<bool> &values);
 
   //---------------------------------------------------------------------------
@@ -248,7 +249,13 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO doc
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of 32-bit integers.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type,
+  /// unless it is a mixed list of only numbers (integers will be TODO)
+  /// All entries numeric -> can be looked up as floating point list.
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
 
@@ -664,7 +671,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
       const std::vector<std::pair<std::string_view, std::string_view>>
           &replacements);
 
-  /// @brief Loads a nested TOML configuration.
+  /// @brief Loads a nested configuration.
   ///
   /// For example, if your configuration had a field "storage", which
   /// should be defined in a separate (e.g. machine-dependent) configuration
@@ -675,10 +682,13 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Then, after loading, you can access these as `"storage.location"` and
   /// `"storage.duration"`.
   ///
+  /// This method deduces the type of the configuration from the file
+  /// extension, similar to `LoadFile`.
+  ///
   /// @param key Parameter name (fully-qualified TOML path) which holds the
-  ///     file name of the nested TOML configuration (must be of type
-  ///     string)
-  void LoadNestedTOMLConfiguration(std::string_view key);
+  ///     file name of the nested configuration file. The file name must be
+  ///     given as string.
+  void LoadNestedConfiguration(std::string_view key);
 
   //---------------------------------------------------------------------------
   // Serialization
@@ -702,6 +712,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Pointer to internal implementation.
   std::unique_ptr<Impl> pimpl_;
 };
+
+/// @brief Loads a configuration file.
+///
+/// The configuration type will be deduced from the file extension, *i.e.*
+/// `.toml`, `.json`, or `.cfg`.
+/// For JSON files, the default `NullValuePolicy` will be used, see
+/// `LoadJSONFile`.
+///
+/// @param filename Path to the configuration file.
+Configuration LoadFile(std::string_view filename);
 
 /// @brief Loads a TOML configuration from the given file.
 /// @param filename Path to the `.toml` file.
@@ -736,6 +756,12 @@ enum class NullValuePolicy : unsigned char {
 };
 
 /// @brief Loads a JSON configuration from a string.
+///
+/// Because a configuration must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
+/// configuration would have 1 element, and you need to access it via its key.
+/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+///
 /// @param filename Path to the `.json` file.
 /// @param none_policy How to deal with None values.
 WERKZEUGKISTE_CONFIG_EXPORT
@@ -743,6 +769,12 @@ Configuration LoadJSONFile(std::string_view filename,
     NullValuePolicy none_policy = NullValuePolicy::Skip);
 
 /// @brief Loads a JSON configuration from a string.
+///
+/// Because a configuration must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
+/// configuration would have 1 element, and you need to access it via its key.
+/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+///
 /// @param json_string String representation of the JSON configuration.
 /// @param none_policy How to deal with None values.
 WERKZEUGKISTE_CONFIG_EXPORT
