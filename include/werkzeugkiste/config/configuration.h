@@ -41,16 +41,13 @@ namespace werkzeugkiste::config {
 ///
 /// TODOs:
 /// * [ ] LoadNestedJSONConfiguration
-/// * [ ] LoadJSONFile
-/// * [ ] LoadJSONString
 /// * [ ] NestedLists int & double (for "matrices")
 /// * [ ] If eigen3 is available, enable GetMatrix.
 ///       Static dimensions vs dynamic?
 /// * [ ] Setters for ...Pair
 /// * [ ] Optional & Default getters for ...Pair
-/// * [ ] Support get/set list of groups, i.e. vector<Configuration>
 /// * [ ] Convenience types: Point/Index/Rectangle
-/// * [ ] Convenience type casts: uint32
+/// * [ ] Convenience type casts: unsigned integer
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
