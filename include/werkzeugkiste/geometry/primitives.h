@@ -300,6 +300,17 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
   Line2d_<T> ClipLineSegmentByRectangle(const vec_type& top_left,
       const vec_type& size) const;
 
+  // TODO doc
+  Line2d_<T> TiltRad(double angle_rad) const;
+
+  /// @brief Tilts the line/segment, *i.e.* rotates the end point around the
+  ///   start point.
+  /// @param angle_deg Tilt angle in degrees.
+  /// @return A new line which has been rotated around the start point.
+  inline Line2d_<T> TiltDeg(double angle_deg) const {
+    return TiltRad(Deg2Rad(angle_deg));
+  }
+
   /// Overloaded output stream operator.
   friend std::ostream& operator<<(std::ostream& stream, const Line2d_& line) {
     stream << "Line(" << line.pt_from_.ToString(false) << " --> "

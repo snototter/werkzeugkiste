@@ -785,6 +785,11 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
   return Line2d_<T>{int_points[0], int_points[1]};
 }
 
+template <typename T>
+Line2d_<T> Line2d_<T>::TiltRad(double angle_rad) const {
+  return Line2d_<T>{From(), To().RotateRadians(From(), angle_rad)};
+}
+
 // Explicit instantiation:
 template class Line2d_<double>;
 
