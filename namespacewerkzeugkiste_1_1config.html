@@ -216,10 +216,10 @@
             </dt>
             <dd>Returns a YAML-formatted string.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adf2aff11946fb13bdf2e3f178caad86c" class="m-doc">IsValidKey</a>(</span><span class="m-doc-wrap">std::string_view key,
-              bool allow_dots) -&gt; WERKZEUGKISTE_CONFIG_EXPORT bool</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#abd47cd321e2710898e9086d55e583966" class="m-doc">IsValidKey</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool allow_dots) -&gt; WERKZEUGKISTE_CONFIG_EXPORT bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Checks if the given key is a valid parameter name.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::string</span>
             </dt>
@@ -599,13 +599,29 @@
             </h3>
             <p>Returns a YAML-formatted string.</p>
           </div></section>
-          <section class="m-doc-details" id="adf2aff11946fb13bdf2e3f178caad86c"><div>
+          <section class="m-doc-details" id="abd47cd321e2710898e9086d55e583966"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT bool werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adf2aff11946fb13bdf2e3f178caad86c" class="m-doc-self">IsValidKey</a>(</span><span class="m-doc-wrap">std::string_view key,
-              bool allow_dots)</span></span>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT bool werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd47cd321e2710898e9086d55e583966" class="m-doc-self">IsValidKey</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool allow_dots) <span class="m-label m-success">noexcept</span></span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
             </h3>
-            <p><span></span></p>
+            <p>Checks if the given key is a valid parameter name.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The key to be checked.</td>
+                </tr>
+                <tr>
+                  <td>allow_dots</td>
+                  <td>If true, dots (as in a key path / fully-qualified parameter name) are also allowed.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>A valid parameter name consists of alpha-numeric characters, dashes and underscores. Optionally, dots are also allowed (if )</p>
           </div></section>
           <section class="m-doc-details" id="a0ccee9dccf309d5590d43326ba5f9312"><div>
             <h3>

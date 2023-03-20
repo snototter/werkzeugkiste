@@ -220,6 +220,14 @@
               const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; size) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;</span>
             </dt>
             <dd></dd>
+            <dt id="ab7a113847899906cebcc83a221528ace">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7a113847899906cebcc83a221528ace" class="m-doc-self">TiltRad</a>(</span><span class="m-doc-wrap">double angle_rad) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a7e0fd7f1d06884521158a5915444d4aa" class="m-doc">TiltDeg</a>(</span><span class="m-doc-wrap">double angle_deg) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;</span>
+            </dt>
+            <dd>Tilts the line/segment, <em>i.e.</em> rotates the end point around the start point.</dd>
           </dl>
         </section>
         <section id="friends">
@@ -451,6 +459,32 @@
               const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; size) const</span></span>
             </h3>
 <p>Clips this line segment(!) such that only the part within the rectangle remains, check via <code><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#a363699cfcffe523286d91ad5c603fb22" class="m-doc">IsValid()</a></code> afterwards.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7e0fd7f1d06884521158a5915444d4aa"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt; werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7e0fd7f1d06884521158a5915444d4aa" class="m-doc-self">TiltDeg</a>(</span><span class="m-doc-wrap">double angle_deg) const</span></span>
+            </h3>
+            <p>Tilts the line/segment, <em>i.e.</em> rotates the end point around the start point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">angle_deg</td>
+                  <td>Tilt angle in degrees.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A new line which has been rotated around the start point.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>

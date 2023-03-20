@@ -465,14 +465,26 @@
             <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp = double&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a70683cb8ba7eedf064b742a6cd54539d" class="m-doc">RotateRadians</a>(</span><span class="m-doc-wrap">double theta) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6f8af53abc0331d34a24775b53cf63a9" class="m-doc">RotateRadians</a>(</span><span class="m-doc-wrap">double angle_rad) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
             </dt>
             <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp = double&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a69d9a447153e740ba21c437d8989ce2c" class="m-doc">RotateDegrees</a>(</span><span class="m-doc-wrap">double theta) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac6130a3377cbfba648dd72ffe8fd6427" class="m-doc">RotateDegrees</a>(</span><span class="m-doc-wrap">double angle_deg) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
             </dt>
             <dd></dd>
+            <dt id="aead23eb23b0f51c196a96ec730f0b254">
+              <div class="m-doc-template">template&lt;typename Tp = double&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#aead23eb23b0f51c196a96ec730f0b254" class="m-doc-self">RotateRadians</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 2&gt;&amp; rotation_center,
+              double angle_rad) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a0be7a295b72e9b965f85bd391169488c">
+              <div class="m-doc-template">template&lt;typename Tp = double&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0be7a295b72e9b965f85bd391169488c" class="m-doc-self">RotateDegrees</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 2&gt;&amp; rotation_center,
+              double angle_deg) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
+            </dt>
+            <dd><span></span></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a708ac240ea4d9025f8a8895d26a1d1c0" class="m-doc">ToString</a>(</span><span class="m-doc-wrap">bool include_type = true,
               int fixed_precision = 0) const -&gt; std::string</span>
@@ -719,23 +731,23 @@
             </h3>
 <p>Returns the 90° counter-clock-wise rotated vector. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</p>
           </div></section>
-          <section class="m-doc-details" id="a70683cb8ba7eedf064b742a6cd54539d"><div>
+          <section class="m-doc-details" id="a6f8af53abc0331d34a24775b53cf63a9"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T, std::size_t Dim&gt;
                 template&lt;typename Tp = double&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a70683cb8ba7eedf064b742a6cd54539d" class="m-doc-self">RotateRadians</a>(</span><span class="m-doc-wrap">double theta) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6f8af53abc0331d34a24775b53cf63a9" class="m-doc-self">RotateRadians</a>(</span><span class="m-doc-wrap">double angle_rad) const</span></span>
             </h3>
 <p>Returns a copy of this vector rotated by the given radians. This method assumes that the coordinate system is right-handed and is only supported for 2D vector specialization with floating point value type.</p>
           </div></section>
-          <section class="m-doc-details" id="a69d9a447153e740ba21c437d8989ce2c"><div>
+          <section class="m-doc-details" id="ac6130a3377cbfba648dd72ffe8fd6427"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T, std::size_t Dim&gt;
                 template&lt;typename Tp = double&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a69d9a447153e740ba21c437d8989ce2c" class="m-doc-self">RotateDegrees</a>(</span><span class="m-doc-wrap">double theta) const</span></span>
+              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac6130a3377cbfba648dd72ffe8fd6427" class="m-doc-self">RotateDegrees</a>(</span><span class="m-doc-wrap">double angle_deg) const</span></span>
             </h3>
 <p>Returns a double precision vector which is the result of rotating this vector by the given angle in degrees. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</p>
           </div></section>
