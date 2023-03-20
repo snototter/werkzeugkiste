@@ -148,6 +148,10 @@ TEST(GeometricPrimitives, Line2d) {
   EXPECT_DOUBLE_EQ(sorted.AngleDeg({1, -1}), 135);
 
   // TODO extend test suite
+
+  auto tilted = line1.TiltDeg(90);
+  EXPECT_EQ(line1.From(), tilted.From());
+  EXPECT_EQ(wkg::Vec2d(-line1.To().Y(), line1.To().X()), tilted.To());
 }
 
 TEST(GeometricPrimitives, Line3d) {

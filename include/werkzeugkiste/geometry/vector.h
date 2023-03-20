@@ -787,9 +787,9 @@ class Vec {
   /// value type.
   template <typename Tp = double>
   Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRadians(
-      double theta) const {
-    const double ct = std::cos(theta);
-    const double st = std::sin(theta);
+      double angle_rad) const {
+    const double ct = std::cos(angle_rad);
+    const double st = std::sin(angle_rad);
     const double x = static_cast<double>(val[0]);
     const double y = static_cast<double>(val[1]);
     return Vec<Tp, 2>{(ct * x) - (st * y), (st * x) + (ct * y)};
@@ -802,8 +802,25 @@ class Vec {
   /// and is only supported for 2D vectors.
   template <typename Tp = double>
   Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDegrees(
-      double theta) const {
-    return RotateRadians(Deg2Rad(theta));
+      double angle_deg) const {
+    return RotateRadians(Deg2Rad(angle_deg));
+  }
+
+  // TODO doc & test
+  template <typename Tp = double>
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRadians(
+      const Vec<Tp, 2>& rotation_center,
+      double angle_rad) const {
+    Vec<Tp, 2> vec = *this - rotation_center;
+    return vec.RotateRadians(angle_rad) + rotation_center;
+  }
+
+  // TODO doc & test
+  template <typename Tp = double>
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDegrees(
+      const Vec<Tp, 2>& rotation_center,
+      double angle_deg) const {
+    return RotateRadians(rotation_center, Deg2Rad(angle_deg));
   }
 
   //---------------------------------------------------------------------------
