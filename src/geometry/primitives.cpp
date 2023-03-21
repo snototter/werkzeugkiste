@@ -383,13 +383,13 @@ Line2d_<T> Line2d_<T>::LeftToRight() const {
   }
 
   if (IsEpsEqual(pt_from_.X(), pt_to_.X())) {
-    // A vertical line will be sorted top-to-bottom:
+    // A vertical line will be sorted in ascending y-coordinates:
     if (pt_from_.Y() < pt_to_.Y()) {
       return Line2d_<T>{pt_from_, pt_to_};
     }
     return Line2d_<T>{pt_to_, pt_from_};
   } else {
-    // A horizontal line will be sorted left-to-right:
+    // A horizontal line will be sorted by ascending x-coordinates:
     if (pt_from_.X() < pt_to_.X()) {
       return Line2d_<T>{pt_from_, pt_to_};
     }

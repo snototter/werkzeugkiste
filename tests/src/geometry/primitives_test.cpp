@@ -171,8 +171,8 @@ TEST(GeometricPrimitives, Line2dOrdering) {
   EXPECT_EQ(ltr.From(), repeated.From());
   EXPECT_EQ(ltr.To(), repeated.To());
 
-  // Vertical lines will be sorted top-to-bottom
-  line = wkg::Line2d{{2, 1}, {2, 17}};
+  // Vertical lines will be sorted by ascending y-coordinate
+  line = wkg::Line2d{{2, 17}, {2, 1}};
   ltr = line.LeftToRight();
   EXPECT_EQ(line.To(), ltr.From());
   EXPECT_EQ(line.From(), ltr.To());
