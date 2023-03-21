@@ -64,10 +64,10 @@ jobs:
       run: cmake --build build/coverage -t coverage
 
     - name: Update coveralls.io
-      uses: coverallsapp/github-action@v2.0.0
+      uses: coverallsapp/github-action@v1.2.4
       with:
         github-token: ${{ github.token }}
-        file: build/coverage/coverage.info
+        path-to-lcov: build/coverage/coverage.info
 
   sanitize:
     needs: [lint]
