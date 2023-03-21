@@ -248,7 +248,7 @@ TEST(GeometricPrimitives, Line2dClipping) {
   EXPECT_EQ(wkg::Vec2d(0, 1), clipped.To()) << "Clipped: " << clipped;
   // TODO Skipped reversed test
 
-  // 1 point inside, 1 outside
+  // pt2 inside, pt1 outside/on-the-edge
   clipped = line.ClipLineByRectangle({-5, 0}, {10, 5});
   EXPECT_TRUE(clipped.IsValid());
   EXPECT_EQ(wkg::Vec2d(1, 0), clipped.From()) << "Clipped: " << clipped;
@@ -257,6 +257,16 @@ TEST(GeometricPrimitives, Line2dClipping) {
   EXPECT_TRUE(clipped.IsValid());
   EXPECT_EQ(wkg::Vec2d(1, 0), clipped.From()) << "Clipped: " << clipped;
   EXPECT_EQ(line.To(), clipped.To()) << "Clipped: " << clipped;
+
+  // pt1 inside, pt2 outside
+  clipped = line.ClipLineByRectangle({-5, -5}, {10, 6});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, -4), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(0, 1), clipped.To()) << "Clipped: " << clipped;
+  clipped = line.ClipLineSegmentByRectangle({-5, -5}, {10, 6});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(0, 1), clipped.To()) << "Clipped: " << clipped;
 
   // Line/Segment fully outside the clipping region
   clipped = line.ClipLineByRectangle({10, 0}, {5, 5});
