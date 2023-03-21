@@ -154,8 +154,12 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
   /// Returns a line with flipped direction vector.
   inline Line2d_ Reversed() const { return Line2d_<T>{pt_to_, pt_from_}; }
 
-  /// Returns a line where from/to are sorted left-to-right. If the line is
-  /// vertical, they will be sorted top-to-bottom.
+  // TODO usage of "top-to-bottom" follows image coordinate system, not
+  // Euclidean --> consistently & explicitly state what is top/bottom
+
+  /// @brief Returns a new line, where from/to are sorted by ascending
+  ///   x-coordinates (left-to-right). If the line was vertical, the points
+  ///   will be sorted by ascending y-coordinates.
   Line2d_ LeftToRight() const;
 
   /// For a segment, this returns the start point. For a line, it's simply one
@@ -313,8 +317,8 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
 
   /// Overloaded output stream operator.
   friend std::ostream& operator<<(std::ostream& stream, const Line2d_& line) {
-    stream << "Line(" << line.pt_from_.ToString(false) << " --> "
-           << line.pt_to_.ToString(false) << ')';
+    stream << "Line(" << line.pt_from_.ToString(/*include_type=*/false)
+           << " --> " << line.pt_to_.ToString(/*include_type=*/false) << ')';
     return stream;
   }
 
