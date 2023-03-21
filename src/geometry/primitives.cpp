@@ -386,16 +386,14 @@ Line2d_<T> Line2d_<T>::LeftToRight() const {
     // A vertical line will be sorted top-to-bottom:
     if (pt_from_.Y() < pt_to_.Y()) {
       return Line2d_<T>{pt_from_, pt_to_};
-    } else {
-      return Line2d_<T>{pt_to_, pt_from_};
     }
+    return Line2d_<T>{pt_to_, pt_from_};
   } else {
     // A horizontal line will be sorted left-to-right:
     if (pt_from_.X() < pt_to_.X()) {
       return Line2d_<T>{pt_from_, pt_to_};
-    } else {
-      return Line2d_<T>{pt_to_, pt_from_};
     }
+    return Line2d_<T>{pt_to_, pt_from_};
   }
 }
 
@@ -734,7 +732,14 @@ Line2d_<T> Line2d_<T>::ClipLineByRectangle(const vec_type& top_left,
     return Line2d_<T>{};
   }
 
-  return Line2d_<T>{int_points[0], int_points[1]};
+  Line2d_<T> clipped{int_points[0], int_points[1]};
+  if (clipped.Direction().Dot(Direction()) < T{0}) {
+    // The direction vectors form an obtuse angle, i.e. the clipped line
+    // points in the wrong direction.
+    // See illustration: https://math.stackexchange.com/a/2505193
+    return clipped.Reversed();
+  }
+  return clipped;
 }
 
 template <typename T>
@@ -779,10 +784,18 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
       return Line2d_<T>{pt_from_, int_points[0]};
     }
 
+    // The end point is must be inside, but the start point not:
     return Line2d_<T>{int_points[0], pt_to_};
   }
 
-  return Line2d_<T>{int_points[0], int_points[1]};
+  Line2d_<T> clipped{int_points[0], int_points[1]};
+  if (clipped.Direction().Dot(Direction()) < T{0}) {
+    // The direction vectors form an obtuse angle, i.e. the clipped line
+    // points in the wrong direction.
+    // See illustration: https://math.stackexchange.com/a/2505193
+    return clipped.Reversed();
+  }
+  return clipped;
 }
 
 template <typename T>
