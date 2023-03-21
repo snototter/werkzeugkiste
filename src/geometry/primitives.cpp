@@ -382,19 +382,19 @@ Line2d_<T> Line2d_<T>::LeftToRight() const {
     return Line2d_<T>{};
   }
 
+  // If the line is vertical, arrange the points by ascending y-coordinates:
   if (IsEpsEqual(pt_from_.X(), pt_to_.X())) {
-    // A vertical line will be sorted in ascending y-coordinates:
     if (pt_from_.Y() < pt_to_.Y()) {
       return Line2d_<T>{pt_from_, pt_to_};
     }
     return Line2d_<T>{pt_to_, pt_from_};
-  } else {
-    // A horizontal line will be sorted by ascending x-coordinates:
-    if (pt_from_.X() < pt_to_.X()) {
-      return Line2d_<T>{pt_from_, pt_to_};
-    }
-    return Line2d_<T>{pt_to_, pt_from_};
   }
+
+  // Otherwise,simply arrange them according to their x-coordinates:
+  if (pt_from_.X() < pt_to_.X()) {
+    return Line2d_<T>{pt_from_, pt_to_};
+  }
+  return Line2d_<T>{pt_to_, pt_from_};
 }
 
 template <typename T>
@@ -702,14 +702,26 @@ Line2d_<T> Line2d_<T>::ClipLineByRectangle(const vec_type& top_left,
   const vec_type bottom_right{top_right.X(), top_left.Y() + size.Height()};
   const vec_type bottom_left{top_left.X(), bottom_right.Y()};
 
-  const std::vector<Line2d_> edges{Line2d_<T>{top_left, top_right},
+  const std::vector<Line2d_<T>> edges{Line2d_<T>{top_left, top_right},
       Line2d_<T>{top_right, bottom_right},
       Line2d_<T>{bottom_right, bottom_left},
       Line2d_<T>{bottom_left, top_left}};
 
+  const vec_type direction = Direction();
+  auto forms_obtuse_angle = [direction](const Line2d_<T>& other) -> bool {
+    // Returns true if the direction vectors of this & other form an obtuse
+    // angle. Here, this means that the two lines point in the opposite
+    // directions.
+    // See illustration: https://math.stackexchange.com/a/2505193
+    return direction.Dot(other.Direction()) < T{0};
+  };
+
   std::vector<vec_type> int_points;
   for (std::size_t i = 0; i < 4; ++i) {
     if (IsCollinear(edges[i])) {
+      if (forms_obtuse_angle(edges[i])) {
+        return edges[i].Reversed();
+      }
       return edges[i];
     }
 
@@ -733,10 +745,7 @@ Line2d_<T> Line2d_<T>::ClipLineByRectangle(const vec_type& top_left,
   }
 
   Line2d_<T> clipped{int_points[0], int_points[1]};
-  if (clipped.Direction().Dot(Direction()) < T{0}) {
-    // The direction vectors form an obtuse angle, i.e. the clipped line
-    // points in the wrong direction.
-    // See illustration: https://math.stackexchange.com/a/2505193
+  if (forms_obtuse_angle(clipped)) {
     return clipped.Reversed();
   }
   return clipped;
