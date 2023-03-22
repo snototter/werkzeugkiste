@@ -18,6 +18,35 @@
 namespace werkzeugkiste::geometry {
 
 //-----------------------------------------------------------------------------
+// Type abbreviations to distinguish specializations of vectors and other
+// geometric primitives.
+
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, int16_t>, char>
+TypeAbbreviation() {
+  return 's';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, int32_t>, char>
+TypeAbbreviation() {
+  return 'i';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, int64_t>, char>
+TypeAbbreviation() {
+  return 'l';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, float>, char> TypeAbbreviation() {
+  return 'f';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, double>, char>
+TypeAbbreviation() {
+  return 'd';
+}
+
+//-----------------------------------------------------------------------------
 // Vectors/Coordinates
 
 // TODO update doc
@@ -846,7 +875,8 @@ class Vec {
       if (fixed_precision > 0) {
         s << std::fixed << std::setprecision(fixed_precision);
       } else {
-        s << std::setprecision(std::numeric_limits<T>::max_digits10);
+        // https://en.cppreference.com/w/cpp/io/manip/setprecision
+        s << std::setprecision(std::numeric_limits<T>::digits10 + 1);
       }
     }
 
@@ -865,30 +895,6 @@ class Vec {
   friend std::ostream& operator<<(std::ostream& os, const Vec<T, Dim>& vec) {
     os << vec.ToString();
     return os;
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, int16_t>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 's';
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, int32_t>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 'i';
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, double>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 'd';
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, float>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 'f';
   }
 
   /// Returns the class type name, e.g. "Vec2d".
