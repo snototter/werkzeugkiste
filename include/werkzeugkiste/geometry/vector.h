@@ -831,7 +831,7 @@ class Vec {
   /// is only supported for 2D vector specialization with floating point
   /// value type.
   template <typename Tp = double>
-  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRadians(
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRad(
       double angle_rad) const {
     const double ct = std::cos(angle_rad);
     const double st = std::sin(angle_rad);
@@ -846,26 +846,26 @@ class Vec {
   /// This method assumes that the coordinate system is right-handed
   /// and is only supported for 2D vectors.
   template <typename Tp = double>
-  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDegrees(
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDeg(
       double angle_deg) const {
-    return RotateRadians(Deg2Rad(angle_deg));
+    return RotateRad(Deg2Rad(angle_deg));
   }
 
   // TODO doc & test
   template <typename Tp = double>
-  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRadians(
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRad(
       const Vec<Tp, 2>& rotation_center,
       double angle_rad) const {
     Vec<Tp, 2> vec = *this - rotation_center;
-    return vec.RotateRadians(angle_rad) + rotation_center;
+    return vec.RotateRad(angle_rad) + rotation_center;
   }
 
   // TODO doc & test
   template <typename Tp = double>
-  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDegrees(
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDeg(
       const Vec<Tp, 2>& rotation_center,
       double angle_deg) const {
-    return RotateRadians(rotation_center, Deg2Rad(angle_deg));
+    return RotateRad(rotation_center, Deg2Rad(angle_deg));
   }
 
   //---------------------------------------------------------------------------
