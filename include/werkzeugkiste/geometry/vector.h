@@ -788,6 +788,22 @@ class Vec {
   /// Returns the minimum dimension value.
   T MinValue() const { return val[MinIndex()]; }
 
+  //---------------------------------------------------------------------------
+  // Angles
+
+  /// @brief Returns the angle in [0, pi] between this and `other`.
+  /// @return The angle in radians.
+  double AngleRad(const Vec<T, Dim>& other) const {
+    return std::acos(
+        std::min(1.0, std::max(-1.0, UnitVector().Dot(other.UnitVector()))));
+  }
+
+  /// @brief Returns the angle in [0, 180] between this and `other`.
+  /// @return The angle in degrees.
+  inline double AngleDeg(const Vec<T, Dim>& other) const {
+    return Rad2Deg(AngleRad(other));
+  }
+
   //-------------------------------------------------
   // Rotations
 
@@ -1005,7 +1021,7 @@ inline Vec<T, Dim> VectorProjection(const Vec<T, Dim>& a,
 
 // TODO move inside vector, enable if dim == 2
 /// Computes the angle (in radians) of a 2d direction vector w.r.t. the
-/// positive X axis.
+/// positive X axis. Result is in [-pi, +pi]
 template <typename T>
 inline double AngleRadFromDirectionVec(const Vec<T, 2>& vec) {
   // Dot product is proportional to the cosine, whereas
@@ -1013,11 +1029,12 @@ inline double AngleRadFromDirectionVec(const Vec<T, 2>& vec) {
   // See: https://math.stackexchange.com/a/879474
   const Vec<double, 2> ref{1, 0};
   const Vec<double, 2> unit = vec.UnitVector();
+  // TODO clip
   return std::atan2(ref.Determinant(unit), ref.Dot(unit));
 }
 
 /// Computes the angle (in degrees) of a 2d direction vector w.r.t. the
-/// positive X axis.
+/// positive X axis. Result is in [-180, +180]
 template <typename T>
 inline double AngleDegFromDirectionVec(const Vec<T, 2>& vec) {
   return Rad2Deg(AngleRadFromDirectionVec(vec));
