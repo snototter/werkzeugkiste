@@ -438,6 +438,17 @@ bool Line2d_<T>::IsCollinear(const Line2d_& other) const {
 }
 
 template <typename T>
+bool Line2d_<T>::IsParallel(const Line2d_& other) const {
+  // The two lines are parallel if the angle between them is almost zero.
+  // Without computing the exact angle, we can leverage the "2D cross product",
+  // i.e. the determinant.
+  // See also https://math.stackexchange.com/a/1858452
+  const vec_type ud1{UnitDirection()};
+  const vec_type ud2{other.UnitDirection()};
+  return IsEpsZero(ud1.Determinant(ud2));
+}
+
+template <typename T>
 bool Line2d_<T>::IsPointLeftOfLine(const vec_type& point,
     bool* is_on_line) const {
   const T det = Direction().Determinant(point - pt_to_);

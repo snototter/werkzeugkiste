@@ -350,6 +350,63 @@ TEST(GeometricPrimitives, Line2dClipping) {
   EXPECT_EQ(wkg::Vec2d(5, -2), clipped.To()) << "Clipped: " << clipped;
 }
 
+TEST(GeometricPrimitives, Line2dAngles) {
+  wkg::Line2d l1{{0.0, 0.0}, {3.0, 0.0}};
+  wkg::Line2d l2{{1.0, -0.6}, {1.0, -0.2}};
+
+  EXPECT_FALSE(l1.IsCollinear(l2));
+  EXPECT_FALSE(l1.IsParallel(l2));
+  EXPECT_DOUBLE_EQ(90.0, l1.AngleDeg(l2));
+  EXPECT_DOUBLE_EQ(90.0, l1.AngleDeg(l2.Reversed()));
+
+  l2 = wkg::Line2d{{0, 0}, {1, 1}};
+  EXPECT_FALSE(l1.IsCollinear(l2));
+  EXPECT_FALSE(l1.IsParallel(l2));
+  EXPECT_DOUBLE_EQ(45.0, l1.AngleDeg(l2));
+  // The angle computation should consider the orientation of the lines:
+  EXPECT_DOUBLE_EQ(135.0, l1.AngleDeg(l2.Reversed()));
+
+  l2 = wkg::Line2d{{-1, 0}, {-2, 1}};
+  EXPECT_FALSE(l1.IsCollinear(l2));
+  EXPECT_FALSE(l1.IsParallel(l2));
+  EXPECT_DOUBLE_EQ(135.0, l1.AngleDeg(l2));
+  EXPECT_DOUBLE_EQ(45.0, l1.AngleDeg(l2.Reversed()));
+
+  l2 = wkg::Line2d{{-1, 0}, {-2, 0}};
+  EXPECT_TRUE(l1.IsCollinear(l2));
+  EXPECT_TRUE(l1.IsParallel(l2));
+  EXPECT_DOUBLE_EQ(180.0, l1.AngleDeg(l2));
+  EXPECT_DOUBLE_EQ(0.0, l1.AngleDeg(l2.Reversed()));
+
+  // Parallel lines
+  l2 = wkg::Line2d{{-1, -1}, {-2, -1}};
+  EXPECT_FALSE(l1.IsCollinear(l2));
+  EXPECT_TRUE(l1.IsParallel(l2));
+  EXPECT_DOUBLE_EQ(180.0, l1.AngleDeg(l2));
+  EXPECT_DOUBLE_EQ(0.0, l1.AngleDeg(l2.Reversed()));
+
+  // Tilt the line to get additional tests:
+  l2 = l1.TiltDeg(5);
+  double angle = l1.AngleDeg(l2);
+  EXPECT_TRUE(wkg::IsEpsEqual(5.0, angle)) << "Got: " << angle;
+
+  l2 = l1.TiltDeg(75);
+  angle = l1.AngleDeg(l2);
+  EXPECT_TRUE(wkg::IsEpsEqual(75.0, angle)) << "Got: " << angle;
+
+  l2 = l1.TiltDeg(135);
+  angle = l1.AngleDeg(l2);
+  EXPECT_TRUE(wkg::IsEpsEqual(135.0, angle)) << "Got: " << angle;
+
+  l2 = l1.TiltDeg(179);
+  angle = l1.AngleDeg(l2);
+  EXPECT_TRUE(wkg::IsEpsEqual(179.0, angle)) << "Got: " << angle;
+
+  l2 = l1.TiltDeg(182);
+  angle = l1.AngleDeg(l2);
+  EXPECT_TRUE(wkg::IsEpsEqual(178.0, angle)) << "Got: " << angle;
+}
+
 TEST(GeometricPrimitives, Line3d) {
   wkg::Line3d line1({0.0, 0.0, 0.0}, {3.0, 0.0, 0.0});
   EXPECT_TRUE(line1.IsValid());
