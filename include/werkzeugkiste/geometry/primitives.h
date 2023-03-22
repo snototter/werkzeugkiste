@@ -218,23 +218,43 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
     return Rad2Deg(AngleRad(v));
   }
 
-  /// Returns the line in homogeneous coordinates, *i.e.* a 3-element vector
-  /// in P^2 (Projective 2-space). For more details on lines in projective
-  /// space, refer to
+  /// @brief Returns the angle between the direction vectors of the lines.
+  /// @param other The other line.
+  /// @return Angle in radians, between [0, pi].
+  inline double AngleRad(const Line2d_& other) const {
+    return std::acos(std::max(-1.0,
+        std::min(1.0,
+            static_cast<double>(UnitDirection().Dot(other.UnitDirection())))));
+  }
+
+  /// @brief Returns the angle between the direction vectors of the lines.
+  /// @param other The other line.
+  /// @return Angle in degrees, between [0, 180].
+  inline double AngleDeg(const Line2d_& other) const {
+    return Rad2Deg(AngleRad(other));
+  }
+
+  /// @brief Returns the line in homogeneous coordinates.
+  ///
+  /// For more details on lines in projective space, refer to
   /// `Bob Fisher's CVonline
   /// <http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/BEARDSLEY/node2.html>`__,
-  /// or
-  /// `Stan Birchfield's notes
+  /// or `Stan Birchfield's notes
   /// <http://robotics.stanford.edu/~birch/projective/node4.html>`__.
+  ///
+  /// @return A 3-element vector representing the line in P^2, *i.e.* the
+  ///   projective 2-space.
   inline vec3_type HomogeneousForm() const {
     return vec3_type{pt_from_[0], pt_from_[1], 1}.Cross(
         vec3_type{pt_to_[0], pt_to_[1], 1});
   }
 
-  /// Returns the point which is offset * Direction() away from the line's
-  /// starting point, i.e. offset == 0 is the starting point, offset == 1
-  /// is the end point.
-  vec_type PointAtOffset(double offset_factor) const {
+  /// @brief Returns a point between the start and end point.
+  /// @param offset_factor Factor of the distance between start and end point.
+  /// @return The point which is offset * Direction() units away from the
+  ///   line's starting point, i.e. offset == 0 is the starting point,
+  ///   offset == 1 is the end point.
+  inline vec_type PointAtOffset(double offset_factor) const {
     return pt_from_ + offset_factor * Direction();
   }
 
@@ -260,6 +280,10 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
 
   /// Returns true if the two lines are collinear.
   bool IsCollinear(const Line2d_& other) const;
+
+  /// @brief Returns true if the two lines are parallel.
+  /// @param other The second line.
+  bool IsParallel(const Line2d_& other) const;
 
   /// Returns true if the point is left of this line as specified by
   /// pt_from_ --> pt_to_. If you need to distinguish left-of vs. exactly on
