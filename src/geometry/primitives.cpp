@@ -119,12 +119,12 @@ int Circle_<T>::PointsOfTangency(const vec_type& pt,
     const Line2d hypo(pt, center_);
     const Vec2d to_rotate = distance * hypo.UnitDirection();
 
-    Vec2d dir = to_rotate.RotateRadians(alpha);
+    Vec2d dir = to_rotate.RotateRad(alpha);
     if (pot1) {
       *pot1 = pt + dir;
     }
 
-    dir = to_rotate.RotateRadians(-alpha);
+    dir = to_rotate.RotateRad(-alpha);
     if (pot2) {
       *pot2 = pt + dir;
     }
@@ -283,14 +283,14 @@ int Circle_<T>::TransverseCommonTangents(const Circle_<T>& other,
   const vec_type hypo_dir = hypo.UnitDirection();
 
   if ((tangent1 != nullptr) || (tangent2 != nullptr)) {
-    vec_type dir = hypo_dir.RotateRadians(alpha);
+    vec_type dir = hypo_dir.RotateRad(alpha);
     const vec_type t11 = intersection + (tangent_length1 * dir);
     const vec_type t12 = intersection - (tangent_length2 * dir);
     if (tangent1) {
       *tangent1 = Line2d_<T>{t11, t12};
     }
 
-    dir = hypo_dir.RotateRadians(-alpha);
+    dir = hypo_dir.RotateRad(-alpha);
     const vec_type t21 = intersection + (tangent_length1 * dir);
     const vec_type t22 = intersection - (tangent_length2 * dir);
     if (tangent2) {
@@ -820,7 +820,7 @@ Line2d_<T> Line2d_<T>::ClipLineSegmentByRectangle(const vec_type& top_left,
 
 template <typename T>
 Line2d_<T> Line2d_<T>::TiltRad(double angle_rad) const {
-  return Line2d_<T>{From(), To().RotateRadians(From(), angle_rad)};
+  return Line2d_<T>{From(), To().RotateRad(From(), angle_rad)};
 }
 
 // Explicit instantiation:

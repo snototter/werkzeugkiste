@@ -110,7 +110,7 @@ void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), vec.Y()));
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.Y(), -vec.X()));
 
-  auto rotated = vec.RotateDegrees(-90);
+  auto rotated = vec.RotateDeg(-90);
   double x = static_cast<double>(vec.X());
   double y = static_cast<double>(vec.Y());
   EXPECT_TRUE(wkg::IsEpsEqual(rotated.X(), y));
@@ -122,7 +122,7 @@ void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), -vec.Y()));
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.Y(), vec.X()));
 
-  rotated = vec.RotateDegrees(90);
+  rotated = vec.RotateDeg(90);
   EXPECT_TRUE(wkg::IsEpsEqual(rotated.X(), -y));
   EXPECT_TRUE(wkg::IsEpsEqual(rotated.Y(), x));
   // EXPECT_DOUBLE_EQ(rotated.Y(), x);  // TODO difference is too large
@@ -827,28 +827,28 @@ TEST(VectorTest, Angles2d) {
   EXPECT_DOUBLE_EQ(90.0, wkg::AngleDegFromDirectionVec(-vec2));
 
   // Rotate vectors:
-  vec2 = vec2.RotateDegrees(5);
+  vec2 = vec2.RotateDeg(5);
   EXPECT_DOUBLE_EQ(-85.0, wkg::AngleDegFromDirectionVec(vec2));
   EXPECT_DOUBLE_EQ(85.0, vec1.AngleDeg(vec2));
 
   EXPECT_DOUBLE_EQ(0.0, vec1.AngleDeg(vec1));
-  vec2 = vec1.RotateDegrees(5);
+  vec2 = vec1.RotateDeg(5);
   double angle = vec1.AngleDeg(vec2);
   EXPECT_TRUE(wkg::IsEpsEqual(5.0, angle)) << "Got: " << angle;
 
-  vec2 = vec1.RotateDegrees(97);
+  vec2 = vec1.RotateDeg(97);
   angle = vec1.AngleDeg(vec2);
   EXPECT_TRUE(wkg::IsEpsEqual(97.0, angle)) << "Got: " << angle;
 
-  vec2 = vec1.RotateDegrees(180);
+  vec2 = vec1.RotateDeg(180);
   angle = vec1.AngleDeg(vec2);
   EXPECT_TRUE(wkg::IsEpsEqual(180.0, angle)) << "Got: " << angle;
 
-  vec2 = vec1.RotateDegrees(182);
+  vec2 = vec1.RotateDeg(182);
   angle = vec1.AngleDeg(vec2);
   EXPECT_TRUE(wkg::IsEpsEqual(178.0, angle)) << "Got: " << angle;
 
-  vec2 = vec1.RotateDegrees(265);
+  vec2 = vec1.RotateDeg(265);
   angle = vec1.AngleDeg(vec2);
   EXPECT_TRUE(wkg::IsEpsEqual(95.0, angle)) << "Got: " << angle;
 }
