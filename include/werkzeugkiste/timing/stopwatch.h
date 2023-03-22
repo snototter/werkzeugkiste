@@ -17,17 +17,22 @@ namespace werkzeugkiste::timing {
 // TODO change all these checks to constexpr!
 template <typename Duration>
 std::string DurationAbbreviation() {
-  if (std::is_same<Duration, std::chrono::nanoseconds>::value) {
+  if constexpr (std::is_same<Duration, std::chrono::nanoseconds>::value) {
     return "ns";
-  } else if (std::is_same<Duration, std::chrono::microseconds>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::microseconds>::value) {
     return "us";
-  } else if (std::is_same<Duration, std::chrono::milliseconds>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::milliseconds>::value) {
     return "ms";
-  } else if (std::is_same<Duration, std::chrono::seconds>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::seconds>::value) {
     return "sec";
-  } else if (std::is_same<Duration, std::chrono::minutes>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::minutes>::value) {
     return "min";
-  } else if (std::is_same<Duration, std::chrono::hours>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::hours>::value) {
     return "hrs";
   }
 #if __cplusplus >= 202002L  // C++20
@@ -35,16 +40,20 @@ std::string DurationAbbreviation() {
   // early 2018. Since it is 2022, we don't need to add support
   // for outdated MSVC versions.
   // https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus
-  else if (std::is_same<Duration, std::chrono::days>::value) {
+  if constexpr (std::is_same<Duration, std::chrono::days>::value) {
     return "days";
-  } else if (std::is_same<Duration, std::chrono::weeks>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::weeks>::value) {
     return "wks";
-  } else if (std::is_same<Duration, std::chrono::months>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::months>::value) {
     return "mth";
-  } else if (std::is_same<Duration, std::chrono::years>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::years>::value) {
     return "yrs";
   }
 #endif  // C++20
+
   std::ostringstream s;
   s << "Duration \"" << typeid(Duration).name()
     << "\" has not been mapped to its abbreviation yet.";
@@ -55,25 +64,32 @@ std::string DurationAbbreviation() {
 /// given clock type, e.g. "std::chrono::system_clock".
 template <typename Clock>
 std::string ClockTypeName() {
-  if (std::is_same<Clock, std::chrono::steady_clock>::value) {
+  if constexpr (std::is_same<Clock, std::chrono::steady_clock>::value) {
     return "std::chrono::steady_clock";
-  } else if (std::is_same<Clock, std::chrono::system_clock>::value) {
+  }
+  if constexpr (std::is_same<Clock, std::chrono::system_clock>::value) {
     return "std::chrono::system_clock";
-  } else if (std::is_same<Clock, std::chrono::high_resolution_clock>::value) {
+  }
+  if constexpr (std::is_same<Clock,
+                    std::chrono::high_resolution_clock>::value) {
     // The highres clock should just be an alias to system or steady (C++11),
     // thus we should never enter (but it doesn't hurt to include it either).
     return "std::chrono::high_resolution_clock";
   }
 #if __cplusplus >= 202002L  // C++20
-  else if (std::is_same<Clock, std::chrono::utc_clock>::value) {
+  if constexpr (std::is_same<Clock, std::chrono::utc_clock>::value) {
     return "std::chrono::utc_clock";
-  } else if (std::is_same<Clock, std::chrono::tai_clock>::value) {
+  }
+  if constexpr (std::is_same<Clock, std::chrono::tai_clock>::value) {
     return "std::chrono::tai_clock";
-  } else if (std::is_same<Clock, std::chrono::gps_clock>::value) {
+  }
+  if constexpr (std::is_same<Clock, std::chrono::gps_clock>::value) {
     return "std::chrono::gps_clock";
-  } else if (std::is_same<Clock, std::chrono::file_clock>::value) {
+  }
+  if constexpr (std::is_same<Clock, std::chrono::file_clock>::value) {
     return "std::chrono::file_clock";
-  } else if (std::is_same<Clock, std::chrono::local_t>::value) {
+  }
+  if constexpr (std::is_same<Clock, std::chrono::local_t>::value) {
     return "std::chrono::local_t";
   }
 #endif  // C++20
@@ -88,27 +104,35 @@ std::string ClockTypeName() {
 /// duration type, e.g. "std::chrono::nanoseconds".
 template <typename Duration>
 std::string PrecisionTypeName() {
-  if (std::is_same<Duration, std::chrono::nanoseconds>::value) {
+  if constexpr (std::is_same<Duration, std::chrono::nanoseconds>::value) {
     return "std::chrono::nanoseconds";
-  } else if (std::is_same<Duration, std::chrono::microseconds>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::microseconds>::value) {
     return "std::chrono::microseconds";
-  } else if (std::is_same<Duration, std::chrono::milliseconds>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::milliseconds>::value) {
     return "std::chrono::milliseconds";
-  } else if (std::is_same<Duration, std::chrono::seconds>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::seconds>::value) {
     return "std::chrono::seconds";
-  } else if (std::is_same<Duration, std::chrono::minutes>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::minutes>::value) {
     return "std::chrono::minutes";
-  } else if (std::is_same<Duration, std::chrono::hours>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::hours>::value) {
     return "std::chrono::hours";
   }
 #if __cplusplus >= 202002L  // C++20
-  else if (std::is_same<Duration, std::chrono::days>::value) {
+  if constexpr (std::is_same<Duration, std::chrono::days>::value) {
     return "std::chrono::days";
-  } else if (std::is_same<Duration, std::chrono::weeks>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::weeks>::value) {
     return "std::chrono::weeks";
-  } else if (std::is_same<Duration, std::chrono::months>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::months>::value) {
     return "std::chrono::months";
-  } else if (std::is_same<Duration, std::chrono::years>::value) {
+  }
+  if constexpr (std::is_same<Duration, std::chrono::years>::value) {
     return "std::chrono::years";
   }
 #endif  // C++20

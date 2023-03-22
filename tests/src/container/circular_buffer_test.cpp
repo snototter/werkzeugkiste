@@ -176,11 +176,11 @@ TEST(ContainerUtilsTest, Iterators) {
   int val = 1;
   for (it = buffer.begin(); it != buffer.end(); ++it, ++val) {
     EXPECT_EQ(*it, val);
-    EXPECT_EQ(buffer[val - 1], val);
+    EXPECT_EQ(buffer[static_cast<std::size_t>(val - 1)], val);
 
     *it = val - 1;
     EXPECT_EQ(*it, val - 1);
-    EXPECT_EQ(buffer[val - 1], val - 1);
+    EXPECT_EQ(buffer[static_cast<std::size_t>(val - 1)], val - 1);
   }
   EXPECT_NO_THROW(buffer[2]);
   EXPECT_THROW(buffer.at(2), std::out_of_range);
@@ -191,11 +191,11 @@ TEST(ContainerUtilsTest, Iterators) {
   val = 0;
   for (it = buffer.begin(); it != buffer.end(); it++, val++) {
     EXPECT_EQ(*it, val);
-    EXPECT_EQ(buffer[val], val);
+    EXPECT_EQ(buffer[static_cast<std::size_t>(val)], val);
 
     *it = val + 1;
     EXPECT_EQ(*it, val + 1);
-    EXPECT_EQ(buffer[val], val + 1);
+    EXPECT_EQ(buffer[static_cast<std::size_t>(val)], val + 1);
   }
   EXPECT_EQ(buffer[0], 1);
   EXPECT_EQ(buffer[1], 2);

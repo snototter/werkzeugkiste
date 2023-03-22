@@ -113,6 +113,8 @@ void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
   auto rotated = vec.RotateDegrees(-90);
   double x = static_cast<double>(vec.X());
   double y = static_cast<double>(vec.Y());
+  EXPECT_TRUE(wkg::IsEpsEqual(rotated.X(), y));
+  EXPECT_TRUE(wkg::IsEpsEqual(rotated.Y(), -x));
   // EXPECT_DOUBLE_EQ(rotated.X(), y);
   // EXPECT_DOUBLE_EQ(rotated.Y(), -x);
 
@@ -122,6 +124,7 @@ void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
 
   rotated = vec.RotateDegrees(90);
   EXPECT_TRUE(wkg::IsEpsEqual(rotated.X(), -y));
+  EXPECT_TRUE(wkg::IsEpsEqual(rotated.Y(), x));
   // EXPECT_DOUBLE_EQ(rotated.Y(), x);  // TODO difference is too large
 
   // TODO extend (determinant, arbitrary rotation...)
