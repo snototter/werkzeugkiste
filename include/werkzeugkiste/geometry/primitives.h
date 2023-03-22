@@ -319,7 +319,7 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
   friend std::ostream& operator<<(std::ostream& stream, const Line2d_& line) {
     constexpr bool include_type = false;
     stream << "Line2" << TypeAbbreviation<T>() << '('
-           << line.pt_from_.ToString(include_type) << " --> "
+           << line.pt_from_.ToString(include_type) << ", "
            << line.pt_to_.ToString(include_type) << ')';
     return stream;
   }
@@ -473,7 +473,7 @@ class Line3d_ {  // NOLINT(readability-identifier-naming)
   friend std::ostream& operator<<(std::ostream& stream, const Line3d_& line) {
     constexpr bool include_type = false;
     stream << "Line3" << TypeAbbreviation<T>() << '('
-           << line.pt_from_.ToString(include_type) << " --> "
+           << line.pt_from_.ToString(include_type) << ", "
            << line.pt_to_.ToString(include_type) << ')';
     return stream;
   }
