@@ -154,6 +154,202 @@ TEST(GeometricPrimitives, Line2d) {
   EXPECT_EQ(wkg::Vec2d(-line1.To().Y(), line1.To().X()), tilted.To());
 }
 
+TEST(GeometricPrimitives, Line2dOrdering) {
+  wkg::Line2d line{};
+  auto ltr = line.LeftToRight();
+  EXPECT_FALSE(line.IsValid());
+  EXPECT_FALSE(ltr.IsValid());
+
+  line = wkg::Line2d{{2, -1}, {-1, 2}};
+  ltr = line.LeftToRight();
+  EXPECT_TRUE(line.IsValid());
+  EXPECT_TRUE(ltr.IsValid());
+  EXPECT_EQ(line.To(), ltr.From());
+  EXPECT_EQ(line.From(), ltr.To());
+
+  auto repeated = ltr.LeftToRight();
+  EXPECT_EQ(ltr.From(), repeated.From());
+  EXPECT_EQ(ltr.To(), repeated.To());
+
+  // Vertical lines will be sorted by ascending y-coordinate
+  line = wkg::Line2d{{2, 17}, {2, 1}};
+  ltr = line.LeftToRight();
+  EXPECT_EQ(line.To(), ltr.From());
+  EXPECT_EQ(line.From(), ltr.To());
+
+  repeated = ltr.LeftToRight();
+  EXPECT_EQ(ltr.From(), repeated.From());
+  EXPECT_EQ(ltr.To(), repeated.To());
+
+  // Horizontal lines will be sorted left-to-right
+  line = wkg::Line2d{{42, -17}, {-9, -17}};
+  ltr = line.LeftToRight();
+  EXPECT_EQ(line.To(), ltr.From());
+  EXPECT_EQ(line.From(), ltr.To());
+
+  repeated = ltr.LeftToRight();
+  EXPECT_EQ(ltr.From(), repeated.From());
+  EXPECT_EQ(ltr.To(), repeated.To());
+}
+
+TEST(GeometricPrimitives, Line2dClipping) {
+  wkg::Line2d line{{2, -1}, {-1, 2}};
+
+  auto clipped = line.ClipLineByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, -4), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(-4, 5), clipped.To()) << "Clipped: " << clipped;
+  // Reverse the line
+  clipped = line.Reversed().ClipLineByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, -4), clipped.To())
+      << "Clipped: " << clipped;  // broken
+  EXPECT_EQ(wkg::Vec2d(-4, 5), clipped.From())
+      << "Clipped: " << clipped;  // broken
+
+  // If interpreted as a segment, it would be fully within this clipping rect:
+  clipped = line.ClipLineSegmentByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.To()) << "Clipped: " << clipped;
+  // Reverse the segment
+  clipped = line.Reversed().ClipLineSegmentByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.From()) << "Clipped: " << clipped;
+
+  // Segment is the top-left and bottom-right rect corner:
+  clipped = line.ClipLineByRectangle({-1, -1}, {3, 3});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.To()) << "Clipped: " << clipped;
+  // Reverse the line
+  clipped = line.Reversed().ClipLineByRectangle({-1, -1}, {3, 3});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.From()) << "Clipped: " << clipped;
+  // Repeat for segment:
+  clipped = line.ClipLineSegmentByRectangle({-1, -1}, {3, 3});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.To()) << "Clipped: " << clipped;
+  clipped = line.Reversed().ClipLineSegmentByRectangle({-1, -1}, {3, 3});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.From()) << "Clipped: " << clipped;
+
+  clipped = line.ClipLineByRectangle({0, 0}, {5, 5});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(1, 0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(0, 1), clipped.To()) << "Clipped: " << clipped;
+  clipped = line.ClipLineSegmentByRectangle({0, 0}, {5, 5});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(1, 0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(0, 1), clipped.To()) << "Clipped: " << clipped;
+
+  // pt2 inside, pt1 outside/on-the-edge
+  clipped = line.ClipLineByRectangle({-5, 0}, {10, 5});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(1, 0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(-4, 5), clipped.To()) << "Clipped: " << clipped;
+  clipped = line.ClipLineSegmentByRectangle({-5, 0}, {10, 5});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(1, 0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.To()) << "Clipped: " << clipped;
+
+  // pt1 inside, pt2 outside
+  clipped = line.ClipLineByRectangle({-5, -5}, {10, 6});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, -4), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(0, 1), clipped.To()) << "Clipped: " << clipped;
+  clipped = line.ClipLineSegmentByRectangle({-5, -5}, {10, 6});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.From(), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(0, 1), clipped.To()) << "Clipped: " << clipped;
+
+  // Line/Segment fully outside the clipping region
+  clipped = line.ClipLineByRectangle({10, 0}, {5, 5});
+  EXPECT_FALSE(clipped.IsValid()) << "Clipped: " << clipped;
+  clipped = line.ClipLineSegmentByRectangle({10, 0}, {5, 5});
+  EXPECT_FALSE(clipped.IsValid()) << "Clipped: " << clipped;
+
+  clipped = line.ClipLineByRectangle({-10, -10}, {5, 5});
+  EXPECT_FALSE(clipped.IsValid()) << "Clipped: " << clipped;
+  clipped = line.ClipLineSegmentByRectangle({-10, -10}, {5, 5});
+  EXPECT_FALSE(clipped.IsValid()) << "Clipped: " << clipped;
+
+  line = wkg::Line2d{{5, -5}, {5, 5}};
+  clipped = line.ClipLineByRectangle({0, 0}, {10, 2});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, 0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(5, 2), clipped.To()) << "Clipped: " << clipped;
+  clipped = line.ClipLineSegmentByRectangle({0, 0}, {10, 2});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, 0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(5, 2), clipped.To()) << "Clipped: " << clipped;
+
+  line = wkg::Line2d{{4, -6}, {-6, 2}};
+  clipped = line.ClipLineByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(2.75, -5.0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(-5.0, 1.2), clipped.To()) << "Clipped: " << clipped;
+  // Reversed line
+  clipped = line.Reversed().ClipLineByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(2.75, -5.0), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(-5.0, 1.2), clipped.From()) << "Clipped: " << clipped;
+  // Same for a segment
+  clipped = line.ClipLineSegmentByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(2.75, -5.0), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(-5.0, 1.2), clipped.To()) << "Clipped: " << clipped;
+  // And reversed
+  clipped = line.Reversed().ClipLineSegmentByRectangle({-5, -5}, {10, 10});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(2.75, -5.0), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(-5.0, 1.2), clipped.From()) << "Clipped: " << clipped;
+
+  // Line is collinear to an edge
+  line = wkg::Line2d{{-27, 15}, {-25, 15}};
+  clipped = line.ClipLineByRectangle({0, 0}, {20, 15});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(0, 15), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(20, 15), clipped.To()) << "Clipped: " << clipped;
+  // Reversed
+  clipped = line.Reversed().ClipLineByRectangle({0, 0}, {20, 15});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(0, 15), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(20, 15), clipped.From()) << "Clipped: " << clipped;
+  // Corresponding segment is not within the clip region
+  clipped = line.ClipLineSegmentByRectangle({0, 0}, {20, 15});
+  EXPECT_FALSE(clipped.IsValid()) << "Clipped: " << clipped;
+  clipped = line.Reversed().ClipLineSegmentByRectangle({0, 0}, {20, 15});
+  EXPECT_FALSE(clipped.IsValid()) << "Clipped: " << clipped;
+
+  // Another edge-collinear line (but the segment will be partially on
+  // the edge)
+  line = wkg::Line2d{{5, -3}, {5, 2}};
+  clipped = line.ClipLineByRectangle({0, -2}, {5, 4});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, -2), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(5, 2), clipped.To()) << "Clipped: " << clipped;
+  // Reversed line
+  clipped = line.Reversed().ClipLineByRectangle({0, -2}, {5, 4});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, -2), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(5, 2), clipped.From()) << "Clipped: " << clipped;
+  // Segment
+  clipped = line.ClipLineSegmentByRectangle({0, -2}, {5, 4});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(wkg::Vec2d(5, -2), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(line.To(), clipped.To()) << "Clipped: " << clipped;
+  // Reversed segment
+  clipped = line.Reversed().ClipLineSegmentByRectangle({0, -2}, {5, 4});
+  EXPECT_TRUE(clipped.IsValid());
+  EXPECT_EQ(line.To(), clipped.From()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(5, -2), clipped.To()) << "Clipped: " << clipped;
+}
+
 TEST(GeometricPrimitives, Line3d) {
   wkg::Line3d line1({0.0, 0.0, 0.0}, {3.0, 0.0, 0.0});
   EXPECT_TRUE(line1.IsValid());
