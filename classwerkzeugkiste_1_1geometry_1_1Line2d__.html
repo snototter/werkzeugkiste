@@ -151,13 +151,21 @@
             </dt>
             <dd></dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ada9fde07820a76a1caaea6c00b578ac7" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const -&gt; double</span>
+            </dt>
+            <dd>Returns the angle between the direction vectors of the lines.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af440868de82b6fe5c702e1124c8b487c" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const -&gt; double</span>
+            </dt>
+            <dd>Returns the angle between the direction vectors of the lines.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab61555cdf63975183fe2ba6174cc9d57" class="m-doc">HomogeneousForm</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#a92ab60de0480f6b1a7388735afe7b9e2" class="m-doc">vec3_<wbr />type</a></span>
             </dt>
-            <dd></dd>
+            <dd>Returns the line in homogeneous coordinates.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae9e4f657de2d0c43a448ec78791c78c7" class="m-doc">PointAtOffset</a>(</span><span class="m-doc-wrap">double offset_factor) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
-            <dd></dd>
+            <dd>Returns a point between the start and end point.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab3f09b754cad9aa3f7fc03e79e86e059" class="m-doc">ClosestPointOnLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
@@ -178,6 +186,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#acb02d130c79b74c76125d604956342f2" class="m-doc-self">IsCollinear</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const -&gt; bool</span>
             </dt>
             <dd>Returns true if the two lines are collinear.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a94c7af3d29c880907a6590656777ae4e" class="m-doc">IsParallel</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const -&gt; bool</span>
+            </dt>
+            <dd>Returns true if the two lines are parallel.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a514a8360285c4a1d9f560df61cf319d7" class="m-doc">IsPointLeftOfLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point,
               bool* is_on_line = nullptr) const -&gt; bool</span>
@@ -333,6 +345,58 @@
             </h3>
 <p>Returns the angle between the line and the given directional vector. The angle will be between 0 and 180 degrees.</p>
           </div></section>
+          <section class="m-doc-details" id="ada9fde07820a76a1caaea6c00b578ac7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ada9fde07820a76a1caaea6c00b578ac7" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const</span></span>
+            </h3>
+            <p>Returns the angle between the direction vectors of the lines.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The other line.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Angle in radians, between [0, pi].</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af440868de82b6fe5c702e1124c8b487c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af440868de82b6fe5c702e1124c8b487c" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const</span></span>
+            </h3>
+            <p>Returns the angle between the direction vectors of the lines.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The other line.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Angle in degrees, between [0, 180].</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ab61555cdf63975183fe2ba6174cc9d57"><div>
             <h3>
               <div class="m-doc-template">
@@ -340,7 +404,16 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#a92ab60de0480f6b1a7388735afe7b9e2" class="m-doc">vec3_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab61555cdf63975183fe2ba6174cc9d57" class="m-doc-self">HomogeneousForm</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-<p>Returns the line in homogeneous coordinates, <em>i.e.</em> a 3-element vector in P^2 (Projective 2-space). For more details on lines in projective space, refer to <code>Bob Fisher&#x27;s CVonline &lt;<a href="http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/BEARDSLEY/node2.html">http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_<wbr />COPIES/BEARDSLEY/node2.html</a>&gt;</code>__, or <code>Stan Birchfield&#x27;s notes &lt;<a href="http://robotics.stanford.edu/~birch/projective/node4.html">http:/<wbr />/<wbr />robotics.stanford.edu/<wbr />~birch/<wbr />projective/<wbr />node4.html</a>&gt;</code>__.</p>
+            <p>Returns the line in homogeneous coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>A 3-element vector representing the line in P^2, <em>i.e.</em> the projective 2-space.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>For more details on lines in projective space, refer to <code>Bob Fisher&#x27;s CVonline &lt;<a href="http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/BEARDSLEY/node2.html">http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_<wbr />COPIES/BEARDSLEY/node2.html</a>&gt;</code>__, or <code>Stan Birchfield&#x27;s notes &lt;<a href="http://robotics.stanford.edu/~birch/projective/node4.html">http:/<wbr />/<wbr />robotics.stanford.edu/<wbr />~birch/<wbr />projective/<wbr />node4.html</a>&gt;</code>__.</p>
           </div></section>
           <section class="m-doc-details" id="ae9e4f657de2d0c43a448ec78791c78c7"><div>
             <h3>
@@ -349,7 +422,24 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9e4f657de2d0c43a448ec78791c78c7" class="m-doc-self">PointAtOffset</a>(</span><span class="m-doc-wrap">double offset_factor) const</span></span>
             </h3>
-<p>Returns the point which is offset * <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#adfff023c6d8a77e30c3035e64b9702b1" class="m-doc">Direction()</a> away from the line&#x27;s starting point, i.e. offset == 0 is the starting point, offset == 1 is the end point.</p>
+            <p>Returns a point between the start and end point.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">offset_factor</td>
+                  <td>Factor of the distance between start and end point.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The point which is offset * <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#adfff023c6d8a77e30c3035e64b9702b1" class="m-doc">Direction()</a> units away from the line&#x27;s starting point, i.e. offset == 0 is the starting point, offset == 1 is the end point.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="ab3f09b754cad9aa3f7fc03e79e86e059"><div>
             <h3>
@@ -368,6 +458,26 @@
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cfd9db0875c6f9f9c85e056ac88eeec" class="m-doc-self">ClosestPointOnSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const</span></span>
             </h3>
 <p>Returns the point on this line segment(!) which is closest to the given point.</p>
+          </div></section>
+          <section class="m-doc-details" id="a94c7af3d29c880907a6590656777ae4e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a94c7af3d29c880907a6590656777ae4e" class="m-doc-self">IsParallel</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const</span></span>
+            </h3>
+            <p>Returns true if the two lines are parallel.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">other</td>
+                  <td>The second line.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
           <section class="m-doc-details" id="a514a8360285c4a1d9f560df61cf319d7"><div>
             <h3>

@@ -434,6 +434,14 @@
             </dt>
             <dd>Returns the minimum dimension value.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c4302baf5092c2d5c96ba2dff9dc1b1" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) const -&gt; double</span>
+            </dt>
+            <dd>Returns the angle in [0, pi] between this and <code>other</code>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab650d5a2ed43a9db0b46c335a78de661" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) const -&gt; double</span>
+            </dt>
+            <dd>Returns the angle in [0, 180] between this and <code>other</code>.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#adcf4c1603cf85f0e64a10502001cda53" class="m-doc">PerpendicularClockwise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
             </dt>
@@ -690,6 +698,40 @@
               <span class="m-doc-wrap-bumper">Tp werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4f47cc45c2ef4f4961a6d10b02ff433" class="m-doc-self">Determinant</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;&amp; other) const</span></span>
             </h3>
 <p>Returns the determinant of the two 2d vectors, i.e. the &quot;2d cross product&quot;.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5c4302baf5092c2d5c96ba2dff9dc1b1"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T, std::size_t Dim&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c4302baf5092c2d5c96ba2dff9dc1b1" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) const</span></span>
+            </h3>
+            <p>Returns the angle in [0, pi] between this and <code>other</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The angle in radians.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab650d5a2ed43a9db0b46c335a78de661"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T, std::size_t Dim&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab650d5a2ed43a9db0b46c335a78de661" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) const</span></span>
+            </h3>
+            <p>Returns the angle in [0, 180] between this and <code>other</code>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td>The angle in degrees.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
           <section class="m-doc-details" id="adcf4c1603cf85f0e64a10502001cda53"><div>
             <h3>
