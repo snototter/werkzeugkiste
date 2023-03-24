@@ -22,7 +22,21 @@ namespace werkzeugkiste::config {
 
 /// @brief Encapsulates configuration data.
 ///
-/// * Internally, a TOML configuration is used to store the parameters.
+/// This class provides access to configuration data in a format compatible
+/// to TOML.
+/// Supported data types:
+/// * Booleans
+/// * Integer (internally stored as 64-bit signed integer).
+/// * Floating point numbers (internally stored as double precision values).
+/// * Strings
+/// * Dates, times and date-times following RFC 3339,
+///   https://www.rfc-editor.org/rfc/rfc3339
+/// * Lists of configuration parameters (may be of any type).
+/// * Groups, aka tables (TOML), i.e. a collection of named parameters. Similar
+///   to objects in JSON, dicts (with keys of type `str`) in Python, groups in
+///   `libconfig`.
+///
+/// TODO clean up doc / extend by examples:
 /// * Explicit method names are preferred over a templated "Get<>".
 /// * Get("unknown-key") throws a KeyError if the parameter does not exist.
 /// * GetOptional returns an optional scalar.
@@ -38,16 +52,6 @@ namespace werkzeugkiste::config {
 /// * Integers & floating points will be implicitly converted if the value can
 ///   be represented *exactly* by the target type. For example, double(2.0)
 ///   can be looked up as int, but 2.5 cannot (will raise a `TypeError`).
-///
-/// TODOs:
-/// * [ ] LoadNestedJSONConfiguration
-/// * [ ] NestedLists int & double (for "matrices")
-/// * [ ] If eigen3 is available, enable GetMatrix.
-///       Static dimensions vs dynamic?
-/// * [ ] Setters for ...Pair
-/// * [ ] Optional & Default getters for ...Pair
-/// * [ ] Convenience types: Point/Index/Rectangle
-/// * [ ] Convenience type casts: unsigned integer
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -212,10 +216,24 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   int32_t GetInteger32(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Returns the 32-bit integer parameter or the default value.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 32-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to be returned if the parameter does not exist.
   int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
 
-  // TODO doc
+  /// @brief Returns the 32-bit integer parameter or `std::nullopt` if it does
+  ///   not exist.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 32-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<int32_t> GetOptionalInteger32(std::string_view key) const;
 
   /// @brief Sets a 32-bit signed integer parameter.
@@ -232,10 +250,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetInteger32(std::string_view key, int32_t value);
 
-  // TODO doc
+  // TODO remove! (replace by getinteger32point)
   std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
-  // TODO GetPairOr
-  // TODO GetOptionalPair
 
   // /// @brief Alias for `GetInteger32Pair`. Can be used to retrieve a 2D
   // ///   size definition of a buffer, image, frame, etc.
@@ -259,23 +275,15 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
 
-  /// @brief Returns a list of 2D indices (integral x/y coordinates, e.g. a
-  ///   polyline).
-  ///
-  /// For the floating point counterpart, refer to `GetPoints2D`.
-  ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<std::tuple<int32_t, int32_t>> GetIndices2D(
-      std::string_view key) const;
-
-  /// @brief Returns a list of 3D indices (integral x/y/z coordinates, e.g. a
-  ///   polyline).
-  ///
-  /// For the floating point counterpart, refer to `GetPoints3D`.
-  ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetIndices3D(
-      std::string_view key) const;
+  // TODO remove
+  // /// @brief Returns a list of 3D indices (integral x/y/z coordinates, e.g. a
+  // ///   polyline).
+  // ///
+  // /// For the floating point counterpart, refer to `GetPoints3D`.
+  // ///
+  // /// @param key Fully-qualified parameter name.
+  // std::vector<std::tuple<int32_t, int32_t, int32_t>> GetIndices3D(
+  //     std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Integers (64-bit)
@@ -290,7 +298,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   int64_t GetInteger64(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Returns the 64-bit integer parameter or the default value.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 64-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to be returned if the parameter does not exist.
   int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
 
   // TODO doc
@@ -311,6 +326,36 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetInteger64List(std::string_view key,
       const std::vector<int64_t> &values);
 
+  /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 2D points. Each point in the configuration must have at least
+  /// 2 dimensions, but may also have more (i.e. only loading the x/y
+  /// components of 3D points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point2d<int64_t>> GetInteger64Points2D(
+      std::string_view key) const;
+
+  /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 3D points. Each point in the configuration must have at least
+  /// 3 dimensions, but may also have more (i.e. only loading the first 3
+  /// components of n-dim points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point3d<int64_t>> GetInteger64Points3D(
+      std::string_view key) const;
+
   //---------------------------------------------------------------------------
   // Floating Point
 
@@ -324,7 +369,15 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   double GetDouble(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Returns the double-precision floating point parameter or the
+  ///   default value.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. integer values can usually be exactly
+  /// represented by a double).
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to be returned if the parameter does not exist.
   double GetDoubleOr(std::string_view key, double default_val) const;
 
   // TODO doc
@@ -344,8 +397,35 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO doc
   void SetDoubleList(std::string_view key, const std::vector<double> &values);
 
-  // TODO getpoints2d
-  // TODO getpoints3d
+  // TODO get integer/double point (singular)
+
+  /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 2D points. Each point in the configuration must have at least
+  /// 2 dimensions, but may also have more (i.e. only loading the x/y
+  /// components of 3D points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point2d<double>> GetDoublePoints2D(std::string_view key) const;
+
+  /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 3D points. Each point in the configuration must have at least
+  /// 3 dimensions, but may also have more (i.e. only loading the x/y/z
+  /// components of n-dim points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point3d<double>> GetDoublePoints3D(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Strings
@@ -368,8 +448,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::string GetStringOr(std::string_view key,
       std::string_view default_val) const;
 
-  /// @brief Returns an optional string or `std::nullopt` if it does not
-  ///   exist.
+  /// @brief Returns an optional string or `std::nullopt` if it does not exist.
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
@@ -444,7 +523,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<date> GetDateList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of date parameters.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of dates.
   void SetDateList(std::string_view key, const std::vector<date> &values);
 
   //---------------------------------------------------------------------------
@@ -493,7 +577,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<time> GetTimeList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of time parameters.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of times.
   void SetTimeList(std::string_view key, const std::vector<time> &values);
 
   //---------------------------------------------------------------------------
@@ -546,7 +635,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<date_time> GetDateTimeList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of date-time parameters.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of date-times.
   void SetDateTimeList(std::string_view key,
       const std::vector<date_time> &values);
 

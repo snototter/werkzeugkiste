@@ -22,6 +22,9 @@ TEST(ConfigScalarTest, Integer) {
     int32_max_overflow = 2147483648
     int32_min = -2147483648
     int32_min_underflow = -2147483649
+
+    flt1 = 42.0
+    flt2 = 1e-3
     )toml"sv);
   EXPECT_TRUE(config.GetOptionalInteger32("int32_1"sv).has_value());
   EXPECT_EQ(-123456, config.GetOptionalInteger32("int32_1"sv).value());
@@ -90,6 +93,22 @@ TEST(ConfigScalarTest, Integer) {
         "Key `int32` does not exist! Did you mean: `int32_1`, `int32_2`?"};
     EXPECT_EQ(exp_msg, std::string(e.what()));
   }
+
+  EXPECT_EQ(42, config.GetInteger32("flt1"sv));
+  EXPECT_EQ(42, config.GetInteger32Or("flt1"sv, 0));
+  EXPECT_EQ(42, config.GetOptionalInteger32("flt1"sv).value());
+
+  EXPECT_EQ(42, config.GetInteger64("flt1"sv));
+  EXPECT_EQ(42, config.GetInteger64Or("flt1"sv, 0));
+  EXPECT_EQ(42, config.GetOptionalInteger64("flt1"sv).value());
+
+  EXPECT_THROW(config.GetInteger32("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Or("flt2"sv, 0), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger32("flt2"sv), wkc::TypeError);
+
+  EXPECT_THROW(config.GetInteger64("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Or("flt2"sv, 0), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInteger64("flt2"sv), wkc::TypeError);
 }
 
 TEST(ConfigScalarTest, FloatingPoint) {

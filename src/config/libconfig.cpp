@@ -79,7 +79,7 @@ Tcfg CastSetting(const libconfig::Setting &value) {
 /// @param lst_key Fully-qualified parameter name of the list.
 /// @param cfg werkzeugkiste configuration.
 /// @param node Node/Setting holding the libconfig value.
-// NOLINTNEXTLINE(misc-no-recursion)
+// NOLINTNEXTLINE(misc-no-recursion, google-runtime-references)
 void AppendListValue(std::string_view lst_key,
     Configuration &cfg,
     const libconfig::Setting &node) {

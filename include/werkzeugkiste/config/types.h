@@ -295,6 +295,38 @@ struct date_time {
 };
 
 //-----------------------------------------------------------------------------
+// Convenience types to query configuration parameters
+
+/// @brief A point in 2D Euclidean space.
+/// @tparam Tp Underlying type, either integral or floating point.
+template <typename Tp>
+struct point2d {
+  static_assert(std::is_arithmetic_v<Tp>,
+      "Only arithmetic types are supported!");
+
+ public:
+  using value_type = Tp;
+  static constexpr std::size_t ndim = 2;
+  Tp x{};
+  Tp y{};
+};
+
+/// @brief A point in 3D Euclidean space.
+/// @tparam Tp Underlying type, either integral or floating point.
+template <typename Tp>
+struct point3d {
+  static_assert(std::is_arithmetic_v<Tp>,
+      "Only arithmetic types are supported!");
+
+ public:
+  using value_type = Tp;
+  static constexpr std::size_t ndim = 3;
+  Tp x{};
+  Tp y{};
+  Tp z{};
+};
+
+//-----------------------------------------------------------------------------
 // Readable type identifiers to support meaningful error messages
 
 template <typename T>
