@@ -11,14 +11,10 @@
 #include <vector>
 
 namespace werkzeugkiste::files {
-class IOError : public std::exception {
+/// @brief Indicates an I/O error (e.g. invalid path or missing permissions).
+class IOError : public std::runtime_error {
  public:
-  explicit IOError(std::string msg) : msg_{std::move(msg)} {}
-
-  const char *what() const noexcept override { return msg_.c_str(); }
-
- private:
-  std::string msg_{};
+  explicit IOError(const std::string &msg) : std::runtime_error(msg) {}
 };
 
 /// Reads all lines of the plain text file.
