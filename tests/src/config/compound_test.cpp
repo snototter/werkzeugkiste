@@ -32,7 +32,85 @@ inline std::vector<VecType> TuplesToVecs(const Tuples &tuples) {
   return poly;
 }
 
-TEST(ConfigCompoundTest, IntegralPointLists) {
+TEST(ConfigCompoundTest, Points) {
+  const auto config = wkc::LoadTOMLString(R"toml(
+    str = "not an index list"
+
+    poly1 = [[1, 2], [3, 4], [5, 6], [-7, -8]]
+
+    poly2 = [{y = 20, x = 10}, {x = 30, y = 40}, {y = 60, x = 50}]
+
+    poly3 = [[1, 2, 3], [4, 5, 6], {x = -9, y = 0, z = -3}]
+    )toml"sv);
+
+  // 2D integral point
+  EXPECT_THROW(config.GetInteger64Point2D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger64Point2D("str"sv), wkc::TypeError);
+
+  EXPECT_THROW(config.GetInteger64Point2D("poly1"sv), wkc::TypeError);
+  auto p2i = config.GetInteger64Point2D("poly1[0]"sv);
+  EXPECT_EQ(1, p2i.x);
+  EXPECT_EQ(2, p2i.y);
+
+  p2i = config.GetInteger64Point2D("poly2[2]"sv);
+  EXPECT_EQ(50, p2i.x);
+  EXPECT_EQ(60, p2i.y);
+
+  p2i = config.GetInteger64Point2D("poly3[0]"sv);
+  EXPECT_EQ(1, p2i.x);
+  EXPECT_EQ(2, p2i.y);
+
+  p2i = config.GetInteger64Point2D("poly3[2]"sv);
+  EXPECT_EQ(-9, p2i.x);
+  EXPECT_EQ(0, p2i.y);
+
+  // 3D integral point
+  EXPECT_THROW(config.GetInteger64Point3D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger64Point3D("str"sv), wkc::TypeError);
+
+  EXPECT_THROW(config.GetInteger64Point3D("poly1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Point3D("poly1[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger64Point3D("poly2[0]"sv), wkc::TypeError);
+
+  auto p3i = config.GetInteger64Point3D("poly3[0]"sv);
+  EXPECT_EQ(1, p3i.x);
+  EXPECT_EQ(2, p3i.y);
+  EXPECT_EQ(3, p3i.z);
+
+  p3i = config.GetInteger64Point3D("poly3[2]"sv);
+  EXPECT_EQ(-9, p3i.x);
+  EXPECT_EQ(0, p3i.y);
+  EXPECT_EQ(-3, p3i.z);
+
+  // Double precision points
+  EXPECT_THROW(config.GetDoublePoint2D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetDoublePoint2D("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoublePoint2D("poly1"sv), wkc::TypeError);
+  auto p2d = config.GetDoublePoint2D("poly1[0]"sv);
+  EXPECT_DOUBLE_EQ(1.0, p2d.x);
+  EXPECT_DOUBLE_EQ(2.0, p2d.y);
+
+  p2d = config.GetDoublePoint2D("poly2[2]"sv);
+  EXPECT_DOUBLE_EQ(50.0, p2d.x);
+  EXPECT_DOUBLE_EQ(60.0, p2d.y);
+
+  EXPECT_THROW(config.GetDoublePoint3D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetDoublePoint3D("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoublePoint3D("poly1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetDoublePoint3D("poly1[0]"sv), wkc::TypeError);
+
+  auto p3d = config.GetDoublePoint3D("poly3[0]"sv);
+  EXPECT_DOUBLE_EQ(1.0, p3d.x);
+  EXPECT_DOUBLE_EQ(2.0, p3d.y);
+  EXPECT_DOUBLE_EQ(3.0, p3d.z);
+
+  p3d = config.GetDoublePoint3D("poly3[2]"sv);
+  EXPECT_DOUBLE_EQ(-9.0, p3d.x);
+  EXPECT_DOUBLE_EQ(0.0, p3d.y);
+  EXPECT_DOUBLE_EQ(-3.0, p3d.z);
+}
+
+TEST(ConfigCompoundTest, PointLists) {
   const auto config = wkc::LoadTOMLString(R"toml(
     str = "not an index list"
 

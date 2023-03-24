@@ -244,25 +244,6 @@ void Traverse(toml::node &node,
   }
 }
 
-/// Casts the value if the given 64-bit integer can be safely cast into a
-/// 32-bit integer. Otherwise, a std::domain_error will be thrown.
-inline int32_t SafeInteger32Cast(int64_t value64, std::string_view param_name) {
-  constexpr auto min32 =
-      static_cast<int64_t>(std::numeric_limits<int32_t>::min());
-  constexpr auto max32 =
-      static_cast<int64_t>(std::numeric_limits<int32_t>::max());
-  if ((value64 > max32) || (value64 < min32)) {
-    std::string msg{"Parameter value `"};
-    msg += param_name;
-    msg += " = ";
-    msg += std::to_string(value64);
-    msg += "` exceeds 32-bit integer range!";
-    throw TypeError{msg};
-  }
-
-  return static_cast<int32_t>(value64);
-}
-
 template <typename T>
 constexpr const char *TomlTypeName() {
   if constexpr (std::is_same_v<T, toml::table>) {
@@ -906,191 +887,6 @@ void AppendScalarListElement(toml::table &tbl,
   arr->push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
 }
 
-// /// @brief Utility to turn a std::array into a std::tuple.
-// template <typename Array, std::size_t... Idx>
-// inline auto ArrayToTuple(const Array &arr,
-//     std::index_sequence<Idx...> /* indices */) {
-//   return std::make_tuple(arr[Idx]...);
-// }
-
-// /// @brief Utility to turn a std::array into a std::tuple.
-// template <typename Type, std::size_t Num>
-// inline auto ArrayToTuple(const std::array<Type, Num> &arr) {
-//   return ArrayToTuple(arr, std::make_index_sequence<Num>{});
-// }
-
-// // TODO remove
-// /// @brief Extracts a single Dim-dimensional point from the given
-// /// toml::array into the `point` std::array.
-// template <typename Type, std::size_t Dim>
-// inline void ExtractPointFromTOMLArray(const toml::array &arr,
-//     std::string_view key,
-//     std::array<Type, Dim> &point) {
-//   // The array must have at least Dim entries - more are also allowed, as
-//   // they will just be ignored.
-//   if (arr.size() < Dim) {
-//     std::ostringstream msg;
-//     msg << "Invalid parameter `" << key << "`. Cannot extract a " << Dim
-//         << "D point from a " << arr.size() << "-element array!";
-//     throw TypeError{msg.str()};
-//   }
-
-//   // The first Dim entries of the array must be of the
-//   // correct data type in order to extract them for the point.
-//   for (std::size_t idx = 0; idx < Dim; ++idx) {
-//     if (arr[idx].is_number()) {
-//       if (!arr[idx].is<Type>()) {
-//         std::ostringstream msg;
-//         msg << "Invalid parameter `" << key << "`. Dimension [" << idx
-//             << "] is `" << TomlTypeName(arr, key) << "` instead of `"
-//             << TypeName<Type>() << "`!";
-//         throw TypeError{msg.str()};
-//       }
-//       point[idx] = Type{*arr[idx].as<Type>()};
-//     }
-//   }
-// }
-
-// // TODO remove
-// /// @brief Extracts a single Dim-dimensional point as std::tuple from the
-// /// given toml::array.
-// template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
-// inline Tuple ExtractPointTuple(const toml::array &arr, std::string_view key)
-// {
-//   using CoordType = std::tuple_element_t<0, Tuple>;
-//   static_assert(std::is_same_v<CoordType, int32_t> ||
-//                     std::is_same_v<CoordType, int64_t> ||
-//                     std::is_same_v<CoordType, double>,
-//       "Only integer (32- and 64-bit) and double-precision floating "
-//       "point types are supported!");
-
-//   using LookupType = std::
-//       conditional_t<std::is_same_v<CoordType, int32_t>, int64_t, CoordType>;
-
-//   std::array<LookupType, Dim> point{};
-//   ExtractPointFromTOMLArray(arr, key, point);
-
-//   if constexpr (std::is_same_v<CoordType, int32_t>) {
-//     std::array<CoordType, Dim> cast{};
-//     for (std::size_t idx = 0; idx < Dim; ++idx) {
-//       cast[idx] = SafeInteger32Cast(point[idx], key);
-//     }
-//     return ArrayToTuple(cast);
-//   } else {
-//     return ArrayToTuple(point);
-//   }
-// }
-
-// // TODO remove
-// /// @brief Extracts a single Dim-dimensional point from the given
-// /// toml::table into the `point` std::array. The table must
-// /// have "x", "y", ... entries which are used to look up the
-// /// corresponding point coordinates.
-// template <typename Type, std::size_t Dim>
-// inline void ExtractPointFromTOMLTable(const toml::table &tbl,
-//     std::string_view key,
-//     std::array<Type, Dim> &point) {
-//   using namespace std::string_view_literals;
-//   constexpr std::array<std::string_view, 3> point_keys{"x"sv, "y"sv, "z"sv};
-//   static_assert(Dim <= point_keys.size(),
-//       "Table keys for higher-dimensional points have not yet been defined!");
-
-//   for (std::size_t idx = 0; idx < Dim; ++idx) {
-//     if (!tbl.contains(point_keys[idx])) {
-//       std::ostringstream msg;
-//       msg << "Invalid parameter `" << key
-//           << "`. Table entry does not specify the `" << point_keys[idx]
-//           << "` coordinate!";
-//       throw TypeError{msg.str()};
-//     }
-
-//     if (!tbl[point_keys[idx]].is<Type>()) {
-//       std::ostringstream msg;
-//       msg << "Invalid parameter `" << key << "`. Dimension `" <<
-//       point_keys[idx]
-//           << "` is `" << TomlTypeName(tbl[point_keys[idx]], key)
-//           << "` instead of `" << TypeName<Type>() << "`!";
-//       throw TypeError{msg.str()};
-//     }
-
-//     point[idx] = Type{*tbl[point_keys[idx]].as<Type>()};
-//   }
-// }
-
-// // TODO remove
-// /// @brief Extracts a single Dim-dimensional point as std::tuple from the
-// /// given toml::table.
-// template <typename Tuple, std::size_t Dim = std::tuple_size_v<Tuple>>
-// inline Tuple ExtractPointTuple(const toml::table &tbl, std::string_view key)
-// {
-//   using CoordType = std::tuple_element_t<0, Tuple>;
-//   static_assert(std::is_same_v<CoordType, int32_t> ||
-//                     std::is_same_v<CoordType, int64_t> ||
-//                     std::is_same_v<CoordType, double>,
-//       "Only integer (32- and 64-bit) and double-precision floating "
-//       "point types are supported!");
-
-//   using LookupType = std::
-//       conditional_t<std::is_same_v<CoordType, int32_t>, int64_t, CoordType>;
-
-//   std::array<LookupType, Dim> point{};
-//   ExtractPointFromTOMLTable(tbl, key, point);
-
-//   if constexpr (std::is_same_v<LookupType, CoordType>) {
-//     return ArrayToTuple(point);
-//   } else {
-//     std::array<CoordType, Dim> cast{};
-//     for (std::size_t idx = 0; idx < Dim; ++idx) {
-//       cast[idx] = SafeInteger32Cast(point[idx], key);
-//     }
-//     return ArrayToTuple(cast);
-//   }
-// }
-
-// // TODO remove
-// /// @brief Extracts a list of tuples: This can be used to query a list of
-// /// "points" (e.g. a polyline), "pixels", or "indices". Each coordinate must
-// /// be specified as integer or floating point.
-// template <typename Tuple>
-// std::vector<Tuple> GetTuples(const toml::table &tbl, std::string_view key) {
-//   if (!ContainsKey(tbl, key)) {
-//     throw KeyErrorWithSimilarKeys(tbl, key);
-//   }
-
-//   const auto node = tbl.at_path(key);
-//   if (!node.is_array()) {
-//     std::string msg{"Invalid point list configuration: `"};
-//     msg += key;
-//     msg += "` must be a list, but is of type `";
-//     msg += TomlTypeName(node, key);
-//     msg += "`!";
-//     throw TypeError{msg};
-//   }
-
-//   const toml::array &arr = *node.as_array();
-//   std::size_t arr_index = 0;
-//   std::vector<Tuple> poly;
-//   for (auto &&value : arr) {
-//     const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
-//     if (value.is_array()) {
-//       const auto &pt = *value.as_array();
-//       poly.emplace_back(ExtractPointTuple<Tuple>(pt, fqn));
-//     } else if (value.is_table()) {
-//       const auto &pt = *value.as_table();
-//       poly.emplace_back(ExtractPointTuple<Tuple>(pt, fqn));
-//     } else {
-//       std::string msg{
-//           "Invalid polygon. All parameter entries must be either arrays or "
-//           "tables, but `"};
-//       msg += fqn;
-//       msg += "` is not!";
-//       throw TypeError{msg};
-//     }
-//     ++arr_index;
-//   }
-//   return poly;
-// }
-
 /// @brief Extracts a single pointXd from the given toml::table.
 template <typename Pt>
 inline Pt ConvertTableToPoint(const toml::table &tbl, std::string_view key) {
@@ -1150,6 +946,34 @@ inline Pt ConvertArrayToPoint(const toml::array &arr, std::string_view key) {
     point.z = values[2];
   }
   return point;
+}
+
+template <typename Pt>
+Pt GetPoint(const toml::table &tbl, std::string_view key) {
+  static_assert(std::is_arithmetic_v<typename Pt::value_type>);
+  static_assert(Pt::ndim == 2 || Pt::ndim == 3);
+  if (!ContainsKey(tbl, key)) {
+    throw KeyErrorWithSimilarKeys(tbl, key);
+  }
+
+  const auto node = tbl.at_path(key);
+  if (node.is_array()) {
+    const auto &pt = *node.as_array();
+    return ConvertArrayToPoint<Pt>(pt, key);
+  }
+  if (node.is_table()) {
+    const auto &pt = *node.as_table();
+    return ConvertTableToPoint<Pt>(pt, key);
+  }
+
+  std::string msg{"Cannot convert `"};
+  msg += key;
+  msg += "` to a ";
+  msg += std::to_string(Pt::ndim);
+  msg += "D point. Expected a group or list, but got `";
+  msg += TomlTypeName(node, key);
+  msg += "`!";
+  throw TypeError{msg};
 }
 
 template <typename Pt>
@@ -1645,6 +1469,16 @@ void Configuration::SetInteger64List(std::string_view key,
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
+point2d<int64_t> Configuration::GetInteger64Point2D(
+    std::string_view key) const {
+  return detail::GetPoint<point2d<int64_t>>(pimpl_->config_root, key);
+}
+
+point3d<int64_t> Configuration::GetInteger64Point3D(
+    std::string_view key) const {
+  return detail::GetPoint<point3d<int64_t>>(pimpl_->config_root, key);
+}
+
 std::vector<point2d<int64_t>> Configuration::GetInteger64Points2D(
     std::string_view key) const {
   return detail::GetPoints<point2d<int64_t>>(pimpl_->config_root, key);
@@ -1693,6 +1527,14 @@ std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
 void Configuration::SetDoubleList(std::string_view key,
     const std::vector<double> &values) {
   detail::SetList<double>(pimpl_->config_root, key, values);
+}
+
+point2d<double> Configuration::GetDoublePoint2D(std::string_view key) const {
+  return detail::GetPoint<point2d<double>>(pimpl_->config_root, key);
+}
+
+point3d<double> Configuration::GetDoublePoint3D(std::string_view key) const {
+  return detail::GetPoint<point3d<double>>(pimpl_->config_root, key);
 }
 
 std::vector<point2d<double>> Configuration::GetDoublePoints2D(

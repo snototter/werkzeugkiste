@@ -326,6 +326,36 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetInteger64List(std::string_view key,
       const std::vector<int64_t> &values);
 
+  /// @brief Returns a 2D point with integer coordinates.
+  ///
+  /// Interprets a list of numbers as 2D point. If the list contains more than
+  /// two elements, only the first two entries are loaded as x and y
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x` and `y` parameters can also
+  /// be loaded as a 2D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point2d<int64_t> GetInteger64Point2D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
+
+  /// @brief Returns a 3D point with integer coordinates.
+  ///
+  /// Interprets a list of numbers as 3D point. If the list contains more than
+  /// three elements, only the first three entries are loaded as x, y and z
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x`, `y` and `z` parameters can
+  /// also be loaded as a 3D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point3d<int64_t> GetInteger64Point3D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
+
   /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
   ///
   /// Supports loading nested lists and lists of {x, y} tables as a
@@ -397,7 +427,35 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // TODO doc
   void SetDoubleList(std::string_view key, const std::vector<double> &values);
 
-  // TODO get integer/double point (singular)
+  /// @brief Returns a 2D point with floating point coordinates.
+  ///
+  /// Interprets a list of numbers as 2D point. If the list contains more than
+  /// two elements, only the first two entries are loaded as x and y
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x` and `y` parameters can also
+  /// be loaded as a 2D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point2d<double> GetDoublePoint2D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
+
+  /// @brief Returns a 3D point with floating point coordinates.
+  ///
+  /// Interprets a list of numbers as 3D point. If the list contains more than
+  /// three elements, only the first three entries are loaded as x, y and z
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x`, `y` and `z` parameters can
+  /// also be loaded as a 3D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point3d<double> GetDoublePoint3D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
 
   /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
   ///
