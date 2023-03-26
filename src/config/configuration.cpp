@@ -428,15 +428,6 @@ Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
       }
       return tmp;
     }
-  } else {
-    // LCOV_EXCL_START
-    std::string msg{"Parameter lookup for type `"};
-    msg += TypeName<Tcfg>();
-    msg +=
-        "` is not supported. Please report at "
-        "https://github.com/snototter/werkzeugkiste/issues";
-    throw std::logic_error{msg};
-    // LCOV_EXCL_STOP
   }
 
   std::string msg{"Cannot query `"};
@@ -449,15 +440,10 @@ Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
   throw TypeError{msg};
 }
 
-// TODO fix doc
 /// @brief Converts an interface-exposed type to a TOML type if possible.
 /// Throws a type error upon invalid numeric conversion (i.e. the number is not
 /// exactly representable by the target type).
 /// @tparam Ttoml The TOML type.
-/// @tparam Tmessage Type needed for error message to avoid separate int32_t
-/// specialization. Internally, all integers are stored as 64-bit: If there
-/// would be an error while setting a 32-bit value, we don't want to show a
-/// confusing "user provided 64-bit" error message.
 /// @tparam Tcfg The type exposed via the werkzeugkiste::config API.
 /// @param value The value to be converted.
 /// @param key The fully-qualified parameter name.
@@ -497,17 +483,16 @@ Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
               value.time.minute,
               value.time.second,
               value.time.nanosecond}};
-    } else {  // NOLINT
-      toml::time_offset offset{};
-      offset.minutes = static_cast<int16_t>(value.offset.value().minutes);
-      return toml::date_time{
-          toml::date{value.date.year, value.date.month, value.date.day},
-          toml::time{value.time.hour,
-              value.time.minute,
-              value.time.second,
-              value.time.nanosecond},
-          offset};
     }
+    toml::time_offset offset{};
+    offset.minutes = static_cast<int16_t>(value.offset.value().minutes);
+    return toml::date_time{
+        toml::date{value.date.year, value.date.month, value.date.day},
+        toml::time{value.time.hour,
+            value.time.minute,
+            value.time.second,
+            value.time.nanosecond},
+        offset};
   }
 
   std::string msg{"Cannot convert input of type `"};
@@ -762,8 +747,6 @@ void ReplaceHomogeneousList(toml::array &arr,
   toml::array toml_arr{};
   for (const auto &value : vec) {
     toml_arr.push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
-    // TODO Nice-to-have: Catch exception and re-throw with extended error
-    // message that includes the index into "vec". (low-priority)
   }
   arr = toml_arr;
 }
@@ -1410,23 +1393,8 @@ std::vector<int32_t> Configuration::GetInteger32List(
 
 void Configuration::SetInteger32List(std::string_view key,
     const std::vector<int32_t> &values) {
-  detail::SetList<int64_t>(pimpl_->config_root, key,
-      values);  // TODO test
+  detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
-
-// TODO remove
-// std::vector<std::tuple<int32_t, int32_t>> Configuration::GetIndices2D(
-//     std::string_view key) const {
-//   return detail::GetTuples<std::tuple<int32_t, int32_t>>(
-//       pimpl_->config_root, key);
-// }
-
-// std::vector<std::tuple<int32_t, int32_t, int32_t>>
-// Configuration::GetIndices3D(
-//     std::string_view key) const {
-//   return detail::GetTuples<std::tuple<int32_t, int32_t, int32_t>>(
-//       pimpl_->config_root, key);
-// }
 
 //---------------------------------------------------------------------------
 // Integer (64-bit)
@@ -1948,7 +1916,7 @@ void Configuration::LoadNestedConfiguration(std::string_view key) {
     std::string msg{"Could not insert nested configuration at `"};
     msg += key;
     msg += "`!";
-    throw std::runtime_error{msg};  // TODO add to docstr
+    throw std::runtime_error{msg};
     // LCOV_EXCL_STOP
   }
 }
@@ -1986,18 +1954,19 @@ Configuration LoadFile(std::string_view filename) {
   const std::optional<std::string> ext = files::Extension(filename);
   const std::string lower =
       (ext.has_value()) ? strings::Lower(ext.value()) : "";
-  if (lower.compare(".toml") == 0) {
+  if (lower == ".toml") {
     return LoadTOMLFile(filename);
-  } else if (lower.compare(".json") == 0) {
-    return LoadJSONFile(filename);
-  } else if (lower.compare(".cfg") == 0) {
-    return LoadLibconfigFile(filename);
-  } else {
-    std::string msg{"Cannot deduce configuration type from file name `"};
-    msg += filename;
-    msg += "`!";
-    throw ParseError{msg};
   }
+  if (lower == ".json") {
+    return LoadJSONFile(filename);
+  }
+  if (lower == ".cfg") {
+    return LoadLibconfigFile(filename);
+  }
+  std::string msg{"Cannot deduce configuration type from file name `"};
+  msg += filename;
+  msg += "`!";
+  throw ParseError{msg};
 }
 
 #undef WZK_CONFIG_LOOKUP_RAISE_PATH_CREATION_ERROR

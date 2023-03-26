@@ -874,6 +874,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// This method deduces the type of the configuration from the file
   /// extension, similar to `LoadFile`.
   ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is not a string.
+  /// Raises a `ParseError` if parsing the external configuration failed.
+  /// Raises a `std::runtime_error` if replacing the internal configuration
+  ///   failed for unforeseen reasons.
+  ///
   /// @param key Parameter name (fully-qualified TOML path) which holds the
   ///     file name of the nested configuration file. The file name must be
   ///     given as string.
