@@ -302,10 +302,12 @@ struct date_time {
 template <typename Tp>
 struct point2d {
   static_assert(std::is_arithmetic_v<Tp>,
-      "Only arithmetic types are supported!");
+      "Type of coordinates must be integer or floating point!");
 
  public:
+  // NOLINTNEXTLINE(readability-identifier-naming)
   using value_type = Tp;
+
   static constexpr std::size_t ndim = 2;
   Tp x{};
   Tp y{};
@@ -319,12 +321,46 @@ struct point3d {
       "Only arithmetic types are supported!");
 
  public:
+  // NOLINTNEXTLINE(readability-identifier-naming)
   using value_type = Tp;
   static constexpr std::size_t ndim = 3;
   Tp x{};
   Tp y{};
   Tp z{};
 };
+
+// /// @brief Encapsulates a two-dimensional size.
+// /// @tparam Tp Underlying type, either integral or floating point.
+// template <typename Tp>
+// struct size2d {
+//   static_assert(std::is_arithmetic_v<Tp>,
+//       "Type of dimensions must be integer or floating point!");
+
+//  public:
+//   // NOLINTNEXTLINE(readability-identifier-naming)
+//   using value_type = Tp;
+
+//   static constexpr std::size_t ndim = 2;
+//   Tp width{};
+//   Tp height{};
+// };
+
+// /// @brief Encapsulates a three-dimensional size.
+// /// @tparam Tp Underlying type, either integral or floating point.
+// template <typename Tp>
+// struct size3d {
+//   static_assert(std::is_arithmetic_v<Tp>,
+//       "Type of dimensions must be integer or floating point!");
+
+//  public:
+//   // NOLINTNEXTLINE(readability-identifier-naming)
+//   using value_type = Tp;
+
+//   static constexpr std::size_t ndim = 3;
+//   Tp width{};
+//   Tp height{};
+//   Tp length{};
+// };
 
 //-----------------------------------------------------------------------------
 // Readable type identifiers to support meaningful error messages

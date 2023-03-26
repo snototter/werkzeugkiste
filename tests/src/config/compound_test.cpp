@@ -288,6 +288,7 @@ TEST(ConfigCompoundTest, PointLists) {
 }
 
 TEST(ConfigCompoundTest, Pairs) {
+  // TODO remove ...Pair and replace by Point2d / Size2d instead
   const auto config = wkc::LoadTOMLString(R"toml(
     int_list = [1, 2, 3, 4]
 
