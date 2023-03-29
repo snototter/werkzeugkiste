@@ -250,18 +250,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetInteger32(std::string_view key, int32_t value);
 
-  // TODO remove! (replace by getinteger32point)
-  std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
-
-  // /// @brief Alias for `GetInteger32Pair`. Can be used to retrieve a 2D
-  // ///   size definition of a buffer, image, frame, etc.
-  // /// @param key Fully-qualified parameter name.
-  // inline std::pair<int32_t, int32_t> GetSize2D(std::string_view key) const {
-  //   return GetInteger32Pair(key);  // TODO test
-  // }
-  // // TODO GetSize2DOr
-  // // TODO GetOptionalSize2D
-
   // TODO doc
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
 
@@ -313,11 +301,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   // TODO doc
   void SetInteger64(std::string_view key, int64_t value);
-
-  // TODO doc
-  std::pair<int64_t, int64_t> GetInteger64Pair(std::string_view key) const;
-  // TODO GetPairOr
-  // TODO GetOptionalPair
 
   // TODO doc
   std::vector<int64_t> GetInteger64List(std::string_view key) const;
@@ -415,11 +398,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   // TODO doc
   void SetDouble(std::string_view key, double value);
-
-  // TODO doc
-  std::pair<double, double> GetDoublePair(std::string_view key) const;
-  // TODO GetPairOr
-  // TODO GetOptionalPair
 
   // TODO doc
   std::vector<double> GetDoubleList(std::string_view key) const;

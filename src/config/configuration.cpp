@@ -1040,55 +1040,6 @@ std::vector<Tcfg> GetList(const toml::table &tbl, std::string_view key) {
   }
   return scalars;
 }
-
-/// @brief Extracts a pair of built-in scalar types (integer, double, bool).
-/// This is *not suitable* for TOML++-specific types (date, time, ...)
-template <typename T>
-std::pair<T, T> GetScalarPair(const toml::table &tbl, std::string_view key) {
-  if (!ContainsKey(tbl, key)) {
-    throw KeyErrorWithSimilarKeys(tbl, key);
-  }
-
-  const auto &node = tbl.at_path(key);
-  if (!node.is_array()) {
-    std::string msg{"Invalid pair configuration: Parameter `"};
-    msg += key;
-    msg += "` must be a list, but is `";
-    msg += TomlTypeName(node, key);
-    msg += "`!";
-    throw TypeError{msg};
-  }
-
-  const toml::array &arr = *node.as_array();
-  if (arr.size() != 2) {
-    std::string msg{"Invalid pair configuration: Parameter `"};
-    msg += key;
-    msg += "` must be a 2-element list, but has ";
-    msg += std::to_string(arr.size());
-    msg += ((arr.size() == 1) ? " element!" : " elements!");
-    throw TypeError{msg};
-  }
-
-  std::size_t arr_index = 0;
-  std::array<T, 2> scalars{};
-  for (auto &&value : arr) {
-    const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
-    if (value.is_value()) {
-      scalars[arr_index] = ConvertTomlToConfigType<T>(value, fqn);
-    } else {
-      std::string msg{"Invalid pair configuration `"};
-      msg += key;
-      msg += "`: Both entries must be of scalar type `";
-      msg += TypeName<T>();
-      msg += "`, but `";
-      msg += fqn;
-      msg += "` is not!";
-      throw TypeError{msg};
-    }
-    ++arr_index;
-  }
-  return std::make_pair(scalars[0], scalars[1]);
-}
 }  // namespace detail
 
 // Abusing the PImpl idiom to hide the internally used TOML table.
@@ -1381,11 +1332,6 @@ void Configuration::SetInteger32(std::string_view key, int32_t value) {
       pimpl_->config_root, key, static_cast<int64_t>(value));
 }
 
-std::pair<int32_t, int32_t> Configuration::GetInteger32Pair(
-    std::string_view key) const {
-  return detail::GetScalarPair<int32_t>(pimpl_->config_root, key);
-}
-
 std::vector<int32_t> Configuration::GetInteger32List(
     std::string_view key) const {
   return detail::GetList<int32_t>(pimpl_->config_root, key);
@@ -1420,11 +1366,6 @@ std::optional<int64_t> Configuration::GetOptionalInteger64(
 
 void Configuration::SetInteger64(std::string_view key, int64_t value) {
   detail::SetScalar<int64_t>(pimpl_->config_root, key, value);
-}
-
-std::pair<int64_t, int64_t> Configuration::GetInteger64Pair(
-    std::string_view key) const {
-  return detail::GetScalarPair<int64_t>(pimpl_->config_root, key);
 }
 
 std::vector<int64_t> Configuration::GetInteger64List(
@@ -1481,11 +1422,6 @@ std::optional<double> Configuration::GetOptionalDouble(
 
 void Configuration::SetDouble(std::string_view key, double value) {
   detail::SetScalar<double>(pimpl_->config_root, key, value);
-}
-
-std::pair<double, double> Configuration::GetDoublePair(
-    std::string_view key) const {
-  return detail::GetScalarPair<double>(pimpl_->config_root, key);
 }
 
 std::vector<double> Configuration::GetDoubleList(std::string_view key) const {

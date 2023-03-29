@@ -287,63 +287,6 @@ TEST(ConfigCompoundTest, PointLists) {
   EXPECT_DOUBLE_EQ(-4.5, poly2d_dbl[1].y);
 }
 
-TEST(ConfigCompoundTest, Pairs) {
-  // TODO remove ...Pair and replace by Point2d / Size2d instead
-  const auto config = wkc::LoadTOMLString(R"toml(
-    int_list = [1, 2, 3, 4]
-
-    int32_pair = [1024, 768]
-
-    int64_pair = [2147483647, 2147483648]
-
-    float_pair = [0.5, 1.0]
-
-    mixed_types = [1, "framboozle"]
-
-    a_scalar = 1234
-
-    nested_array = [1, [2, [3, 4]]]
-    )toml"sv);
-
-  // Key error:
-  EXPECT_THROW(config.GetInteger32Pair("no-such-key"sv), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger64Pair("no-such-key"sv), wkc::KeyError);
-  EXPECT_THROW(config.GetDoublePair("no-such-key"sv), wkc::KeyError);
-
-  // A pair must be an array of 2 elements
-  EXPECT_THROW(config.GetInteger32Pair("int_list"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("int_list"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("int_list"sv), wkc::TypeError);
-
-  EXPECT_THROW(config.GetInteger32Pair("mixed_types"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("mixed_types"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("mixed_types"sv), wkc::TypeError);
-
-  EXPECT_THROW(config.GetInteger32Pair("a_scalar"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("a_scalar"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("a_scalar"sv), wkc::TypeError);
-
-  EXPECT_THROW(config.GetInteger32Pair("nested_array"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("nested_array"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetDoublePair("nested_array"sv), wkc::TypeError);
-
-  // Load a valid pair
-  auto p32 = config.GetInteger32Pair("int32_pair"sv);
-  EXPECT_EQ(1024, p32.first);
-  EXPECT_EQ(768, p32.second);
-
-  EXPECT_THROW(config.GetInteger32Pair("int64_pair"sv), wkc::TypeError);
-  auto p64 = config.GetInteger64Pair("int64_pair"sv);
-  EXPECT_EQ(2147483647, p64.first);
-  EXPECT_EQ(2147483648, p64.second);
-
-  EXPECT_THROW(config.GetInteger32Pair("float_pair"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Pair("float_pair"sv), wkc::TypeError);
-  auto pdbl = config.GetDoublePair("float_pair"sv);
-  EXPECT_DOUBLE_EQ(0.5, pdbl.first);
-  EXPECT_DOUBLE_EQ(1.0, pdbl.second);
-}
-
 TEST(ConfigCompoundTest, GetGroup) {
   const auto config = wkc::LoadTOMLString(R"toml(
     str = "A string"
