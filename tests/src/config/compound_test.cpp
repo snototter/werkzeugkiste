@@ -4,7 +4,6 @@
 #include "../test_utils.h"
 
 namespace wkc = werkzeugkiste::config;
-namespace wkg = werkzeugkiste::geometry;
 
 using namespace std::string_view_literals;
 

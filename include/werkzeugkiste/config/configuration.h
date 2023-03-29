@@ -241,7 +241,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter exists and is of a different type,
   ///   unless the value is exactly representable by the existing type. For
   ///   example, an integer value can usually be exactly represented as a
-  ///   floating point number, thus SetInteger32("my-float"sv, 2) will not
+  ///   floating point number, thus `SetInteger32("my-float"sv, 2)` will not
   ///   raise an exception.
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
@@ -250,28 +250,29 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetInteger32(std::string_view key, int32_t value);
 
-  // TODO doc
+  /// @brief Returns a list of 32-bit integers.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast. For example, a list like [0.0, -2.0, 100.0, 12345.0]
+  /// can be exactly represented by a list of 32-bit integer, whereas
+  /// [0.0, 1.5] cannot.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
 
   /// @brief Sets or replaces a list of 32-bit integers.
   ///
-  /// Raises a `TypeError` if the parameter exists but is of a different type,
-  /// unless it is a mixed list of only numbers (integers will be TODO)
-  /// All entries numeric -> can be looked up as floating point list.
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///   If the parameter is a mixed numeric list, however, the values will be
+  ///   cast to the corresponding data type. For example, replacing an existing
+  ///   `[int, double, int]` list by `[1, 2, 3, 4]` results in a parameter
+  ///   list `[int(1), double(2.0), int(3), int(4)]`.
+  ///
   /// @param key Fully-qualified parameter name.
   /// @param values List of flags.
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
-
-  // TODO remove
-  // /// @brief Returns a list of 3D indices (integral x/y/z coordinates, e.g. a
-  // ///   polyline).
-  // ///
-  // /// For the floating point counterpart, refer to `GetPoints3D`.
-  // ///
-  // /// @param key Fully-qualified parameter name.
-  // std::vector<std::tuple<int32_t, int32_t, int32_t>> GetIndices3D(
-  //     std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Integers (64-bit)
@@ -296,16 +297,51 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param default_val Value to be returned if the parameter does not exist.
   int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
 
-  // TODO doc
+  /// @brief Returns the 64-bit integer parameter or `std::nullopt` if it does
+  ///   not exist.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  ///   can be safely cast. For example, double(2.0) can be exactly represented
+  ///   by a 64-bit integer, whereas double(1.5) cannot.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets a 64-bit signed integer parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type,
+  ///   unless the value is exactly representable by the existing type. For
+  ///   example, an integer value can usually be exactly represented as a
+  ///   floating point number, thus `SetInteger64("my-float"sv, 2)` will not
+  ///   raise an exception.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
   void SetInteger64(std::string_view key, int64_t value);
 
-  // TODO doc
+  /// @brief Returns a list of 64-bit integers.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast. For example, a list like [0.0, -2.0, 100.0, 12345.0]
+  /// can be exactly represented by a list of 64-bit integer, whereas
+  /// [0.0, 1.5] cannot.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<int64_t> GetInteger64List(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of 64-bit integers.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///   If the parameter is a mixed numeric list, however, the values will be
+  ///   cast to the corresponding data type. For example, replacing an existing
+  ///   `[int, double, int]` list by `[1, 2, 3, 4]` results in a parameter
+  ///   list `[int(1), double(2.0), int(3), int(4)]`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetInteger64List(std::string_view key,
       const std::vector<int64_t> &values);
 
@@ -393,16 +429,50 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param default_val Value to be returned if the parameter does not exist.
   double GetDoubleOr(std::string_view key, double default_val) const;
 
-  // TODO doc
+  /// @brief Returns the double-precision floating point parameter or
+  ///   `std::nullopt` if it does not exist.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  ///   can be safely cast. For example, integer values can usually be exactly
+  ///   represented by a double.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<double> GetOptionalDouble(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets a double-precision floating point parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type,
+  ///   unless the value is exactly representable by the existing type. For
+  ///   example, `SetDouble("my-integer"sv, 12.0)` will not raise an exception.
+  ///   However, the parameter type of `my-integer` would still be `integer`.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
   void SetDouble(std::string_view key, double value);
 
-  // TODO doc
+  /// @brief Returns a list of double-precision floating point values.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. integer values can usually be exactly
+  /// represented by a double).
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<double> GetDoubleList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of double-precision floating point values.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///   If the parameter is a mixed numeric list, however, this call can
+  ///   succeed if all values can be exactly represented by the corresponding
+  ///   data type. For example, replacing an existing `[int, double, int]`
+  ///   list by `[1.0, 2.3, 3e3, 4.5]` results in a parameter list
+  ///   `[int(1), double(2.3), int(3000), double(4.5)]`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetDoubleList(std::string_view key, const std::vector<double> &values);
 
   /// @brief Returns a 2D point with floating point coordinates.
@@ -509,7 +579,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<std::string> GetStringList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Creates or replaces a parameter holding a list of strings.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different
+  ///   type, *i.e.* this method can *not* be used to change the type of
+  ///   an existing parameter.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of strings to be set.
   void SetStringList(std::string_view key,
       const std::vector<std::string_view> &values);
 
