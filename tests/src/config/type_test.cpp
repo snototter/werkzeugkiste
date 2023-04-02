@@ -324,6 +324,21 @@ TEST(ConfigTypeTest, TimeType) {
   time.nanosecond = 123456789;
   EXPECT_EQ("23:49:30.123456789", time.ToString());
 
+  EXPECT_TRUE(time.IsValid());
+  time.nanosecond = 1000000000;
+  EXPECT_FALSE(time.IsValid());
+  time.nanosecond = 1;
+  time.second = 60;
+  EXPECT_FALSE(time.IsValid());
+  time.second = 0;
+  time.minute = 60;
+  EXPECT_FALSE(time.IsValid());
+  time.minute = 0;
+  time.hour = 24;
+  EXPECT_FALSE(time.IsValid());
+  time.hour = 23;
+  EXPECT_TRUE(time.IsValid());
+
   // Invalid value ranges.
   EXPECT_NO_THROW(wkc::time(0, 0, 0));
   EXPECT_NO_THROW(wkc::time(0, 10, 22));

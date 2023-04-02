@@ -9,16 +9,6 @@
 #include <iomanip>
 #include <sstream>
 
-// TODOs
-// * When upgrading to C++20, we can easily support date/time
-//   checks: https://en.cppreference.com/w/cpp/chrono/year_month_day/ok
-// * Parsing was also introduced in C++20
-// * Use fixed width integer types - switch back to intX_t instead of
-//   least/fast, or change to int for simplicity (requires additional error
-//   handling). We're not targeting any special platform & the fixed width
-//   types are promoted during arithmetic operations (causing GCC warnings),
-//   https://stackoverflow.com/questions/39060852/why-does-the-addition-of-two-shorts-return-an-int/39061103#39061103
-
 // NOLINTBEGIN(*magic-numbers)
 namespace werkzeugkiste::config {
 // NOLINTNEXTLINE(*macro-usage)
@@ -46,35 +36,33 @@ namespace werkzeugkiste::config {
 namespace detail {
 // Collection of low-level date algorithms, along with an excellent analysis
 // of their performance: http://howardhinnant.github.io/date_algorithms.html
-constexpr bool IsLeapYear(unsigned int year) noexcept {
+constexpr bool IsLeapYear(uint32_t year) noexcept {
   return (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
 }
 
-constexpr unsigned int LastDayOfMonthCommonYear(unsigned int m) noexcept {
+constexpr uint32_t LastDayOfMonthCommonYear(uint32_t month) noexcept {
   // NOLINTNEXTLINE(*avoid-c-arrays)
-  constexpr unsigned int days[] = {
-      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-  return days[m - 1];
+  constexpr uint32_t days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  return days[month - 1];
 }
 
-constexpr unsigned int LastDayOfMonth(unsigned int year,
-    unsigned int month) noexcept {
+constexpr uint32_t LastDayOfMonth(uint32_t year, uint32_t month) noexcept {
   return ((month != 2) || !IsLeapYear(year)) ? LastDayOfMonthCommonYear(month)
-                                             : static_cast<unsigned int>(29);
+                                             : static_cast<uint32_t>(29);
 }
 
-constexpr bool IsValidDate(unsigned int year,
-    unsigned int month,
-    unsigned int day) noexcept {
+constexpr bool IsValidDate(uint32_t year,
+    uint32_t month,
+    uint32_t day) noexcept {
   return ((month < 1) || (month > 12))
            ? false
            : ((day > 0) && (day <= LastDayOfMonth(year, month)));
 }
 
-constexpr bool IsValidTime(uint_fast8_t hour,
-    uint_fast8_t minute,
-    uint_fast8_t second,
-    uint_fast32_t nanosecond) {
+constexpr bool IsValidTime(uint32_t hour,
+    uint32_t minute,
+    uint32_t second,
+    uint32_t nanosecond) {
   return (hour < 24) && (minute < 60) && (second < 60) &&
          (nanosecond < 1000000000);
 }
@@ -128,8 +116,8 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct) {
 // Number parsing for date & time types
 template <typename T>
 T ParseDateTimeNumber(const std::string &str,
-    int min_val,
-    int max_val,
+    int32_t min_val,
+    int32_t max_val,
     std::string_view type_str) {
   try {
     // We can't use stoi out of the box:
@@ -171,11 +159,9 @@ date ParseDateString(std::string_view str) {
     if (tokens.size() != 3) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
-    parsed.year =
-        ParseDateTimeNumber<unsigned int>(tokens[0], 0, 9999, "date"sv);
-    parsed.month =
-        ParseDateTimeNumber<unsigned int>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<unsigned int>(tokens[2],
+    parsed.year = ParseDateTimeNumber<uint32_t>(tokens[0], 0, 9999, "date"sv);
+    parsed.month = ParseDateTimeNumber<uint32_t>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseDateTimeNumber<uint32_t>(tokens[2],
         1,
         static_cast<int>(detail::LastDayOfMonth(parsed.year, parsed.month)),
         "date"sv);
@@ -190,13 +176,11 @@ date ParseDateString(std::string_view str) {
     if (tokens.size() != 3) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
-    parsed.year =
-        ParseDateTimeNumber<unsigned int>(tokens[2], 0, 9999, "date"sv);
-    parsed.month =
-        ParseDateTimeNumber<unsigned int>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<unsigned int>(tokens[0],
+    parsed.year = ParseDateTimeNumber<uint32_t>(tokens[2], 0, 9999, "date"sv);
+    parsed.month = ParseDateTimeNumber<uint32_t>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseDateTimeNumber<uint32_t>(tokens[0],
         1,
-        static_cast<int>(detail::LastDayOfMonth(parsed.year, parsed.month)),
+        static_cast<int32_t>(detail::LastDayOfMonth(parsed.year, parsed.month)),
         "date"sv);
 
     return parsed;
@@ -252,10 +236,7 @@ bool date::operator<(const date &other) const {
   if (month > other.month) {
     return false;
   }
-  if (day < other.day) {
-    return true;
-  }
-  return false;
+  return day < other.day;
 }
 
 bool date::operator<=(const date &other) const {
@@ -311,14 +292,14 @@ time::time(std::string_view str) {
     WZK_RAISE_DATETIME_PARSE_ERROR(str, time);
   }
 
-  hour = ParseDateTimeNumber<uint_least8_t>(hms_tokens[0], 0, 23, "time"sv);
-  minute = ParseDateTimeNumber<uint_least8_t>(hms_tokens[1], 0, 59, "time"sv);
+  hour = ParseDateTimeNumber<uint32_t>(hms_tokens[0], 0, 23, "time"sv);
+  minute = ParseDateTimeNumber<uint32_t>(hms_tokens[1], 0, 59, "time"sv);
 
   if (hms_tokens.size() > 2) {
     // Delimiter between second and fraction component can be '.' or ','.
     const std::size_t pos = hms_tokens[2].find_first_of(".,");
     if (pos != std::string::npos) {
-      second = ParseDateTimeNumber<uint_least8_t>(
+      second = ParseDateTimeNumber<uint32_t>(
           hms_tokens[2].substr(0, pos), 0, 59, "time"sv);
 
       const auto subsec_str = hms_tokens[2].substr(pos + 1);
@@ -331,8 +312,8 @@ time::time(std::string_view str) {
             "or 9 (ns) digits!";
         throw ParseError(msg);
       }
-      uint_least32_t subsec_val = ParseDateTimeNumber<uint_least32_t>(
-          subsec_str, 0, 999999999, "time"sv);
+      unsigned int subsec_val =
+          ParseDateTimeNumber<uint32_t>(subsec_str, 0, 999999999, "time"sv);
 
       if (subsec_str.length() == 1) {
         subsec_val *= 100000000;
@@ -346,40 +327,41 @@ time::time(std::string_view str) {
       nanosecond = subsec_val;
 
     } else {
-      second =
-          ParseDateTimeNumber<uint_least8_t>(hms_tokens[2], 0, 59, "time"sv);
+      second = ParseDateTimeNumber<uint32_t>(hms_tokens[2], 0, 59, "time"sv);
     }
   }
 }
 
-time::time(uint_least8_t h, uint_least8_t m, uint_least8_t s, uint_least32_t ns)
+time::time(uint32_t h, uint32_t m, uint32_t s, uint32_t ns)
     : hour{h}, minute{m}, second{s}, nanosecond{ns} {
   if (!detail::IsValidTime(h, m, s, ns)) {
     std::ostringstream msg;
-    msg << "Cannot create a valid `time` from " << +h << ':' << +m << ':' << +s
-        << '.' << +ns << '!';
+    msg << "Cannot create a valid `time` from " << h << ':' << m << ':' << s
+        << '.' << ns << '!';
     throw ValueError(msg.str());
   }
 }
 
 std::string time::ToString() const {
-  // The unary operator+ ensures that uint8 values are
-  // interpreted as numbers and not ASCII characters.
   std::ostringstream s;
-  s << std::setfill('0') << std::setw(2) << +hour << ':' << std::setw(2)
-    << +minute << ':' << std::setw(2) << +second;
+  s << std::setfill('0') << std::setw(2) << hour << ':' << std::setw(2)
+    << minute << ':' << std::setw(2) << second;
   if (nanosecond > 0) {
     if ((nanosecond % 1000000) == 0) {
-      const uint_least32_t ms = nanosecond / 1000000;
-      s << '.' << std::setw(3) << +ms;
+      const uint32_t ms = nanosecond / 1000000;
+      s << '.' << std::setw(3) << ms;
     } else if ((nanosecond % 1000) == 0) {
-      const uint_least32_t us = nanosecond / 1000;
-      s << '.' << std::setw(6) << +us;
+      const uint32_t us = nanosecond / 1000;
+      s << '.' << std::setw(6) << us;
     } else {
-      s << '.' << std::setw(9) << +nanosecond;
+      s << '.' << std::setw(9) << nanosecond;
     }
   }
   return s.str();
+}
+
+bool time::IsValid() const {
+  return detail::IsValidTime(hour, minute, second, nanosecond);
 }
 
 bool time::operator==(const time &other) const {
@@ -390,19 +372,35 @@ bool time::operator==(const time &other) const {
 bool time::operator!=(const time &other) const { return !(*this == other); }
 
 bool time::operator<(const time &other) const {
-  return Pack(*this) < Pack(other);
+  if (hour < other.hour) {
+    return true;
+  }
+  if (hour > other.hour) {
+    return false;
+  }
+  if (minute < other.minute) {
+    return true;
+  }
+  if (minute > other.minute) {
+    return false;
+  }
+  if (second < other.second) {
+    return true;
+  }
+  if (second > other.second) {
+    return false;
+  }
+  return nanosecond < other.nanosecond;
 }
 
 bool time::operator<=(const time &other) const {
-  return Pack(*this) <= Pack(other);
+  return (*this == other) || (*this < other);
 }
 
-bool time::operator>(const time &other) const {
-  return Pack(*this) > Pack(other);
-}
+bool time::operator>(const time &other) const { return !(*this <= other); }
 
 bool time::operator>=(const time &other) const {
-  return Pack(*this) >= Pack(other);
+  return (*this == other) || (*this > other);
 }
 
 //-----------------------------------------------------------------------------
@@ -418,31 +416,31 @@ time_offset::time_offset(std::string_view str) {
     }
     minutes = 0;
   } else {
-    const int_least16_t hrs = ParseDateTimeNumber<int_least16_t>(
+    const int32_t hrs = ParseDateTimeNumber<int32_t>(
         std::string{str.substr(0, pos)}, -23, 23, "time_offset"sv);
-    const int_least16_t mins = ParseDateTimeNumber<int_least16_t>(
+    const int32_t mins = ParseDateTimeNumber<int32_t>(
         std::string{str.substr(pos + 1)}, 0, 59, "time_offset"sv);
     // Offset minutes in RFC 3339 format can only be positive. The
     // string "-01:23", however, corresponds to a total offset of
     // "-83 minutes". Thus, we need to adjust the parsed minutes accordingly.
-    minutes = static_cast<int_least16_t>(hrs * 60);
+    minutes = hrs * 60;
     if ((hrs < 0) || (str[0] == '-')) {
-      minutes -= static_cast<int_least16_t>(mins);
+      minutes -= mins;
     } else {
-      minutes += static_cast<int_least16_t>(mins);
+      minutes += mins;
     }
   }
 }
 
-time_offset::time_offset(int_least8_t h, int_least8_t m) {
+time_offset::time_offset(int32_t h, int32_t m) {
   if ((h < -23) || (h > 23) || (m < -59) || (m > 59)) {
     std::ostringstream msg;
-    msg << "Invalid parameters h=" << +h << ", m=" << +m
+    msg << "Invalid parameters h=" << h << ", m=" << m
         << " for time offset. Values must be -24 < h < 24 and "
            "-60 < m < 60!";
     throw TypeError(msg.str());
   }
-  minutes = static_cast<int_least16_t>(h * 60 + m);
+  minutes = h * 60 + m;
 }
 
 std::string time_offset::ToString() const {
@@ -450,13 +448,11 @@ std::string time_offset::ToString() const {
     return "Z";
   }
 
-  const int_least16_t hrs = std::abs(minutes) / 60;
-  const int_least16_t mins = std::abs(minutes) - hrs * 60;
-  // The unary operator+ ensures that uint8 values are
-  // interpreted as numbers and not ASCII characters.
+  const int32_t hrs = std::abs(minutes) / 60;
+  const int32_t mins = std::abs(minutes) - hrs * 60;
   std::ostringstream s;
-  s << ((minutes >= 0) ? '+' : '-') << std::setfill('0') << std::setw(2) << +hrs
-    << ':' << std::setw(2) << +mins;
+  s << ((minutes >= 0) ? '+' : '-') << std::setfill('0') << std::setw(2) << hrs
+    << ':' << std::setw(2) << mins;
   return s.str();
 }
 
@@ -509,21 +505,22 @@ date_time::date_time(std::string_view str) {
 
 date_time date_time::UTC() const {
   date_time utc{this->date, this->time};
-  constexpr int_least16_t min_per_day = 1440;
+  constexpr int32_t min_per_day = 1440;
   if (this->offset.has_value()) {
-    int_least16_t minutes = static_cast<int_least16_t>(utc.time.hour) * 60 +
-                            utc.time.minute - offset.value().minutes;
-    if (minutes >= min_per_day) {
+    int32_t minutes =
+        static_cast<int32_t>(utc.time.hour * 60 + utc.time.minute) -
+        offset.value().minutes;
+    while (minutes >= min_per_day) {
       ++utc.date;
       minutes -= min_per_day;
     }
-    if (minutes < 0) {
+    while (minutes < 0) {
       --utc.date;
       minutes += min_per_day;
     }
 
-    utc.time.hour = static_cast<uint_least8_t>(minutes / 60);
-    utc.time.minute = static_cast<uint_least8_t>(minutes % 60);
+    utc.time.hour = static_cast<uint32_t>(minutes / 60);
+    utc.time.minute = static_cast<uint32_t>(minutes % 60);
   }
 
   return utc;
