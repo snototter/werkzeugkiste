@@ -46,26 +46,26 @@ namespace werkzeugkiste::config {
 namespace detail {
 // Collection of low-level date algorithms, along with an excellent analysis
 // of their performance: http://howardhinnant.github.io/date_algorithms.html
-constexpr bool IsLeapYear(uint_least16_t year) noexcept {
+constexpr bool IsLeapYear(unsigned int year) noexcept {
   return (year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0));
 }
 
-constexpr uint_least8_t LastDayOfMonthCommonYear(uint_least8_t m) noexcept {
+constexpr unsigned int LastDayOfMonthCommonYear(unsigned int m) noexcept {
   // NOLINTNEXTLINE(*avoid-c-arrays)
-  constexpr uint_least8_t days[] = {
+  constexpr unsigned int days[] = {
       31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
   return days[m - 1];
 }
 
-constexpr uint_least8_t LastDayOfMonth(uint_least16_t year,
-    uint_least8_t month) noexcept {
+constexpr unsigned int LastDayOfMonth(unsigned int year,
+    unsigned int month) noexcept {
   return ((month != 2) || !IsLeapYear(year)) ? LastDayOfMonthCommonYear(month)
-                                             : static_cast<uint_least8_t>(29);
+                                             : static_cast<unsigned int>(29);
 }
 
-constexpr bool IsValidDate(uint_least16_t year,
-    uint_least8_t month,
-    uint_least8_t day) noexcept {
+constexpr bool IsValidDate(unsigned int year,
+    unsigned int month,
+    unsigned int day) noexcept {
   return ((month < 1) || (month > 12))
            ? false
            : ((day > 0) && (day <= LastDayOfMonth(year, month)));
@@ -172,12 +172,12 @@ date ParseDateString(std::string_view str) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
     parsed.year =
-        ParseDateTimeNumber<uint_least16_t>(tokens[0], 0, 9999, "date"sv);
+        ParseDateTimeNumber<unsigned int>(tokens[0], 0, 9999, "date"sv);
     parsed.month =
-        ParseDateTimeNumber<uint_least8_t>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<uint_least8_t>(tokens[2],
+        ParseDateTimeNumber<unsigned int>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseDateTimeNumber<unsigned int>(tokens[2],
         1,
-        detail::LastDayOfMonth(parsed.year, parsed.month),
+        static_cast<int>(detail::LastDayOfMonth(parsed.year, parsed.month)),
         "date"sv);
 
     return parsed;
@@ -191,12 +191,12 @@ date ParseDateString(std::string_view str) {
       WZK_RAISE_DATETIME_PARSE_ERROR(str, date);
     }
     parsed.year =
-        ParseDateTimeNumber<uint_least16_t>(tokens[2], 0, 9999, "date"sv);
+        ParseDateTimeNumber<unsigned int>(tokens[2], 0, 9999, "date"sv);
     parsed.month =
-        ParseDateTimeNumber<uint_least8_t>(tokens[1], 1, 12, "date"sv);
-    parsed.day = ParseDateTimeNumber<uint_least8_t>(tokens[0],
+        ParseDateTimeNumber<unsigned int>(tokens[1], 1, 12, "date"sv);
+    parsed.day = ParseDateTimeNumber<unsigned int>(tokens[0],
         1,
-        detail::LastDayOfMonth(parsed.year, parsed.month),
+        static_cast<int>(detail::LastDayOfMonth(parsed.year, parsed.month)),
         "date"sv);
 
     return parsed;
@@ -212,7 +212,7 @@ date::date(std::string_view str) {
   day = other.day;
 }
 
-date::date(uint_least16_t y, uint_least8_t m, uint_least8_t d)
+date::date(unsigned int y, unsigned int m, unsigned int d)
     : year{y}, month{m}, day{d} {
   if (!detail::IsValidDate(y, m, d)) {
     std::ostringstream msg;
@@ -231,6 +231,8 @@ std::string date::ToString() const {
   return s.str();
 }
 
+bool date::IsValid() const { return detail::IsValidDate(year, month, day); }
+
 bool date::operator==(const date &other) const {
   return (year == other.year) && (month == other.month) && (day == other.day);
 }
@@ -238,19 +240,32 @@ bool date::operator==(const date &other) const {
 bool date::operator!=(const date &other) const { return !(*this == other); }
 
 bool date::operator<(const date &other) const {
-  return Pack(*this) < Pack(other);
+  if (year < other.year) {
+    return true;
+  }
+  if (year > other.year) {
+    return false;
+  }
+  if (month < other.month) {
+    return true;
+  }
+  if (month > other.month) {
+    return false;
+  }
+  if (day < other.day) {
+    return true;
+  }
+  return false;
 }
 
 bool date::operator<=(const date &other) const {
-  return Pack(*this) <= Pack(other);
+  return (*this == other) || (*this < other);
 }
 
-bool date::operator>(const date &other) const {
-  return Pack(*this) > Pack(other);
-}
+bool date::operator>(const date &other) const { return !(*this <= other); }
 
 bool date::operator>=(const date &other) const {
-  return Pack(*this) >= Pack(other);
+  return (*this == other) || (*this > other);
 }
 
 date &date::operator++() {
@@ -271,6 +286,9 @@ date &date::operator++() {
 date &date::operator--() {
   if (day == 1) {
     if (month == 1) {
+      if (year == 0) {
+        throw ValueError{"Cannot decrement date beyond 0000-01-01!"};
+      }
       month = 12;
       --year;
     } else {

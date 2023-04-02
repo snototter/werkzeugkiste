@@ -184,6 +184,9 @@ TEST(ConfigTypeTest, DateType) {
   EXPECT_EQ(wkc::date(1999, 1, 1), --wkc::date(1999, 1, 2));
   EXPECT_EQ(wkc::date(1998, 12, 31), --wkc::date(1999, 1, 1));
 
+  EXPECT_EQ(wkc::date("0000-01-01"sv), --wkc::date("0000-01-02"sv));
+  EXPECT_THROW(--wkc::date("0000-01-01"sv), wkc::ValueError);
+
   // Increment
   EXPECT_EQ(wkc::date(2000, 12, 1), ++wkc::date(2000, 11, 30));
   EXPECT_EQ(wkc::date(2000, 12, 2), ++wkc::date(2000, 12, 1));
@@ -200,6 +203,24 @@ TEST(ConfigTypeTest, DateParsingYMD) {
   auto date = wkc::date(2000, 11, 4);
   auto parsed = wkc::date(date.ToString());
   EXPECT_EQ(date, parsed);
+  EXPECT_TRUE(date.IsValid());
+
+  date.day = 0;
+  EXPECT_FALSE(date.IsValid());
+  date.day = 1;
+  EXPECT_TRUE(date.IsValid());
+
+  date.month = 23;
+  EXPECT_FALSE(date.IsValid());
+  date.month = 0;
+  EXPECT_FALSE(date.IsValid());
+  date.month = 2;
+  EXPECT_TRUE(date.IsValid());
+
+  date.day = 29;
+  EXPECT_TRUE(date.IsValid());
+  date.year++;
+  EXPECT_FALSE(date.IsValid());
 
   // Most common format: Y-m-d
   EXPECT_EQ(wkc::date(2023, 2, 28), wkc::date("2023-02-28"sv));
@@ -227,6 +248,7 @@ TEST(ConfigTypeTest, DateParsingYMD) {
 
   // Dates will be checked
   EXPECT_EQ(wkc::date(1, 2, 3), wkc::date("1-2-3"sv));
+  EXPECT_TRUE(wkc::date(1, 2, 3).IsValid());
 
   EXPECT_THROW(wkc::date(2023, 2, 31), wkc::ValueError);
   EXPECT_NO_THROW(wkc::date(2023, 2, 28));

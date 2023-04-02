@@ -92,13 +92,13 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
 struct WERKZEUGKISTE_CONFIG_EXPORT date {
  public:
   /// The year.
-  uint_least16_t year{};
+  unsigned int year{};
 
   /// The month, from 1-12.
-  uint_least8_t month{};
+  unsigned int month{};
 
   /// The day, from 1-31.
-  uint_least8_t day{};
+  unsigned int day{};
 
   date() = default;
 
@@ -109,10 +109,13 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   /// * d.m.Y
   explicit date(std::string_view str);
 
-  date(uint_least16_t y, uint_least8_t m, uint_least8_t d);
+  date(unsigned int y, unsigned int m, unsigned int d);
 
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
+
+  /// @brief Returns true if this is a valid date.
+  bool IsValid() const;
 
   bool operator==(const date &other) const;
   bool operator!=(const date &other) const;
@@ -132,15 +135,6 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
     os << d.ToString();
     return os;
   }
-
- private:
-  // NOLINTBEGIN(*-magic-numbers)
-  static constexpr uint_least32_t Pack(const date &d) noexcept {
-    return (static_cast<uint_least32_t>(d.year) << 16U) |
-           (static_cast<uint_least32_t>(d.month) << 8U) |
-           static_cast<uint_least32_t>(d.day);
-  }
-  // NOLINTEND(*-magic-numbers)
 };
 
 //-----------------------------------------------------------------------------
