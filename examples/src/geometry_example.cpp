@@ -94,9 +94,9 @@ void VectorDemo(V vec1, V vec2) {
     if constexpr (is_floating_point) {
       std::cout << "\n* Arbitrary rotations:"
                    "\n    v1 10° =  "
-                << vec1.RotateDegrees(10)
-                << "\n    v1 60° =  " << vec1.RotateDegrees(60)
-                << "\n    v1 -10° = " << vec1.RotateDegrees(-10);
+                << vec1.RotateDeg(10)
+                << "\n    v1 60° =  " << vec1.RotateDeg(60)
+                << "\n    v1 -10° = " << vec1.RotateDeg(-10);
     }
   }
 

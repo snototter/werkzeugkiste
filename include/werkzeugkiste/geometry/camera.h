@@ -197,7 +197,8 @@ inline Line2d GetProjectionOfHorizon(const Matrix<Tp, 3, 3>& K,
   const Vec2d pt2 = pt1 + 500.0 * perpendicular_dir;
 
   const Matrix<Tp, 3, 4> P = ProjectionMatrixFromKRt(K, R, t);
-  Vec<Tp, 2> prj1, prj2;
+  Vec<Tp, 2> prj1{};
+  Vec<Tp, 2> prj2{};
   std::tie(prj1, prj2) = ProjectToVecs(P,
       Vec<Tp, 3>(pt1[0], pt1[1], camera_center3d[2]),
       Vec<Tp, 3>(pt2[0], pt2[1], camera_center3d[2]));

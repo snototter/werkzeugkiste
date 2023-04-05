@@ -154,8 +154,12 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
   /// Returns a line with flipped direction vector.
   inline Line2d_ Reversed() const { return Line2d_<T>{pt_to_, pt_from_}; }
 
-  /// Returns a line where from/to are sorted left-to-right. If the line is
-  /// vertical, they will be sorted top-to-bottom.
+  // TODO usage of "top-to-bottom" follows image coordinate system, not
+  // Euclidean --> consistently & explicitly state what is top/bottom
+
+  /// @brief Returns a new line, where from/to are sorted by ascending
+  ///   x-coordinates (left-to-right). If the line was vertical, the points
+  ///   will be sorted by ascending y-coordinates.
   Line2d_ LeftToRight() const;
 
   /// For a segment, this returns the start point. For a line, it's simply one
@@ -214,23 +218,43 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
     return Rad2Deg(AngleRad(v));
   }
 
-  /// Returns the line in homogeneous coordinates, *i.e.* a 3-element vector
-  /// in P^2 (Projective 2-space). For more details on lines in projective
-  /// space, refer to
+  /// @brief Returns the angle between the direction vectors of the lines.
+  /// @param other The other line.
+  /// @return Angle in radians, between [0, pi].
+  inline double AngleRad(const Line2d_& other) const {
+    return std::acos(std::max(-1.0,
+        std::min(1.0,
+            static_cast<double>(UnitDirection().Dot(other.UnitDirection())))));
+  }
+
+  /// @brief Returns the angle between the direction vectors of the lines.
+  /// @param other The other line.
+  /// @return Angle in degrees, between [0, 180].
+  inline double AngleDeg(const Line2d_& other) const {
+    return Rad2Deg(AngleRad(other));
+  }
+
+  /// @brief Returns the line in homogeneous coordinates.
+  ///
+  /// For more details on lines in projective space, refer to
   /// `Bob Fisher's CVonline
   /// <http://homepages.inf.ed.ac.uk/rbf/CVonline/LOCAL_COPIES/BEARDSLEY/node2.html>`__,
-  /// or
-  /// `Stan Birchfield's notes
+  /// or `Stan Birchfield's notes
   /// <http://robotics.stanford.edu/~birch/projective/node4.html>`__.
+  ///
+  /// @return A 3-element vector representing the line in P^2, *i.e.* the
+  ///   projective 2-space.
   inline vec3_type HomogeneousForm() const {
     return vec3_type{pt_from_[0], pt_from_[1], 1}.Cross(
         vec3_type{pt_to_[0], pt_to_[1], 1});
   }
 
-  /// Returns the point which is offset * Direction() away from the line's
-  /// starting point, i.e. offset == 0 is the starting point, offset == 1
-  /// is the end point.
-  vec_type PointAtOffset(double offset_factor) const {
+  /// @brief Returns a point between the start and end point.
+  /// @param offset_factor Factor of the distance between start and end point.
+  /// @return The point which is offset * Direction() units away from the
+  ///   line's starting point, i.e. offset == 0 is the starting point,
+  ///   offset == 1 is the end point.
+  inline vec_type PointAtOffset(double offset_factor) const {
     return pt_from_ + offset_factor * Direction();
   }
 
@@ -256,6 +280,10 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
 
   /// Returns true if the two lines are collinear.
   bool IsCollinear(const Line2d_& other) const;
+
+  /// @brief Returns true if the two lines are parallel.
+  /// @param other The second line.
+  bool IsParallel(const Line2d_& other) const;
 
   /// Returns true if the point is left of this line as specified by
   /// pt_from_ --> pt_to_. If you need to distinguish left-of vs. exactly on
@@ -300,10 +328,23 @@ class Line2d_ {  // NOLINT(readability-identifier-naming)
   Line2d_<T> ClipLineSegmentByRectangle(const vec_type& top_left,
       const vec_type& size) const;
 
+  // TODO doc
+  Line2d_<T> TiltRad(double angle_rad) const;
+
+  /// @brief Tilts the line/segment, *i.e.* rotates the end point around the
+  ///   start point.
+  /// @param angle_deg Tilt angle in degrees.
+  /// @return A new line which has been rotated around the start point.
+  inline Line2d_<T> TiltDeg(double angle_deg) const {
+    return TiltRad(Deg2Rad(angle_deg));
+  }
+
   /// Overloaded output stream operator.
   friend std::ostream& operator<<(std::ostream& stream, const Line2d_& line) {
-    stream << "Line(" << line.pt_from_.ToString(false) << " --> "
-           << line.pt_to_.ToString(false) << ')';
+    constexpr bool include_type = false;
+    stream << "Line2" << TypeAbbreviation<T>() << '('
+           << line.pt_from_.ToString(include_type) << ", "
+           << line.pt_to_.ToString(include_type) << ')';
     return stream;
   }
 
@@ -454,8 +495,10 @@ class Line3d_ {  // NOLINT(readability-identifier-naming)
 
   /// Overloaded output stream operator.
   friend std::ostream& operator<<(std::ostream& stream, const Line3d_& line) {
-    stream << "Line(" << line.pt_from_.ToString(false) << " --> "
-           << line.pt_to_.ToString(false) << ')';
+    constexpr bool include_type = false;
+    stream << "Line3" << TypeAbbreviation<T>() << '('
+           << line.pt_from_.ToString(include_type) << ", "
+           << line.pt_to_.ToString(include_type) << ')';
     return stream;
   }
 
