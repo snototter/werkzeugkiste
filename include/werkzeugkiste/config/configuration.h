@@ -99,7 +99,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Returns the length of the list `key`.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
-  /// Raises a `TypeError` if the parameter is not a list.
+  /// Raises a `TypeError` if the parameter is not a list or a group.
   ///
   /// @param key Fully-qualified identifier of the parameter.
   std::size_t Size(std::string_view key) const;
@@ -137,7 +137,23 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   type. False otherwise.
   bool IsHomogeneousScalarList(std::string_view key) const;
 
-  /// @brief Returns a list of (fully-qualified) parameter names.
+  /// @brief Returns a list of (fully-qualified) parameter names below the
+  ///   given key.
+  ///
+  /// @param key Fully-qualified name of the parameter.
+  /// @param include_array_entries If true, the name of each parameter will
+  ///   be returned, *i.e.* each array element will be included. Otherwise,
+  ///   only named parameters (*e.g.* a dictionary/table within an array, such
+  ///   as `arr[3].name`) will be included.
+  /// @param recursive If true, the names of all parameters "below" this
+  ///   configuration/group will be returned. Otherwise, only the first-level
+  ///   child parameters will be returned.
+  std::vector<std::string> ListParameterNames(std::string_view key,
+      bool include_array_entries,
+      bool recursive) const;
+
+  /// @brief Returns a list of (fully-qualified) parameter names below the
+  ///   configuration root.
   ///
   /// @param include_array_entries If true, the name of each parameter will
   /// be returned, *i.e.* each array element will be included. Otherwise,
@@ -146,8 +162,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param recursive If true, the names of all parameters "below" this
   /// configuration/group will be returned. Otherwise, only the first-level
   /// child parameters will be returned.
-  std::vector<std::string> ListParameterNames(bool include_array_entries,
-      bool recursive) const;
+  inline std::vector<std::string> ListParameterNames(bool include_array_entries,
+      bool recursive) const {
+    return ListParameterNames("", include_array_entries, recursive);
+  };
 
   //---------------------------------------------------------------------------
   // Booleans

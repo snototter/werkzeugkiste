@@ -1045,6 +1045,27 @@ std::vector<Tcfg> GetList(const toml::table &tbl, std::string_view key) {
 // Abusing the PImpl idiom to hide the internally used TOML table.
 struct Configuration::Impl {
   toml::table config_root{};
+
+  const toml::table &Table(std::string_view key) const {
+    if (key.empty()) {
+      return config_root;
+    }
+
+    if (!detail::ContainsKey(config_root, key)) {
+      throw detail::KeyErrorWithSimilarKeys(config_root, key);
+    }
+
+    const auto node = config_root.at_path(key);
+    if (!node.is_table()) {
+      std::string msg{"Cannot lookup parameter `"};
+      msg += key;
+      msg += "` as group, because it is a `";
+      msg += detail::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+    return *node.as_table();
+  }
 };
 
 Configuration::Configuration() : pimpl_{new Impl{}} {}
@@ -1263,12 +1284,12 @@ bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
   return true;
 }
 
-std::vector<std::string> Configuration::ListParameterNames(
+std::vector<std::string> Configuration::ListParameterNames(std::string_view key,
     bool include_array_entries,
     bool recursive) const {
   using namespace std::string_view_literals;
   return detail::ListTableKeys(
-      pimpl_->config_root, ""sv, include_array_entries, recursive);
+      pimpl_->Table(key), ""sv, include_array_entries, recursive);
 }
 
 //---------------------------------------------------------------------------
@@ -1653,23 +1674,8 @@ void Configuration::Append(std::string_view key, const Configuration &group) {
 // Group/"Sub-Configuration"
 
 Configuration Configuration::GetGroup(std::string_view key) const {
-  if (!Contains(key)) {
-    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
-  }
-
+  const toml::table &tbl = pimpl_->Table(key);
   Configuration cfg;
-  const auto nv = pimpl_->config_root.at_path(key);
-
-  if (!nv.is_table()) {
-    std::string msg{"Cannot retrieve `"};
-    msg += key;
-    msg += "` as a group, because it is a`";
-    msg += detail::TomlTypeName(nv, key);
-    msg += "`!";
-    throw TypeError{msg};
-  }
-
-  const toml::table &tbl = *nv.as_table();
   cfg.pimpl_->config_root = tbl;
   return cfg;
 }

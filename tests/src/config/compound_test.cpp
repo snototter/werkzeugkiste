@@ -318,6 +318,26 @@ TEST(ConfigCompoundTest, GetGroup) {
   keys = sub.ListParameterNames(true, true);
   CheckMatchingContainers({"str", "lst", "lst[0]", "lst[1]"}, keys);
 
+  EXPECT_THROW(
+      config.ListParameterNames("lvl1.flt"sv, false, false), wkc::TypeError);
+
+  keys = config.ListParameterNames("lvl1.grp1"sv, false, false);
+  CheckMatchingContainers({"str", "lst"}, keys);
+
+  keys = config.ListParameterNames("lvl1"sv, false, false);
+  CheckMatchingContainers({"flt", "grp1", "grp2", "grp3"}, keys);
+
+  keys = config.ListParameterNames("lvl1"sv, false, true);
+  CheckMatchingContainers({"flt",
+                              "grp1",
+                              "grp1.str",
+                              "grp1.lst",
+                              "grp2",
+                              "grp2.str",
+                              "grp2.val",
+                              "grp3"},
+      keys);
+
   sub = config.GetGroup("lvl1.grp2"sv);
   EXPECT_FALSE(sub.Empty());
   keys = sub.ListParameterNames(false, false);
