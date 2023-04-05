@@ -54,7 +54,8 @@ TEST(ConfigTypeTest, TypeQueries) {
 
     )toml"sv);
 
-  EXPECT_THROW(config.Type(""sv), wkc::KeyError);
+  EXPECT_EQ(wkc::ConfigType::Group, config.Type(""sv));
+  EXPECT_THROW(config.Type("no-such-key"sv), wkc::KeyError);
 
   // Bool, int, float, string
   EXPECT_TRUE(config.Contains("bool"sv));

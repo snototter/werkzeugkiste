@@ -1207,6 +1207,10 @@ std::size_t Configuration::Size(std::string_view key) const {
 }
 
 ConfigType Configuration::Type(std::string_view key) const {
+  if (key.empty()) {
+    return ConfigType::Group;
+  }
+
   const auto nv = pimpl_->config_root.at_path(key);
   switch (nv.type()) {
     case toml::node_type::none:
