@@ -17,17 +17,13 @@ This toolbox will only receive sporadic updates, basically whenever I have to
 reuse (and modernize) some of my older code.
 Currently, it provides the following functionality. Note that the namespace
 name also equals the corresponding CMake target to be linked against:
-* `werkzeugkiste::config`: Utilitity to interact with TOML configurations.
+* `werkzeugkiste::config`: Utilitity to interact with TOML/JSON/libconfig configurations.
 * `werkzeugkiste::container`: Sorting/lookup utilities and a custom
   circular buffer.
 * `werkzeugkiste::files`: Basic file I/O and filesystem utilities.  
   _Caveat:_ These utilities are only tested on GNU/Linux and will be replaced
   by wrappers to C++17's `std::filesystem`.
 * `werkzeugkiste::geometry`: Math utilities, focused on basic 2D & 3D geometry.
-  * Type-safe number comparisons (`IsEpsEqual`, `IsEpsZero`) and basic math
-    utils (such as `Sign`).
-  * 2D geometry: Circles & lines.
-  * 3D geometry: Planes & lines.
 * `werkzeugkiste::strings`: Common string manipulation.
 * `werkzeugkiste::timing`: Provides a stop watch & additional helpers on top
   of `std::chrono` (to hide some of its template boilerplate).

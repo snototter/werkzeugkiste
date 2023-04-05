@@ -18,6 +18,35 @@
 namespace werkzeugkiste::geometry {
 
 //-----------------------------------------------------------------------------
+// Type abbreviations to distinguish specializations of vectors and other
+// geometric primitives.
+
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, int16_t>, char>
+TypeAbbreviation() {
+  return 's';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, int32_t>, char>
+TypeAbbreviation() {
+  return 'i';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, int64_t>, char>
+TypeAbbreviation() {
+  return 'l';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, float>, char> TypeAbbreviation() {
+  return 'f';
+}
+template <typename Tp>
+constexpr std::enable_if_t<std::is_same_v<Tp, double>, char>
+TypeAbbreviation() {
+  return 'd';
+}
+
+//-----------------------------------------------------------------------------
 // Vectors/Coordinates
 
 // TODO update doc
@@ -759,6 +788,22 @@ class Vec {
   /// Returns the minimum dimension value.
   T MinValue() const { return val[MinIndex()]; }
 
+  //---------------------------------------------------------------------------
+  // Angles
+
+  /// @brief Returns the angle in [0, pi] between this and `other`.
+  /// @return The angle in radians.
+  double AngleRad(const Vec<T, Dim>& other) const {
+    return std::acos(
+        std::min(1.0, std::max(-1.0, UnitVector().Dot(other.UnitVector()))));
+  }
+
+  /// @brief Returns the angle in [0, 180] between this and `other`.
+  /// @return The angle in degrees.
+  inline double AngleDeg(const Vec<T, Dim>& other) const {
+    return Rad2Deg(AngleRad(other));
+  }
+
   //-------------------------------------------------
   // Rotations
 
@@ -786,10 +831,10 @@ class Vec {
   /// is only supported for 2D vector specialization with floating point
   /// value type.
   template <typename Tp = double>
-  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRadians(
-      double theta) const {
-    const double ct = std::cos(theta);
-    const double st = std::sin(theta);
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRad(
+      double angle_rad) const {
+    const double ct = std::cos(angle_rad);
+    const double st = std::sin(angle_rad);
     const double x = static_cast<double>(val[0]);
     const double y = static_cast<double>(val[1]);
     return Vec<Tp, 2>{(ct * x) - (st * y), (st * x) + (ct * y)};
@@ -801,9 +846,26 @@ class Vec {
   /// This method assumes that the coordinate system is right-handed
   /// and is only supported for 2D vectors.
   template <typename Tp = double>
-  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDegrees(
-      double theta) const {
-    return RotateRadians(Deg2Rad(theta));
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDeg(
+      double angle_deg) const {
+    return RotateRad(Deg2Rad(angle_deg));
+  }
+
+  // TODO doc & test
+  template <typename Tp = double>
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateRad(
+      const Vec<Tp, 2>& rotation_center,
+      double angle_rad) const {
+    Vec<Tp, 2> vec = *this - rotation_center;
+    return vec.RotateRad(angle_rad) + rotation_center;
+  }
+
+  // TODO doc & test
+  template <typename Tp = double>
+  Vec<typename std::enable_if<(Dim == 2), Tp>::type, Dim> RotateDeg(
+      const Vec<Tp, 2>& rotation_center,
+      double angle_deg) const {
+    return RotateRad(rotation_center, Deg2Rad(angle_deg));
   }
 
   //---------------------------------------------------------------------------
@@ -829,7 +891,8 @@ class Vec {
       if (fixed_precision > 0) {
         s << std::fixed << std::setprecision(fixed_precision);
       } else {
-        s << std::setprecision(std::numeric_limits<T>::max_digits10);
+        // https://en.cppreference.com/w/cpp/io/manip/setprecision
+        s << std::setprecision(std::numeric_limits<T>::digits10 + 1);
       }
     }
 
@@ -848,30 +911,6 @@ class Vec {
   friend std::ostream& operator<<(std::ostream& os, const Vec<T, Dim>& vec) {
     os << vec.ToString();
     return os;
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, int16_t>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 's';
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, int32_t>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 'i';
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, double>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 'd';
-  }
-
-  template <typename Tp = T,
-      typename std::enable_if<std::is_same<Tp, float>::value, int>::type = 0>
-  inline static char TypeAbbreviation() {
-    return 'f';
   }
 
   /// Returns the class type name, e.g. "Vec2d".
@@ -982,7 +1021,7 @@ inline Vec<T, Dim> VectorProjection(const Vec<T, Dim>& a,
 
 // TODO move inside vector, enable if dim == 2
 /// Computes the angle (in radians) of a 2d direction vector w.r.t. the
-/// positive X axis.
+/// positive X axis. Result is in [-pi, +pi]
 template <typename T>
 inline double AngleRadFromDirectionVec(const Vec<T, 2>& vec) {
   // Dot product is proportional to the cosine, whereas
@@ -990,11 +1029,12 @@ inline double AngleRadFromDirectionVec(const Vec<T, 2>& vec) {
   // See: https://math.stackexchange.com/a/879474
   const Vec<double, 2> ref{1, 0};
   const Vec<double, 2> unit = vec.UnitVector();
+  // TODO clip
   return std::atan2(ref.Determinant(unit), ref.Dot(unit));
 }
 
 /// Computes the angle (in degrees) of a 2d direction vector w.r.t. the
-/// positive X axis.
+/// positive X axis. Result is in [-180, +180]
 template <typename T>
 inline double AngleDegFromDirectionVec(const Vec<T, 2>& vec) {
   return Rad2Deg(AngleRadFromDirectionVec(vec));
