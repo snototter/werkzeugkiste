@@ -1002,22 +1002,7 @@ std::vector<Pt> GetPoints(const toml::table &tbl, std::string_view key) {
 }
 
 template <typename Tcfg>
-std::vector<Tcfg> GetList(const toml::table &tbl, std::string_view key) {
-  if (!ContainsKey(tbl, key)) {
-    throw KeyErrorWithSimilarKeys(tbl, key);
-  }
-
-  const auto &node = tbl.at_path(key);
-  if (!node.is_array()) {
-    std::string msg{"Invalid list configuration: Parameter `"};
-    msg += key;
-    msg += "` must be a list, but is `";
-    msg += TomlTypeName(node, key);
-    msg += "`!";
-    throw TypeError{msg};
-  }
-
-  const toml::array &arr = *node.as_array();
+std::vector<Tcfg> GetList(const toml::array &arr, std::string_view key) {
   std::size_t arr_index = 0;
   std::vector<Tcfg> scalars{};
   for (auto &&value : arr) {
@@ -1055,7 +1040,7 @@ struct Configuration::Impl {
       throw detail::KeyErrorWithSimilarKeys(config_root, key);
     }
 
-    const auto node = config_root.at_path(key);
+    const auto &node = config_root.at_path(key);
     if (!node.is_table()) {
       std::string msg{"Cannot lookup parameter `"};
       msg += key;
@@ -1065,6 +1050,44 @@ struct Configuration::Impl {
       throw TypeError{msg};
     }
     return *node.as_table();
+  }
+
+  toml::table &Table(std::string_view key) {
+    if (key.empty()) {
+      return config_root;
+    }
+
+    if (!detail::ContainsKey(config_root, key)) {
+      throw detail::KeyErrorWithSimilarKeys(config_root, key);
+    }
+
+    auto node = config_root.at_path(key);
+    if (!node.is_table()) {
+      std::string msg{"Cannot lookup parameter `"};
+      msg += key;
+      msg += "` as group, because it is a `";
+      msg += detail::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+    return *node.as_table();
+  }
+
+  const toml::array &List(std::string_view key) const {
+    if (!detail::ContainsKey(config_root, key)) {
+      throw detail::KeyErrorWithSimilarKeys(config_root, key);
+    }
+
+    const auto &node = config_root.at_path(key);
+    if (!node.is_array()) {
+      std::string msg{"Cannot lookup parameter `"};
+      msg += key;
+      msg += "` as list, because it is a `";
+      msg += detail::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+    return *node.as_array();
   }
 };
 
@@ -1318,7 +1341,7 @@ void Configuration::SetBoolean(std::string_view key, bool value) {
 }
 
 std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
-  return detail::GetList<bool>(pimpl_->config_root, key);
+  return detail::GetList<bool>(pimpl_->List(key), key);
 }
 
 void Configuration::SetBooleanList(std::string_view key,
@@ -1355,7 +1378,7 @@ void Configuration::SetInteger32(std::string_view key, int32_t value) {
 
 std::vector<int32_t> Configuration::GetInteger32List(
     std::string_view key) const {
-  return detail::GetList<int32_t>(pimpl_->config_root, key);
+  return detail::GetList<int32_t>(pimpl_->List(key), key);
 }
 
 void Configuration::SetInteger32List(std::string_view key,
@@ -1391,7 +1414,7 @@ void Configuration::SetInteger64(std::string_view key, int64_t value) {
 
 std::vector<int64_t> Configuration::GetInteger64List(
     std::string_view key) const {
-  return detail::GetList<int64_t>(pimpl_->config_root, key);
+  return detail::GetList<int64_t>(pimpl_->List(key), key);
 }
 
 void Configuration::SetInteger64List(std::string_view key,
@@ -1446,7 +1469,7 @@ void Configuration::SetDouble(std::string_view key, double value) {
 }
 
 std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
-  return detail::GetList<double>(pimpl_->config_root, key);
+  return detail::GetList<double>(pimpl_->List(key), key);
 }
 
 void Configuration::SetDoubleList(std::string_view key,
@@ -1498,7 +1521,7 @@ void Configuration::SetString(std::string_view key, std::string_view value) {
 
 std::vector<std::string> Configuration::GetStringList(
     std::string_view key) const {
-  return detail::GetList<std::string>(pimpl_->config_root, key);
+  return detail::GetList<std::string>(pimpl_->List(key), key);
 }
 
 void Configuration::SetStringList(std::string_view key,
@@ -1532,7 +1555,7 @@ void Configuration::SetDate(std::string_view key, const date &value) {
 }
 
 std::vector<date> Configuration::GetDateList(std::string_view key) const {
-  return detail::GetList<date>(pimpl_->config_root, key);
+  return detail::GetList<date>(pimpl_->List(key), key);
 }
 
 void Configuration::SetDateList(std::string_view key,
@@ -1566,7 +1589,7 @@ void Configuration::SetTime(std::string_view key, const time &value) {
 }
 
 std::vector<time> Configuration::GetTimeList(std::string_view key) const {
-  return detail::GetList<time>(pimpl_->config_root, key);
+  return detail::GetList<time>(pimpl_->List(key), key);
 }
 
 void Configuration::SetTimeList(std::string_view key,
@@ -1602,7 +1625,7 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
 
 std::vector<date_time> Configuration::GetDateTimeList(
     std::string_view key) const {
-  return detail::GetList<date_time>(pimpl_->config_root, key);
+  return detail::GetList<date_time>(pimpl_->List(key), key);
 }
 
 void Configuration::SetDateTimeList(std::string_view key,
@@ -1726,7 +1749,8 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
 //---------------------------------------------------------------------------
 // Convenience utilities
 
-bool Configuration::AdjustRelativePaths(std::string_view base_path,
+bool Configuration::AdjustRelativePaths(std::string_view key,
+    std::string_view base_path,
     const std::vector<std::string_view> &parameters) {
   using namespace std::string_view_literals;
   const KeyMatcher matcher{parameters};
@@ -1769,11 +1793,11 @@ bool Configuration::AdjustRelativePaths(std::string_view base_path,
       }
     }
   };
-  detail::Traverse(pimpl_->config_root, ""sv, func);
+  detail::Traverse(pimpl_->Table(key), ""sv, func);
   return replaced;
 }
 
-bool Configuration::ReplaceStringPlaceholders(
+bool Configuration::ReplaceStringPlaceholders(std::string_view key,
     const std::vector<std::pair<std::string_view, std::string_view>>
         &replacements) {
   // Sanity check, search string can't be empty
@@ -1808,7 +1832,7 @@ bool Configuration::ReplaceStringPlaceholders(
       }
     }
   };
-  detail::Traverse(pimpl_->config_root, ""sv, func);
+  detail::Traverse(pimpl_->Table(key), ""sv, func);
   return replaced;
 }
 

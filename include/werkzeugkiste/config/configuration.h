@@ -164,7 +164,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// child parameters will be returned.
   inline std::vector<std::string> ListParameterNames(bool include_array_entries,
       bool recursive) const {
-    return ListParameterNames("", include_array_entries, recursive);
+    using namespace std::string_view_literals;
+    return ListParameterNames(""sv, include_array_entries, recursive);
   };
 
   //---------------------------------------------------------------------------
@@ -913,25 +914,54 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Convenience utilities
 
-  /// @brief Adjusts the given parameters to hold either an absolute file path,
-  /// or the result of "base_path / <param>" if they initially held a relative
-  /// file path.
+  /// @brief Adjusts the given parameters below the `key` group to hold either
+  ///   an absolute file path, or the result of "base_path / <param>" if they
+  ///   initially held a relative file path.
+  /// @param key Fully-qualified parameter name.
   /// @param base_path Base path to be prepended to relative file paths.
   /// @param parameters A list of parameter names / patterns. The wildcard '*'
   /// is also supported. For example, valid names are: "my-param",
   /// "files.video1", etc. Valid patterns would be "*path",
   /// "some.nested.*.filename", etc.
   /// @return True if any parameter has been adjusted.
-  bool AdjustRelativePaths(std::string_view base_path,
+  bool AdjustRelativePaths(std::string_view key,
+      std::string_view base_path,
       const std::vector<std::string_view> &parameters);
 
-  /// @brief Visits all string parameters and replaces any occurrence of the
-  /// given needle/replacement pairs.
+  /// @brief Adjusts the given parameters below the configuration root to hold
+  ///   either an absolute file path, or the result of "base_path / <param>" if
+  ///   they initially held a relative file path.
+  /// @param base_path Base path to be prepended to relative file paths.
+  /// @param parameters A list of parameter names / patterns. The wildcard '*'
+  /// is also supported. For example, valid names are: "my-param",
+  /// "files.video1", etc. Valid patterns would be "*path",
+  /// "some.nested.*.filename", etc.
+  /// @return True if any parameter has been adjusted.
+  inline bool AdjustRelativePaths(std::string_view base_path,
+      const std::vector<std::string_view> &parameters) {
+    using namespace std::string_view_literals;
+    return AdjustRelativePaths(""sv, base_path, parameters);
+  }
+
+  /// @brief Visits all string parameters below the given `key` group and
+  ///   replaces any occurrence of the given needle/replacement pairs.
+  /// @param key Fully-qualified parameter name.
   /// @param replacements List of `<search, replacement>` pairs.
   /// @return True if any placeholder has actually been replaced.
-  bool ReplaceStringPlaceholders(
+  bool ReplaceStringPlaceholders(std::string_view key,
       const std::vector<std::pair<std::string_view, std::string_view>>
           &replacements);
+
+  /// @brief Visits all string parameters below the root configuration and
+  ///   replaces any occurrence of the given needle/replacement pairs.
+  /// @param replacements List of `<search, replacement>` pairs.
+  /// @return True if any placeholder has actually been replaced.
+  inline bool ReplaceStringPlaceholders(
+      const std::vector<std::pair<std::string_view, std::string_view>>
+          &replacements) {
+    using namespace std::string_view_literals;
+    return ReplaceStringPlaceholders(""sv, replacements);
+  }
 
   /// @brief Loads a nested configuration.
   ///

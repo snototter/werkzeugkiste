@@ -84,6 +84,9 @@ TEST(ConfigUtilsTest, AbsolutePaths) {
       wkf::FullFile(wkf::DirName(__FILE__), "test-valid1.toml"sv);
   auto config = wkc::LoadTOMLFile(fname);
 
+  // Create a copy
+  wkc::Configuration copy{config};
+
   EXPECT_FALSE(config.AdjustRelativePaths("...", {"no-such-key"sv}));
   EXPECT_TRUE(
       config.AdjustRelativePaths(wkf::DirName(__FILE__), {"section1.*path"sv}));
@@ -104,6 +107,29 @@ TEST(ConfigUtilsTest, AbsolutePaths) {
   EXPECT_THROW(
       config.AdjustRelativePaths("this-will-throw", {"section1.time"sv}),
       wkc::TypeError);
+
+  // ------------------------------
+  // Edge cases
+  // Non-existing key
+  EXPECT_THROW(
+      copy.AdjustRelativePaths("foo"sv, wkf::DirName(__FILE__), {"needle"sv}),
+      wkc::KeyError);
+  // Parameter is not a group
+  EXPECT_THROW(copy.AdjustRelativePaths(
+                   "value1"sv, wkf::DirName(__FILE__), {"needle"sv}),
+      wkc::TypeError);
+  // Adjust only paths below a specific group
+  EXPECT_TRUE(copy.AdjustRelativePaths(
+      "section3"sv, wkf::DirName(__FILE__), {"*path"sv}));
+
+  EXPECT_EQ("this/is/a/relative/path", copy.GetString("section1.rel_path"sv));
+  EXPECT_EQ("/this/is/an/absolute/path", copy.GetString("section1.abs_path"sv));
+
+  expected =
+      wkf::FullFile(wkf::DirName(__FILE__), "this/is/another/relative/path"sv);
+  EXPECT_EQ(expected, copy.GetString("section3.rel_path"sv));
+  EXPECT_EQ(
+      "/this/is/another/absolute/path", copy.GetString("section3.abs_path"sv));
 }
 
 TEST(ConfigUtilsTest, StringReplacements) {
@@ -131,6 +157,8 @@ TEST(ConfigUtilsTest, StringReplacements) {
     [[configs]]
     name = "%TOREP%/D"
     )toml"sv);
+  // Create a copy
+  wkc::Configuration copy{config};
 
   EXPECT_FALSE(config.ReplaceStringPlaceholders({}));
   EXPECT_FALSE(config.ReplaceStringPlaceholders({{"no-such-text"sv, "bar"sv}}));
@@ -160,6 +188,24 @@ TEST(ConfigUtilsTest, StringReplacements) {
   EXPECT_EQ(".../b", config.GetString("configs[1].name"sv));
   EXPECT_EQ(".../C", config.GetString("configs[2].name"sv));
   EXPECT_EQ(".../D", config.GetString("configs[3].name"sv));
+
+  // ------------------------------
+  // Edge cases
+  // Non-existing key
+  EXPECT_THROW(
+      copy.ReplaceStringPlaceholders("foo"sv, {{"needle"sv, "replace"sv}}),
+      wkc::KeyError);
+  // Parameter is not a group
+  EXPECT_THROW(
+      copy.ReplaceStringPlaceholders("str1"sv, {{"needle"sv, "replace"sv}}),
+      wkc::TypeError);
+
+  // Replace only strings below a specific group
+  EXPECT_TRUE(copy.ReplaceStringPlaceholders("table"sv, {{"e"sv, "foo"sv}}));
+  EXPECT_EQ("This is a test", copy.GetString("str2"sv));
+  EXPECT_EQ("Hello world!", copy.GetString("str3"sv));
+  EXPECT_EQ("Anothfoor tfoost!", copy.GetString("table.str1"sv));
+  EXPECT_EQ("Untouchfood", copy.GetString("table.str2"sv));
 }
 
 // NOLINTEND
