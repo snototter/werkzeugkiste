@@ -66,7 +66,7 @@
             </li>
           </ul>
         </div>
-<ul><li>Internally, a TOML configuration is used to store the parameters.</li><li>Explicit method names are preferred over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li><li>Mixed lists:<ul><li>All entries numeric -&gt; can be looked up as floating point list.</li><li>Can be created programmatically via CreateList + Append, as well as by loading a mixed list from a TOML/JSON/... string or file</li><li>Can be replaced by an empty list, but cannot be replaced by a homogeneous list.</li><li>Individual elements can be looked up and set (via their corresponding GetTYPE/SetTYPE).</li></ul></li><li>Integers &amp; floating points will be implicitly converted if the value can be represented <em>exactly</em> by the target type. For example, double(2.0) can be looked up as int, but 2.5 cannot (will raise a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code>).</li></ul><p>TODOs:</p><ul><li>[ ] LoadNestedJSONConfiguration</li><li>[ ] NestedLists int &amp; double (for &quot;matrices&quot;)</li><li>[ ] If eigen3 is available, enable GetMatrix. Static dimensions vs dynamic?</li><li>[ ] Setters for ...Pair</li><li>[ ] Optional &amp; Default getters for ...Pair</li><li>[ ] Convenience types: Point/Index/Rectangle</li><li>[ ] Convenience type casts: unsigned integer</li></ul>
+<p>This class provides access to configuration data in a format compatible to TOML. Supported data types:</p><ul><li>Booleans</li><li>Integer (internally stored as 64-bit signed integer).</li><li>Floating point numbers (internally stored as double precision values).</li><li>Strings</li><li>Dates, times and date-times following RFC 3339, <a href="https://www.rfc-editor.org/rfc/rfc3339">https:/<wbr />/<wbr />www.rfc-editor.org/<wbr />rfc/<wbr />rfc3339</a></li><li>Lists of configuration parameters (may be of any type).</li><li>Groups, aka tables (TOML), i.e. a collection of named parameters. Similar to objects in JSON, dicts (with keys of type <code>str</code>) in Python, groups in <code>libconfig</code>.</li></ul><p>TODO clean up doc / extend by examples:</p><ul><li>Explicit method names are preferred over a templated &quot;Get&lt;&gt;&quot;.</li><li>Get(&quot;unknown-key&quot;) throws a <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a> if the parameter does not exist.</li><li>GetOptional returns an optional scalar.</li><li>Get..Or returns a default value if the parameter does not exist.</li><li>Mixed lists:<ul><li>All entries numeric -&gt; can be looked up as floating point list.</li><li>Can be created programmatically via CreateList + Append, as well as by loading a mixed list from a TOML/JSON/... string or file</li><li>Can be replaced by an empty list, but cannot be replaced by a homogeneous list.</li><li>Individual elements can be looked up and set (via their corresponding GetTYPE/SetTYPE).</li></ul></li><li>Integers &amp; floating points will be implicitly converted if the value can be represented <em>exactly</em> by the target type. For example, double(2.0) can be looked up as int, but 2.5 cannot (will raise a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code>).</li></ul>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -153,10 +153,16 @@
             </dt>
             <dd>Checks if a list parameter contains only scalars of the same type.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#af85d3ef5e6a03b75fe745eb4c0e8ae43" class="m-doc">ListParameterNames</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool include_array_entries,
+              bool recursive) const -&gt; std::vector&lt;std::string&gt;</span>
+            </dt>
+            <dd>Returns a list of (fully-qualified) parameter names below the given key.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6b9614bf426432f91bc0eac031711dcb" class="m-doc">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries,
               bool recursive) const -&gt; std::vector&lt;std::string&gt;</span>
             </dt>
-            <dd>Returns a list of (fully-qualified) parameter names.</dd>
+            <dd>Returns a list of (fully-qualified) parameter names below the configuration root.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a95296db8058e86db55350c4ba94107cd" class="m-doc">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
             </dt>
@@ -188,103 +194,115 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a0e62d33cadd8243ed0131c9d6a761067" class="m-doc">GetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int32_t</span>
             </dt>
             <dd>Returns the 32-bit integer parameter.</dd>
-            <dt id="a22afad86b80bb2e65c3ce49205f9e75d">
-              <span class="m-doc-wrap-bumper">auto <a href="#a22afad86b80bb2e65c3ce49205f9e75d" class="m-doc-self">GetInteger32Or</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a22afad86b80bb2e65c3ce49205f9e75d" class="m-doc">GetInteger32Or</a>(</span><span class="m-doc-wrap">std::string_view key,
               int32_t default_val) const -&gt; int32_t</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="affe8dae092ee32f2d83c1672a346684d">
-              <span class="m-doc-wrap-bumper">auto <a href="#affe8dae092ee32f2d83c1672a346684d" class="m-doc-self">GetOptionalInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;int32_t&gt;</span>
+            <dd>Returns the 32-bit integer parameter or the default value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#affe8dae092ee32f2d83c1672a346684d" class="m-doc">GetOptionalInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;int32_t&gt;</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Returns the 32-bit integer parameter or <code>std::nullopt</code> if it does not exist.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#a0bfd10ac84bb413c367ae19835ea75f2" class="m-doc">SetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key,
               int32_t value)</span>
             </dt>
             <dd>Sets a 32-bit signed integer parameter.</dd>
-            <dt id="a243f7bdfcd6199343d1c5ff0e35bde31">
-              <span class="m-doc-wrap-bumper">auto <a href="#a243f7bdfcd6199343d1c5ff0e35bde31" class="m-doc-self">GetInteger32Pair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;int32_t, int32_t&gt;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0b276bb9b1f95e1019099048091ed179" class="m-doc">GetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int32_t&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a0b276bb9b1f95e1019099048091ed179">
-              <span class="m-doc-wrap-bumper">auto <a href="#a0b276bb9b1f95e1019099048091ed179" class="m-doc-self">GetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int32_t&gt;</span>
-            </dt>
-            <dd><span></span></dd>
+            <dd>Returns a list of 32-bit integers.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#adb03b853199630cebefbe043ad6e74d8" class="m-doc">SetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;int32_t&gt;&amp; values)</span>
             </dt>
             <dd>Sets or replaces a list of 32-bit integers.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2bb4ffa8a50cf913a723539d28ea86ca" class="m-doc">GetIndices2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::tuple&lt;int32_t, int32_t&gt;&gt;</span>
-            </dt>
-            <dd>Returns a list of 2D indices (integral x/y coordinates, e.g. a polyline).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8811f6d49edfb4b3f5fd2432e7f0ee24" class="m-doc">GetIndices3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::tuple&lt;int32_t, int32_t, int32_t&gt;&gt;</span>
-            </dt>
-            <dd>Returns a list of 3D indices (integral x/y/z coordinates, e.g. a polyline).</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#adbf37babfe3208a2f87e5da0935d850a" class="m-doc">GetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int64_t</span>
             </dt>
             <dd>Returns the 64-bit integer parameter.</dd>
-            <dt id="abdff03b2fae4c66024806a126290d5c6">
-              <span class="m-doc-wrap-bumper">auto <a href="#abdff03b2fae4c66024806a126290d5c6" class="m-doc-self">GetInteger64Or</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abdff03b2fae4c66024806a126290d5c6" class="m-doc">GetInteger64Or</a>(</span><span class="m-doc-wrap">std::string_view key,
               int64_t default_val) const -&gt; int64_t</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a242ece3fcfe6aa3f73aa2e6f25f64051">
-              <span class="m-doc-wrap-bumper">auto <a href="#a242ece3fcfe6aa3f73aa2e6f25f64051" class="m-doc-self">GetOptionalInteger64</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;int64_t&gt;</span>
+            <dd>Returns the 64-bit integer parameter or the default value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a242ece3fcfe6aa3f73aa2e6f25f64051" class="m-doc">GetOptionalInteger64</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;int64_t&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a44cc3e7129ebedc290bdbbc0355e24fe">
-              <span class="m-doc-wrap-bumper">void <a href="#a44cc3e7129ebedc290bdbbc0355e24fe" class="m-doc-self">SetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Returns the 64-bit integer parameter or <code>std::nullopt</code> if it does not exist.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a44cc3e7129ebedc290bdbbc0355e24fe" class="m-doc">SetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key,
               int64_t value)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="ab60c950551eeb082a47bea3de74dc36f">
-              <span class="m-doc-wrap-bumper">auto <a href="#ab60c950551eeb082a47bea3de74dc36f" class="m-doc-self">GetInteger64Pair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;int64_t, int64_t&gt;</span>
+            <dd>Sets a 64-bit signed integer parameter.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a93d084bccf63cfa9ed669d63cf9153ef" class="m-doc">GetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int64_t&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a93d084bccf63cfa9ed669d63cf9153ef">
-              <span class="m-doc-wrap-bumper">auto <a href="#a93d084bccf63cfa9ed669d63cf9153ef" class="m-doc-self">GetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;int64_t&gt;</span>
-            </dt>
-            <dd><span></span></dd>
-            <dt id="a8868932f8189a62d08088d2113fd92c8">
-              <span class="m-doc-wrap-bumper">void <a href="#a8868932f8189a62d08088d2113fd92c8" class="m-doc-self">SetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Returns a list of 64-bit integers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a8868932f8189a62d08088d2113fd92c8" class="m-doc">SetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;int64_t&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Sets or replaces a list of 64-bit integers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#abe5deedf5b548178fa57f24a5e02a1aa" class="m-doc">GetInteger64Point2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;int64_t&gt;</span>
+            </dt>
+            <dd>Returns a 2D point with integer coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#acc0950ca64741e6671793f7d953ff2b2" class="m-doc">GetInteger64Point3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;int64_t&gt;</span>
+            </dt>
+            <dd>Returns a 3D point with integer coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3e6a65790c009cef09374d39b0d167df" class="m-doc">GetInteger64Points2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;int64_t&gt;&gt;</span>
+            </dt>
+            <dd>Returns a list of 2D points (e.g. a polyline or polygon).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aebe40a6aa137c1be5d17df50ed671b5c" class="m-doc">GetInteger64Points3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;int64_t&gt;&gt;</span>
+            </dt>
+            <dd>Returns a list of 3D points (e.g. a polyline or polygon).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a749e5cc0b14f47da66a8872c06492bb2" class="m-doc">GetDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; double</span>
             </dt>
             <dd>Returns the double-precision floating point parameter.</dd>
-            <dt id="a1a8446005a5bc279410553344e167e89">
-              <span class="m-doc-wrap-bumper">auto <a href="#a1a8446005a5bc279410553344e167e89" class="m-doc-self">GetDoubleOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a8446005a5bc279410553344e167e89" class="m-doc">GetDoubleOr</a>(</span><span class="m-doc-wrap">std::string_view key,
               double default_val) const -&gt; double</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a65402cb4db45da60b3da06bcaaab0d6c">
-              <span class="m-doc-wrap-bumper">auto <a href="#a65402cb4db45da60b3da06bcaaab0d6c" class="m-doc-self">GetOptionalDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;double&gt;</span>
+            <dd>Returns the double-precision floating point parameter or the default value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a65402cb4db45da60b3da06bcaaab0d6c" class="m-doc">GetOptionalDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;double&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="aee676c05e77cdd40f4a73d2e9cdcf08f">
-              <span class="m-doc-wrap-bumper">void <a href="#aee676c05e77cdd40f4a73d2e9cdcf08f" class="m-doc-self">SetDouble</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Returns the double-precision floating point parameter or <code>std::nullopt</code> if it does not exist.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aee676c05e77cdd40f4a73d2e9cdcf08f" class="m-doc">SetDouble</a>(</span><span class="m-doc-wrap">std::string_view key,
               double value)</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a4f216f811175abb371cba9965f35969e">
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f216f811175abb371cba9965f35969e" class="m-doc-self">GetDoublePair</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::pair&lt;double, double&gt;</span>
+            <dd>Sets a double-precision floating point parameter.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a6a0cbff7c370019ededf8f66d01f2cff" class="m-doc">GetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;double&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt id="a6a0cbff7c370019ededf8f66d01f2cff">
-              <span class="m-doc-wrap-bumper">auto <a href="#a6a0cbff7c370019ededf8f66d01f2cff" class="m-doc-self">GetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;double&gt;</span>
-            </dt>
-            <dd><span></span></dd>
-            <dt id="a25a1572708b22cf07d23fdee9bece57f">
-              <span class="m-doc-wrap-bumper">void <a href="#a25a1572708b22cf07d23fdee9bece57f" class="m-doc-self">SetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dd>Returns a list of double-precision floating point values.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a25a1572708b22cf07d23fdee9bece57f" class="m-doc">SetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;double&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Sets or replaces a list of double-precision floating point values.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae0e0fb329d60451a9543be5c0e840ec3" class="m-doc">GetDoublePoint2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;double&gt;</span>
+            </dt>
+            <dd>Returns a 2D point with floating point coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a5c5ad21b03a166adc8b6f15796101c14" class="m-doc">GetDoublePoint3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;double&gt;</span>
+            </dt>
+            <dd>Returns a 3D point with floating point coordinates.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a19264f7365b1f35989fa8cf0a8ec483e" class="m-doc">GetDoublePoints2D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;double&gt;&gt;</span>
+            </dt>
+            <dd>Returns a list of 2D points (e.g. a polyline or polygon).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a57ca4ba522e69f9a3abbc319c68245" class="m-doc">GetDoublePoints3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;double&gt;&gt;</span>
+            </dt>
+            <dd>Returns a list of 3D points (e.g. a polyline or polygon).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4e524cbe51f6900224854ec8ab887e85" class="m-doc">GetString</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::string</span>
             </dt>
@@ -307,11 +325,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab85a411c339a43deda45b4abdaf321d9" class="m-doc">GetStringList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;std::string&gt;</span>
             </dt>
             <dd>Returns a list of strings.</dd>
-            <dt id="af70764e7fa1efee7c97730b634ae450d">
-              <span class="m-doc-wrap-bumper">void <a href="#af70764e7fa1efee7c97730b634ae450d" class="m-doc-self">SetStringList</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#af70764e7fa1efee7c97730b634ae450d" class="m-doc">SetStringList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;std::string_view&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Creates or replaces a parameter holding a list of strings.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0b19984d96199fc0d40b6a2111d46132" class="m-doc">GetDate</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a></span>
             </dt>
@@ -334,11 +352,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af45d804e1c8de97180c8a015ed1005ba" class="m-doc">GetDateList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;</span>
             </dt>
             <dd>Returns a list of date parameters.</dd>
-            <dt id="aa853aaa2f2dea317b2dff1321998f7ef">
-              <span class="m-doc-wrap-bumper">void <a href="#aa853aaa2f2dea317b2dff1321998f7ef" class="m-doc-self">SetDateList</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aa853aaa2f2dea317b2dff1321998f7ef" class="m-doc">SetDateList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Sets or replaces a list of date parameters.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a249009878cfff298d08dd4bcf3ca1c66" class="m-doc">GetTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a></span>
             </dt>
@@ -361,11 +379,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af06f099e872ed322638e82136a7c0f69" class="m-doc">GetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;</span>
             </dt>
             <dd>Returns a list of time parameters.</dd>
-            <dt id="a49df9b696f557a4d8dd8faf822e0b03c">
-              <span class="m-doc-wrap-bumper">void <a href="#a49df9b696f557a4d8dd8faf822e0b03c" class="m-doc-self">SetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#a49df9b696f557a4d8dd8faf822e0b03c" class="m-doc">SetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Sets or replaces a list of time parameters.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a73413ae7bd5f14a8fe2367f7faabc868" class="m-doc">GetDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a></span>
             </dt>
@@ -388,11 +406,11 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a62dc913da41e8483d4bb507c7efbe68b" class="m-doc">GetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;</span>
             </dt>
             <dd>Returns a list of date-time parameters.</dd>
-            <dt id="aef122d26f1f6ccddaf3fd7c48a16f997">
-              <span class="m-doc-wrap-bumper">void <a href="#aef122d26f1f6ccddaf3fd7c48a16f997" class="m-doc-self">SetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a href="#aef122d26f1f6ccddaf3fd7c48a16f997" class="m-doc">SetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;&amp; values)</span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Sets or replaces a list of date-time parameters.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#afa87b18dd0a7c101e118004da78e533d" class="m-doc">CreateList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
@@ -460,14 +478,25 @@
             </dt>
             <dd>Inserts (or replaces) the given configuration group.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a601337e82b1a37da15e1c5624989b360" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::string_view base_path,
+              const std::vector&lt;std::string_view&gt;&amp; parameters) -&gt; bool</span>
+            </dt>
+            <dd>Adjusts the given parameters below the <code>key</code> group to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a390d1627ce2261f9111cd5295e5b0450" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
               const std::vector&lt;std::string_view&gt;&amp; parameters) -&gt; bool</span>
             </dt>
-            <dd>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</dd>
+            <dd>Adjusts the given parameters below the configuration root to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ac7a1209bab52b6e80d9ee9d2c300428d" class="m-doc">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements) -&gt; bool</span>
+            </dt>
+            <dd>Visits all string parameters below the given <code>key</code> group and replaces any occurrence of the given needle/replacement pairs.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ae96887f1b24e2c6e644576b9b2a9d03c" class="m-doc">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements) -&gt; bool</span>
             </dt>
-            <dd>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</dd>
+            <dd>Visits all string parameters below the root configuration and replaces any occurrence of the given needle/replacement pairs.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#ad74771f215027f596925374fa6045ff8" class="m-doc">LoadNestedConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
@@ -559,7 +588,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is not a list.</p>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is not a list or a group.</p>
           </div></section>
           <section class="m-doc-details" id="a84c5a32b850c9caf85dcc12d30791589"><div>
             <h3>
@@ -621,12 +650,39 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is not a list.</p>
           </div></section>
+          <section class="m-doc-details" id="af85d3ef5e6a03b75fe745eb4c0e8ae43"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af85d3ef5e6a03b75fe745eb4c0e8ae43" class="m-doc-self">ListParameterNames</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool include_array_entries,
+              bool recursive) const</span></span>
+            </h3>
+            <p>Returns a list of (fully-qualified) parameter names below the given key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified name of the parameter.</td>
+                </tr>
+                <tr>
+                  <td>include_array_entries</td>
+                  <td>If true, the name of each parameter will be returned, <em>i.e.</em> each array element will be included. Otherwise, only named parameters (<em>e.g.</em> a dictionary/table within an array, such as <code>arr[3].name</code>) will be included.</td>
+                </tr>
+                <tr>
+                  <td>recursive</td>
+                  <td>If true, the names of all parameters &quot;below&quot; this configuration/group will be returned. Otherwise, only the first-level child parameters will be returned.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a6b9614bf426432f91bc0eac031711dcb"><div>
             <h3>
               <span class="m-doc-wrap-bumper">std::vector&lt;std::string&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6b9614bf426432f91bc0eac031711dcb" class="m-doc-self">ListParameterNames</a>(</span><span class="m-doc-wrap">bool include_array_entries,
               bool recursive) const</span></span>
             </h3>
-            <p>Returns a list of (fully-qualified) parameter names.</p>
+            <p>Returns a list of (fully-qualified) parameter names below the configuration root.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -784,6 +840,47 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. double(2.0) can be exactly represented by a 32-bit integer, whereas double(1.5) cannot).</p>
           </div></section>
+          <section class="m-doc-details" id="a22afad86b80bb2e65c3ce49205f9e75d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int32_t werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a22afad86b80bb2e65c3ce49205f9e75d" class="m-doc-self">GetInteger32Or</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int32_t default_val) const</span></span>
+            </h3>
+            <p>Returns the 32-bit integer parameter or the default value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>default_val</td>
+                  <td>Value to be returned if the parameter does not exist.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. double(2.0) can be exactly represented by a 32-bit integer, whereas double(1.5) cannot).</p>
+          </div></section>
+          <section class="m-doc-details" id="affe8dae092ee32f2d83c1672a346684d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;int32_t&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affe8dae092ee32f2d83c1672a346684d" class="m-doc-self">GetOptionalInteger32</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns the 32-bit integer parameter or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. double(2.0) can be exactly represented by a 32-bit integer, whereas double(1.5) cannot).</p>
+          </div></section>
           <section class="m-doc-details" id="a0bfd10ac84bb413c367ae19835ea75f2"><div>
             <h3>
               <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0bfd10ac84bb413c367ae19835ea75f2" class="m-doc-self">SetInteger32</a>(</span><span class="m-doc-wrap">std::string_view key,
@@ -805,7 +902,25 @@
                 </tr>
               </tbody>
             </table>
-<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type, unless the value is exactly representable by the existing type. For example, an integer value can usually be exactly represented as a floating point number, thus SetInteger32(&quot;my-float&quot;sv, 2) will not raise an exception. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type, unless the value is exactly representable by the existing type. For example, an integer value can usually be exactly represented as a floating point number, thus <code>SetInteger32(&quot;my-float&quot;sv, 2)</code> will not raise an exception. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0b276bb9b1f95e1019099048091ed179"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;int32_t&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b276bb9b1f95e1019099048091ed179" class="m-doc-self">GetInteger32List</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of 32-bit integers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast. For example, a list like [0.0, -2.0, 100.0, 12345.0] can be exactly represented by a list of 32-bit integer, whereas [0.0, 1.5] cannot.</p>
           </div></section>
           <section class="m-doc-details" id="adb03b853199630cebefbe043ad6e74d8"><div>
             <h3>
@@ -828,43 +943,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type, unless it is a mixed list of only numbers (integers will be TODO) All entries numeric -&gt; can be looked up as floating point list.</p>
-          </div></section>
-          <section class="m-doc-details" id="a2bb4ffa8a50cf913a723539d28ea86ca"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::tuple&lt;int32_t, int32_t&gt;&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2bb4ffa8a50cf913a723539d28ea86ca" class="m-doc-self">GetIndices2D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
-            </h3>
-            <p>Returns a list of 2D indices (integral x/y coordinates, e.g. a polyline).</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">key</td>
-                  <td>Fully-qualified parameter name.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>For the floating point counterpart, refer to <code>GetPoints2D</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a8811f6d49edfb4b3f5fd2432e7f0ee24"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;std::tuple&lt;int32_t, int32_t, int32_t&gt;&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8811f6d49edfb4b3f5fd2432e7f0ee24" class="m-doc-self">GetIndices3D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
-            </h3>
-            <p>Returns a list of 3D indices (integral x/y/z coordinates, e.g. a polyline).</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">key</td>
-                  <td>Fully-qualified parameter name.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>For the floating point counterpart, refer to <code>GetPoints3D</code>.</p>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type. If the parameter is a mixed numeric list, however, the values will be cast to the corresponding data type. For example, replacing an existing <code>[int, double, int]</code> list by <code>[1, 2, 3, 4]</code> results in a parameter list <code>[int(1), double(2.0), int(3), int(4)]</code>.</p>
           </div></section>
           <section class="m-doc-details" id="adbf37babfe3208a2f87e5da0935d850a"><div>
             <h3>
@@ -884,6 +963,183 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. double(2.0) can be exactly represented by a 64-bit integer, whereas double(1.5) cannot).</p>
           </div></section>
+          <section class="m-doc-details" id="abdff03b2fae4c66024806a126290d5c6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">int64_t werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abdff03b2fae4c66024806a126290d5c6" class="m-doc-self">GetInteger64Or</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int64_t default_val) const</span></span>
+            </h3>
+            <p>Returns the 64-bit integer parameter or the default value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>default_val</td>
+                  <td>Value to be returned if the parameter does not exist.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. double(2.0) can be exactly represented by a 64-bit integer, whereas double(1.5) cannot).</p>
+          </div></section>
+          <section class="m-doc-details" id="a242ece3fcfe6aa3f73aa2e6f25f64051"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;int64_t&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a242ece3fcfe6aa3f73aa2e6f25f64051" class="m-doc-self">GetOptionalInteger64</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns the 64-bit integer parameter or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast. For example, double(2.0) can be exactly represented by a 64-bit integer, whereas double(1.5) cannot.</p>
+          </div></section>
+          <section class="m-doc-details" id="a44cc3e7129ebedc290bdbbc0355e24fe"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a44cc3e7129ebedc290bdbbc0355e24fe" class="m-doc-self">SetInteger64</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int64_t value)</span></span>
+            </h3>
+            <p>Sets a 64-bit signed integer parameter.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>The value to be set.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type, unless the value is exactly representable by the existing type. For example, an integer value can usually be exactly represented as a floating point number, thus <code>SetInteger64(&quot;my-float&quot;sv, 2)</code> will not raise an exception. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="a93d084bccf63cfa9ed669d63cf9153ef"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;int64_t&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a93d084bccf63cfa9ed669d63cf9153ef" class="m-doc-self">GetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of 64-bit integers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast. For example, a list like [0.0, -2.0, 100.0, 12345.0] can be exactly represented by a list of 64-bit integer, whereas [0.0, 1.5] cannot.</p>
+          </div></section>
+          <section class="m-doc-details" id="a8868932f8189a62d08088d2113fd92c8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8868932f8189a62d08088d2113fd92c8" class="m-doc-self">SetInteger64List</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;int64_t&gt;&amp; values)</span></span>
+            </h3>
+            <p>Sets or replaces a list of 64-bit integers.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of flags.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type. If the parameter is a mixed numeric list, however, the values will be cast to the corresponding data type. For example, replacing an existing <code>[int, double, int]</code> list by <code>[1, 2, 3, 4]</code> results in a parameter list <code>[int(1), double(2.0), int(3), int(4)]</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="abe5deedf5b548178fa57f24a5e02a1aa"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;int64_t&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abe5deedf5b548178fa57f24a5e02a1aa" class="m-doc-self">GetInteger64Point2D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a 2D point with integer coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Interprets a list of numbers as 2D point. If the list contains more than two elements, only the first two entries are loaded as x and y coordinate, respectively. Similarly, a group which holds (at least) <code>x</code> and <code>y</code> parameters can also be loaded as a 2D point.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
+          </div></section>
+          <section class="m-doc-details" id="acc0950ca64741e6671793f7d953ff2b2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;int64_t&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acc0950ca64741e6671793f7d953ff2b2" class="m-doc-self">GetInteger64Point3D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a 3D point with integer coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Interprets a list of numbers as 3D point. If the list contains more than three elements, only the first three entries are loaded as x, y and z coordinate, respectively. Similarly, a group which holds (at least) <code>x</code>, <code>y</code> and <code>z</code> parameters can also be loaded as a 3D point.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3e6a65790c009cef09374d39b0d167df"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;int64_t&gt;&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3e6a65790c009cef09374d39b0d167df" class="m-doc-self">GetInteger64Points2D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of 2D points (e.g. a polyline or polygon).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Supports loading nested lists and lists of {x, y} tables as a list of 2D points. Each point in the configuration must have at least 2 dimensions, but may also have more (i.e. only loading the x/y components of 3D points is allowed).</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if any coordinate is defined as a different type, unless it can be safely cast.</p>
+          </div></section>
+          <section class="m-doc-details" id="aebe40a6aa137c1be5d17df50ed671b5c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;int64_t&gt;&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aebe40a6aa137c1be5d17df50ed671b5c" class="m-doc-self">GetInteger64Points3D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of 3D points (e.g. a polyline or polygon).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Supports loading nested lists and lists of {x, y} tables as a list of 3D points. Each point in the configuration must have at least 3 dimensions, but may also have more (i.e. only loading the first 3 components of n-dim points is allowed).</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if any coordinate is defined as a different type, unless it can be safely cast.</p>
+          </div></section>
           <section class="m-doc-details" id="a749e5cc0b14f47da66a8872c06492bb2"><div>
             <h3>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a749e5cc0b14f47da66a8872c06492bb2" class="m-doc-self">GetDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
@@ -901,6 +1157,183 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. integer values can usually be exactly represented by a double).</p>
+          </div></section>
+          <section class="m-doc-details" id="a1a8446005a5bc279410553344e167e89"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a8446005a5bc279410553344e167e89" class="m-doc-self">GetDoubleOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+              double default_val) const</span></span>
+            </h3>
+            <p>Returns the double-precision floating point parameter or the default value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>default_val</td>
+                  <td>Value to be returned if the parameter does not exist.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. integer values can usually be exactly represented by a double).</p>
+          </div></section>
+          <section class="m-doc-details" id="a65402cb4db45da60b3da06bcaaab0d6c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::optional&lt;double&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a65402cb4db45da60b3da06bcaaab0d6c" class="m-doc-self">GetOptionalDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns the double-precision floating point parameter or <code>std::nullopt</code> if it does not exist.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast. For example, integer values can usually be exactly represented by a double.</p>
+          </div></section>
+          <section class="m-doc-details" id="aee676c05e77cdd40f4a73d2e9cdcf08f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aee676c05e77cdd40f4a73d2e9cdcf08f" class="m-doc-self">SetDouble</a>(</span><span class="m-doc-wrap">std::string_view key,
+              double value)</span></span>
+            </h3>
+            <p>Sets a double-precision floating point parameter.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>value</td>
+                  <td>The value to be set.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type, unless the value is exactly representable by the existing type. For example, <code>SetDouble(&quot;my-integer&quot;sv, 12.0)</code> will not raise an exception. However, the parameter type of <code>my-integer</code> would still be <code>integer</code>. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
+          </div></section>
+          <section class="m-doc-details" id="a6a0cbff7c370019ededf8f66d01f2cff"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;double&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6a0cbff7c370019ededf8f66d01f2cff" class="m-doc-self">GetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of double-precision floating point values.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type, unless it can be safely cast (e.g. integer values can usually be exactly represented by a double).</p>
+          </div></section>
+          <section class="m-doc-details" id="a25a1572708b22cf07d23fdee9bece57f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a25a1572708b22cf07d23fdee9bece57f" class="m-doc-self">SetDoubleList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;double&gt;&amp; values)</span></span>
+            </h3>
+            <p>Sets or replaces a list of double-precision floating point values.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of flags.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type. If the parameter is a mixed numeric list, however, this call can succeed if all values can be exactly represented by the corresponding data type. For example, replacing an existing <code>[int, double, int]</code> list by <code>[1.0, 2.3, 3e3, 4.5]</code> results in a parameter list <code>[int(1), double(2.3), int(3000), double(4.5)]</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae0e0fb329d60451a9543be5c0e840ec3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;double&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0e0fb329d60451a9543be5c0e840ec3" class="m-doc-self">GetDoublePoint2D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a 2D point with floating point coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Interprets a list of numbers as 2D point. If the list contains more than two elements, only the first two entries are loaded as x and y coordinate, respectively. Similarly, a group which holds (at least) <code>x</code> and <code>y</code> parameters can also be loaded as a 2D point.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5c5ad21b03a166adc8b6f15796101c14"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;double&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5c5ad21b03a166adc8b6f15796101c14" class="m-doc-self">GetDoublePoint3D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a 3D point with floating point coordinates.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Interprets a list of numbers as 3D point. If the list contains more than three elements, only the first three entries are loaded as x, y and z coordinate, respectively. Similarly, a group which holds (at least) <code>x</code>, <code>y</code> and <code>z</code> parameters can also be loaded as a 3D point.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
+          </div></section>
+          <section class="m-doc-details" id="a19264f7365b1f35989fa8cf0a8ec483e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">point2d</a>&lt;double&gt;&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a19264f7365b1f35989fa8cf0a8ec483e" class="m-doc-self">GetDoublePoints2D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of 2D points (e.g. a polyline or polygon).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Supports loading nested lists and lists of {x, y} tables as a list of 2D points. Each point in the configuration must have at least 2 dimensions, but may also have more (i.e. only loading the x/y components of 3D points is allowed).</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if any coordinate is defined as a different type, unless it can be safely cast.</p>
+          </div></section>
+          <section class="m-doc-details" id="a1a57ca4ba522e69f9a3abbc319c68245"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;double&gt;&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a57ca4ba522e69f9a3abbc319c68245" class="m-doc-self">GetDoublePoints3D</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+            </h3>
+            <p>Returns a list of 3D points (e.g. a polyline or polygon).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Supports loading nested lists and lists of {x, y} tables as a list of 3D points. Each point in the configuration must have at least 3 dimensions, but may also have more (i.e. only loading the x/y/z components of n-dim points is allowed).</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if any coordinate is defined as a different type, unless it can be safely cast.</p>
           </div></section>
           <section class="m-doc-details" id="a4e524cbe51f6900224854ec8ab887e85"><div>
             <h3>
@@ -1002,6 +1435,29 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="af70764e7fa1efee7c97730b634ae450d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af70764e7fa1efee7c97730b634ae450d" class="m-doc-self">SetStringList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;std::string_view&gt;&amp; values)</span></span>
+            </h3>
+            <p>Creates or replaces a parameter holding a list of strings.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of strings to be set.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type, <em>i.e.</em> this method can <em>not</em> be used to change the type of an existing parameter.</p>
+          </div></section>
           <section class="m-doc-details" id="a0b19984d96199fc0d40b6a2111d46132"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0b19984d96199fc0d40b6a2111d46132" class="m-doc-self">GetDate</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
@@ -1101,6 +1557,29 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa853aaa2f2dea317b2dff1321998f7ef"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa853aaa2f2dea317b2dff1321998f7ef" class="m-doc-self">SetDateList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;&amp; values)</span></span>
+            </h3>
+            <p>Sets or replaces a list of date parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of dates.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
           <section class="m-doc-details" id="a249009878cfff298d08dd4bcf3ca1c66"><div>
             <h3>
@@ -1202,6 +1681,29 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
+          <section class="m-doc-details" id="a49df9b696f557a4d8dd8faf822e0b03c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a49df9b696f557a4d8dd8faf822e0b03c" class="m-doc-self">SetTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;&amp; values)</span></span>
+            </h3>
+            <p>Sets or replaces a list of time parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of times.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
+          </div></section>
           <section class="m-doc-details" id="a73413ae7bd5f14a8fe2367f7faabc868"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a> werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a73413ae7bd5f14a8fe2367f7faabc868" class="m-doc-self">GetDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
@@ -1301,6 +1803,29 @@
               </tbody>
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
+          </div></section>
+          <section class="m-doc-details" id="aef122d26f1f6ccddaf3fd7c48a16f997"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aef122d26f1f6ccddaf3fd7c48a16f997" class="m-doc-self">SetDateTimeList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;&amp; values)</span></span>
+            </h3>
+            <p>Sets or replaces a list of date-time parameters.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>values</td>
+                  <td>List of date-times.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
           <section class="m-doc-details" id="afa87b18dd0a7c101e118004da78e533d"><div>
             <h3>
@@ -1603,12 +2128,45 @@
             </table>
 <p>If the <code>key</code> already exists, it must be a group. Otherwise, the parameter will be newly created, along with all &quot;parents&quot; in the fully-qualified name (which defines a &quot;path&quot; through the configuration table/tree).</p>
           </div></section>
+          <section class="m-doc-details" id="a601337e82b1a37da15e1c5624989b360"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a601337e82b1a37da15e1c5624989b360" class="m-doc-self">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::string_view base_path,
+              const std::vector&lt;std::string_view&gt;&amp; parameters)</span></span>
+            </h3>
+            <p>Adjusts the given parameters below the <code>key</code> group to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>base_path</td>
+                  <td>Base path to be prepended to relative file paths.</td>
+                </tr>
+                <tr>
+                  <td>parameters</td>
+                  <td>A list of parameter names / patterns. The wildcard &#x27;*&#x27; is also supported. For example, valid names are: &quot;my-param&quot;, &quot;files.video1&quot;, etc. Valid patterns would be &quot;*path&quot;, &quot;some.nested.*.filename&quot;, etc.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if any parameter has been adjusted.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a390d1627ce2261f9111cd5295e5b0450"><div>
             <h3>
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a390d1627ce2261f9111cd5295e5b0450" class="m-doc-self">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view base_path,
               const std::vector&lt;std::string_view&gt;&amp; parameters)</span></span>
             </h3>
-            <p>Adjusts the given parameters to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</p>
+            <p>Adjusts the given parameters below the configuration root to hold either an absolute file path, or the result of &quot;base_path / &lt;param&gt;&quot; if they initially held a relative file path.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -1631,11 +2189,39 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ac7a1209bab52b6e80d9ee9d2c300428d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7a1209bab52b6e80d9ee9d2c300428d" class="m-doc-self">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements)</span></span>
+            </h3>
+            <p>Visits all string parameters below the given <code>key</code> group and replaces any occurrence of the given needle/replacement pairs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>replacements</td>
+                  <td>List of <code>&lt;search, replacement&gt;</code> pairs.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if any placeholder has actually been replaced.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="ae96887f1b24e2c6e644576b9b2a9d03c"><div>
             <h3>
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae96887f1b24e2c6e644576b9b2a9d03c" class="m-doc-self">ReplaceStringPlaceholders</a>(</span><span class="m-doc-wrap">const std::vector&lt;std::pair&lt;std::string_view, std::string_view&gt;&gt;&amp; replacements)</span></span>
             </h3>
-            <p>Visits all string parameters and replaces any occurrence of the given needle/replacement pairs.</p>
+            <p>Visits all string parameters below the root configuration and replaces any occurrence of the given needle/replacement pairs.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -1670,7 +2256,7 @@
                 </tr>
               </tbody>
             </table>
-<p>For example, if your configuration had a field &quot;storage&quot;, which should be defined in a separate (e.g. machine-dependent) configuration file, the &quot;main&quot; config could define it as <code>storage = &quot;path/to/conf.toml&quot;</code> This function will then load this TOML and replace <code>storage</code> by the loaded configuration. Suppose that <code>conf.toml</code> defines <code>location = ...</code> and <code>duration = ...</code>. Then, after loading, you can access these as <code>&quot;storage.location&quot;</code> and <code>&quot;storage.duration&quot;</code>.</p><p>This method deduces the type of the configuration from the file extension, similar to <code>LoadFile</code>.</p>
+<p>For example, if your configuration had a field &quot;storage&quot;, which should be defined in a separate (e.g. machine-dependent) configuration file, the &quot;main&quot; config could define it as <code>storage = &quot;path/to/conf.toml&quot;</code> This function will then load this TOML and replace <code>storage</code> by the loaded configuration. Suppose that <code>conf.toml</code> defines <code>location = ...</code> and <code>duration = ...</code>. Then, after loading, you can access these as <code>&quot;storage.location&quot;</code> and <code>&quot;storage.duration&quot;</code>.</p><p>This method deduces the type of the configuration from the file extension, similar to <code>LoadFile</code>.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is not a string. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">ParseError</a></code> if parsing the external configuration failed. Raises a <code>std::runtime_error</code> if replacing the internal configuration failed for unforeseen reasons.</p>
           </div></section>
         </section>
       </div>

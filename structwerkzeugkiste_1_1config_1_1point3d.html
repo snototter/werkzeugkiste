@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>werkzeugkiste/config/types.h file | werkzeugkiste</title>
+  <title>werkzeugkiste::config::point3d struct | werkzeugkiste</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
   <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
   <link rel="icon" href="favicon-dark.png" type="image/png" />
@@ -49,88 +49,66 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="dir_837f0253d12fb61c9a448a6c311624e0.html">werkzeugkiste</a>/</span><span class="m-breadcrumb"><a href="dir_f3d1a7d0c14057362989980550d17f64.html">config</a>/</span>types.h <span class="m-thin">file</span>
+          <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;types.h&gt;</a></div>
+          <div class="m-doc-template">template&lt;typename Tp&gt;</div>
+          <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>point3d <span class="m-thin">struct</span>
         </h1>
-        <p><span></span></p>
+        <p>A point in 3D Euclidean space.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Tp</td>
+              <td>Underlying type, either integral or floating point.</td>
+            </tr>
+          </tbody>
+        </table>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#namespaces">Namespaces</a></li>
-                <li><a href="#nested-classes">Classes</a></li>
-                <li><a href="#define-members">Defines</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
           </ul>
         </div>
-        <section id="namespaces">
-          <h2><a href="#namespaces">Namespaces</a></h2>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt>namespace <a href="namespacewerkzeugkiste.html" class="m-doc">werkzeugkiste</a></dt>
+            <dt id="aa525540426a6ba2fb187c4cb6e14b678">
+              using <a href="#aa525540426a6ba2fb187c4cb6e14b678" class="m-doc-self">value_type</a> = Tp
+            </dt>
             <dd><span></span></dd>
-            <dt>namespace <a href="namespacewerkzeugkiste_1_1config.html" class="m-doc">werkzeugkiste::config</a></dt>
-            <dd>Utilities to handle configurations.</dd>
           </dl>
         </section>
-        <section id="nested-classes">
-          <h2><a href="#nested-classes">Classes</a></h2>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">werkzeugkiste::config::ParseError</a>
-            </dt>
-            <dd>Indicates a failure during parsing a configuration string/file.</dd>
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">werkzeugkiste::config::KeyError</a>
-            </dt>
-            <dd>Indicates that an invalid key was provided to access a parameter.</dd>
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">werkzeugkiste::config::TypeError</a>
-            </dt>
-            <dd>Indicates that an invalid type was used to query or set a parameter.</dd>
-            <dt>
-              class <a href="classwerkzeugkiste_1_1config_1_1ValueError.html" class="m-doc">werkzeugkiste::config::ValueError</a>
-            </dt>
-            <dd>Indicates invalid input values.</dd>
-            <dt>
-              struct <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">werkzeugkiste::config::date</a>
-            </dt>
-            <dd>A local date.</dd>
-            <dt>
-              struct <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">werkzeugkiste::config::time</a>
-            </dt>
-            <dd>A local time.</dd>
-            <dt>
-              struct <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">werkzeugkiste::config::time_offset</a>
+            <dt id="ae7921180ca6070f5802a27fb0767649e">
+              static std::size_t <a href="#ae7921180ca6070f5802a27fb0767649e" class="m-doc-self">ndim</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd><span></span></dd>
-            <dt>
-              struct <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">werkzeugkiste::config::date_time</a>
-            </dt>
-            <dd>A date-time specification following RFC 3339.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename Tp&gt;</div>
-              struct <a href="structwerkzeugkiste_1_1config_1_1point2d.html" class="m-doc">werkzeugkiste::config::point2d</a>
-            </dt>
-            <dd>A point in 2D Euclidean space.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename Tp&gt;</div>
-              struct <a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">werkzeugkiste::config::point3d</a>
-            </dt>
-            <dd>A point in 3D Euclidean space.</dd>
           </dl>
         </section>
-        <section id="define-members">
-          <h2><a href="#define-members">Defines</a></h2>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a3dbe59c206af6f9d3bb70e268748e1bc">
-              <span class="m-doc-wrap-bumper">#define <a href="#a3dbe59c206af6f9d3bb70e268748e1bc" class="m-doc-self">WZKREG_TNSPEC_STR</a>(</span><span class="m-doc-wrap">T,
-              R)</span>
+            <dt id="ab317404684dba2977879e6189cb6cbdc">
+              Tp <a href="#ab317404684dba2977879e6189cb6cbdc" class="m-doc-self">x</a>
             </dt>
             <dd><span></span></dd>
-            <dt id="af80c9832a4eab064a1210826cc224951">
-              <span class="m-doc-wrap-bumper">#define <a href="#af80c9832a4eab064a1210826cc224951" class="m-doc-self">WZKREG_TNSPEC</a>(</span><span class="m-doc-wrap">T)</span>
+            <dt id="abd7a109f9fecfdc2e2e0cd5c9bd438ed">
+              Tp <a href="#abd7a109f9fecfdc2e2e0cd5c9bd438ed" class="m-doc-self">y</a>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="adab0f01292c814def637a42ecbc2c13a">
+              Tp <a href="#adab0f01292c814def637a42ecbc2c13a" class="m-doc-self">z</a>
             </dt>
             <dd><span></span></dd>
           </dl>

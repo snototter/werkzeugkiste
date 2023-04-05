@@ -78,11 +78,11 @@
               <span class="m-doc-wrap-bumper"><a href="#affe6d03eea7fff69eb30937112013a79" class="m-doc">time</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Parses a string representation.</dd>
-            <dt id="a74ea381f93389a38931b28cebfbb3008">
-              <span class="m-doc-wrap-bumper"><a href="#a74ea381f93389a38931b28cebfbb3008" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">uint_least8_t h,
-              uint_least8_t m,
-              uint_least8_t s = 0,
-              uint_least32_t ns = 0)</span>
+            <dt id="af9c6828423dd24bdbb930bb85de4ff4a">
+              <span class="m-doc-wrap-bumper"><a href="#af9c6828423dd24bdbb930bb85de4ff4a" class="m-doc-self">time</a>(</span><span class="m-doc-wrap">uint32_t h,
+              uint32_t m,
+              uint32_t s = 0,
+              uint32_t ns = 0)</span>
             </dt>
             <dd><span></span></dd>
           </dl>
@@ -94,6 +94,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#abde6efd2b2b0f631b3da38ba04a9fb43" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
             <dd>Returns &quot;HH:MM:SS.sssssssss&quot;.</dd>
+            <dt id="ace11da02c441c3de46c79623958ad095">
+              <span class="m-doc-wrap-bumper">auto <a href="#ace11da02c441c3de46c79623958ad095" class="m-doc-self">IsValid</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            </dt>
+            <dd>Returns true if this is a valid time between 00:00 and 23:59:59.999999999.</dd>
             <dt id="a1915a4e1f658980eb3f1c454be2842c8">
               <span class="m-doc-wrap-bumper">auto <a href="#a1915a4e1f658980eb3f1c454be2842c8" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&amp; other) const -&gt; bool</span>
             </dt>
@@ -123,20 +127,20 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a0cb53eaeb88c9fa46d1c72674b568aad">
-              uint_least8_t <a href="#a0cb53eaeb88c9fa46d1c72674b568aad" class="m-doc-self">hour</a>
+            <dt id="a7111d986c4a3d0e4488aaa7797d988f2">
+              uint32_t <a href="#a7111d986c4a3d0e4488aaa7797d988f2" class="m-doc-self">hour</a>
             </dt>
             <dd>The hour, from 0-23.</dd>
-            <dt id="a3e3dce6b97586405fdeb96ae86b46f83">
-              uint_least8_t <a href="#a3e3dce6b97586405fdeb96ae86b46f83" class="m-doc-self">minute</a>
+            <dt id="a38894280fab17d5bb1da204b66de0ff0">
+              uint32_t <a href="#a38894280fab17d5bb1da204b66de0ff0" class="m-doc-self">minute</a>
             </dt>
             <dd>The minute, from 0-59.</dd>
-            <dt id="a7f82033eac68503a520efc1a9539bc05">
-              uint_least8_t <a href="#a7f82033eac68503a520efc1a9539bc05" class="m-doc-self">second</a>
+            <dt id="a874785bf082effcf1a130422f57773ab">
+              uint32_t <a href="#a874785bf082effcf1a130422f57773ab" class="m-doc-self">second</a>
             </dt>
             <dd>The second, from 0-59.</dd>
-            <dt id="a310b529da02277cf6ee0b5a802119043">
-              uint_least32_t <a href="#a310b529da02277cf6ee0b5a802119043" class="m-doc-self">nanosecond</a>
+            <dt id="a4553f8c2a183c7f3a3ff8c94f1e0867a">
+              uint32_t <a href="#a4553f8c2a183c7f3a3ff8c94f1e0867a" class="m-doc-self">nanosecond</a>
             </dt>
             <dd>The nanoseconds, from 0-999999999.</dd>
           </dl>
