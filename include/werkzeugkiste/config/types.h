@@ -92,13 +92,13 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
 struct WERKZEUGKISTE_CONFIG_EXPORT date {
  public:
   /// The year.
-  uint_least16_t year{};
+  uint32_t year{};
 
   /// The month, from 1-12.
-  uint_least8_t month{};
+  uint32_t month{};
 
   /// The day, from 1-31.
-  uint_least8_t day{};
+  uint32_t day{};
 
   date() = default;
 
@@ -109,10 +109,13 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   /// * d.m.Y
   explicit date(std::string_view str);
 
-  date(uint_least16_t y, uint_least8_t m, uint_least8_t d);
+  date(uint32_t y, uint32_t m, uint32_t d);
 
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
+
+  /// @brief Returns true if this is a valid date.
+  bool IsValid() const;
 
   bool operator==(const date &other) const;
   bool operator!=(const date &other) const;
@@ -132,15 +135,6 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
     os << d.ToString();
     return os;
   }
-
- private:
-  // NOLINTBEGIN(*-magic-numbers)
-  static constexpr uint_least32_t Pack(const date &d) noexcept {
-    return (static_cast<uint_least32_t>(d.year) << 16U) |
-           (static_cast<uint_least32_t>(d.month) << 8U) |
-           static_cast<uint_least32_t>(d.day);
-  }
-  // NOLINTEND(*-magic-numbers)
 };
 
 //-----------------------------------------------------------------------------
@@ -150,16 +144,16 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
 struct WERKZEUGKISTE_CONFIG_EXPORT time {
  public:
   /// The hour, from 0-23.
-  uint_least8_t hour{};
+  uint32_t hour{};
 
   /// The minute, from 0-59.
-  uint_least8_t minute{};
+  uint32_t minute{};
 
   /// The second, from 0-59.
-  uint_least8_t second{};
+  uint32_t second{};
 
   /// The nanoseconds, from 0-999999999.
-  uint_least32_t nanosecond{};
+  uint32_t nanosecond{};
 
   time() = default;
 
@@ -173,13 +167,14 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   /// * HH:MM:SS.sssssssss (for nanoseconds)
   explicit time(std::string_view str);
 
-  time(uint_least8_t h,
-      uint_least8_t m,
-      uint_least8_t s = 0,
-      uint_least32_t ns = 0);
+  time(uint32_t h, uint32_t m, uint32_t s = 0, uint32_t ns = 0);
 
   /// @brief Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
+
+  /// @brief Returns true if this is a valid time between 00:00 and
+  ///   23:59:59.999999999.
+  bool IsValid() const;
 
   bool operator==(const time &other) const;
   bool operator!=(const time &other) const;
@@ -193,16 +188,6 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
     os << t.ToString();
     return os;
   }
-
- private:
-  // NOLINTBEGIN(*-magic-numbers)
-  static constexpr uint_least64_t Pack(const time &t) noexcept {
-    return (static_cast<uint_least64_t>(t.hour) << 48U) |
-           (static_cast<uint_least64_t>(t.minute) << 40U) |
-           (static_cast<uint_least64_t>(t.second) << 32U) |
-           static_cast<uint_least64_t>(t.nanosecond);
-  }
-  // NOLINTEND(*-magic-numbers)
 };
 
 //-----------------------------------------------------------------------------
@@ -217,11 +202,11 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
  public:
   /// The offset from UTC+0 in minutes.
-  int_least16_t minutes{};
+  int32_t minutes{};
 
   time_offset() = default;
 
-  explicit time_offset(int_least16_t m) : minutes{m} {}
+  explicit time_offset(int32_t m) : minutes{m} {}
 
   /// @brief Parses a string representation.
   ///
@@ -232,7 +217,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
 
   // TODO doc + highlight that (-1, 30) is *not* equivalent to "-01:30", but
   // instead "-00:30".
-  time_offset(int_least8_t h, int_least8_t m);
+  time_offset(int32_t h, int32_t m);
 
   /// Returns "Z" or "+/-HH:MM".
   std::string ToString() const;
@@ -293,6 +278,74 @@ struct date_time {
     return os;
   }
 };
+
+//-----------------------------------------------------------------------------
+// Convenience types to query configuration parameters
+
+/// @brief A point in 2D Euclidean space.
+/// @tparam Tp Underlying type, either integral or floating point.
+template <typename Tp>
+struct point2d {
+  static_assert(std::is_arithmetic_v<Tp>,
+      "Type of coordinates must be integer or floating point!");
+
+ public:
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  using value_type = Tp;
+
+  static constexpr std::size_t ndim = 2;
+  Tp x{};
+  Tp y{};
+};
+
+/// @brief A point in 3D Euclidean space.
+/// @tparam Tp Underlying type, either integral or floating point.
+template <typename Tp>
+struct point3d {
+  static_assert(std::is_arithmetic_v<Tp>,
+      "Only arithmetic types are supported!");
+
+ public:
+  // NOLINTNEXTLINE(readability-identifier-naming)
+  using value_type = Tp;
+  static constexpr std::size_t ndim = 3;
+  Tp x{};
+  Tp y{};
+  Tp z{};
+};
+
+// /// @brief Encapsulates a two-dimensional size.
+// /// @tparam Tp Underlying type, either integral or floating point.
+// template <typename Tp>
+// struct size2d {
+//   static_assert(std::is_arithmetic_v<Tp>,
+//       "Type of dimensions must be integer or floating point!");
+
+//  public:
+//   // NOLINTNEXTLINE(readability-identifier-naming)
+//   using value_type = Tp;
+
+//   static constexpr std::size_t ndim = 2;
+//   Tp width{};
+//   Tp height{};
+// };
+
+// /// @brief Encapsulates a three-dimensional size.
+// /// @tparam Tp Underlying type, either integral or floating point.
+// template <typename Tp>
+// struct size3d {
+//   static_assert(std::is_arithmetic_v<Tp>,
+//       "Type of dimensions must be integer or floating point!");
+
+//  public:
+//   // NOLINTNEXTLINE(readability-identifier-naming)
+//   using value_type = Tp;
+
+//   static constexpr std::size_t ndim = 3;
+//   Tp width{};
+//   Tp height{};
+//   Tp length{};
+// };
 
 //-----------------------------------------------------------------------------
 // Readable type identifiers to support meaningful error messages

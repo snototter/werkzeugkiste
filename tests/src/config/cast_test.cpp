@@ -48,17 +48,6 @@ void CheckSafeCast(std::string_view lbl,
       << ' ' << value << " to " << wkc::TypeName<T>() << ". Test: " << lbl;
 }
 
-// template <typename T, typename S>
-// void CheckCheckedCast(S value, bool should_be_representable) {
-//   if (should_be_representable) {
-//     // TODO
-//   } else {
-//     EXPECT_THROW(wkc::checked_numcast<T>(value), std::domain_error)
-//       << "checked_numcast didn't throw for " << wkc::TypeName<S>()
-//       << ' ' << value << " to " << wkc::TypeName<T>();
-//   }
-// }
-
 TEST(CastTest, Static) {
   static_assert(wkc::are_integral_v<int, int16_t>);
   bool flag = wkc::are_integral_v<int, int16_t>;

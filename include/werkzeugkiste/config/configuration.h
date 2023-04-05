@@ -22,7 +22,21 @@ namespace werkzeugkiste::config {
 
 /// @brief Encapsulates configuration data.
 ///
-/// * Internally, a TOML configuration is used to store the parameters.
+/// This class provides access to configuration data in a format compatible
+/// to TOML.
+/// Supported data types:
+/// * Booleans
+/// * Integer (internally stored as 64-bit signed integer).
+/// * Floating point numbers (internally stored as double precision values).
+/// * Strings
+/// * Dates, times and date-times following RFC 3339,
+///   https://www.rfc-editor.org/rfc/rfc3339
+/// * Lists of configuration parameters (may be of any type).
+/// * Groups, aka tables (TOML), i.e. a collection of named parameters. Similar
+///   to objects in JSON, dicts (with keys of type `str`) in Python, groups in
+///   `libconfig`.
+///
+/// TODO clean up doc / extend by examples:
 /// * Explicit method names are preferred over a templated "Get<>".
 /// * Get("unknown-key") throws a KeyError if the parameter does not exist.
 /// * GetOptional returns an optional scalar.
@@ -38,16 +52,6 @@ namespace werkzeugkiste::config {
 /// * Integers & floating points will be implicitly converted if the value can
 ///   be represented *exactly* by the target type. For example, double(2.0)
 ///   can be looked up as int, but 2.5 cannot (will raise a `TypeError`).
-///
-/// TODOs:
-/// * [ ] LoadNestedJSONConfiguration
-/// * [ ] NestedLists int & double (for "matrices")
-/// * [ ] If eigen3 is available, enable GetMatrix.
-///       Static dimensions vs dynamic?
-/// * [ ] Setters for ...Pair
-/// * [ ] Optional & Default getters for ...Pair
-/// * [ ] Convenience types: Point/Index/Rectangle
-/// * [ ] Convenience type casts: unsigned integer
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -95,7 +99,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Returns the length of the list `key`.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
-  /// Raises a `TypeError` if the parameter is not a list.
+  /// Raises a `TypeError` if the parameter is not a list or a group.
   ///
   /// @param key Fully-qualified identifier of the parameter.
   std::size_t Size(std::string_view key) const;
@@ -133,7 +137,23 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   type. False otherwise.
   bool IsHomogeneousScalarList(std::string_view key) const;
 
-  /// @brief Returns a list of (fully-qualified) parameter names.
+  /// @brief Returns a list of (fully-qualified) parameter names below the
+  ///   given key.
+  ///
+  /// @param key Fully-qualified name of the parameter.
+  /// @param include_array_entries If true, the name of each parameter will
+  ///   be returned, *i.e.* each array element will be included. Otherwise,
+  ///   only named parameters (*e.g.* a dictionary/table within an array, such
+  ///   as `arr[3].name`) will be included.
+  /// @param recursive If true, the names of all parameters "below" this
+  ///   configuration/group will be returned. Otherwise, only the first-level
+  ///   child parameters will be returned.
+  std::vector<std::string> ListParameterNames(std::string_view key,
+      bool include_array_entries,
+      bool recursive) const;
+
+  /// @brief Returns a list of (fully-qualified) parameter names below the
+  ///   configuration root.
   ///
   /// @param include_array_entries If true, the name of each parameter will
   /// be returned, *i.e.* each array element will be included. Otherwise,
@@ -142,8 +162,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param recursive If true, the names of all parameters "below" this
   /// configuration/group will be returned. Otherwise, only the first-level
   /// child parameters will be returned.
-  std::vector<std::string> ListParameterNames(bool include_array_entries,
-      bool recursive) const;
+  inline std::vector<std::string> ListParameterNames(bool include_array_entries,
+      bool recursive) const {
+    using namespace std::string_view_literals;
+    return ListParameterNames(""sv, include_array_entries, recursive);
+  };
 
   //---------------------------------------------------------------------------
   // Booleans
@@ -212,10 +235,24 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   int32_t GetInteger32(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Returns the 32-bit integer parameter or the default value.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 32-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to be returned if the parameter does not exist.
   int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
 
-  // TODO doc
+  /// @brief Returns the 32-bit integer parameter or `std::nullopt` if it does
+  ///   not exist.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 32-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<int32_t> GetOptionalInteger32(std::string_view key) const;
 
   /// @brief Sets a 32-bit signed integer parameter.
@@ -223,7 +260,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter exists and is of a different type,
   ///   unless the value is exactly representable by the existing type. For
   ///   example, an integer value can usually be exactly represented as a
-  ///   floating point number, thus SetInteger32("my-float"sv, 2) will not
+  ///   floating point number, thus `SetInteger32("my-float"sv, 2)` will not
   ///   raise an exception.
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
@@ -232,50 +269,29 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param value The value to be set.
   void SetInteger32(std::string_view key, int32_t value);
 
-  // TODO doc
-  std::pair<int32_t, int32_t> GetInteger32Pair(std::string_view key) const;
-  // TODO GetPairOr
-  // TODO GetOptionalPair
-
-  // /// @brief Alias for `GetInteger32Pair`. Can be used to retrieve a 2D
-  // ///   size definition of a buffer, image, frame, etc.
-  // /// @param key Fully-qualified parameter name.
-  // inline std::pair<int32_t, int32_t> GetSize2D(std::string_view key) const {
-  //   return GetInteger32Pair(key);  // TODO test
-  // }
-  // // TODO GetSize2DOr
-  // // TODO GetOptionalSize2D
-
-  // TODO doc
+  /// @brief Returns a list of 32-bit integers.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast. For example, a list like [0.0, -2.0, 100.0, 12345.0]
+  /// can be exactly represented by a list of 32-bit integer, whereas
+  /// [0.0, 1.5] cannot.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<int32_t> GetInteger32List(std::string_view key) const;
 
   /// @brief Sets or replaces a list of 32-bit integers.
   ///
-  /// Raises a `TypeError` if the parameter exists but is of a different type,
-  /// unless it is a mixed list of only numbers (integers will be TODO)
-  /// All entries numeric -> can be looked up as floating point list.
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///   If the parameter is a mixed numeric list, however, the values will be
+  ///   cast to the corresponding data type. For example, replacing an existing
+  ///   `[int, double, int]` list by `[1, 2, 3, 4]` results in a parameter
+  ///   list `[int(1), double(2.0), int(3), int(4)]`.
+  ///
   /// @param key Fully-qualified parameter name.
   /// @param values List of flags.
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
-
-  /// @brief Returns a list of 2D indices (integral x/y coordinates, e.g. a
-  ///   polyline).
-  ///
-  /// For the floating point counterpart, refer to `GetPoints2D`.
-  ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<std::tuple<int32_t, int32_t>> GetIndices2D(
-      std::string_view key) const;
-
-  /// @brief Returns a list of 3D indices (integral x/y/z coordinates, e.g. a
-  ///   polyline).
-  ///
-  /// For the floating point counterpart, refer to `GetPoints3D`.
-  ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<std::tuple<int32_t, int32_t, int32_t>> GetIndices3D(
-      std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Integers (64-bit)
@@ -290,26 +306,123 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   int64_t GetInteger64(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Returns the 64-bit integer parameter or the default value.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. double(2.0) can be exactly represented by a
+  /// 64-bit integer, whereas double(1.5) cannot).
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to be returned if the parameter does not exist.
   int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
 
-  // TODO doc
+  /// @brief Returns the 64-bit integer parameter or `std::nullopt` if it does
+  ///   not exist.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  ///   can be safely cast. For example, double(2.0) can be exactly represented
+  ///   by a 64-bit integer, whereas double(1.5) cannot.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets a 64-bit signed integer parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type,
+  ///   unless the value is exactly representable by the existing type. For
+  ///   example, an integer value can usually be exactly represented as a
+  ///   floating point number, thus `SetInteger64("my-float"sv, 2)` will not
+  ///   raise an exception.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
   void SetInteger64(std::string_view key, int64_t value);
 
-  // TODO doc
-  std::pair<int64_t, int64_t> GetInteger64Pair(std::string_view key) const;
-  // TODO GetPairOr
-  // TODO GetOptionalPair
-
-  // TODO doc
+  /// @brief Returns a list of 64-bit integers.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast. For example, a list like [0.0, -2.0, 100.0, 12345.0]
+  /// can be exactly represented by a list of 64-bit integer, whereas
+  /// [0.0, 1.5] cannot.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<int64_t> GetInteger64List(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of 64-bit integers.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///   If the parameter is a mixed numeric list, however, the values will be
+  ///   cast to the corresponding data type. For example, replacing an existing
+  ///   `[int, double, int]` list by `[1, 2, 3, 4]` results in a parameter
+  ///   list `[int(1), double(2.0), int(3), int(4)]`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetInteger64List(std::string_view key,
       const std::vector<int64_t> &values);
+
+  /// @brief Returns a 2D point with integer coordinates.
+  ///
+  /// Interprets a list of numbers as 2D point. If the list contains more than
+  /// two elements, only the first two entries are loaded as x and y
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x` and `y` parameters can also
+  /// be loaded as a 2D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point2d<int64_t> GetInteger64Point2D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
+
+  /// @brief Returns a 3D point with integer coordinates.
+  ///
+  /// Interprets a list of numbers as 3D point. If the list contains more than
+  /// three elements, only the first three entries are loaded as x, y and z
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x`, `y` and `z` parameters can
+  /// also be loaded as a 3D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point3d<int64_t> GetInteger64Point3D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
+
+  /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 2D points. Each point in the configuration must have at least
+  /// 2 dimensions, but may also have more (i.e. only loading the x/y
+  /// components of 3D points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point2d<int64_t>> GetInteger64Points2D(
+      std::string_view key) const;
+
+  /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 3D points. Each point in the configuration must have at least
+  /// 3 dimensions, but may also have more (i.e. only loading the first 3
+  /// components of n-dim points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point3d<int64_t>> GetInteger64Points3D(
+      std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Floating Point
@@ -324,28 +437,120 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   double GetDouble(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Returns the double-precision floating point parameter or the
+  ///   default value.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. integer values can usually be exactly
+  /// represented by a double).
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param default_val Value to be returned if the parameter does not exist.
   double GetDoubleOr(std::string_view key, double default_val) const;
 
-  // TODO doc
+  /// @brief Returns the double-precision floating point parameter or
+  ///   `std::nullopt` if it does not exist.
+  ///
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  ///   can be safely cast. For example, integer values can usually be exactly
+  ///   represented by a double.
+  ///
+  /// @param key Fully-qualified parameter name.
   std::optional<double> GetOptionalDouble(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets a double-precision floating point parameter.
+  ///
+  /// Raises a `TypeError` if the parameter exists and is of a different type,
+  ///   unless the value is exactly representable by the existing type. For
+  ///   example, `SetDouble("my-integer"sv, 12.0)` will not raise an exception.
+  ///   However, the parameter type of `my-integer` would still be `integer`.
+  /// Raises a `std::logic_error` if setting the value in the underlying TOML
+  ///   library failed for unforeseen/not handled reasons.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param value The value to be set.
   void SetDouble(std::string_view key, double value);
 
-  // TODO doc
-  std::pair<double, double> GetDoublePair(std::string_view key) const;
-  // TODO GetPairOr
-  // TODO GetOptionalPair
-
-  // TODO doc
+  /// @brief Returns a list of double-precision floating point values.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is of a different type, unless it
+  /// can be safely cast (e.g. integer values can usually be exactly
+  /// represented by a double).
+  ///
+  /// @param key Fully-qualified parameter name.
   std::vector<double> GetDoubleList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of double-precision floating point values.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///   If the parameter is a mixed numeric list, however, this call can
+  ///   succeed if all values can be exactly represented by the corresponding
+  ///   data type. For example, replacing an existing `[int, double, int]`
+  ///   list by `[1.0, 2.3, 3e3, 4.5]` results in a parameter list
+  ///   `[int(1), double(2.3), int(3000), double(4.5)]`.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of flags.
   void SetDoubleList(std::string_view key, const std::vector<double> &values);
 
-  // TODO getpoints2d
-  // TODO getpoints3d
+  /// @brief Returns a 2D point with floating point coordinates.
+  ///
+  /// Interprets a list of numbers as 2D point. If the list contains more than
+  /// two elements, only the first two entries are loaded as x and y
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x` and `y` parameters can also
+  /// be loaded as a 2D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point2d<double> GetDoublePoint2D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
+
+  /// @brief Returns a 3D point with floating point coordinates.
+  ///
+  /// Interprets a list of numbers as 3D point. If the list contains more than
+  /// three elements, only the first three entries are loaded as x, y and z
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x`, `y` and `z` parameters can
+  /// also be loaded as a 3D point.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully-qualified parameter name
+  point3d<double> GetDoublePoint3D(std::string_view key) const;
+  // TODO doc / Get...Or / GetOptional
+
+  /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 2D points. Each point in the configuration must have at least
+  /// 2 dimensions, but may also have more (i.e. only loading the x/y
+  /// components of 3D points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point2d<double>> GetDoublePoints2D(std::string_view key) const;
+
+  /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
+  ///
+  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// list of 3D points. Each point in the configuration must have at least
+  /// 3 dimensions, but may also have more (i.e. only loading the x/y/z
+  /// components of n-dim points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully-qualified parameter name.
+  std::vector<point3d<double>> GetDoublePoints3D(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Strings
@@ -368,8 +573,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::string GetStringOr(std::string_view key,
       std::string_view default_val) const;
 
-  /// @brief Returns an optional string or `std::nullopt` if it does not
-  ///   exist.
+  /// @brief Returns an optional string or `std::nullopt` if it does not exist.
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
@@ -394,7 +598,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<std::string> GetStringList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Creates or replaces a parameter holding a list of strings.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different
+  ///   type, *i.e.* this method can *not* be used to change the type of
+  ///   an existing parameter.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of strings to be set.
   void SetStringList(std::string_view key,
       const std::vector<std::string_view> &values);
 
@@ -444,7 +655,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<date> GetDateList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of date parameters.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of dates.
   void SetDateList(std::string_view key, const std::vector<date> &values);
 
   //---------------------------------------------------------------------------
@@ -493,7 +709,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<time> GetTimeList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of time parameters.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of times.
   void SetTimeList(std::string_view key, const std::vector<time> &values);
 
   //---------------------------------------------------------------------------
@@ -546,7 +767,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   std::vector<date_time> GetDateTimeList(std::string_view key) const;
 
-  // TODO doc
+  /// @brief Sets or replaces a list of date-time parameters.
+  ///
+  /// Raises a `TypeError` if the parameter exists but is of a different type.
+  ///
+  /// @param key Fully-qualified parameter name.
+  /// @param values List of date-times.
   void SetDateTimeList(std::string_view key,
       const std::vector<date_time> &values);
 
@@ -688,25 +914,54 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Convenience utilities
 
-  /// @brief Adjusts the given parameters to hold either an absolute file path,
-  /// or the result of "base_path / <param>" if they initially held a relative
-  /// file path.
+  /// @brief Adjusts the given parameters below the `key` group to hold either
+  ///   an absolute file path, or the result of "base_path / <param>" if they
+  ///   initially held a relative file path.
+  /// @param key Fully-qualified parameter name.
   /// @param base_path Base path to be prepended to relative file paths.
   /// @param parameters A list of parameter names / patterns. The wildcard '*'
   /// is also supported. For example, valid names are: "my-param",
   /// "files.video1", etc. Valid patterns would be "*path",
   /// "some.nested.*.filename", etc.
   /// @return True if any parameter has been adjusted.
-  bool AdjustRelativePaths(std::string_view base_path,
+  bool AdjustRelativePaths(std::string_view key,
+      std::string_view base_path,
       const std::vector<std::string_view> &parameters);
 
-  /// @brief Visits all string parameters and replaces any occurrence of the
-  /// given needle/replacement pairs.
+  /// @brief Adjusts the given parameters below the configuration root to hold
+  ///   either an absolute file path, or the result of "base_path / <param>" if
+  ///   they initially held a relative file path.
+  /// @param base_path Base path to be prepended to relative file paths.
+  /// @param parameters A list of parameter names / patterns. The wildcard '*'
+  /// is also supported. For example, valid names are: "my-param",
+  /// "files.video1", etc. Valid patterns would be "*path",
+  /// "some.nested.*.filename", etc.
+  /// @return True if any parameter has been adjusted.
+  inline bool AdjustRelativePaths(std::string_view base_path,
+      const std::vector<std::string_view> &parameters) {
+    using namespace std::string_view_literals;
+    return AdjustRelativePaths(""sv, base_path, parameters);
+  }
+
+  /// @brief Visits all string parameters below the given `key` group and
+  ///   replaces any occurrence of the given needle/replacement pairs.
+  /// @param key Fully-qualified parameter name.
   /// @param replacements List of `<search, replacement>` pairs.
   /// @return True if any placeholder has actually been replaced.
-  bool ReplaceStringPlaceholders(
+  bool ReplaceStringPlaceholders(std::string_view key,
       const std::vector<std::pair<std::string_view, std::string_view>>
           &replacements);
+
+  /// @brief Visits all string parameters below the root configuration and
+  ///   replaces any occurrence of the given needle/replacement pairs.
+  /// @param replacements List of `<search, replacement>` pairs.
+  /// @return True if any placeholder has actually been replaced.
+  inline bool ReplaceStringPlaceholders(
+      const std::vector<std::pair<std::string_view, std::string_view>>
+          &replacements) {
+    using namespace std::string_view_literals;
+    return ReplaceStringPlaceholders(""sv, replacements);
+  }
 
   /// @brief Loads a nested configuration.
   ///
@@ -721,6 +976,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// This method deduces the type of the configuration from the file
   /// extension, similar to `LoadFile`.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter is not a string.
+  /// Raises a `ParseError` if parsing the external configuration failed.
+  /// Raises a `std::runtime_error` if replacing the internal configuration
+  ///   failed for unforeseen reasons.
   ///
   /// @param key Parameter name (fully-qualified TOML path) which holds the
   ///     file name of the nested configuration file. The file name must be

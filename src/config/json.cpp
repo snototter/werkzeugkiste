@@ -7,12 +7,15 @@
 #include <string>
 #include <string_view>
 
+// NOLINTBEGIN(*-macro-usage, readability-identifier-naming)
+
 // Ensure that nlohmann/json doesn't include conversions from std::filesystem,
 // because they will lead to linkage errors in the CI runners.
 #define JSON_HAS_FILESYSTEM 0
 #define JSON_HAS_EXPERIMENTAL_FILESYSTEM 0
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
+// NOLINTEND(*-macro-usage, readability-identifier-naming)
 
 namespace werkzeugkiste::config {
 namespace detail {
@@ -121,7 +124,8 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
 Configuration FromJSONRoot(const json &object, NullValuePolicy none_policy) {
   if (object.is_object()) {
     return FromJSONObject(object, none_policy);
-  } else if (object.is_array()) {
+  }
+  if (object.is_array()) {
     Configuration cfg{};
     const std::string_view key{"json"};
     cfg.CreateList(key);
@@ -129,15 +133,15 @@ Configuration FromJSONRoot(const json &object, NullValuePolicy none_policy) {
       AppendListValue(key, cfg, element, none_policy);
     }
     return cfg;
-  } else {
-    // LCOV_EXCL_START
-    // This branch should be unreachable.
-    throw std::logic_error{
-        "Internal util `FromJSONRoot` invoked with neither JSON object nor "
-        "array! Please "
-        "report at https://github.com/snototter/werkzeugkiste/issues"};
-    // LCOV_EXCL_STOP
   }
+
+  // LCOV_EXCL_START
+  // This branch should be unreachable.
+  throw std::logic_error{
+      "Internal util `FromJSONRoot` invoked with neither JSON object nor "
+      "array! Please "
+      "report at https://github.com/snototter/werkzeugkiste/issues"};
+  // LCOV_EXCL_STOP
 }
 }  // namespace detail
 
