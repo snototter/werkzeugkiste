@@ -1766,18 +1766,7 @@ bool Configuration::AdjustRelativePaths(std::string_view key,
   bool *rep_ptr = &replaced;
   auto func = [rep_ptr, to_replace, base_path](
                   toml::node &node, std::string_view fqn) -> void {
-    if (to_replace(fqn)) {
-      // Ensure that the provided key/pattern did not pick up a wrong node by
-      // mistake:
-      if (!node.is_string()) {
-        std::string msg{"Inside `EnsureAbsolutePaths()`, path parameter `"};
-        msg += fqn;
-        msg += "` must be a string, but is `";
-        msg += detail::TomlTypeName(node, fqn);
-        msg += "`!";
-        throw TypeError{msg};
-      }
-
+    if (node.is_string() && to_replace(fqn)) {
       // Check if the path is relative
       const std::string param_str =
           detail::ConvertTomlToConfigType<std::string>(node, fqn);
