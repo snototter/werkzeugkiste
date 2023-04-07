@@ -87,9 +87,11 @@ TEST(ConfigUtilsTest, AbsolutePaths) {
   // Create a copy
   wkc::Configuration copy{config};
 
-  EXPECT_FALSE(config.AdjustRelativePaths("...", {"no-such-key"sv}));
-  EXPECT_TRUE(
-      config.AdjustRelativePaths(wkf::DirName(__FILE__), {"section1.*path"sv}));
+  bool result = config.AdjustRelativePaths("...", {"no-such-key"sv});
+  EXPECT_FALSE(result);
+  result =
+      config.AdjustRelativePaths(wkf::DirName(__FILE__), {"section1.*path"sv});
+  EXPECT_TRUE(result);
 
   std::string expected =
       wkf::FullFile(wkf::DirName(__FILE__), "this/is/a/relative/path"sv);
@@ -102,11 +104,10 @@ TEST(ConfigUtilsTest, AbsolutePaths) {
   // TODO check special character handling (backslash, umlauts,
   // whitespace)
 
-  EXPECT_THROW(config.AdjustRelativePaths("this-will-throw", {"value1"sv}),
-      wkc::TypeError);
-  EXPECT_THROW(
-      config.AdjustRelativePaths("this-will-throw", {"section1.time"sv}),
-      wkc::TypeError);
+  result = config.AdjustRelativePaths("this-will-throw", {"value1"sv});
+  EXPECT_FALSE(result);
+  result = config.AdjustRelativePaths("this-will-throw", {"section1.time"sv});
+  EXPECT_FALSE(result);
 
   // ------------------------------
   // Edge cases
@@ -119,8 +120,9 @@ TEST(ConfigUtilsTest, AbsolutePaths) {
                    "value1"sv, wkf::DirName(__FILE__), {"needle"sv}),
       wkc::TypeError);
   // Adjust only paths below a specific group
-  EXPECT_TRUE(copy.AdjustRelativePaths(
-      "section3"sv, wkf::DirName(__FILE__), {"*path"sv}));
+  result = copy.AdjustRelativePaths(
+      "section3"sv, wkf::DirName(__FILE__), {"*path"sv});
+  EXPECT_TRUE(result);
 
   EXPECT_EQ("this/is/a/relative/path", copy.GetString("section1.rel_path"sv));
   EXPECT_EQ("/this/is/an/absolute/path", copy.GetString("section1.abs_path"sv));
@@ -128,8 +130,8 @@ TEST(ConfigUtilsTest, AbsolutePaths) {
   expected =
       wkf::FullFile(wkf::DirName(__FILE__), "this/is/another/relative/path"sv);
   EXPECT_EQ(expected, copy.GetString("section3.rel_path"sv));
-  EXPECT_EQ(
-      "/this/is/another/absolute/path", copy.GetString("section3.abs_path"sv));
+  expected = "/this/is/another/absolute/path";
+  EXPECT_EQ(expected, copy.GetString("section3.abs_path"sv));
 }
 
 TEST(ConfigUtilsTest, StringReplacements) {

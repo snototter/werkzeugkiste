@@ -920,9 +920,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified parameter name.
   /// @param base_path Base path to be prepended to relative file paths.
   /// @param parameters A list of parameter names / patterns. The wildcard '*'
-  /// is also supported. For example, valid names are: "my-param",
-  /// "files.video1", etc. Valid patterns would be "*path",
-  /// "some.nested.*.filename", etc.
+  ///   is also supported. For example, valid names are: "my-param",
+  ///   "files.video1", etc. Valid patterns would be "*path",
+  ///   "some.nested.*.filename", etc. Parameters that match the pattern, but
+  ///   are not strings will be skipped.
   /// @return True if any parameter has been adjusted.
   bool AdjustRelativePaths(std::string_view key,
       std::string_view base_path,
@@ -933,9 +934,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   they initially held a relative file path.
   /// @param base_path Base path to be prepended to relative file paths.
   /// @param parameters A list of parameter names / patterns. The wildcard '*'
-  /// is also supported. For example, valid names are: "my-param",
-  /// "files.video1", etc. Valid patterns would be "*path",
-  /// "some.nested.*.filename", etc.
+  ///   is also supported. For example, valid names are: "my-param",
+  ///   "files.video1", etc. Valid patterns would be "*path",
+  ///   "some.nested.*.filename", etc. Parameters that match the pattern, but
+  ///   are not strings will be skipped.
   /// @return True if any parameter has been adjusted.
   inline bool AdjustRelativePaths(std::string_view base_path,
       const std::vector<std::string_view> &parameters) {
