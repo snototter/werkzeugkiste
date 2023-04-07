@@ -18,7 +18,7 @@ namespace werkzeugkiste::files {
 // filename sorting & filtering
 // mkdir & mkpath
 // exists
-// isdir, isabsolute
+// isdir
 // listdircontents
 // getextension
 
@@ -137,7 +137,7 @@ std::string DirName(const std::string& path) {
 }
 
 bool IsAbsolute(std::string_view path) {
-#if defined(__linux__) || defined(__unix__)
+#if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
   return (path.length() > 0) && (path[0] == k_file_separator);
 #else
   throw std::logic_error(

@@ -45,6 +45,9 @@ std::string Parent(std::string_view path);
 WERKZEUGKISTE_FILES_EXPORT
 std::string DirName(const std::string &path);
 
+/// @brief Returns true if the given path is absolute.
+///
+/// Only supported on Linux, Unix & Apple systems.
 WERKZEUGKISTE_FILES_EXPORT
 bool IsAbsolute(std::string_view path);
 
