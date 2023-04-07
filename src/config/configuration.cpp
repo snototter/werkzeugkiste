@@ -1031,7 +1031,7 @@ std::vector<Tcfg> GetList(const toml::array &arr, std::string_view key) {
 struct Configuration::Impl {
   toml::table config_root{};
 
-  const toml::table &Table(std::string_view key) const {
+  const toml::table &ImmutableTable(std::string_view key) const {
     if (key.empty()) {
       return config_root;
     }
@@ -1052,7 +1052,7 @@ struct Configuration::Impl {
     return *node.as_table();
   }
 
-  toml::table &Table(std::string_view key) {
+  toml::table &MutableTable(std::string_view key) {
     if (key.empty()) {
       return config_root;
     }
@@ -1274,8 +1274,8 @@ void Configuration::Delete(std::string_view key) {
   }
 
   const std::size_t erased = parent->erase(path.second);
+  // LCOV_EXCL_START
   if (erased == 0) {
-    // LCOV_EXCL_START
     // Should be unreachable.
     std::string msg{"Unknown error while deleting parameter `"};
     msg += key;
@@ -1283,8 +1283,8 @@ void Configuration::Delete(std::string_view key) {
         "`! Please report at"
         "https://github.com/snototter/werkzeugkiste/issues";
     throw std::runtime_error{msg};
-    // LCOV_EXCL_STOP
   }
+  // LCOV_EXCL_STOP
 }
 
 bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
@@ -1316,7 +1316,7 @@ std::vector<std::string> Configuration::ListParameterNames(std::string_view key,
     bool recursive) const {
   using namespace std::string_view_literals;
   return detail::ListTableKeys(
-      pimpl_->Table(key), ""sv, include_array_entries, recursive);
+      pimpl_->ImmutableTable(key), ""sv, include_array_entries, recursive);
 }
 
 //---------------------------------------------------------------------------
@@ -1701,7 +1701,7 @@ void Configuration::Append(std::string_view key, const Configuration &group) {
 // Group/"Sub-Configuration"
 
 Configuration Configuration::GetGroup(std::string_view key) const {
-  const toml::table &tbl = pimpl_->Table(key);
+  const toml::table &tbl = pimpl_->ImmutableTable(key);
   Configuration cfg;
   cfg.pimpl_->config_root = tbl;
   return cfg;
@@ -1786,7 +1786,7 @@ bool Configuration::AdjustRelativePaths(std::string_view key,
       }
     }
   };
-  detail::Traverse(pimpl_->Table(key), ""sv, func);
+  detail::Traverse(pimpl_->MutableTable(key), ""sv, func);
   return replaced;
 }
 
@@ -1825,7 +1825,7 @@ bool Configuration::ReplaceStringPlaceholders(std::string_view key,
       }
     }
   };
-  detail::Traverse(pimpl_->Table(key), ""sv, func);
+  detail::Traverse(pimpl_->MutableTable(key), ""sv, func);
   return replaced;
 }
 
@@ -1870,14 +1870,14 @@ void Configuration::LoadNestedConfiguration(std::string_view key) {
 
   const auto result = parent->insert(path.second, loaded.pimpl_->config_root);
 
+  // LCOV_EXCL_START
   if (!result.second) {
-    // LCOV_EXCL_START
     std::string msg{"Could not insert nested configuration at `"};
     msg += key;
     msg += "`!";
     throw std::runtime_error{msg};
-    // LCOV_EXCL_STOP
   }
+  // LCOV_EXCL_STOP
 }
 
 //---------------------------------------------------------------------------

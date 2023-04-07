@@ -17,6 +17,8 @@ TEST(GeometricPrimitives, Circle) {
   // Collinear points
   wkg::Circle c1({0, 0}, {0, 0}, {10, 20});
   EXPECT_FALSE(c1.IsValid());
+  EXPECT_EQ(wkg::Vec2d(0, 0), c1.Center());
+  EXPECT_DOUBLE_EQ(0, c1.Area());
 
   const double x = 3.0;
   const double y = 4.0;
@@ -26,6 +28,8 @@ TEST(GeometricPrimitives, Circle) {
   EXPECT_DOUBLE_EQ(c2.CenterX(), x);
   EXPECT_DOUBLE_EQ(c2.CenterY(), y);
   EXPECT_DOUBLE_EQ(c2.Radius(), r);
+  EXPECT_EQ(wkg::Vec2d(x, y), c2.Center());
+  EXPECT_DOUBLE_EQ(78.53981633974483, c2.Area());
 
   // Circle-circle intersection:
   c1 = c2;
@@ -84,7 +88,10 @@ TEST(GeometricPrimitives, Circle) {
 }
 
 TEST(GeometricPrimitives, Line2d) {
-  wkg::Line2d line1{{0.0, 0.0}, {3.0, 0.0}};
+  wkg::Line2d line1{};
+  EXPECT_FALSE(line1.IsValid());
+  line1.SetFrom({0, 0});
+  line1.SetTo({3.0, 0.0});
   wkg::Line2d line2{{1.0, -0.6}, {-17.0, -0.6}};
   wkg::Line2d line3{{-100.0, -0.6}, {-170.0, -0.6}};
 
@@ -194,6 +201,9 @@ TEST(GeometricPrimitives, Line2dOrdering) {
 
 TEST(GeometricPrimitives, Line2dClipping) {
   wkg::Line2d line{{2, -1}, {-1, 2}};
+  std::ostringstream str;
+  str << line;
+  EXPECT_EQ("Line2d((2, -1), (-1, 2))", str.str());
 
   auto clipped = line.ClipLineByRectangle({-5, -5}, {10, 10});
   EXPECT_TRUE(clipped.IsValid());
@@ -202,10 +212,8 @@ TEST(GeometricPrimitives, Line2dClipping) {
   // Reverse the line
   clipped = line.Reversed().ClipLineByRectangle({-5, -5}, {10, 10});
   EXPECT_TRUE(clipped.IsValid());
-  EXPECT_EQ(wkg::Vec2d(5, -4), clipped.To())
-      << "Clipped: " << clipped;  // broken
-  EXPECT_EQ(wkg::Vec2d(-4, 5), clipped.From())
-      << "Clipped: " << clipped;  // broken
+  EXPECT_EQ(wkg::Vec2d(5, -4), clipped.To()) << "Clipped: " << clipped;
+  EXPECT_EQ(wkg::Vec2d(-4, 5), clipped.From()) << "Clipped: " << clipped;
 
   // If interpreted as a segment, it would be fully within this clipping rect:
   clipped = line.ClipLineSegmentByRectangle({-5, -5}, {10, 10});

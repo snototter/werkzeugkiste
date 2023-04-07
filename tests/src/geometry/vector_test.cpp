@@ -71,6 +71,8 @@ void TestIndexing(wkg::Vec<Tp, Dim> vec) {
   EXPECT_THROW(vec[-DimInt - 1], std::out_of_range);
   EXPECT_THROW(vec[-DimInt - 2], std::out_of_range);
 
+  EXPECT_THROW(vec[-3 * DimInt], std::out_of_range);
+
   // Negative indexing with unchecked access:
   for (int idx = 0; idx < DimInt; ++idx) {
     EXPECT_EQ(vec.val[DimInt - idx - 1], vec[-(idx + 1)]);
@@ -667,9 +669,13 @@ TEST(VectorTest, All) {
   EXPECT_THROW((wkg::Vec4d{2, 17, 3}), std::invalid_argument);
 
   wkg::Vec2d zero2d;
+  EXPECT_EQ(zero2d, wkg::Vec2d::All(0));
 
   wkg::Vec2d v2d_a{23, 17};
   VectorTestHelper(v2d_a);
+
+  auto h2d = v2d_a.Homogeneous();
+  EXPECT_EQ(wkg::Vec3d(23, 17, 1), h2d);
 
   auto unit2d = v2d_a.UnitVector();
   EXPECT_DOUBLE_EQ(1.0, unit2d.Length());
