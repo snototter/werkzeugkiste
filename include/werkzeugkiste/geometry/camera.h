@@ -16,7 +16,7 @@ namespace werkzeugkiste::geometry {
 //-----------------------------------------------------------------------------
 // Camera projection matrix
 
-/// Returns the pinhole projection matrix `P = K * [R | t] = K * Rt`.
+/// @brief Returns the pinhole projection matrix `P = K * [R | t] = K * Rt`.
 template <typename Tp>
 inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
     const Matrix<Tp, 3, 4>& Rt) {
@@ -25,7 +25,7 @@ inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
   return K * Rt;
 }
 
-/// Returns the pinhole projection matrix `P = K * [R | t]`.
+/// @brief Returns the pinhole projection matrix `P = K * [R | t]`.
 template <typename Tp>
 inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
     const Matrix<Tp, 3, 3>& R,
@@ -37,7 +37,7 @@ inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
   return ProjectionMatrixFromKRt(K, Rt);
 }
 
-/// Returns the projection matrix `P = K * [R | t]`.
+/// @brief Returns the projection matrix `P = K * [R | t]`.
 template <typename Tp>
 inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
     const Matrix<Tp, 3, 3>& R,
@@ -50,7 +50,7 @@ inline Matrix<Tp, 3, 4> ProjectionMatrixFromKRt(const Matrix<Tp, 3, 3>& K,
 //-----------------------------------------------------------------------------
 // Optical center
 
-/// Returns the optical center C = -R' * t.
+/// @brief Returns the optical center `C = -R' * t`.
 template <typename Tp>
 inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 3>& R,
     const Matrix<Tp, 3, 1>& t) {
@@ -59,7 +59,7 @@ inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 3>& R,
   return EigenColToVec<Tp, 3, 1>(-R.transpose() * t, 0);
 }
 
-/// Returns the optical center C = -R' * t.
+/// @brief Returns the optical center `C = -R' * t`.
 template <typename Tp>
 inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 3>& R,
     const Vec<Tp, 3>& t) {
@@ -68,7 +68,7 @@ inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 3>& R,
   return CameraCenterFromRt(R, VecToEigenMat<3>(t));
 }
 
-/// Returns the optical center C = -R' * t.
+/// @brief Returns the optical center `C = -R' * t`.
 template <typename Tp>
 inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 4>& Rt) {
   static_assert(
@@ -81,8 +81,9 @@ inline Vec<Tp, 3> CameraCenterFromRt(const Matrix<Tp, 3, 4>& Rt) {
 // Ground Plane
 
 // FIXME test
-/// Returns the ground plane-to-image plane homography from the camera's
+/// @brief Returns the ground plane-to-image plane homography from the camera's
 /// projection matrix.
+///
 /// `H_gp2cam = [p_0, p_1, p_3]`, where `p_i` is the i-th column of P
 template <typename Tp>
 inline Matrix<Tp, 3, 3> GroundplaneToImageHomography(
@@ -95,7 +96,7 @@ inline Matrix<Tp, 3, 3> GroundplaneToImageHomography(
 }
 
 // FIXME test
-/// Returns the image plane-to-ground plane homography from the camera's
+/// @brief Returns the image plane-to-ground plane homography from the camera's
 /// projection matrix.
 template <typename Tp>
 inline Matrix<Tp, 3, 3> ImageToGroundplaneHomography(
@@ -117,8 +118,8 @@ inline Plane_<Tp> ImagePlaneInCameraCoordinateSystem() {
   return Plane_<Tp>{{0, 0, 1}, -1};
 }
 
-/// Returns the image plane in the world reference frame, given the camera's
-/// extrinsic parameters.
+/// @brief Returns the image plane in the world reference frame, given the
+/// camera's extrinsic parameters.
 template <typename Tp>
 inline Plane_<Tp> ImagePlaneInWorldCoordinateSystem(const Matrix<Tp, 3, 3>& R,
     const Vec<Tp, 3>& t) {
@@ -137,7 +138,7 @@ inline Plane_<Tp> ImagePlaneInWorldCoordinateSystem(const Matrix<Tp, 3, 3>& R,
   return Plane_<Tp>(normal_world, offset);
 }
 
-/// Returns true if the world point lies in front of the image plane.
+/// @brief Returns true if the world point lies in front of the image plane.
 template <typename Tp>
 inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
     const Matrix<Tp, 3, 4>& Rt) {
@@ -150,7 +151,7 @@ inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
   return img_plane_cam.IsPointInFrontOfPlane(pt_cam);
 }
 
-/// Returns true if the world point lies in front of the image plane.
+/// @brief Returns true if the world point lies in front of the image plane.
 template <typename Tp>
 inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
     const Matrix<Tp, 3, 3>& R,
@@ -165,8 +166,10 @@ inline bool IsInFrontOfImagePlane(const Vec<Tp, 3>& pt_world,
 //-----------------------------------------------------------------------------
 // Horizon
 
-/// Returns a the projected line of horizon for the given pinhole camera
-/// calibration. If a valid image size is given, the line will be clipped
+/// @brief Returns a the projected line of horizon for the given pinhole camera
+/// calibration.
+///
+/// If a valid image size is given, the line will be clipped
 /// to the visible region. Check `result.IsValid()`, as the horizon may lie
 /// outside of the image.
 template <typename Tp>
@@ -223,8 +226,8 @@ inline bool IsPointInsideImage(const Vec<Tp, 2>& pt, const Vec2i& img_size) {
           static_cast<Tp>(img_size.Height())});
 }
 
-/// Returns true if the given world point would be visible if projected into
-/// the camera image. If `projected` is a valid pointer, it will be set to
+/// @brief Returns true if the given world point would be visible if projected
+/// into the camera image. If `projected` is a valid pointer, it will be set to
 /// the projected image coordinates.
 template <typename Tp>
 inline bool ProjectsPointOntoImage(const Vec<Tp, 3>& pt_world,

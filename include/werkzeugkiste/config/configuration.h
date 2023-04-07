@@ -96,7 +96,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified identifier of the parameter.
   bool Contains(std::string_view key) const;
 
-  /// @brief Returns the length of the list `key`.
+  /// @brief Returns the length of the parameter list/group named `key`.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is not a list or a group.

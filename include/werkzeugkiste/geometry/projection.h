@@ -31,7 +31,8 @@ using Mat3x4d = Matrix<double, 3, 4>;
 //-----------------------------------------------------------------------------
 // Conversion between werkzeugkiste and Eigen
 
-/// Converts a werkzeugkiste vector to an Eigen vector (single-column matrix).
+/// @brief Converts a werkzeugkiste vector to an Eigen vector (single-column
+/// matrix).
 template <int Rows, typename V>
 inline Matrix<typename V::value_type, Rows, 1> VecToEigenMat(const V& vec) {
   constexpr int v_dim_int = static_cast<int>(V::ndim);
@@ -51,7 +52,7 @@ inline Matrix<typename V::value_type, Rows, 1> VecToEigenMat(const V& vec) {
   return mat;
 }
 
-/// Returns a vector for the given matrix column.
+/// @brief Returns a vector for the given matrix column.
 template <typename Tp, int Rows, int Columns>
 Vec<Tp, static_cast<std::size_t>(Rows)> EigenColToVec(
     const Matrix<Tp, Rows, Columns>& eig,
@@ -63,7 +64,8 @@ Vec<Tp, static_cast<std::size_t>(Rows)> EigenColToVec(
   return v;
 }
 
-/// Returns a matrix where each column holds one vector.
+/// @brief Returns a matrix where each column holds one vector.
+///
 /// Note that the matrix size is fixed at compile time, thus it will be
 /// created on the stack. This function should only be used for a maximum
 /// of up to 32 vectors. Refer to the Eigen3 docs for details:
@@ -126,7 +128,7 @@ inline auto ArrayToTuple(const Array& arr,
   return std::make_tuple(arr[Idx]...);
 }
 
-/// Returns a tuple of vectors (one vector per matrix column).
+/// @brief Returns a tuple of vectors (one vector per matrix column).
 template <typename Tp, int Rows, int Columns>
 inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat) {
   static_assert((Rows > 0) && (Columns > 0),
@@ -143,7 +145,7 @@ inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat) {
 //-----------------------------------------------------------------------------
 // Transformation/projection utitilites
 
-/// Computes `mat * [vec0, vec1, ...]` and returns the result as a tuple
+/// @brief Computes `mat * [vec0, vec1, ...]` and returns the result as a tuple
 /// of vectors.
 ///
 /// The vector dimensionality must be either equal to or 1 less than the number
@@ -181,7 +183,7 @@ TransformToVecs(const Matrix<typename V::value_type, Rows, Columns>& mat,
       transformed);
 }
 
-/// Convenience utility to avoid using std::tie() for a single vector.
+/// @brief Convenience utility to avoid using std::tie() for a single vector.
 /// See `TransformToVecs`.
 template <typename V, typename... Vs, int Rows, int Columns>
 inline Vec<typename V::value_type, static_cast<typename V::index_type>(Rows)>
@@ -197,7 +199,7 @@ TransformToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
   return EigenColToVec<typename V::value_type, Rows, 1>(transformed, 0);
 }
 
-/// Computes `mat * [vec0, vec1, ...]`, divides the result by the
+/// @brief Computes `mat * [vec0, vec1, ...]`, divides the result by the
 /// homogeneous coordinate (*i.e.* last row) and returns a tuple of vectors.
 ///
 /// The vector dimensionality must be either equal to or 1 less than the number
@@ -238,7 +240,7 @@ ProjectToVecs(const Matrix<typename V::value_type, Rows, Columns>& mat,
       projected);
 }
 
-/// Convenience utility to avoid using std::tie() for a single vector.
+/// @brief Convenience utility to avoid using std::tie() for a single vector.
 /// See `ProjectToVecs`.
 template <typename V, typename... Vs, int Rows, int Columns>
 inline Vec<typename V::value_type, static_cast<std::size_t>(Rows - 1)>
@@ -262,7 +264,7 @@ ProjectToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
 //-----------------------------------------------------------------------------
 // Rotation utilities
 
-/// Returns the 3x3 rotation matrix, rotating around the x-axis.
+/// @brief Returns the 3x3 rotation matrix, rotating around the x-axis.
 template <typename Tp>
 inline constexpr Matrix<Tp, 3, 3> RotationX(Tp angle, bool angle_in_deg) {
   static_assert(std::is_floating_point<Tp>::value,
@@ -277,7 +279,7 @@ inline constexpr Matrix<Tp, 3, 3> RotationX(Tp angle, bool angle_in_deg) {
   return rot;
 }
 
-/// Returns the 3x3 rotation matrix, rotating around the y-axis.
+/// @brief Returns the 3x3 rotation matrix, rotating around the y-axis.
 template <typename Tp>
 inline constexpr Matrix<Tp, 3, 3> RotationY(Tp angle, bool angle_in_deg) {
   static_assert(std::is_floating_point<Tp>::value,
@@ -292,7 +294,7 @@ inline constexpr Matrix<Tp, 3, 3> RotationY(Tp angle, bool angle_in_deg) {
   return rot;
 }
 
-/// Returns the 3x3 rotation matrix, rotating around the z-axis.
+/// @brief Returns the 3x3 rotation matrix, rotating around the z-axis.
 template <typename Tp>
 inline constexpr Matrix<Tp, 3, 3> RotationZ(Tp angle, bool angle_in_deg) {
   static_assert(std::is_floating_point<Tp>::value,
@@ -307,7 +309,7 @@ inline constexpr Matrix<Tp, 3, 3> RotationZ(Tp angle, bool angle_in_deg) {
   return rot;
 }
 
-/// Returns the 3x3 rotation matrix in ZYX order.
+/// @brief Returns the 3x3 rotation matrix in ZYX order.
 template <typename Tp>
 inline constexpr Matrix<Tp, 3, 3> RotationMatrix(Tp angle_x,
     Tp angle_y,

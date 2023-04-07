@@ -9,7 +9,7 @@
 #include <string_view>
 #include <vector>
 
-/// File system utilities.
+/// @brief File system utilities (mainly targeted for GNU/Linux systems).
 namespace werkzeugkiste::files {
 
 WERKZEUGKISTE_FILES_EXPORT

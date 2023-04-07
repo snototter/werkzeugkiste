@@ -17,11 +17,11 @@ class IOError : public std::runtime_error {
   explicit IOError(const std::string &msg) : std::runtime_error(msg) {}
 };
 
-/// Reads all lines of the plain text file.
+/// @brief Reads all lines of the plain text file.
 std::vector<std::string> WERKZEUGKISTE_FILES_EXPORT ReadAsciiFile(
     std::string_view filename);
 
-/// Reads the plain text file into a single string.
+/// @brief Reads the plain text file into a single string.
 std::string WERKZEUGKISTE_FILES_EXPORT CatAsciiFile(std::string_view filename);
 
 // TODO doc
@@ -46,38 +46,39 @@ class WERKZEUGKISTE_FILES_EXPORT AsciiFileIterator {
   AsciiFileIterator &operator=(const AsciiFileIterator &) = delete;
   AsciiFileIterator &operator=(AsciiFileIterator &&) = delete;
 
-  /// Returns true if there are still lines left to be read from the file.
+  /// @brief Returns true if there are still lines left to be read from the
+  /// file.
   bool HasLine() const { return !done_; }
 
-  /// Returns the currently read line.
+  /// @brief Returns the currently read line.
   reference Line() const { return line_; }
 
-  /// Returns the 0-based number of the currently read line.
+  /// @brief Returns the 0-based number of the currently read line.
   std::size_t LineNumber() const { return line_number_; }
 
-  /// Returns the currently read line. Overloaded for convenience.
+  /// @brief Returns the currently read line. Overloaded for convenience.
   reference operator*() const { return Line(); }
 
-  /// Returns a const pointer to the currently read line.
+  /// @brief Returns a const pointer to the currently read line.
   pointer operator->() const { return &line_; }
 
-  /// Advances this iterator to the next line and returns the read line.
+  /// @brief Advances this iterator to the next line and returns the read line.
   reference Next();
 
-  /// Advances this iterator to the next line.
+  /// @brief Advances this iterator to the next line.
   AsciiFileIterator &operator++();
 
  private:
-  /// Input file stream.
+  /// @brief Input file stream.
   std::ifstream ifs_{};
 
-  /// Indicates whether there are lines left to be read.
+  /// @brief Indicates whether there are lines left to be read.
   bool done_{true};
 
-  /// Holds the most recently read line.
+  /// @brief Holds the most recently read line.
   std::string line_{};
 
-  /// Holds the 0-based line number of the currently read line.
+  /// @brief Holds the 0-based line number of the currently read line.
   std::size_t line_number_{0};
 };
 

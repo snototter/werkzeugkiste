@@ -8,13 +8,14 @@
 #include <stdexcept>
 #include <string>
 
-/// Stop watch & additional helpers on top of `std::chrono` (to hide
-/// some of its template boilerplate).
+/// @brief Stop watch & additional helpers on top of `std::chrono`.
+///
+/// These utilities are intended to hide some of the template boilerplate
+/// of `std::chrono`.
 namespace werkzeugkiste::timing {
 
-/// Returns the abbreviation for the given
-/// duration type, e.g. std::chrono::hours --> "hrs".
-// TODO change all these checks to constexpr!
+/// @brief Returns the abbreviation for the given
+/// duration type, *e.g.* `"hrs"` for `std::chrono::hours`.
 template <typename Duration>
 std::string DurationAbbreviation() {
   if constexpr (std::is_same<Duration, std::chrono::nanoseconds>::value) {
@@ -60,8 +61,8 @@ std::string DurationAbbreviation() {
   throw std::runtime_error(s.str());
 }
 
-/// Returns the fully-qualified name of the
-/// given clock type, e.g. "std::chrono::system_clock".
+/// @brief Returns the fully-qualified name of the
+/// given clock type, *e.g.* `"std::chrono::system_clock"`.
 template <typename Clock>
 std::string ClockTypeName() {
   if constexpr (std::is_same<Clock, std::chrono::steady_clock>::value) {
@@ -100,8 +101,8 @@ std::string ClockTypeName() {
   throw std::runtime_error(s.str());
 }
 
-/// Returns the fully-qualified name of the given
-/// duration type, e.g. "std::chrono::nanoseconds".
+/// @brief Returns the fully-qualified name of the given
+/// duration type, *e.g.* `"std::chrono::nanoseconds"`.
 template <typename Duration>
 std::string PrecisionTypeName() {
   if constexpr (std::is_same<Duration, std::chrono::nanoseconds>::value) {
@@ -143,8 +144,8 @@ std::string PrecisionTypeName() {
   throw std::runtime_error(s.str());
 }
 
-/// Returns the number of ticks for the given
-/// std::chrono::duration with a different precision.
+/// @brief Returns the number of ticks for the given
+/// `std::chrono::duration` at a potentially different precision.
 template <typename DurationFrom, typename DurationTo>
 inline constexpr double CastToTicks(const DurationFrom& duration) {
   // Floating-point duration requires no explicit duration_cast
@@ -154,42 +155,46 @@ inline constexpr double CastToTicks(const DurationFrom& duration) {
   return target.count();
 }
 
-/// Returns the number of seconds for the given std::chrono::duration.
+/// @brief Returns the number of seconds for the given `std::chrono::duration`.
 template <typename Duration>
 inline constexpr double ToSeconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::seconds>(duration);
 }
 
-/// Returns the number of milliseconds for the given std::chrono::duration.
+/// @brief Returns the number of milliseconds for the given
+/// `std::chrono::duration`.
 template <typename Duration>
 inline constexpr double ToMilliseconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::milliseconds>(duration);
 }
 
-/// Returns the number of microseconds for the given std::chrono::duration.
+/// @brief Returns the number of microseconds for the given
+/// `std::chrono::duration`.
 template <typename Duration>
 inline constexpr double ToMicroseconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::microseconds>(duration);
 }
 
-/// Returns the number of nanoseconds for the given std::chrono::duration.
+/// @brief Returns the number of nanoseconds for the given
+/// `std::chrono::duration`.
 template <typename Duration>
 inline constexpr double ToNanoseconds(const Duration& duration) {
   return CastToTicks<Duration, std::chrono::nanoseconds>(duration);
 }
 
-/// Returns a human readable string approximating the given time.
+/// @brief Returns a human readable string approximating the given time.
 ///
 /// For example, `SecondsToString(3700 * 24 + 50) = '1 day 40 minutes'`.
 WERKZEUGKISTE_TIMING_EXPORT
 std::string SecondsToString(unsigned int seconds);
 
-/// A stop watch with configurable clock.
+/// @brief A stop watch with configurable clock.
 ///
 /// A stop watch measures the time since you last called `Start()`,
 /// or since its construction.
 /// Use its `ElapsedXXX()` methods to get the elapsed time in the
-/// corresponding time interval (i.e. precision), e.g. `ElapsedSeconds()`.
+/// corresponding time interval (__i.e.__ precision), __e.g.__
+/// `ElapsedSeconds()`.
 ///
 /// Duration measurements should use a monotonic clock. Thus, we
 /// explicitly default to `steady_clock` (since `high_resolution_clock` is
@@ -197,13 +202,13 @@ std::string SecondsToString(unsigned int seconds);
 template <typename Clock = std::chrono::steady_clock>
 class StopWatch_ {  // NOLINT
  public:
-  /// Clock type used by this stop watch.
+  /// @brief Clock type used by this stop watch.
   using clock_type = Clock;  // NOLINT
 
-  /// Constructor starts the stop watch.
+  /// @brief Constructor starts the stop watch.
   StopWatch_() { Start(); }
 
-  /// Copy-constructor copies the other's start time point.
+  /// @brief Copy-constructor copies the other's start time point.
   StopWatch_(const StopWatch_& other) : t_start_{other.t_start_} {}
 
   // TODO future extension: similar to a scoped guard, add an
@@ -219,14 +224,16 @@ class StopWatch_ {  // NOLINT
   StopWatch_& operator=(const StopWatch_& other) = default;
   StopWatch_& operator=(StopWatch_&& other) noexcept = default;
 
-  /// Starts or restarts the stop watch.
+  /// @brief Starts or restarts the stop watch.
   void Start() { t_start_ = clock_type::now(); }
 
-  /// Returns the elapsed time as ticks of the
-  /// given time interval (specified as tick interval, which
-  /// is a rational fraction - std::ratio - representing the
-  /// time in seconds from one tick to the next, i.e. similar
-  /// to the Period template parameter in ``std::chrono::duration``).
+  /// @brief Returns the elapsed time as ticks of the
+  /// given time interval.
+  ///
+  /// The time interval is a rational fraction, __i.e.__ `std::ratio`,
+  /// which represents the time in seconds from one tick to the next,
+  /// __i.e.__ similar to the `Period` template parameter in
+  /// `std::chrono::duration`.
   template <typename Ratio>
   double ElapsedAs() const {
     const auto t_end = clock_type::now();
@@ -235,19 +242,19 @@ class StopWatch_ {  // NOLINT
     return duration.count();
   }
 
-  /// Returns the elapsed time in seconds.
+  /// @brief Returns the elapsed time in seconds.
   double ElapsedSeconds() const { return ElapsedAs<std::ratio<1>>(); }
 
-  /// Returns the elapsed time in milliseconds.
+  /// @brief Returns the elapsed time in milliseconds.
   double ElapsedMilliseconds() const { return ElapsedAs<std::milli>(); }
 
-  /// Returns the elapsed time in microseconds.
+  /// @brief Returns the elapsed time in microseconds.
   double ElapsedMicroseconds() const { return ElapsedAs<std::micro>(); }
 
-  /// Returns the elapsed time in nanoseconds.
+  /// @brief Returns the elapsed time in nanoseconds.
   double ElapsedNanoseconds() const { return ElapsedAs<std::nano>(); }
 
-  /// Returns the number of years before this stop watch
+  /// @brief Returns the number of years before this stop watch
   /// will overflow.
   double YearsUntilOverflow() const {
     const auto duration_hrs = std::chrono::duration_cast<std::chrono::hours>(
@@ -257,20 +264,23 @@ class StopWatch_ {  // NOLINT
     return static_cast<double>(duration_hrs.count()) / hrs_per_year;
   }
 
-  /// Returns true if the used clock is steady (monotonic).
+  /// @brief Returns true if the used clock is steady (monotonic).
   bool IsSteady() const { return clock_type::is_steady; }
 
-  /// Returns a readable clock typeid, for
-  /// example "std::chrono::steady_clock".
+  /// @brief Returns a readable clock typeid, for
+  ///  example `"std::chrono::steady_clock"`.
   std::string ClockName() const { return ClockTypeName<Clock>(); }
 
  private:
-  /// Time point from which we measure the elapsed time.
+  /// @brief Time point from which we measure the elapsed time.
   typename clock_type::time_point t_start_{};
 };
 
+/// @brief Default stop watch using the monotonic `std::chrono::steady_clock`.
 extern template class WERKZEUGKISTE_TIMING_EXPORT
     StopWatch_<std::chrono::steady_clock>;
+
+/// @brief Typedef for the default stop watch.
 using StopWatch = StopWatch_<std::chrono::steady_clock>;
 
 }  // namespace werkzeugkiste::timing
