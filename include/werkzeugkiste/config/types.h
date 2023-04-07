@@ -67,7 +67,8 @@ enum class ConfigType : unsigned char {
   /// @brief A local time.
   Time,
 
-  /// @brief A date-time following RFC 3339.
+  /// @brief A date-time following <a
+  /// href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a>.
   DateTime,
 
   /// @brief A list/array of unnamed parameters.
@@ -88,7 +89,7 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
 //-----------------------------------------------------------------------------
 // Date
 
-/// @brief A local date.
+/// @brief Represents a local date.
 struct WERKZEUGKISTE_CONFIG_EXPORT date {
  public:
   /// The year.
@@ -140,7 +141,7 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
 //-----------------------------------------------------------------------------
 // Time
 
-/// @brief A local time.
+/// @brief Represents a local time.
 struct WERKZEUGKISTE_CONFIG_EXPORT time {
  public:
   /// The hour, from 0-23.
@@ -193,17 +194,18 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
 //-----------------------------------------------------------------------------
 // Time zone offset
 
-// TODO doc
-// Caveats:
-// time_offset cannot represent the 'unknown local offset convention', i.e.
-// distinguishing between -00:00 and +00:00.
-// https://www.rfc-editor.org/rfc/rfc3339
-// --> this is done via the optional<time_offset> in date_time instead.
+/// @brief Represents a time zone offset.
+///
+/// Note that `time_offset` cannot represent the __unknown local offset
+/// convention__ (according to
+/// <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a>, __i.e.__ it
+///  cannot distinguish between `-00:00` and `+00:00`.
 struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
  public:
-  /// The offset from UTC+0 in minutes.
+  /// @brief The offset from `UTC+00:00` in minutes.
   int32_t minutes{};
 
+  /// @brief Default c'tor.
   time_offset() = default;
 
   explicit time_offset(int32_t m) : minutes{m} {}
@@ -211,15 +213,15 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
   /// @brief Parses a string representation.
   ///
   /// Supported formats are:
-  /// * Z
-  /// * [+-]?HH:MM
+  /// * `Z`, __i.e.__ the 0 offset.
+  /// * `[+-]?HH:MM`
   explicit time_offset(std::string_view str);
 
   // TODO doc + highlight that (-1, 30) is *not* equivalent to "-01:30", but
   // instead "-00:30".
   time_offset(int32_t h, int32_t m);
 
-  /// Returns "Z" or "+/-HH:MM".
+  /// @brief Returns `"Z"` or `"+/-HH:MM"`.
   std::string ToString() const;
 
   bool operator==(const time_offset &other) const;
@@ -239,7 +241,8 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
 //-----------------------------------------------------------------------------
 // Date-time
 
-/// @brief A date-time specification following RFC 3339.
+/// @brief A date-time specification following
+///   <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a>.
 struct date_time {
  public:
   config::date date{};
@@ -259,20 +262,23 @@ struct date_time {
   // UTC already.
   date_time UTC() const;
 
-  /// @brief Returns the representation in RFC 3339 format.
+  /// @brief Returns the representation in the <a
+  /// href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a> format.
   std::string ToString() const;
 
+  /// @brief Returns `true` if this `date_time` has no time zone offset.
   inline bool IsLocal() const { return !offset.has_value(); }
 
-  // TODO operators
   bool operator==(const date_time &other) const;
   bool operator!=(const date_time &other) const;
+  // TODO operators
   //  bool operator<(const time_offset &other) const;
   //  bool operator<=(const time_offset &other) const;
   //  bool operator>(const time_offset &other) const;
   //  bool operator>=(const time_offset &other) const;
 
-  /// @brief Prints the RFC 3339 representation out to the stream.
+  /// @brief Prints the <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC
+  /// 3339</a> representation out to the stream.
   friend std::ostream &operator<<(std::ostream &os, const date_time &t) {
     os << t.ToString();
     return os;

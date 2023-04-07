@@ -1,5 +1,4 @@
 #include <werkzeugkiste/strings/strings.h>
-#include <werkzeugkiste_macros.h>
 
 #include <algorithm>
 #include <cctype>
@@ -11,8 +10,6 @@
 namespace werkzeugkiste::strings {
 
 namespace detail {
-// TODO should we use char32_t instead?
-// TODO # -- nr
 const std::unordered_map<std::string, std::string>& Replacements() {
   static const std::unordered_map<std::string, std::string> replacements{
       // TODO expand list:
@@ -114,12 +111,12 @@ bool IsNumeric(const std::string& s) {
     char* pl_end{};
     // NOLINTNEXTLINE(*-magic-numbers)
     const int64_t dummyl = strtoll(s.c_str(), &pl_end, 10);
-    WERKZEUGKISTE_UNUSED_VAR(dummyl);
+    (void)(dummyl);
 
     // Check double
     char* pd_end{};
     const double dummyd = strtod(s.c_str(), &pd_end);
-    WERKZEUGKISTE_UNUSED_VAR(dummyd);
+    (void)(dummyd);
 
     is_numeric = (*pd_end == 0) || (*pl_end == 0);
   }

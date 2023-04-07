@@ -9,13 +9,13 @@
 
 // NOLINTBEGIN(*-magic-numbers)
 
-/// Math utils for 2D/3D geometry.
+/// @brief Math utils for 2D/3D geometry.
 namespace werkzeugkiste::geometry {
 
-/// Mathematical constants.
+/// @brief Mathematical constants.
 namespace constants {
 
-// Pi
+/// @brief Pi
 template <typename Tp>
 inline constexpr Tp pi_tpl =
     static_cast<std::enable_if_t<std::is_floating_point_v<Tp>, Tp>>(
@@ -24,7 +24,7 @@ inline constexpr Tp pi_tpl =
 inline constexpr double pi_d = pi_tpl<double>;
 inline constexpr float pi_f = pi_tpl<float>;
 
-// 1 / Pi
+/// @brief `1 / Pi`
 template <typename Tp>
 inline constexpr Tp inv_pi_tpl =
     static_cast<std::enable_if_t<std::is_floating_point_v<Tp>, Tp>>(
@@ -33,7 +33,7 @@ inline constexpr Tp inv_pi_tpl =
 inline constexpr double inv_pi_d = inv_pi_tpl<double>;
 inline constexpr float inv_pi_f = inv_pi_tpl<float>;
 
-// sqrt(2)
+/// @brief `sqrt(2)`
 template <typename Tp>
 inline constexpr Tp sqrt2_tpl =
     static_cast<std::enable_if_t<std::is_floating_point_v<Tp>, Tp>>(
@@ -47,7 +47,7 @@ inline constexpr float sqrt2_f = sqrt2_tpl<float>;
 //-----------------------------------------------------------------------------
 // Angle conversions.
 
-/// Convert angle from degrees to radians.
+/// @brief Convert angle from degrees to radians.
 inline constexpr double Deg2Rad(double deg) {
   return (constants::pi_d / 180.0) * deg;
 }
@@ -60,7 +60,7 @@ inline constexpr double Deg2Rad(int deg) {
   return Deg2Rad(static_cast<double>(deg));
 }
 
-/// Convert angle from radians to degrees.
+/// @brief Convert angle from radians to degrees.
 inline constexpr double Rad2Deg(double rad) {
   return rad * 180.0 * constants::inv_pi_d;
 }
@@ -79,7 +79,7 @@ inline constexpr float Rad2Deg(float rad) {
 // https://bitbashing.io/comparing-floats.html
 // https://peps.python.org/pep-0485
 
-/// Uses the machine epsilon to check whether the given number is
+/// @brief Uses the machine epsilon to check whether the given number is
 /// approximately zero, i.e. computes `|x| <= eps` for floating
 /// point numbers. Integral types will be compared to zero using the
 /// default equality check.
@@ -94,13 +94,14 @@ inline constexpr bool IsEpsZero(T x) {
   }
 }
 
-/// Epsilon equality check for floating point numbers, similar
-/// to Python's math.isclose(), see PEP 485, https://peps.python.org/pep-0485/
+/// @brief Epsilon equality check for floating point numbers, similar
+/// to Python's math.isclose(), see
+/// <a href="https://peps.python.org/pep-0485/">PEP 485</a>.
 ///
-/// Module special case handling, this function returns:
-///   (|x-y| <= rel_tol * |x|)
-///   or (|x-y| <= rel_tol * |y|)
-///   or (|x-y| <= abs_tol)
+/// Modulo special case handling, this function returns:
+/// * `(|x-y| <= rel_tol * |x|)`
+/// * or `(|x-y| <= rel_tol * |y|)`
+/// * or `(|x-y| <= abs_tol)`
 template <typename TVal, typename TTol = double>
 inline constexpr bool IsClose(TVal x,
     TVal y,
@@ -124,7 +125,7 @@ inline constexpr bool IsClose(TVal x,
               absolute_tolerance));
 }
 
-/// Checks if two floating point numbers are "approximately" equal,
+/// @brief Checks if two floating point numbers are "approximately" equal,
 /// according to a fixed relative tolerance (1e-9 for double precision,
 /// 1e-6 for single precision types), see `IsClose`.
 /// As there is no sane default value for the absolute tolerance,
@@ -147,13 +148,13 @@ inline constexpr bool IsEpsEqual(T x, T y) {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-/// Signum helper for unsigned types (to avoid compiler warnings).
+/// @brief Signum helper for unsigned types (to avoid compiler warnings).
 template <typename T>
 inline constexpr int _util_sign(T x, std::false_type /*is_signed*/) {
   return static_cast<T>(0) < x;
 }
 
-/// Signum helper for signed types (to avoid compiler warnings when using
+/// @brief Signum helper for signed types (to avoid compiler warnings when using
 /// unsigned types).
 template <typename T>
 inline constexpr int _util_sign(T x, std::true_type /*is_signed*/) {
@@ -162,8 +163,9 @@ inline constexpr int _util_sign(T x, std::true_type /*is_signed*/) {
 
 // NOLINTEND(readability-identifier-naming)
 
-/// Signum function which returns +1 (if x is positive), 0 (if x equals 0),
-/// or -1 (if x is negative).
+/// @brief Signum function which returns +1 (if x is positive), 0 (if x equals
+/// 0), or -1 (if x is negative).
+///
 /// This type-safe implementation is based on
 /// https://stackoverflow.com/a/4609795 by `user79758` (CC BY-SA 4.0).
 template <typename T>
