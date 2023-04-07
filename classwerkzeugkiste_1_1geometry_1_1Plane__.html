@@ -89,12 +89,12 @@
               T offset)</span>
             </dt>
             <dd>Constructs a plane from its Hessian form.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#aaadee565ae423f558d96e7cc6d1105b5" class="m-doc">Plane_</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; p,
+            <dt id="aaadee565ae423f558d96e7cc6d1105b5">
+              <span class="m-doc-wrap-bumper"><a href="#aaadee565ae423f558d96e7cc6d1105b5" class="m-doc-self">Plane_</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; p,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; q,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; r)</span>
             </dt>
-            <dd></dd>
+            <dd>Constructs a plane from 3 points. If the points are collinear, the plane will be invalid.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -108,38 +108,38 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ae05524af7bd9a183bbf433b4ec7327a2" class="m-doc-self">Normal</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a></span>
             </dt>
             <dd>Returns the plane&#x27;s normal vector.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ac127d4b52a3717f085dfc2a1c5672c" class="m-doc">Offset</a>(</span><span class="m-doc-wrap">) const -&gt; T</span>
+            <dt id="a2ac127d4b52a3717f085dfc2a1c5672c">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ac127d4b52a3717f085dfc2a1c5672c" class="m-doc-self">Offset</a>(</span><span class="m-doc-wrap">) const -&gt; T</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the plane&#x27;s offset, i.e. the distance from the plane to the coordinate system origin, measured along the plane&#x27;s normal. Put differently, this is the minimum distance between the plane and the origin.</dd>
             <dt id="aeee48b723f9280bd055f0173a7e6a72a">
               <span class="m-doc-wrap-bumper">auto <a href="#aeee48b723f9280bd055f0173a7e6a72a" class="m-doc-self">DistancePointToPlane</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; pt) const -&gt; T</span>
             </dt>
             <dd>Returns the distance from the given point to the plane.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a823893a4bf943b372c3a74a141058edb" class="m-doc">IsPointInFrontOfPlane</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; pt) const -&gt; bool</span>
+            <dt id="a823893a4bf943b372c3a74a141058edb">
+              <span class="m-doc-wrap-bumper">auto <a href="#a823893a4bf943b372c3a74a141058edb" class="m-doc-self">IsPointInFrontOfPlane</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; pt) const -&gt; bool</span>
             </dt>
-            <dd></dd>
+            <dd>Returns true if the given point is in front of the plane, i.e. the side where the plane&#x27;s normal points to.</dd>
             <dt id="ae8243dc6d284923eeeb4b56b791c054e">
               <span class="m-doc-wrap-bumper">auto <a href="#ae8243dc6d284923eeeb4b56b791c054e" class="m-doc-self">IsPointOnPlane</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; pt) const -&gt; bool</span>
             </dt>
             <dd>Returns true if the given point lies exactly on the plane.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1d49a93769d7f4fc24f8b0bd6149d9ed" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&amp; other) const -&gt; double</span>
+            <dt id="a1d49a93769d7f4fc24f8b0bd6149d9ed">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1d49a93769d7f4fc24f8b0bd6149d9ed" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&amp; other) const -&gt; double</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#abee3f89f97914243bbbb49c803bfa2dd" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&amp; other) const -&gt; double</span>
+            <dd>Returns the dihedral angle, <em>i.e.</em> the angle between the two planes, in radians. The angle will be between 0 and Pi.</dd>
+            <dt id="abee3f89f97914243bbbb49c803bfa2dd">
+              <span class="m-doc-wrap-bumper">auto <a href="#abee3f89f97914243bbbb49c803bfa2dd" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&amp; other) const -&gt; double</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad01ceadd19a37208ea7277f3681a56ad" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a>&lt;T&gt;&amp; line) const -&gt; double</span>
+            <dd>Returns the dihedral angle, <em>i.e.</em> the angle between the two planes, in degrees. The angle will be between 0 and 180.</dd>
+            <dt id="ad01ceadd19a37208ea7277f3681a56ad">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad01ceadd19a37208ea7277f3681a56ad" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a>&lt;T&gt;&amp; line) const -&gt; double</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad92d2b37ffac02486963f40b74f08029" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a>&lt;T&gt;&amp; line) const -&gt; double</span>
+            <dd>Returns the angle between this plane and the line in radians. The angle will be between -Pi/2 and Pi/2.</dd>
+            <dt id="ad92d2b37ffac02486963f40b74f08029">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad92d2b37ffac02486963f40b74f08029" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a>&lt;T&gt;&amp; line) const -&gt; double</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the angle between this plane and the line in degrees. The angle will be between -90 and +90.</dd>
             <dt id="ac264e573fcd0085047795942d87febcf">
               <span class="m-doc-wrap-bumper">auto <a href="#ac264e573fcd0085047795942d87febcf" class="m-doc-self">XYZIntercepts</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a></span>
             </dt>
@@ -155,74 +155,6 @@
             </dt>
             <dd>Overloaded output stream operator.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aaadee565ae423f558d96e7cc6d1105b5"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />geometry::<wbr />Plane_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aaadee565ae423f558d96e7cc6d1105b5" class="m-doc-self">Plane_</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; p,
-              const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; q,
-              const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; r)</span></span>
-            </h3>
-<p>Constructs a plane from 3 points. If the points are collinear, the plane will be invalid.</p>
-          </div></section>
-          <section class="m-doc-details" id="a2ac127d4b52a3717f085dfc2a1c5672c"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">T werkzeugkiste::<wbr />geometry::<wbr />Plane_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2ac127d4b52a3717f085dfc2a1c5672c" class="m-doc-self">Offset</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns the plane&#x27;s offset, i.e. the distance from the plane to the coordinate system origin, measured along the plane&#x27;s normal. Put differently, this is the minimum distance between the plane and the origin.</p>
-          </div></section>
-          <section class="m-doc-details" id="a823893a4bf943b372c3a74a141058edb"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Plane_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a823893a4bf943b372c3a74a141058edb" class="m-doc-self">IsPointInFrontOfPlane</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html#acd95ad2b44075cfa3af7f9f657ee5292" class="m-doc">vec_<wbr />type</a>&amp; pt) const</span></span>
-            </h3>
-<p>Returns true if the given point is in front of the plane, i.e. the side where the plane&#x27;s normal points to.</p>
-          </div></section>
-          <section class="m-doc-details" id="a1d49a93769d7f4fc24f8b0bd6149d9ed"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Plane_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1d49a93769d7f4fc24f8b0bd6149d9ed" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&amp; other) const</span></span>
-            </h3>
-<p>Returns the dihedral angle, <em>i.e.</em> the angle between the two planes, in radians. The angle will be between 0 and Pi.</p>
-          </div></section>
-          <section class="m-doc-details" id="abee3f89f97914243bbbb49c803bfa2dd"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Plane_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abee3f89f97914243bbbb49c803bfa2dd" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&amp; other) const</span></span>
-            </h3>
-<p>Returns the dihedral angle, <em>i.e.</em> the angle between the two planes, in degrees. The angle will be between 0 and 180.</p>
-          </div></section>
-          <section class="m-doc-details" id="ad01ceadd19a37208ea7277f3681a56ad"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Plane_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad01ceadd19a37208ea7277f3681a56ad" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a>&lt;T&gt;&amp; line) const</span></span>
-            </h3>
-<p>Returns the angle between this plane and the line in radians. The angle will be between -Pi/2 and Pi/2.</p>
-          </div></section>
-          <section class="m-doc-details" id="ad92d2b37ffac02486963f40b74f08029"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Plane_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad92d2b37ffac02486963f40b74f08029" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line3d__.html" class="m-doc">Line3d_<wbr /></a>&lt;T&gt;&amp; line) const</span></span>
-            </h3>
-<p>Returns the angle between this plane and the line in degrees. The angle will be between -90 and +90.</p>
-          </div></section>
         </section>
       </div>
     </div>

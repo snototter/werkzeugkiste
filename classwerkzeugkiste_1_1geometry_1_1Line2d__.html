@@ -88,11 +88,11 @@
               <span class="m-doc-wrap-bumper"><a href="#a5f927498d2337206903102b0ad279d99" class="m-doc-self">Line2d_</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Default constructor yields an invalid line/segment.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#a98c673a287e5254371a70ea13d110fca" class="m-doc">Line2d_</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> from,
+            <dt id="a98c673a287e5254371a70ea13d110fca">
+              <span class="m-doc-wrap-bumper"><a href="#a98c673a287e5254371a70ea13d110fca" class="m-doc-self">Line2d_</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> from,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> to)</span>
             </dt>
-            <dd></dd>
+            <dd>Construct a line from 2 real valued points. In case of a segment, these denote the start and end points.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -106,30 +106,30 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a1d3ea28e5dbf5d94fb6777bac6fce165" class="m-doc-self">LeftToRight</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a></span>
             </dt>
             <dd>Returns a new line, where from/to are sorted by ascending x-coordinates (left-to-right). If the line was vertical, the points will be sorted by ascending y-coordinates.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad067addedb826e5e950567db6bdcecf8" class="m-doc">From</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp;</span>
+            <dt id="ad067addedb826e5e950567db6bdcecf8">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad067addedb826e5e950567db6bdcecf8" class="m-doc-self">From</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp;</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#a77c90dbe5f3f9790b83f3ae7364d50e4" class="m-doc">SetFrom</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; from)</span>
+            <dd>For a segment, this returns the start point. For a line, it&#x27;s simply one of the given points to construct the line in the first place.</dd>
+            <dt id="a77c90dbe5f3f9790b83f3ae7364d50e4">
+              <span class="m-doc-wrap-bumper">void <a href="#a77c90dbe5f3f9790b83f3ae7364d50e4" class="m-doc-self">SetFrom</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; from)</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a26c2dc5fa10b062aa77d6f2077b50553" class="m-doc">To</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp;</span>
+            <dd>Sets the first reference point (starting point of a line segment; or any point on a line).</dd>
+            <dt id="a26c2dc5fa10b062aa77d6f2077b50553">
+              <span class="m-doc-wrap-bumper">auto <a href="#a26c2dc5fa10b062aa77d6f2077b50553" class="m-doc-self">To</a>(</span><span class="m-doc-wrap">) const -&gt; const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp;</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#affbf03012a836cad24360329864bfc05" class="m-doc">SetTo</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; to)</span>
+            <dd>For a segment, this returns the end point. For a line, it&#x27;s simply one of the given points to construct the line in the first place.</dd>
+            <dt id="affbf03012a836cad24360329864bfc05">
+              <span class="m-doc-wrap-bumper">void <a href="#affbf03012a836cad24360329864bfc05" class="m-doc-self">SetTo</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; to)</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1a084abdd555a0b0da27a608e8bfa1f4" class="m-doc">Length</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            <dd>Sets the second reference point (end point of a line segment; or any point on a line).</dd>
+            <dt id="a1a084abdd555a0b0da27a608e8bfa1f4">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a084abdd555a0b0da27a608e8bfa1f4" class="m-doc-self">Length</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adfff023c6d8a77e30c3035e64b9702b1" class="m-doc">Direction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
+            <dd>Returns the length from the start to the end point. As such, it&#x27;s only meaningful for a line segment.</dd>
+            <dt id="adfff023c6d8a77e30c3035e64b9702b1">
+              <span class="m-doc-wrap-bumper">auto <a href="#adfff023c6d8a77e30c3035e64b9702b1" class="m-doc-self">Direction</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
-            <dd></dd>
+            <dd>Returns the non-normalized direction vector from the start point to the end point.</dd>
             <dt id="a0535d3606238bc6b4af89e052b72fb73">
               <span class="m-doc-wrap-bumper">auto <a href="#a0535d3606238bc6b4af89e052b72fb73" class="m-doc-self">UnitDirection</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
@@ -138,18 +138,18 @@
               <span class="m-doc-wrap-bumper">auto <a href="#addd1e4927c521ac52ea413145d223ae0" class="m-doc-self">MidPoint</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
             <dd>Returns the point halfway between from and to.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a363699cfcffe523286d91ad5c603fb22" class="m-doc">IsValid</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
+            <dt id="a363699cfcffe523286d91ad5c603fb22">
+              <span class="m-doc-wrap-bumper">auto <a href="#a363699cfcffe523286d91ad5c603fb22" class="m-doc-self">IsValid</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae7ff5af5c873bbd756fe274dac8245c8" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; v) const -&gt; double</span>
+            <dd>Returns true if the line object is valid, <em>i.e.</em> start and end points are not the same.</dd>
+            <dt id="ae7ff5af5c873bbd756fe274dac8245c8">
+              <span class="m-doc-wrap-bumper">auto <a href="#ae7ff5af5c873bbd756fe274dac8245c8" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; v) const -&gt; double</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a74a146888435f706bead0aaa5d910430" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; v) const -&gt; double</span>
+            <dd>Returns the angle between the line and the given directional vector. The angle will be between 0 and Pi.</dd>
+            <dt id="a74a146888435f706bead0aaa5d910430">
+              <span class="m-doc-wrap-bumper">auto <a href="#a74a146888435f706bead0aaa5d910430" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; v) const -&gt; double</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the angle between the line and the given directional vector. The angle will be between 0 and 180 degrees.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ada9fde07820a76a1caaea6c00b578ac7" class="m-doc">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other) const -&gt; double</span>
             </dt>
@@ -166,14 +166,14 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ae9e4f657de2d0c43a448ec78791c78c7" class="m-doc">PointAtOffset</a>(</span><span class="m-doc-wrap">double offset_factor) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
             <dd>Returns a point between the start and end point.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab3f09b754cad9aa3f7fc03e79e86e059" class="m-doc">ClosestPointOnLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
+            <dt id="ab3f09b754cad9aa3f7fc03e79e86e059">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab3f09b754cad9aa3f7fc03e79e86e059" class="m-doc-self">ClosestPointOnLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6cfd9db0875c6f9f9c85e056ac88eeec" class="m-doc">ClosestPointOnSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
+            <dd>Returns the closest point on the line, i.e. the projection of the given point onto this line.</dd>
+            <dt id="a6cfd9db0875c6f9f9c85e056ac88eeec">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6cfd9db0875c6f9f9c85e056ac88eeec" class="m-doc-self">ClosestPointOnSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a></span>
             </dt>
-            <dd></dd>
+            <dd>Returns the point on this line segment(!) which is closest to the given point.</dd>
             <dt id="a9164d704e3fe2c99dece9c088024531b">
               <span class="m-doc-wrap-bumper">auto <a href="#a9164d704e3fe2c99dece9c088024531b" class="m-doc-self">DistancePointToLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const -&gt; double</span>
             </dt>
@@ -194,44 +194,44 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a514a8360285c4a1d9f560df61cf319d7" class="m-doc">IsPointLeftOfLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point,
               bool* is_on_line = nullptr) const -&gt; bool</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8a21841864b28595e19c7f27146e0410" class="m-doc">IntersectionLineLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other,
+            <dd>Returns true if the point is left of this line as specified by pt_from_ --&gt; pt_to_.</dd>
+            <dt id="a8a21841864b28595e19c7f27146e0410">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8a21841864b28595e19c7f27146e0410" class="m-doc-self">IntersectionLineLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection_point = nullptr) const -&gt; bool</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a575447cd3e03885c46e007702f0767bf" class="m-doc">IntersectionLineLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; segment,
+            <dd>Returns true if this line intersects the other line and optionally sets the <code>intersection_point</code>.</dd>
+            <dt id="a575447cd3e03885c46e007702f0767bf">
+              <span class="m-doc-wrap-bumper">auto <a href="#a575447cd3e03885c46e007702f0767bf" class="m-doc-self">IntersectionLineLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; segment,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection_point = nullptr) const -&gt; bool</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a13346e6a6c30f4c41e7f0ab5bba0e4ba" class="m-doc">IntersectionLineSegmentLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; segment,
+            <dd>Returns true if this line(!) intersects the other line segment(!) and optionally sets the <code>intersection_point</code>.</dd>
+            <dt id="a13346e6a6c30f4c41e7f0ab5bba0e4ba">
+              <span class="m-doc-wrap-bumper">auto <a href="#a13346e6a6c30f4c41e7f0ab5bba0e4ba" class="m-doc-self">IntersectionLineSegmentLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; segment,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection_point = nullptr) const -&gt; bool</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a6d4884a6464387f56bb0a1f6c1aca496" class="m-doc">IntersectionLineCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; circle,
+            <dd>Returns true if this line segment(!) intersects the other line segment(!) and optionally sets the <code>intersection_point</code>.</dd>
+            <dt id="a6d4884a6464387f56bb0a1f6c1aca496">
+              <span class="m-doc-wrap-bumper">auto <a href="#a6d4884a6464387f56bb0a1f6c1aca496" class="m-doc-self">IntersectionLineCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; circle,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8b0d7702246fc4c7ee99a285c5652789" class="m-doc">IntersectionLineSegmentCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; circle,
+            <dd>Returns the number of intersections (0, 1, or 2) of this line and the circle. Optionally sets the intersection points.</dd>
+            <dt id="a8b0d7702246fc4c7ee99a285c5652789">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8b0d7702246fc4c7ee99a285c5652789" class="m-doc-self">IntersectionLineSegmentCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; circle,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa43e91c2e59d151b5168ff406d6776b6" class="m-doc">ClipLineByRectangle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; top_left,
+            <dd>Returns the number of intersections (0, 1, or 2) of this line segment(!) and the circle. Optionally sets the intersection points.</dd>
+            <dt id="aa43e91c2e59d151b5168ff406d6776b6">
+              <span class="m-doc-wrap-bumper">auto <a href="#aa43e91c2e59d151b5168ff406d6776b6" class="m-doc-self">ClipLineByRectangle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; top_left,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; size) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3700070b10cb2b311d914f5022860e3e" class="m-doc">ClipLineSegmentByRectangle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; top_left,
+            <dd>Clips this line(!) such that only the part within the rectangle remains, check via <code><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#a363699cfcffe523286d91ad5c603fb22" class="m-doc">IsValid()</a></code> afterwards.</dd>
+            <dt id="a3700070b10cb2b311d914f5022860e3e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3700070b10cb2b311d914f5022860e3e" class="m-doc-self">ClipLineSegmentByRectangle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; top_left,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; size) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Clips this line segment(!) such that only the part within the rectangle remains, check via <code><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#a363699cfcffe523286d91ad5c603fb22" class="m-doc">IsValid()</a></code> afterwards.</dd>
             <dt id="ab7a113847899906cebcc83a221528ace">
               <span class="m-doc-wrap-bumper">auto <a href="#ab7a113847899906cebcc83a221528ace" class="m-doc-self">TiltRad</a>(</span><span class="m-doc-wrap">double angle_rad) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;</span>
             </dt>
@@ -254,97 +254,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a98c673a287e5254371a70ea13d110fca"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a98c673a287e5254371a70ea13d110fca" class="m-doc-self">Line2d_</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> from,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> to)</span></span>
-            </h3>
-<p>Construct a line from 2 real valued points. In case of a segment, these denote the start and end points.</p>
-          </div></section>
-          <section class="m-doc-details" id="ad067addedb826e5e950567db6bdcecf8"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad067addedb826e5e950567db6bdcecf8" class="m-doc-self">From</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>For a segment, this returns the start point. For a line, it&#x27;s simply one of the given points to construct the line in the first place.</p>
-          </div></section>
-          <section class="m-doc-details" id="a77c90dbe5f3f9790b83f3ae7364d50e4"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a77c90dbe5f3f9790b83f3ae7364d50e4" class="m-doc-self">SetFrom</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; from)</span></span>
-            </h3>
-<p>Sets the first reference point (starting point of a line segment; or any point on a line).</p>
-          </div></section>
-          <section class="m-doc-details" id="a26c2dc5fa10b062aa77d6f2077b50553"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a26c2dc5fa10b062aa77d6f2077b50553" class="m-doc-self">To</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>For a segment, this returns the end point. For a line, it&#x27;s simply one of the given points to construct the line in the first place.</p>
-          </div></section>
-          <section class="m-doc-details" id="affbf03012a836cad24360329864bfc05"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#affbf03012a836cad24360329864bfc05" class="m-doc-self">SetTo</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; to)</span></span>
-            </h3>
-<p>Sets the second reference point (end point of a line segment; or any point on a line).</p>
-          </div></section>
-          <section class="m-doc-details" id="a1a084abdd555a0b0da27a608e8bfa1f4"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a084abdd555a0b0da27a608e8bfa1f4" class="m-doc-self">Length</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns the length from the start to the end point. As such, it&#x27;s only meaningful for a line segment.</p>
-          </div></section>
-          <section class="m-doc-details" id="adfff023c6d8a77e30c3035e64b9702b1"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adfff023c6d8a77e30c3035e64b9702b1" class="m-doc-self">Direction</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns the non-normalized direction vector from the start point to the end point.</p>
-          </div></section>
-          <section class="m-doc-details" id="a363699cfcffe523286d91ad5c603fb22"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a363699cfcffe523286d91ad5c603fb22" class="m-doc-self">IsValid</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns true if the line object is valid, <em>i.e.</em> start and end points are not the same.</p>
-          </div></section>
-          <section class="m-doc-details" id="ae7ff5af5c873bbd756fe274dac8245c8"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae7ff5af5c873bbd756fe274dac8245c8" class="m-doc-self">AngleRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; v) const</span></span>
-            </h3>
-<p>Returns the angle between the line and the given directional vector. The angle will be between 0 and Pi.</p>
-          </div></section>
-          <section class="m-doc-details" id="a74a146888435f706bead0aaa5d910430"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74a146888435f706bead0aaa5d910430" class="m-doc-self">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; v) const</span></span>
-            </h3>
-<p>Returns the angle between the line and the given directional vector. The angle will be between 0 and 180 degrees.</p>
-          </div></section>
           <section class="m-doc-details" id="ada9fde07820a76a1caaea6c00b578ac7"><div>
             <h3>
               <div class="m-doc-template">
@@ -441,24 +350,6 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ab3f09b754cad9aa3f7fc03e79e86e059"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab3f09b754cad9aa3f7fc03e79e86e059" class="m-doc-self">ClosestPointOnLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const</span></span>
-            </h3>
-<p>Returns the closest point on the line, i.e. the projection of the given point onto this line.</p>
-          </div></section>
-          <section class="m-doc-details" id="a6cfd9db0875c6f9f9c85e056ac88eeec"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a> werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6cfd9db0875c6f9f9c85e056ac88eeec" class="m-doc-self">ClosestPointOnSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point) const</span></span>
-            </h3>
-<p>Returns the point on this line segment(!) which is closest to the given point.</p>
-          </div></section>
           <section class="m-doc-details" id="a94c7af3d29c880907a6590656777ae4e"><div>
             <h3>
               <div class="m-doc-template">
@@ -487,79 +378,8 @@
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a514a8360285c4a1d9f560df61cf319d7" class="m-doc-self">IsPointLeftOfLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; point,
               bool* is_on_line = nullptr) const</span></span>
             </h3>
-<p>Returns true if the point is left of this line as specified by pt_from_ --&gt; pt_to_. If you need to distinguish left-of vs. exactly on the line, pass a valid pointer <code>is_on_line</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a8a21841864b28595e19c7f27146e0410"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8a21841864b28595e19c7f27146e0410" class="m-doc-self">IntersectionLineLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; other,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection_point = nullptr) const</span></span>
-            </h3>
-<p>Returns true if this line intersects the other line and optionally sets the <code>intersection_point</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a575447cd3e03885c46e007702f0767bf"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a575447cd3e03885c46e007702f0767bf" class="m-doc-self">IntersectionLineLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; segment,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection_point = nullptr) const</span></span>
-            </h3>
-<p>Returns true if this line(!) intersects the other line segment(!) and optionally sets the <code>intersection_point</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a13346e6a6c30f4c41e7f0ab5bba0e4ba"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a13346e6a6c30f4c41e7f0ab5bba0e4ba" class="m-doc-self">IntersectionLineSegmentLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&amp; segment,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection_point = nullptr) const</span></span>
-            </h3>
-<p>Returns true if this line segment(!) intersects the other line segment(!) and optionally sets the <code>intersection_point</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a6d4884a6464387f56bb0a1f6c1aca496"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6d4884a6464387f56bb0a1f6c1aca496" class="m-doc-self">IntersectionLineCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; circle,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of intersections (0, 1, or 2) of this line and the circle. Optionally sets the intersection points.</p>
-          </div></section>
-          <section class="m-doc-details" id="a8b0d7702246fc4c7ee99a285c5652789"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8b0d7702246fc4c7ee99a285c5652789" class="m-doc-self">IntersectionLineSegmentCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; circle,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of intersections (0, 1, or 2) of this line segment(!) and the circle. Optionally sets the intersection points.</p>
-          </div></section>
-          <section class="m-doc-details" id="aa43e91c2e59d151b5168ff406d6776b6"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt; werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa43e91c2e59d151b5168ff406d6776b6" class="m-doc-self">ClipLineByRectangle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; top_left,
-              const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; size) const</span></span>
-            </h3>
-<p>Clips this line(!) such that only the part within the rectangle remains, check via <code><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#a363699cfcffe523286d91ad5c603fb22" class="m-doc">IsValid()</a></code> afterwards.</p>
-          </div></section>
-          <section class="m-doc-details" id="a3700070b10cb2b311d914f5022860e3e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt; werkzeugkiste::<wbr />geometry::<wbr />Line2d_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3700070b10cb2b311d914f5022860e3e" class="m-doc-self">ClipLineSegmentByRectangle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; top_left,
-              const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#aac7217fc4b687de5d2d08b8c94482b92" class="m-doc">vec_<wbr />type</a>&amp; size) const</span></span>
-            </h3>
-<p>Clips this line segment(!) such that only the part within the rectangle remains, check via <code><a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html#a363699cfcffe523286d91ad5c603fb22" class="m-doc">IsValid()</a></code> afterwards.</p>
+            <p>Returns true if the point is left of this line as specified by pt_from_ --&gt; pt_to_.</p>
+<p>If you need to distinguish left-of vs. exactly on the line, pass a valid pointer <code>is_on_line</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a7e0fd7f1d06884521158a5915444d4aa"><div>
             <h3>

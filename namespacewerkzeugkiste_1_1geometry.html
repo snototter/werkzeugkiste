@@ -86,7 +86,7 @@
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               class <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>Represents a circle.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               class <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_</a>
@@ -101,7 +101,7 @@
               <div class="m-doc-template">template&lt;typename T, std::size_t Dim&gt;</div>
               class <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>
             </dt>
-            <dd></dd>
+            <dd>Template class to represent a vector/coordinate.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -207,28 +207,28 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ae9469b0f4bbfde883d29ea8c8a2ea7ac" class="m-doc">CameraCenterFromRt</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;&amp; R,
               const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 1&gt;&amp; t) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;</span>
             </dt>
-            <dd>Returns the optical center C = -R&#x27; * t.</dd>
+            <dd>Returns the optical center &lsquo;C = -R&rsquo; * t`.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a1edae30d70c77cd293d1344602b176e0" class="m-doc">CameraCenterFromRt</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;&amp; R,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;&amp; t) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;</span>
             </dt>
-            <dd>Returns the optical center C = -R&#x27; * t.</dd>
+            <dd>Returns the optical center &lsquo;C = -R&rsquo; * t`.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ac8e3e60b2ff0d8ca95d39a5d77692b55" class="m-doc">CameraCenterFromRt</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 4&gt;&amp; Rt) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;</span>
             </dt>
-            <dd>Returns the optical center C = -R&#x27; * t.</dd>
+            <dd>Returns the optical center &lsquo;C = -R&rsquo; * t`.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a2117151967b389708ca2a6ba3e7c6876" class="m-doc">GroundplaneToImageHomography</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 4&gt;&amp; P) -&gt; <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the ground plane-to-image plane homography from the camera&#x27;s projection matrix.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a56a8c6926be151796de2dd62a834a873" class="m-doc">ImageToGroundplaneHomography</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 4&gt;&amp; P) -&gt; <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the image plane-to-ground plane homography from the camera&#x27;s projection matrix.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a4ffb57d605859d9ca1135f67f6926305" class="m-doc">ImagePlaneInCameraCoordinateSystem</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&lt;Tp&gt;</span>
@@ -239,7 +239,7 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ae578fab4c288c55b47f0566ffc314586" class="m-doc">ImagePlaneInWorldCoordinateSystem</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;&amp; R,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;&amp; t) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&lt;Tp&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the image plane in the world reference frame, given the camera&#x27;s extrinsic parameters.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a96cb888245bcf11a7301527f9e31a2b4" class="m-doc">IsInFrontOfImagePlane</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;&amp; pt_world,
@@ -260,7 +260,7 @@
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;&amp; t,
               const <a href="namespacewerkzeugkiste_1_1geometry.html#a6745362fd3d06b7e41d29f71de0140fc" class="m-doc">Vec2i</a>&amp; image_size = {0, 0}) -&gt; <a href="namespacewerkzeugkiste_1_1geometry.html#a7ec7948267c0fa7c1e14c4671b88f5c0" class="m-doc">Line2d</a></span>
             </dt>
-            <dd></dd>
+            <dd>Returns a the projected line of horizon for the given pinhole camera calibration.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#acae6473d5d1396777c9695136bf124bb" class="m-doc">IsPointInsideImage</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 2&gt;&amp; pt,
@@ -274,7 +274,7 @@
               const <a href="namespacewerkzeugkiste_1_1geometry.html#a6745362fd3d06b7e41d29f71de0140fc" class="m-doc">Vec2i</a>&amp; img_size,
               <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 2&gt;* projected) -&gt; bool</span>
             </dt>
-            <dd></dd>
+            <dd>Returns true if the given world point would be visible if projected into the camera image. If <code>projected</code> is a valid pointer, it will be set to the projected image coordinates.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a04cf823bcf5437992fadc547d7cd13a1" class="m-doc">IsPointInsideRectangle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, 2&gt;&amp; pt,
@@ -298,7 +298,7 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a8d1d7ef8ddcb60b3a9f789df95c439d3" class="m-doc">VecsToEigenMat</a>(</span><span class="m-doc-wrap">const V&amp; vec0,
               const Vs&amp;... others) -&gt; <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;typename V::value_type, Dim, static_cast&lt;int&gt;1+sizeof...(Vs))&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a matrix where each column holds one vector.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Array, std::size_t... Idx&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a33d76b6bd1cb7062c405db171d558c62" class="m-doc">ArrayToTuple</a>(</span><span class="m-doc-wrap">const Array&amp; arr,
@@ -316,26 +316,26 @@
               const V&amp; vec0,
               const Vs&amp;... others) -&gt; std::tuple&lt;<a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename V::value_type, static_cast&lt;std::size_t&gt;Rows)&gt;, <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename Vs::value_type, static_cast&lt;std::size_t&gt;Rows)&gt;...&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Computes <code>mat * [vec0, vec1, ...]</code> and returns the result as a tuple of vectors.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename V, typename... Vs, int Rows, int Columns&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a1a4e5a2bb99e781ccdd3dbe1db118a9e" class="m-doc">TransformToVec</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;typename V::value_type, Rows, Columns&gt;&amp; mat,
               const V&amp; vec) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename V::value_type, static_cast&lt;typename V::index_type&gt;Rows)&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Convenience utility to avoid using std::tie() for a single vector. See <code>TransformToVecs</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename V, typename... Vs, int Rows, int Columns&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ad7641d0054bc18d2bf483c6e75003d61" class="m-doc">ProjectToVecs</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;typename V::value_type, Rows, Columns&gt;&amp; mat,
               const V&amp; vec0,
               const Vs&amp;... others) -&gt; std::tuple&lt;<a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename V::value_type, static_cast&lt;typename V::index_type&gt;Rows - 1)&gt;, <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename Vs::value_type, static_cast&lt;typename Vs::index_type&gt;Rows - 1)&gt;...&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Computes <code>mat * [vec0, vec1, ...]</code>, divides the result by the homogeneous coordinate (<em>i.e.</em> last row) and returns a tuple of vectors.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename V, typename... Vs, int Rows, int Columns&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ae3d650a44cbed80c4a90d791a6937756" class="m-doc">ProjectToVec</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;typename V::value_type, Rows, Columns&gt;&amp; mat,
               const V&amp; vec) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename V::value_type, static_cast&lt;std::size_t&gt;Rows - 1)&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Convenience utility to avoid using std::tie() for a single vector. See <code>ProjectToVecs</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#aab52998921157cc55ae18e2bec7633cd" class="m-doc">RotationX</a>(</span><span class="m-doc-wrap">Tp angle,
@@ -386,7 +386,7 @@
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a220c38033b967ff85483e239f77068e0" class="m-doc">IsEpsZero</a>(</span><span class="m-doc-wrap">T x) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Uses the machine epsilon to check whether the given number is approximately zero, i.e. computes <code>|x| &lt;= eps</code> for floating point numbers. Integral types will be compared to zero using the default equality check.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename TVal, typename TTol = double&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a6abb0a8d0bb1d368cb9fe20d9220d452" class="m-doc">IsClose</a>(</span><span class="m-doc-wrap">TVal x,
@@ -394,13 +394,13 @@
               TTol relative_tolerance = 1e-9,
               TTol absolute_tolerance = 0.0) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Epsilon equality check for floating point numbers, similar to Python&#x27;s math.isclose(), see <a href="https://peps.python.org/pep-0485/">PEP 485</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#af2435cb1d8877d264179f0c84d9faad4" class="m-doc">IsEpsEqual</a>(</span><span class="m-doc-wrap">T x,
               T y) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Checks if two floating point numbers are &quot;approximately&quot; equal, according to a fixed relative tolerance (1e-9 for double precision, 1e-6 for single precision types), see <code>IsClose</code>. As there is no sane default value for the absolute tolerance, only the relative tolerance is checked.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a7f5e857a36fca843d49d86990dd20be2" class="m-doc">_util_sign</a>(</span><span class="m-doc-wrap">T x,
@@ -412,12 +412,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aa21dc1358af4223f05e17a9edafbfcce" class="m-doc">_util_sign</a>(</span><span class="m-doc-wrap">T x,
               std::true_type) -&gt; int <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Signum helper for signed types (to avoid compiler warnings when using unsigned types).</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a74afb9e37d8e6419227aa4e6b982a431" class="m-doc">Sign</a>(</span><span class="m-doc-wrap">T x) -&gt; int <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Signum function which returns +1 (if x is positive), 0 (if x equals 0), or -1 (if x is negative).</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#adaf9bfbda82fdec4e8f4184bda6ece37" class="m-doc">RoundBase</a>(</span><span class="m-doc-wrap">T value,
@@ -465,38 +465,38 @@
               <span class="m-doc-wrap-bumper">auto <a href="#aa033834def530cda3b5fbba021bbeb30" class="m-doc">ScalarProjection</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; a,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; b) -&gt; T</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the length of the vector projection.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T, std::size_t Dim&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a11d33e1a95b0a6b2987b7640bdce5191" class="m-doc">VectorProjection</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; a,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; b) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns :math:<code>\operatorname{proj}_{\mathbf{b}} \mathbf{a}</code>, <em>i.e.</em> the projection of a onto b.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#ac7dc055298bc92744da66d92d99a0451" class="m-doc">AngleRadFromDirectionVec</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, 2&gt;&amp; vec) -&gt; double</span>
             </dt>
-            <dd></dd>
+            <dd>Computes the angle (in radians) of a 2d direction vector w.r.t. the positive X axis. Result is in [-pi, +pi].</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a3de6f635768f012b7bc39658ed4fa96c" class="m-doc">AngleDegFromDirectionVec</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, 2&gt;&amp; vec) -&gt; double</span>
             </dt>
-            <dd></dd>
+            <dd>Computes the angle (in degrees) of a 2d direction vector w.r.t. the positive X axis. Result is in [-180, +180].</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4bcc505e2fba9be6aa10d25c5ace421a" class="m-doc">DirectionVecFromAngleRad</a>(</span><span class="m-doc-wrap">double rad) -&gt; <a href="namespacewerkzeugkiste_1_1geometry.html#ad8a799bcc149a974db9f52f3ade0521c" class="m-doc">Vec2d</a></span>
             </dt>
-            <dd></dd>
+            <dd>Returns the unit direction vector given its angle (in radians) w.r.t. the positive X axis.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a56496c4ac0c66dea2fa1eb1f6b24df62" class="m-doc">DirectionVecFromAngleDeg</a>(</span><span class="m-doc-wrap">double deg) -&gt; <a href="namespacewerkzeugkiste_1_1geometry.html#ad8a799bcc149a974db9f52f3ade0521c" class="m-doc">Vec2d</a></span>
             </dt>
-            <dd></dd>
+            <dd>Returns the unit direction vector given its angle (in degrees) w.r.t. the positive X axis.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T, std::size_t Dim, template&lt;typename...&gt; class Container = std::vector&gt;</div>
               <span class="m-doc-wrap-bumper">void <a href="#a8121fb9c7edc4281ffee83415d35762b" class="m-doc">MinMaxCoordinates</a>(</span><span class="m-doc-wrap">const Container&lt;<a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&gt;&amp; values,
               <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; min,
               <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; max)</span>
             </dt>
-            <dd></dd>
+            <dd>Computes the minimum/maximum along each dimension.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -509,11 +509,11 @@
             <dt>
               template class WERKZEUGKISTE_GEOMETRY_EXPORT <a href="#a307c0c36d10c55095091735526dd645c" class="m-doc">Line2d_< double ></a>
             </dt>
-            <dd>A 2-dimensional line using double precision.</dd>
+            <dd>Available specialization for a 2-dimensional line/segment with double precision.</dd>
             <dt>
               template class WERKZEUGKISTE_GEOMETRY_EXPORT <a href="#ab9166a8c57664a27d5f835af6898fc35" class="m-doc">Line3d_< double ></a>
             </dt>
-            <dd>A 3-dimensional line using double precision.</dd>
+            <dd>Available 3-dimensional double precision specialization of a line/segment.</dd>
             <dt>
               template class WERKZEUGKISTE_GEOMETRY_EXPORT <a href="#a2786e6d30e669963c857aafb1877dec8" class="m-doc">Plane_< double ></a>
             </dt>
@@ -730,7 +730,7 @@
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae9469b0f4bbfde883d29ea8c8a2ea7ac" class="m-doc-self">CameraCenterFromRt</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;&amp; R,
               const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 1&gt;&amp; t)</span></span>
             </h3>
-            <p>Returns the optical center C = -R&#x27; * t.</p>
+            <p>Returns the optical center &lsquo;C = -R&rsquo; * t`.</p>
           </div></section>
           <section class="m-doc-details" id="a1edae30d70c77cd293d1344602b176e0"><div>
             <h3>
@@ -741,7 +741,7 @@
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1edae30d70c77cd293d1344602b176e0" class="m-doc-self">CameraCenterFromRt</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;&amp; R,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;&amp; t)</span></span>
             </h3>
-            <p>Returns the optical center C = -R&#x27; * t.</p>
+            <p>Returns the optical center &lsquo;C = -R&rsquo; * t`.</p>
           </div></section>
           <section class="m-doc-details" id="ac8e3e60b2ff0d8ca95d39a5d77692b55"><div>
             <h3>
@@ -751,7 +751,7 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac8e3e60b2ff0d8ca95d39a5d77692b55" class="m-doc-self">CameraCenterFromRt</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 4&gt;&amp; Rt)</span></span>
             </h3>
-            <p>Returns the optical center C = -R&#x27; * t.</p>
+            <p>Returns the optical center &lsquo;C = -R&rsquo; * t`.</p>
           </div></section>
           <section class="m-doc-details" id="a2117151967b389708ca2a6ba3e7c6876"><div>
             <h3>
@@ -761,7 +761,8 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2117151967b389708ca2a6ba3e7c6876" class="m-doc-self">GroundplaneToImageHomography</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 4&gt;&amp; P)</span></span>
             </h3>
-<p>Returns the ground plane-to-image plane homography from the camera&#x27;s projection matrix. <code>H_gp2cam = [p_0, p_1, p_3]</code>, where <code>p_i</code> is the i-th column of P</p>
+            <p>Returns the ground plane-to-image plane homography from the camera&#x27;s projection matrix.</p>
+<p><code>H_gp2cam = [p_0, p_1, p_3]</code>, where <code>p_i</code> is the i-th column of P</p>
           </div></section>
           <section class="m-doc-details" id="a56a8c6926be151796de2dd62a834a873"><div>
             <h3>
@@ -771,7 +772,7 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56a8c6926be151796de2dd62a834a873" class="m-doc-self">ImageToGroundplaneHomography</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 4&gt;&amp; P)</span></span>
             </h3>
-<p>Returns the image plane-to-ground plane homography from the camera&#x27;s projection matrix.</p>
+            <p>Returns the image plane-to-ground plane homography from the camera&#x27;s projection matrix.</p>
           </div></section>
           <section class="m-doc-details" id="a4ffb57d605859d9ca1135f67f6926305"><div>
             <h3>
@@ -792,7 +793,7 @@
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Plane__.html" class="m-doc">Plane_<wbr /></a>&lt;Tp&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae578fab4c288c55b47f0566ffc314586" class="m-doc-self">ImagePlaneInWorldCoordinateSystem</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;Tp, 3, 3&gt;&amp; R,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;&amp; t)</span></span>
             </h3>
-<p>Returns the image plane in the world reference frame, given the camera&#x27;s extrinsic parameters.</p>
+            <p>Returns the image plane in the world reference frame, given the camera&#x27;s extrinsic parameters.</p>
           </div></section>
           <section class="m-doc-details" id="a96cb888245bcf11a7301527f9e31a2b4"><div>
             <h3>
@@ -828,7 +829,8 @@
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 3&gt;&amp; t,
               const <a href="namespacewerkzeugkiste_1_1geometry.html#a6745362fd3d06b7e41d29f71de0140fc" class="m-doc">Vec2i</a>&amp; image_size = {0, 0})</span></span>
             </h3>
-<p>Returns a the projected line of horizon for the given pinhole camera calibration. If a valid image size is given, the line will be clipped to the visible region. Check <code>result.IsValid()</code>, as the horizon may lie outside of the image.</p>
+            <p>Returns a the projected line of horizon for the given pinhole camera calibration.</p>
+<p>If a valid image size is given, the line will be clipped to the visible region. Check <code>result.IsValid()</code>, as the horizon may lie outside of the image.</p>
           </div></section>
           <section class="m-doc-details" id="acae6473d5d1396777c9695136bf124bb"><div>
             <h3>
@@ -852,7 +854,7 @@
               const <a href="namespacewerkzeugkiste_1_1geometry.html#a6745362fd3d06b7e41d29f71de0140fc" class="m-doc">Vec2i</a>&amp; img_size,
               <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 2&gt;* projected)</span></span>
             </h3>
-<p>Returns true if the given world point would be visible if projected into the camera image. If <code>projected</code> is a valid pointer, it will be set to the projected image coordinates.</p>
+            <p>Returns true if the given world point would be visible if projected into the camera image. If <code>projected</code> is a valid pointer, it will be set to the projected image coordinates.</p>
           </div></section>
           <section class="m-doc-details" id="a04cf823bcf5437992fadc547d7cd13a1"><div>
             <h3>
@@ -896,7 +898,8 @@
               <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;typename V::value_type, Dim, static_cast&lt;int&gt;1+sizeof...(Vs))&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8d1d7ef8ddcb60b3a9f789df95c439d3" class="m-doc-self">VecsToEigenMat</a>(</span><span class="m-doc-wrap">const V&amp; vec0,
               const Vs&amp;... others)</span></span>
             </h3>
-<p>Returns a matrix where each column holds one vector. Note that the matrix size is fixed at compile time, thus it will be created on the stack. This function should only be used for a maximum of up to 32 vectors. Refer to the Eigen3 docs for details: <a href="https://eigen.tuxfamily.org/dox/group__TutorialMatrixClass.html">https://eigen.tuxfamily.org/dox/group_<wbr />_<wbr />TutorialMatrixClass.html</a></p>
+            <p>Returns a matrix where each column holds one vector.</p>
+<p>Note that the matrix size is fixed at compile time, thus it will be created on the stack. This function should only be used for a maximum of up to 32 vectors. Refer to the Eigen3 docs for details: <a href="https://eigen.tuxfamily.org/dox/group__TutorialMatrixClass.html">https://eigen.tuxfamily.org/dox/group_<wbr />_<wbr />TutorialMatrixClass.html</a></p>
           </div></section>
           <section class="m-doc-details" id="a33d76b6bd1cb7062c405db171d558c62"><div>
             <h3>
@@ -929,7 +932,8 @@
               const V&amp; vec0,
               const Vs&amp;... others)</span></span>
             </h3>
-<p>Computes <code>mat * [vec0, vec1, ...]</code> and returns the result as a tuple of vectors.</p><p>The vector dimensionality must be either equal to or 1 less than the number of projection matrix columns. If not equal, a homogeneous coordinate will be implicitly added to each vector, <em>i.e.</em> [vec0.x(), vec0.y(), ..., 1].</p><p>Example:</p><blockquote><blockquote><blockquote><p>wkg::Vec2d v1{17, 42}, v2{9, -3}, v3{0, 0.01}; wkg::Matrix&lt;double, 4, 2&gt; M; M &lt;&lt; 1, 2, 3, 4, 5, 6, 7, 8; wkg::Vec4d a, b, c; std::tie(out1, out2, out3) = TransformToVecs( T_matrix, in1, in2, in3); // Or with padded homogeneous coordinate: wkg::Matrix&lt;double, 4, 3&gt; M; M &lt;&lt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12; wkg::Vec4d a, b, c; std::tie(out1, out2, out3) = TransformToVecs( T_matrix, in1, in2, in3);</p></blockquote></blockquote></blockquote>
+            <p>Computes <code>mat * [vec0, vec1, ...]</code> and returns the result as a tuple of vectors.</p>
+<p>The vector dimensionality must be either equal to or 1 less than the number of projection matrix columns. If not equal, a homogeneous coordinate will be implicitly added to each vector, <em>i.e.</em> [vec0.x(), vec0.y(), ..., 1].</p><p>Example:</p><blockquote><blockquote><blockquote><p>wkg::Vec2d v1{17, 42}, v2{9, -3}, v3{0, 0.01}; wkg::Matrix&lt;double, 4, 2&gt; M; M &lt;&lt; 1, 2, 3, 4, 5, 6, 7, 8; wkg::Vec4d a, b, c; std::tie(out1, out2, out3) = TransformToVecs( T_matrix, in1, in2, in3); // Or with padded homogeneous coordinate: wkg::Matrix&lt;double, 4, 3&gt; M; M &lt;&lt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12; wkg::Vec4d a, b, c; std::tie(out1, out2, out3) = TransformToVecs( T_matrix, in1, in2, in3);</p></blockquote></blockquote></blockquote>
           </div></section>
           <section class="m-doc-details" id="a1a4e5a2bb99e781ccdd3dbe1db118a9e"><div>
             <h3>
@@ -940,7 +944,7 @@
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename V::value_type, static_cast&lt;typename V::index_type&gt;Rows)&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a4e5a2bb99e781ccdd3dbe1db118a9e" class="m-doc-self">TransformToVec</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;typename V::value_type, Rows, Columns&gt;&amp; mat,
               const V&amp; vec)</span></span>
             </h3>
-<p>Convenience utility to avoid using std::tie() for a single vector. See <code>TransformToVecs</code>.</p>
+            <p>Convenience utility to avoid using std::tie() for a single vector. See <code>TransformToVecs</code>.</p>
           </div></section>
           <section class="m-doc-details" id="ad7641d0054bc18d2bf483c6e75003d61"><div>
             <h3>
@@ -952,7 +956,8 @@
               const V&amp; vec0,
               const Vs&amp;... others)</span></span>
             </h3>
-<p>Computes <code>mat * [vec0, vec1, ...]</code>, divides the result by the homogeneous coordinate (<em>i.e.</em> last row) and returns a tuple of vectors.</p><p>The vector dimensionality must be either equal to or 1 less than the number of projection matrix columns. If not equal, a homogeneous coordinate will be implicitly added to each vector, <em>i.e.</em> [vec0.x(), vec0.y(), ..., 1].</p><p>Example:</p><blockquote><blockquote><blockquote><p>wkg::Vec3d v1{17, 42, 1}, v2{9, -3, 1}; wkg::Matrix&lt;double, 3, 3&gt; H; H &lt;&lt; 1, 2, 3, 4, 5, 6, 7, 8, 9; wkg::Vec2d out1, out2; std::tie(out1, out2) = ProjectToVecs(H, v1, v2);</p></blockquote></blockquote></blockquote>
+            <p>Computes <code>mat * [vec0, vec1, ...]</code>, divides the result by the homogeneous coordinate (<em>i.e.</em> last row) and returns a tuple of vectors.</p>
+<p>The vector dimensionality must be either equal to or 1 less than the number of projection matrix columns. If not equal, a homogeneous coordinate will be implicitly added to each vector, <em>i.e.</em> [vec0.x(), vec0.y(), ..., 1].</p><p>Example:</p><blockquote><blockquote><blockquote><p>wkg::Vec3d v1{17, 42, 1}, v2{9, -3, 1}; wkg::Matrix&lt;double, 3, 3&gt; H; H &lt;&lt; 1, 2, 3, 4, 5, 6, 7, 8, 9; wkg::Vec2d out1, out2; std::tie(out1, out2) = ProjectToVecs(H, v1, v2);</p></blockquote></blockquote></blockquote>
           </div></section>
           <section class="m-doc-details" id="ae3d650a44cbed80c4a90d791a6937756"><div>
             <h3>
@@ -963,7 +968,7 @@
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename V::value_type, static_cast&lt;std::size_t&gt;Rows - 1)&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae3d650a44cbed80c4a90d791a6937756" class="m-doc-self">ProjectToVec</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1geometry.html#a621439a4343144fbe9dbdbd2459bcb3a" class="m-doc">Matrix</a>&lt;typename V::value_type, Rows, Columns&gt;&amp; mat,
               const V&amp; vec)</span></span>
             </h3>
-<p>Convenience utility to avoid using std::tie() for a single vector. See <code>ProjectToVecs</code>.</p>
+            <p>Convenience utility to avoid using std::tie() for a single vector. See <code>ProjectToVecs</code>.</p>
           </div></section>
           <section class="m-doc-details" id="aab52998921157cc55ae18e2bec7633cd"><div>
             <h3>
@@ -1054,7 +1059,7 @@
               </div>
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a220c38033b967ff85483e239f77068e0" class="m-doc-self">IsEpsZero</a>(</span><span class="m-doc-wrap">T x) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Uses the machine epsilon to check whether the given number is approximately zero, i.e. computes <code>|x| &lt;= eps</code> for floating point numbers. Integral types will be compared to zero using the default equality check.</p>
+            <p>Uses the machine epsilon to check whether the given number is approximately zero, i.e. computes <code>|x| &lt;= eps</code> for floating point numbers. Integral types will be compared to zero using the default equality check.</p>
           </div></section>
           <section class="m-doc-details" id="a6abb0a8d0bb1d368cb9fe20d9220d452"><div>
             <h3>
@@ -1067,7 +1072,8 @@
               TTol relative_tolerance = 1e-9,
               TTol absolute_tolerance = 0.0) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Epsilon equality check for floating point numbers, similar to Python&#x27;s math.isclose(), see PEP 485, <a href="https://peps.python.org/pep-0485/">https:/<wbr />/<wbr />peps.python.org/<wbr />pep-0485/<wbr /></a></p><p>Module special case handling, this function returns: (|x-y| &lt;= rel_tol * |x|) or (|x-y| &lt;= rel_tol * |y|) or (|x-y| &lt;= abs_tol)</p>
+            <p>Epsilon equality check for floating point numbers, similar to Python&#x27;s math.isclose(), see <a href="https://peps.python.org/pep-0485/">PEP 485</a>.</p>
+<p>Modulo special case handling, this function returns:</p><ul><li><code>(|x-y| &lt;= rel_tol * |x|)</code></li><li>or <code>(|x-y| &lt;= rel_tol * |y|)</code></li><li>or <code>(|x-y| &lt;= abs_tol)</code></li></ul>
           </div></section>
           <section class="m-doc-details" id="af2435cb1d8877d264179f0c84d9faad4"><div>
             <h3>
@@ -1078,7 +1084,7 @@
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af2435cb1d8877d264179f0c84d9faad4" class="m-doc-self">IsEpsEqual</a>(</span><span class="m-doc-wrap">T x,
               T y) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Checks if two floating point numbers are &quot;approximately&quot; equal, according to a fixed relative tolerance (1e-9 for double precision, 1e-6 for single precision types), see <code>IsClose</code>. As there is no sane default value for the absolute tolerance, only the relative tolerance is checked.</p>
+            <p>Checks if two floating point numbers are &quot;approximately&quot; equal, according to a fixed relative tolerance (1e-9 for double precision, 1e-6 for single precision types), see <code>IsClose</code>. As there is no sane default value for the absolute tolerance, only the relative tolerance is checked.</p>
           </div></section>
           <section class="m-doc-details" id="a7f5e857a36fca843d49d86990dd20be2"><div>
             <h3>
@@ -1100,7 +1106,7 @@
               <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa21dc1358af4223f05e17a9edafbfcce" class="m-doc-self">_util_sign</a>(</span><span class="m-doc-wrap">T x,
               std::true_type) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Signum helper for signed types (to avoid compiler warnings when using unsigned types).</p>
+            <p>Signum helper for signed types (to avoid compiler warnings when using unsigned types).</p>
           </div></section>
           <section class="m-doc-details" id="a74afb9e37d8e6419227aa4e6b982a431"><div>
             <h3>
@@ -1110,7 +1116,8 @@
               </div>
               <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a74afb9e37d8e6419227aa4e6b982a431" class="m-doc-self">Sign</a>(</span><span class="m-doc-wrap">T x) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Signum function which returns +1 (if x is positive), 0 (if x equals 0), or -1 (if x is negative). This type-safe implementation is based on <a href="https://stackoverflow.com/a/4609795">https:/<wbr />/<wbr />stackoverflow.com/<wbr />a/<wbr />4609795</a> by <code>user79758</code> (CC BY-SA 4.0).</p>
+            <p>Signum function which returns +1 (if x is positive), 0 (if x equals 0), or -1 (if x is negative).</p>
+<p>This type-safe implementation is based on <a href="https://stackoverflow.com/a/4609795">https:/<wbr />/<wbr />stackoverflow.com/<wbr />a/<wbr />4609795</a> by <code>user79758</code> (CC BY-SA 4.0).</p>
           </div></section>
           <section class="m-doc-details" id="adaf9bfbda82fdec4e8f4184bda6ece37"><div>
             <h3>
@@ -1203,6 +1210,7 @@
               <span class="m-doc-wrap-bumper">T werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa033834def530cda3b5fbba021bbeb30" class="m-doc-self">ScalarProjection</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; a,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; b)</span></span>
             </h3>
+            <p>Returns the length of the vector projection.</p>
 <p>Scalar projection is the length of the vector projection, which is the vector component of a in the direction of b. See also: <a href="https://en.wikipedia.org/wiki/Vector_projection">https://en.wikipedia.org/wiki/Vector_<wbr />projection</a></p>
           </div></section>
           <section class="m-doc-details" id="a11d33e1a95b0a6b2987b7640bdce5191"><div>
@@ -1214,7 +1222,8 @@
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a11d33e1a95b0a6b2987b7640bdce5191" class="m-doc-self">VectorProjection</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; a,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; b)</span></span>
             </h3>
-<p>Returns :math:<code>\operatorname{proj}_{\mathbf{b}} \mathbf{a}</code>, <em>i.e.</em> the projection of a onto b See also: <a href="https://en.wikipedia.org/wiki/Vector_projection">https://en.wikipedia.org/wiki/Vector_<wbr />projection</a></p>
+            <p>Returns :math:<code>\operatorname{proj}_{\mathbf{b}} \mathbf{a}</code>, <em>i.e.</em> the projection of a onto b.</p>
+<p>See also: <a href="https://en.wikipedia.org/wiki/Vector_projection">https://en.wikipedia.org/wiki/Vector_<wbr />projection</a></p>
           </div></section>
           <section class="m-doc-details" id="ac7dc055298bc92744da66d92d99a0451"><div>
             <h3>
@@ -1224,7 +1233,7 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac7dc055298bc92744da66d92d99a0451" class="m-doc-self">AngleRadFromDirectionVec</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, 2&gt;&amp; vec)</span></span>
             </h3>
-<p>Computes the angle (in radians) of a 2d direction vector w.r.t. the positive X axis. Result is in [-pi, +pi]</p>
+            <p>Computes the angle (in radians) of a 2d direction vector w.r.t. the positive X axis. Result is in [-pi, +pi].</p>
           </div></section>
           <section class="m-doc-details" id="a3de6f635768f012b7bc39658ed4fa96c"><div>
             <h3>
@@ -1234,21 +1243,21 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3de6f635768f012b7bc39658ed4fa96c" class="m-doc-self">AngleDegFromDirectionVec</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, 2&gt;&amp; vec)</span></span>
             </h3>
-<p>Computes the angle (in degrees) of a 2d direction vector w.r.t. the positive X axis. Result is in [-180, +180]</p>
+            <p>Computes the angle (in degrees) of a 2d direction vector w.r.t. the positive X axis. Result is in [-180, +180].</p>
           </div></section>
           <section class="m-doc-details" id="a4bcc505e2fba9be6aa10d25c5ace421a"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1geometry.html#ad8a799bcc149a974db9f52f3ade0521c" class="m-doc">Vec2d</a> werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4bcc505e2fba9be6aa10d25c5ace421a" class="m-doc-self">DirectionVecFromAngleRad</a>(</span><span class="m-doc-wrap">double rad)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="vector_8h.html">&lt;werkzeugkiste/geometry/vector.h&gt;</a></div>
             </h3>
-<p>Returns the unit direction vector given its angle (in radians) w.r.t. the positive X axis.</p>
+            <p>Returns the unit direction vector given its angle (in radians) w.r.t. the positive X axis.</p>
           </div></section>
           <section class="m-doc-details" id="a56496c4ac0c66dea2fa1eb1f6b24df62"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="namespacewerkzeugkiste_1_1geometry.html#ad8a799bcc149a974db9f52f3ade0521c" class="m-doc">Vec2d</a> werkzeugkiste::<wbr />geometry::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a56496c4ac0c66dea2fa1eb1f6b24df62" class="m-doc-self">DirectionVecFromAngleDeg</a>(</span><span class="m-doc-wrap">double deg)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="vector_8h.html">&lt;werkzeugkiste/geometry/vector.h&gt;</a></div>
             </h3>
-<p>Returns the unit direction vector given its angle (in degrees) w.r.t. the positive X axis.</p>
+            <p>Returns the unit direction vector given its angle (in degrees) w.r.t. the positive X axis.</p>
           </div></section>
           <section class="m-doc-details" id="a8121fb9c7edc4281ffee83415d35762b"><div>
             <h3>
@@ -1260,7 +1269,8 @@
               <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; min,
               <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; max)</span></span>
             </h3>
-<p>Computes the minimum/maximum along each dimension.</p><p>Useful to get axis-aligned bounding boxes, a starting point for hull computations, etc.</p>
+            <p>Computes the minimum/maximum along each dimension.</p>
+<p>Useful to get axis-aligned bounding boxes, a starting point for hull computations, etc.</p>
           </div></section>
         </section>
         <section>
@@ -1277,14 +1287,14 @@
               template class WERKZEUGKISTE_GEOMETRY_EXPORT werkzeugkiste::<wbr />geometry::<wbr /><a href="#a307c0c36d10c55095091735526dd645c" class="m-doc-self">Line2d_< double ></a>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="primitives_8h.html">&lt;werkzeugkiste/geometry/primitives.h&gt;</a></div>
             </h3>
-            <p>A 2-dimensional line using double precision.</p>
+            <p>Available specialization for a 2-dimensional line/segment with double precision.</p>
           </div></section>
           <section class="m-doc-details" id="ab9166a8c57664a27d5f835af6898fc35"><div>
             <h3>
               template class WERKZEUGKISTE_GEOMETRY_EXPORT werkzeugkiste::<wbr />geometry::<wbr /><a href="#ab9166a8c57664a27d5f835af6898fc35" class="m-doc-self">Line3d_< double ></a>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="primitives_8h.html">&lt;werkzeugkiste/geometry/primitives.h&gt;</a></div>
             </h3>
-            <p>A 3-dimensional line using double precision.</p>
+            <p>Available 3-dimensional double precision specialization of a line/segment.</p>
           </div></section>
           <section class="m-doc-details" id="a2786e6d30e669963c857aafb1877dec8"><div>
             <h3>

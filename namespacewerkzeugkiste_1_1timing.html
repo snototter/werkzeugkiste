@@ -51,6 +51,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>timing <span class="m-thin">namespace</span>
         </h1>
+        <p>Stop watch &amp; additional helpers on top of <code>std::chrono</code>.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -64,7 +65,7 @@
             </li>
           </ul>
         </div>
-<p>Stop watch &amp; additional helpers on top of <code>std::chrono</code> (to hide some of its template boilerplate).</p>
+<p>These utilities are intended to hide some of the template boilerplate of <code>std::chrono</code>.</p>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
@@ -72,7 +73,7 @@
               <div class="m-doc-template">template&lt;typename Clock = std::chrono::steady_clock&gt;</div>
               class <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_</a>
             </dt>
-            <dd></dd>
+            <dd>A stop watch with configurable clock.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -81,7 +82,7 @@
             <dt>
               using <a href="#a29d46c7748459b955311dff13ad67ac2" class="m-doc">StopWatch</a> = <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&lt;std::chrono::steady_clock&gt;
             </dt>
-            <dd><span></span></dd>
+            <dd>Typedef for the default stop watch.</dd>
           </dl>
         </section>
         <section id="func-members">
@@ -91,46 +92,46 @@
               <div class="m-doc-template">template&lt;typename Duration&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a4e600a44d046afebc72b78fa1fdadd89" class="m-doc">DurationAbbreviation</a>(</span><span class="m-doc-wrap">) -&gt; std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the abbreviation for the given duration type, <em>e.g.</em> <code>&quot;hrs&quot;</code> for <code>std::chrono::hours</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Clock&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a1194794c81579cfdbd964db6b9ab0b7a" class="m-doc">ClockTypeName</a>(</span><span class="m-doc-wrap">) -&gt; std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the fully-qualified name of the given clock type, <em>e.g.</em> <code>&quot;std::chrono::system_clock&quot;</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Duration&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a6eea807d632b8d64ccf64980aad280a2" class="m-doc">PrecisionTypeName</a>(</span><span class="m-doc-wrap">) -&gt; std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the fully-qualified name of the given duration type, <em>e.g.</em> <code>&quot;std::chrono::nanoseconds&quot;</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename DurationFrom, typename DurationTo&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a51349e426cc0a9cf95fbd80ec4beeb16" class="m-doc">CastToTicks</a>(</span><span class="m-doc-wrap">const DurationFrom&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Returns the number of ticks for the given <code>std::chrono::duration</code> at a potentially different precision.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Duration&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a17562c2ddb3accb8308c3a5a7daadd2c" class="m-doc">ToSeconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Returns the number of seconds for the given std::chrono::duration.</dd>
+            <dd>Returns the number of seconds for the given <code>std::chrono::duration</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Duration&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#aa6e73b31a4b776e2448ab38a077e374a" class="m-doc">ToMilliseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Returns the number of milliseconds for the given std::chrono::duration.</dd>
+            <dd>Returns the number of milliseconds for the given <code>std::chrono::duration</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Duration&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a290915e287515a01e4818678d030ca44" class="m-doc">ToMicroseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Returns the number of microseconds for the given std::chrono::duration.</dd>
+            <dd>Returns the number of microseconds for the given <code>std::chrono::duration</code>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Duration&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#acd9d5af644a6fff2de8417446ec4c0b7" class="m-doc">ToNanoseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) -&gt; double <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd>Returns the number of nanoseconds for the given std::chrono::duration.</dd>
+            <dd>Returns the number of nanoseconds for the given <code>std::chrono::duration</code>.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6ddf7df8bb8b368b006fdb3d2b4d9815" class="m-doc">SecondsToString</a>(</span><span class="m-doc-wrap">unsigned int seconds) -&gt; WERKZEUGKISTE_TIMING_EXPORT std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a human readable string approximating the given time.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a8e85b2d456931eec2ea85334f1a8f66d" class="m-doc">SetTocFormat</a>(</span><span class="m-doc-wrap">bool print_labels_aligned = false,
               int fixed_number_width = 0,
@@ -190,7 +191,7 @@
               using werkzeugkiste::<wbr />timing::<wbr /><a href="#a29d46c7748459b955311dff13ad67ac2" class="m-doc-self">StopWatch</a> = <a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html" class="m-doc">StopWatch_<wbr /></a>&lt;std::chrono::steady_clock&gt;
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
             </h3>
-            <p><span></span></p>
+            <p>Typedef for the default stop watch.</p>
           </div></section>
         </section>
         <section>
@@ -203,7 +204,7 @@
               </div>
               <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e600a44d046afebc72b78fa1fdadd89" class="m-doc-self">DurationAbbreviation</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-<p>Returns the abbreviation for the given duration type, e.g. std::chrono::hours --&gt; &quot;hrs&quot;.</p>
+            <p>Returns the abbreviation for the given duration type, <em>e.g.</em> <code>&quot;hrs&quot;</code> for <code>std::chrono::hours</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a1194794c81579cfdbd964db6b9ab0b7a"><div>
             <h3>
@@ -213,7 +214,7 @@
               </div>
               <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1194794c81579cfdbd964db6b9ab0b7a" class="m-doc-self">ClockTypeName</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-<p>Returns the fully-qualified name of the given clock type, e.g. &quot;std::chrono::system_clock&quot;.</p>
+            <p>Returns the fully-qualified name of the given clock type, <em>e.g.</em> <code>&quot;std::chrono::system_clock&quot;</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a6eea807d632b8d64ccf64980aad280a2"><div>
             <h3>
@@ -223,7 +224,7 @@
               </div>
               <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6eea807d632b8d64ccf64980aad280a2" class="m-doc-self">PrecisionTypeName</a>(</span><span class="m-doc-wrap">)</span></span>
             </h3>
-<p>Returns the fully-qualified name of the given duration type, e.g. &quot;std::chrono::nanoseconds&quot;.</p>
+            <p>Returns the fully-qualified name of the given duration type, <em>e.g.</em> <code>&quot;std::chrono::nanoseconds&quot;</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a51349e426cc0a9cf95fbd80ec4beeb16"><div>
             <h3>
@@ -233,7 +234,7 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a51349e426cc0a9cf95fbd80ec4beeb16" class="m-doc-self">CastToTicks</a>(</span><span class="m-doc-wrap">const DurationFrom&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-<p>Returns the number of ticks for the given std::chrono::duration with a different precision.</p>
+            <p>Returns the number of ticks for the given <code>std::chrono::duration</code> at a potentially different precision.</p>
           </div></section>
           <section class="m-doc-details" id="a17562c2ddb3accb8308c3a5a7daadd2c"><div>
             <h3>
@@ -243,7 +244,7 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a17562c2ddb3accb8308c3a5a7daadd2c" class="m-doc-self">ToSeconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Returns the number of seconds for the given std::chrono::duration.</p>
+            <p>Returns the number of seconds for the given <code>std::chrono::duration</code>.</p>
           </div></section>
           <section class="m-doc-details" id="aa6e73b31a4b776e2448ab38a077e374a"><div>
             <h3>
@@ -253,7 +254,7 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa6e73b31a4b776e2448ab38a077e374a" class="m-doc-self">ToMilliseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Returns the number of milliseconds for the given std::chrono::duration.</p>
+            <p>Returns the number of milliseconds for the given <code>std::chrono::duration</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a290915e287515a01e4818678d030ca44"><div>
             <h3>
@@ -263,7 +264,7 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a290915e287515a01e4818678d030ca44" class="m-doc-self">ToMicroseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Returns the number of microseconds for the given std::chrono::duration.</p>
+            <p>Returns the number of microseconds for the given <code>std::chrono::duration</code>.</p>
           </div></section>
           <section class="m-doc-details" id="acd9d5af644a6fff2de8417446ec4c0b7"><div>
             <h3>
@@ -273,14 +274,15 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd9d5af644a6fff2de8417446ec4c0b7" class="m-doc-self">ToNanoseconds</a>(</span><span class="m-doc-wrap">const Duration&amp; duration) <span class="m-label m-primary">constexpr</span></span></span>
             </h3>
-            <p>Returns the number of nanoseconds for the given std::chrono::duration.</p>
+            <p>Returns the number of nanoseconds for the given <code>std::chrono::duration</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a6ddf7df8bb8b368b006fdb3d2b4d9815"><div>
             <h3>
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_TIMING_EXPORT std::string werkzeugkiste::<wbr />timing::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6ddf7df8bb8b368b006fdb3d2b4d9815" class="m-doc-self">SecondsToString</a>(</span><span class="m-doc-wrap">unsigned int seconds)</span></span>
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="stopwatch_8h.html">&lt;werkzeugkiste/timing/stopwatch.h&gt;</a></div>
             </h3>
-<p>Returns a human readable string approximating the given time.</p><p>For example, &lsquo;SecondsToString(3700 * 24 + 50) = &#x27;1 day 40 minutes&rsquo;`.</p>
+            <p>Returns a human readable string approximating the given time.</p>
+<p>For example, &lsquo;SecondsToString(3700 * 24 + 50) = &#x27;1 day 40 minutes&rsquo;`.</p>
           </div></section>
           <section class="m-doc-details" id="a8e85b2d456931eec2ea85334f1a8f66d"><div>
             <h3>

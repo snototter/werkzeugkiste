@@ -53,6 +53,7 @@
           <div class="m-doc-template">template&lt;typename Clock = std::chrono::steady_clock&gt;</div>
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1timing.html">timing</a>::<wbr/></span>StopWatch_ <span class="m-thin">class</span>
         </h1>
+        <p>A stop watch with configurable clock.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -66,7 +67,7 @@
             </li>
           </ul>
         </div>
-<p>A stop watch with configurable clock.</p><p>A stop watch measures the time since you last called <code><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html#a20efe7cdbab68f73921c6986df92106e" class="m-doc">Start()</a></code>, or since its construction. Use its <code>ElapsedXXX()</code> methods to get the elapsed time in the corresponding time interval (i.e. precision), e.g. <code><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html#a5d7d06da8378b8ee9b15b1a08f0d5565" class="m-doc">ElapsedSeconds()</a></code>.</p><p>Duration measurements should use a monotonic clock. Thus, we explicitly default to <code>steady_clock</code> (since <code>high_resolution_clock</code> is not guaranteed to be steady).</p>
+<p>A stop watch measures the time since you last called <code><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html#a20efe7cdbab68f73921c6986df92106e" class="m-doc">Start()</a></code>, or since its construction. Use its <code>ElapsedXXX()</code> methods to get the elapsed time in the corresponding time interval (<strong>i.e.</strong> precision), <strong>e.g.</strong> <code><a href="classwerkzeugkiste_1_1timing_1_1StopWatch__.html#a5d7d06da8378b8ee9b15b1a08f0d5565" class="m-doc">ElapsedSeconds()</a></code>.</p><p>Duration measurements should use a monotonic clock. Thus, we explicitly default to <code>steady_clock</code> (since <code>high_resolution_clock</code> is not guaranteed to be steady).</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -116,7 +117,7 @@
               <div class="m-doc-template">template&lt;typename Ratio&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a6abe882b7cebb9d7f4dc9cb124f3111c" class="m-doc">ElapsedAs</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the elapsed time as ticks of the given time interval.</dd>
             <dt id="a5d7d06da8378b8ee9b15b1a08f0d5565">
               <span class="m-doc-wrap-bumper">auto <a href="#a5d7d06da8378b8ee9b15b1a08f0d5565" class="m-doc-self">ElapsedSeconds</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
             </dt>
@@ -133,18 +134,18 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af41170d6e0479895f84718c7b44bd68c" class="m-doc-self">ElapsedNanoseconds</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
             </dt>
             <dd>Returns the elapsed time in nanoseconds.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a089012b2945bbf28d300039b38308c55" class="m-doc">YearsUntilOverflow</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
+            <dt id="a089012b2945bbf28d300039b38308c55">
+              <span class="m-doc-wrap-bumper">auto <a href="#a089012b2945bbf28d300039b38308c55" class="m-doc-self">YearsUntilOverflow</a>(</span><span class="m-doc-wrap">) const -&gt; double</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the number of years before this stop watch will overflow.</dd>
             <dt id="a8072fba54d7101c0572558aaa7416580">
               <span class="m-doc-wrap-bumper">auto <a href="#a8072fba54d7101c0572558aaa7416580" class="m-doc-self">IsSteady</a>(</span><span class="m-doc-wrap">) const -&gt; bool</span>
             </dt>
             <dd>Returns true if the used clock is steady (monotonic).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a5cb1f2ffe6d2ab4328bc0ca2738259e9" class="m-doc">ClockName</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
+            <dt id="a5cb1f2ffe6d2ab4328bc0ca2738259e9">
+              <span class="m-doc-wrap-bumper">auto <a href="#a5cb1f2ffe6d2ab4328bc0ca2738259e9" class="m-doc-self">ClockName</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a readable clock typeid, for example <code>&quot;std::chrono::steady_clock&quot;</code>.</dd>
           </dl>
         </section>
         <section>
@@ -157,25 +158,8 @@
               </div>
               <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr />StopWatch_&lt;Clock&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a6abe882b7cebb9d7f4dc9cb124f3111c" class="m-doc-self">ElapsedAs</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
-<p>Returns the elapsed time as ticks of the given time interval (specified as tick interval, which is a rational fraction - std::ratio - representing the time in seconds from one tick to the next, i.e. similar to the Period template parameter in <code>std::chrono::duration</code>).</p>
-          </div></section>
-          <section class="m-doc-details" id="a089012b2945bbf28d300039b38308c55"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename Clock&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">double werkzeugkiste::<wbr />timing::<wbr />StopWatch_&lt;Clock&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a089012b2945bbf28d300039b38308c55" class="m-doc-self">YearsUntilOverflow</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns the number of years before this stop watch will overflow.</p>
-          </div></section>
-          <section class="m-doc-details" id="a5cb1f2ffe6d2ab4328bc0ca2738259e9"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename Clock&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />timing::<wbr />StopWatch_&lt;Clock&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5cb1f2ffe6d2ab4328bc0ca2738259e9" class="m-doc-self">ClockName</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns a readable clock typeid, for example &quot;std::chrono::steady_clock&quot;.</p>
+            <p>Returns the elapsed time as ticks of the given time interval.</p>
+<p>The time interval is a rational fraction, <strong>i.e.</strong> <code>std::ratio</code>, which represents the time in seconds from one tick to the next, <strong>i.e.</strong> similar to the <code>Period</code> template parameter in <code>std::chrono::duration</code>.</p>
           </div></section>
         </section>
       </div>

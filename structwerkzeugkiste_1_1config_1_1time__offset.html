@@ -52,7 +52,7 @@
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1config.html">config</a>::<wbr/></span>time_offset <span class="m-thin">struct</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;types.h&gt;</a></div>
         </h1>
-        <p><span></span></p>
+        <p>Represents a time zone offset.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -67,13 +67,14 @@
             </li>
           </ul>
         </div>
+<p>Note that <code><a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a></code> cannot represent the <strong>unknown local offset convention</strong> (according to <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a>, <strong>i.e.</strong> it cannot distinguish between <code>-00:00</code> and <code>+00:00</code>.</p>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt id="a59171ee1329120646ce16eea946a724a">
               <span class="m-doc-wrap-bumper"><a href="#a59171ee1329120646ce16eea946a724a" class="m-doc-self">time_offset</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Default c&#x27;tor.</dd>
             <dt id="a8d5791c3d8a5fe2eaf71562ec84bd779">
               <span class="m-doc-wrap-bumper"><a href="#a8d5791c3d8a5fe2eaf71562ec84bd779" class="m-doc-self">time_offset</a>(</span><span class="m-doc-wrap">int32_t m) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
@@ -95,7 +96,7 @@
             <dt id="a40db84c998a7b2e6025404bc1b22f7c2">
               <span class="m-doc-wrap-bumper">auto <a href="#a40db84c998a7b2e6025404bc1b22f7c2" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
-            <dd>Returns &quot;Z&quot; or &quot;+/-HH:MM&quot;.</dd>
+            <dd>Returns <code>&quot;Z&quot;</code> or <code>&quot;+/-HH:MM&quot;</code>.</dd>
             <dt id="a0a6842c655a2554525d30dc80c9b2d1b">
               <span class="m-doc-wrap-bumper">auto <a href="#a0a6842c655a2554525d30dc80c9b2d1b" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="structwerkzeugkiste_1_1config_1_1time__offset.html" class="m-doc">time_<wbr />offset</a>&amp; other) const -&gt; bool</span>
             </dt>
@@ -128,7 +129,7 @@
             <dt id="a7e48ad63f9253f390abf52684596dc0a">
               int32_t <a href="#a7e48ad63f9253f390abf52684596dc0a" class="m-doc-self">minutes</a>
             </dt>
-            <dd>The offset from UTC+0 in minutes.</dd>
+            <dd>The offset from <code>UTC+00:00</code> in minutes.</dd>
           </dl>
         </section>
         <section id="friends">
@@ -148,7 +149,7 @@
               <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />config::<wbr />time_offset::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0af024bb9d2ad8f8c2eb9765ed0a504e" class="m-doc-self">time_offset</a>(</span><span class="m-doc-wrap">std::string_view str) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Parses a string representation.</p>
-<p>Supported formats are:</p><ul><li>Z</li><li>[+-]?HH:MM</li></ul>
+<p>Supported formats are:</p><ul><li><code>Z</code>, <strong>i.e.</strong> the 0 offset.</li><li><code>[+-]?HH:MM</code></li></ul>
           </div></section>
         </section>
       </div>

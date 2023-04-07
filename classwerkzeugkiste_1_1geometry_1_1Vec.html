@@ -53,6 +53,7 @@
           <div class="m-doc-template">template&lt;typename T, std::size_t Dim&gt;</div>
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1geometry.html">geometry</a>::<wbr/></span>Vec <span class="m-thin">class</span>
         </h1>
+        <p>Template class to represent a vector/coordinate.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -70,7 +71,7 @@
             </li>
           </ul>
         </div>
-<p>Template class to represent a vector/coordinate.</p><p>Any dimension can be accessed via random access, i.e. <code>operator[]</code>, or via its publicly exposed <code>val</code> array member.</p><p>2D vectors additionally provide access via <code>Width</code>/<code>Height</code>. Thus, using them to hold 2D dimensions feels lexically correct.</p>
+<p>Any dimension can be accessed via random access, i.e. <code>operator[]</code>, or via its publicly exposed <code>val</code> array member.</p><p>2D vectors additionally provide access via <code>Width</code>/<code>Height</code>. Thus, using them to hold 2D dimensions feels lexically correct.</p>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -134,14 +135,14 @@
               Tp w) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Convenience (x, y, z, w) constructor for 4D vector.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper"><a href="#ac57c1f8523ae89f537ec430231a28e61" class="m-doc">Vec</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;T&gt; values)</span>
+            <dt id="ac57c1f8523ae89f537ec430231a28e61">
+              <span class="m-doc-wrap-bumper"><a href="#ac57c1f8523ae89f537ec430231a28e61" class="m-doc-self">Vec</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;T&gt; values)</span>
             </dt>
-            <dd></dd>
+            <dd>Constructor accepting an <code>initializer_list</code> with either 0 or <code>Dim</code> entries.</dd>
             <dt id="adea51f73007130bcaed821a0b14eb49e">
               <span class="m-doc-wrap-bumper"><a href="#adea51f73007130bcaed821a0b14eb49e" class="m-doc-self">~Vec</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
-            <dd>Default destruction is fine - no special cleanup procedure required.</dd>
+            <dd>Destructor.</dd>
             <dt id="a3ec75273226e160e661e6ecc4bcf5e1c">
               <span class="m-doc-wrap-bumper"><a href="#a3ec75273226e160e661e6ecc4bcf5e1c" class="m-doc-self">Vec</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -154,7 +155,7 @@
               <div class="m-doc-template">template&lt;typename TargetType&gt;</div>
               <span class="m-doc-wrap-bumper"><a href="#a50a0d07f142c8044bcbd0c084b156bfb" class="m-doc-self">operator Vec&lt;TargetType, Dim&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
-            <dd><span></span></dd>
+            <dd>Explicit cast.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -175,27 +176,27 @@
             <dt id="aef1e93b0274970577f51502afef8e73a">
               <span class="m-doc-wrap-bumper">auto <a href="#aef1e93b0274970577f51502afef8e73a" class="m-doc-self">ToInteger</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;int32_t, Dim&gt;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad59dad46a57ef6e5c5c9f5b1b05b3e62" class="m-doc">Homogeneous</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim+1&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
+            <dd>Convenience conversion (truncation) to an integer vector.</dd>
+            <dt id="ad59dad46a57ef6e5c5c9f5b1b05b3e62">
+              <span class="m-doc-wrap-bumper">auto <a href="#ad59dad46a57ef6e5c5c9f5b1b05b3e62" class="m-doc-self">Homogeneous</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim+1&gt; <span class="m-label m-flat m-primary">constexpr</span></span>
             </dt>
-            <dd></dd>
+            <dd>Returns the homogeneous representation of this vector, <em>i.e.</em> the vector has an additional dimension which is set to 1.</dd>
             <dt id="aa58f125094c9d587faf45b026e4485d3">
               <span class="m-doc-wrap-bumper">auto <a href="#aa58f125094c9d587faf45b026e4485d3" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::size_t idx) -&gt; T&amp;</span>
             </dt>
-            <dd><span></span></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0272c640bfadd603d94fd0b54ba062c2" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">int idx) -&gt; T&amp;</span>
+            <dd>Supports array-like mutable access.</dd>
+            <dt id="a0272c640bfadd603d94fd0b54ba062c2">
+              <span class="m-doc-wrap-bumper">auto <a href="#a0272c640bfadd603d94fd0b54ba062c2" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">int idx) -&gt; T&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Array-like mutable access, which supports negative indexing. For example, vec[-1] == vec[Dim - 1].</dd>
             <dt id="a2aa9c3fcc3599ffb2b41fa30ae85dd6e">
               <span class="m-doc-wrap-bumper">auto <a href="#a2aa9c3fcc3599ffb2b41fa30ae85dd6e" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">std::size_t idx) const -&gt; const T&amp;</span>
             </dt>
             <dd><span></span></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#adaa3d5b53d72dcfaae67f195be53ef6d" class="m-doc">operator[]</a>(</span><span class="m-doc-wrap">int idx) const -&gt; const T&amp;</span>
+            <dt id="adaa3d5b53d72dcfaae67f195be53ef6d">
+              <span class="m-doc-wrap-bumper">auto <a href="#adaa3d5b53d72dcfaae67f195be53ef6d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">int idx) const -&gt; const T&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Array-like non-mutable access, which supports negative indexing. For example, vec[-1] == vec[Dim - 1].</dd>
             <dt id="a74b3e429ca0a994ac16a432678bdce28">
               <span class="m-doc-wrap-bumper">auto <a href="#a74b3e429ca0a994ac16a432678bdce28" class="m-doc-self">X</a>(</span><span class="m-doc-wrap">) const -&gt; const T&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -289,7 +290,7 @@
               Tp relative_tolerance,
               Tp absolute_tolerance) const -&gt; bool</span>
             </dt>
-            <dd></dd>
+            <dd>&quot;Almost equal&quot; check for vectors with floating point value type.</dd>
             <dt id="aa116df8907ee4d94be61c15b679fd2d9">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#aa116df8907ee4d94be61c15b679fd2d9" class="m-doc-self">IsEqual</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_integral&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp; other) const -&gt; bool</span>
@@ -327,59 +328,59 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a2180ce6ee72443af991abee65d78aad1" class="m-doc-self">operator-=</a>(</span><span class="m-doc-wrap">T value) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
             </dt>
             <dd>Overloaded <code>vec -= scalar</code>, see <code>SubtractScalar</code>.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a7253250176e1ccf2f0404cac30d63b91" class="m-doc">MultiplyScalar</a>(</span><span class="m-doc-wrap">T scale) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
+            <dt id="a7253250176e1ccf2f0404cac30d63b91">
+              <span class="m-doc-wrap-bumper">auto <a href="#a7253250176e1ccf2f0404cac30d63b91" class="m-doc-self">MultiplyScalar</a>(</span><span class="m-doc-wrap">T scale) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Multiplies each dimension by the given scalar and returns the modified instance.</dd>
             <dt id="aa9b94c9493719ca58fe40649b68dae9e">
               <span class="m-doc-wrap-bumper">auto <a href="#aa9b94c9493719ca58fe40649b68dae9e" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">T scale) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
             </dt>
             <dd>Overloaded <code>vec *= scalar</code>, see <code>MultiplyScalar</code>.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a06d971e1533db9acbb05a9453025af4d" class="m-doc">MultiplyVector</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
+            <dt id="a06d971e1533db9acbb05a9453025af4d">
+              <span class="m-doc-wrap-bumper">auto <a href="#a06d971e1533db9acbb05a9453025af4d" class="m-doc-self">MultiplyVector</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Performs element-wise multiplication and returns the modified instance.</dd>
             <dt id="a5f112824f50cde6999d1f0aa1bb04743">
               <span class="m-doc-wrap-bumper">auto <a href="#a5f112824f50cde6999d1f0aa1bb04743" class="m-doc-self">operator*=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
             </dt>
             <dd>Overloaded <code>vec1 *= vec2</code>, see <code>MultiplyVector</code>.</dd>
-            <dt>
+            <dt id="a10d01639533216dd388b11dae5a24f33">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a10d01639533216dd388b11dae5a24f33" class="m-doc">DivideScalar</a>(</span><span class="m-doc-wrap">Tp divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a10d01639533216dd388b11dae5a24f33" class="m-doc-self">DivideScalar</a>(</span><span class="m-doc-wrap">Tp divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
             </dt>
-            <dd></dd>
-            <dt>
+            <dd>Divides each element by the given scalar and returns the modified instance. Note that division is only supported for floating point types. Use <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html#a624183a73bc3b42a606386bc49b82f09" class="m-doc">ToDouble()</a> to obtain a casted copy of this vector before division.</dd>
+            <dt id="acd68956c3c38c8333bf66c18b24b286a">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#acd68956c3c38c8333bf66c18b24b286a" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">double divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#acd68956c3c38c8333bf66c18b24b286a" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">double divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
             </dt>
-            <dd></dd>
-            <dt>
+            <dd>Overloaded for convenience, see <code>DivideScalar</code>. Only supported for floating point-based vector specializations. Use <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html#a624183a73bc3b42a606386bc49b82f09" class="m-doc">ToDouble()</a> to convert integral vectors before division.</dd>
+            <dt id="a522844af4ce08030fd92a0195825f7a5">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a522844af4ce08030fd92a0195825f7a5" class="m-doc">DivideVector</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a522844af4ce08030fd92a0195825f7a5" class="m-doc-self">DivideVector</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
             </dt>
-            <dd></dd>
-            <dt>
+            <dd>Performs element-wise division and returns the modified instance. Only supported for floating point-based vector specializations. Use <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html#a624183a73bc3b42a606386bc49b82f09" class="m-doc">ToDouble()</a> to convert integral vectors before division.</dd>
+            <dt id="a738f69d39a3aee3fde00b735f76993f4">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a738f69d39a3aee3fde00b735f76993f4" class="m-doc">operator/=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a738f69d39a3aee3fde00b735f76993f4" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Overloaded element-wise division, see <code>DivideVector</code>. Only supported for floating point-based vector specializations.</dd>
             <dt id="a846394269c06e23807db864204b28717">
               <span class="m-doc-wrap-bumper">auto <a href="#a846394269c06e23807db864204b28717" class="m-doc-self">Negate</a>(</span><span class="m-doc-wrap">) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp;</span>
             </dt>
             <dd>Inverts (i.e. negates) each dimension.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1cfaffa6c9e395e1788f835a33479ca3" class="m-doc">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;</span>
+            <dt id="a1cfaffa6c9e395e1788f835a33479ca3">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1cfaffa6c9e395e1788f835a33479ca3" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a copy of this vector where each dimension is negated. Use <code>Negate</code> to explicitly negate this instance.</dd>
             <dt id="a15b21123af47e4ec9d681d66dc4446b0">
               <span class="m-doc-wrap-bumper">auto <a href="#a15b21123af47e4ec9d681d66dc4446b0" class="m-doc-self">Dot</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) const -&gt; T</span>
             </dt>
             <dd>Computes the dot product.</dd>
-            <dt>
+            <dt id="ae4f47cc45c2ef4f4961a6d10b02ff433">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ae4f47cc45c2ef4f4961a6d10b02ff433" class="m-doc">Determinant</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;&amp; other) const -&gt; Tp</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ae4f47cc45c2ef4f4961a6d10b02ff433" class="m-doc-self">Determinant</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;&amp; other) const -&gt; Tp</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the determinant of the two 2d vectors, i.e. the &quot;2d cross product&quot;.</dd>
             <dt id="a1e067af9b71493d74b45a2d2497e8456">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a1e067af9b71493d74b45a2d2497e8456" class="m-doc-self">Cross</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==3), Tp&gt;::type, Dim&gt;</span>
@@ -441,26 +442,26 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ab650d5a2ed43a9db0b46c335a78de661" class="m-doc">AngleDeg</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other) const -&gt; double</span>
             </dt>
             <dd>Returns the angle in [0, 180] between this and <code>other</code>.</dd>
-            <dt>
+            <dt id="adcf4c1603cf85f0e64a10502001cda53">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#adcf4c1603cf85f0e64a10502001cda53" class="m-doc">PerpendicularClockwise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#adcf4c1603cf85f0e64a10502001cda53" class="m-doc-self">PerpendicularClockwise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
             </dt>
-            <dd></dd>
-            <dt>
+            <dd>Returns the 90° clock-wise rotated vector. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</dd>
+            <dt id="ab7d3c30e9fac333cb204e96ef9d88331">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab7d3c30e9fac333cb204e96ef9d88331" class="m-doc">PerpendicularCounterClockwise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#ab7d3c30e9fac333cb204e96ef9d88331" class="m-doc-self">PerpendicularCounterClockwise</a>(</span><span class="m-doc-wrap">) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the 90° counter-clock-wise rotated vector. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp = double&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a0cf32508b05eafe063cc7f35fc80414c" class="m-doc">RotateRad</a>(</span><span class="m-doc-wrap">double angle_rad) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a copy of this vector rotated by the given radians.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Tp = double&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#aa738711d5db23a0fb115c45bda48ab89" class="m-doc">RotateDeg</a>(</span><span class="m-doc-wrap">double angle_deg) const -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a double precision vector which is the result of rotating this vector by the given angle in degrees.</dd>
             <dt id="a8439b20818258aefd25c4b526ca32b21">
               <div class="m-doc-template">template&lt;typename Tp = double&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a8439b20818258aefd25c4b526ca32b21" class="m-doc-self">RotateRad</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, 2&gt;&amp; rotation_center,
@@ -477,7 +478,7 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a708ac240ea4d9025f8a8895d26a1d1c0" class="m-doc">ToString</a>(</span><span class="m-doc-wrap">bool include_type = true,
               int fixed_precision = 0) const -&gt; std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a human-readable string representation. If <code>include_type</code> is true, the class name will be included, e.g. &quot;Vec2i(1, 2)&quot;. Otherwise, it will only return the coordinates within parentheses, e.g. &quot;(13, 77)&quot;.</dd>
           </dl>
         </section>
         <section id="pub-attribs">
@@ -496,17 +497,17 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a5fc531fa7e22593e610b7fa49b9080f9" class="m-doc">operator==</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; lhs,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; rhs) -&gt; bool</span>
             </dt>
-            <dd></dd>
+            <dd>Equality checks can be used for all vector specializations.</dd>
             <dt id="af63e130a1ebae9e85bc7c77f091ab4df">
               <span class="m-doc-wrap-bumper">auto <a href="#af63e130a1ebae9e85bc7c77f091ab4df" class="m-doc-self">operator!=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; lhs,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; rhs) -&gt; bool</span>
             </dt>
-            <dd>Inequality checks can be used for floating point specializations.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a99cfe1219faf95919f3e0e7b0a85bc41" class="m-doc">operator+</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
+            <dd>Inequality checks can be used for all vector specializations.</dd>
+            <dt id="a99cfe1219faf95919f3e0e7b0a85bc41">
+              <span class="m-doc-wrap-bumper">auto <a href="#a99cfe1219faf95919f3e0e7b0a85bc41" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; rhs) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Overloaded <code>vec1 + vec2</code>. By-value passing of lhs helps optimizing chained a+b+c equations.</dd>
             <dt id="af52ec624b6a4b0e7aac243b2940d1b56">
               <span class="m-doc-wrap-bumper">auto <a href="#af52ec624b6a4b0e7aac243b2940d1b56" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
               T rhs) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;</span>
@@ -547,24 +548,24 @@
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; rhs) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;</span>
             </dt>
             <dd>Overloaded <code>vec1 * vec2</code>.</dd>
-            <dt>
+            <dt id="a4f3a06426dd09151e3009aea5a302463">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4f3a06426dd09151e3009aea5a302463" class="m-doc">operator/</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
+              <span class="m-doc-wrap-bumper">auto <a href="#a4f3a06426dd09151e3009aea5a302463" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
               double divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;</span>
             </dt>
-            <dd></dd>
-            <dt>
+            <dd>Overloaded for convenience. Divides each dimension by the given scalar. Only supported for floating point-based vector specializations.</dd>
+            <dt id="a9d4ad189122377b0d2872d86cf7ba771">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9d4ad189122377b0d2872d86cf7ba771" class="m-doc">operator/</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
+              <span class="m-doc-wrap-bumper">auto <a href="#a9d4ad189122377b0d2872d86cf7ba771" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;</span>
             </dt>
-            <dd></dd>
-            <dt>
+            <dd>Overloaded element-wise division, see <code>DivideVector</code>. Only supported for floating point-based vector specializations.</dd>
+            <dt id="aae387bb9574333580eb57d09501ed8a9">
               <div class="m-doc-template">template&lt;typename Tp = T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a href="#aae387bb9574333580eb57d09501ed8a9" class="m-doc">operator/</a>(</span><span class="m-doc-wrap">Tp scalar,
+              <span class="m-doc-wrap-bumper">auto <a href="#aae387bb9574333580eb57d09501ed8a9" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">Tp scalar,
               <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; vec) -&gt; <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a vector where each dimension is the result of the element-wise division `scalar / divisor[dimension]. Only supported for floating point-based vector specializations.</dd>
             <dt id="a7c75108f94096851cfccda0f6c8b51c1">
               <span class="m-doc-wrap-bumper">auto <a href="#a7c75108f94096851cfccda0f6c8b51c1" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; vec) -&gt; std::ostream&amp;</span>
@@ -574,42 +575,6 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ac57c1f8523ae89f537ec430231a28e61"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ac57c1f8523ae89f537ec430231a28e61" class="m-doc-self">Vec</a>(</span><span class="m-doc-wrap">std::initializer_list&lt;T&gt; values)</span></span>
-            </h3>
-<p>Constructor accepting an <code>initializer_list</code> with either 0 or <code>Dim</code> entries.</p>
-          </div></section>
-          <section class="m-doc-details" id="ad59dad46a57ef6e5c5c9f5b1b05b3e62"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim+1&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ad59dad46a57ef6e5c5c9f5b1b05b3e62" class="m-doc-self">Homogeneous</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-<p>Returns the homogeneous representation of this vector, <em>i.e.</em> the vector has an additional dimension which is set to 1.</p>
-          </div></section>
-          <section class="m-doc-details" id="a0272c640bfadd603d94fd0b54ba062c2"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">T&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0272c640bfadd603d94fd0b54ba062c2" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">int idx)</span></span>
-            </h3>
-<p>Array-like mutable access, which supports negative indexing. For example, vec[-1] == vec[Dim - 1].</p>
-          </div></section>
-          <section class="m-doc-details" id="adaa3d5b53d72dcfaae67f195be53ef6d"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const T&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adaa3d5b53d72dcfaae67f195be53ef6d" class="m-doc-self">operator[]</a>(</span><span class="m-doc-wrap">int idx) const</span></span>
-            </h3>
-<p>Array-like non-mutable access, which supports negative indexing. For example, vec[-1] == vec[Dim - 1].</p>
-          </div></section>
           <section class="m-doc-details" id="a24b97c62ad906a523b3396d03a752eed"><div>
             <h3>
               <div class="m-doc-template">
@@ -620,84 +585,8 @@
               Tp relative_tolerance,
               Tp absolute_tolerance) const</span></span>
             </h3>
-<p>&quot;Almost equal&quot; check for vectors with floating point value type. Returns true if all dimensions of both vectors are approximately equal, depending on both relative and absolute tolerance thresholds, see <code><a href="namespacewerkzeugkiste_1_1geometry.html#a6abb0a8d0bb1d368cb9fe20d9220d452" class="m-doc">werkzeugkiste::<wbr />geometry::<wbr />IsClose</a></code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="a7253250176e1ccf2f0404cac30d63b91"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7253250176e1ccf2f0404cac30d63b91" class="m-doc-self">MultiplyScalar</a>(</span><span class="m-doc-wrap">T scale)</span></span>
-            </h3>
-<p>Multiplies each dimension by the given scalar and returns the modified instance.</p>
-          </div></section>
-          <section class="m-doc-details" id="a06d971e1533db9acbb05a9453025af4d"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a06d971e1533db9acbb05a9453025af4d" class="m-doc-self">MultiplyVector</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; other)</span></span>
-            </h3>
-<p>Performs element-wise multiplication and returns the modified instance.</p>
-          </div></section>
-          <section class="m-doc-details" id="a10d01639533216dd388b11dae5a24f33"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a10d01639533216dd388b11dae5a24f33" class="m-doc-self">DivideScalar</a>(</span><span class="m-doc-wrap">Tp divisor)</span></span>
-            </h3>
-<p>Divides each element by the given scalar and returns the modified instance. Note that division is only supported for floating point types. Use <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html#a624183a73bc3b42a606386bc49b82f09" class="m-doc">ToDouble()</a> to obtain a casted copy of this vector before division.</p>
-          </div></section>
-          <section class="m-doc-details" id="acd68956c3c38c8333bf66c18b24b286a"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acd68956c3c38c8333bf66c18b24b286a" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">double divisor)</span></span>
-            </h3>
-<p>Overloaded for convenience, see <code>DivideScalar</code>. Only supported for floating point-based vector specializations. Use <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html#a624183a73bc3b42a606386bc49b82f09" class="m-doc">ToDouble()</a> to convert integral vectors before division.</p>
-          </div></section>
-          <section class="m-doc-details" id="a522844af4ce08030fd92a0195825f7a5"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a522844af4ce08030fd92a0195825f7a5" class="m-doc-self">DivideVector</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor)</span></span>
-            </h3>
-<p>Performs element-wise division and returns the modified instance. Only supported for floating point-based vector specializations. Use <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html#a624183a73bc3b42a606386bc49b82f09" class="m-doc">ToDouble()</a> to convert integral vectors before division.</p>
-          </div></section>
-          <section class="m-doc-details" id="a738f69d39a3aee3fde00b735f76993f4"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt;&amp; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a738f69d39a3aee3fde00b735f76993f4" class="m-doc-self">operator/=</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor)</span></span>
-            </h3>
-<p>Overloaded element-wise division, see <code>DivideVector</code>. Only supported for floating point-based vector specializations.</p>
-          </div></section>
-          <section class="m-doc-details" id="a1cfaffa6c9e395e1788f835a33479ca3"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1cfaffa6c9e395e1788f835a33479ca3" class="m-doc-self">operator-</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns a copy of this vector where each dimension is negated. Use <code>Negate</code> to explicitly negate this instance.</p>
-          </div></section>
-          <section class="m-doc-details" id="ae4f47cc45c2ef4f4961a6d10b02ff433"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">Tp werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4f47cc45c2ef4f4961a6d10b02ff433" class="m-doc-self">Determinant</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt;&amp; other) const</span></span>
-            </h3>
-<p>Returns the determinant of the two 2d vectors, i.e. the &quot;2d cross product&quot;.</p>
+            <p>&quot;Almost equal&quot; check for vectors with floating point value type.</p>
+<p>Returns true if all dimensions of both vectors are approximately equal, depending on both relative and absolute tolerance thresholds, see <code><a href="namespacewerkzeugkiste_1_1geometry.html#a6abb0a8d0bb1d368cb9fe20d9220d452" class="m-doc">werkzeugkiste::<wbr />geometry::<wbr />IsClose</a></code>.</p>
           </div></section>
           <section class="m-doc-details" id="a5c4302baf5092c2d5c96ba2dff9dc1b1"><div>
             <h3>
@@ -733,26 +622,6 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="adcf4c1603cf85f0e64a10502001cda53"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adcf4c1603cf85f0e64a10502001cda53" class="m-doc-self">PerpendicularClockwise</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns the 90° clock-wise rotated vector. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</p>
-          </div></section>
-          <section class="m-doc-details" id="ab7d3c30e9fac333cb204e96ef9d88331"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab7d3c30e9fac333cb204e96ef9d88331" class="m-doc-self">PerpendicularCounterClockwise</a>(</span><span class="m-doc-wrap">) const</span></span>
-            </h3>
-<p>Returns the 90° counter-clock-wise rotated vector. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</p>
-          </div></section>
           <section class="m-doc-details" id="a0cf32508b05eafe063cc7f35fc80414c"><div>
             <h3>
               <div class="m-doc-template">
@@ -761,7 +630,8 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0cf32508b05eafe063cc7f35fc80414c" class="m-doc-self">RotateRad</a>(</span><span class="m-doc-wrap">double angle_rad) const</span></span>
             </h3>
-<p>Returns a copy of this vector rotated by the given radians. This method assumes that the coordinate system is right-handed and is only supported for 2D vector specialization with floating point value type.</p>
+            <p>Returns a copy of this vector rotated by the given radians.</p>
+<p>This method assumes that the coordinate system is right-handed and is only supported for 2D vector specialization with floating point value type.</p>
           </div></section>
           <section class="m-doc-details" id="aa738711d5db23a0fb115c45bda48ab89"><div>
             <h3>
@@ -771,7 +641,8 @@
               </div>
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;(Dim==2), Tp&gt;::type, Dim&gt; werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa738711d5db23a0fb115c45bda48ab89" class="m-doc-self">RotateDeg</a>(</span><span class="m-doc-wrap">double angle_deg) const</span></span>
             </h3>
-<p>Returns a double precision vector which is the result of rotating this vector by the given angle in degrees. This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</p>
+            <p>Returns a double precision vector which is the result of rotating this vector by the given angle in degrees.</p>
+<p>This method assumes that the coordinate system is right-handed and is only supported for 2D vectors.</p>
           </div></section>
           <section class="m-doc-details" id="a708ac240ea4d9025f8a8895d26a1d1c0"><div>
             <h3>
@@ -781,7 +652,8 @@
               <span class="m-doc-wrap-bumper">std::string werkzeugkiste::<wbr />geometry::<wbr />Vec&lt;T, Dim&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a708ac240ea4d9025f8a8895d26a1d1c0" class="m-doc-self">ToString</a>(</span><span class="m-doc-wrap">bool include_type = true,
               int fixed_precision = 0) const</span></span>
             </h3>
-<p>Returns a human-readable string representation. If <code>include_type</code> is true, the class name will be included, e.g. &quot;Vec2i(1, 2)&quot;. Otherwise, it will only return the coordinates within parentheses, e.g. &quot;(13, 77)&quot;.</p><p>For floating point types, the output precision will be set to the maximum precision if fixed_precision &lt;= 0. If a positive fixed_precision is provided, the output format will be adjusted.</p>
+            <p>Returns a human-readable string representation. If <code>include_type</code> is true, the class name will be included, e.g. &quot;Vec2i(1, 2)&quot;. Otherwise, it will only return the coordinates within parentheses, e.g. &quot;(13, 77)&quot;.</p>
+<p>For floating point types, the output precision will be set to the maximum precision if fixed_precision &lt;= 0. If a positive fixed_precision is provided, the output format will be adjusted.</p>
           </div></section>
           <section class="m-doc-details" id="a5fc531fa7e22593e610b7fa49b9080f9"><div>
             <h3>
@@ -791,50 +663,8 @@
               <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a5fc531fa7e22593e610b7fa49b9080f9" class="m-doc-self">operator==</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; lhs,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; rhs)</span></span>
             </h3>
-<p>Equality checks can be used for all vector specializations. Floating point value types use the <code>IsClose</code> check with:</p><ul><li>relative tolerance of 1e-6 (float) and 1e-9 (double), and</li><li>absolute tolerance of 1e-9 (float) and 1e-12 (double).</li></ul><p>Float can store 6-9 significant digits, whereas double can typically store 15-18 significant digits. Given the usage scenarios of this template class, the above tolerances are sufficiently tight.</p>
-          </div></section>
-          <section class="m-doc-details" id="a99cfe1219faf95919f3e0e7b0a85bc41"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a99cfe1219faf95919f3e0e7b0a85bc41" class="m-doc-self">operator+</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
-              const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt;&amp; rhs)</span></span>
-            </h3>
-<p>Overloaded <code>vec1 + vec2</code>. By-value passing of lhs helps optimizing chained a+b+c equations.</p>
-          </div></section>
-          <section class="m-doc-details" id="a4f3a06426dd09151e3009aea5a302463"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4f3a06426dd09151e3009aea5a302463" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
-              double divisor)</span></span>
-            </h3>
-<p>Overloaded for convenience. Divides each dimension by the given scalar. Only supported for floating point-based vector specializations.</p>
-          </div></section>
-          <section class="m-doc-details" id="a9d4ad189122377b0d2872d86cf7ba771"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9d4ad189122377b0d2872d86cf7ba771" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; lhs,
-              const <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;Tp, Dim&gt;&amp; divisor)</span></span>
-            </h3>
-<p>Overloaded element-wise division, see <code>DivideVector</code>. Only supported for floating point-based vector specializations.</p>
-          </div></section>
-          <section class="m-doc-details" id="aae387bb9574333580eb57d09501ed8a9"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T, std::size_t Dim&gt;
-                template&lt;typename Tp = T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;typename std::enable_if&lt;std::is_floating_point&lt;Tp&gt;::value, Tp&gt;::type, Dim&gt; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aae387bb9574333580eb57d09501ed8a9" class="m-doc-self">operator/</a>(</span><span class="m-doc-wrap">Tp scalar,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Vec.html" class="m-doc">Vec</a>&lt;T, Dim&gt; vec)</span></span>
-            </h3>
-<p>Returns a vector where each dimension is the result of the element-wise division `scalar / divisor[dimension]. Only supported for floating point-based vector specializations.</p>
+            <p>Equality checks can be used for all vector specializations.</p>
+<p>Floating point value types use the <code>IsClose</code> check with:</p><ul><li>relative tolerance of 1e-6 (float) and 1e-9 (double), and</li><li>absolute tolerance of 1e-9 (float) and 1e-12 (double).</li></ul><p>Float can store 6-9 significant digits, whereas double can typically store 15-18 significant digits. Given the usage scenarios of this template class, the above tolerances are sufficiently tight.</p>
           </div></section>
         </section>
       </div>

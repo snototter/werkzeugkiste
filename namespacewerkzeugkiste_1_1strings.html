@@ -52,6 +52,7 @@
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>strings <span class="m-thin">namespace</span>
           <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="strings_8h.html">&lt;werkzeugkiste/strings/strings.h&gt;</a></div>
         </h1>
+        <p>Common string manipulation &amp; check utilities.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -63,7 +64,6 @@
             </li>
           </ul>
         </div>
-<p>Common string manipulation &amp; checks. The kind you&#x27;ve already re-implemented/copied at least a dozen times.</p>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
@@ -108,10 +108,10 @@
               std::string_view str2) -&gt; std::size_t</span>
             </dt>
             <dd>Returns the absolute length difference of the two strings.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a45ea6e2bc65bebc56e424c811f012ab7" class="m-doc">Trim</a>(</span><span class="m-doc-wrap">std::string_view s) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
+            <dt id="a45ea6e2bc65bebc56e424c811f012ab7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a45ea6e2bc65bebc56e424c811f012ab7" class="m-doc-self">Trim</a>(</span><span class="m-doc-wrap">std::string_view s) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a copy with leading &amp; trailing white space removed.</dd>
             <dt id="a16193c8ac6aebdf399a6606d7a00c4c4">
               <span class="m-doc-wrap-bumper">auto <a href="#a16193c8ac6aebdf399a6606d7a00c4c4" class="m-doc-self">LTrim</a>(</span><span class="m-doc-wrap">std::string_view totrim) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
@@ -120,10 +120,10 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a3ce56668ae13ac899addc6fdd7d5a2cd" class="m-doc-self">RTrim</a>(</span><span class="m-doc-wrap">std::string_view totrim) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
             <dd>Returns a copy with trailing white space removed.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab1f50321eeb92e9e62960fa6755d9487" class="m-doc">IsNumeric</a>(</span><span class="m-doc-wrap">const std::string&amp; s) -&gt; WERKZEUGKISTE_STRINGS_EXPORT bool</span>
+            <dt id="ab1f50321eeb92e9e62960fa6755d9487">
+              <span class="m-doc-wrap-bumper">auto <a href="#ab1f50321eeb92e9e62960fa6755d9487" class="m-doc-self">IsNumeric</a>(</span><span class="m-doc-wrap">const std::string&amp; s) -&gt; WERKZEUGKISTE_STRINGS_EXPORT bool</span>
             </dt>
-            <dd></dd>
+            <dd>Returns true if the string can be safely cast into either an <code>int64_t</code> or a <code>double</code> type.</dd>
             <dt id="a2519a762ade643f0379e89ea80564ec5">
               <span class="m-doc-wrap-bumper">auto <a href="#a2519a762ade643f0379e89ea80564ec5" class="m-doc-self">IsInteger</a>(</span><span class="m-doc-wrap">std::string_view str) -&gt; WERKZEUGKISTE_STRINGS_EXPORT bool</span>
             </dt>
@@ -132,44 +132,44 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ae0c7ae937d6669fa471ade64594cdf31" class="m-doc">Split</a>(</span><span class="m-doc-wrap">std::string_view s,
               char delim) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Tokenizes the string by the given delimiter.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab0a9d6fb7cd9fb385c1b650242ff9942" class="m-doc">Tokenize</a>(</span><span class="m-doc-wrap">std::string_view s,
               std::string_view delim) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string_view&gt;</span>
             </dt>
-            <dd></dd>
+            <dd>Tokenizes the string by the given delimiter.</dd>
             <dt id="a87da07f659fd83d2780b005f0dfb14f7">
               <div class="m-doc-template">template&lt;typename Container, typename Tp = std::decay_t&lt;decltype(*begin(std::declval&lt;Container&gt;()))&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a href="#a87da07f659fd83d2780b005f0dfb14f7" class="m-doc-self">Concatenate</a>(</span><span class="m-doc-wrap">const Container&amp; container,
               std::string_view delimiter = &quot;&quot;) -&gt; std::string</span>
             </dt>
-            <dd><span></span></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a240b78bfae2a24097e03b237f8d79f8b" class="m-doc">Replace</a>(</span><span class="m-doc-wrap">std::string_view haystack,
+            <dd>Concatenates all strings in the given container.</dd>
+            <dt id="a240b78bfae2a24097e03b237f8d79f8b">
+              <span class="m-doc-wrap-bumper">auto <a href="#a240b78bfae2a24097e03b237f8d79f8b" class="m-doc-self">Replace</a>(</span><span class="m-doc-wrap">std::string_view haystack,
               std::string_view needle,
               std::string_view replacement) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Replaces all occurrences of the given search string <code>needle</code> within the <code>haystack</code>.</dd>
             <dt id="a43b2f40f4d0d7b919457c37817f9c2fa">
               <span class="m-doc-wrap-bumper">auto <a href="#a43b2f40f4d0d7b919457c37817f9c2fa" class="m-doc-self">Replace</a>(</span><span class="m-doc-wrap">std::string_view haystack,
               char needle,
               char replacement) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
             <dd>Replaces all occurrences of the given character.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#acbf942a0e4934dfcc1921c05ef8a04e0" class="m-doc">ClipUrl</a>(</span><span class="m-doc-wrap">const std::string&amp; url) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
+            <dt id="acbf942a0e4934dfcc1921c05ef8a04e0">
+              <span class="m-doc-wrap-bumper">auto <a href="#acbf942a0e4934dfcc1921c05ef8a04e0" class="m-doc-self">ClipUrl</a>(</span><span class="m-doc-wrap">const std::string&amp; url) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Clips the given URL string to include only the protocol and domain, <em>i.e.</em> server paths &amp; parameters will be excluded.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4259b314a434981583b2b8b7477f3e23" class="m-doc">GetUrlProtocol</a>(</span><span class="m-doc-wrap">const std::string&amp; url,
               std::string&amp; protocol,
               std::string&amp; remainder) -&gt; WERKZEUGKISTE_STRINGS_EXPORT bool</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9c8e3ec1bc57f3ddecc26ed4760a92dd" class="m-doc">ObscureUrlAuthentication</a>(</span><span class="m-doc-wrap">const std::string&amp; url) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
+            <dd>Splits a URL into protocol and remainder.</dd>
+            <dt id="a9c8e3ec1bc57f3ddecc26ed4760a92dd">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9c8e3ec1bc57f3ddecc26ed4760a92dd" class="m-doc-self">ObscureUrlAuthentication</a>(</span><span class="m-doc-wrap">const std::string&amp; url) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the URL after replacing any plaintext authentication data by the text <code>&lt;auth&gt;</code>.</dd>
             <dt id="a32934a638d14c22651f9b0f1e6f31912">
               <span class="m-doc-wrap-bumper">auto <a href="#a32934a638d14c22651f9b0f1e6f31912" class="m-doc-self">Remove</a>(</span><span class="m-doc-wrap">std::string_view s,
               std::initializer_list&lt;char&gt; chars) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
@@ -184,14 +184,14 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a7934df89daaffc1d4758f230bd8abef5" class="m-doc">Slug</a>(</span><span class="m-doc-wrap">std::string_view s,
               bool strip_dashes = false) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a slug representation of the string.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ad3cfe9b3a91d96382a185672f8970e34" class="m-doc">Shorten</a>(</span><span class="m-doc-wrap">std::string_view s,
               std::size_t desired_length,
               int ellipsis_position = -1,
               std::string_view ellipsis = &quot;...&quot;) -&gt; WERKZEUGKISTE_STRINGS_EXPORT std::string</span>
             </dt>
-            <dd></dd>
+            <dd>Returns a string with length &lt;= <code>desired_length</code>, where the customizable <code>ellipsis</code> has been inserted to indicate that the input string has been clipped.</dd>
             <dt id="a9a9726b96cb77372a1b3de62adfbe7d1">
               <span class="m-doc-wrap-bumper">auto <a href="#a9a9726b96cb77372a1b3de62adfbe7d1" class="m-doc-self">Indent</a>(</span><span class="m-doc-wrap">std::string_view s,
               std::size_t n,
@@ -235,45 +235,21 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a45ea6e2bc65bebc56e424c811f012ab7"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::string werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45ea6e2bc65bebc56e424c811f012ab7" class="m-doc-self">Trim</a>(</span><span class="m-doc-wrap">std::string_view s)</span></span>
-            </h3>
-<p>Returns a copy with leading &amp; trailing white space removed.</p>
-          </div></section>
-          <section class="m-doc-details" id="ab1f50321eeb92e9e62960fa6755d9487"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT bool werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab1f50321eeb92e9e62960fa6755d9487" class="m-doc-self">IsNumeric</a>(</span><span class="m-doc-wrap">const std::string&amp; s)</span></span>
-            </h3>
-<p>Returns true if the string can be safely cast into either an <code>int64_t</code> or a <code>double</code> type.</p>
-          </div></section>
           <section class="m-doc-details" id="ae0c7ae937d6669fa471ade64594cdf31"><div>
             <h3>
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string&gt; werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae0c7ae937d6669fa471ade64594cdf31" class="m-doc-self">Split</a>(</span><span class="m-doc-wrap">std::string_view s,
               char delim)</span></span>
             </h3>
-<p>Tokenizes the string by the given delimiter.</p><p>Note that an empty trailing token will be skipped. For example: Split(&quot;a-b-c&quot;, &#x27;-&#x27;) returns the same 3 tokens (namely, &quot;a&quot;, &quot;b&quot; and &quot;c&quot;) as Split(&quot;a-b-c-&quot;, &#x27;-&#x27;). For &quot;a-b-c--&quot;, however, &quot;a&quot;, &quot;b&quot;, &quot;c&quot; and &quot;&quot; would be returned.</p>
+            <p>Tokenizes the string by the given delimiter.</p>
+<p>Note that an empty trailing token will be skipped. For example: Split(&quot;a-b-c&quot;, &#x27;-&#x27;) returns the same 3 tokens (namely, &quot;a&quot;, &quot;b&quot; and &quot;c&quot;) as Split(&quot;a-b-c-&quot;, &#x27;-&#x27;). For &quot;a-b-c--&quot;, however, &quot;a&quot;, &quot;b&quot;, &quot;c&quot; and &quot;&quot; would be returned.</p>
           </div></section>
           <section class="m-doc-details" id="ab0a9d6fb7cd9fb385c1b650242ff9942"><div>
             <h3>
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::vector&lt;std::string_view&gt; werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab0a9d6fb7cd9fb385c1b650242ff9942" class="m-doc-self">Tokenize</a>(</span><span class="m-doc-wrap">std::string_view s,
               std::string_view delim)</span></span>
             </h3>
-<p>Tokenizes the string by the given delimiter.</p><p>Note that empty tokens will be skipped. For example: Tokenize(&quot;a-b-c&quot;, &quot;-&quot;) returns the same 3 tokens (namely, &quot;a&quot;, &quot;b&quot; and &quot;c&quot;) as Tokenize(&quot;a-b-c-&quot;, &quot;-&quot;) and also &quot;-a-b-c--&quot;.</p>
-          </div></section>
-          <section class="m-doc-details" id="a240b78bfae2a24097e03b237f8d79f8b"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::string werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a240b78bfae2a24097e03b237f8d79f8b" class="m-doc-self">Replace</a>(</span><span class="m-doc-wrap">std::string_view haystack,
-              std::string_view needle,
-              std::string_view replacement)</span></span>
-            </h3>
-<p>Replaces all occurrences of the given search string <code>needle</code> within the <code>haystack</code>.</p>
-          </div></section>
-          <section class="m-doc-details" id="acbf942a0e4934dfcc1921c05ef8a04e0"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::string werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acbf942a0e4934dfcc1921c05ef8a04e0" class="m-doc-self">ClipUrl</a>(</span><span class="m-doc-wrap">const std::string&amp; url)</span></span>
-            </h3>
-<p>Clips the given URL string to include only the protocol and domain, <em>i.e.</em> server paths &amp; parameters will be excluded.</p>
+            <p>Tokenizes the string by the given delimiter.</p>
+<p>Note that empty tokens will be skipped. For example: Tokenize(&quot;a-b-c&quot;, &quot;-&quot;) returns the same 3 tokens (namely, &quot;a&quot;, &quot;b&quot; and &quot;c&quot;) as Tokenize(&quot;a-b-c-&quot;, &quot;-&quot;) and also &quot;-a-b-c--&quot;.</p>
           </div></section>
           <section class="m-doc-details" id="a4259b314a434981583b2b8b7477f3e23"><div>
             <h3>
@@ -281,20 +257,16 @@
               std::string&amp; protocol,
               std::string&amp; remainder)</span></span>
             </h3>
-<p>Sets <code>protocol</code> to the URL&#x27;s protocol, e.g. <code><a href="https://">https:/<wbr />/<wbr /></a></code>, <code>rtp://</code>, ... Returns true if the <code>url</code> string contained a protocol part.</p>
-          </div></section>
-          <section class="m-doc-details" id="a9c8e3ec1bc57f3ddecc26ed4760a92dd"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::string werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9c8e3ec1bc57f3ddecc26ed4760a92dd" class="m-doc-self">ObscureUrlAuthentication</a>(</span><span class="m-doc-wrap">const std::string&amp; url)</span></span>
-            </h3>
-<p>Returns the URL after replacing any plaintext authentication data by the text <code>&lt;auth&gt;</code>.</p>
+            <p>Splits a URL into protocol and remainder.</p>
+<p>Sets <code>protocol</code> to the URL&#x27;s protocol, e.g. <code><a href="https://">https:/<wbr />/<wbr /></a></code>, <code>rtp://</code>, etc. Returns true if the <code>url</code> string contained a protocol part.</p>
           </div></section>
           <section class="m-doc-details" id="a7934df89daaffc1d4758f230bd8abef5"><div>
             <h3>
               <span class="m-doc-wrap-bumper">WERKZEUGKISTE_STRINGS_EXPORT std::string werkzeugkiste::<wbr />strings::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a7934df89daaffc1d4758f230bd8abef5" class="m-doc-self">Slug</a>(</span><span class="m-doc-wrap">std::string_view s,
               bool strip_dashes = false)</span></span>
             </h3>
-<p>Returns a slug representation of the string.</p><p>The input will be converted to lower case &amp; trimmed. The number sign/hash will be replaced by &quot;nr&quot;. Any other non-alphanumeric symbols will be replaced by dashes. If <code>strip_dashes</code> is true, the remaining dashes will then also be stripped: e.g. <code>img_dir</code> would become <code>imgdir</code>.</p>
+            <p>Returns a slug representation of the string.</p>
+<p>The input will be converted to lower case &amp; trimmed. The number sign/hash will be replaced by &quot;nr&quot;. Any other non-alphanumeric symbols will be replaced by dashes. If <code>strip_dashes</code> is true, the remaining dashes will then also be stripped: e.g. <code>img_dir</code> would become <code>imgdir</code>.</p>
           </div></section>
           <section class="m-doc-details" id="ad3cfe9b3a91d96382a185672f8970e34"><div>
             <h3>
@@ -303,7 +275,8 @@
               int ellipsis_position = -1,
               std::string_view ellipsis = &quot;...&quot;)</span></span>
             </h3>
-<p>Returns a string with length &lt;= <code>desired_length</code>, where the customizable <code>ellipsis</code> has been inserted to indicate that the input string has been clipped.</p><p>Argument ellipsis_position specifies where the ellipsis will be placed:</p><ul><li><code>&lt; 0</code>: Left</li><li><code>0</code>: Centered</li><li><code>&gt; 0</code>: Right</li></ul>
+            <p>Returns a string with length &lt;= <code>desired_length</code>, where the customizable <code>ellipsis</code> has been inserted to indicate that the input string has been clipped.</p>
+<p>Argument ellipsis_position specifies where the ellipsis will be placed:</p><ul><li><code>&lt; 0</code>: Left</li><li><code>0</code>: Centered</li><li><code>&gt; 0</code>: Right</li></ul>
           </div></section>
           <section class="m-doc-details" id="ad5e15cccf24ab33c96f7485eecf61aba"><div>
             <h3>

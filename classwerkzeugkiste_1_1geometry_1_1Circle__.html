@@ -53,7 +53,7 @@
           <div class="m-doc-template">template&lt;typename T&gt;</div>
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span><span class="m-breadcrumb"><a href="namespacewerkzeugkiste_1_1geometry.html">geometry</a>::<wbr/></span>Circle_ <span class="m-thin">class</span>
         </h1>
-        <p><span></span></p>
+        <p>Represents a circle.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -93,7 +93,7 @@
               const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; q,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; r)</span>
             </dt>
-            <dd></dd>
+            <dd>Circle from 3 points.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -123,47 +123,49 @@
               <span class="m-doc-wrap-bumper">auto <a href="#abcf11ece16bfefb5b9cc30a8056882dc" class="m-doc-self">Area</a>(</span><span class="m-doc-wrap">) const -&gt; T</span>
             </dt>
             <dd>Returns the area.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3549b4b26e7ed215b7317718c078d1c0" class="m-doc">IsPointInCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; pt,
+            <dt id="a3549b4b26e7ed215b7317718c078d1c0">
+              <span class="m-doc-wrap-bumper">auto <a href="#a3549b4b26e7ed215b7317718c078d1c0" class="m-doc-self">IsPointInCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; pt,
               bool* is_on_circle = nullptr) const -&gt; bool</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2d948ad51ffff9ae89e43886c625b1c4" class="m-doc">PointsOfTangency</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; pt,
+            <dd>Returns true if the point is inside the circle. If you need to distinguish inside and exactly on the circle, pass a valid <code>is_on_circle</code> pointer.</dd>
+            <dt id="a2d948ad51ffff9ae89e43886c625b1c4">
+              <span class="m-doc-wrap-bumper">auto <a href="#a2d948ad51ffff9ae89e43886c625b1c4" class="m-doc-self">PointsOfTangency</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; pt,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* pot1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* pot2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aff83c262fcff79b3dc064ee57deee0ca" class="m-doc">DirectCommonTangents</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
+            <dd>Returns the number of points of tangency (i.e. 0, 1, or 2) between this circle and the given point. Optionally sets the points of tangency.</dd>
+            <dt id="aff83c262fcff79b3dc064ee57deee0ca">
+              <span class="m-doc-wrap-bumper">auto <a href="#aff83c262fcff79b3dc064ee57deee0ca" class="m-doc-self">DirectCommonTangents</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9df81de1333f68fe9206815970d7514e" class="m-doc">TransverseCommonTangents</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
+            <dd>Returns the number of direct common tangents (German &quot;aeussere
+Tangenten&quot;) between the two circles. Optionally sets the tangent lines.</dd>
+            <dt id="a9df81de1333f68fe9206815970d7514e">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9df81de1333f68fe9206815970d7514e" class="m-doc-self">TransverseCommonTangents</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a1a6d29a061a4d15dd12a950198f8c656" class="m-doc">IntersectionCircleCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
+            <dd>Returns the number of transverse common tangents (German &quot;innere
+Tangenten&quot;) between the two circles. These are 0 if the circles overlap, 1 if they intersect in exactly one point, and 2 if the circles do not touch. Optionally sets the tangent lines.</dd>
+            <dt id="a1a6d29a061a4d15dd12a950198f8c656">
+              <span class="m-doc-wrap-bumper">auto <a href="#a1a6d29a061a4d15dd12a950198f8c656" class="m-doc-self">IntersectionCircleCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9a7289d2f83f99ad7b65a949c2d80a73" class="m-doc">IntersectionCircleLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;&amp; line,
+            <dd>Returns the number of intersections (0, 1, or 2) of the two circles. Returns -1 if the circles are equal and thus every point on the circles is an intersection point. Optionally sets the intersection points.</dd>
+            <dt id="a9a7289d2f83f99ad7b65a949c2d80a73">
+              <span class="m-doc-wrap-bumper">auto <a href="#a9a7289d2f83f99ad7b65a949c2d80a73" class="m-doc-self">IntersectionCircleLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;&amp; line,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a8fcdf4eee187dbd3f2e4be20bbbecba7" class="m-doc">IntersectionCircleLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;&amp; segment,
+            <dd>Returns the number of intersections (0, 1, or 2) of this circle and the line. Optionally sets the intersection points.</dd>
+            <dt id="a8fcdf4eee187dbd3f2e4be20bbbecba7">
+              <span class="m-doc-wrap-bumper">auto <a href="#a8fcdf4eee187dbd3f2e4be20bbbecba7" class="m-doc-self">IntersectionCircleLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;&amp; segment,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
               <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const -&gt; int</span>
             </dt>
-            <dd></dd>
+            <dd>Returns the number of intersections (0, 1, or 2) of this circle and the line segment(!). Optionally sets the intersection points.</dd>
           </dl>
         </section>
         <section>
@@ -177,85 +179,8 @@
               const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; q,
               const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; r)</span></span>
             </h3>
-<p>Circle from 3 points. If they are collinear, the circle will be invalid. Check via <code><a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5cbd9b78f9a8fe72054e6119dfcce1e2" class="m-doc">IsValid()</a></code> afterwards.</p>
-          </div></section>
-          <section class="m-doc-details" id="a3549b4b26e7ed215b7317718c078d1c0"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />geometry::<wbr />Circle_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a3549b4b26e7ed215b7317718c078d1c0" class="m-doc-self">IsPointInCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; pt,
-              bool* is_on_circle = nullptr) const</span></span>
-            </h3>
-<p>Returns true if the point is inside the circle. If you need to distinguish inside and exactly on the circle, pass a valid <code>is_on_circle</code> pointer.</p>
-          </div></section>
-          <section class="m-doc-details" id="a2d948ad51ffff9ae89e43886c625b1c4"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Circle_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2d948ad51ffff9ae89e43886c625b1c4" class="m-doc-self">PointsOfTangency</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>&amp; pt,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* pot1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* pot2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of points of tangency (i.e. 0, 1, or 2) between this circle and the given point. Optionally sets the points of tangency.</p>
-          </div></section>
-          <section class="m-doc-details" id="aff83c262fcff79b3dc064ee57deee0ca"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Circle_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aff83c262fcff79b3dc064ee57deee0ca" class="m-doc-self">DirectCommonTangents</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of direct common tangents (German &quot;aeussere
-Tangenten&quot;) between the two circles. Optionally sets the tangent lines.</p>
-          </div></section>
-          <section class="m-doc-details" id="a9df81de1333f68fe9206815970d7514e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Circle_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9df81de1333f68fe9206815970d7514e" class="m-doc-self">TransverseCommonTangents</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;* tangent2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of transverse common tangents (German &quot;innere
-Tangenten&quot;) between the two circles. These are 0 if the circles overlap, 1 if they intersect in exactly one point, and 2 if the circles do not touch. Optionally sets the tangent lines.</p>
-          </div></section>
-          <section class="m-doc-details" id="a1a6d29a061a4d15dd12a950198f8c656"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Circle_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a1a6d29a061a4d15dd12a950198f8c656" class="m-doc-self">IntersectionCircleCircle</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html" class="m-doc">Circle_<wbr /></a>&lt;T&gt;&amp; other,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of intersections (0, 1, or 2) of the two circles. Returns -1 if the circles are equal and thus every point on the circles is an intersection point. Optionally sets the intersection points.</p>
-          </div></section>
-          <section class="m-doc-details" id="a9a7289d2f83f99ad7b65a949c2d80a73"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Circle_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9a7289d2f83f99ad7b65a949c2d80a73" class="m-doc-self">IntersectionCircleLine</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;&amp; line,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of intersections (0, 1, or 2) of this circle and the line. Optionally sets the intersection points.</p>
-          </div></section>
-          <section class="m-doc-details" id="a8fcdf4eee187dbd3f2e4be20bbbecba7"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">int werkzeugkiste::<wbr />geometry::<wbr />Circle_&lt;T&gt;::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a8fcdf4eee187dbd3f2e4be20bbbecba7" class="m-doc-self">IntersectionCircleLineSegment</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1geometry_1_1Line2d__.html" class="m-doc">Line2d_<wbr /></a>&lt;T&gt;&amp; segment,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection1 = nullptr,
-              <a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5bc0683acffe9f7378fac81c31374c84" class="m-doc">vec_<wbr />type</a>* intersection2 = nullptr) const</span></span>
-            </h3>
-<p>Returns the number of intersections (0, 1, or 2) of this circle and the line segment(!). Optionally sets the intersection points.</p>
+            <p>Circle from 3 points.</p>
+<p>If they are collinear, the circle will be invalid. Check via <code><a href="classwerkzeugkiste_1_1geometry_1_1Circle__.html#a5cbd9b78f9a8fe72054e6119dfcce1e2" class="m-doc">IsValid()</a></code> afterwards.</p>
           </div></section>
         </section>
       </div>
