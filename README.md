@@ -1,15 +1,19 @@
 # Werkzeugkiste - Yet Another C++ Utility Library
 
-[![Release](https://img.shields.io/github/v/release/snototter/werkzeugkiste)](https://github.com/snototter/werkzeugkiste/releases)
-[![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue.svg?style=flat&logo=c%2B%2B)](https://en.cppreference.com/w/cpp/compiler_support)
-[![CI Status](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml/badge.svg)](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml)
-[![Coverage Status](https://coveralls.io/repos/github/snototter/werkzeugkiste/badge.svg?branch=main)](https://coveralls.io/github/snototter/werkzeugkiste?branch=main)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snototter/werkzeugkiste/blob/master/LICENSE?raw=true)
-
 This library is a collection of frequently used C++ snippets copy-pasted across
 way too many of my projects. Since there's tons of so-called utilities, utils,
-tools & toolboxes out there, I prefer to call this one **`werkzeugkiste`** (the
-German word for toolbox).
+tools & toolboxes out there, I prefer to call this one **`werkzeugkiste`**,
+__i.e.__ the German word for toolbox.
+
+[![Release](https://img.shields.io/github/v/release/snototter/werkzeugkiste)](https://github.com/snototter/werkzeugkiste/releases)
+
+[![C++17](https://img.shields.io/badge/std-c%2B%2B17-blue.svg?style=flat&logo=c%2B%2B)](https://en.cppreference.com/w/cpp/compiler_support)
+
+[![CI Status](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml/badge.svg)](https://github.com/snototter/werkzeugkiste/actions/workflows/ci.yml)
+
+[![Coverage Status](https://coveralls.io/repos/github/snototter/werkzeugkiste/badge.svg?branch=main)](https://coveralls.io/github/snototter/werkzeugkiste?branch=main)
+
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/snototter/werkzeugkiste/blob/master/LICENSE?raw=true)
 
 
 ## Functionality
