@@ -92,7 +92,7 @@
       "cacheVariables": {
         "ENABLE_COVERAGE": "ON",
         "CMAKE_BUILD_TYPE": "Coverage",
-        "CMAKE_CXX_FLAGS_COVERAGE": "-Og -g --coverage -fkeep-inline-functions -fkeep-static-functions",
+        "CMAKE_CXX_FLAGS_COVERAGE": "-Og -g --coverage -fkeep-inline-functions -fkeep-static-functions -fno-inline -fno-inline-small-functions -fno-default-inline",
         "CMAKE_EXE_LINKER_FLAGS_COVERAGE": "--coverage",
         "CMAKE_SHARED_LINKER_FLAGS_COVERAGE": "--coverage",
         "werkzeugkiste_WITH_LIBCONFIG": "ON"

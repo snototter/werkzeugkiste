@@ -293,6 +293,8 @@ TEST(ConfigListTest, NumericList) {
 
     nested_lst = [1, 2, [3, 4], "frobmorten", {name = "fail"}]
 
+    flts = [0.5, 1e-3]
+
     scalar = 'value'
     )toml");
 
@@ -386,6 +388,12 @@ TEST(ConfigListTest, NumericList) {
 
   EXPECT_THROW(config.ClearList("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.ClearList("scalar"sv), wkc::TypeError);
+
+  // Replace a homogeneous floating point list:
+  EXPECT_NO_THROW(config.SetDoubleList("flts"sv, {-1.0, -2.0, -3.0}));
+  EXPECT_DOUBLE_EQ(-1.0, config.GetDouble("flts[0]"sv));
+  EXPECT_DOUBLE_EQ(-2.0, config.GetDouble("flts[1]"sv));
+  EXPECT_DOUBLE_EQ(-3.0, config.GetDouble("flts[2]"sv));
 }
 
 TEST(ConfigListTest, SetBooleanList) {

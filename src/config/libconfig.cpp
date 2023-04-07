@@ -354,8 +354,8 @@ void PrintScalar(const Configuration &cfg,
       out << EscapeString(cfg.GetDateTime(key).ToString());
       break;
 
+    // LCOV_EXCL_START
     default: {
-      // LCOV_EXCL_START
       // This branch should be unreachable.
       std::string msg{
           "`ConfigType` not handled in `PrintScalar` for parameter `"};
@@ -364,8 +364,8 @@ void PrintScalar(const Configuration &cfg,
           "`! Please report at"
           "https://github.com/snototter/werkzeugkiste/issues";
       throw std::logic_error{msg};
-      // LCOV_EXCL_STOP
     }
+      // LCOV_EXCL_STOP
   }
 }
 
