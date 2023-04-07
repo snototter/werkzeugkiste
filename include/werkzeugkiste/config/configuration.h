@@ -22,36 +22,23 @@ namespace werkzeugkiste::config {
 
 /// @brief Encapsulates configuration data.
 ///
-/// This class provides access to configuration data in a format compatible
-/// to TOML.
-/// Supported data types:
-/// * Booleans
-/// * Integer (internally stored as 64-bit signed integer).
-/// * Floating point numbers (internally stored as double precision values).
-/// * Strings
-/// * Dates, times and date-times following RFC 3339,
-///   https://www.rfc-editor.org/rfc/rfc3339
-/// * Lists of configuration parameters (may be of any type).
-/// * Groups, aka tables (TOML), i.e. a collection of named parameters. Similar
-///   to objects in JSON, dicts (with keys of type `str`) in Python, groups in
-///   `libconfig`.
+/// This class provides a unified access to different configuration file
+/// formats provides several additional utilities, such as replacing
+/// placeholders, adjusting file paths, *etc.*
 ///
-/// TODO clean up doc / extend by examples:
-/// * Explicit method names are preferred over a templated "Get<>".
-/// * Get("unknown-key") throws a KeyError if the parameter does not exist.
-/// * GetOptional returns an optional scalar.
-/// * Get..Or returns a default value if the parameter does not exist.
-/// * Mixed lists:
-///   - All entries numeric -> can be looked up as floating point list.
-///   - Can be created programmatically via CreateList + Append, as well as by
-///     loading a mixed list from a TOML/JSON/... string or file
-///   - Can be replaced by an empty list, but cannot be replaced by a
-///     homogeneous list.
-///   - Individual elements can be looked up and set (via their corresponding
-///     GetTYPE/SetTYPE).
-/// * Integers & floating points will be implicitly converted if the value can
-///   be represented *exactly* by the target type. For example, double(2.0)
-///   can be looked up as int, but 2.5 cannot (will raise a `TypeError`).
+/// This utitility class is intended for *"typical"*, human-friendly
+/// configuration scenarios and, similar to
+/// <a href="https://toml.io/en">TOML</a>, supports the following data types:
+/// * Basic scalars: `bool`, `int32_t`, `int64_t`, `double`, and `std::string`.
+/// * Local date, local time, and date-time (date + time + time zone offset)
+///   types.
+/// * Aggregate types, *i.e.* lists and groups of parameters.
+///
+/// The following configuration formats are supported:
+/// * <a href="https://toml.io/en">TOML</a>,
+/// * <a href="https://www.json.org/">JSON</a>,
+/// * <a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and
+/// * <a href="https://yaml.org/">YAML</a> (only for exporting).
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -377,7 +364,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point2d<int64_t> GetInteger64Point2D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetInteger64Point2DOr / GetOptional...
 
   /// @brief Returns a 3D point with integer coordinates.
   ///
@@ -392,7 +380,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point3d<int64_t> GetInteger64Point3D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetInteger64Point3DOr / GetOptional...
 
   /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
   ///
@@ -507,7 +496,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point2d<double> GetDoublePoint2D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetDoublePoint2DOr / GetOptional...
 
   /// @brief Returns a 3D point with floating point coordinates.
   ///
@@ -522,7 +512,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point3d<double> GetDoublePoint3D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetDoublePoint3DOr / GetOptional...
 
   /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
   ///
