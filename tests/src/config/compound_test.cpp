@@ -424,4 +424,308 @@ TEST(ConfigCompoundTest, SetGroup) {
   EXPECT_TRUE(config.Contains("my-grp.my-str"sv));
 }
 
+TEST(ConfigCompoundTest, GetMatrices) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    int = 3
+
+    lst-int = [1, 2, 3]
+    lst-flt = [0.0, -3.5, 1e6]
+    lst-convertible = [42, 20.0, -3.0, 0, 123.0]
+
+    empty = []
+
+    mat-uint8 = [
+      [0, 127],
+      [10, 100],
+      [32, 64]
+    ]
+
+    mat-int32 = [
+      [-3,  2, 17],
+      [ 0, 19, 42],  # Trailing comma is also allowed
+    ]
+
+    mat-int64 = [
+      [2147483648, -2147483649], # int32 overflow & underflow
+      [1, 2]
+    ]
+
+    # Not a valid 2d matrix:
+    invalid1 = [[1], 3]
+
+    # Contains a non-numeric value:
+    invalid2 = [[1, 2], [3, 'four']]
+
+    # Jagged array:
+    invalid3 = [[1, 2], [3]]
+    )toml"sv);
+
+  // -------------------------------------------------------------
+  // ---- 8-bit unsigned integer
+  // Invalid queries
+  EXPECT_THROW(config.GetMatrixUInt8("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetMatrixUInt8("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixUInt8("invalid1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixUInt8("invalid2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixUInt8("invalid3"sv), wkc::TypeError);
+
+  auto mat_u8 = config.GetMatrixUInt8("empty"sv);
+  EXPECT_EQ(0, mat_u8.size());
+
+  mat_u8 = config.GetMatrixUInt8("lst-int"sv);
+  EXPECT_TRUE(mat_u8.IsRowMajor);
+  EXPECT_EQ(3, mat_u8.rows());
+  EXPECT_EQ(1, mat_u8.cols());
+  EXPECT_EQ(1, mat_u8(0, 0));
+  EXPECT_EQ(2, mat_u8(1, 0));
+  EXPECT_EQ(3, mat_u8(2, 0));
+
+  mat_u8 = config.GetMatrixUInt8("mat-uint8"sv);
+  EXPECT_TRUE(mat_u8.IsRowMajor);
+  EXPECT_EQ(3, mat_u8.rows());
+  EXPECT_EQ(2, mat_u8.cols());
+  EXPECT_EQ(0, mat_u8(0, 0));
+  EXPECT_EQ(127, mat_u8(0, 1));
+  EXPECT_EQ(10, mat_u8(1, 0));
+  EXPECT_EQ(100, mat_u8(1, 1));
+  EXPECT_EQ(32, mat_u8(2, 0));
+  EXPECT_EQ(64, mat_u8(2, 1));
+
+  // mat-int32 contains a negative number
+  EXPECT_THROW(config.GetMatrixUInt8("mat-int32"sv), wkc::TypeError);
+
+  // -------------------------------------------------------------
+  // ---- 32-bit signed integer
+  // Invalid queries
+  EXPECT_THROW(config.GetMatrixInt32("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetMatrixInt32("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixInt32("invalid1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixInt32("invalid2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixInt32("invalid3"sv), wkc::TypeError);
+
+  // Retrieve lists as Nx1 matrices:
+  auto mat_int32 = config.GetMatrixInt32("empty"sv);
+  EXPECT_EQ(0, mat_int32.size());
+
+  mat_int32 = config.GetMatrixInt32("lst-int"sv);
+  EXPECT_TRUE(mat_int32.IsRowMajor);
+  EXPECT_EQ(3, mat_int32.rows());
+  EXPECT_EQ(1, mat_int32.cols());
+  EXPECT_EQ(1, mat_int32(0, 0));
+  EXPECT_EQ(2, mat_int32(1, 0));
+  EXPECT_EQ(3, mat_int32(2, 0));
+
+  mat_int32 = config.GetMatrixInt32("lst-convertible"sv);
+  EXPECT_TRUE(mat_int32.IsRowMajor);
+  EXPECT_EQ(5, mat_int32.rows());
+  EXPECT_EQ(1, mat_int32.cols());
+  EXPECT_EQ(42, mat_int32(0, 0));
+  EXPECT_EQ(20, mat_int32(1, 0));
+  EXPECT_EQ(-3, mat_int32(2, 0));
+  EXPECT_EQ(0, mat_int32(3, 0));
+  EXPECT_EQ(123, mat_int32(4, 0));
+
+  // lst-flt contains values that can't be represented by an int:
+  EXPECT_THROW(config.GetMatrixInt32("lst-flt"sv), wkc::TypeError);
+
+  mat_int32 = config.GetMatrixInt32("mat-int32"sv);
+  EXPECT_TRUE(mat_int32.IsRowMajor);
+  EXPECT_EQ(2, mat_int32.rows());
+  EXPECT_EQ(3, mat_int32.cols());
+
+  // mat-int64 contains values that over- & underflow 32-bit integer
+  EXPECT_THROW(config.GetMatrixInt32("mat-int64"sv), wkc::TypeError);
+
+  // -------------------------------------------------------------
+  // ---- 64-bit signed integer
+  // Invalid queries
+  EXPECT_THROW(config.GetMatrixInt64("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetMatrixInt64("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixInt64("invalid1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixInt64("invalid2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixInt64("invalid3"sv), wkc::TypeError);
+
+  // Retrieve lists as Nx1 matrices:
+  auto mat_int64 = config.GetMatrixInt64("empty"sv);
+  EXPECT_EQ(0, mat_int64.size());
+
+  mat_int64 = config.GetMatrixInt64("lst-int"sv);
+  EXPECT_TRUE(mat_int64.IsRowMajor);
+  EXPECT_EQ(3, mat_int64.rows());
+  EXPECT_EQ(1, mat_int64.cols());
+
+  mat_int64 = config.GetMatrixInt64("lst-convertible"sv);
+  EXPECT_TRUE(mat_int64.IsRowMajor);
+  EXPECT_EQ(5, mat_int64.rows());
+  EXPECT_EQ(1, mat_int64.cols());
+  EXPECT_EQ(42, mat_int64(0, 0));
+  EXPECT_EQ(20, mat_int64(1, 0));
+  EXPECT_EQ(-3, mat_int64(2, 0));
+  EXPECT_EQ(0, mat_int64(3, 0));
+  EXPECT_EQ(123, mat_int64(4, 0));
+
+  // lst-flt contains values that can't be represented by an int:
+  EXPECT_THROW(config.GetMatrixInt64("lst-flt"sv), wkc::TypeError);
+
+  mat_int64 = config.GetMatrixInt64("mat-int32"sv);
+  EXPECT_TRUE(mat_int64.IsRowMajor);
+  EXPECT_EQ(2, mat_int64.rows());
+  EXPECT_EQ(3, mat_int64.cols());
+
+  mat_int64 = config.GetMatrixInt64("mat-int64"sv);
+  EXPECT_TRUE(mat_int64.IsRowMajor);
+  EXPECT_EQ(2, mat_int64.rows());
+  EXPECT_EQ(2, mat_int64.cols());
+  EXPECT_EQ(2147483648, mat_int64(0, 0));
+  EXPECT_EQ(-2147483649, mat_int64(0, 1));
+  EXPECT_EQ(1, mat_int64(1, 0));
+  EXPECT_EQ(2, mat_int64(1, 1));
+
+  // -------------------------------------------------------------
+  // ---- Double
+  // Invalid queries
+  EXPECT_THROW(config.GetMatrixDouble("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetMatrixDouble("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixDouble("invalid1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixDouble("invalid2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixDouble("invalid3"sv), wkc::TypeError);
+
+  // Retrieve lists as Nx1 matrices:
+  auto mat_dbl = config.GetMatrixDouble("empty"sv);
+  EXPECT_EQ(0, mat_dbl.size());
+
+  mat_dbl = config.GetMatrixDouble("lst-int"sv);
+  EXPECT_TRUE(mat_dbl.IsRowMajor);
+  EXPECT_EQ(3, mat_dbl.rows());
+  EXPECT_EQ(1, mat_dbl.cols());
+  EXPECT_DOUBLE_EQ(1.0, mat_dbl(0, 0));
+  EXPECT_DOUBLE_EQ(2.0, mat_dbl(1, 0));
+  EXPECT_DOUBLE_EQ(3.0, mat_dbl(2, 0));
+
+  mat_dbl = config.GetMatrixDouble("lst-convertible"sv);
+  EXPECT_TRUE(mat_dbl.IsRowMajor);
+  EXPECT_EQ(5, mat_dbl.rows());
+  EXPECT_EQ(1, mat_dbl.cols());
+  EXPECT_DOUBLE_EQ(42.0, mat_dbl(0, 0));
+  EXPECT_DOUBLE_EQ(20.0, mat_dbl(1, 0));
+  EXPECT_DOUBLE_EQ(-3.0, mat_dbl(2, 0));
+  EXPECT_DOUBLE_EQ(0.0, mat_dbl(3, 0));
+  EXPECT_DOUBLE_EQ(123.0, mat_dbl(4, 0));
+
+  mat_dbl = config.GetMatrixDouble("lst-flt"sv);
+  EXPECT_TRUE(mat_dbl.IsRowMajor);
+  EXPECT_EQ(3, mat_dbl.rows());
+  EXPECT_EQ(1, mat_dbl.cols());
+  EXPECT_DOUBLE_EQ(0.0, mat_dbl(0, 0));
+  EXPECT_DOUBLE_EQ(-3.5, mat_dbl(1, 0));
+  EXPECT_DOUBLE_EQ(1e6, mat_dbl(2, 0));
+}
+
+TEST(ConfigCompoundTest, SetMatrices) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    int = 3
+
+    lst = [1, 2, 3, 'four']
+    )toml");
+
+  // -------------------------------------------------------------
+  // ---- Set a parameter from a 2d integer matrix
+  Eigen::Matrix2i m2i;
+  m2i << 1, 2, 3, 4;
+
+  EXPECT_NO_THROW(config.SetMatrix("m2i"sv, m2i));
+  EXPECT_EQ(2, config.Size("m2i"sv));
+  EXPECT_EQ(2, config.Size("m2i[0]"sv));
+  EXPECT_EQ(2, config.Size("m2i[1]"sv));
+
+  EXPECT_EQ(1, config.GetInteger32("m2i[0][0]"sv));
+  EXPECT_EQ(2, config.GetInteger32("m2i[0][1]"sv));
+  EXPECT_EQ(3, config.GetInteger32("m2i[1][0]"sv));
+  EXPECT_EQ(4, config.GetInteger32("m2i[1][1]"sv));
+
+  EXPECT_FALSE(m2i.IsRowMajor);  // Eigen is column-major by default
+  auto m2i_retrieved = config.GetMatrixInt32("m2i"sv);
+  EXPECT_TRUE(m2i_retrieved.IsRowMajor);  // But wzk returns row-major
+  EXPECT_EQ(m2i, m2i_retrieved);
+
+  // Changing the type of an existing parameter is not allowed
+  EXPECT_THROW(config.SetMatrix("int"sv, m2i), wkc::TypeError);
+
+  // But we can replace an existing list by this matrix, as matrices
+  // are stored as lists (nested if needed):
+  EXPECT_NO_THROW(config.SetMatrix("lst"sv, m2i));
+  EXPECT_EQ(2, config.Size("lst"sv));
+  EXPECT_EQ(2, config.Size("lst[0]"sv));
+  EXPECT_EQ(2, config.Size("lst[1]"sv));
+
+  // -------------------------------------------------------------
+  // ---- Set a parameter from a 2d double matrix
+  Eigen::Matrix3d m3d;
+  m3d << -1, -2, -3, 1, 2, 3, 0.1, 0.2, 0.3;
+
+  EXPECT_NO_THROW(config.SetMatrix("m3d"sv, m3d));
+  EXPECT_EQ(3, config.Size("m3d"sv));
+  EXPECT_EQ(3, config.Size("m3d[0]"sv));
+  EXPECT_EQ(3, config.Size("m3d[1]"sv));
+  EXPECT_EQ(3, config.Size("m3d[2]"sv));
+  EXPECT_DOUBLE_EQ(m3d(0, 0), config.GetDouble("m3d[0][0]"sv));
+  EXPECT_DOUBLE_EQ(m3d(0, 1), config.GetDouble("m3d[0][1]"sv));
+  EXPECT_DOUBLE_EQ(m3d(0, 2), config.GetDouble("m3d[0][2]"sv));
+  EXPECT_DOUBLE_EQ(m3d(1, 0), config.GetDouble("m3d[1][0]"sv));
+  EXPECT_DOUBLE_EQ(m3d(1, 1), config.GetDouble("m3d[1][1]"sv));
+  EXPECT_DOUBLE_EQ(m3d(1, 2), config.GetDouble("m3d[1][2]"sv));
+  EXPECT_DOUBLE_EQ(m3d(2, 0), config.GetDouble("m3d[2][0]"sv));
+  EXPECT_DOUBLE_EQ(m3d(2, 1), config.GetDouble("m3d[2][1]"sv));
+  EXPECT_DOUBLE_EQ(m3d(2, 2), config.GetDouble("m3d[2][2]"sv));
+
+  // Changing the type of an existing parameter is not allowed
+  EXPECT_THROW(config.SetMatrix("int"sv, m2i), wkc::TypeError);
+
+  // But we can replace an existing list (see m2i test above):
+  EXPECT_NO_THROW(config.SetMatrix("lst"sv, m3d));
+  EXPECT_EQ(3, config.Size("lst"sv));
+  EXPECT_EQ(3, config.Size("lst[0]"sv));
+  EXPECT_EQ(3, config.Size("lst[1]"sv));
+  EXPECT_EQ(3, config.Size("lst[2]"sv));
+
+  // -------------------------------------------------------------
+  // ---- Set a parameter from a column vector
+  // Eigen::Vector is a Nx1 matrix
+  Eigen::Vector2f v2f;
+  v2f << 0.5f, -2.0f;
+  EXPECT_EQ(2, v2f.rows());
+  EXPECT_EQ(1, v2f.cols());
+  EXPECT_NO_THROW(config.SetMatrix("v2f"sv, v2f));
+  // Check that the parameter is a 2-element list
+  EXPECT_EQ(2, config.Size("v2f"sv));
+  EXPECT_DOUBLE_EQ(0.5, config.GetDouble("v2f[0]"sv));
+  EXPECT_DOUBLE_EQ(-2.0, config.GetDouble("v2f[1]"sv));
+  // Retrieve as 2x1 matrix
+  auto m2d = config.GetMatrixDouble("v2f"sv);
+  EXPECT_EQ(2, m2d.rows());
+  EXPECT_EQ(1, m2d.cols());
+  EXPECT_DOUBLE_EQ(0.5, m2d(0, 0));
+  EXPECT_DOUBLE_EQ(-2.0, m2d(1, 0));
+
+  // -------------------------------------------------------------
+  // ---- Set a parameter from a row vector
+  Eigen::MatrixXi mxi(1, 3);
+  mxi << -42, 0, 420;
+  EXPECT_EQ(1, mxi.rows());
+  EXPECT_EQ(3, mxi.cols());
+  EXPECT_NO_THROW(config.SetMatrix("mxi"sv, mxi));
+  EXPECT_EQ(3, config.Size("mxi"sv));
+  EXPECT_EQ(-42, config.GetInteger32("mxi[0]"sv));
+  EXPECT_EQ(0, config.GetInteger32("mxi[1]"sv));
+  EXPECT_EQ(420, config.GetInteger32("mxi[2]"sv));
+
+  // Querying this row vector will return a column vector:
+  mxi = config.GetMatrixInt32("mxi"sv);
+  EXPECT_EQ(3, mxi.rows());
+  EXPECT_EQ(1, mxi.cols());
+  EXPECT_EQ(-42, mxi(0, 0));
+  EXPECT_EQ(0, mxi(1, 0));
+  EXPECT_EQ(420, mxi(2, 0));
+}
+
 // NOLINTEND
