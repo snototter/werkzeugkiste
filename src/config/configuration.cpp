@@ -1025,6 +1025,68 @@ std::vector<Tcfg> GetList(const toml::array &arr, std::string_view key) {
   }
   return scalars;
 }
+
+template <typename Tp>
+Matrix<Tp> GetMatrix(const toml::array &lst, std::string_view key) {
+  // Return empty matrix if parameter is an empty list:
+  if (lst.empty()) {
+    return Matrix<Tp>(0, 0);
+  }
+
+  // The (outer) list has at least 1 element.
+  const bool is_2d = lst[0].is_array();
+  const std::size_t num_rows{lst.size()};
+  const std::size_t num_cols{is_2d ? lst[0].as_array()->size() : 1};
+
+  Matrix<Tp> mat(num_rows, num_cols);
+  for (std::size_t idx_lst = 0; idx_lst < num_rows; ++idx_lst) {
+    const std::string row_key = FullyQualifiedArrayElementPath(idx_lst, key);
+    // Eigen requires signed indices
+    const int row = static_cast<int>(idx_lst);
+
+    if (is_2d) {
+      // To iterate over the inner/nested lists, we first need to perform
+      // the sanity checks: current "row" must be a list of the correct
+      // length.
+      if (!lst[idx_lst].is_array()) {
+        std::string msg{"Cannot extract 2D matrix, because value at `"};
+        msg += row_key + "` is not a list, but a `" +
+               TomlTypeName(lst[idx_lst], row_key) + "`!";
+        throw TypeError{msg};
+      }
+
+      const toml::array &nested_lst = *lst[idx_lst].as_array();
+      const std::size_t nested_size = nested_lst.size();
+
+      if (nested_size != num_cols) {
+        std::string msg{"Cannot extract 2D matrix of size "};
+        msg += std::to_string(num_rows) + 'x' + std::to_string(num_cols) +
+               ", because list at `" + row_key + "` contains " +
+               std::to_string(nested_size) + " elements!";
+        throw TypeError{msg};
+      }
+
+      for (std::size_t idx_nested = 0; idx_nested < num_cols; ++idx_nested) {
+        const int col = static_cast<int>(idx_nested);
+        const std::string col_key =
+            FullyQualifiedArrayElementPath(idx_nested, row_key);
+        mat(row, col) =
+            ConvertTomlToConfigType<Tp>(nested_lst[idx_nested], col_key);
+      }
+    } else {
+      mat(row, 0) = ConvertTomlToConfigType<Tp>(lst[idx_lst], row_key);
+    }
+  }
+
+  WZKLOG_CRITICAL("TODO mat int32 from {}: {:s}, RxC {}x{}, row major: {}",
+      key,
+      mat,
+      mat.rows(),
+      mat.cols(),
+      mat.IsRowMajor);
+  return mat;
+}
+
 }  // namespace detail
 
 // Abusing the PImpl idiom to hide the internally used TOML table.
@@ -1073,7 +1135,7 @@ struct Configuration::Impl {
     return *node.as_table();
   }
 
-  const toml::array &List(std::string_view key) const {
+  const toml::array &ImmutableList(std::string_view key) const {
     if (!detail::ContainsKey(config_root, key)) {
       throw detail::KeyErrorWithSimilarKeys(config_root, key);
     }
@@ -1345,7 +1407,7 @@ void Configuration::SetBoolean(std::string_view key, bool value) {
 }
 
 std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
-  return detail::GetList<bool>(pimpl_->List(key), key);
+  return detail::GetList<bool>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetBooleanList(std::string_view key,
@@ -1382,12 +1444,33 @@ void Configuration::SetInteger32(std::string_view key, int32_t value) {
 
 std::vector<int32_t> Configuration::GetInteger32List(
     std::string_view key) const {
-  return detail::GetList<int32_t>(pimpl_->List(key), key);
+  return detail::GetList<int32_t>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetInteger32List(std::string_view key,
     const std::vector<int32_t> &values) {
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
+}
+
+Matrix<int32_t> Configuration::GetInteger32Matrix(std::string_view key) const {
+  return detail::GetMatrix<int32_t>(pimpl_->ImmutableList(key), key);
+  // // TODO get pimpl->ImmutableList()
+  // // TODO check that param is a list
+  // std::size_t rows{Size(key)};
+  // // TODO check if param is a nested list
+  // std::size_t cols{1};
+
+  // // TODO if empty, return an empty matrix
+  // Matrix<Tp> mat{};
+
+  // // TODO if nested list is jagged, throw a type error
+
+  // mat.resize(rows, cols);
+  // // m(row, col)
+  // mat(0, 0) = 1;
+  // mat(0, 1) = 17;
+  // WZKLOG_CRITICAL("TODO mat int32 from {}: {:s}, RxC {}x{}, row major: {}",
+  // key, mat, mat.rows(), mat.cols(), mat.IsRowMajor); return mat;
 }
 
 //---------------------------------------------------------------------------
@@ -1418,7 +1501,7 @@ void Configuration::SetInteger64(std::string_view key, int64_t value) {
 
 std::vector<int64_t> Configuration::GetInteger64List(
     std::string_view key) const {
-  return detail::GetList<int64_t>(pimpl_->List(key), key);
+  return detail::GetList<int64_t>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetInteger64List(std::string_view key,
@@ -1473,7 +1556,7 @@ void Configuration::SetDouble(std::string_view key, double value) {
 }
 
 std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
-  return detail::GetList<double>(pimpl_->List(key), key);
+  return detail::GetList<double>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetDoubleList(std::string_view key,
@@ -1525,7 +1608,7 @@ void Configuration::SetString(std::string_view key, std::string_view value) {
 
 std::vector<std::string> Configuration::GetStringList(
     std::string_view key) const {
-  return detail::GetList<std::string>(pimpl_->List(key), key);
+  return detail::GetList<std::string>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetStringList(std::string_view key,
@@ -1559,7 +1642,7 @@ void Configuration::SetDate(std::string_view key, const date &value) {
 }
 
 std::vector<date> Configuration::GetDateList(std::string_view key) const {
-  return detail::GetList<date>(pimpl_->List(key), key);
+  return detail::GetList<date>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetDateList(std::string_view key,
@@ -1593,7 +1676,7 @@ void Configuration::SetTime(std::string_view key, const time &value) {
 }
 
 std::vector<time> Configuration::GetTimeList(std::string_view key) const {
-  return detail::GetList<time>(pimpl_->List(key), key);
+  return detail::GetList<time>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetTimeList(std::string_view key,
@@ -1629,7 +1712,7 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
 
 std::vector<date_time> Configuration::GetDateTimeList(
     std::string_view key) const {
-  return detail::GetList<date_time>(pimpl_->List(key), key);
+  return detail::GetList<date_time>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetDateTimeList(std::string_view key,

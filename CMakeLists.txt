@@ -23,6 +23,12 @@ include(cmake/project-is-top-level.cmake)
 include(cmake/variables.cmake)
 
 # ##############################################################################
+# ---- Dependencies ----
+
+find_package(Eigen3 REQUIRED NO_MODULE)
+# TODO: * move all fetch/find package calls up here *
+
+# ##############################################################################
 # ---- Declare libraries ----
 # This toolbox consists of several "sub-utilities", each of which provides a
 # separate library to be consumed. For the lazy, there is a single
@@ -164,7 +170,6 @@ generate_export_header(
   CUSTOM_CONTENT_FROM_VARIABLE
   pragma_suppress_c4251)
 
-find_package(Eigen3 REQUIRED NO_MODULE)
 target_link_libraries(werkzeugkiste-geometry PUBLIC Eigen3::Eigen)
 target_link_libraries(werkzeugkiste-geometry PRIVATE werkzeugkiste::logging)
 
@@ -414,8 +419,7 @@ generate_export_header(
   CUSTOM_CONTENT_FROM_VARIABLE
   pragma_suppress_c4251)
 
-# find_package(Eigen3 REQUIRED NO_MODULE) TODO make optional (load matrix)
-# target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
+target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
 target_link_libraries(
   werkzeugkiste-config PRIVATE werkzeugkiste::logging werkzeugkiste::strings
                                werkzeugkiste::files werkzeugkiste::container)

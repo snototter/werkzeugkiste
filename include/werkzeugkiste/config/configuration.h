@@ -5,6 +5,7 @@
 #include <werkzeugkiste/config/keymatcher.h>
 #include <werkzeugkiste/config/types.h>
 
+#include <Eigen/Core>
 #include <cmath>
 #include <initializer_list>
 #include <limits>
@@ -19,6 +20,10 @@
 
 /// @brief Utilities to handle configurations.
 namespace werkzeugkiste::config {
+
+template <typename Tp>
+using Matrix =
+    Eigen::Matrix<Tp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
 
 /// @brief Encapsulates configuration data.
 ///
@@ -279,6 +284,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of flags.
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
+
+  // TODO
+  Matrix<int32_t> GetInteger32Matrix(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Integers (64-bit)

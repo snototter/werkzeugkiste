@@ -424,4 +424,58 @@ TEST(ConfigCompoundTest, SetGroup) {
   EXPECT_TRUE(config.Contains("my-grp.my-str"sv));
 }
 
+TEST(ConfigCompoundTest, Matrices) {
+  auto config = wkc::LoadTOMLString(R"toml(
+    int = 3
+
+    lst-int = [1, 2, 3]
+    lst-flt = [0.0, -3.5, 1e6]
+    lst-convertible = [42, 20.0, -3.0, 0, 123.0]
+
+    empty = []
+
+    mat-int32 = [
+      [-3,  2, 17],
+      [ 0, 19, 42]
+    ]
+
+    # Not a valid 2d matrix:
+    invalid1 = [[1], 3]
+
+    # Contains a non-numeric value:
+    invalid2 = [[1, 2], [3, 'four']]
+
+    # Jagged array:
+    invalid3 = [[1, 2], [3]]
+    )toml"sv);
+
+  // Invalid queries
+  EXPECT_THROW(config.GetInteger32Matrix("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInteger32Matrix("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Matrix("invalid1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Matrix("invalid2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInteger32Matrix("invalid3"sv), wkc::TypeError);
+
+  // Retrieve lists as Nx1 matrices:
+  auto mat_int32 = config.GetInteger32Matrix("lst-int"sv);
+  EXPECT_EQ(3, mat_int32.rows());
+  EXPECT_EQ(1, mat_int32.cols());
+
+  mat_int32 = config.GetInteger32Matrix("lst-convertible"sv);
+  EXPECT_EQ(5, mat_int32.rows());
+  EXPECT_EQ(1, mat_int32.cols());
+
+  // lst-flt contains values that can't be represented by an int:
+  EXPECT_THROW(config.GetInteger32Matrix("lst-flt"sv), wkc::TypeError);
+
+  // TODO add 32bit overflow example
+
+  mat_int32 = config.GetInteger32Matrix("mat-int32"sv);
+  EXPECT_EQ(2, mat_int32.rows());
+  EXPECT_EQ(3, mat_int32.cols());
+
+  // TODO add int64
+  // TODO add double
+}
+
 // NOLINTEND
