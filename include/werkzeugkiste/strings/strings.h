@@ -9,11 +9,10 @@
 #include <string_view>
 #include <vector>
 
-/// Common string manipulation & checks. The kind you've
-/// already re-implemented/copied at least a dozen times.
+/// @brief Common string manipulation & check utilities.
 namespace werkzeugkiste::strings {
 
-/// Returns true if the string ends with the given suffix.
+/// @brief Returns true if the string ends with the given suffix.
 inline constexpr bool EndsWith(std::string_view s,
     std::string_view suffix) noexcept {
   bool result{false};
@@ -25,7 +24,7 @@ inline constexpr bool EndsWith(std::string_view s,
   return result;
 }
 
-/// Returns true if the string ends with the given character.
+/// @brief Returns true if the string ends with the given character.
 inline constexpr bool EndsWith(std::string_view s, char end) noexcept {
   bool result{false};
   if (s.length() > 0) {
@@ -34,7 +33,7 @@ inline constexpr bool EndsWith(std::string_view s, char end) noexcept {
   return result;
 }
 
-/// Returns true if the given string starts with the prefix.
+/// @brief Returns true if the given string starts with the prefix.
 inline constexpr bool StartsWith(std::string_view s,
     std::string_view prefix) noexcept {
   bool result{false};
@@ -45,27 +44,27 @@ inline constexpr bool StartsWith(std::string_view s,
   return result;
 }
 
-/// Returns true if the string starts with the given character.
+/// @brief Returns true if the string starts with the given character.
 inline constexpr bool StartsWith(std::string_view s, char first) noexcept {
   return (s.length() > 0) ? (s[0] == first) : false;
 }
 
-/// Converts the string to lower case (in-place).
+/// @brief Converts the string to lower case (in-place).
 WERKZEUGKISTE_STRINGS_EXPORT
 void ToLower(std::string& s);  // NOLINT
 
-/// Returns a copy, converted to lower case.
+/// @brief Returns a copy, converted to lower case.
 inline std::string Lower(std::string_view s) {
   std::string tmp(s);
   ToLower(tmp);
   return tmp;
 }
 
-/// Converts the string to upper case (in-place).
+/// @brief Converts the string to upper case (in-place).
 WERKZEUGKISTE_STRINGS_EXPORT
 void ToUpper(std::string& s);  // NOLINT
 
-/// Returns a copy, converted to upper case.
+/// @brief Returns a copy, converted to upper case.
 inline std::string Upper(const std::string& s) {
   std::string tmp(s);
   ToUpper(tmp);
@@ -86,20 +85,20 @@ inline std::size_t LengthDifference(std::string_view str1,
   return l1 - l2;
 }
 
-/// Returns a copy with leading & trailing
+/// @brief Returns a copy with leading & trailing
 /// white space removed.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Trim(std::string_view s);
 
-/// Returns a copy with leading white space removed.
+/// @brief Returns a copy with leading white space removed.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string LTrim(std::string_view totrim);
 
-/// Returns a copy with trailing white space removed.
+/// @brief Returns a copy with trailing white space removed.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string RTrim(std::string_view totrim);
 
-/// Returns true if the string can be safely cast into
+/// @brief Returns true if the string can be safely cast into
 /// either an `int64_t` or a `double` type.
 WERKZEUGKISTE_STRINGS_EXPORT
 bool IsNumeric(const std::string& s);
@@ -109,7 +108,7 @@ bool IsNumeric(const std::string& s);
 WERKZEUGKISTE_STRINGS_EXPORT
 bool IsInteger(std::string_view str);
 
-/// Tokenizes the string by the given delimiter.
+/// @brief Tokenizes the string by the given delimiter.
 ///
 /// Note that an empty trailing token will be skipped.
 /// For example: Split("a-b-c", '-') returns the same 3 tokens (namely,
@@ -118,7 +117,7 @@ bool IsInteger(std::string_view str);
 WERKZEUGKISTE_STRINGS_EXPORT
 std::vector<std::string> Split(std::string_view s, char delim);
 
-/// Tokenizes the string by the given delimiter.
+/// @brief Tokenizes the string by the given delimiter.
 ///
 /// Note that empty tokens will be skipped.
 /// For example: Tokenize("a-b-c", "-") returns the same 3 tokens (namely,
@@ -127,6 +126,7 @@ WERKZEUGKISTE_STRINGS_EXPORT
 std::vector<std::string_view> Tokenize(std::string_view s,
     std::string_view delim);
 
+/// @brief Concatenates all strings in the given container.
 template <typename Container,
     typename Tp = std::decay_t<decltype(*begin(std::declval<Container>()))>>
 inline std::string Concatenate(const Container& container,
@@ -144,46 +144,48 @@ inline std::string Concatenate(const Container& container,
   return concat.str();
 }
 
-/// Replaces all occurrences of the given search
+/// @brief Replaces all occurrences of the given search
 /// string `needle` within the `haystack`.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Replace(std::string_view haystack,
     std::string_view needle,
     std::string_view replacement);
 
-/// Replaces all occurrences of the given character.
+/// @brief Replaces all occurrences of the given character.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Replace(std::string_view haystack, char needle, char replacement);
 
-/// Clips the given URL string to include only the
+/// @brief Clips the given URL string to include only the
 /// protocol and domain, *i.e.* server paths & parameters
 /// will be excluded.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string ClipUrl(const std::string& url);
 
+/// @brief Splits a URL into protocol and remainder.
+///
 /// Sets `protocol` to the URL's protocol, e.g.
-/// `https://`, `rtp://`, ...
+/// `https://`, `rtp://`, etc.
 /// Returns true if the `url` string contained a
 /// protocol part.
 WERKZEUGKISTE_STRINGS_EXPORT
 bool GetUrlProtocol(const std::string& url,
-    std::string& protocol,    // NOLINT
-    std::string& remainder);  // NOLINT
+    std::string& protocol,
+    std::string& remainder);
 
-/// Returns the URL after replacing any plaintext
+/// @brief Returns the URL after replacing any plaintext
 /// authentication data by the text `<auth>`.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string ObscureUrlAuthentication(const std::string& url);
 
-/// Returns a copy where all given characters have been removed.
+/// @brief Returns a copy where all given characters have been removed.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Remove(std::string_view s, std::initializer_list<char> chars);
 
-/// Returns a copy where the given character has been removed.
+/// @brief Returns a copy where the given character has been removed.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Remove(std::string_view s, char c);
 
-/// Returns a slug representation of the string.
+/// @brief Returns a slug representation of the string.
 ///
 /// The input will be converted to lower case & trimmed.
 /// The number sign/hash will be replaced by "nr". Any
@@ -195,7 +197,7 @@ std::string Remove(std::string_view s, char c);
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Slug(std::string_view s, bool strip_dashes = false);
 
-/// Returns a string with length <= `desired_length`,
+/// @brief Returns a string with length <= `desired_length`,
 /// where the customizable `ellipsis` has been inserted
 /// to indicate that the input string has been clipped.
 ///
@@ -210,7 +212,7 @@ std::string Shorten(std::string_view s,
     int ellipsis_position = -1,
     std::string_view ellipsis = "...");
 
-/// Returns the string indented by n-times the given character.
+/// @brief Returns the string indented by n-times the given character.
 WERKZEUGKISTE_STRINGS_EXPORT
 std::string Indent(std::string_view s, std::size_t n, char character = ' ');
 

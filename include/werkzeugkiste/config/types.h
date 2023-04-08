@@ -67,7 +67,8 @@ enum class ConfigType : unsigned char {
   /// @brief A local time.
   Time,
 
-  /// @brief A date-time following RFC 3339.
+  /// @brief A date-time following <a
+  /// href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a>.
   DateTime,
 
   /// @brief A list/array of unnamed parameters.
@@ -88,17 +89,17 @@ std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
 //-----------------------------------------------------------------------------
 // Date
 
-/// @brief A local date.
+/// @brief Represents a local date.
 struct WERKZEUGKISTE_CONFIG_EXPORT date {
  public:
   /// The year.
-  uint_least16_t year{};
+  uint32_t year{};
 
   /// The month, from 1-12.
-  uint_least8_t month{};
+  uint32_t month{};
 
   /// The day, from 1-31.
-  uint_least8_t day{};
+  uint32_t day{};
 
   date() = default;
 
@@ -109,10 +110,13 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
   /// * d.m.Y
   explicit date(std::string_view str);
 
-  date(uint_least16_t y, uint_least8_t m, uint_least8_t d);
+  date(uint32_t y, uint32_t m, uint32_t d);
 
   /// Returns "YYYY-mm-dd".
   std::string ToString() const;
+
+  /// @brief Returns true if this is a valid date.
+  bool IsValid() const;
 
   bool operator==(const date &other) const;
   bool operator!=(const date &other) const;
@@ -132,34 +136,25 @@ struct WERKZEUGKISTE_CONFIG_EXPORT date {
     os << d.ToString();
     return os;
   }
-
- private:
-  // NOLINTBEGIN(*-magic-numbers)
-  static constexpr uint_least32_t Pack(const date &d) noexcept {
-    return (static_cast<uint_least32_t>(d.year) << 16U) |
-           (static_cast<uint_least32_t>(d.month) << 8U) |
-           static_cast<uint_least32_t>(d.day);
-  }
-  // NOLINTEND(*-magic-numbers)
 };
 
 //-----------------------------------------------------------------------------
 // Time
 
-/// @brief A local time.
+/// @brief Represents a local time.
 struct WERKZEUGKISTE_CONFIG_EXPORT time {
  public:
   /// The hour, from 0-23.
-  uint_least8_t hour{};
+  uint32_t hour{};
 
   /// The minute, from 0-59.
-  uint_least8_t minute{};
+  uint32_t minute{};
 
   /// The second, from 0-59.
-  uint_least8_t second{};
+  uint32_t second{};
 
   /// The nanoseconds, from 0-999999999.
-  uint_least32_t nanosecond{};
+  uint32_t nanosecond{};
 
   time() = default;
 
@@ -173,13 +168,14 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
   /// * HH:MM:SS.sssssssss (for nanoseconds)
   explicit time(std::string_view str);
 
-  time(uint_least8_t h,
-      uint_least8_t m,
-      uint_least8_t s = 0,
-      uint_least32_t ns = 0);
+  time(uint32_t h, uint32_t m, uint32_t s = 0, uint32_t ns = 0);
 
   /// @brief Returns "HH:MM:SS.sssssssss".
   std::string ToString() const;
+
+  /// @brief Returns true if this is a valid time between 00:00 and
+  ///   23:59:59.999999999.
+  bool IsValid() const;
 
   bool operator==(const time &other) const;
   bool operator!=(const time &other) const;
@@ -193,48 +189,39 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time {
     os << t.ToString();
     return os;
   }
-
- private:
-  // NOLINTBEGIN(*-magic-numbers)
-  static constexpr uint_least64_t Pack(const time &t) noexcept {
-    return (static_cast<uint_least64_t>(t.hour) << 48U) |
-           (static_cast<uint_least64_t>(t.minute) << 40U) |
-           (static_cast<uint_least64_t>(t.second) << 32U) |
-           static_cast<uint_least64_t>(t.nanosecond);
-  }
-  // NOLINTEND(*-magic-numbers)
 };
 
 //-----------------------------------------------------------------------------
 // Time zone offset
 
-// TODO doc
-// Caveats:
-// time_offset cannot represent the 'unknown local offset convention', i.e.
-// distinguishing between -00:00 and +00:00.
-// https://www.rfc-editor.org/rfc/rfc3339
-// --> this is done via the optional<time_offset> in date_time instead.
+/// @brief Represents a time zone offset.
+///
+/// Note that `time_offset` cannot represent the __unknown local offset
+/// convention__ (according to
+/// <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a>, __i.e.__ it
+///  cannot distinguish between `-00:00` and `+00:00`.
 struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
  public:
-  /// The offset from UTC+0 in minutes.
-  int_least16_t minutes{};
+  /// @brief The offset from `UTC+00:00` in minutes.
+  int32_t minutes{};
 
+  /// @brief Default c'tor.
   time_offset() = default;
 
-  explicit time_offset(int_least16_t m) : minutes{m} {}
+  explicit time_offset(int32_t m) : minutes{m} {}
 
   /// @brief Parses a string representation.
   ///
   /// Supported formats are:
-  /// * Z
-  /// * [+-]?HH:MM
+  /// * `Z`, __i.e.__ the 0 offset.
+  /// * `[+-]?HH:MM`
   explicit time_offset(std::string_view str);
 
   // TODO doc + highlight that (-1, 30) is *not* equivalent to "-01:30", but
   // instead "-00:30".
-  time_offset(int_least8_t h, int_least8_t m);
+  time_offset(int32_t h, int32_t m);
 
-  /// Returns "Z" or "+/-HH:MM".
+  /// @brief Returns `"Z"` or `"+/-HH:MM"`.
   std::string ToString() const;
 
   bool operator==(const time_offset &other) const;
@@ -254,7 +241,8 @@ struct WERKZEUGKISTE_CONFIG_EXPORT time_offset {
 //-----------------------------------------------------------------------------
 // Date-time
 
-/// @brief A date-time specification following RFC 3339.
+/// @brief A date-time specification following
+///   <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a>.
 struct date_time {
  public:
   config::date date{};
@@ -274,20 +262,23 @@ struct date_time {
   // UTC already.
   date_time UTC() const;
 
-  /// @brief Returns the representation in RFC 3339 format.
+  /// @brief Returns the representation in the <a
+  /// href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a> format.
   std::string ToString() const;
 
+  /// @brief Returns `true` if this `date_time` has no time zone offset.
   inline bool IsLocal() const { return !offset.has_value(); }
 
-  // TODO operators
   bool operator==(const date_time &other) const;
   bool operator!=(const date_time &other) const;
+  // TODO operators
   //  bool operator<(const time_offset &other) const;
   //  bool operator<=(const time_offset &other) const;
   //  bool operator>(const time_offset &other) const;
   //  bool operator>=(const time_offset &other) const;
 
-  /// @brief Prints the RFC 3339 representation out to the stream.
+  /// @brief Prints the <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC
+  /// 3339</a> representation out to the stream.
   friend std::ostream &operator<<(std::ostream &os, const date_time &t) {
     os << t.ToString();
     return os;

@@ -3,15 +3,20 @@
 
 #include <string>
 
-/// Werkzeugkiste is yet another C++ utility library: a collection
-/// of commonly used, reusable C++ snippets.
+/// @brief ``werkzeugkiste`` is yet another C++ utility library: a collection
+///   of commonly used, reusable C++ snippets.
 namespace werkzeugkiste {
 
+/// @brief The major version, *i.e.* `@PROJECT_VERSION_MAJOR@`.
 inline constexpr unsigned version_major = @PROJECT_VERSION_MAJOR@;
+
+/// @brief The minor version, *i.e.* `@PROJECT_VERSION_MINOR@`.
 inline constexpr unsigned version_minor = @PROJECT_VERSION_MINOR@;
+
+/// @brief The patch version, *i.e.* `@PROJECT_VERSION_PATCH@`.
 inline constexpr unsigned version_patch = @PROJECT_VERSION_PATCH@;
 
-/// Returns a string representation of the library version, i.e. "@PROJECT_VERSION@".
+/// @brief Returns a string representation of the library version, *i.e.* `"@PROJECT_VERSION@"`.
 inline constexpr auto Version() {
   using namespace std::literals;
   auto version = "@PROJECT_VERSION@"sv;

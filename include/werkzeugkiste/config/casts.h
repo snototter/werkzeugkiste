@@ -62,7 +62,7 @@ constexpr bool is_promotable() {
   return false;
 }
 
-/// @brief Implementation namespace.
+/// @brief Internal implementation namespace.
 namespace detail {
 
 // NOLINTNEXTLINE(*macro-usage)

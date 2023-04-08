@@ -1002,22 +1002,7 @@ std::vector<Pt> GetPoints(const toml::table &tbl, std::string_view key) {
 }
 
 template <typename Tcfg>
-std::vector<Tcfg> GetList(const toml::table &tbl, std::string_view key) {
-  if (!ContainsKey(tbl, key)) {
-    throw KeyErrorWithSimilarKeys(tbl, key);
-  }
-
-  const auto &node = tbl.at_path(key);
-  if (!node.is_array()) {
-    std::string msg{"Invalid list configuration: Parameter `"};
-    msg += key;
-    msg += "` must be a list, but is `";
-    msg += TomlTypeName(node, key);
-    msg += "`!";
-    throw TypeError{msg};
-  }
-
-  const toml::array &arr = *node.as_array();
+std::vector<Tcfg> GetList(const toml::array &arr, std::string_view key) {
   std::size_t arr_index = 0;
   std::vector<Tcfg> scalars{};
   for (auto &&value : arr) {
@@ -1040,11 +1025,132 @@ std::vector<Tcfg> GetList(const toml::table &tbl, std::string_view key) {
   }
   return scalars;
 }
+
+template <typename Tp>
+Matrix<Tp> GetMatrix(const toml::array &lst, std::string_view key) {
+  // Return empty matrix if parameter is an empty list:
+  if (lst.empty()) {
+    return Matrix<Tp>(0, 0);
+  }
+
+  // The (outer) list has at least 1 element.
+  const bool is_2d = lst[0].is_array();
+  const std::size_t num_rows{lst.size()};
+  const std::size_t num_cols{is_2d ? lst[0].as_array()->size() : 1};
+
+  Matrix<Tp> mat(num_rows, num_cols);
+  for (std::size_t idx_lst = 0; idx_lst < num_rows; ++idx_lst) {
+    const std::string row_key = FullyQualifiedArrayElementPath(idx_lst, key);
+    // Eigen requires signed indices
+    const int row = static_cast<int>(idx_lst);
+
+    if (is_2d) {
+      // To iterate over the inner/nested lists, we first need to perform
+      // the sanity checks: current "row" must be a list of the correct
+      // length.
+      if (!lst[idx_lst].is_array()) {
+        std::string msg{"Cannot extract 2D matrix, because value at `"};
+        msg += row_key + "` is not a list, but a `" +
+               TomlTypeName(lst[idx_lst], row_key) + "`!";
+        throw TypeError{msg};
+      }
+
+      const toml::array &nested_lst = *lst[idx_lst].as_array();
+      const std::size_t nested_size = nested_lst.size();
+
+      if (nested_size != num_cols) {
+        std::string msg{"Cannot extract 2D matrix of size "};
+        msg += std::to_string(num_rows) + 'x' + std::to_string(num_cols) +
+               ", because list at `" + row_key + "` contains " +
+               std::to_string(nested_size) + " elements!";
+        throw TypeError{msg};
+      }
+
+      for (std::size_t idx_nested = 0; idx_nested < num_cols; ++idx_nested) {
+        const int col = static_cast<int>(idx_nested);
+        const std::string col_key =
+            FullyQualifiedArrayElementPath(idx_nested, row_key);
+        mat(row, col) =
+            ConvertTomlToConfigType<Tp>(nested_lst[idx_nested], col_key);
+      }
+    } else {
+      mat(row, 0) = ConvertTomlToConfigType<Tp>(lst[idx_lst], row_key);
+    }
+  }
+
+  WZKLOG_CRITICAL("TODO mat int32 from {}: {:s}, RxC {}x{}, row major: {}",
+      key,
+      mat,
+      mat.rows(),
+      mat.cols(),
+      mat.IsRowMajor);
+  return mat;
+}
+
 }  // namespace detail
 
 // Abusing the PImpl idiom to hide the internally used TOML table.
 struct Configuration::Impl {
   toml::table config_root{};
+
+  const toml::table &ImmutableTable(std::string_view key) const {
+    if (key.empty()) {
+      return config_root;
+    }
+
+    if (!detail::ContainsKey(config_root, key)) {
+      throw detail::KeyErrorWithSimilarKeys(config_root, key);
+    }
+
+    const auto &node = config_root.at_path(key);
+    if (!node.is_table()) {
+      std::string msg{"Cannot lookup parameter `"};
+      msg += key;
+      msg += "` as group, because it is a `";
+      msg += detail::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+    return *node.as_table();
+  }
+
+  toml::table &MutableTable(std::string_view key) {
+    if (key.empty()) {
+      return config_root;
+    }
+
+    if (!detail::ContainsKey(config_root, key)) {
+      throw detail::KeyErrorWithSimilarKeys(config_root, key);
+    }
+
+    auto node = config_root.at_path(key);
+    if (!node.is_table()) {
+      std::string msg{"Cannot lookup parameter `"};
+      msg += key;
+      msg += "` as group, because it is a `";
+      msg += detail::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+    return *node.as_table();
+  }
+
+  const toml::array &ImmutableList(std::string_view key) const {
+    if (!detail::ContainsKey(config_root, key)) {
+      throw detail::KeyErrorWithSimilarKeys(config_root, key);
+    }
+
+    const auto &node = config_root.at_path(key);
+    if (!node.is_array()) {
+      std::string msg{"Cannot lookup parameter `"};
+      msg += key;
+      msg += "` as list, because it is a `";
+      msg += detail::TomlTypeName(node, key);
+      msg += "`!";
+      throw TypeError{msg};
+    }
+    return *node.as_array();
+  }
 };
 
 Configuration::Configuration() : pimpl_{new Impl{}} {}
@@ -1163,6 +1269,10 @@ std::size_t Configuration::Size(std::string_view key) const {
 }
 
 ConfigType Configuration::Type(std::string_view key) const {
+  if (key.empty()) {
+    return ConfigType::Group;
+  }
+
   const auto nv = pimpl_->config_root.at_path(key);
   switch (nv.type()) {
     case toml::node_type::none:
@@ -1226,8 +1336,8 @@ void Configuration::Delete(std::string_view key) {
   }
 
   const std::size_t erased = parent->erase(path.second);
+  // LCOV_EXCL_START
   if (erased == 0) {
-    // LCOV_EXCL_START
     // Should be unreachable.
     std::string msg{"Unknown error while deleting parameter `"};
     msg += key;
@@ -1235,8 +1345,8 @@ void Configuration::Delete(std::string_view key) {
         "`! Please report at"
         "https://github.com/snototter/werkzeugkiste/issues";
     throw std::runtime_error{msg};
-    // LCOV_EXCL_STOP
   }
+  // LCOV_EXCL_STOP
 }
 
 bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
@@ -1263,12 +1373,12 @@ bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
   return true;
 }
 
-std::vector<std::string> Configuration::ListParameterNames(
+std::vector<std::string> Configuration::ListParameterNames(std::string_view key,
     bool include_array_entries,
     bool recursive) const {
   using namespace std::string_view_literals;
   return detail::ListTableKeys(
-      pimpl_->config_root, ""sv, include_array_entries, recursive);
+      pimpl_->ImmutableTable(key), ""sv, include_array_entries, recursive);
 }
 
 //---------------------------------------------------------------------------
@@ -1297,7 +1407,7 @@ void Configuration::SetBoolean(std::string_view key, bool value) {
 }
 
 std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
-  return detail::GetList<bool>(pimpl_->config_root, key);
+  return detail::GetList<bool>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetBooleanList(std::string_view key,
@@ -1334,12 +1444,33 @@ void Configuration::SetInteger32(std::string_view key, int32_t value) {
 
 std::vector<int32_t> Configuration::GetInteger32List(
     std::string_view key) const {
-  return detail::GetList<int32_t>(pimpl_->config_root, key);
+  return detail::GetList<int32_t>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetInteger32List(std::string_view key,
     const std::vector<int32_t> &values) {
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
+}
+
+Matrix<int32_t> Configuration::GetInteger32Matrix(std::string_view key) const {
+  return detail::GetMatrix<int32_t>(pimpl_->ImmutableList(key), key);
+  // // TODO get pimpl->ImmutableList()
+  // // TODO check that param is a list
+  // std::size_t rows{Size(key)};
+  // // TODO check if param is a nested list
+  // std::size_t cols{1};
+
+  // // TODO if empty, return an empty matrix
+  // Matrix<Tp> mat{};
+
+  // // TODO if nested list is jagged, throw a type error
+
+  // mat.resize(rows, cols);
+  // // m(row, col)
+  // mat(0, 0) = 1;
+  // mat(0, 1) = 17;
+  // WZKLOG_CRITICAL("TODO mat int32 from {}: {:s}, RxC {}x{}, row major: {}",
+  // key, mat, mat.rows(), mat.cols(), mat.IsRowMajor); return mat;
 }
 
 //---------------------------------------------------------------------------
@@ -1370,7 +1501,7 @@ void Configuration::SetInteger64(std::string_view key, int64_t value) {
 
 std::vector<int64_t> Configuration::GetInteger64List(
     std::string_view key) const {
-  return detail::GetList<int64_t>(pimpl_->config_root, key);
+  return detail::GetList<int64_t>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetInteger64List(std::string_view key,
@@ -1425,7 +1556,7 @@ void Configuration::SetDouble(std::string_view key, double value) {
 }
 
 std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
-  return detail::GetList<double>(pimpl_->config_root, key);
+  return detail::GetList<double>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetDoubleList(std::string_view key,
@@ -1477,7 +1608,7 @@ void Configuration::SetString(std::string_view key, std::string_view value) {
 
 std::vector<std::string> Configuration::GetStringList(
     std::string_view key) const {
-  return detail::GetList<std::string>(pimpl_->config_root, key);
+  return detail::GetList<std::string>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetStringList(std::string_view key,
@@ -1511,7 +1642,7 @@ void Configuration::SetDate(std::string_view key, const date &value) {
 }
 
 std::vector<date> Configuration::GetDateList(std::string_view key) const {
-  return detail::GetList<date>(pimpl_->config_root, key);
+  return detail::GetList<date>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetDateList(std::string_view key,
@@ -1545,7 +1676,7 @@ void Configuration::SetTime(std::string_view key, const time &value) {
 }
 
 std::vector<time> Configuration::GetTimeList(std::string_view key) const {
-  return detail::GetList<time>(pimpl_->config_root, key);
+  return detail::GetList<time>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetTimeList(std::string_view key,
@@ -1581,7 +1712,7 @@ void Configuration::SetDateTime(std::string_view key, const date_time &value) {
 
 std::vector<date_time> Configuration::GetDateTimeList(
     std::string_view key) const {
-  return detail::GetList<date_time>(pimpl_->config_root, key);
+  return detail::GetList<date_time>(pimpl_->ImmutableList(key), key);
 }
 
 void Configuration::SetDateTimeList(std::string_view key,
@@ -1653,23 +1784,8 @@ void Configuration::Append(std::string_view key, const Configuration &group) {
 // Group/"Sub-Configuration"
 
 Configuration Configuration::GetGroup(std::string_view key) const {
-  if (!Contains(key)) {
-    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
-  }
-
+  const toml::table &tbl = pimpl_->ImmutableTable(key);
   Configuration cfg;
-  const auto nv = pimpl_->config_root.at_path(key);
-
-  if (!nv.is_table()) {
-    std::string msg{"Cannot retrieve `"};
-    msg += key;
-    msg += "` as a group, because it is a`";
-    msg += detail::TomlTypeName(nv, key);
-    msg += "`!";
-    throw TypeError{msg};
-  }
-
-  const toml::table &tbl = *nv.as_table();
   cfg.pimpl_->config_root = tbl;
   return cfg;
 }
@@ -1720,7 +1836,8 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
 //---------------------------------------------------------------------------
 // Convenience utilities
 
-bool Configuration::AdjustRelativePaths(std::string_view base_path,
+bool Configuration::AdjustRelativePaths(std::string_view key,
+    std::string_view base_path,
     const std::vector<std::string_view> &parameters) {
   using namespace std::string_view_literals;
   const KeyMatcher matcher{parameters};
@@ -1732,18 +1849,7 @@ bool Configuration::AdjustRelativePaths(std::string_view base_path,
   bool *rep_ptr = &replaced;
   auto func = [rep_ptr, to_replace, base_path](
                   toml::node &node, std::string_view fqn) -> void {
-    if (to_replace(fqn)) {
-      // Ensure that the provided key/pattern did not pick up a wrong node by
-      // mistake:
-      if (!node.is_string()) {
-        std::string msg{"Inside `EnsureAbsolutePaths()`, path parameter `"};
-        msg += fqn;
-        msg += "` must be a string, but is `";
-        msg += detail::TomlTypeName(node, fqn);
-        msg += "`!";
-        throw TypeError{msg};
-      }
-
+    if (node.is_string() && to_replace(fqn)) {
       // Check if the path is relative
       const std::string param_str =
           detail::ConvertTomlToConfigType<std::string>(node, fqn);
@@ -1763,11 +1869,11 @@ bool Configuration::AdjustRelativePaths(std::string_view base_path,
       }
     }
   };
-  detail::Traverse(pimpl_->config_root, ""sv, func);
+  detail::Traverse(pimpl_->MutableTable(key), ""sv, func);
   return replaced;
 }
 
-bool Configuration::ReplaceStringPlaceholders(
+bool Configuration::ReplaceStringPlaceholders(std::string_view key,
     const std::vector<std::pair<std::string_view, std::string_view>>
         &replacements) {
   // Sanity check, search string can't be empty
@@ -1802,7 +1908,7 @@ bool Configuration::ReplaceStringPlaceholders(
       }
     }
   };
-  detail::Traverse(pimpl_->config_root, ""sv, func);
+  detail::Traverse(pimpl_->MutableTable(key), ""sv, func);
   return replaced;
 }
 
@@ -1847,14 +1953,14 @@ void Configuration::LoadNestedConfiguration(std::string_view key) {
 
   const auto result = parent->insert(path.second, loaded.pimpl_->config_root);
 
+  // LCOV_EXCL_START
   if (!result.second) {
-    // LCOV_EXCL_START
     std::string msg{"Could not insert nested configuration at `"};
     msg += key;
     msg += "`!";
     throw std::runtime_error{msg};
-    // LCOV_EXCL_STOP
   }
+  // LCOV_EXCL_STOP
 }
 
 //---------------------------------------------------------------------------

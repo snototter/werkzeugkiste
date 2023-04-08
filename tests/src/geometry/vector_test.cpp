@@ -71,6 +71,8 @@ void TestIndexing(wkg::Vec<Tp, Dim> vec) {
   EXPECT_THROW(vec[-DimInt - 1], std::out_of_range);
   EXPECT_THROW(vec[-DimInt - 2], std::out_of_range);
 
+  EXPECT_THROW(vec[-3 * DimInt], std::out_of_range);
+
   // Negative indexing with unchecked access:
   for (int idx = 0; idx < DimInt; ++idx) {
     EXPECT_EQ(vec.val[DimInt - idx - 1], vec[-(idx + 1)]);
@@ -110,9 +112,22 @@ void TestVec2dGeometry(wkg::Vec<Tp, 2> vec) {
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), vec.Y()));
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.Y(), -vec.X()));
 
+  auto rotated = vec.RotateDeg(-90);
+  double x = static_cast<double>(vec.X());
+  double y = static_cast<double>(vec.Y());
+  EXPECT_TRUE(wkg::IsEpsEqual(rotated.X(), y));
+  EXPECT_TRUE(wkg::IsEpsEqual(rotated.Y(), -x));
+  // EXPECT_DOUBLE_EQ(rotated.X(), y);
+  // EXPECT_DOUBLE_EQ(rotated.Y(), -x);
+
   perpendicular = vec.PerpendicularCounterClockwise();
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.X(), -vec.Y()));
   EXPECT_TRUE(wkg::IsEpsEqual(perpendicular.Y(), vec.X()));
+
+  rotated = vec.RotateDeg(90);
+  EXPECT_TRUE(wkg::IsEpsEqual(rotated.X(), -y));
+  EXPECT_TRUE(wkg::IsEpsEqual(rotated.Y(), x));
+  // EXPECT_DOUBLE_EQ(rotated.Y(), x);  // TODO difference is too large
 
   // TODO extend (determinant, arbitrary rotation...)
 }
@@ -654,9 +669,13 @@ TEST(VectorTest, All) {
   EXPECT_THROW((wkg::Vec4d{2, 17, 3}), std::invalid_argument);
 
   wkg::Vec2d zero2d;
+  EXPECT_EQ(zero2d, wkg::Vec2d::All(0));
 
   wkg::Vec2d v2d_a{23, 17};
   VectorTestHelper(v2d_a);
+
+  auto h2d = v2d_a.Homogeneous();
+  EXPECT_EQ(wkg::Vec3d(23, 17, 1), h2d);
 
   auto unit2d = v2d_a.UnitVector();
   EXPECT_DOUBLE_EQ(1.0, unit2d.Length());
@@ -791,6 +810,99 @@ TEST(VectorTest, MinMaxCoordinates) {
   EXPECT_DOUBLE_EQ(max3.X(), 100.0);
   EXPECT_DOUBLE_EQ(max3.Y(), 0.0);
   EXPECT_DOUBLE_EQ(max3.Z(), 17.0);
+}
+
+TEST(VectorTest, Angles2d) {
+  wkg::Vec2d vec1{1, 0};
+  wkg::Vec2d vec2{1, 1};
+  EXPECT_DOUBLE_EQ(45.0, vec1.AngleDeg(vec2));
+
+  vec2 = wkg::Vec2d{0, 1};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
+
+  vec2 = wkg::Vec2d{-1, 0};
+  EXPECT_DOUBLE_EQ(180.0, vec1.AngleDeg(vec2));
+
+  // AngleDeg returns the angle in [0, +180]
+  vec2 = wkg::Vec2d{0, -1};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
+
+  // For [0, +/-180], we can use:
+  EXPECT_DOUBLE_EQ(0.0, wkg::AngleDegFromDirectionVec(vec1));
+  EXPECT_DOUBLE_EQ(-90.0, wkg::AngleDegFromDirectionVec(vec2));
+  EXPECT_DOUBLE_EQ(90.0, wkg::AngleDegFromDirectionVec(-vec2));
+
+  // Rotate vectors:
+  vec2 = vec2.RotateDeg(5);
+  EXPECT_DOUBLE_EQ(-85.0, wkg::AngleDegFromDirectionVec(vec2));
+  EXPECT_DOUBLE_EQ(85.0, vec1.AngleDeg(vec2));
+
+  EXPECT_DOUBLE_EQ(0.0, vec1.AngleDeg(vec1));
+  vec2 = vec1.RotateDeg(5);
+  double angle = vec1.AngleDeg(vec2);
+  EXPECT_TRUE(wkg::IsEpsEqual(5.0, angle)) << "Got: " << angle;
+
+  vec2 = vec1.RotateDeg(97);
+  angle = vec1.AngleDeg(vec2);
+  EXPECT_TRUE(wkg::IsEpsEqual(97.0, angle)) << "Got: " << angle;
+
+  vec2 = vec1.RotateDeg(180);
+  angle = vec1.AngleDeg(vec2);
+  EXPECT_TRUE(wkg::IsEpsEqual(180.0, angle)) << "Got: " << angle;
+
+  vec2 = vec1.RotateDeg(182);
+  angle = vec1.AngleDeg(vec2);
+  EXPECT_TRUE(wkg::IsEpsEqual(178.0, angle)) << "Got: " << angle;
+
+  vec2 = vec1.RotateDeg(265);
+  angle = vec1.AngleDeg(vec2);
+  EXPECT_TRUE(wkg::IsEpsEqual(95.0, angle)) << "Got: " << angle;
+}
+
+TEST(VectorTest, Angles2i) {
+  wkg::Vec2i vec1{10, 0};
+  EXPECT_DOUBLE_EQ(0.0, vec1.AngleDeg(vec1));
+
+  wkg::Vec2i vec2{1, 1};
+  EXPECT_DOUBLE_EQ(45.0, vec1.AngleDeg(vec2));
+
+  vec2 = wkg::Vec2i{0, 1};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
+
+  vec2 = wkg::Vec2i{-1, 0};
+  EXPECT_DOUBLE_EQ(180.0, vec1.AngleDeg(vec2));
+
+  // AngleDeg returns the angle in [0, 180]
+  vec2 = wkg::Vec2i{0, -1};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
+
+  // For [0, 360], we can use:
+  EXPECT_DOUBLE_EQ(0.0, wkg::AngleDegFromDirectionVec(vec1));
+  EXPECT_DOUBLE_EQ(-90.0, wkg::AngleDegFromDirectionVec(vec2));
+  EXPECT_DOUBLE_EQ(90.0, wkg::AngleDegFromDirectionVec(-vec2));
+
+  vec1 = wkg::Vec2i{1, 1};
+  vec2 = wkg::Vec2i{-3, 3};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
+
+  vec2 = wkg::Vec2i{3, -3};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
+
+  // TODO use AngleDegFromDirectionVec to compute the angle between two 2d vecs
+}
+
+TEST(VectorTest, Angles3d) {
+  wkg::Vec3d vec1{1, 0, 0};
+  EXPECT_DOUBLE_EQ(0.0, vec1.AngleDeg(vec1));
+
+  wkg::Vec3d vec2{1, 1, 1};
+  EXPECT_DOUBLE_EQ(54.735610317245346, vec1.AngleDeg(vec2));
+
+  vec2 = wkg::Vec3d{0, 1, 0};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
+
+  vec2 = wkg::Vec3d{0, 0, 1};
+  EXPECT_DOUBLE_EQ(90.0, vec1.AngleDeg(vec2));
 }
 
 // NOLINTEND

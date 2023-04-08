@@ -12,3 +12,7 @@ time = 08:00:00
 
 [section2]
 nested_toml = "test-valid2.toml"
+
+[section3]
+rel_path = "this/is/another/relative/path"
+abs_path = "/this/is/another/absolute/path"

@@ -5,6 +5,7 @@
 #include <werkzeugkiste/config/keymatcher.h>
 #include <werkzeugkiste/config/types.h>
 
+#include <Eigen/Core>
 #include <cmath>
 #include <initializer_list>
 #include <limits>
@@ -20,38 +21,29 @@
 /// @brief Utilities to handle configurations.
 namespace werkzeugkiste::config {
 
+template <typename Tp>
+using Matrix =
+    Eigen::Matrix<Tp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
 /// @brief Encapsulates configuration data.
 ///
-/// This class provides access to configuration data in a format compatible
-/// to TOML.
-/// Supported data types:
-/// * Booleans
-/// * Integer (internally stored as 64-bit signed integer).
-/// * Floating point numbers (internally stored as double precision values).
-/// * Strings
-/// * Dates, times and date-times following RFC 3339,
-///   https://www.rfc-editor.org/rfc/rfc3339
-/// * Lists of configuration parameters (may be of any type).
-/// * Groups, aka tables (TOML), i.e. a collection of named parameters. Similar
-///   to objects in JSON, dicts (with keys of type `str`) in Python, groups in
-///   `libconfig`.
+/// This class provides a unified access to different configuration file
+/// formats provides several additional utilities, such as replacing
+/// placeholders, adjusting file paths, *etc.*
 ///
-/// TODO clean up doc / extend by examples:
-/// * Explicit method names are preferred over a templated "Get<>".
-/// * Get("unknown-key") throws a KeyError if the parameter does not exist.
-/// * GetOptional returns an optional scalar.
-/// * Get..Or returns a default value if the parameter does not exist.
-/// * Mixed lists:
-///   - All entries numeric -> can be looked up as floating point list.
-///   - Can be created programmatically via CreateList + Append, as well as by
-///     loading a mixed list from a TOML/JSON/... string or file
-///   - Can be replaced by an empty list, but cannot be replaced by a
-///     homogeneous list.
-///   - Individual elements can be looked up and set (via their corresponding
-///     GetTYPE/SetTYPE).
-/// * Integers & floating points will be implicitly converted if the value can
-///   be represented *exactly* by the target type. For example, double(2.0)
-///   can be looked up as int, but 2.5 cannot (will raise a `TypeError`).
+/// This utitility class is intended for *"typical"*, human-friendly
+/// configuration scenarios and, similar to
+/// <a href="https://toml.io/en">TOML</a>, supports the following data types:
+/// * Basic scalars: `bool`, `int32_t`, `int64_t`, `double`, and `std::string`.
+/// * Local date, local time, and date-time (date + time + time zone offset)
+///   types.
+/// * Aggregate types, *i.e.* lists and groups of parameters.
+///
+/// The following configuration formats are supported:
+/// * <a href="https://toml.io/en">TOML</a>,
+/// * <a href="https://www.json.org/">JSON</a>,
+/// * <a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and
+/// * <a href="https://yaml.org/">YAML</a> (only for exporting).
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -96,10 +88,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully-qualified identifier of the parameter.
   bool Contains(std::string_view key) const;
 
-  /// @brief Returns the length of the list `key`.
+  /// @brief Returns the length of the parameter list/group named `key`.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
-  /// Raises a `TypeError` if the parameter is not a list.
+  /// Raises a `TypeError` if the parameter is not a list or a group.
   ///
   /// @param key Fully-qualified identifier of the parameter.
   std::size_t Size(std::string_view key) const;
@@ -137,7 +129,23 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   type. False otherwise.
   bool IsHomogeneousScalarList(std::string_view key) const;
 
-  /// @brief Returns a list of (fully-qualified) parameter names.
+  /// @brief Returns a list of (fully-qualified) parameter names below the
+  ///   given key.
+  ///
+  /// @param key Fully-qualified name of the parameter.
+  /// @param include_array_entries If true, the name of each parameter will
+  ///   be returned, *i.e.* each array element will be included. Otherwise,
+  ///   only named parameters (*e.g.* a dictionary/table within an array, such
+  ///   as `arr[3].name`) will be included.
+  /// @param recursive If true, the names of all parameters "below" this
+  ///   configuration/group will be returned. Otherwise, only the first-level
+  ///   child parameters will be returned.
+  std::vector<std::string> ListParameterNames(std::string_view key,
+      bool include_array_entries,
+      bool recursive) const;
+
+  /// @brief Returns a list of (fully-qualified) parameter names below the
+  ///   configuration root.
   ///
   /// @param include_array_entries If true, the name of each parameter will
   /// be returned, *i.e.* each array element will be included. Otherwise,
@@ -146,8 +154,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param recursive If true, the names of all parameters "below" this
   /// configuration/group will be returned. Otherwise, only the first-level
   /// child parameters will be returned.
-  std::vector<std::string> ListParameterNames(bool include_array_entries,
-      bool recursive) const;
+  inline std::vector<std::string> ListParameterNames(bool include_array_entries,
+      bool recursive) const {
+    using namespace std::string_view_literals;
+    return ListParameterNames(""sv, include_array_entries, recursive);
+  };
 
   //---------------------------------------------------------------------------
   // Booleans
@@ -274,6 +285,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
 
+  // TODO
+  Matrix<int32_t> GetInteger32Matrix(std::string_view key) const;
+
   //---------------------------------------------------------------------------
   // Integers (64-bit)
 
@@ -358,7 +372,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point2d<int64_t> GetInteger64Point2D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetInteger64Point2DOr / GetOptional...
 
   /// @brief Returns a 3D point with integer coordinates.
   ///
@@ -373,7 +388,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point3d<int64_t> GetInteger64Point3D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetInteger64Point3DOr / GetOptional...
 
   /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
   ///
@@ -488,7 +504,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point2d<double> GetDoublePoint2D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetDoublePoint2DOr / GetOptional...
 
   /// @brief Returns a 3D point with floating point coordinates.
   ///
@@ -503,7 +520,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point3d<double> GetDoublePoint3D(std::string_view key) const;
-  // TODO doc / Get...Or / GetOptional
+
+  // TODO For consistency, add: GetDoublePoint3DOr / GetOptional...
 
   /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
   ///
@@ -895,25 +913,56 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Convenience utilities
 
-  /// @brief Adjusts the given parameters to hold either an absolute file path,
-  /// or the result of "base_path / <param>" if they initially held a relative
-  /// file path.
+  /// @brief Adjusts the given parameters below the `key` group to hold either
+  ///   an absolute file path, or the result of "base_path / <param>" if they
+  ///   initially held a relative file path.
+  /// @param key Fully-qualified parameter name.
   /// @param base_path Base path to be prepended to relative file paths.
   /// @param parameters A list of parameter names / patterns. The wildcard '*'
-  /// is also supported. For example, valid names are: "my-param",
-  /// "files.video1", etc. Valid patterns would be "*path",
-  /// "some.nested.*.filename", etc.
+  ///   is also supported. For example, valid names are: "my-param",
+  ///   "files.video1", etc. Valid patterns would be "*path",
+  ///   "some.nested.*.filename", etc. Parameters that match the pattern, but
+  ///   are not strings will be skipped.
   /// @return True if any parameter has been adjusted.
-  bool AdjustRelativePaths(std::string_view base_path,
+  bool AdjustRelativePaths(std::string_view key,
+      std::string_view base_path,
       const std::vector<std::string_view> &parameters);
 
-  /// @brief Visits all string parameters and replaces any occurrence of the
-  /// given needle/replacement pairs.
+  /// @brief Adjusts the given parameters below the configuration root to hold
+  ///   either an absolute file path, or the result of "base_path / <param>" if
+  ///   they initially held a relative file path.
+  /// @param base_path Base path to be prepended to relative file paths.
+  /// @param parameters A list of parameter names / patterns. The wildcard '*'
+  ///   is also supported. For example, valid names are: "my-param",
+  ///   "files.video1", etc. Valid patterns would be "*path",
+  ///   "some.nested.*.filename", etc. Parameters that match the pattern, but
+  ///   are not strings will be skipped.
+  /// @return True if any parameter has been adjusted.
+  inline bool AdjustRelativePaths(std::string_view base_path,
+      const std::vector<std::string_view> &parameters) {
+    using namespace std::string_view_literals;
+    return AdjustRelativePaths(""sv, base_path, parameters);
+  }
+
+  /// @brief Visits all string parameters below the given `key` group and
+  ///   replaces any occurrence of the given needle/replacement pairs.
+  /// @param key Fully-qualified parameter name.
   /// @param replacements List of `<search, replacement>` pairs.
   /// @return True if any placeholder has actually been replaced.
-  bool ReplaceStringPlaceholders(
+  bool ReplaceStringPlaceholders(std::string_view key,
       const std::vector<std::pair<std::string_view, std::string_view>>
           &replacements);
+
+  /// @brief Visits all string parameters below the root configuration and
+  ///   replaces any occurrence of the given needle/replacement pairs.
+  /// @param replacements List of `<search, replacement>` pairs.
+  /// @return True if any placeholder has actually been replaced.
+  inline bool ReplaceStringPlaceholders(
+      const std::vector<std::pair<std::string_view, std::string_view>>
+          &replacements) {
+    using namespace std::string_view_literals;
+    return ReplaceStringPlaceholders(""sv, replacements);
+  }
 
   /// @brief Loads a nested configuration.
   ///
