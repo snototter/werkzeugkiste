@@ -477,6 +477,28 @@
               const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
             </dt>
             <dd>Inserts (or replaces) the given configuration group.</dd>
+            <dt id="a61566032cc997e80d2d6729cf57dc8ab">
+              <span class="m-doc-wrap-bumper">auto <a href="#a61566032cc997e80d2d6729cf57dc8ab" class="m-doc-self">GetMatrixUInt8</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#a3c2e43ca8a59877dfcaca608559618e1" class="m-doc">Matrix</a>&lt;uint8_t&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="af51f6b07518ddd8b95743c848fc85a49">
+              <span class="m-doc-wrap-bumper">auto <a href="#af51f6b07518ddd8b95743c848fc85a49" class="m-doc-self">GetMatrixInt32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#a3c2e43ca8a59877dfcaca608559618e1" class="m-doc">Matrix</a>&lt;int32_t&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="aec581deda20e88e7d8e73584a3ed000a">
+              <span class="m-doc-wrap-bumper">auto <a href="#aec581deda20e88e7d8e73584a3ed000a" class="m-doc-self">GetMatrixInt64</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#a3c2e43ca8a59877dfcaca608559618e1" class="m-doc">Matrix</a>&lt;int64_t&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a02e0a1ee7a5d4a7fcf2c7340d555e6ed">
+              <span class="m-doc-wrap-bumper">auto <a href="#a02e0a1ee7a5d4a7fcf2c7340d555e6ed" class="m-doc-self">GetMatrixDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#a3c2e43ca8a59877dfcaca608559618e1" class="m-doc">Matrix</a>&lt;double&gt;</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Derived, typename TpMat = typename Derived::Scalar&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a href="#acfe1eb644604e72aa979352c3cdb1d61" class="m-doc">SetMatrix</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const Eigen::MatrixBase&lt;Derived&gt;&amp; mat)</span>
+            </dt>
+            <dd>Stores a matrix as list.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a601337e82b1a37da15e1c5624989b360" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view key,
               std::string_view base_path,
@@ -2127,6 +2149,45 @@
               </tbody>
             </table>
 <p>If the <code>key</code> already exists, it must be a group. Otherwise, the parameter will be newly created, along with all &quot;parents&quot; in the fully-qualified name (which defines a &quot;path&quot; through the configuration table/tree).</p>
+          </div></section>
+          <section class="m-doc-details" id="acfe1eb644604e72aa979352c3cdb1d61"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Derived, typename TpMat = typename Derived::Scalar&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#acfe1eb644604e72aa979352c3cdb1d61" class="m-doc-self">SetMatrix</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const Eigen::MatrixBase&lt;Derived&gt;&amp; mat)</span></span>
+            </h3>
+            <p>Stores a matrix as list.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Derived</td>
+                  <td>Eigen matrix type.</td>
+                </tr>
+                <tr>
+                  <td>TpMat</td>
+                  <td>The corresponding scalar type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>mat</td>
+                  <td>The <code>Eigen::Matrix</code> or <code>Eigen::Vector</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Matrices will be stored as lists of either 64-bit integers or double precision floating point numbers, depending on the <code>Scalar</code> type of the matrix. Nx1 or 1xN matrices (i.e. column or row vectors) will be stored as a single list. RxC matrices will be stored as nested lists.</p><p>Any dense matrix type is supported. To extend this functionality for other types, refer to: <a href="https://eigen.tuxfamily.org/dox/TopicFunctionTakingEigenTypes.html">https:/<wbr />/<wbr />eigen.tuxfamily.org/<wbr />dox/<wbr />TopicFunctionTakingEigenTypes.html</a></p>
           </div></section>
           <section class="m-doc-details" id="a601337e82b1a37da15e1c5624989b360"><div>
             <h3>
