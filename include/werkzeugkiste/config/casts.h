@@ -1,7 +1,7 @@
 #ifndef WERKZEUGKISTE_CONFIG_CASTS_H
 #define WERKZEUGKISTE_CONFIG_CASTS_H
 
-#include <werkzeugkiste/config/configuration.h>
+#include <werkzeugkiste/config/types.h>
 
 #include <cmath>
 #include <limits>

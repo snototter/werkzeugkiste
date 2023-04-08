@@ -1,6 +1,7 @@
 #ifndef WERKZEUGKISTE_CONFIG_CONFIGURATION_H
 #define WERKZEUGKISTE_CONFIG_CONFIGURATION_H
 
+#include <werkzeugkiste/config/casts.h>
 #include <werkzeugkiste/config/config_export.h>
 #include <werkzeugkiste/config/keymatcher.h>
 #include <werkzeugkiste/config/types.h>
@@ -285,9 +286,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetInteger32List(std::string_view key,
       const std::vector<int32_t> &values);
 
-  // TODO
-  Matrix<int32_t> GetInteger32Matrix(std::string_view key) const;
-
   //---------------------------------------------------------------------------
   // Integers (64-bit)
 
@@ -372,6 +370,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully-qualified parameter name
   point2d<int64_t> GetInteger64Point2D(std::string_view key) const;
+  // TODO replace by vec2i
 
   // TODO For consistency, add: GetInteger64Point2DOr / GetOptional...
 
@@ -911,6 +910,62 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetGroup(std::string_view key, const Configuration &group);
 
   //---------------------------------------------------------------------------
+  // Matrices
+
+  Matrix<uint8_t> GetMatrixUInt8(std::string_view key) const;
+  Matrix<int32_t> GetMatrixInt32(std::string_view key) const;
+  Matrix<int64_t> GetMatrixInt64(std::string_view key) const;
+  // Matrix<float> GetMatrixFloat(std::string_view key) const;
+  Matrix<double> GetMatrixDouble(std::string_view key) const;
+
+  /// @brief Stores a matrix as list.
+  ///
+  /// Matrices will be stored as lists of either 64-bit integers or
+  /// double precision floating point numbers, depending on the `Scalar`
+  /// type of the matrix.
+  /// Nx1 or 1xN matrices (i.e. column or row vectors) will be stored as a
+  /// single list. RxC matrices will be stored as nested lists.
+  ///
+  /// Any dense matrix type is supported.
+  /// To extend this functionality for other types, refer to:
+  /// https://eigen.tuxfamily.org/dox/TopicFunctionTakingEigenTypes.html
+  ///
+  /// @tparam Derived Eigen matrix type.
+  /// @tparam TpMat The corresponding scalar type.
+  /// @param key Fully-qualified parameter name.
+  /// @param mat The `Eigen::Matrix` or `Eigen::Vector`.
+  template <typename Derived, typename TpMat = typename Derived::Scalar>
+  void SetMatrix(std::string_view key, const Eigen::MatrixBase<Derived> &mat) {
+    static_assert(std::is_arithmetic_v<TpMat>,
+        "Only matrices of arithmetic types are supported!");
+    using TpCfg =
+        std::conditional_t<std::is_integral_v<TpMat>, int64_t, double>;
+
+    if (EnsureTypeIfExists(key, ConfigType::List)) {
+      ClearList(key);
+    } else {
+      CreateList(key);
+    }
+
+    // Matrix will be flattened if it holds only 1 row or column
+    const bool single_list = (mat.rows() == 1) || (mat.cols() == 1);
+
+    for (int row = 0; row < mat.rows(); ++row) {
+      const std::string nested_key =
+          single_list ? std::string{key}
+                      : ListElementKey(key, static_cast<std::size_t>(row));
+      if (!single_list) {
+        AppendList(key);
+      }
+
+      for (int col = 0; col < mat.cols(); ++col) {
+        Append(nested_key,
+            checked_numcast<TpCfg, TpMat, TypeError>(mat.coeff(row, col)));
+      }
+    }
+  }
+
+  //---------------------------------------------------------------------------
   // Convenience utilities
 
   /// @brief Adjusts the given parameters below the `key` group to hold either
@@ -1010,6 +1065,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// Pointer to internal implementation.
   std::unique_ptr<Impl> pimpl_;
+
+  /// @brief Raises a `TypeError` if the parameter exists, but is of a
+  ///   different type.
+  /// @param key Fully-qualified parameter name.
+  /// @param expected The expected type of the parameter.
+  /// @return True if the parameter exists, false otherwise.
+  bool EnsureTypeIfExists(std::string_view key, ConfigType expected) const;
+
+  /// @brief Returns the fully-qualified parameter name for the given parameter
+  ///   name and element index.
+  /// @param key The parameter name of the list.
+  /// @param index The 0-based index of the list element.
+  /// @return The fully-qualified name, *i.e.* `key[index]`.
+  static std::string ListElementKey(std::string_view key, std::size_t index);
 };
 
 /// @brief Loads a configuration file.

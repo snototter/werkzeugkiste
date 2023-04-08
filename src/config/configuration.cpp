@@ -66,9 +66,9 @@ inline std::string FullyQualifiedPath(const toml::key &key,
 /// Returns the "fully-qualified TOML path" for the given array index.
 /// For example, `path = section1.arr` & `array_index = 3` results
 /// in `section1.arr[3]`.
-inline std::string FullyQualifiedArrayElementPath(std::size_t array_index,
-    std::string_view path) {
-  std::string fqn{path};
+inline std::string FullyQualifiedArrayElementPath(std::string_view key,
+    std::size_t array_index) {
+  std::string fqn{key};
   fqn += '[';
   fqn += std::to_string(array_index);
   fqn += ']';
@@ -91,7 +91,7 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
   std::vector<std::string> keys;
   std::size_t array_index = 0;
   for (auto &&value : arr) {
-    const std::string fqn = FullyQualifiedArrayElementPath(array_index, path);
+    const std::string fqn = FullyQualifiedArrayElementPath(path, array_index);
     if (include_array_entries) {
       keys.push_back(fqn);
     }
@@ -224,7 +224,7 @@ void Traverse(toml::node &node,
     toml::array &arr = *node.as_array();
     std::size_t index = 0;
     for (auto &value : arr) {
-      const std::string fqn = FullyQualifiedArrayElementPath(index, path);
+      const std::string fqn = FullyQualifiedArrayElementPath(path, index);
       visit_func(value, fqn);
 
       if (value.is_array() || value.is_table()) {
@@ -918,7 +918,7 @@ inline Pt ConvertArrayToPoint(const toml::array &arr, std::string_view key) {
 
   std::array<CoordType, Pt::ndim> values{};
   for (std::size_t idx = 0; idx < Pt::ndim; ++idx) {
-    const auto fqn = FullyQualifiedArrayElementPath(idx, key);
+    const auto fqn = FullyQualifiedArrayElementPath(key, idx);
     values[idx] = ConvertTomlToConfigType<CoordType>(arr[idx], fqn);
   }
 
@@ -981,7 +981,7 @@ std::vector<Pt> GetPoints(const toml::table &tbl, std::string_view key) {
   std::size_t arr_index = 0;
   std::vector<Pt> points;
   for (auto &&value : arr) {
-    const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
+    const auto fqn = FullyQualifiedArrayElementPath(key, arr_index);
     if (value.is_array()) {
       const auto &pt = *value.as_array();
       points.push_back(ConvertArrayToPoint<Pt>(pt, fqn));
@@ -1006,7 +1006,7 @@ std::vector<Tcfg> GetList(const toml::array &arr, std::string_view key) {
   std::size_t arr_index = 0;
   std::vector<Tcfg> scalars{};
   for (auto &&value : arr) {
-    const auto fqn = FullyQualifiedArrayElementPath(arr_index, key);
+    const auto fqn = FullyQualifiedArrayElementPath(key, arr_index);
     if (value.is_value()) {
       scalars.push_back(ConvertTomlToConfigType<Tcfg>(value, fqn));
     } else {
@@ -1040,7 +1040,7 @@ Matrix<Tp> GetMatrix(const toml::array &lst, std::string_view key) {
 
   Matrix<Tp> mat(num_rows, num_cols);
   for (std::size_t idx_lst = 0; idx_lst < num_rows; ++idx_lst) {
-    const std::string row_key = FullyQualifiedArrayElementPath(idx_lst, key);
+    const std::string row_key = FullyQualifiedArrayElementPath(key, idx_lst);
     // Eigen requires signed indices
     const int row = static_cast<int>(idx_lst);
 
@@ -1069,7 +1069,7 @@ Matrix<Tp> GetMatrix(const toml::array &lst, std::string_view key) {
       for (std::size_t idx_nested = 0; idx_nested < num_cols; ++idx_nested) {
         const int col = static_cast<int>(idx_nested);
         const std::string col_key =
-            FullyQualifiedArrayElementPath(idx_nested, row_key);
+            FullyQualifiedArrayElementPath(row_key, idx_nested);
         mat(row, col) =
             ConvertTomlToConfigType<Tp>(nested_lst[idx_nested], col_key);
       }
@@ -1078,12 +1078,6 @@ Matrix<Tp> GetMatrix(const toml::array &lst, std::string_view key) {
     }
   }
 
-  WZKLOG_CRITICAL("TODO mat int32 from {}: {:s}, RxC {}x{}, row major: {}",
-      key,
-      mat,
-      mat.rows(),
-      mat.cols(),
-      mat.IsRowMajor);
   return mat;
 }
 
@@ -1381,6 +1375,29 @@ std::vector<std::string> Configuration::ListParameterNames(std::string_view key,
       pimpl_->ImmutableTable(key), ""sv, include_array_entries, recursive);
 }
 
+bool Configuration::EnsureTypeIfExists(std::string_view key,
+    ConfigType expected) const {
+  if (!Contains(key)) {
+    return false;
+  }
+
+  const ConfigType actual_type = Type(key);
+  if (actual_type == expected) {
+    return true;
+  }
+
+  std::string msg{"Invalid type of existing parameter `"};
+  msg += key;
+  msg += "`: Expected `" + ConfigTypeToString(expected) +
+         "`, but parameter is `" + ConfigTypeToString(actual_type) + "`!";
+  throw TypeError{msg};
+}
+
+std::string Configuration::ListElementKey(std::string_view key,
+    std::size_t index) {
+  return detail::FullyQualifiedArrayElementPath(key, index);
+}
+
 //---------------------------------------------------------------------------
 // Boolean
 
@@ -1450,27 +1467,6 @@ std::vector<int32_t> Configuration::GetInteger32List(
 void Configuration::SetInteger32List(std::string_view key,
     const std::vector<int32_t> &values) {
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
-}
-
-Matrix<int32_t> Configuration::GetInteger32Matrix(std::string_view key) const {
-  return detail::GetMatrix<int32_t>(pimpl_->ImmutableList(key), key);
-  // // TODO get pimpl->ImmutableList()
-  // // TODO check that param is a list
-  // std::size_t rows{Size(key)};
-  // // TODO check if param is a nested list
-  // std::size_t cols{1};
-
-  // // TODO if empty, return an empty matrix
-  // Matrix<Tp> mat{};
-
-  // // TODO if nested list is jagged, throw a type error
-
-  // mat.resize(rows, cols);
-  // // m(row, col)
-  // mat(0, 0) = 1;
-  // mat(0, 1) = 17;
-  // WZKLOG_CRITICAL("TODO mat int32 from {}: {:s}, RxC {}x{}, row major: {}",
-  // key, mat, mat.rows(), mat.cols(), mat.IsRowMajor); return mat;
 }
 
 //---------------------------------------------------------------------------
@@ -1831,6 +1827,25 @@ void Configuration::SetGroup(std::string_view key, const Configuration &group) {
       // LCOV_EXCL_STOP
     }
   }
+}
+
+//---------------------------------------------------------------------------
+// Matrices
+
+Matrix<uint8_t> Configuration::GetMatrixUInt8(std::string_view key) const {
+  return detail::GetMatrix<uint8_t>(pimpl_->ImmutableList(key), key);
+}
+
+Matrix<int32_t> Configuration::GetMatrixInt32(std::string_view key) const {
+  return detail::GetMatrix<int32_t>(pimpl_->ImmutableList(key), key);
+}
+
+Matrix<int64_t> Configuration::GetMatrixInt64(std::string_view key) const {
+  return detail::GetMatrix<int64_t>(pimpl_->ImmutableList(key), key);
+}
+
+Matrix<double> Configuration::GetMatrixDouble(std::string_view key) const {
+  return detail::GetMatrix<double>(pimpl_->ImmutableList(key), key);
 }
 
 //---------------------------------------------------------------------------
