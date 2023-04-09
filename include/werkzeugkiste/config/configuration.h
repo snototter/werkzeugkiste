@@ -40,7 +40,6 @@
 ///     ]
 ///     )toml");
 ///
-///
 /// // Basic parameter queries:
 /// using namespace std::string_view_literals;
 /// double val_dbl = cfg.GetDouble("my-double"sv);
@@ -49,22 +48,23 @@
 /// wkc::date day = cfg.GetDate("day"sv);
 ///
 /// // If a parameter does not exist:
-/// cfg.GetString("unknown"sv);                 // Throws a wkc::KeyError
-/// cfg.GetStringOr("unknown"sv, "fallback"sv); // Returns "fallback"
-/// cfg.GetOptionalString("unknown"sv);         // Returns std::nullopt
+/// cfg.GetString("unknown"sv);                 // Throws a wkc::KeyError.
+/// cfg.GetStringOr("unknown"sv, "fallback"sv); // Returns "fallback".
+/// cfg.GetOptionalString("unknown"sv);         // Returns std::nullopt.
 ///
 /// // A wkc::TypeError will be thrown if the parameter is of a different type:
 /// cfg.GetString("my-long"sv);
 ///
 /// // Type conversion between numeric types is supported if the parameter
 /// // can be exactly represented by the requested type:
-/// val_dbl = cfg.GetDouble("my-long"sv);
-/// // The following will throw a wkc::TypeError:
+/// val_dbl = cfg.GetDouble("my-long"sv);  // Implicit conversion.
 /// cfg.GetInt64("my-double"sv); // Value can't be represented by an integer.
 /// cfg.GetInt32("my-long"sv);   // Value exceeds int32 range.
 ///
 /// // Usage convenience for geometric types:
-/// Eigen::MatrixXd intrinsics = cfg.GetMatrixDouble("camera-matrix"sv);
+/// wkc::Matrix<double> intrinsics = cfg.GetMatrixDouble("camera-matrix"sv);
+/// // Note that matrices will use row-major storage order.
+///
 /// // TODO not yet available
 /// // namespace wkg = werkzeugkiste::geometry;
 /// // std::vector<wkg::Vec2i> polyline = cfg.GetVec2iList("poly2"sv);
