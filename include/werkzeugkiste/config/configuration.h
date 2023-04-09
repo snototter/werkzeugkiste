@@ -19,7 +19,58 @@
 #include <utility>
 #include <vector>
 
-/// @brief Utilities to handle configurations.
+/// @brief Utilities to handle configurations in a unified manner.
+///
+/// @code {.cpp}
+/// #include <werkzeugkiste/config/configuration.h>
+/// namespace wkc = werkzeugkiste::config;
+/// // Load a configuration from a file ...
+/// wkc::Configuration cfg = wkc::LoadTOMLFile("path/to/config.toml");
+/// // ... or a string:
+/// wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+///     my-double = 42.17
+///     my-long = 2147483648
+///     labels = ["lbl1", "lbl2"]
+///     day = 2023-10-09
+///
+///     camera-matrix = [
+///       [800,   0, 400],
+///       [  0, 750, 300],
+///       [  0,   0,   1]
+///     ]
+///     )toml");
+///
+///
+/// // Basic parameter queries:
+/// using namespace std::string_view_literals;
+/// double val_dbl = cfg.GetDouble("my-double"sv);
+/// int64_t val_long = cfg.GetInt64("my-long"sv);
+/// std::vector<std::string> strings = cfg.GetStringList("labels"sv);
+/// wkc::date day = cfg.GetDate("day"sv);
+///
+/// // If a parameter does not exist:
+/// cfg.GetString("unknown"sv);                 // Throws a wkc::KeyError
+/// cfg.GetStringOr("unknown"sv, "fallback"sv); // Returns "fallback"
+/// cfg.GetOptionalString("unknown"sv);         // Returns std::nullopt
+///
+/// // A wkc::TypeError will be thrown if the parameter is of a different type:
+/// cfg.GetString("my-long"sv);
+///
+/// // Type conversion between numeric types is supported if the parameter
+/// // can be exactly represented by the requested type:
+/// val_dbl = cfg.GetDouble("my-long"sv);
+/// // The following will throw a wkc::TypeError:
+/// cfg.GetInt64("my-double"sv); // Value can't be represented by an integer.
+/// cfg.GetInt32("my-long"sv);   // Value exceeds int32 range.
+///
+/// // Usage convenience for geometric types:
+/// Eigen::MatrixXd intrinsics = cfg.GetMatrixDouble("camera-matrix"sv);
+/// // TODO not yet available
+/// // namespace wkg = werkzeugkiste::geometry;
+/// // std::vector<wkg::Vec2i> polyline = cfg.GetVec2iList("poly2"sv);
+/// // Type conversion
+/// // std::vector<wkg::Vec2d> polyline = cfg.GetVec2dList("poly2"sv);
+/// @endcode
 namespace werkzeugkiste::config {
 
 template <typename Tp>

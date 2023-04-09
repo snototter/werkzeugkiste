@@ -469,7 +469,7 @@ TEST(ConfigCompoundTest, GetMatrices) {
   EXPECT_THROW(config.GetMatrixUInt8("invalid2"sv), wkc::TypeError);
   EXPECT_THROW(config.GetMatrixUInt8("invalid3"sv), wkc::TypeError);
 
-  auto mat_u8 = config.GetMatrixUInt8("empty"sv);
+  wkc::Matrix<uint8_t> mat_u8 = config.GetMatrixUInt8("empty"sv);
   EXPECT_EQ(0, mat_u8.size());
 
   mat_u8 = config.GetMatrixUInt8("lst-int"sv);
@@ -504,7 +504,7 @@ TEST(ConfigCompoundTest, GetMatrices) {
   EXPECT_THROW(config.GetMatrixInt32("invalid3"sv), wkc::TypeError);
 
   // Retrieve lists as Nx1 matrices:
-  auto mat_int32 = config.GetMatrixInt32("empty"sv);
+  wkc::Matrix<int32_t> mat_int32 = config.GetMatrixInt32("empty"sv);
   EXPECT_EQ(0, mat_int32.size());
 
   mat_int32 = config.GetMatrixInt32("lst-int"sv);
@@ -546,7 +546,7 @@ TEST(ConfigCompoundTest, GetMatrices) {
   EXPECT_THROW(config.GetMatrixInt64("invalid3"sv), wkc::TypeError);
 
   // Retrieve lists as Nx1 matrices:
-  auto mat_int64 = config.GetMatrixInt64("empty"sv);
+  wkc::Matrix<int64_t> mat_int64 = config.GetMatrixInt64("empty"sv);
   EXPECT_EQ(0, mat_int64.size());
 
   mat_int64 = config.GetMatrixInt64("lst-int"sv);
@@ -591,7 +591,7 @@ TEST(ConfigCompoundTest, GetMatrices) {
   EXPECT_THROW(config.GetMatrixDouble("invalid3"sv), wkc::TypeError);
 
   // Retrieve lists as Nx1 matrices:
-  auto mat_dbl = config.GetMatrixDouble("empty"sv);
+  wkc::Matrix<double> mat_dbl = config.GetMatrixDouble("empty"sv);
   EXPECT_EQ(0, mat_dbl.size());
 
   mat_dbl = config.GetMatrixDouble("lst-int"sv);

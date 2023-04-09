@@ -154,7 +154,7 @@ inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat) {
 /// `[vec0.X(), vec0.Y(), ..., 1]`.
 ///
 /// Example:
-/// @code
+/// @code {.cpp}
 /// wkg::Vec2d v1{17, 42}, v2{9, -3}, v3{0, 0.01};
 /// wkg::Matrix<double, 4, 2> M;
 /// M << 1, 2, 3, 4, 5, 6, 7, 8;
@@ -211,7 +211,7 @@ TransformToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
 /// be implicitly added to each vector, *i.e.* [vec0.x(), vec0.y(), ..., 1].
 ///
 /// Example:
-/// @code
+/// @code {.cpp}
 /// wkg::Vec3d v1{17, 42, 1}, v2{9, -3, 1};
 /// wkg::Matrix<double, 3, 3> H;
 /// H << 1, 2, 3,
