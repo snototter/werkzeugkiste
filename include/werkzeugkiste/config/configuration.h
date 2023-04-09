@@ -29,12 +29,13 @@ using Matrix =
 /// @brief Encapsulates configuration data.
 ///
 /// This class provides a unified access to different configuration file
-/// formats provides several additional utilities, such as replacing
-/// placeholders, adjusting file paths, *etc.*
+/// formats, as well as several convenience utilities, such as replacing
+/// string placeholders, adjusting file paths, *etc.*
 ///
 /// This utitility class is intended for *"typical"*, human-friendly
 /// configuration scenarios and, similar to
-/// <a href="https://toml.io/en">TOML</a>, supports the following data types:
+/// <a href="https://toml.io/en">TOML</a>, supports the following parameter
+/// types:
 /// * Basic scalars: `bool`, `int32_t`, `int64_t`, `double`, and `std::string`.
 /// * Local date, local time, and date-time (date + time + time zone offset)
 ///   types.
@@ -45,6 +46,12 @@ using Matrix =
 /// * <a href="https://www.json.org/">JSON</a>,
 /// * <a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and
 /// * <a href="https://yaml.org/">YAML</a> (only for exporting).
+///
+/// For usage convenience, this class support conversion from the
+/// TOML-compatible parameter types to:
+/// * <a href="https://eigen.tuxfamily.org/">`Eigen` matrices</a> (1- and
+///   2-dimensional) can be loaded from (nested) numeric lists.
+/// * Basic geometry types defined within `werkzeugkiste::geometry`.
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.

@@ -200,21 +200,27 @@ TransformToVec(const Matrix<typename V::value_type, Rows, Columns>& mat,
   return EigenColToVec<typename V::value_type, Rows, 1>(transformed, 0);
 }
 
-/// @brief Computes `mat * [vec0, vec1, ...]`, divides the result by the
-/// homogeneous coordinate (*i.e.* last row) and returns a tuple of vectors.
+/// @brief Returns the (normalized) projection result.
+///
+/// Computes `mat * [vec0, vec1, ...]`, divides the result by the
+/// homogeneous coordinate (__i.e.__ last row) and strips the homogeneous
+/// coordinate.
 ///
 /// The vector dimensionality must be either equal to or 1 less than the number
 /// of projection matrix columns. If not equal, a homogeneous coordinate will
 /// be implicitly added to each vector, *i.e.* [vec0.x(), vec0.y(), ..., 1].
 ///
 /// Example:
-///   >>> wkg::Vec3d v1{17, 42, 1}, v2{9, -3, 1};
-///   >>> wkg::Matrix<double, 3, 3> H;
-///   >>> H << 1, 2, 3,
-///   >>>      4, 5, 6,
-///   >>>      7, 8, 9;
-///   >>> wkg::Vec2d out1, out2;
-///   >>> std::tie(out1, out2) = ProjectToVecs(H, v1, v2);
+/// @code
+/// wkg::Vec3d v1{17, 42, 1}, v2{9, -3, 1};
+/// wkg::Matrix<double, 3, 3> H;
+/// H << 1, 2, 3,
+///      4, 5, 6,
+///      7, 8, 9;
+/// wkg::Vec2d out1, out2;
+/// std::tie(out1, out2) = ProjectToVecs(H, v1, v2);
+/// @endcode
+/// @return A tuple of vectors.
 template <typename V, typename... Vs, int Rows, int Columns>
 inline std::tuple<
     Vec<typename V::value_type, static_cast<typename V::index_type>(Rows - 1)>,
