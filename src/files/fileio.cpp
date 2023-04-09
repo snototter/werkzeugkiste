@@ -5,8 +5,7 @@
 #include <fstream>
 #include <sstream>
 
-namespace werkzeugkiste {
-namespace files {
+namespace werkzeugkiste::files {
 
 std::vector<std::string> ReadAsciiFile(std::string_view filename) {
   std::ifstream ifs(std::string(filename), std::ios::in);
@@ -77,5 +76,4 @@ AsciiFileIterator& AsciiFileIterator::operator++() {
   return *this;
 }
 
-}  // namespace files
-}  // namespace werkzeugkiste
+}  // namespace werkzeugkiste::files

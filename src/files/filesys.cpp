@@ -48,11 +48,7 @@ bool IsDir(const std::string& path) {
     return false;
   }
 
-  if (info.st_mode & S_IFDIR) {
-    return true;
-  }
-
-  return false;
+  return ((info.st_mode & S_IFDIR) != 0);
 }
 
 std::optional<std::string> Basename(std::string_view path) {
@@ -131,9 +127,9 @@ std::string Parent(std::string_view path) {
 std::string DirName(const std::string& path) {
   if (Exists(path) && IsDir(path)) {
     return path;
-  } else {
-    return Parent(path);
   }
+
+  return Parent(path);
 }
 
 bool IsAbsolute(std::string_view path) {

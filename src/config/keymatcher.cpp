@@ -126,11 +126,8 @@ bool IsValidKey(std::string_view key, bool allow_dots) noexcept {
         return (std::isalnum(c) != 0) || (c == '-') || (c == '_') ||
                (allow_dots ? (c == '.') : false);
       });
-  if (pos != key.end()) {
-    return false;
-  }
 
-  return true;
+  return (pos == key.end());
 }
 
 }  // namespace werkzeugkiste::config
