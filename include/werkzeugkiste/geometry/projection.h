@@ -148,23 +148,24 @@ inline auto EigenMatToVecTuple(const Matrix<Tp, Rows, Columns>& vec_mat) {
 /// @brief Computes `mat * [vec0, vec1, ...]` and returns the result as a tuple
 /// of vectors.
 ///
-/// The vector dimensionality must be either equal to or 1 less than the number
-/// of projection matrix columns. If not equal, a homogeneous coordinate will
-/// be implicitly added to each vector, *i.e.* [vec0.x(), vec0.y(), ..., 1].
+/// The vector dimensionality `D` must be either equal to or 1 less than the
+/// number of projection matrix columns `C`. If `D == C - 1`, a homogeneous
+/// coordinate will be implicitly added to each vector, *i.e.*
+/// `[vec0.X(), vec0.Y(), ..., 1]`.
 ///
 /// Example:
-///   >>> wkg::Vec2d v1{17, 42}, v2{9, -3}, v3{0, 0.01};
-///   >>> wkg::Matrix<double, 4, 2> M;
-///   >>> M << 1, 2, 3, 4, 5, 6, 7, 8;
-///   >>> wkg::Vec4d a, b, c;
-///   >>> std::tie(out1, out2, out3) = TransformToVecs(
-///   >>>   T_matrix, in1, in2, in3);
-///   >>> // Or with padded homogeneous coordinate:
-///   >>> wkg::Matrix<double, 4, 3> M;
-///   >>> M << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
-///   >>> wkg::Vec4d a, b, c;
-///   >>> std::tie(out1, out2, out3) = TransformToVecs(
-///   >>>   T_matrix, in1, in2, in3);
+/// @code
+/// wkg::Vec2d v1{17, 42}, v2{9, -3}, v3{0, 0.01};
+/// wkg::Matrix<double, 4, 2> M;
+/// M << 1, 2, 3, 4, 5, 6, 7, 8;
+/// wkg::Vec4d a, b, c;
+/// std::tie(out1, out2, out3) = TransformToVecs(T_matrix, in1, in2, in3);
+/// // Or with padded homogeneous coordinate:
+/// wkg::Matrix<double, 4, 3> M;
+/// M << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
+/// wkg::Vec4d a, b, c;
+/// std::tie(out1, out2, out3) = TransformToVecs(T_matrix, in1, in2, in3);
+/// @endcode
 template <typename V, typename... Vs, int Rows, int Columns>
 inline std::tuple<Vec<typename V::value_type, static_cast<std::size_t>(Rows)>,
     Vec<typename Vs::value_type, static_cast<std::size_t>(Rows)>...>
