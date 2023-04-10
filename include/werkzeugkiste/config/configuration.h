@@ -219,6 +219,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
     return ListParameterNames(""sv, include_array_entries, recursive);
   };
 
+  /// @brief Raises a `TypeError` if the parameter exists, but is of a
+  ///   different type.
+  /// @param key Fully-qualified parameter name.
+  /// @param expected The expected type of the parameter.
+  /// @return True if the parameter exists, false otherwise.
+  bool EnsureTypeIfExists(std::string_view key, ConfigType expected) const;
+
+  /// @brief Returns the fully-qualified parameter name for the given parameter
+  ///   name and element index.
+  /// @param key The parameter name of the list.
+  /// @param index The 0-based index of the list element.
+  /// @return The fully-qualified name, *i.e.* `key[index]`.
+  static std::string KeyForListElement(std::string_view key, std::size_t index);
+
   //---------------------------------------------------------------------------
   // Booleans
 
@@ -1011,7 +1025,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
     for (int row = 0; row < mat.rows(); ++row) {
       const std::string nested_key =
           single_list ? std::string{key}
-                      : ListElementKey(key, static_cast<std::size_t>(row));
+                      : KeyForListElement(key, static_cast<std::size_t>(row));
       if (!single_list) {
         AppendList(key);
       }
@@ -1123,20 +1137,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// Pointer to internal implementation.
   std::unique_ptr<Impl> pimpl_;
-
-  /// @brief Raises a `TypeError` if the parameter exists, but is of a
-  ///   different type.
-  /// @param key Fully-qualified parameter name.
-  /// @param expected The expected type of the parameter.
-  /// @return True if the parameter exists, false otherwise.
-  bool EnsureTypeIfExists(std::string_view key, ConfigType expected) const;
-
-  /// @brief Returns the fully-qualified parameter name for the given parameter
-  ///   name and element index.
-  /// @param key The parameter name of the list.
-  /// @param index The 0-based index of the list element.
-  /// @return The fully-qualified name, *i.e.* `key[index]`.
-  static std::string ListElementKey(std::string_view key, std::size_t index);
 };
 
 /// @brief Loads a configuration file.

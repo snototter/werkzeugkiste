@@ -1393,7 +1393,7 @@ bool Configuration::EnsureTypeIfExists(std::string_view key,
   throw TypeError{msg};
 }
 
-std::string Configuration::ListElementKey(std::string_view key,
+std::string Configuration::KeyForListElement(std::string_view key,
     std::size_t index) {
   return detail::FullyQualifiedArrayElementPath(key, index);
 }
