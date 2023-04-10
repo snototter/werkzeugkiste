@@ -129,8 +129,8 @@ bool IsInteger(std::string_view str) {
   }
 
   const bool has_sign = (str[0] == '-' || str[0] == '+');
-  const auto begin = has_sign ? str.begin() + 1 : str.begin();
-  const auto pos = std::find_if(
+  const auto* const begin = has_sign ? str.begin() + 1 : str.begin();
+  const auto* const pos = std::find_if(
       begin, str.end(), [](char c) -> bool { return std::isdigit(c) == 0; });
   if (pos != str.end()) {
     return false;

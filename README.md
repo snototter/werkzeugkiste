@@ -2,7 +2,7 @@
 
 This library is a collection of frequently used C++ snippets copy-pasted across
 way too many of my projects. Since there's tons of so-called utilities, utils,
-tools & toolboxes out there, I prefer to call this one **`werkzeugkiste`**,
+tools & toolboxes out there, I prefer to call this one `werkzeugkiste`,
 __i.e.__ the German word for toolbox.
 
 [![Release](https://img.shields.io/github/v/release/snototter/werkzeugkiste)](https://github.com/snototter/werkzeugkiste/releases)

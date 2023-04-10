@@ -19,7 +19,58 @@
 #include <utility>
 #include <vector>
 
-/// @brief Utilities to handle configurations.
+/// @brief Utilities to handle configurations in a unified manner.
+///
+/// @code {.cpp}
+/// #include <werkzeugkiste/config/configuration.h>
+/// namespace wkc = werkzeugkiste::config;
+/// // Load a configuration from a file ...
+/// wkc::Configuration cfg = wkc::LoadTOMLFile("path/to/config.toml");
+/// // ... or a string:
+/// wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+///     my-double = 42.17
+///     my-long = 2147483648
+///     labels = ["lbl1", "lbl2"]
+///     day = 2023-10-09
+///
+///     camera-matrix = [
+///       [800,   0, 400],
+///       [  0, 750, 300],
+///       [  0,   0,   1]
+///     ]
+///     )toml");
+///
+/// // Basic parameter queries:
+/// using namespace std::string_view_literals;
+/// double val_dbl = cfg.GetDouble("my-double"sv);
+/// int64_t val_long = cfg.GetInt64("my-long"sv);
+/// std::vector<std::string> strings = cfg.GetStringList("labels"sv);
+/// wkc::date day = cfg.GetDate("day"sv);
+///
+/// // If a parameter does not exist:
+/// cfg.GetString("unknown"sv);                 // Throws a wkc::KeyError.
+/// cfg.GetStringOr("unknown"sv, "fallback"sv); // Returns "fallback".
+/// cfg.GetOptionalString("unknown"sv);         // Returns std::nullopt.
+///
+/// // A wkc::TypeError will be thrown if the parameter is of a different type:
+/// cfg.GetString("my-long"sv);
+///
+/// // Type conversion between numeric types is supported if the parameter
+/// // can be exactly represented by the requested type:
+/// val_dbl = cfg.GetDouble("my-long"sv);  // Implicit conversion.
+/// cfg.GetInt64("my-double"sv); // Value can't be represented by an integer.
+/// cfg.GetInt32("my-long"sv);   // Value exceeds int32 range.
+///
+/// // Usage convenience for geometric types:
+/// wkc::Matrix<double> intrinsics = cfg.GetMatrixDouble("camera-matrix"sv);
+/// // Note that matrices will use row-major storage order.
+///
+/// // TODO not yet available
+/// // namespace wkg = werkzeugkiste::geometry;
+/// // std::vector<wkg::Vec2i> polyline = cfg.GetVec2iList("poly2"sv);
+/// // Type conversion
+/// // std::vector<wkg::Vec2d> polyline = cfg.GetVec2dList("poly2"sv);
+/// @endcode
 namespace werkzeugkiste::config {
 
 template <typename Tp>
@@ -29,12 +80,13 @@ using Matrix =
 /// @brief Encapsulates configuration data.
 ///
 /// This class provides a unified access to different configuration file
-/// formats provides several additional utilities, such as replacing
-/// placeholders, adjusting file paths, *etc.*
+/// formats, as well as several convenience utilities, such as replacing
+/// string placeholders, adjusting file paths, *etc.*
 ///
 /// This utitility class is intended for *"typical"*, human-friendly
 /// configuration scenarios and, similar to
-/// <a href="https://toml.io/en">TOML</a>, supports the following data types:
+/// <a href="https://toml.io/en">TOML</a>, supports the following parameter
+/// types:
 /// * Basic scalars: `bool`, `int32_t`, `int64_t`, `double`, and `std::string`.
 /// * Local date, local time, and date-time (date + time + time zone offset)
 ///   types.
@@ -45,6 +97,12 @@ using Matrix =
 /// * <a href="https://www.json.org/">JSON</a>,
 /// * <a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and
 /// * <a href="https://yaml.org/">YAML</a> (only for exporting).
+///
+/// For usage convenience, this class support conversion from the
+/// TOML-compatible parameter types to:
+/// * <a href="https://eigen.tuxfamily.org/">`Eigen` matrices</a> (1- and
+///   2-dimensional) can be loaded from (nested) numeric lists.
+/// * Basic geometry types defined within `werkzeugkiste::geometry`.
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -160,6 +218,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
     using namespace std::string_view_literals;
     return ListParameterNames(""sv, include_array_entries, recursive);
   };
+
+  /// @brief Raises a `TypeError` if the parameter exists, but is of a
+  ///   different type.
+  /// @param key Fully-qualified parameter name.
+  /// @param expected The expected type of the parameter.
+  /// @return True if the parameter exists, false otherwise.
+  bool EnsureTypeIfExists(std::string_view key, ConfigType expected) const;
+
+  /// @brief Returns the fully-qualified parameter name for the given parameter
+  ///   name and element index.
+  /// @param key The parameter name of the list.
+  /// @param index The 0-based index of the list element.
+  /// @return The fully-qualified name, *i.e.* `key[index]`.
+  static std::string KeyForListElement(std::string_view key, std::size_t index);
 
   //---------------------------------------------------------------------------
   // Booleans
@@ -953,7 +1025,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
     for (int row = 0; row < mat.rows(); ++row) {
       const std::string nested_key =
           single_list ? std::string{key}
-                      : ListElementKey(key, static_cast<std::size_t>(row));
+                      : KeyForListElement(key, static_cast<std::size_t>(row));
       if (!single_list) {
         AppendList(key);
       }
@@ -1065,20 +1137,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// Pointer to internal implementation.
   std::unique_ptr<Impl> pimpl_;
-
-  /// @brief Raises a `TypeError` if the parameter exists, but is of a
-  ///   different type.
-  /// @param key Fully-qualified parameter name.
-  /// @param expected The expected type of the parameter.
-  /// @return True if the parameter exists, false otherwise.
-  bool EnsureTypeIfExists(std::string_view key, ConfigType expected) const;
-
-  /// @brief Returns the fully-qualified parameter name for the given parameter
-  ///   name and element index.
-  /// @param key The parameter name of the list.
-  /// @param index The 0-based index of the list element.
-  /// @return The fully-qualified name, *i.e.* `key[index]`.
-  static std::string ListElementKey(std::string_view key, std::size_t index);
 };
 
 /// @brief Loads a configuration file.
