@@ -1844,6 +1844,10 @@ Matrix<int64_t> Configuration::GetMatrixInt64(std::string_view key) const {
   return detail::GetMatrix<int64_t>(pimpl_->ImmutableList(key), key);
 }
 
+Matrix<float> Configuration::GetMatrixFloat(std::string_view key) const {
+  return detail::GetMatrix<float>(pimpl_->ImmutableList(key), key);
+}
+
 Matrix<double> Configuration::GetMatrixDouble(std::string_view key) const {
   return detail::GetMatrix<double>(pimpl_->ImmutableList(key), key);
 }

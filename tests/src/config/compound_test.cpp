@@ -582,6 +582,45 @@ TEST(ConfigCompoundTest, GetMatrices) {
   EXPECT_EQ(2, mat_int64(1, 1));
 
   // -------------------------------------------------------------
+  // ---- Float
+  // Invalid queries
+  EXPECT_THROW(config.GetMatrixFloat("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetMatrixFloat("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixFloat("invalid1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixFloat("invalid2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetMatrixFloat("invalid3"sv), wkc::TypeError);
+
+  // Retrieve lists as Nx1 matrices:
+  wkc::Matrix<float> mat_flt = config.GetMatrixFloat("empty"sv);
+  EXPECT_EQ(0, mat_flt.size());
+
+  mat_flt = config.GetMatrixFloat("lst-int"sv);
+  EXPECT_TRUE(mat_flt.IsRowMajor);
+  EXPECT_EQ(3, mat_flt.rows());
+  EXPECT_EQ(1, mat_flt.cols());
+  EXPECT_FLOAT_EQ(1.0, mat_flt(0, 0));
+  EXPECT_FLOAT_EQ(2.0, mat_flt(1, 0));
+  EXPECT_FLOAT_EQ(3.0, mat_flt(2, 0));
+
+  mat_flt = config.GetMatrixFloat("lst-convertible"sv);
+  EXPECT_TRUE(mat_flt.IsRowMajor);
+  EXPECT_EQ(5, mat_flt.rows());
+  EXPECT_EQ(1, mat_flt.cols());
+  EXPECT_FLOAT_EQ(42.0, mat_flt(0, 0));
+  EXPECT_FLOAT_EQ(20.0, mat_flt(1, 0));
+  EXPECT_FLOAT_EQ(-3.0, mat_flt(2, 0));
+  EXPECT_FLOAT_EQ(0.0, mat_flt(3, 0));
+  EXPECT_FLOAT_EQ(123.0, mat_flt(4, 0));
+
+  mat_flt = config.GetMatrixFloat("lst-flt"sv);
+  EXPECT_TRUE(mat_flt.IsRowMajor);
+  EXPECT_EQ(3, mat_flt.rows());
+  EXPECT_EQ(1, mat_flt.cols());
+  EXPECT_FLOAT_EQ(0.0, mat_flt(0, 0));
+  EXPECT_FLOAT_EQ(-3.5, mat_flt(1, 0));
+  EXPECT_FLOAT_EQ(1e6, mat_flt(2, 0));
+
+  // -------------------------------------------------------------
   // ---- Double
   // Invalid queries
   EXPECT_THROW(config.GetMatrixDouble("no-such-key"sv), wkc::KeyError);

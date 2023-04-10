@@ -984,10 +984,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Matrices
 
+  // TODO doc
   Matrix<uint8_t> GetMatrixUInt8(std::string_view key) const;
   Matrix<int32_t> GetMatrixInt32(std::string_view key) const;
   Matrix<int64_t> GetMatrixInt64(std::string_view key) const;
-  // Matrix<float> GetMatrixFloat(std::string_view key) const;
+  Matrix<float> GetMatrixFloat(std::string_view key) const;
   Matrix<double> GetMatrixDouble(std::string_view key) const;
 
   /// @brief Stores a matrix as list.
