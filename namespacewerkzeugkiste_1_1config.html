@@ -51,7 +51,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>config <span class="m-thin">namespace</span>
         </h1>
-        <p>Utilities to handle configurations.</p>
+        <p>Utilities to handle configurations in a unified manner.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -68,6 +68,54 @@
             </li>
           </ul>
         </div>
+<pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;werkzeugkiste/config/configuration.h&gt;</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">wkc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">werkzeugkiste</span><span class="o">::</span><span class="nn">config</span><span class="p">;</span>
+<span class="c1">// Load a configuration from a file ...</span>
+<span class="n">wkc</span><span class="o">::</span><span class="n">Configuration</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">LoadTOMLFile</span><span class="p">(</span><span class="s">&quot;path/to/config.toml&quot;</span><span class="p">);</span>
+<span class="c1">// ... or a string:</span>
+<span class="n">wkc</span><span class="o">::</span><span class="n">Configuration</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">LoadTOMLString</span><span class="p">(</span><span class="sa">R</span><span class="s">&quot;</span><span class="dl">toml(</span>
+<span class="s">    my-double = 42.17</span>
+<span class="s">    my-long = 2147483648</span>
+<span class="s">    labels = [&quot;lbl1&quot;, &quot;lbl2&quot;]</span>
+<span class="s">    day = 2023-10-09</span>
+
+<span class="s">    camera-matrix = [</span>
+<span class="s">      [800,   0, 400],</span>
+<span class="s">      [  0, 750, 300],</span>
+<span class="s">      [  0,   0,   1]</span>
+<span class="s">    ]</span>
+<span class="s">    </span><span class="dl">)toml</span><span class="s">&quot;</span><span class="p">);</span>
+
+<span class="c1">// Basic parameter queries:</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="o">::</span><span class="nn">string_view_literals</span><span class="p">;</span>
+<span class="kt">double</span><span class="w"> </span><span class="n">val_dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetDouble</span><span class="p">(</span><span class="s">&quot;my-double&quot;</span><span class="n">sv</span><span class="p">);</span>
+<span class="kt">int64_t</span><span class="w"> </span><span class="n">val_long</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64</span><span class="p">(</span><span class="s">&quot;my-long&quot;</span><span class="n">sv</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">strings</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetStringList</span><span class="p">(</span><span class="s">&quot;labels&quot;</span><span class="n">sv</span><span class="p">);</span>
+<span class="n">wkc</span><span class="o">::</span><span class="n">date</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetDate</span><span class="p">(</span><span class="s">&quot;day&quot;</span><span class="n">sv</span><span class="p">);</span>
+
+<span class="c1">// If a parameter does not exist:</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="s">&quot;unknown&quot;</span><span class="n">sv</span><span class="p">);</span><span class="w">                 </span><span class="c1">// Throws a wkc::KeyError.</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">GetStringOr</span><span class="p">(</span><span class="s">&quot;unknown&quot;</span><span class="n">sv</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;fallback&quot;</span><span class="n">sv</span><span class="p">);</span><span class="w"> </span><span class="c1">// Returns &quot;fallback&quot;.</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">GetOptionalString</span><span class="p">(</span><span class="s">&quot;unknown&quot;</span><span class="n">sv</span><span class="p">);</span><span class="w">         </span><span class="c1">// Returns std::nullopt.</span>
+
+<span class="c1">// A wkc::TypeError will be thrown if the parameter is of a different type:</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">GetString</span><span class="p">(</span><span class="s">&quot;my-long&quot;</span><span class="n">sv</span><span class="p">);</span>
+
+<span class="c1">// Type conversion between numeric types is supported if the parameter</span>
+<span class="c1">// can be exactly represented by the requested type:</span>
+<span class="n">val_dbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetDouble</span><span class="p">(</span><span class="s">&quot;my-long&quot;</span><span class="n">sv</span><span class="p">);</span><span class="w">  </span><span class="c1">// Implicit conversion.</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64</span><span class="p">(</span><span class="s">&quot;my-double&quot;</span><span class="n">sv</span><span class="p">);</span><span class="w"> </span><span class="c1">// Value can&#39;t be represented by an integer.</span>
+<span class="n">cfg</span><span class="p">.</span><span class="n">GetInt32</span><span class="p">(</span><span class="s">&quot;my-long&quot;</span><span class="n">sv</span><span class="p">);</span><span class="w">   </span><span class="c1">// Value exceeds int32 range.</span>
+
+<span class="c1">// Usage convenience for geometric types:</span>
+<span class="n">wkc</span><span class="o">::</span><span class="n">Matrix</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="w"> </span><span class="n">intrinsics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetMatrixDouble</span><span class="p">(</span><span class="s">&quot;camera-matrix&quot;</span><span class="n">sv</span><span class="p">);</span>
+<span class="c1">// Note that matrices will use row-major storage order.</span>
+
+<span class="c1">// TODO not yet available</span>
+<span class="c1">// namespace wkg = werkzeugkiste::geometry;</span>
+<span class="c1">// std::vector&lt;wkg::Vec2i&gt; polyline = cfg.GetVec2iList(&quot;poly2&quot;sv);</span>
+<span class="c1">// Type conversion</span>
+<span class="c1">// std::vector&lt;wkg::Vec2d&gt; polyline = cfg.GetVec2dList(&quot;poly2&quot;sv);</span></pre>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">

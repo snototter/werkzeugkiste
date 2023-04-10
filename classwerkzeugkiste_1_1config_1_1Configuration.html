@@ -66,7 +66,7 @@
             </li>
           </ul>
         </div>
-<p>This class provides a unified access to different configuration file formats provides several additional utilities, such as replacing placeholders, adjusting file paths, <em>etc.</em></p><p>This utitility class is intended for *&quot;typical&quot;*, human-friendly configuration scenarios and, similar to <a href="https://toml.io/en">TOML</a>, supports the following data types:</p><ul><li>Basic scalars: <code>bool</code>, <code>int32_t</code>, <code>int64_t</code>, <code>double</code>, and <code>std::string</code>.</li><li>Local date, local time, and date-time (date + time + time zone offset) types.</li><li>Aggregate types, <em>i.e.</em> lists and groups of parameters.</li></ul><p>The following configuration formats are supported:</p><ul><li><a href="https://toml.io/en">TOML</a>,</li><li><a href="https://www.json.org/">JSON</a>,</li><li><a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and</li><li><a href="https://yaml.org/">YAML</a> (only for exporting).</li></ul>
+<p>This class provides a unified access to different configuration file formats, as well as several convenience utilities, such as replacing string placeholders, adjusting file paths, <em>etc.</em></p><p>This utitility class is intended for *&quot;typical&quot;*, human-friendly configuration scenarios and, similar to <a href="https://toml.io/en">TOML</a>, supports the following parameter types:</p><ul><li>Basic scalars: <code>bool</code>, <code>int32_t</code>, <code>int64_t</code>, <code>double</code>, and <code>std::string</code>.</li><li>Local date, local time, and date-time (date + time + time zone offset) types.</li><li>Aggregate types, <em>i.e.</em> lists and groups of parameters.</li></ul><p>The following configuration formats are supported:</p><ul><li><a href="https://toml.io/en">TOML</a>,</li><li><a href="https://www.json.org/">JSON</a>,</li><li><a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and</li><li><a href="https://yaml.org/">YAML</a> (only for exporting).</li></ul><p>For usage convenience, this class support conversion from the TOML-compatible parameter types to:</p><ul><li><a href="https://eigen.tuxfamily.org/"><code>Eigen</code> matrices</a> (1- and 2-dimensional) can be loaded from (nested) numeric lists.</li><li>Basic geometry types defined within <code><a href="namespacewerkzeugkiste_1_1geometry.html" class="m-doc">werkzeugkiste::<wbr />geometry</a></code>.</li></ul>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -78,6 +78,11 @@
               <span class="m-doc-wrap-bumper">static auto <a href="#a91939c8dae00f9e8794b232b20a44302" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
             <dd>Loads a TOML configuration from the given file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static auto <a href="#ae4ed19f154853198566df123aaa58d15" class="m-doc">KeyForListElement</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::size_t index) -&gt; std::string</span>
+            </dt>
+            <dd>Returns the fully-qualified parameter name for the given parameter name and element index.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -163,6 +168,11 @@
               bool recursive) const -&gt; std::vector&lt;std::string&gt;</span>
             </dt>
             <dd>Returns a list of (fully-qualified) parameter names below the configuration root.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a122206bef6a85c3b3c55b01f5210da79" class="m-doc">EnsureTypeIfExists</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a> expected) const -&gt; bool</span>
+            </dt>
+            <dd>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists, but is of a different type.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a95296db8058e86db55350c4ba94107cd" class="m-doc">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
             </dt>
@@ -577,6 +587,34 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ae4ed19f154853198566df123aaa58d15"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static std::string werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ae4ed19f154853198566df123aaa58d15" class="m-doc-self">KeyForListElement</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::size_t index)</span></span>
+            </h3>
+            <p>Returns the fully-qualified parameter name for the given parameter name and element index.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The parameter name of the list.</td>
+                </tr>
+                <tr>
+                  <td>index</td>
+                  <td>The 0-based index of the list element.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The fully-qualified name, <em>i.e.</em> <code>key[index]</code>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a9457f9510a75a6a245277a683b02177a"><div>
             <h3>
               <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a9457f9510a75a6a245277a683b02177a" class="m-doc-self">Contains</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
@@ -719,6 +757,34 @@
                   <td>If true, the names of all parameters &quot;below&quot; this configuration/group will be returned. Otherwise, only the first-level child parameters will be returned.</td>
                 </tr>
               </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a122206bef6a85c3b3c55b01f5210da79"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a122206bef6a85c3b3c55b01f5210da79" class="m-doc-self">EnsureTypeIfExists</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a> expected) const</span></span>
+            </h3>
+            <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists, but is of a different type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Fully-qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>expected</td>
+                  <td>The expected type of the parameter.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the parameter exists, false otherwise.</td>
+                </tr>
+              </tfoot>
             </table>
           </div></section>
           <section class="m-doc-details" id="a95296db8058e86db55350c4ba94107cd"><div>
