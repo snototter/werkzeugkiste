@@ -49,7 +49,7 @@ namespace werkzeugkiste::config {
   } while (false)
 
 namespace detail {
-/// Returns the "fully-qualified TOML path" for the given key and its parent
+/// Returns the "fully qualified TOML path" for the given key and its parent
 /// path. For example, `key = param` & `parent_path = lvl1.lvl2` results
 /// in `lvl1.lvl2.param`.
 inline std::string FullyQualifiedPath(const toml::key &key,
@@ -63,7 +63,7 @@ inline std::string FullyQualifiedPath(const toml::key &key,
   return std::string(key.str());
 }
 
-/// Returns the "fully-qualified TOML path" for the given array index.
+/// Returns the "fully qualified TOML path" for the given array index.
 /// For example, `path = section1.arr` & `array_index = 3` results
 /// in `section1.arr[3]`.
 inline std::string FullyQualifiedArrayElementPath(std::string_view key,
@@ -81,7 +81,7 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
     bool include_array_entries,
     bool recursive);
 
-/// Returns all fully-qualified paths for named parameters within
+/// Returns all fully qualified paths for named parameters within
 /// the given TOML array.
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListArrayKeys(const toml::array &arr,
@@ -114,7 +114,7 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
   return keys;
 }
 
-/// Returns all fully-qualified paths for named parameters within
+/// Returns all fully qualified paths for named parameters within
 /// the given TOML table.
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
@@ -340,7 +340,7 @@ inline const char *TomlTypeName(const NodeView &node, std::string_view key) {
 }
 
 /// Returns true if the TOML table contains a valid node at the given,
-/// fully-qualified path/key.
+/// fully qualified path/key.
 inline bool ContainsKey(const toml::table &tbl, std::string_view key) {
   // Needed, because `tbl.contains()` only checks the direct children.
   const auto node = tbl.at_path(key);
@@ -446,7 +446,7 @@ Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
 /// @tparam Ttoml The TOML type.
 /// @tparam Tcfg The type exposed via the werkzeugkiste::config API.
 /// @param value The value to be converted.
-/// @param key The fully-qualified parameter name.
+/// @param key The fully qualified parameter name.
 template <typename Ttoml, typename Tcfg>
 Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
   if constexpr (std::is_same_v<Tcfg, Ttoml>) {
@@ -505,7 +505,7 @@ Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
   throw TypeError{msg};
 }
 
-/// @brief Looks up the value at the given key (fully-qualified TOML path).
+/// @brief Looks up the value at the given key (fully qualified TOML path).
 ///
 /// If the key does not exist, a KeyError will be raised unless
 /// `allow_default` is true (in which case the `default_val` will be
@@ -527,7 +527,7 @@ T LookupScalar(const toml::table &tbl,
   return ConvertTomlToConfigType<T>(node, key);
 }
 
-/// @brief Looks up the value at the given key (fully-qualified TOML path).
+/// @brief Looks up the value at the given key (fully qualified TOML path).
 ///
 /// If the key does not exist, a nullopt will be returned.
 template <typename T>
@@ -541,7 +541,7 @@ std::optional<T> LookupOptionalScalar(const toml::table &tbl,
   return ConvertTomlToConfigType<T>(node, key);
 }
 
-/// Splits a fully-qualified TOML path into <anchestor, child>.
+/// Splits a fully qualified TOML path into <anchestor, child>.
 /// This does *not* handle arrays!
 inline std::pair<std::string_view, std::string_view> SplitTomlPath(
     std::string_view path) {
@@ -562,7 +562,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 /// @brief Throws a KeyError if the given key cannot be created, e.g. if it
 ///   refers to an array element or contains unsupported characters (a quoted
 ///   key or whitespace, etc.)
-/// @param key The bare key or the fully-qualified parameter name (dotted key).
+/// @param key The bare key or the fully qualified parameter name (dotted key).
 void EnsureDottedOrBareKey(std::string_view key) {
   if (!IsValidKey(key, /*allow_dots=*/true)) {
     std::string msg{
@@ -670,7 +670,7 @@ void ReplaceScalar(NodeView &node, Tcfg value, std::string_view key) {
 /// would be an error while setting a 32-bit value, we don't want to show a
 /// confusing "user provided 64-bit" error message.
 /// @param tbl The TOML root node.
-/// @param key The fully-qualified parameter name.
+/// @param key The fully qualified parameter name.
 /// @param value The value to be set.
 template <typename Ttoml, typename Tvalue>
 void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
@@ -738,7 +738,7 @@ void CreateList(toml::table &tbl,
 /// @tparam Ttoml Element type of existing TOML array.
 /// @tparam Tcfg Element type of replacement vector.
 /// @param arr List to be replaced.
-/// @param key Fully-qualified parameter name.
+/// @param key Fully qualified parameter name.
 /// @param vec List of replacement values.
 template <typename Ttoml, typename Tcfg>
 void ReplaceHomogeneousList(toml::array &arr,

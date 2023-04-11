@@ -76,7 +76,7 @@ Tcfg CastSetting(const libconfig::Setting &value) {
 }
 
 /// @brief Appends the libconfig value to a werkzeugkiste list.
-/// @param lst_key Fully-qualified parameter name of the list.
+/// @param lst_key Fully qualified parameter name of the list.
 /// @param cfg werkzeugkiste configuration.
 /// @param node Node/Setting holding the libconfig value.
 // NOLINTNEXTLINE(misc-no-recursion, google-runtime-references)
@@ -321,7 +321,7 @@ std::string IntegerString(int64_t val) {
 ///   parameter to the given output stream.
 /// @param cfg The werkzeugkiste configuration.
 /// @param out The output stream.
-/// @param key Fully-qualified parameter name.
+/// @param key Fully qualified parameter name.
 void PrintScalar(const Configuration &cfg,
     std::ostream &out,
     std::string_view key) {
@@ -382,7 +382,7 @@ void PrintIndent(std::ostream &out, std::size_t indentation_level) {
 ///   list parameter to the output stream.
 /// @param cfg The werkzeugkiste configuration.
 /// @param out The output stream.
-/// @param key Fully-qualified parameter name of the list.
+/// @param key Fully qualified parameter name of the list.
 /// @param indent Indentation level.
 // NOLINTNEXTLINE(misc-no-recursion)
 void PrintList(const Configuration &cfg,
@@ -449,7 +449,7 @@ void PrintList(const Configuration &cfg,
 ///   parameter group/table to the output stream.
 /// @param cfg The werkzeugkiste configuration.
 /// @param out The output stream.
-/// @param key Fully-qualified parameter name of the group/table.
+/// @param key Fully qualified parameter name of the group/table.
 /// @param indent Indentation level.
 /// @param include_brackets If set to true, the enclosing curly brackets will
 ///   also be printed.

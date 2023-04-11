@@ -61,7 +61,7 @@ std::string DurationAbbreviation() {
   throw std::runtime_error(s.str());
 }
 
-/// @brief Returns the fully-qualified name of the
+/// @brief Returns the fully qualified name of the
 /// given clock type, *e.g.* `"std::chrono::system_clock"`.
 template <typename Clock>
 std::string ClockTypeName() {
@@ -101,7 +101,7 @@ std::string ClockTypeName() {
   throw std::runtime_error(s.str());
 }
 
-/// @brief Returns the fully-qualified name of the given
+/// @brief Returns the fully qualified name of the given
 /// duration type, *e.g.* `"std::chrono::nanoseconds"`.
 template <typename Duration>
 std::string PrecisionTypeName() {
