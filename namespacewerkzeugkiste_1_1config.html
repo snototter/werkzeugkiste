@@ -143,7 +143,7 @@
             <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1KeyMatcher.html" class="m-doc">KeyMatcher</a>
             </dt>
-            <dd><span></span></dd>
+            <dd>Matches keys (fully qualified parameter names) against user-defined patterns.</dd>
             <dt>
               class <a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">ParseError</a>
             </dt>
@@ -193,7 +193,9 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a>: unsigned char { </span><span class="m-doc-wrap"><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">Skip</a>,
-              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc">NullString</a> }</span>
+              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc">NullString</a>,
+              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215" class="m-doc">EmptyList</a>,
+              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1" class="m-doc">Fail</a> }</span>
             </dt>
             <dd>How to handle Null/None values (e.g. when loading JSON).</dd>
             <dt>
@@ -341,6 +343,18 @@
                   <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf">NullString</a></td>
                   <td>
                   <p>Null values will be <strong>replaced</strong> by the string &quot;null&quot;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215">EmptyList</a></td>
+                  <td>
+                  <p>Null values will be <strong>replaced</strong> by an empty list.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1">Fail</a></td>
+                  <td>
+                  <p>A <code><a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">werkzeugkiste::<wbr />config::<wbr />ParseError</a></code> will be thrown.</p>
                   </td>
                 </tr>
               </tbody>
@@ -699,7 +713,7 @@
                 </tr>
                 <tr>
                   <td>allow_dots</td>
-                  <td>If true, dots (as in a key path / fully-qualified parameter name) are also allowed.</td>
+                  <td>If true, dots (as in a key path / fully qualified parameter name) are also allowed.</td>
                 </tr>
               </tbody>
             </table>
