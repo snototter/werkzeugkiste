@@ -980,11 +980,139 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Matrices
 
-  // TODO doc
+  /// @brief Returns a list/nested list as a 2D matrix.
+  ///
+  /// @code {.cpp}
+  /// auto config = werkzeugkiste::config::LoadTOMLString(R"toml(
+  ///    mat = [
+  ///      [0, 127],
+  ///      [10, 100],
+  ///      [32, 64]]
+  ///
+  ///    lst = [1, 2, 3]
+  ///    )toml");
+  ///
+  /// // A nested list can be loaded as a matrix.
+  /// auto mat = config.GetMatrixUInt8("mat"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 2);
+  ///
+  /// // A single list will always be loaded as a row vector.
+  /// auto mat = config.GetMatrixUInt8("lst"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 1);
+  /// @endcode
+  ///
+  /// @param key Fully qualified name of the parameter.
+  /// @return Matrix of `uint8_t` values in row-major order.
   Matrix<uint8_t> GetMatrixUInt8(std::string_view key) const;
+
+  /// @brief Returns a list/nested list as a 2D matrix.
+  ///
+  /// @code {.cpp}
+  /// auto config = werkzeugkiste::config::LoadTOMLString(R"toml(
+  ///    mat = [
+  ///      [0, 127],
+  ///      [10, 100],
+  ///      [32, 64]]
+  ///
+  ///    lst = [1, 2, 3]
+  ///    )toml");
+  ///
+  /// // A nested list can be loaded as a matrix.
+  /// auto mat = config.GetMatrixInt32("mat"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 2);
+  ///
+  /// // A single list will always be loaded as a row vector.
+  /// auto mat = config.GetMatrixInt32("lst"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 1);
+  /// @endcode
+  ///
+  /// @param key Fully qualified name of the parameter.
+  /// @return Matrix of `int32_t` values in row-major order.
   Matrix<int32_t> GetMatrixInt32(std::string_view key) const;
+
+  /// @brief Returns a list/nested list as a 2D matrix.
+  ///
+  /// @code {.cpp}
+  /// auto config = werkzeugkiste::config::LoadTOMLString(R"toml(
+  ///    mat = [
+  ///      [0, 127],
+  ///      [10, 100],
+  ///      [32, 64]]
+  ///
+  ///    lst = [1, 2, 3]
+  ///    )toml");
+  ///
+  /// // A nested list can be loaded as a matrix.
+  /// auto mat = config.GetMatrixInt64("mat"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 2);
+  ///
+  /// // A single list will always be loaded as a row vector.
+  /// auto mat = config.GetMatrixInt64("lst"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 1);
+  /// @endcode
+  ///
+  /// @param key Fully qualified name of the parameter.
+  /// @return Matrix of `int64_t` values in row-major order.
   Matrix<int64_t> GetMatrixInt64(std::string_view key) const;
+
+  /// @brief Returns a list/nested list as a 2D matrix.
+  ///
+  /// @code {.cpp}
+  /// auto config = werkzeugkiste::config::LoadTOMLString(R"toml(
+  ///    mat = [
+  ///      [0, 127],
+  ///      [10, 100],
+  ///      [32, 64]]
+  ///
+  ///    lst = [1, 2, 3]
+  ///    )toml");
+  ///
+  /// // A nested list can be loaded as a matrix.
+  /// auto mat = config.GetMatrixFloat("mat"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 2);
+  ///
+  /// // A single list will always be loaded as a row vector.
+  /// auto mat = config.GetMatrixFloat("lst"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 1);
+  /// @endcode
+  ///
+  /// @param key Fully qualified name of the parameter.
+  /// @return Matrix of `float` values in row-major order.
   Matrix<float> GetMatrixFloat(std::string_view key) const;
+
+  /// @brief Returns a list/nested list as a 2D matrix.
+  ///
+  /// @code {.cpp}
+  /// auto config = werkzeugkiste::config::LoadTOMLString(R"toml(
+  ///    mat = [
+  ///      [0, 127],
+  ///      [10, 100],
+  ///      [32, 64]]
+  ///
+  ///    lst = [1, 2, 3]
+  ///    )toml");
+  ///
+  /// // A nested list can be loaded as a matrix.
+  /// auto mat = config.GetMatrixDouble("mat"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 2);
+  ///
+  /// // A single list will always be loaded as a row vector.
+  /// auto mat = config.GetMatrixDouble("lst"sv);
+  /// assert(mat.rows() == 3);
+  /// assert(mat.cols() == 1);
+  /// @endcode
+  ///
+  /// @param key Fully qualified name of the parameter.
+  /// @return Matrix of `double` values in row-major order.
   Matrix<double> GetMatrixDouble(std::string_view key) const;
 
   /// @brief Stores a matrix as list.
