@@ -42,6 +42,16 @@ void AppendListValue(std::string_view lst_key,
       case NullValuePolicy::NullString:
         cfg.Append(lst_key, "null"sv);
         break;
+
+      case NullValuePolicy::EmptyList:
+        cfg.AppendList(lst_key);
+        break;
+
+      case NullValuePolicy::Fail:
+        std::string msg{"Null/None value occured while parsing JSON list `"};
+        msg += lst_key;
+        msg += "`!";
+        throw ParseError{msg};
     }
   } else if (value.is_boolean()) {
     cfg.Append(lst_key, value.get<bool>());
@@ -91,6 +101,17 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
         case NullValuePolicy::NullString:
           grp.SetString(key, "null"sv);
           break;
+
+        case NullValuePolicy::EmptyList:
+          grp.CreateList(key);
+          break;
+
+        case NullValuePolicy::Fail:
+          std::string msg{
+              "Null/None value occured while parsing JSON parameter `"};
+          msg += key;
+          msg += "`!";
+          throw ParseError{msg};
       }
     } else if (value.is_boolean()) {
       grp.SetBoolean(key, value.get<bool>());
@@ -99,7 +120,7 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
       grp.SetDouble(key, value.get<double>());
     } else if (value.is_number_integer()) {
       // https://json.nlohmann.me/api/basic_json/number_integer_t/
-      grp.SetInteger64(key, value.get<int64_t>());
+      grp.SetInt64(key, value.get<int64_t>());
     } else if (value.is_string()) {
       grp.SetString(key, value.get<std::string>());
     } else if (value.is_array()) {

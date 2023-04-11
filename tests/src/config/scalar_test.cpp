@@ -26,31 +26,31 @@ TEST(ConfigScalarTest, Integer) {
     flt1 = 42.0
     flt2 = 1e-3
     )toml"sv);
-  EXPECT_TRUE(config.GetOptionalInteger32("int32_1"sv).has_value());
-  EXPECT_EQ(-123456, config.GetOptionalInteger32("int32_1"sv).value());
+  EXPECT_TRUE(config.GetOptionalInt32("int32_1"sv).has_value());
+  EXPECT_EQ(-123456, config.GetOptionalInt32("int32_1"sv).value());
 
-  EXPECT_EQ(-123456, config.GetInteger32("int32_1"sv));
-  EXPECT_EQ(987654, config.GetInteger32("int32_2"sv));
+  EXPECT_EQ(-123456, config.GetInt32("int32_1"sv));
+  EXPECT_EQ(987654, config.GetInt32("int32_2"sv));
 
-  EXPECT_THROW(config.GetInteger32(" int32_1"sv), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger32(" int32_1 "sv), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger32(" int32_1 "sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32(" int32_1"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32(" int32_1 "sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32(" int32_1 "sv), wkc::KeyError);
 
-  EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
-  EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
+  EXPECT_EQ(2147483647, config.GetInt32("int32_max"sv));
+  EXPECT_EQ(-2147483648, config.GetInt32("int32_min"sv));
 
-  EXPECT_THROW(config.GetInteger32("int32_min_underflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("int32_min_underflow"sv), wkc::TypeError);
   try {
-    config.GetInteger32("int32_min_underflow"sv);
+    config.GetInt32("int32_min_underflow"sv);
   } catch (const wkc::TypeError &e) {
     EXPECT_TRUE(wks::StartsWith(e.what(),
         "Cannot convert numeric parameter `int32_min_underflow` to `int32_t`. Underflow"sv))
         << "Actual exception message: " << e.what();
   }
 
-  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("int32_max_overflow"sv), wkc::TypeError);
   try {
-    config.GetInteger32("int32_max_overflow"sv);
+    config.GetInt32("int32_max_overflow"sv);
   } catch (const wkc::TypeError &e) {
     EXPECT_TRUE(wks::StartsWith(e.what(),
         "Cannot convert numeric parameter `int32_max_overflow` to `int32_t`. Overflow"sv))
@@ -58,57 +58,56 @@ TEST(ConfigScalarTest, Integer) {
   }
 
   EXPECT_THROW(
-      config.GetOptionalInteger32("int32_min_underflow"sv), wkc::TypeError);
-  EXPECT_THROW(
-      config.GetOptionalInteger32("int32_max_overflow"sv), wkc::TypeError);
+      config.GetOptionalInt32("int32_min_underflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInt32("int32_max_overflow"sv), wkc::TypeError);
 
-  EXPECT_EQ(-1, config.GetInteger32Or("test"sv, -1));
-  EXPECT_EQ(17, config.GetInteger32Or("test"sv, 17));
-  EXPECT_THROW(config.GetInteger32("test"sv), wkc::KeyError);
-  EXPECT_FALSE(config.GetOptionalInteger32("test"sv).has_value());
+  EXPECT_EQ(-1, config.GetInt32Or("test"sv, -1));
+  EXPECT_EQ(17, config.GetInt32Or("test"sv, 17));
+  EXPECT_THROW(config.GetInt32("test"sv), wkc::KeyError);
+  EXPECT_FALSE(config.GetOptionalInt32("test"sv).has_value());
 
-  EXPECT_EQ(-123456, config.GetInteger64("int32_1"sv));
-  EXPECT_TRUE(config.GetOptionalInteger64("int32_1"sv).has_value());
-  EXPECT_EQ(-123456, config.GetOptionalInteger64("int32_1"sv).value());
+  EXPECT_EQ(-123456, config.GetInt64("int32_1"sv));
+  EXPECT_TRUE(config.GetOptionalInt64("int32_1"sv).has_value());
+  EXPECT_EQ(-123456, config.GetOptionalInt64("int32_1"sv).value());
 
-  EXPECT_EQ(+987654, config.GetInteger64("int32_2"sv));
+  EXPECT_EQ(+987654, config.GetInt64("int32_2"sv));
 
-  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_underflow"sv));
-  EXPECT_EQ(-2147483649,
-      config.GetOptionalInteger64("int32_min_underflow"sv).value());
-
-  EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
+  EXPECT_EQ(-2147483649, config.GetInt64("int32_min_underflow"sv));
   EXPECT_EQ(
-      +2147483648, config.GetOptionalInteger64("int32_max_overflow"sv).value());
+      -2147483649, config.GetOptionalInt64("int32_min_underflow"sv).value());
 
-  EXPECT_EQ(-1, config.GetInteger64Or("test"sv, -1));
-  EXPECT_EQ(17, config.GetInteger64Or("test"sv, 17));
-  EXPECT_THROW(config.GetInteger64("test"sv), wkc::KeyError);
-  EXPECT_FALSE(config.GetOptionalInteger64("test"sv).has_value());
+  EXPECT_EQ(+2147483648, config.GetInt64("int32_max_overflow"sv));
+  EXPECT_EQ(
+      +2147483648, config.GetOptionalInt64("int32_max_overflow"sv).value());
+
+  EXPECT_EQ(-1, config.GetInt64Or("test"sv, -1));
+  EXPECT_EQ(17, config.GetInt64Or("test"sv, 17));
+  EXPECT_THROW(config.GetInt64("test"sv), wkc::KeyError);
+  EXPECT_FALSE(config.GetOptionalInt64("test"sv).has_value());
 
   try {
-    config.GetInteger32("int32"sv);
+    config.GetInt32("int32"sv);
   } catch (const wkc::KeyError &e) {
     const std::string exp_msg{
         "Key `int32` does not exist! Did you mean: `int32_1`, `int32_2`?"};
     EXPECT_EQ(exp_msg, std::string(e.what()));
   }
 
-  EXPECT_EQ(42, config.GetInteger32("flt1"sv));
-  EXPECT_EQ(42, config.GetInteger32Or("flt1"sv, 0));
-  EXPECT_EQ(42, config.GetOptionalInteger32("flt1"sv).value());
+  EXPECT_EQ(42, config.GetInt32("flt1"sv));
+  EXPECT_EQ(42, config.GetInt32Or("flt1"sv, 0));
+  EXPECT_EQ(42, config.GetOptionalInt32("flt1"sv).value());
 
-  EXPECT_EQ(42, config.GetInteger64("flt1"sv));
-  EXPECT_EQ(42, config.GetInteger64Or("flt1"sv, 0));
-  EXPECT_EQ(42, config.GetOptionalInteger64("flt1"sv).value());
+  EXPECT_EQ(42, config.GetInt64("flt1"sv));
+  EXPECT_EQ(42, config.GetInt64Or("flt1"sv, 0));
+  EXPECT_EQ(42, config.GetOptionalInt64("flt1"sv).value());
 
-  EXPECT_THROW(config.GetInteger32("flt2"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32Or("flt2"sv, 0), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalInteger32("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Or("flt2"sv, 0), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInt32("flt2"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger64("flt2"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Or("flt2"sv, 0), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalInteger64("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64Or("flt2"sv, 0), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInt64("flt2"sv), wkc::TypeError);
 }
 
 TEST(ConfigScalarTest, FloatingPoint) {
@@ -154,11 +153,11 @@ TEST(ConfigScalarTest, FloatingPoint) {
   // Implicit conversion is possible if the value is exactly representable:
   EXPECT_DOUBLE_EQ(32.0, config.GetDouble("int"sv));
   EXPECT_DOUBLE_EQ(32.0, config.GetOptionalDouble("int"sv).value());
-  EXPECT_EQ(1, config.GetInteger32("flt1"sv));
-  EXPECT_EQ(1L, config.GetInteger64("flt1"sv));
+  EXPECT_EQ(1, config.GetInt32("flt1"sv));
+  EXPECT_EQ(1L, config.GetInt64("flt1"sv));
   // -3.14 is not:
-  EXPECT_THROW(config.GetInteger32("flt2"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("flt2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64("flt2"sv), wkc::TypeError);
 }
 
 TEST(ConfigScalarTest, LookupScalars) {
@@ -189,14 +188,14 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_FALSE(config.GetBooleanOr("no-such.bool"sv, false));
 
   EXPECT_THROW(config.GetBooleanList("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32Or("bool"sv, 0), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalInteger32("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64Or("bool"sv, 2), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalInteger64("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Or("bool"sv, 0), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInt32("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64Or("bool"sv, 2), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInt64("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleOr("bool"sv, 1.0), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalDouble("bool"sv), wkc::TypeError);
@@ -207,8 +206,8 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_THROW(config.GetStringList("bool"sv), wkc::TypeError);
 
   // Integer parameter
-  EXPECT_EQ(42, config.GetInteger32("int"sv));
-  EXPECT_EQ(42, config.GetInteger64("int"sv));
+  EXPECT_EQ(42, config.GetInt32("int"sv));
+  EXPECT_EQ(42, config.GetInt64("int"sv));
 
   EXPECT_THROW(config.GetBoolean("int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetBooleanOr("int"sv, true), wkc::TypeError);
@@ -224,8 +223,8 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_THROW(config.GetString("flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringOr("flt"sv, "..."sv), wkc::TypeError);
   // This float is exactly representable by an integer
-  EXPECT_EQ(1, config.GetInteger32("flt"sv));
-  EXPECT_EQ(1L, config.GetInteger64("flt"sv));
+  EXPECT_EQ(1, config.GetInt32("flt"sv));
+  EXPECT_EQ(1L, config.GetInt64("flt"sv));
 
   // String parameter
   const std::string expected{"A string"};
@@ -240,10 +239,10 @@ TEST(ConfigScalarTest, LookupScalars) {
 
   EXPECT_THROW(config.GetBoolean("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalBoolean("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalInteger32("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalInteger64("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInt32("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalInt64("str"sv), wkc::TypeError);
 
   // Date parameter
   EXPECT_EQ(wkc::date(2023, 01, 02), config.GetDate("dates.day"sv));
@@ -301,10 +300,10 @@ TEST(ConfigScalarTest, LookupScalars) {
   // Invalid access
   EXPECT_THROW(config.GetBoolean("int_list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetBoolean("tbl"sv), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger32("int_list"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("tbl"sv), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger64("int_list"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt64("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64("tbl"sv), wkc::KeyError);
   EXPECT_THROW(config.GetDouble("int_list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("tbl"sv), wkc::KeyError);
   EXPECT_THROW(config.GetString("int_list"sv), wkc::TypeError);
@@ -316,10 +315,10 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_THROW(config.GetDateTime("int_list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDateTime("tbl"sv), wkc::KeyError);
 
-  EXPECT_THROW(config.GetInteger32("dates"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("dates.day"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("dates.time"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("dates.dt1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("dates"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("dates.time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("dates.dt1"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.day"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDouble("dates.time"sv), wkc::TypeError);
@@ -412,24 +411,24 @@ TEST(ConfigScalarTest, SetNonBooleanScalars) {
     )toml"sv);
 
   // Change integers
-  EXPECT_EQ(12345, config.GetInteger32("integer"sv));
-  EXPECT_NO_THROW(config.SetInteger32("integer"sv, -123));
-  EXPECT_EQ(-123, config.GetInteger32("integer"sv));
+  EXPECT_EQ(12345, config.GetInt32("integer"sv));
+  EXPECT_NO_THROW(config.SetInt32("integer"sv, -123));
+  EXPECT_EQ(-123, config.GetInt32("integer"sv));
 
-  EXPECT_EQ(-123, config.GetInteger64("integer"sv));
-  EXPECT_NO_THROW(config.SetInteger64("integer"sv, -2147483649));
-  EXPECT_EQ(-2147483649, config.GetInteger64("integer"sv));
+  EXPECT_EQ(-123, config.GetInt64("integer"sv));
+  EXPECT_NO_THROW(config.SetInt64("integer"sv, -2147483649));
+  EXPECT_EQ(-2147483649, config.GetInt64("integer"sv));
 
   // White space in keys is not allowed when setting a value
-  EXPECT_THROW(config.SetInteger32(""sv, 1), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger32(" invalid-key"sv, 1), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger32("invalid-key "sv, 1), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger32("invalid key"sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32(""sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32(" invalid-key"sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32("invalid-key "sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32("invalid key"sv, 1), wkc::KeyError);
 
-  EXPECT_THROW(config.SetInteger64(""sv, 1), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger64(" invalid-key"sv, 17), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger64("invalid-key "sv, 17), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger64("invalid key"sv, 17), wkc::KeyError);
+  EXPECT_THROW(config.SetInt64(""sv, 1), wkc::KeyError);
+  EXPECT_THROW(config.SetInt64(" invalid-key"sv, 17), wkc::KeyError);
+  EXPECT_THROW(config.SetInt64("invalid-key "sv, 17), wkc::KeyError);
+  EXPECT_THROW(config.SetInt64("invalid key"sv, 17), wkc::KeyError);
 
   EXPECT_THROW(config.SetDouble(""sv, 1.0), wkc::KeyError);
   EXPECT_THROW(config.SetDouble(" invalid-key"sv, 0.1), wkc::KeyError);
@@ -451,7 +450,7 @@ TEST(ConfigScalarTest, SetNonBooleanScalars) {
   // But it can be set if the value is convertible
   EXPECT_NO_THROW(config.SetDouble("integer"sv, 3.0));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("integer"sv));
-  EXPECT_EQ(3, config.GetInteger32("integer"sv));
+  EXPECT_EQ(3, config.GetInt32("integer"sv));
 
   // Set a string:
   EXPECT_EQ("value", config.GetString("section.string"sv));
@@ -465,12 +464,12 @@ TEST(ConfigScalarTest, SetNonBooleanScalars) {
   EXPECT_EQ("foobar", config.GetString("section.array[2]"sv));
 
   // Add new scalars:
-  EXPECT_NO_THROW(config.SetInteger32("new-values.int32"sv, 3));
-  EXPECT_NO_THROW(config.SetInteger64("new-values.int64"sv, 64));
+  EXPECT_NO_THROW(config.SetInt32("new-values.int32"sv, 3));
+  EXPECT_NO_THROW(config.SetInt64("new-values.int64"sv, 64));
   EXPECT_NO_THROW(config.SetDouble("new-values.float"sv, 1e23));
   EXPECT_NO_THROW(config.SetString("new-values.str", "It works!"));
-  EXPECT_EQ(3, config.GetInteger32("new-values.int32"sv));
-  EXPECT_EQ(64, config.GetInteger32("new-values.int64"sv));
+  EXPECT_EQ(3, config.GetInt32("new-values.int32"sv));
+  EXPECT_EQ(64, config.GetInt32("new-values.int64"sv));
   EXPECT_DOUBLE_EQ(1e23, config.GetDouble("new-values.float"sv));
   EXPECT_EQ("It works!", config.GetString("new-values.str"sv));
 
@@ -557,14 +556,14 @@ TEST(ConfigScalarTest, ReplaceListElements) {
   // Integer list.
 
   // Replace a single element in the list:
-  EXPECT_NO_THROW(config.SetInteger32("ints[2]"sv, -2));
-  EXPECT_EQ(-2, config.GetInteger32("ints[2]"sv));
+  EXPECT_NO_THROW(config.SetInt32("ints[2]"sv, -2));
+  EXPECT_EQ(-2, config.GetInt32("ints[2]"sv));
 
-  EXPECT_THROW(config.SetInteger32("ints [2]"sv, -2), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32("ints [2]"sv, -2), wkc::KeyError);
 
   // A compatible/convertible value can also be used:
   EXPECT_NO_THROW(config.SetDouble("ints[0]"sv, 5.0));
-  EXPECT_EQ(5, config.GetInteger32("ints[0]"sv));
+  EXPECT_EQ(5, config.GetInt32("ints[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
 
   EXPECT_THROW(config.SetDouble("ints [0] "sv, 5.0), wkc::KeyError);
@@ -583,7 +582,7 @@ TEST(ConfigScalarTest, ReplaceListElements) {
   EXPECT_EQ("", config.GetString("strs[1]"sv));
 
   EXPECT_THROW(config.SetBoolean("strs[0]"sv, true), wkc::TypeError);
-  EXPECT_THROW(config.SetInteger32("strs[1]"sv, 1), wkc::TypeError);
+  EXPECT_THROW(config.SetInt32("strs[1]"sv, 1), wkc::TypeError);
 
   //---------------------------------------------------------------------------
   // Mixed value list - such a list cannot be created programmatically, but it
@@ -594,12 +593,12 @@ TEST(ConfigScalarTest, ReplaceListElements) {
   EXPECT_THROW(config.SetBoolean("mixed[0]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetDouble("mixed[0]"sv, -4.5), wkc::TypeError);
   EXPECT_NO_THROW(config.SetDouble("mixed[0]"sv, -4.0));
-  EXPECT_EQ(-4, config.GetInteger32("mixed[0]"sv));
+  EXPECT_EQ(-4, config.GetInt32("mixed[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("mixed[0]"sv));
 
   EXPECT_THROW(config.SetBoolean("mixed[1]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetString("mixed[1]"sv, "3/2"), wkc::TypeError);
-  EXPECT_NO_THROW(config.SetInteger64("mixed[1]"sv, -12345));
+  EXPECT_NO_THROW(config.SetInt64("mixed[1]"sv, -12345));
   EXPECT_DOUBLE_EQ(-12345.0, config.GetDouble("mixed[1]"sv));
   EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("mixed[1]"sv));
 

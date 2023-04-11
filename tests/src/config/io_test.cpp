@@ -50,7 +50,7 @@ TEST(ConfigIOTest, NestedTOML) {
   EXPECT_THROW(config.LoadNestedConfiguration("lvl1.lvl2"sv), wkc::TypeError);
   config.LoadNestedConfiguration("nested_config"sv);
 
-  EXPECT_EQ(1, config.GetInteger32("nested_config.value1"sv));
+  EXPECT_EQ(1, config.GetInt32("nested_config.value1"sv));
   EXPECT_DOUBLE_EQ(2.3, config.GetDouble("nested_config.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
       config.GetString("nested_config.section1.rel_path"sv));
@@ -92,13 +92,13 @@ TEST(ConfigIOTest, ConfigConstruction) {
   EXPECT_TRUE(config.Equals(copy));
   EXPECT_FALSE(config.Empty());
   EXPECT_FALSE(copy.Empty());
-  EXPECT_EQ(1, config.GetInteger32("value1"sv));
-  EXPECT_EQ(1, copy.GetInteger32("value1"sv));
+  EXPECT_EQ(1, config.GetInt32("value1"sv));
+  EXPECT_EQ(1, copy.GetInt32("value1"sv));
 
   // Force move construction
   wkc::Configuration moved{std::move(config)};
   EXPECT_FALSE(copy.Empty());
-  EXPECT_EQ(1, moved.GetInteger32("value1"sv));
+  EXPECT_EQ(1, moved.GetInt32("value1"sv));
 
   // Test copy assignment
   wkc::Configuration tmp{};
@@ -293,17 +293,17 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ(from_file, config);
 
   EXPECT_EQ(6, config.Size());
-  EXPECT_EQ(1, config.GetInteger32("int"sv));
+  EXPECT_EQ(1, config.GetInt32("int"sv));
   EXPECT_DOUBLE_EQ(2.5, config.GetDouble("flt"sv));
 
   EXPECT_FALSE(config.IsHomogeneousScalarList("arr1"sv));
   EXPECT_EQ(3, config.Size("arr1"sv));
-  EXPECT_THROW(config.GetInteger32List("arr1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("arr1"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetDoubleList("arr1"sv));
 
   EXPECT_FALSE(config.IsHomogeneousScalarList("arr2"sv));
   EXPECT_EQ(3, config.Size("arr2"sv));
-  EXPECT_NO_THROW(config.GetInteger32List("arr2"sv));
+  EXPECT_NO_THROW(config.GetInt32List("arr2"sv));
   EXPECT_NO_THROW(config.GetDoubleList("arr2"sv));
 
   EXPECT_EQ(2, config.Size("grp"sv));
@@ -324,12 +324,12 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ(5, config.Size("nested[3]"sv));
 
   EXPECT_EQ(1, config.Size("nested[3][0]"sv));
-  EXPECT_EQ(1, config.GetInteger32("nested[3][0][0]"sv));
+  EXPECT_EQ(1, config.GetInt32("nested[3][0][0]"sv));
 
   EXPECT_EQ(0, config.Size("nested[3][1]"sv));
 
   EXPECT_THROW(config.Size("nested[3][2]"sv), wkc::TypeError);
-  EXPECT_EQ(3, config.GetInteger32("nested[3][2]"sv));
+  EXPECT_EQ(3, config.GetInt32("nested[3][2]"sv));
 
   EXPECT_EQ(2, config.Size("nested[3][3]"sv));
   EXPECT_TRUE(config.IsHomogeneousScalarList("nested[3][3]"sv));
@@ -342,22 +342,63 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("nested[4]"sv));
   EXPECT_EQ(2, config.Size("nested[4]"sv));
   EXPECT_EQ("bar", config.GetString("nested[4].foo"sv));
-  EXPECT_EQ(42, config.GetInteger32("nested[4].int"sv));
+  EXPECT_EQ(42, config.GetInt32("nested[4].int"sv));
   EXPECT_NO_THROW(config.SetDouble("nested[4].flt"sv, 1.2));
   EXPECT_DOUBLE_EQ(1.2, config.GetDouble("nested[4].flt"sv));
 
   // Parse valid JSON string which consists of a top-level array
-  const std::string_view js{R"json(
-    [1, 2, { "int": 1, "flt": 2.5}, 4, null]
+  std::string_view js{R"json(
+    [1, 2, { "int": 1, "flt": 2.5, "none": null}, 4, null]
     )json"sv};
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::Skip);
   EXPECT_EQ(1, config.Size());
   EXPECT_EQ(4, config.Size("json"sv));
+  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
   EXPECT_EQ(2, config.Size("json[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
+  EXPECT_FALSE(config.Contains("json[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
 
+  // Replace null values with "null" strings
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::NullString);
   EXPECT_EQ(1, config.Size());
   EXPECT_EQ(5, config.Size("json"sv));
+  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
+  EXPECT_EQ(3, config.Size("json[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
+  EXPECT_EQ("null", config.GetString("json[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
+  EXPECT_EQ("null", config.GetString("json[4]"sv));
+
+  // Replace null values with empty lists
+  config = wkc::LoadJSONString(js, wkc::NullValuePolicy::EmptyList);
+  EXPECT_EQ(1, config.Size());
+  EXPECT_EQ(5, config.Size("json"sv));
+  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
+  EXPECT_EQ(3, config.Size("json[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("json[2].none"sv));
+  EXPECT_EQ(0, config.Size("json[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("json[4]"sv));
+  EXPECT_EQ(0, config.Size("json[4]"sv));
+
+  // Null values should throw an exception
+  js = R"json({ "int": 1, "flt": 2.5, "none": null})json"sv;
+  EXPECT_NO_THROW(wkc::LoadJSONString(js, wkc::NullValuePolicy::Skip));
+  EXPECT_THROW(
+      wkc::LoadJSONString(js, wkc::NullValuePolicy::Fail), wkc::ParseError);
+
+  js = "[1, 3, null]"sv;
+  EXPECT_NO_THROW(wkc::LoadJSONString(js, wkc::NullValuePolicy::Skip));
+  EXPECT_THROW(
+      wkc::LoadJSONString(js, wkc::NullValuePolicy::Fail), wkc::ParseError);
 }
 
 TEST(ConfigIOTest, NullValuePolicy) {
@@ -448,13 +489,13 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_EQ(subgroup, config.GetGroup("group.subgroup"sv));
   EXPECT_EQ("Value", subgroup.GetString("str"sv));
   EXPECT_EQ(2, subgroup.Size("size"sv));
-  EXPECT_EQ(640, subgroup.GetInteger32("size.width"sv));
-  EXPECT_EQ(480, subgroup.GetInteger32("size.height"sv));
+  EXPECT_EQ(640, subgroup.GetInt32("size.width"sv));
+  EXPECT_EQ(480, subgroup.GetInt32("size.height"sv));
 
   EXPECT_EQ(3, subgroup.Size("ints"sv));
-  EXPECT_EQ(10, subgroup.GetInteger32("ints[0]"sv));
-  EXPECT_EQ(11, subgroup.GetInteger32("ints[1]"sv));
-  EXPECT_EQ(-12, subgroup.GetInteger32("ints[2]"sv));
+  EXPECT_EQ(10, subgroup.GetInt32("ints[0]"sv));
+  EXPECT_EQ(11, subgroup.GetInt32("ints[1]"sv));
+  EXPECT_EQ(-12, subgroup.GetInt32("ints[2]"sv));
 
   EXPECT_EQ(3, subgroup.Size("flts"sv));
   EXPECT_DOUBLE_EQ(1e-3, subgroup.GetDouble("flts[0]"sv));
@@ -471,7 +512,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_TRUE(wks::EndsWith(str, "automatically concatenated."sv));
 
   EXPECT_FALSE(config.GetBoolean("group.flag"sv));
-  EXPECT_EQ(-54321, config.GetInteger32("group.int"sv));
+  EXPECT_EQ(-54321, config.GetInt32("group.int"sv));
   EXPECT_DOUBLE_EQ(1e6, config.GetDouble("group.flt"sv));
   EXPECT_EQ("Another String", config.GetString("group.str"sv));
 
@@ -480,7 +521,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
 
   EXPECT_EQ(3, config.Size("list[0]"sv));
   EXPECT_EQ("abc", config.GetString("list[0][0]"sv));
-  EXPECT_EQ(123, config.GetInteger32("list[0][1]"sv));
+  EXPECT_EQ(123, config.GetInt32("list[0][1]"sv));
   EXPECT_TRUE(config.GetBoolean("list[0][2]"sv));
 
   EXPECT_DOUBLE_EQ(1.234, config.GetDouble("list[1]"sv));
@@ -489,7 +530,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_EQ(wkc::ConfigType::List, config.Type("list[2]"sv));
 
   EXPECT_EQ(3, config.Size("list[3]"sv));
-  const auto ints = config.GetInteger32List("list[3]"sv);
+  const auto ints = config.GetInt32List("list[3]"sv);
   EXPECT_EQ(1, ints[0]);
   EXPECT_EQ(2, ints[1]);
   EXPECT_EQ(3, ints[2]);
@@ -497,8 +538,8 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_EQ(1, config.Size("list[4]"sv));
   EXPECT_TRUE(config.Contains("list[4].a"sv));
   EXPECT_EQ(3, config.Size("list[4].a"sv));
-  EXPECT_EQ(1, config.GetInteger32("list[4].a[0]"sv));
-  EXPECT_EQ(2, config.GetInteger32("list[4].a[1]"sv));
+  EXPECT_EQ(1, config.GetInt32("list[4].a[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("list[4].a[1]"sv));
   EXPECT_TRUE(config.GetBoolean("list[4].a[2]"sv));
 
   EXPECT_EQ(0, config.Size("list[5]"sv));
@@ -506,12 +547,12 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
 
   // Check the "bigints" group
   const auto bigints = config.GetGroup("bigints"sv);
-  EXPECT_THROW(bigints.GetInteger32("int"sv), wkc::TypeError);
-  EXPECT_EQ(9223372036854775807L, bigints.GetInteger64("int"sv));
-  EXPECT_EQ(9223372036854775807L, config.GetInteger64("bigints.int"sv));
-  EXPECT_THROW(bigints.GetInteger32("hex"sv), wkc::TypeError);
-  EXPECT_EQ(0x1122334455667788L, bigints.GetInteger64("hex"sv));
-  EXPECT_EQ(0x1122334455667788L, config.GetInteger64("bigints.hex"sv));
+  EXPECT_THROW(bigints.GetInt32("int"sv), wkc::TypeError);
+  EXPECT_EQ(9223372036854775807L, bigints.GetInt64("int"sv));
+  EXPECT_EQ(9223372036854775807L, config.GetInt64("bigints.int"sv));
+  EXPECT_THROW(bigints.GetInt32("hex"sv), wkc::TypeError);
+  EXPECT_EQ(0x1122334455667788L, bigints.GetInt64("hex"sv));
+  EXPECT_EQ(0x1122334455667788L, config.GetInt64("bigints.hex"sv));
 }
 
 TEST(ConfigIOTest, ParseLibconfigStrings) {
@@ -550,21 +591,21 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
     };
     )lcfg");
 
-  EXPECT_EQ(987654, config.GetInteger32("int_pos"sv));
-  EXPECT_EQ(-123456, config.GetInteger32("int_neg"sv));
-  EXPECT_EQ(2147483647, config.GetInteger32("int32_max"sv));
-  EXPECT_EQ(-2147483648, config.GetInteger32("int32_min"sv));
-  EXPECT_THROW(config.GetInteger32("int32_min_underflow"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32("int32_max_overflow"sv), wkc::TypeError);
-  EXPECT_EQ(-2147483649, config.GetInteger64("int32_min_underflow"sv));
-  EXPECT_EQ(+2147483648, config.GetInteger64("int32_max_overflow"sv));
+  EXPECT_EQ(987654, config.GetInt32("int_pos"sv));
+  EXPECT_EQ(-123456, config.GetInt32("int_neg"sv));
+  EXPECT_EQ(2147483647, config.GetInt32("int32_max"sv));
+  EXPECT_EQ(-2147483648, config.GetInt32("int32_min"sv));
+  EXPECT_THROW(config.GetInt32("int32_min_underflow"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32("int32_max_overflow"sv), wkc::TypeError);
+  EXPECT_EQ(-2147483649, config.GetInt64("int32_min_underflow"sv));
+  EXPECT_EQ(+2147483648, config.GetInt64("int32_max_overflow"sv));
 
   EXPECT_DOUBLE_EQ(-1000.0, config.GetDouble("flt"sv));
   EXPECT_FALSE(config.GetBoolean("flag"sv));
   EXPECT_EQ("value", config.GetString("str"sv));
 
   // List of integers
-  auto ints = config.GetInteger32List("ints"sv);
+  auto ints = config.GetInt32List("ints"sv);
   EXPECT_EQ(3, ints.size());
   EXPECT_EQ(1, ints[0]);
   EXPECT_EQ(2, ints[1]);
@@ -586,7 +627,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(3, config.Size("mixed"sv));
   EXPECT_EQ(wkc::ConfigType::List, config.Type("mixed"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("mixed[0]"sv));
-  EXPECT_EQ(1, config.GetInteger32("mixed[0]"sv));
+  EXPECT_EQ(1, config.GetInt32("mixed[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("mixed[1]"sv));
   EXPECT_TRUE(config.GetBoolean("mixed[1]"sv));
   EXPECT_EQ(wkc::ConfigType::String, config.Type("mixed[2]"sv));
@@ -602,13 +643,13 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("nested[1]"sv));
   auto subgroup = config.GetGroup("nested[1]"sv);
   EXPECT_EQ(2, subgroup.Size());
-  EXPECT_EQ(3, subgroup.GetInteger32("age"sv));
-  EXPECT_EQ(3, config.GetInteger32("nested[1].age"sv));
+  EXPECT_EQ(3, subgroup.GetInt32("age"sv));
+  EXPECT_EQ(3, config.GetInt32("nested[1].age"sv));
   EXPECT_EQ("bar", subgroup.GetString("name"sv));
   EXPECT_EQ("bar", config.GetString("nested[1].name"sv));
 
   EXPECT_EQ(wkc::ConfigType::List, config.Type("nested[2]"sv));
-  ints = config.GetInteger32List("nested[2]"sv);
+  ints = config.GetInt32List("nested[2]"sv);
   EXPECT_EQ(2, ints.size());
   EXPECT_EQ(-1, ints[0]);
   EXPECT_EQ(23, ints[1]);
@@ -617,7 +658,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("group"sv));
   EXPECT_EQ(3, config.Size("group"sv));
   EXPECT_TRUE(config.GetBoolean("group.flag"sv));
-  EXPECT_EQ(123, config.GetInteger32("group.count"sv));
+  EXPECT_EQ(123, config.GetInt32("group.count"sv));
 
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("group.subgroup"sv));
   EXPECT_FALSE(config.GetBoolean("group.subgroup.flag"sv));

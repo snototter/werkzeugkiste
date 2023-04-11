@@ -49,7 +49,7 @@ namespace werkzeugkiste::config {
   } while (false)
 
 namespace detail {
-/// Returns the "fully-qualified TOML path" for the given key and its parent
+/// Returns the "fully qualified TOML path" for the given key and its parent
 /// path. For example, `key = param` & `parent_path = lvl1.lvl2` results
 /// in `lvl1.lvl2.param`.
 inline std::string FullyQualifiedPath(const toml::key &key,
@@ -63,7 +63,7 @@ inline std::string FullyQualifiedPath(const toml::key &key,
   return std::string(key.str());
 }
 
-/// Returns the "fully-qualified TOML path" for the given array index.
+/// Returns the "fully qualified TOML path" for the given array index.
 /// For example, `path = section1.arr` & `array_index = 3` results
 /// in `section1.arr[3]`.
 inline std::string FullyQualifiedArrayElementPath(std::string_view key,
@@ -81,7 +81,7 @@ std::vector<std::string> ListTableKeys(const toml::table &tbl,
     bool include_array_entries,
     bool recursive);
 
-/// Returns all fully-qualified paths for named parameters within
+/// Returns all fully qualified paths for named parameters within
 /// the given TOML array.
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListArrayKeys(const toml::array &arr,
@@ -114,7 +114,7 @@ std::vector<std::string> ListArrayKeys(const toml::array &arr,
   return keys;
 }
 
-/// Returns all fully-qualified paths for named parameters within
+/// Returns all fully qualified paths for named parameters within
 /// the given TOML table.
 // NOLINTNEXTLINE(misc-no-recursion)
 std::vector<std::string> ListTableKeys(const toml::table &tbl,
@@ -340,7 +340,7 @@ inline const char *TomlTypeName(const NodeView &node, std::string_view key) {
 }
 
 /// Returns true if the TOML table contains a valid node at the given,
-/// fully-qualified path/key.
+/// fully qualified path/key.
 inline bool ContainsKey(const toml::table &tbl, std::string_view key) {
   // Needed, because `tbl.contains()` only checks the direct children.
   const auto node = tbl.at_path(key);
@@ -446,7 +446,7 @@ Tcfg ConvertTomlToConfigType(const NodeView &node, std::string_view key) {
 /// @tparam Ttoml The TOML type.
 /// @tparam Tcfg The type exposed via the werkzeugkiste::config API.
 /// @param value The value to be converted.
-/// @param key The fully-qualified parameter name.
+/// @param key The fully qualified parameter name.
 template <typename Ttoml, typename Tcfg>
 Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
   if constexpr (std::is_same_v<Tcfg, Ttoml>) {
@@ -505,7 +505,7 @@ Ttoml ConvertConfigTypeToToml(const Tcfg &value, std::string_view key) {
   throw TypeError{msg};
 }
 
-/// @brief Looks up the value at the given key (fully-qualified TOML path).
+/// @brief Looks up the value at the given key (fully qualified TOML path).
 ///
 /// If the key does not exist, a KeyError will be raised unless
 /// `allow_default` is true (in which case the `default_val` will be
@@ -527,7 +527,7 @@ T LookupScalar(const toml::table &tbl,
   return ConvertTomlToConfigType<T>(node, key);
 }
 
-/// @brief Looks up the value at the given key (fully-qualified TOML path).
+/// @brief Looks up the value at the given key (fully qualified TOML path).
 ///
 /// If the key does not exist, a nullopt will be returned.
 template <typename T>
@@ -541,7 +541,7 @@ std::optional<T> LookupOptionalScalar(const toml::table &tbl,
   return ConvertTomlToConfigType<T>(node, key);
 }
 
-/// Splits a fully-qualified TOML path into <anchestor, child>.
+/// Splits a fully qualified TOML path into <anchestor, child>.
 /// This does *not* handle arrays!
 inline std::pair<std::string_view, std::string_view> SplitTomlPath(
     std::string_view path) {
@@ -562,7 +562,7 @@ inline std::pair<std::string_view, std::string_view> SplitTomlPath(
 /// @brief Throws a KeyError if the given key cannot be created, e.g. if it
 ///   refers to an array element or contains unsupported characters (a quoted
 ///   key or whitespace, etc.)
-/// @param key The bare key or the fully-qualified parameter name (dotted key).
+/// @param key The bare key or the fully qualified parameter name (dotted key).
 void EnsureDottedOrBareKey(std::string_view key) {
   if (!IsValidKey(key, /*allow_dots=*/true)) {
     std::string msg{
@@ -670,7 +670,7 @@ void ReplaceScalar(NodeView &node, Tcfg value, std::string_view key) {
 /// would be an error while setting a 32-bit value, we don't want to show a
 /// confusing "user provided 64-bit" error message.
 /// @param tbl The TOML root node.
-/// @param key The fully-qualified parameter name.
+/// @param key The fully qualified parameter name.
 /// @param value The value to be set.
 template <typename Ttoml, typename Tvalue>
 void SetScalar(toml::table &tbl, std::string_view key, Tvalue value) {
@@ -738,7 +738,7 @@ void CreateList(toml::table &tbl,
 /// @tparam Ttoml Element type of existing TOML array.
 /// @tparam Tcfg Element type of replacement vector.
 /// @param arr List to be replaced.
-/// @param key Fully-qualified parameter name.
+/// @param key Fully qualified parameter name.
 /// @param vec List of replacement values.
 template <typename Ttoml, typename Tcfg>
 void ReplaceHomogeneousList(toml::array &arr,
@@ -1435,13 +1435,13 @@ void Configuration::SetBooleanList(std::string_view key,
 //---------------------------------------------------------------------------
 // Integer (32-bit)
 
-int32_t Configuration::GetInteger32(std::string_view key) const {
+int32_t Configuration::GetInt32(std::string_view key) const {
   return detail::LookupScalar<int32_t>(pimpl_->config_root,
       key,
       /*allow_default=*/false);
 }
 
-int32_t Configuration::GetInteger32Or(std::string_view key,
+int32_t Configuration::GetInt32Or(std::string_view key,
     int32_t default_val) const {
   return detail::LookupScalar<int32_t>(pimpl_->config_root,
       key,
@@ -1449,22 +1449,21 @@ int32_t Configuration::GetInteger32Or(std::string_view key,
       default_val);
 }
 
-std::optional<int32_t> Configuration::GetOptionalInteger32(
+std::optional<int32_t> Configuration::GetOptionalInt32(
     std::string_view key) const {
   return detail::LookupOptionalScalar<int32_t>(pimpl_->config_root, key);
 }
 
-void Configuration::SetInteger32(std::string_view key, int32_t value) {
+void Configuration::SetInt32(std::string_view key, int32_t value) {
   detail::SetScalar<int64_t>(
       pimpl_->config_root, key, static_cast<int64_t>(value));
 }
 
-std::vector<int32_t> Configuration::GetInteger32List(
-    std::string_view key) const {
+std::vector<int32_t> Configuration::GetInt32List(std::string_view key) const {
   return detail::GetList<int32_t>(pimpl_->ImmutableList(key), key);
 }
 
-void Configuration::SetInteger32List(std::string_view key,
+void Configuration::SetInt32List(std::string_view key,
     const std::vector<int32_t> &values) {
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
@@ -1472,13 +1471,13 @@ void Configuration::SetInteger32List(std::string_view key,
 //---------------------------------------------------------------------------
 // Integer (64-bit)
 
-int64_t Configuration::GetInteger64(std::string_view key) const {
+int64_t Configuration::GetInt64(std::string_view key) const {
   return detail::LookupScalar<int64_t>(pimpl_->config_root,
       key,
       /*allow_default=*/false);
 }
 
-int64_t Configuration::GetInteger64Or(std::string_view key,
+int64_t Configuration::GetInt64Or(std::string_view key,
     int64_t default_val) const {
   return detail::LookupScalar<int64_t>(pimpl_->config_root,
       key,
@@ -1486,41 +1485,38 @@ int64_t Configuration::GetInteger64Or(std::string_view key,
       default_val);
 }
 
-std::optional<int64_t> Configuration::GetOptionalInteger64(
+std::optional<int64_t> Configuration::GetOptionalInt64(
     std::string_view key) const {
   return detail::LookupOptionalScalar<int64_t>(pimpl_->config_root, key);
 }
 
-void Configuration::SetInteger64(std::string_view key, int64_t value) {
+void Configuration::SetInt64(std::string_view key, int64_t value) {
   detail::SetScalar<int64_t>(pimpl_->config_root, key, value);
 }
 
-std::vector<int64_t> Configuration::GetInteger64List(
-    std::string_view key) const {
+std::vector<int64_t> Configuration::GetInt64List(std::string_view key) const {
   return detail::GetList<int64_t>(pimpl_->ImmutableList(key), key);
 }
 
-void Configuration::SetInteger64List(std::string_view key,
+void Configuration::SetInt64List(std::string_view key,
     const std::vector<int64_t> &values) {
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
-point2d<int64_t> Configuration::GetInteger64Point2D(
-    std::string_view key) const {
+point2d<int64_t> Configuration::GetInt64Point2D(std::string_view key) const {
   return detail::GetPoint<point2d<int64_t>>(pimpl_->config_root, key);
 }
 
-point3d<int64_t> Configuration::GetInteger64Point3D(
-    std::string_view key) const {
+point3d<int64_t> Configuration::GetInt64Point3D(std::string_view key) const {
   return detail::GetPoint<point3d<int64_t>>(pimpl_->config_root, key);
 }
 
-std::vector<point2d<int64_t>> Configuration::GetInteger64Points2D(
+std::vector<point2d<int64_t>> Configuration::GetInt64Points2D(
     std::string_view key) const {
   return detail::GetPoints<point2d<int64_t>>(pimpl_->config_root, key);
 }
 
-std::vector<point3d<int64_t>> Configuration::GetInteger64Points3D(
+std::vector<point3d<int64_t>> Configuration::GetInt64Points3D(
     std::string_view key) const {
   return detail::GetPoints<point3d<int64_t>>(pimpl_->config_root, key);
 }
@@ -1842,6 +1838,10 @@ Matrix<int32_t> Configuration::GetMatrixInt32(std::string_view key) const {
 
 Matrix<int64_t> Configuration::GetMatrixInt64(std::string_view key) const {
   return detail::GetMatrix<int64_t>(pimpl_->ImmutableList(key), key);
+}
+
+Matrix<float> Configuration::GetMatrixFloat(std::string_view key) const {
+  return detail::GetMatrix<float>(pimpl_->ImmutableList(key), key);
 }
 
 Matrix<double> Configuration::GetMatrixDouble(std::string_view key) const {

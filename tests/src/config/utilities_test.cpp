@@ -48,7 +48,7 @@ TEST(ConfigUtilsTest, NestedTOML) {
   EXPECT_THROW(config.LoadNestedConfiguration("lvl1.lvl2"sv), wkc::TypeError);
   config.LoadNestedConfiguration("nested_config"sv);
 
-  EXPECT_EQ(1, config.GetInteger32("nested_config.value1"sv));
+  EXPECT_EQ(1, config.GetInt32("nested_config.value1"sv));
   EXPECT_DOUBLE_EQ(2.3, config.GetDouble("nested_config.value2"sv));
   EXPECT_EQ("this/is/a/relative/path",
       config.GetString("nested_config.section1.rel_path"sv));
@@ -178,7 +178,7 @@ TEST(ConfigUtilsTest, StringReplacements) {
   EXPECT_EQ("", config.GetString("str1"sv));
   EXPECT_EQ("This is a 123", config.GetString("str2"sv));
   EXPECT_EQ("Hello replacement!", config.GetString("str3"sv));
-  EXPECT_EQ(123, config.GetInteger32("value"sv));
+  EXPECT_EQ(123, config.GetInt32("value"sv));
   EXPECT_EQ("List 123", config.GetString("str_list[0]"sv));
   EXPECT_EQ("Frobmorten", config.GetString("str_list[1]"sv));
   EXPECT_EQ("Another 123!", config.GetString("table.str1"sv));
