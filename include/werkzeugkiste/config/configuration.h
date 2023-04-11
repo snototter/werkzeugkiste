@@ -979,6 +979,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   //---------------------------------------------------------------------------
   // Matrices
+  //
+  // To add support for additional data types, we need to:
+  // 1) Add GetMatrixType below.
+  // 2) Add test case to tests/config/compound_test.
+  // 3) Extend GetMatrix in pyzeugkiste.
+  // 4) Add test cases to test_get_numpy in pyzeugkiste.
 
   /// @brief Returns a list/nested list as a 2D matrix.
   ///
