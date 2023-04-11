@@ -1179,7 +1179,13 @@ enum class NullValuePolicy : unsigned char {
   Skip,
 
   /// @brief Null values will be **replaced** by the string "null".
-  NullString
+  NullString,
+
+  /// @brief Null values will be **replaced** by an empty list.
+  EmptyList,
+
+  /// @brief A `werkzeugkiste::config::ParseError` will be thrown.
+  Fail
 };
 
 /// @brief Loads a JSON configuration from a string.
