@@ -1435,13 +1435,13 @@ void Configuration::SetBooleanList(std::string_view key,
 //---------------------------------------------------------------------------
 // Integer (32-bit)
 
-int32_t Configuration::GetInteger32(std::string_view key) const {
+int32_t Configuration::GetInt32(std::string_view key) const {
   return detail::LookupScalar<int32_t>(pimpl_->config_root,
       key,
       /*allow_default=*/false);
 }
 
-int32_t Configuration::GetInteger32Or(std::string_view key,
+int32_t Configuration::GetInt32Or(std::string_view key,
     int32_t default_val) const {
   return detail::LookupScalar<int32_t>(pimpl_->config_root,
       key,
@@ -1449,22 +1449,21 @@ int32_t Configuration::GetInteger32Or(std::string_view key,
       default_val);
 }
 
-std::optional<int32_t> Configuration::GetOptionalInteger32(
+std::optional<int32_t> Configuration::GetOptionalInt32(
     std::string_view key) const {
   return detail::LookupOptionalScalar<int32_t>(pimpl_->config_root, key);
 }
 
-void Configuration::SetInteger32(std::string_view key, int32_t value) {
+void Configuration::SetInt32(std::string_view key, int32_t value) {
   detail::SetScalar<int64_t>(
       pimpl_->config_root, key, static_cast<int64_t>(value));
 }
 
-std::vector<int32_t> Configuration::GetInteger32List(
-    std::string_view key) const {
+std::vector<int32_t> Configuration::GetInt32List(std::string_view key) const {
   return detail::GetList<int32_t>(pimpl_->ImmutableList(key), key);
 }
 
-void Configuration::SetInteger32List(std::string_view key,
+void Configuration::SetInt32List(std::string_view key,
     const std::vector<int32_t> &values) {
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
@@ -1472,13 +1471,13 @@ void Configuration::SetInteger32List(std::string_view key,
 //---------------------------------------------------------------------------
 // Integer (64-bit)
 
-int64_t Configuration::GetInteger64(std::string_view key) const {
+int64_t Configuration::GetInt64(std::string_view key) const {
   return detail::LookupScalar<int64_t>(pimpl_->config_root,
       key,
       /*allow_default=*/false);
 }
 
-int64_t Configuration::GetInteger64Or(std::string_view key,
+int64_t Configuration::GetInt64Or(std::string_view key,
     int64_t default_val) const {
   return detail::LookupScalar<int64_t>(pimpl_->config_root,
       key,
@@ -1486,41 +1485,38 @@ int64_t Configuration::GetInteger64Or(std::string_view key,
       default_val);
 }
 
-std::optional<int64_t> Configuration::GetOptionalInteger64(
+std::optional<int64_t> Configuration::GetOptionalInt64(
     std::string_view key) const {
   return detail::LookupOptionalScalar<int64_t>(pimpl_->config_root, key);
 }
 
-void Configuration::SetInteger64(std::string_view key, int64_t value) {
+void Configuration::SetInt64(std::string_view key, int64_t value) {
   detail::SetScalar<int64_t>(pimpl_->config_root, key, value);
 }
 
-std::vector<int64_t> Configuration::GetInteger64List(
-    std::string_view key) const {
+std::vector<int64_t> Configuration::GetInt64List(std::string_view key) const {
   return detail::GetList<int64_t>(pimpl_->ImmutableList(key), key);
 }
 
-void Configuration::SetInteger64List(std::string_view key,
+void Configuration::SetInt64List(std::string_view key,
     const std::vector<int64_t> &values) {
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
-point2d<int64_t> Configuration::GetInteger64Point2D(
-    std::string_view key) const {
+point2d<int64_t> Configuration::GetInt64Point2D(std::string_view key) const {
   return detail::GetPoint<point2d<int64_t>>(pimpl_->config_root, key);
 }
 
-point3d<int64_t> Configuration::GetInteger64Point3D(
-    std::string_view key) const {
+point3d<int64_t> Configuration::GetInt64Point3D(std::string_view key) const {
   return detail::GetPoint<point3d<int64_t>>(pimpl_->config_root, key);
 }
 
-std::vector<point2d<int64_t>> Configuration::GetInteger64Points2D(
+std::vector<point2d<int64_t>> Configuration::GetInt64Points2D(
     std::string_view key) const {
   return detail::GetPoints<point2d<int64_t>>(pimpl_->config_root, key);
 }
 
-std::vector<point3d<int64_t>> Configuration::GetInteger64Points3D(
+std::vector<point3d<int64_t>> Configuration::GetInt64Points3D(
     std::string_view key) const {
   return detail::GetPoints<point3d<int64_t>>(pimpl_->config_root, key);
 }

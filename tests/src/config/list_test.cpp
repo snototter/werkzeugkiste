@@ -14,8 +14,8 @@ TEST(ConfigListTest, GetEmptyLists) {
     )toml");
 
   EXPECT_TRUE(config.GetBooleanList("empty"sv).empty());
-  EXPECT_TRUE(config.GetInteger32List("empty"sv).empty());
-  EXPECT_TRUE(config.GetInteger64List("empty"sv).empty());
+  EXPECT_TRUE(config.GetInt32List("empty"sv).empty());
+  EXPECT_TRUE(config.GetInt64List("empty"sv).empty());
   EXPECT_TRUE(config.GetDoubleList("empty"sv).empty());
   EXPECT_TRUE(config.GetStringList("empty"sv).empty());
   EXPECT_TRUE(config.GetDateList("empty"sv).empty());
@@ -32,9 +32,9 @@ TEST(ConfigListTest, GetEmptyLists) {
   EXPECT_THROW(config.SetBooleanList("invalid!key"sv, {}), wkc::KeyError);
   EXPECT_THROW(config.SetBooleanList("invalid key"sv, {}), wkc::KeyError);
 
-  EXPECT_THROW(config.SetInteger32List("invalidkey?"sv, {}), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger32List("invalid'key"sv, {}), wkc::KeyError);
-  EXPECT_THROW(config.SetInteger32List("invalid*key"sv, {}), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32List("invalidkey?"sv, {}), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32List("invalid'key"sv, {}), wkc::KeyError);
+  EXPECT_THROW(config.SetInt32List("invalid*key"sv, {}), wkc::KeyError);
 
   // An empty list can be set to any type -> it will still have no type.
   EXPECT_NO_THROW(config.SetBooleanList("empty"sv, {}));
@@ -67,8 +67,8 @@ TEST(ConfigListTest, SetEmptyLists) {
 
   // An empty list can be set to any type.
   EXPECT_NO_THROW(config.SetBooleanList("empty"sv, {}));
-  EXPECT_NO_THROW(config.SetInteger32List("empty"sv, {}));
-  EXPECT_NO_THROW(config.SetInteger64List("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetInt32List("empty"sv, {}));
+  EXPECT_NO_THROW(config.SetInt64List("empty"sv, {}));
   EXPECT_NO_THROW(config.SetDoubleList("empty"sv, {}));
   EXPECT_NO_THROW(config.SetStringList("empty"sv, {}));
   EXPECT_NO_THROW(config.SetDateList("empty"sv, {}));
@@ -81,17 +81,17 @@ TEST(ConfigListTest, SetEmptyLists) {
   // an empty string list from an empty list of dates...
   EXPECT_NO_THROW(config.SetBooleanList("ints"sv, {}));
   EXPECT_TRUE(config.GetBooleanList("ints"sv).empty());
-  EXPECT_TRUE(config.GetInteger32List("ints"sv).empty());
+  EXPECT_TRUE(config.GetInt32List("ints"sv).empty());
   // Restore the integer list to check replacing it by other empty lists.
-  config.SetInteger32List("ints"sv, {1, 2});
+  config.SetInt32List("ints"sv, {1, 2});
   EXPECT_NO_THROW(config.SetDoubleList("ints"sv, {}));
-  config.SetInteger32List("ints"sv, {1, 2});
+  config.SetInt32List("ints"sv, {1, 2});
   EXPECT_NO_THROW(config.SetStringList("ints"sv, {}));
-  config.SetInteger32List("ints"sv, {1, 2});
+  config.SetInt32List("ints"sv, {1, 2});
   EXPECT_NO_THROW(config.SetDateList("ints"sv, {}));
-  config.SetInteger32List("ints"sv, {1, 2});
+  config.SetInt32List("ints"sv, {1, 2});
   EXPECT_NO_THROW(config.SetTimeList("ints"sv, {}));
-  config.SetInteger32List("ints"sv, {1, 2});
+  config.SetInt32List("ints"sv, {1, 2});
   EXPECT_NO_THROW(config.SetDateTimeList("ints"sv, {}));
 
   EXPECT_TRUE(config.IsHomogeneousScalarList("ints"sv));
@@ -104,8 +104,8 @@ TEST(ConfigListTest, SetEmptyLists) {
 
   // A list cannot replace an existing scalar parameter
   EXPECT_THROW(config.SetBooleanList("str"sv, {}), wkc::TypeError);
-  EXPECT_THROW(config.SetInteger32List("str"sv, {}), wkc::TypeError);
-  EXPECT_THROW(config.SetInteger64List("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetInt32List("str"sv, {}), wkc::TypeError);
+  EXPECT_THROW(config.SetInt64List("str"sv, {}), wkc::TypeError);
   EXPECT_THROW(config.SetDoubleList("str"sv, {}), wkc::TypeError);
   EXPECT_THROW(config.SetDateList("str"sv, {}), wkc::TypeError);
   EXPECT_THROW(config.SetTimeList("str"sv, {}), wkc::TypeError);
@@ -160,26 +160,24 @@ TEST(ConfigListTest, GetLists) {
     )toml"sv);
 
   // Key error:
-  EXPECT_THROW(config.GetInteger32List("no-such-key"sv), wkc::KeyError);
-  EXPECT_THROW(config.GetInteger64List("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32List("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt64List("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetDoubleList("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetStringList("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.IsHomogeneousScalarList("no-such-key"sv), wkc::KeyError);
 
   // Try to load a wrong data type as list:
   EXPECT_THROW(config.GetBooleanList("an_int"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("an_int"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("not-a-list"sv), wkc::TypeError);
-  EXPECT_THROW(
-      config.GetInteger32List("not-a-list.no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32List("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("not-a-list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("not-a-list.no-such-key"sv), wkc::KeyError);
 
-  EXPECT_THROW(config.GetInteger64List("an_int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.IsHomogeneousScalarList("an_int"sv), wkc::TypeError);
 
-  EXPECT_THROW(config.GetInteger64List("not-a-list"sv), wkc::TypeError);
-  EXPECT_THROW(
-      config.GetInteger64List("not-a-list.no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt64List("not-a-list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("not-a-list.no-such-key"sv), wkc::KeyError);
 
   EXPECT_THROW(config.GetDoubleList("an_int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleList("not-a-list"sv), wkc::TypeError);
@@ -191,31 +189,31 @@ TEST(ConfigListTest, GetLists) {
 
   // Cannot load inhomogeneous arrays (would need to load each element with its
   // corresponding type separately):
-  EXPECT_THROW(config.GetInteger32List("mixed_types"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("mixed_types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("mixed_types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("mixed_types"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleList("mixed_types"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("mixed_types"sv), wkc::TypeError);
-  EXPECT_EQ(1, config.GetInteger32("mixed_types[0]"sv));
-  EXPECT_EQ(2, config.GetInteger32("mixed_types[1]"sv));
+  EXPECT_EQ(1, config.GetInt32("mixed_types[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("mixed_types[1]"sv));
   EXPECT_EQ("framboozle", config.GetString("mixed_types[2]"sv));
 
   EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_types"sv));
 
   EXPECT_FALSE(config.IsHomogeneousScalarList("nested_lst"sv));
-  EXPECT_THROW(config.GetInteger32List("nested_lst"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("nested_lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("nested_lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("nested_lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleList("nested_lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("nested_lst"sv), wkc::TypeError);
 
   // Cannot load a list of tables:
-  EXPECT_THROW(config.GetInteger32List("products"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("products"sv), wkc::TypeError);
 
   // Lists must consist of elements of the same type (unless an
   // implicit & lossless cast is available)
   EXPECT_TRUE(config.IsHomogeneousScalarList("ints32"sv));
-  auto list32 = config.GetInteger32List("ints32"sv);
+  auto list32 = config.GetInt32List("ints32"sv);
   EXPECT_EQ(8, list32.size());
-  auto list64 = config.GetInteger64List("ints32"sv);
+  auto list64 = config.GetInt64List("ints32"sv);
   EXPECT_EQ(8, list64.size());
   EXPECT_EQ(1, list32[0]);
   EXPECT_EQ(6, list32[5]);
@@ -227,10 +225,10 @@ TEST(ConfigListTest, GetLists) {
 
   // Implicit type conversion:
   EXPECT_TRUE(config.IsHomogeneousScalarList("ints64"sv));
-  EXPECT_THROW(config.GetInteger32List("ints64"sv), wkc::TypeError);
-  EXPECT_NO_THROW(config.GetInteger32List("ints64_castable"sv));
+  EXPECT_THROW(config.GetInt32List("ints64"sv), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetInt32List("ints64_castable"sv));
 
-  list64 = config.GetInteger64List("ints64"sv);
+  list64 = config.GetInt64List("ints64"sv);
   EXPECT_EQ(5, list64.size());
 
   EXPECT_TRUE(config.IsHomogeneousScalarList("floats"sv));
@@ -242,26 +240,26 @@ TEST(ConfigListTest, GetLists) {
 
   // As a user, you should assume that a float cannot be
   // queried as another type by default:
-  EXPECT_THROW(config.GetInteger32List("floats"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("floats"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("floats"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("floats"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("floats"sv), wkc::TypeError);
   // But if an exact representation (i.e. a lossless cast) is
   // possible, we allow implicit type conversion:
-  EXPECT_NO_THROW(config.GetInteger32List("floats_castable"sv));
-  list32 = config.GetInteger32List("floats_castable"sv);
+  EXPECT_NO_THROW(config.GetInt32List("floats_castable"sv));
+  list32 = config.GetInt32List("floats_castable"sv);
   EXPECT_EQ(4, list32.size());
   EXPECT_EQ(0, list32[0]);
   EXPECT_EQ(-2, list32[1]);
   EXPECT_EQ(100, list32[2]);
   EXPECT_EQ(12345, list32[3]);
-  EXPECT_NO_THROW(config.GetInteger64List("floats_castable"sv));
+  EXPECT_NO_THROW(config.GetInt64List("floats_castable"sv));
   EXPECT_THROW(config.GetStringList("floats_castable"sv), wkc::TypeError);
 
   // Implicit conversion to integers fails for fractional numbers,
   // such as "4.5" in mixed_int_flt:
   EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_int_flt"sv));
-  EXPECT_THROW(config.GetInteger32List("mixed_int_flt"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("mixed_int_flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("mixed_int_flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("mixed_int_flt"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetDoubleList("mixed_int_flt"sv));
 
   // Load dates:
@@ -300,28 +298,28 @@ TEST(ConfigListTest, NumericList) {
 
   // Create an integer list
   EXPECT_FALSE(config.Contains("ints"sv));
-  EXPECT_NO_THROW(config.SetInteger32List("ints"sv, {-3, 0}));
+  EXPECT_NO_THROW(config.SetInt32List("ints"sv, {-3, 0}));
   EXPECT_TRUE(config.Contains("ints"sv));
   EXPECT_TRUE(config.IsHomogeneousScalarList("ints"sv));
-  auto ints32 = config.GetInteger32List("ints"sv);
+  auto ints32 = config.GetInt32List("ints"sv);
   EXPECT_EQ(2, ints32.size());
   EXPECT_EQ(-3, ints32[0]);
   EXPECT_EQ(0, ints32[1]);
 
   // Update the integer list:
-  EXPECT_NO_THROW(config.SetInteger64List("ints"sv, {1, -42, 17}));
+  EXPECT_NO_THROW(config.SetInt64List("ints"sv, {1, -42, 17}));
   EXPECT_TRUE(config.IsHomogeneousScalarList("ints"sv));
-  ints32 = config.GetInteger32List("ints"sv);
+  ints32 = config.GetInt32List("ints"sv);
   EXPECT_EQ(3, ints32.size());
   EXPECT_EQ(1, ints32[0]);
   EXPECT_EQ(-42, ints32[1]);
   EXPECT_EQ(17, ints32[2]);
   // Internally, integers are 64-bit, thus the following
   // (int32::max + 1; int32::min - 1) will not throw.
-  EXPECT_NO_THROW(config.SetInteger64List("ints"sv, {2147483648, -2147483649}));
+  EXPECT_NO_THROW(config.SetInt64List("ints"sv, {2147483648, -2147483649}));
   // But it can no longer be loaded as 32-bit integers.
-  EXPECT_THROW(config.GetInteger32List("ints"sv), wkc::TypeError);
-  auto ints64 = config.GetInteger64List("ints"sv);
+  EXPECT_THROW(config.GetInt32List("ints"sv), wkc::TypeError);
+  auto ints64 = config.GetInt64List("ints"sv);
   EXPECT_EQ(2, ints64.size());
   EXPECT_EQ(2147483648L, ints64[0]);
   EXPECT_EQ(-2147483649L, ints64[1]);
@@ -330,13 +328,13 @@ TEST(ConfigListTest, NumericList) {
   // ConfigScalarTest.ReplaceListElements for more details).
   EXPECT_THROW(config.SetDouble("ints[0]"sv, 32.8), wkc::TypeError);
   EXPECT_NO_THROW(config.SetDouble("ints[0]"sv, 32.0));
-  EXPECT_EQ(32, config.GetInteger32("ints[0]"sv));
+  EXPECT_EQ(32, config.GetInt32("ints[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("ints[0]"sv));
 
   // A list of integers can be replaced by a list of compatible/convertible
   // floating point values...
   EXPECT_NO_THROW(config.SetDoubleList("ints"sv, {1.0, 5.0}));
-  ints64 = config.GetInteger64List("ints"sv);
+  ints64 = config.GetInt64List("ints"sv);
   EXPECT_EQ(2, ints64.size());
   EXPECT_EQ(1, ints64[0]);
   EXPECT_EQ(5, ints64[1]);
@@ -354,9 +352,9 @@ TEST(ConfigListTest, NumericList) {
   // A mixed list that only contains numbers can be replaced by a homogeneous
   // list. Its type, however, will be floating point afterwards:
   EXPECT_FALSE(config.IsHomogeneousScalarList("mixed_int_flt"sv));
-  EXPECT_NO_THROW(config.SetInteger32List("mixed_int_flt"sv, {1, 2}));
+  EXPECT_NO_THROW(config.SetInt32List("mixed_int_flt"sv, {1, 2}));
   EXPECT_TRUE(config.IsHomogeneousScalarList("mixed_int_flt"sv));
-  ints32 = config.GetInteger32List("mixed_int_flt"sv);
+  ints32 = config.GetInt32List("mixed_int_flt"sv);
   EXPECT_EQ(2, ints32.size());
   EXPECT_EQ(1, ints32[0]);
   EXPECT_EQ(2, ints32[1]);
@@ -365,11 +363,11 @@ TEST(ConfigListTest, NumericList) {
 
   // ... but for all other types/mixtures, the type cannot be changed.
   EXPECT_THROW(
-      config.SetInteger64List("mixed_types"sv, {1, 3, -17}), wkc::TypeError);
+      config.SetInt64List("mixed_types"sv, {1, 3, -17}), wkc::TypeError);
 
   EXPECT_NO_THROW(config.SetBooleanList("flags"sv, {true, false}));
   EXPECT_TRUE(config.IsHomogeneousScalarList("flags"sv));
-  EXPECT_THROW(config.SetInteger32List("flags"sv, {1, 3, -17}), wkc::TypeError);
+  EXPECT_THROW(config.SetInt32List("flags"sv, {1, 3, -17}), wkc::TypeError);
   EXPECT_THROW(config.SetStringList("flags"sv, {"abc"}), wkc::TypeError);
 
   EXPECT_THROW(
@@ -410,8 +408,8 @@ TEST(ConfigListTest, SetBooleanList) {
   EXPECT_FALSE(flags[1]);
   EXPECT_TRUE(flags[2]);
 
-  EXPECT_THROW(config.GetInteger32List("flags"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger64List("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("flags"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("flags"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoubleList("flags"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringList("flags"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDateList("flags"sv), wkc::TypeError);
@@ -592,7 +590,7 @@ TEST(ConfigListTest, MixedList) {
 
   EXPECT_THROW(config.GetBooleanList("numbers"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDateList("numbers"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("numbers"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("numbers"sv), wkc::TypeError);
   const auto flts = config.GetDoubleList("numbers"sv);
   EXPECT_EQ(2, flts.size());
   EXPECT_DOUBLE_EQ(1.0, flts[0]);
@@ -601,11 +599,11 @@ TEST(ConfigListTest, MixedList) {
   // The mixed list cannot be loaded as a homogeneous type.
   EXPECT_THROW(config.GetBooleanList("types"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDateList("types"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInteger32List("types"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("types"sv), wkc::TypeError);
 
   // But each element can be looked up individually.
   EXPECT_TRUE(config.GetBoolean("types[0]"sv));
-  EXPECT_EQ(-42, config.GetInteger64("types[1]"sv));
+  EXPECT_EQ(-42, config.GetInt64("types[1]"sv));
   EXPECT_DOUBLE_EQ(4.2, config.GetDouble("types[2]"sv));
   EXPECT_EQ("foo", config.GetString("types[3]"sv));
   EXPECT_EQ(wkc::date{"2011-09-10"sv}, config.GetDate("types[4]"sv));
@@ -621,7 +619,7 @@ TEST(ConfigListTest, MixedList) {
 
   EXPECT_THROW(config.SetDouble("types[1]"sv, 1.23), wkc::TypeError);
   EXPECT_NO_THROW(config.SetDouble("types[1]"sv, 17.0));
-  EXPECT_EQ(17, config.GetInteger32("types[1]"sv));
+  EXPECT_EQ(17, config.GetInt32("types[1]"sv));
 
   EXPECT_THROW(
       config.SetTime("types[4]"sv, wkc::time{"08:00"sv}), wkc::TypeError);
@@ -717,7 +715,7 @@ TEST(ConfigListTest, CreateMixedList) {
   // But this list cannot be replaced by a homogeneous list, as this would
   // change the type of the boolean element
   const std::vector<int32_t> ints{1, 17, 42};
-  EXPECT_THROW(config.SetInteger32List("empty"sv, ints), wkc::TypeError);
+  EXPECT_THROW(config.SetInt32List("empty"sv, ints), wkc::TypeError);
 
   // A mixed-type, numeric-only list, however, can be replaced by a numeric
   // list:
@@ -726,7 +724,7 @@ TEST(ConfigListTest, CreateMixedList) {
   config.Append("numbers"sv, -3);
   config.Append("numbers"sv, 3.5);
   EXPECT_EQ(3, config.Size("numbers"sv));
-  EXPECT_NO_THROW(config.SetInteger32List("numbers"sv, ints));
+  EXPECT_NO_THROW(config.SetInt32List("numbers"sv, ints));
   EXPECT_EQ(wkc::ConfigType::FloatingPoint, config.Type("numbers[2]"sv));
 
   // Create a new mixed type list programmatically
@@ -748,15 +746,15 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_THROW(config.Append("no-such-key"sv, 42), wkc::KeyError);
   EXPECT_NO_THROW(config.Append("lst"sv, 42));
   EXPECT_EQ(2, config.Size("lst"sv));
-  EXPECT_EQ(42, config.GetInteger32("lst[1]"sv));
+  EXPECT_EQ(42, config.GetInt32("lst[1]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[1]"sv));
 
   EXPECT_THROW(config.Append("str"sv, 17L), wkc::TypeError);
   EXPECT_THROW(config.Append("no-such-key"sv, 17L), wkc::KeyError);
   EXPECT_NO_THROW(config.Append("lst"sv, 17L));
   EXPECT_EQ(3, config.Size("lst"sv));
-  EXPECT_EQ(17, config.GetInteger32("lst[2]"sv));
-  EXPECT_EQ(17L, config.GetInteger64("lst[2]"sv));
+  EXPECT_EQ(17, config.GetInt32("lst[2]"sv));
+  EXPECT_EQ(17L, config.GetInt64("lst[2]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[2]"sv));
 
   EXPECT_THROW(config.Append("str"sv, 1e-3), wkc::TypeError);
@@ -788,14 +786,14 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_NO_THROW(config.Append("lst[5]"sv, -2));
   EXPECT_EQ(6, config.Size("lst"sv));
   EXPECT_EQ(2, config.Size("lst[5]"sv));
-  EXPECT_EQ(1, config.GetInteger32("lst[5][0]"sv));
-  EXPECT_EQ(-2, config.GetInteger32("lst[5][1]"sv));
-  EXPECT_NO_THROW(config.GetInteger32List("lst[5]"sv));
+  EXPECT_EQ(1, config.GetInt32("lst[5][0]"sv));
+  EXPECT_EQ(-2, config.GetInt32("lst[5][1]"sv));
+  EXPECT_NO_THROW(config.GetInt32List("lst[5]"sv));
   EXPECT_NO_THROW(config.Append("lst[5]"sv, "three"sv));
   EXPECT_EQ(6, config.Size("lst"sv));
   EXPECT_EQ(3, config.Size("lst[5]"sv));
   EXPECT_EQ("three", config.GetString("lst[5][2]"sv));
-  EXPECT_THROW(config.GetInteger32List("lst[5]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("lst[5]"sv), wkc::TypeError);
 
   // Append date/time-related types
   EXPECT_NO_THROW(config.Append("lst"sv, wkc::date{"2023-03-18"sv}));

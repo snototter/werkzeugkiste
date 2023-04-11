@@ -120,7 +120,7 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
       grp.SetDouble(key, value.get<double>());
     } else if (value.is_number_integer()) {
       // https://json.nlohmann.me/api/basic_json/number_integer_t/
-      grp.SetInteger64(key, value.get<int64_t>());
+      grp.SetInt64(key, value.get<int64_t>());
     } else if (value.is_string()) {
       grp.SetString(key, value.get<std::string>());
     } else if (value.is_array()) {

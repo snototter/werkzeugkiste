@@ -144,7 +144,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   bool operator!=(const Configuration &other) const;
 
   /// @brief Checks if the given key exists in this configuration.
-  /// @param key Fully-qualified identifier of the parameter.
+  /// @param key Fully qualified identifier of the parameter.
   bool Contains(std::string_view key) const;
 
   /// @brief Returns the length of the parameter list/group named `key`.
@@ -152,7 +152,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is not a list or a group.
   ///
-  /// @param key Fully-qualified identifier of the parameter.
+  /// @param key Fully qualified identifier of the parameter.
   std::size_t Size(std::string_view key) const;
 
   /// @brief Returns the number of parameters (key-value pairs) in this
@@ -163,7 +163,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `KeyError` if the parameter does not exist.
   ///
-  /// @param key Fully-qualified identifier of the parameter.
+  /// @param key Fully qualified identifier of the parameter.
   ConfigType Type(std::string_view key) const;
 
   /// @brief Deletes the parameter with the given key.
@@ -175,7 +175,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist or refers to an
   /// element of a list.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   void Delete(std::string_view key);
 
   /// @brief Checks if a list parameter contains only scalars of the same type.
@@ -183,15 +183,15 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is not a list.
   ///
-  /// @param key Fully-qualified name of the parameter.
+  /// @param key Fully qualified name of the parameter.
   /// @return True if the list is empty or contains only scalars of the same
   ///   type. False otherwise.
   bool IsHomogeneousScalarList(std::string_view key) const;
 
-  /// @brief Returns a list of (fully-qualified) parameter names below the
+  /// @brief Returns a list of (Fully qualified) parameter names below the
   ///   given key.
   ///
-  /// @param key Fully-qualified name of the parameter.
+  /// @param key Fully qualified name of the parameter.
   /// @param include_array_entries If true, the name of each parameter will
   ///   be returned, *i.e.* each array element will be included. Otherwise,
   ///   only named parameters (*e.g.* a dictionary/table within an array, such
@@ -203,7 +203,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
       bool include_array_entries,
       bool recursive) const;
 
-  /// @brief Returns a list of (fully-qualified) parameter names below the
+  /// @brief Returns a list of (Fully qualified) parameter names below the
   ///   configuration root.
   ///
   /// @param include_array_entries If true, the name of each parameter will
@@ -221,16 +221,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// @brief Raises a `TypeError` if the parameter exists, but is of a
   ///   different type.
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param expected The expected type of the parameter.
   /// @return True if the parameter exists, false otherwise.
   bool EnsureTypeIfExists(std::string_view key, ConfigType expected) const;
 
-  /// @brief Returns the fully-qualified parameter name for the given parameter
+  /// @brief Returns the Fully qualified parameter name for the given parameter
   ///   name and element index.
   /// @param key The parameter name of the list.
   /// @param index The 0-based index of the list element.
-  /// @return The fully-qualified name, *i.e.* `key[index]`.
+  /// @return The Fully qualified name, *i.e.* `key[index]`.
   static std::string KeyForListElement(std::string_view key, std::size_t index);
 
   //---------------------------------------------------------------------------
@@ -241,7 +241,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   bool GetBoolean(std::string_view key) const;
 
   /// @brief Returns the boolean parameter or the `default_val` if it does not
@@ -249,7 +249,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
   bool GetBooleanOr(std::string_view key, bool default_val) const;
 
@@ -258,7 +258,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::optional<bool> GetOptionalBoolean(std::string_view key) const;
 
   /// @brief Sets a boolean parameter.
@@ -267,7 +267,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetBoolean(std::string_view key, bool value);
 
@@ -276,14 +276,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<bool> GetBooleanList(std::string_view key) const;
 
   /// @brief Sets or replaces a list of boolean flags.
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of flags.
   void SetBooleanList(std::string_view key, const std::vector<bool> &values);
 
@@ -297,8 +297,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. double(2.0) can be exactly represented by a
   /// 32-bit integer, whereas double(1.5) cannot).
   ///
-  /// @param key Fully-qualified parameter name.
-  int32_t GetInteger32(std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  int32_t GetInt32(std::string_view key) const;
 
   /// @brief Returns the 32-bit integer parameter or the default value.
   ///
@@ -306,9 +306,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. double(2.0) can be exactly represented by a
   /// 32-bit integer, whereas double(1.5) cannot).
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to be returned if the parameter does not exist.
-  int32_t GetInteger32Or(std::string_view key, int32_t default_val) const;
+  int32_t GetInt32Or(std::string_view key, int32_t default_val) const;
 
   /// @brief Returns the 32-bit integer parameter or `std::nullopt` if it does
   ///   not exist.
@@ -317,22 +317,22 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. double(2.0) can be exactly represented by a
   /// 32-bit integer, whereas double(1.5) cannot).
   ///
-  /// @param key Fully-qualified parameter name.
-  std::optional<int32_t> GetOptionalInteger32(std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  std::optional<int32_t> GetOptionalInt32(std::string_view key) const;
 
   /// @brief Sets a 32-bit signed integer parameter.
   ///
   /// Raises a `TypeError` if the parameter exists and is of a different type,
   ///   unless the value is exactly representable by the existing type. For
   ///   example, an integer value can usually be exactly represented as a
-  ///   floating point number, thus `SetInteger32("my-float"sv, 2)` will not
+  ///   floating point number, thus `SetInt32("my-float"sv, 2)` will not
   ///   raise an exception.
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
-  void SetInteger32(std::string_view key, int32_t value);
+  void SetInt32(std::string_view key, int32_t value);
 
   /// @brief Returns a list of 32-bit integers.
   ///
@@ -342,8 +342,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be exactly represented by a list of 32-bit integer, whereas
   /// [0.0, 1.5] cannot.
   ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<int32_t> GetInteger32List(std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  std::vector<int32_t> GetInt32List(std::string_view key) const;
 
   /// @brief Sets or replaces a list of 32-bit integers.
   ///
@@ -353,10 +353,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   `[int, double, int]` list by `[1, 2, 3, 4]` results in a parameter
   ///   list `[int(1), double(2.0), int(3), int(4)]`.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of flags.
-  void SetInteger32List(std::string_view key,
-      const std::vector<int32_t> &values);
+  void SetInt32List(std::string_view key, const std::vector<int32_t> &values);
 
   //---------------------------------------------------------------------------
   // Integers (64-bit)
@@ -368,8 +367,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. double(2.0) can be exactly represented by a
   /// 64-bit integer, whereas double(1.5) cannot).
   ///
-  /// @param key Fully-qualified parameter name.
-  int64_t GetInteger64(std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  int64_t GetInt64(std::string_view key) const;
 
   /// @brief Returns the 64-bit integer parameter or the default value.
   ///
@@ -377,9 +376,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. double(2.0) can be exactly represented by a
   /// 64-bit integer, whereas double(1.5) cannot).
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to be returned if the parameter does not exist.
-  int64_t GetInteger64Or(std::string_view key, int64_t default_val) const;
+  int64_t GetInt64Or(std::string_view key, int64_t default_val) const;
 
   /// @brief Returns the 64-bit integer parameter or `std::nullopt` if it does
   ///   not exist.
@@ -388,22 +387,22 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   can be safely cast. For example, double(2.0) can be exactly represented
   ///   by a 64-bit integer, whereas double(1.5) cannot.
   ///
-  /// @param key Fully-qualified parameter name.
-  std::optional<int64_t> GetOptionalInteger64(std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  std::optional<int64_t> GetOptionalInt64(std::string_view key) const;
 
   /// @brief Sets a 64-bit signed integer parameter.
   ///
   /// Raises a `TypeError` if the parameter exists and is of a different type,
   ///   unless the value is exactly representable by the existing type. For
   ///   example, an integer value can usually be exactly represented as a
-  ///   floating point number, thus `SetInteger64("my-float"sv, 2)` will not
+  ///   floating point number, thus `SetInt64("my-float"sv, 2)` will not
   ///   raise an exception.
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
-  void SetInteger64(std::string_view key, int64_t value);
+  void SetInt64(std::string_view key, int64_t value);
 
   /// @brief Returns a list of 64-bit integers.
   ///
@@ -413,8 +412,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be exactly represented by a list of 64-bit integer, whereas
   /// [0.0, 1.5] cannot.
   ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<int64_t> GetInteger64List(std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  std::vector<int64_t> GetInt64List(std::string_view key) const;
 
   /// @brief Sets or replaces a list of 64-bit integers.
   ///
@@ -424,10 +423,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   `[int, double, int]` list by `[1, 2, 3, 4]` results in a parameter
   ///   list `[int(1), double(2.0), int(3), int(4)]`.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of flags.
-  void SetInteger64List(std::string_view key,
-      const std::vector<int64_t> &values);
+  void SetInt64List(std::string_view key, const std::vector<int64_t> &values);
 
   /// @brief Returns a 2D point with integer coordinates.
   ///
@@ -440,11 +438,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
-  /// @param key Fully-qualified parameter name
-  point2d<int64_t> GetInteger64Point2D(std::string_view key) const;
+  /// @param key Fully qualified parameter name
+  point2d<int64_t> GetInt64Point2D(std::string_view key) const;
   // TODO replace by vec2i
 
-  // TODO For consistency, add: GetInteger64Point2DOr / GetOptional...
+  // TODO For consistency, add: GetInt64Point2DOr / GetOptional...
 
   /// @brief Returns a 3D point with integer coordinates.
   ///
@@ -457,10 +455,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
-  /// @param key Fully-qualified parameter name
-  point3d<int64_t> GetInteger64Point3D(std::string_view key) const;
+  /// @param key Fully qualified parameter name
+  point3d<int64_t> GetInt64Point3D(std::string_view key) const;
 
-  // TODO For consistency, add: GetInteger64Point3DOr / GetOptional...
+  // TODO For consistency, add: GetInt64Point3DOr / GetOptional...
 
   /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
   ///
@@ -473,9 +471,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if any coordinate is defined as a different type,
   /// unless it can be safely cast.
   ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<point2d<int64_t>> GetInteger64Points2D(
-      std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  std::vector<point2d<int64_t>> GetInt64Points2D(std::string_view key) const;
 
   /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
   ///
@@ -488,9 +485,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if any coordinate is defined as a different type,
   /// unless it can be safely cast.
   ///
-  /// @param key Fully-qualified parameter name.
-  std::vector<point3d<int64_t>> GetInteger64Points3D(
-      std::string_view key) const;
+  /// @param key Fully qualified parameter name.
+  std::vector<point3d<int64_t>> GetInt64Points3D(std::string_view key) const;
 
   //---------------------------------------------------------------------------
   // Floating Point
@@ -502,7 +498,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. integer values can usually be exactly
   /// represented by a double).
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   double GetDouble(std::string_view key) const;
 
   /// @brief Returns the double-precision floating point parameter or the
@@ -512,7 +508,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. integer values can usually be exactly
   /// represented by a double).
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to be returned if the parameter does not exist.
   double GetDoubleOr(std::string_view key, double default_val) const;
 
@@ -523,7 +519,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   can be safely cast. For example, integer values can usually be exactly
   ///   represented by a double.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::optional<double> GetOptionalDouble(std::string_view key) const;
 
   /// @brief Sets a double-precision floating point parameter.
@@ -535,7 +531,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDouble(std::string_view key, double value);
 
@@ -546,7 +542,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// can be safely cast (e.g. integer values can usually be exactly
   /// represented by a double).
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<double> GetDoubleList(std::string_view key) const;
 
   /// @brief Sets or replaces a list of double-precision floating point values.
@@ -558,7 +554,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   list by `[1.0, 2.3, 3e3, 4.5]` results in a parameter list
   ///   `[int(1), double(2.3), int(3000), double(4.5)]`.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of flags.
   void SetDoubleList(std::string_view key, const std::vector<double> &values);
 
@@ -573,7 +569,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
-  /// @param key Fully-qualified parameter name
+  /// @param key Fully qualified parameter name
   point2d<double> GetDoublePoint2D(std::string_view key) const;
 
   // TODO For consistency, add: GetDoublePoint2DOr / GetOptional...
@@ -589,7 +585,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
-  /// @param key Fully-qualified parameter name
+  /// @param key Fully qualified parameter name
   point3d<double> GetDoublePoint3D(std::string_view key) const;
 
   // TODO For consistency, add: GetDoublePoint3DOr / GetOptional...
@@ -605,7 +601,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if any coordinate is defined as a different type,
   /// unless it can be safely cast.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<point2d<double>> GetDoublePoints2D(std::string_view key) const;
 
   /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
@@ -619,7 +615,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if any coordinate is defined as a different type,
   /// unless it can be safely cast.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<point3d<double>> GetDoublePoints3D(std::string_view key) const;
 
   //---------------------------------------------------------------------------
@@ -630,7 +626,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::string GetString(std::string_view key) const;
 
   /// @brief Returns the string parameter or the `default_val` if it does not
@@ -638,7 +634,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
   std::string GetStringOr(std::string_view key,
       std::string_view default_val) const;
@@ -647,7 +643,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::optional<std::string> GetOptionalString(std::string_view key) const;
 
   /// @brief Sets a string parameter.
@@ -656,7 +652,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetString(std::string_view key, std::string_view value);
 
@@ -665,7 +661,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<std::string> GetStringList(std::string_view key) const;
 
   /// @brief Creates or replaces a parameter holding a list of strings.
@@ -674,7 +670,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   type, *i.e.* this method can *not* be used to change the type of
   ///   an existing parameter.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of strings to be set.
   void SetStringList(std::string_view key,
       const std::vector<std::string_view> &values);
@@ -687,7 +683,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   date GetDate(std::string_view key) const;
 
   /// @brief Returns the date parameter or the `default_val` if it does not
@@ -695,7 +691,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
   date GetDateOr(std::string_view key, const date &default_val) const;
 
@@ -704,7 +700,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::optional<date> GetOptionalDate(std::string_view key) const;
 
   /// @brief Sets a local date parameter.
@@ -713,7 +709,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDate(std::string_view key, const date &value);
 
@@ -722,14 +718,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<date> GetDateList(std::string_view key) const;
 
   /// @brief Sets or replaces a list of date parameters.
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of dates.
   void SetDateList(std::string_view key, const std::vector<date> &values);
 
@@ -741,7 +737,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   time GetTime(std::string_view key) const;
 
   /// @brief Returns the time parameter or the `default_val` if it does not
@@ -749,7 +745,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
   time GetTimeOr(std::string_view key, const time &default_val) const;
 
@@ -758,7 +754,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::optional<time> GetOptionalTime(std::string_view key) const;
 
   /// @brief Sets a local time parameter.
@@ -767,7 +763,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetTime(std::string_view key, const time &value);
 
@@ -776,14 +772,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<time> GetTimeList(std::string_view key) const;
 
   /// @brief Sets or replaces a list of time parameters.
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of times.
   void SetTimeList(std::string_view key, const std::vector<time> &values);
 
@@ -795,7 +791,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   date_time GetDateTime(std::string_view key) const;
 
   /// @brief Returns the date-time parameter or the `default_val` if it does
@@ -803,7 +799,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
   date_time GetDateTimeOr(std::string_view key,
       const date_time &default_val) const;
@@ -813,7 +809,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::optional<date_time> GetOptionalDateTime(std::string_view key) const;
 
   /// @brief Sets a date-time parameter.
@@ -825,7 +821,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `std::logic_error` if setting the value in the underlying TOML
   ///   library failed for unforeseen/not handled reasons.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDateTime(std::string_view key, const date_time &value);
 
@@ -834,14 +830,14 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   std::vector<date_time> GetDateTimeList(std::string_view key) const;
 
   /// @brief Sets or replaces a list of date-time parameters.
   ///
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param values List of date-times.
   void SetDateTimeList(std::string_view key,
       const std::vector<date_time> &values);
@@ -856,7 +852,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key already exists or if a "parent" could
   /// not be created.
   ///
-  /// @param key Fully-qualified name of the parameter.
+  /// @param key Fully qualified name of the parameter.
   void CreateList(std::string_view key);
 
   /// @brief Clears an existing list.
@@ -866,7 +862,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is not a list.
   ///
-  /// @param key Fully-qualified name of the parameter.
+  /// @param key Fully qualified name of the parameter.
   void ClearList(std::string_view key);
 
   /// @brief Appends an empty list to an existing list in order to supported
@@ -875,7 +871,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   void AppendList(std::string_view key);
 
   /// @brief Appends a boolean flag to an existing list.
@@ -883,7 +879,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, bool value);
 
@@ -892,7 +888,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, int32_t value);
 
@@ -901,7 +897,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, int64_t value);
 
@@ -910,7 +906,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, double value);
 
@@ -919,7 +915,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, std::string_view value);
 
@@ -928,7 +924,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, const date &value);
 
@@ -937,7 +933,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, const time &value);
 
@@ -946,7 +942,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param value Value to be appended.
   void Append(std::string_view key, const date_time &value);
 
@@ -955,7 +951,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `KeyError` if the key does not exist.
   /// Raises a `TypeError` if the key exists, but is not a list.
   ///
-  /// @param key Fully-qualified name of the existing list parameter.
+  /// @param key Fully qualified name of the existing list parameter.
   /// @param group Group/"Sub-Configuration" to be appended.
   void Append(std::string_view key, const Configuration &group);
 
@@ -963,7 +959,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // Group/"Sub-Configuration"
 
   /// @brief Returns a copy of the sub-group.
-  /// @param key Fully-qualified name of the parameter (which must be a
+  /// @param key Fully qualified name of the parameter (which must be a
   ///   group, e.g. a JSON dictionary, a TOML table, or a libconfig group).
   Configuration GetGroup(std::string_view key) const;
 
@@ -971,10 +967,10 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// If the `key` already exists, it must be a group. Otherwise, the
   /// parameter will be newly created, along with all "parents" in the
-  /// fully-qualified name (which defines a "path" through the configuration
+  /// Fully qualified name (which defines a "path" through the configuration
   /// table/tree).
   ///
-  /// @param key Fully-qualified name of the parameter. If it exists, it must
+  /// @param key Fully qualified name of the parameter. If it exists, it must
   ///   already be a group. The empty string is not allowed. To replace the
   ///   "root", create a new `Configuration` instance instead or use the
   ///   overloaded assignment operators.
@@ -1005,7 +1001,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @tparam Derived Eigen matrix type.
   /// @tparam TpMat The corresponding scalar type.
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param mat The `Eigen::Matrix` or `Eigen::Vector`.
   template <typename Derived, typename TpMat = typename Derived::Scalar>
   void SetMatrix(std::string_view key, const Eigen::MatrixBase<Derived> &mat) {
@@ -1044,7 +1040,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Adjusts the given parameters below the `key` group to hold either
   ///   an absolute file path, or the result of "base_path / <param>" if they
   ///   initially held a relative file path.
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param base_path Base path to be prepended to relative file paths.
   /// @param parameters A list of parameter names / patterns. The wildcard '*'
   ///   is also supported. For example, valid names are: "my-param",
@@ -1074,7 +1070,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 
   /// @brief Visits all string parameters below the given `key` group and
   ///   replaces any occurrence of the given needle/replacement pairs.
-  /// @param key Fully-qualified parameter name.
+  /// @param key Fully qualified parameter name.
   /// @param replacements List of `<search, replacement>` pairs.
   /// @return True if any placeholder has actually been replaced.
   bool ReplaceStringPlaceholders(std::string_view key,
@@ -1112,7 +1108,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `std::runtime_error` if replacing the internal configuration
   ///   failed for unforeseen reasons.
   ///
-  /// @param key Parameter name (fully-qualified TOML path) which holds the
+  /// @param key Parameter name (Fully qualified TOML path) which holds the
   ///     file name of the nested configuration file. The file name must be
   ///     given as string.
   void LoadNestedConfiguration(std::string_view key);

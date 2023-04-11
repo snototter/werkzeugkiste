@@ -145,12 +145,12 @@ void AppendKeyValue(Configuration &cfg, const libconfig::Setting &node) {
   switch (node.getType()) {
     case libconfig::Setting::TypeInt:
       // NOLINTNEXTLINE(google-runtime-int)
-      cfg.SetInteger64(key, CastSetting<int64_t, int>(node));
+      cfg.SetInt64(key, CastSetting<int64_t, int>(node));
       break;
 
     case libconfig::Setting::TypeInt64:
       // NOLINTNEXTLINE(google-runtime-int)
-      cfg.SetInteger64(key, CastSetting<int64_t, long long>(node));
+      cfg.SetInt64(key, CastSetting<int64_t, long long>(node));
       break;
 
     case libconfig::Setting::TypeFloat:
@@ -331,7 +331,7 @@ void PrintScalar(const Configuration &cfg,
       break;
 
     case ConfigType::Integer:
-      out << IntegerString(cfg.GetInteger64(key));
+      out << IntegerString(cfg.GetInt64(key));
       break;
 
     case ConfigType::FloatingPoint:

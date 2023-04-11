@@ -85,7 +85,8 @@ int main(int /* argc */, char ** /* argv */) {
 
   config =
       wkc::LoadTOMLFile(wkf::FullFile(wkf::DirName(__FILE__), "tomlspec.toml"));
-  const auto params = config.ListParameterNames(false, true);
+  const auto params = config.ListParameterNames(
+      /*include_array_entries=*/false, /*recursive=*/true);
   std::cout << "Parameter names:\n";
   for (const auto &name : params) {
     std::cout << "  " << name << std::endl;
@@ -110,13 +111,13 @@ int main(int /* argc */, char ** /* argv */) {
 
   try {
     std::cout << "Query int32_max: "
-              << config.GetInteger32("integral-numbers.int32_max") << std::endl;
+              << config.GetInt32("integral-numbers.int32_max") << std::endl;
     std::cout << "Query int64 as int32 (should throw exception): "
-              << config.GetInteger32("integral-numbers.int64") << std::endl;
+              << config.GetInt32("integral-numbers.int64") << std::endl;
   } catch (const wkc::TypeError &e) {
     std::cout << "Caught exception: " << e.what() << std::endl;
     std::cout << "Query int64 correctly: "
-              << config.GetInteger64("integral-numbers.int64") << std::endl;
+              << config.GetInt64("integral-numbers.int64") << std::endl;
   }
 
   const auto list_config = wkc::Configuration::LoadTOMLString(R"toml(
@@ -136,14 +137,14 @@ int main(int /* argc */, char ** /* argv */) {
     )toml");
 
   try {
-    list_config.GetInteger32List("no-such-key");
+    list_config.GetInt32List("no-such-key");
     throw std::logic_error("Shouldn't be here");
   } catch (const wkc::KeyError &e) {
     std::cout << "Tried invalid key, got exception: " << e.what() << std::endl;
   }
 
   try {
-    list_config.GetInteger32List("not-a-list");
+    list_config.GetInt32List("not-a-list");
     throw std::logic_error("Shouldn't be here");
   } catch (const wkc::TypeError &e) {
     std::cout << "Tried loading a table as a list, got exception: " << e.what()
@@ -151,7 +152,7 @@ int main(int /* argc */, char ** /* argv */) {
   }
 
   try {
-    list_config.GetInteger32List("mixed_types");
+    list_config.GetInt32List("mixed_types");
     throw std::logic_error("Shouldn't be here");
   } catch (const wkc::TypeError &e) {
     std::cout << "Tried loading an inhomogeneous array as scalar list, got "
