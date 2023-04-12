@@ -39,13 +39,21 @@ FetchContent_MakeAvailable(tomlplusplus)
 
 # ## yaml-cpp (config) ran into cmake configuration issue: yaml-cpp is not
 # included in the export targets, but required for the werkzeugkiste-config
-# export FetchContent_Declare( yaml-cpp GIT_REPOSITORY
-# https://github.com/jbeder/yaml-cpp.git GIT_TAG yaml-cpp-0.7.0)
-# set(YAML_CPP_BUILD_TESTS OFF) set(YAML_CPP_INSTALL ON) set(CMAKE_HOST_WIN32
-# "") FetchContent_MakeAvailable(yaml-cpp) ## rapidyaml (config) caused too many
-# uninitialized variable warnings in dev mode FetchContent_Declare(ryml
-# GIT_REPOSITORY https://github.com/biojppm/rapidyaml.git GIT_TAG v0.5.0
-# GIT_SHALLOW FALSE)  # ensure submodules are checked out
+# export:
+
+# FetchContent_Declare(yaml-cpp
+#   GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+#   GIT_TAG yaml-cpp-0.7.0)
+# set(YAML_CPP_BUILD_TESTS OFF)
+# set(YAML_CPP_INSTALL ON)
+# set(CMAKE_HOST_WIN32 "")
+# FetchContent_MakeAvailable(yaml-cpp)
+
+# ## rapidyaml (config)
+# # caused too many uninitialized variable warnings in dev mode
+# FetchContent_Declare(ryml
+#   GIT_REPOSITORY https://github.com/biojppm/rapidyaml.git GIT_TAG v0.5.0
+#   GIT_SHALLOW FALSE)  # ensure submodules are checked out
 # FetchContent_MakeAvailable(ryml)
 
 # libconfig++ (config)
@@ -462,6 +470,7 @@ target_include_directories(
 # Including JSON via FetchContent failed in dev mode (due to several
 # uninitialized variables). The simplest workaround was to include the single
 # json.hpp header in this repository.
+# Similarly, this also fixed the same issues with rapidyaml.
 
 target_include_directories(
   werkzeugkiste-config SYSTEM
