@@ -1,6 +1,5 @@
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
-#include <werkzeugkiste/logging.h>  // TODO remove
 #include <werkzeugkiste/strings/strings.h>
 
 #include <fstream>
