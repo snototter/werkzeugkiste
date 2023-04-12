@@ -247,7 +247,6 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
       wkc::date_time{"1990-12-31T23:59:59+00:00"sv});
 }
 
-// TODO Can be properly tested once we have LoadJSONString()
 TEST(ConfigIOTest, LoadingJSON) {
   // Invalid file inputs:
   EXPECT_THROW(wkc::LoadJSONFile("no-such-file"sv), wkc::ParseError);
@@ -441,16 +440,43 @@ TEST(ConfigIOTest, SerializeJSONStrings) {
   EXPECT_EQ(config1, config2);
 }
 
-TEST(ConfigIOTest, DumpYAML) {
-  // TODO mixed lsit/nested lists/groups
-  const auto cfg = wkc::LoadTOMLString(R"toml(
-    flag = true
-    int = 42
-    flt = 1e6
-    str = "value"
-    )toml");
+TEST(ConfigIOTest, LoadingYAML) {
+  const std::string ystr{R"yml({
+    val: null,
+    arr: [1, 2, null, 4]
 
-  const std::string yaml = wkc::DumpYAMLString(cfg);
+    })yml"sv};
+
+  wkc::LoadYAMLString(ystr);
+  // Skip loading null/none values
+  //   auto config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::Skip);
+  //   EXPECT_EQ(1, config.Size());
+  //   EXPECT_FALSE(config.Contains("val"sv));
+
+  //   EXPECT_EQ(3, config.Size("arr"sv));
+  //   EXPECT_TRUE(config.IsHomogeneousScalarList("arr"sv));
+  //   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("arr[0]"sv));
+
+  //   // Replace null/none values by the string "null"
+  //   config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::NullString);
+  //   EXPECT_EQ(2, config.Size());
+  //   EXPECT_TRUE(config.Contains("val"sv));
+  //   EXPECT_EQ("null", config.GetString("val"sv));
+
+  //   EXPECT_EQ(4, config.Size("arr"sv));
+  //   EXPECT_EQ("null", config.GetString("arr[2]"sv));
+  // }
+
+  // TEST(ConfigIOTest, DumpYAML) {
+  //   // TODO mixed lsit/nested lists/groups
+  //   const auto cfg = wkc::LoadTOMLString(R"toml(
+  //     flag = true
+  //     int = 42
+  //     flt = 1e6
+  //     str = "value"
+  //     )toml");
+
+  //   const std::string yaml = wkc::DumpYAMLString(cfg);
 }
 
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG

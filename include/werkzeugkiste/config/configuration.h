@@ -1344,6 +1344,16 @@ WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadJSONString(std::string_view json_string,
     NullValuePolicy none_policy = NullValuePolicy::Skip);
 
+// TODO doc
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadYAMLFile(std::string_view filename,
+    NullValuePolicy none_policy = NullValuePolicy::Skip);
+
+// TODO doc
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadYAMLString(const std::string &yaml_string,
+    NullValuePolicy none_policy = NullValuePolicy::Skip);
+
 /// @brief Returns a libconfig-formatted string.
 WERKZEUGKISTE_CONFIG_EXPORT
 std::string DumpLibconfigString(const Configuration &cfg);
