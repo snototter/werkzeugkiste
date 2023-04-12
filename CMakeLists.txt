@@ -24,9 +24,37 @@ include(cmake/variables.cmake)
 
 # ##############################################################################
 # ---- Dependencies ----
+include(FetchContent)
 
+# Eigen (geometry & config)
 find_package(Eigen3 REQUIRED NO_MODULE)
 # TODO: * move all fetch/find package calls up here *
+
+# TOML++ (config)
+FetchContent_Declare(
+  tomlplusplus
+  GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+  GIT_TAG v3.2.0)
+FetchContent_MakeAvailable(tomlplusplus)
+
+# ## yaml-cpp (config) ran into cmake configuration issue: yaml-cpp is not
+# included in the export targets, but required for the werkzeugkiste-config
+# export FetchContent_Declare( yaml-cpp GIT_REPOSITORY
+# https://github.com/jbeder/yaml-cpp.git GIT_TAG yaml-cpp-0.7.0)
+# set(YAML_CPP_BUILD_TESTS OFF) set(YAML_CPP_INSTALL ON) set(CMAKE_HOST_WIN32
+# "") FetchContent_MakeAvailable(yaml-cpp) ## rapidyaml (config) caused too many
+# uninitialized variable warnings in dev mode FetchContent_Declare(ryml
+# GIT_REPOSITORY https://github.com/biojppm/rapidyaml.git GIT_TAG v0.5.0
+# GIT_SHALLOW FALSE)  # ensure submodules are checked out
+# FetchContent_MakeAvailable(ryml)
+
+# libconfig++ (config)
+option(werkzeugkiste_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
+if(werkzeugkiste_WITH_LIBCONFIG)
+  # TODO find portable way (windows?)
+  find_path(LIB_LIBCFG_INCDIR libconfig.h++)
+  find_library(LIB_LIBCFG_LIBRARY NAMES config++)
+endif()
 
 # ##############################################################################
 # ---- Declare libraries ----
@@ -363,15 +391,6 @@ target_compile_features(werkzeugkiste-timing PUBLIC cxx_std_17)
 
 # ##############################################################################
 # ---- Configuration Utils: werkzeugkiste::config ----
-# Requires toml++ for TOML support
-include(FetchContent)
-FetchContent_Declare(
-  tomlplusplus
-  GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-  GIT_TAG v3.2.0)
-FetchContent_MakeAvailable(tomlplusplus)
-
-option(werkzeugkiste_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
 
 # Header files
 set(wzkgconfig_HEADER_FILES
@@ -385,7 +404,7 @@ set(wzkgconfig_HEADER_FILES
 # Source files
 set(wzkgconfig_SOURCE_FILES
     src/config/configuration.cpp src/config/keymatcher.cpp src/config/types.cpp
-    src/config/json.cpp src/config/libconfig.cpp)
+    src/config/json.cpp src/config/libconfig.cpp src/config/yaml.cpp)
 
 # Library
 add_library(werkzeugkiste-config ${wzkgconfig_HEADER_FILES}
@@ -399,9 +418,6 @@ if(NOT BUILD_SHARED_LIBS)
 endif()
 
 if(werkzeugkiste_WITH_LIBCONFIG)
-  # TODO find portable way (mac, win?)
-  find_path(LIB_LIBCFG_INCDIR libconfig.h++)
-  find_library(LIB_LIBCFG_LIBRARY NAMES config++)
 
   target_include_directories(werkzeugkiste-config PRIVATE ${LIB_LIBCFG_INCDIR})
   target_link_libraries(werkzeugkiste-config PRIVATE ${LIB_LIBCFG_LIBRARY})
@@ -423,6 +439,7 @@ target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
 target_link_libraries(
   werkzeugkiste-config PRIVATE werkzeugkiste::logging werkzeugkiste::strings
                                werkzeugkiste::files werkzeugkiste::container)
+# yaml-cpp) #ryml::ryml)
 
 set_target_properties(
   werkzeugkiste-config
