@@ -17,6 +17,57 @@
 
 namespace werkzeugkiste::config {
 namespace detail {
+// taken from
+// https://github.com/biojppm/rapidyaml/blob/master/samples/quickstart.cpp
+struct ErrorHandler {
+  // this will be called on error
+  void on_error(const char *msg, size_t len, ryml::Location loc) {
+    throw ParseError{ryml::formatrs<std::string>("{}:{}:{} ({}B): ERROR: {}",
+        loc.name,
+        loc.line,
+        loc.col,
+        loc.offset,
+        ryml::csubstr(msg, len))};
+  }
+
+  // bridge
+  ryml::Callbacks callbacks() {
+    return ryml::Callbacks(this, nullptr, nullptr, ErrorHandler::s_error);
+  }
+  static void s_error(const char *msg,
+      size_t len,
+      ryml::Location loc,
+      void *this_) {
+    return ((ErrorHandler *)this_)->on_error(msg, len, loc);
+  }
+
+  // // checking
+  // template<class Fn>
+  // void check_error_occurs(Fn &&fn) const
+  // {
+  //     bool expected_error_occurred = false;
+  //     try { fn(); }
+  //     catch(std::runtime_error const&) { expected_error_occurred = true; }
+  //     CHECK(expected_error_occurred);
+  // }
+  // void check_effect(bool committed) const
+  // {
+  //     ryml::Callbacks const& current = ryml::get_callbacks();
+  //     if(committed)
+  //     {
+  //         CHECK(current.m_error == &s_error);
+  //     }
+  //     else
+  //     {
+  //         CHECK(current.m_error != &s_error);
+  //     }
+  //     CHECK(current.m_allocate == defaults.m_allocate);
+  //     CHECK(current.m_free == defaults.m_free);
+  // }
+  // save the default callbacks for checking
+  ErrorHandler() : defaults(ryml::get_callbacks()) {}
+  ryml::Callbacks defaults;
+};
 // // Forward declaration
 // Configuration FromJSONObject(const json &object, NullValuePolicy
 // none_policy);
@@ -168,22 +219,36 @@ namespace detail {
 
 Configuration LoadYAMLString(const std::string &yaml_string,
     NullValuePolicy none_policy) {
-  try {
-    ryml::Tree fails = ryml::parse_in_arena(R"(
-en: "Planet (Gas)
-  bla
- decode this: "\u263A \xE2\x98\xBA"
-)");
-    // ryml::Tree langs = ryml::parse_in_arena(yaml_string.c_str());
-    // ryml::Parser parser{};
-    // // ryml::Tree tree = parser.parse_in_arena();
-    // ryml::Tree tree = parser.parse_in_arena({}, yaml_string.c_str());
-    //     return detail::FromJSONRoot(json::parse(json_string), none_policy);
-  } catch (const std::exception &e) {
-    std::string msg{"Parsing JSON input failed! "};
-    msg += e.what();
-    throw ParseError{msg};
-  }
+  //   try {
+  //     ryml::Tree fails = ryml::parse_in_arena(R"(
+  // en: "Planet (Gas)
+  //   bla
+  //  decode this: "\u263A \xE2\x98\xBA"
+  // )");
+  detail::ErrorHandler err_hnd;
+  ryml::set_callbacks(err_hnd.callbacks());
+  // err_hnd.check_error_occurs([]{
+  //     ryml::Tree tree = ryml::parse_in_arena("errorhandler.yml", "[a: b\n}");
+  //     std::cout << tree;
+  // });
+  // try {
+  //     ryml::Tree tree = ryml::parse_in_arena("errorhandler.yml", "[a: b\n}");
+  //     std::cout << tree;
+  // } catch (const ryml::Exception &e) {
+  //     std::cout << "Exception: " << e.what() << std::endl;
+  auto cs = ryml::csubstr(yaml_string.c_str(), yaml_string.length());
+  ryml::Tree tree = ryml::parse_in_arena(cs);
+
+  ryml::set_callbacks(err_hnd.defaults);
+  // ryml::Parser parser{};
+  // // ryml::Tree tree = parser.parse_in_arena();
+  // ryml::Tree tree = parser.parse_in_arena({}, yaml_string.c_str());
+  //     return detail::FromJSONRoot(json::parse(json_string), none_policy);
+  //   } catch (const std::exception &e) {
+  //     std::string msg{"Parsing JSON input failed! "};
+  //     msg += e.what();
+  //     throw ParseError{msg};
+  //   }
 }
 
 Configuration LoadYAMLFile(std::string_view filename,

@@ -441,13 +441,26 @@ TEST(ConfigIOTest, SerializeJSONStrings) {
 }
 
 TEST(ConfigIOTest, LoadingYAML) {
-  const std::string ystr{R"yml({
-    val: null,
-    arr: [1, 2, null, 4]
+  // const std::string ystr{R"yml({
+  //   val: null,
+  //   arr: [1, 2, null, 4]
 
-    })yml"sv};
+  //   })yml"};
 
-  wkc::LoadYAMLString(ystr);
+  // wkc::LoadYAMLString(ystr);
+
+  std::string fail_str{R"yml({
+    [a: b
+    }
+    )yml"};
+  // std::string fail_str{R"yml({
+  //   arr: [1, 2]
+  //   R"(
+  //   en: "Planet (Gas)
+  //    - bla
+  //     - : !.:: blub
+  //   )yml"};
+  EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
   // Skip loading null/none values
   //   auto config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::Skip);
   //   EXPECT_EQ(1, config.Size());
