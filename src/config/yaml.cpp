@@ -2,7 +2,10 @@
 #include <werkzeugkiste/files/fileio.h>
 #include <werkzeugkiste/logging.h>  // TODO remove
 #include <werkzeugkiste/strings/strings.h>
+
+// NOLINTBEGIN
 #include <yaml-cpp/yaml.h>
+// NOLINTEND
 
 #include <fstream>
 #include <string>
@@ -10,7 +13,6 @@
 
 // #define RYML_SINGLE_HDR_DEFINE_NOW
 // #include <ryml/ryml_all.hpp>
-// NOLINTEND(*-macro-usage, readability-identifier-naming)
 
 // Forward declarations
 namespace werkzeugkiste::config::detail {
@@ -22,16 +24,12 @@ void AppendListItems(const YAML::Node &node,
     std::string_view key);
 }  // namespace werkzeugkiste::config::detail
 
+// NOLINTBEGIN(readability-identifier-naming, misc-no-recursion)
 namespace YAML {
+/// @brief Specialization of the YAML::convert template for a Configuration.
 template <>
 struct convert<werkzeugkiste::config::Configuration> {
-  // static Node encode(const werkzeugkiste::config::Configuration& rhs) {
-  //   Node node;
-  //   // node.push_back(rhs.x);
-  //   // node.push_back(rhs.y);
-  //   // node.push_back(rhs.z);//FIXME
-  //   return node;
-  // }
+  // Encode skipped on purpose, as we reuse the YAML formatter of toml++.
 
   static bool decode(const Node &node,
       werkzeugkiste::config::Configuration &rhs) {
@@ -42,6 +40,12 @@ struct convert<werkzeugkiste::config::Configuration> {
     for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
       const std::string key = it->first.as<std::string>();
       WZKLOG_CRITICAL("decoding config, key: {}", key);
+      switch (it->second.Type()) {
+        case YAML::NodeType::Null:
+          // rhs.Set(key, werkzeugkiste::config::NullValue{});
+          // break;
+          break;
+      }
       if (it->second.IsScalar()) {
         werkzeugkiste::config::detail::SetScalar(it->second, rhs, key);
       } else if (it->second.IsSequence()) {
@@ -106,10 +110,16 @@ struct convert<werkzeugkiste::config::date_time> {
   }
 };
 }  // namespace YAML
+// NOLINTEND(readability-identifier-naming, misc-no-recursion)
 
 namespace werkzeugkiste::config {
 namespace detail {
 inline bool HasTag(const YAML::Node &node) {
+  // LCOV_EXCL_START
+  if (!node.IsScalar()) {
+    return false;
+  }
+  // LCOV_EXCL_STOP
   const std::string &tag = node.Tag();
   return (!tag.empty() && (tag != "?"));
 }
@@ -164,27 +174,56 @@ void SetTaggedScalar(const YAML::Node &node,
   const std::string &value = node.Scalar();
   if ((tag == "tag:yaml.org,2002:str") || (tag == "!")) {
     cfg.SetString(fqn, value);
-    return;
-  }
-
-  if (tag == "tag:yaml.org,2002:bool") {
+  } else if (tag == "tag:yaml.org,2002:bool") {
     cfg.SetBool(fqn, node.as<bool>());
-  }
-
-  if (tag == "tag:yaml.org,2002:int") {
+  } else if (tag == "tag:yaml.org,2002:int") {
     cfg.SetInt64(fqn, std::stol(value));
-  }
-
-  if (tag == "tag:yaml.org,2002:float") {
+    return;
+  } else if (tag == "tag:yaml.org,2002:float") {
     cfg.SetDouble(fqn, std::stod(value));
+  } else {
+    // if (tag == "tag:yaml.org,2002:date") {
+    //   return date{val};
+    // return;
+    // }
+
+    std::string msg{"YAML tag `" + tag + "` is not supported!"};
+    throw std::logic_error{msg};
   }
+}
 
-  // if (tag == "tag:yaml.org,2002:date") {
-  //   return date{val};
-  // }
+void AppendTaggedScalar(const YAML::Node &node,
+    Configuration &cfg,
+    std::string_view fqn) {
+  // LCOV_EXCL_START
+  if (!HasTag(node)) {
+    std::string msg{
+        "AppendTaggedScalar called with untagged node for parameter `"};
+    msg += fqn;
+    msg += "`!";
+    throw std::logic_error(msg);
+  }
+  // LCOV_EXCL_STOP
 
-  std::string msg{"YAML tag `" + tag + "` is not supported!"};
-  throw std::logic_error{msg};
+  const std::string &tag = node.Tag();
+  const std::string &value = node.Scalar();
+  if ((tag == "tag:yaml.org,2002:str") || (tag == "!")) {
+    cfg.Append(fqn, value);
+  } else if (tag == "tag:yaml.org,2002:bool") {
+    cfg.Append(fqn, node.as<bool>());
+  } else if (tag == "tag:yaml.org,2002:int") {
+    cfg.Append(fqn, std::stol(value));
+  } else if (tag == "tag:yaml.org,2002:float") {
+    cfg.Append(fqn, std::stod(value));
+  } else {
+    // if (tag == "tag:yaml.org,2002:date") {
+    //   return date{val};
+    // return;
+    // }
+
+    std::string msg{"YAML tag `" + tag + "` is not supported!"};
+    throw std::logic_error{msg};
+  }
 }
 
 void SetScalar(const YAML::Node &node,

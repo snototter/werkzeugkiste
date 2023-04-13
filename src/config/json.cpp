@@ -113,7 +113,7 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
           throw ParseError{msg};
       }
     } else if (value.is_boolean()) {
-      grp.SetBoolean(key, value.get<bool>());
+      grp.SetBool(key, value.get<bool>());
     } else if (value.is_number_float()) {
       // https://json.nlohmann.me/api/basic_json/number_float_t/
       grp.SetDouble(key, value.get<double>());
