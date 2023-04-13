@@ -47,7 +47,6 @@ FetchContent_Declare(
   yaml-cpp
   GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
   GIT_TAG master)
-# GIT_TAG yaml-cpp-0.7.0)
 set(YAML_CPP_BUILD_TESTS
     OFF
     CACHE INTERNAL BOOL "Disable yaml tests")
@@ -58,11 +57,6 @@ set(YAML_CPP_INSTALL
     CACHE INTERNAL BOOL "Export yaml targets")
 set(CMAKE_HOST_WIN32 OFF)
 FetchContent_MakeAvailable(yaml-cpp)
-
-# ## rapidyaml (config) # caused too many uninitialized variable warnings in dev
-# mode FetchContent_Declare(ryml GIT_REPOSITORY
-# https://github.com/biojppm/rapidyaml.git GIT_TAG v0.5.0 GIT_SHALLOW FALSE)  #
-# ensure submodules are checked out FetchContent_MakeAvailable(ryml)
 
 # libconfig++ (config)
 option(werkzeugkiste_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
