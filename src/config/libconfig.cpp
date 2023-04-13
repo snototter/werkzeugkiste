@@ -112,7 +112,7 @@ void AppendListValue(std::string_view lst_key,
 
     case libconfig::Setting::TypeArray:
     case libconfig::Setting::TypeList: {
-      std::size_t sz = cfg.Size(lst_key);
+      std::size_t sz = cfg.Size(lst_key);  // TODO reuse keyfrom...
       cfg.AppendList(lst_key);
       std::string elem_key{lst_key};
       elem_key += '[';

@@ -2052,6 +2052,9 @@ Configuration LoadFile(std::string_view filename) {
   if (lower == ".json") {
     return LoadJSONFile(filename);
   }
+  if ((lower == ".yaml") || (lower == ".yml")) {
+    return LoadYAMLFile(filename);
+  }
   if (lower == ".cfg") {
     return LoadLibconfigFile(filename);
   }

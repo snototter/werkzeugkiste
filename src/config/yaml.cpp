@@ -75,7 +75,7 @@ struct convert<werkzeugkiste::config::date_time> {
 namespace werkzeugkiste::config {
 namespace detail {
 // Forward declaration
-Configuration FromYAMLNode(const YAML::Node &, NullValuePolicy);
+Configuration FromYAMLNode(const YAML::Node &node, NullValuePolicy none_policy);
 
 /// @brief Returns true if the scalar node is tagged.
 inline bool HasTag(const YAML::Node &node) {
@@ -315,6 +315,15 @@ void AppendListItems(const YAML::Node &node,
       case YAML::NodeType::Map:
         cfg.Append(key, FromYAMLNode(item, none_policy));
         break;
+
+      // LCOV_EXCL_START
+      case YAML::NodeType::Undefined: {
+        std::string msg{"Undefined YAML node type for parameter `"};
+        msg += key;
+        msg += "`!";
+        throw std::logic_error{msg};
+      }
+        // LCOV_EXCL_STOP
     }
   }
 }
@@ -370,17 +379,30 @@ Configuration LoadYAMLString(const std::string &yaml_string,
   try {
     WZKLOG_CRITICAL("INPUT TO PARSER\n{}", yaml_string);
     YAML::Node node = YAML::Load(yaml_string);
-    WZKLOG_CRITICAL("ismap {}, is_seq {}", node.IsMap(), node.IsSequence());
-    // TODO check if ismap
-    auto cfg = detail::FromYAMLNode(node, none_policy);
-    WZKLOG_CRITICAL("parsed into config:\n{}", cfg.ToTOML());
-    return cfg;
+    if (node.IsMap()) {
+      auto cfg = detail::FromYAMLNode(node, none_policy);
+      // TODO remove
+      WZKLOG_CRITICAL("parsed into config:\n{}", cfg.ToTOML());
+      return cfg;
+    }
 
+    if (node.IsSequence()) {
+      Configuration cfg{};
+      const std::string_view key{"list"};
+      cfg.CreateList(key);
+      detail::AppendListItems(node, cfg, key, none_policy);
+      WZKLOG_CRITICAL("parsed LIST into config:\n{}", cfg.ToTOML());
+      return cfg;
+    }
+
+    // LCOV_EXCL_START
+    throw ParseError{
+        "Could not parse YAML, because root node is neither a map nor a "
+        "sequence!"};
+    // LCOV_EXCL_STOP
   } catch (const YAML::Exception &e) {
     throw ParseError(e.what());
   }
-
-  return Configuration{};
 }
 
 Configuration LoadYAMLFile(std::string_view filename,

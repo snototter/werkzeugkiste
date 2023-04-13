@@ -1278,9 +1278,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
 /// @brief Loads a configuration file.
 ///
 /// The configuration type will be deduced from the file extension, *i.e.*
-/// `.toml`, `.json`, or `.cfg`.
-/// For JSON files, the default `NullValuePolicy` will be used, see
-/// `LoadJSONFile`.
+/// `.toml`, `.json`, `.yml`/`.yaml` or `.cfg`.
+/// For JSON and YAML files, the default `NullValuePolicy` will be used, see
+/// `LoadJSONFile` or `LoadYAMLFile`.
 ///
 /// @param filename Path to the configuration file.
 Configuration LoadFile(std::string_view filename);
@@ -1309,10 +1309,10 @@ Configuration LoadLibconfigString(std::string_view lcfg_string);
 
 /// @brief Loads a JSON configuration from a string.
 ///
-/// Because a configuration must consist of key/value pairs, a plain JSON
-/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
-/// configuration would have 1 element, and you need to access it via its key.
-/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+/// Because a `Configuration` must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
 ///
 /// @param filename Path to the `.json` file.
 /// @param none_policy How to deal with None values.
@@ -1322,10 +1322,10 @@ Configuration LoadJSONFile(std::string_view filename,
 
 /// @brief Loads a JSON configuration from a string.
 ///
-/// Because a configuration must consist of key/value pairs, a plain JSON
-/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
-/// configuration would have 1 element, and you need to access it via its key.
-/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+/// Because a `Configuration` must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
 ///
 /// @param json_string String representation of the JSON configuration.
 /// @param none_policy How to deal with None values.
@@ -1333,12 +1333,28 @@ WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadJSONString(std::string_view json_string,
     NullValuePolicy none_policy = NullValuePolicy::Skip);
 
-// TODO doc
+/// @brief Loads a YAML configuration from a file.
+///
+/// Because a `Configuration` must consist of key/value pairs, a plain YAML
+/// sequence (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
+///
+/// @param filename Path to the YAML file.
+/// @param none_policy How to deal with None values.
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadYAMLFile(std::string_view filename,
     NullValuePolicy none_policy = NullValuePolicy::Skip);
 
-// TODO doc
+/// @brief Loads a YAML configuration from a string.
+///
+/// Because a `Configuration` must consist of key/value pairs, a plain YAML
+/// sequence (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
+///
+/// @param yaml_string String representation of the YAML configuration.
+/// @param none_policy How to deal with None values.
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadYAMLString(const std::string &yaml_string,
     NullValuePolicy none_policy = NullValuePolicy::Skip);

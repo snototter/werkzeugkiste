@@ -351,42 +351,42 @@ TEST(ConfigIOTest, LoadingJSON) {
     )json"sv};
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::Skip);
   EXPECT_EQ(1, config.Size());
-  EXPECT_EQ(4, config.Size("json"sv));
-  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
-  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
-  EXPECT_EQ(2, config.Size("json[2]"sv));
-  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
-  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
-  EXPECT_FALSE(config.Contains("json[2].none"sv));
-  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
+  EXPECT_EQ(4, config.Size("list"sv));
+  EXPECT_EQ(1, config.GetInt32("list[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("list[1]"sv));
+  EXPECT_EQ(2, config.Size("list[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("list[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("list[2].flt"sv));
+  EXPECT_FALSE(config.Contains("list[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("list[3]"sv));
 
   // Replace null values with "null" strings
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::NullString);
   EXPECT_EQ(1, config.Size());
-  EXPECT_EQ(5, config.Size("json"sv));
-  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
-  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
-  EXPECT_EQ(3, config.Size("json[2]"sv));
-  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
-  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
-  EXPECT_EQ("null", config.GetString("json[2].none"sv));
-  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
-  EXPECT_EQ("null", config.GetString("json[4]"sv));
+  EXPECT_EQ(5, config.Size("list"sv));
+  EXPECT_EQ(1, config.GetInt32("list[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("list[1]"sv));
+  EXPECT_EQ(3, config.Size("list[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("list[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("list[2].flt"sv));
+  EXPECT_EQ("null", config.GetString("list[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("list[3]"sv));
+  EXPECT_EQ("null", config.GetString("list[4]"sv));
 
   // Replace null values with empty lists
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::EmptyList);
   EXPECT_EQ(1, config.Size());
-  EXPECT_EQ(5, config.Size("json"sv));
-  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
-  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
-  EXPECT_EQ(3, config.Size("json[2]"sv));
-  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
-  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
-  EXPECT_EQ(wkc::ConfigType::List, config.Type("json[2].none"sv));
-  EXPECT_EQ(0, config.Size("json[2].none"sv));
-  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
-  EXPECT_EQ(wkc::ConfigType::List, config.Type("json[4]"sv));
-  EXPECT_EQ(0, config.Size("json[4]"sv));
+  EXPECT_EQ(5, config.Size("list"sv));
+  EXPECT_EQ(1, config.GetInt32("list[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("list[1]"sv));
+  EXPECT_EQ(3, config.Size("list[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("list[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("list[2].flt"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("list[2].none"sv));
+  EXPECT_EQ(0, config.Size("list[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("list[3]"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("list[4]"sv));
+  EXPECT_EQ(0, config.Size("list[4]"sv));
 
   // Null values should throw an exception
   js = R"json({ "int": 1, "flt": 2.5, "none": null})json"sv;
@@ -441,6 +441,8 @@ TEST(ConfigIOTest, SerializeJSONStrings) {
 }
 
 TEST(ConfigIOTest, LoadingYAML) {
+  // TODO test LoadFile to load YAML files
+
   // const std::string ystr{R"yml(
   //   val: null,
   //   arr: [1, 2, null, 4]

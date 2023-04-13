@@ -110,7 +110,7 @@ Configuration FromJSONRoot(const json &object, NullValuePolicy none_policy) {
   }
   if (object.is_array()) {
     Configuration cfg{};
-    const std::string_view key{"json"};
+    const std::string_view key{"list"};
     cfg.CreateList(key);
     for (const json &element : object) {
       AppendListValue(key, cfg, element, none_policy);
