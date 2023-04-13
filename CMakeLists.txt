@@ -55,7 +55,7 @@ set(YAML_CPP_BUILD_TESTS
 set(YAML_CPP_INSTALL
     ON
     CACHE BOOL "Export yaml targets" FORCE)
-set(CMAKE_HOST_WIN32 OFF CACHE Bool "TODO needed to suppress uninitialized var in yaml cpp" FORCE)
+set(CMAKE_HOST_WIN32 "" CACHE STRING "TODO needed to suppress uninitialized var in yaml cpp" FORCE)
 FetchContent_MakeAvailable(yaml-cpp)
 
 # libconfig++ (config)
