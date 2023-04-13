@@ -1,5 +1,6 @@
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/filesys.h>
+#include <werkzeugkiste/logging.h>  // TODO remove
 #include <werkzeugkiste/strings/strings.h>
 
 #include <sstream>
@@ -441,127 +442,264 @@ TEST(ConfigIOTest, SerializeJSONStrings) {
 }
 
 TEST(ConfigIOTest, LoadingYAML) {
-  // TODO test LoadFile to load YAML files
+  // Load YAML files
+  EXPECT_THROW(wkc::LoadYAMLFile(__FILE__), wkc::ParseError);
 
-  // const std::string ystr{R"yml(
-  //   val: null,
-  //   arr: [1, 2, null, 4]
-  //   nones: [null, ~,  ]
+  const auto fname_ci = wkf::FullFile({wkf::DirName(__FILE__),
+      "..",
+      "..",
+      "..",
+      ".github",
+      "workflows",
+      "ci.yml"});
+  auto cfg = wkc::LoadYAMLFile(fname_ci);
+  EXPECT_TRUE(cfg.Contains("jobs.lint.runs-on"sv));
+  EXPECT_EQ("ubuntu-22.04", cfg.GetString("jobs.lint.runs-on"sv));
 
-  //   )yml"};
-  // https://spacelift.io/blog/yaml
+  // Generic file loading
+  auto copy = wkc::LoadFile(fname_ci);
+  EXPECT_EQ(cfg, copy);
 
-  // TODO indentation can lead to aborts in ryml subprocesses - need to
-  // investigate further
+  // Indentation of the test inputs matters!
   std::string ystr{R"yml(---
 int: 42
-int_str: "42"
+str_int: "42"
 int_tagged: !!int 42
-int_str_tagged: !!str 42
+str_int_tagged: !!str 42
+
 flt: 3.14159
 flt_str: "3.14159"
 flt_tagged: !!float 3.14159
 flt_str_tagged: !!str 3.14159
+
+flag: on
+flag_tagged: !!bool off
+
+date: 2019-01-01
+str_date: "2019-01-01"
+date_tagged1: !date 2019-01-01
+date_tagged2: !!date 2019-01-02
+str_date_tagged: !!str 2019-01-01
+
+time: 12:00:00
+str_time: "12:00:00"
+time_tagged1: !time 12:00:00
+time_tagged2: !!time 14:00:00
+str_time_tagged: !!str 12:00:00
+
+list:
+- toml
+- json
+- yaml
+- libconfig
+
+# A sequence of maps
+format-list:
+  - yaml: &fmt_yaml
+      name: "YAML Ain't Markup Language"
+      initial-release: !!float 2001
+  - json: &fmt_json
+      name: JavaScript Object Notation
+      initial-release: !!int 2001
+  - xml: &fmt_xml
+      name: Extensible Markup Language
+      initial-release: !!str 1998
+  - toml: &fmt_toml
+      name: Tom's Obvious, Minimal Language
+      initial-release: 2013
+
+# A map (using references)
+format-group:
+  yaml: *fmt_yaml
+  json: *fmt_json
+  xml: *fmt_xml
+  toml: *fmt_toml
+
 none1: ~
 none2: null
 none3:
-flag: on
-flag_tagged: !!bool true
-date: 2019-01-01
-date_str: "2019-01-01"
-#date_tagged: !!date 2019-01-01
-date_str_tagged: !!str 2019-01-01
-time: 12:00:00
-time_str: "12:00:00"
-#time_tagged: !!time 12:00:00
-time_str_tagged: !!str 12:00:00
-domain:
-- devops
-- devsecops
-tutorial:
-  - yaml:
-      name: "YAML Ain't Markup Language"
-      type: !!str awesome
-      born: 2001
-  - json:
-      name: JavaScript Object Notation
-      type: great
-      born: 2001
-  - xml:
-      name: Extensible Markup Language
-      type: good
-      born: 1996
-published: true
 )yml"};
-
-  auto cfg = wkc::LoadYAMLString(ystr);
-
-  ystr = R"yml(---
-value: 17
-domain:
-- devops
-- devsecops
-)yml";
   cfg = wkc::LoadYAMLString(ystr);
 
+  // Type deduction/tagging for integer:
+  EXPECT_EQ(wkc::ConfigType::Integer, cfg.Type("int"sv));
+  EXPECT_EQ(42, cfg.GetInt64("int"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_int"sv));
+  EXPECT_EQ("42", cfg.GetString("str_int"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, cfg.Type("int_tagged"sv));
+  EXPECT_EQ(42, cfg.GetInt64("int_tagged"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_int_tagged"sv));
+  EXPECT_EQ("42", cfg.GetString("str_int_tagged"sv));
+
+  // Type deduction/tagging for floating point:
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, cfg.Type("flt"sv));
+  EXPECT_DOUBLE_EQ(3.14159, cfg.GetDouble("flt"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("flt_str"sv));
+  EXPECT_EQ("3.14159", cfg.GetString("flt_str"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, cfg.Type("flt_tagged"sv));
+  EXPECT_DOUBLE_EQ(3.14159, cfg.GetDouble("flt_tagged"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("flt_str_tagged"sv));
+  EXPECT_EQ("3.14159", cfg.GetString("flt_str_tagged"sv));
+
+  // Type deduction/tagging for boolean:
+  EXPECT_EQ(wkc::ConfigType::Boolean, cfg.Type("flag"sv));
+  EXPECT_TRUE(cfg.GetBool("flag"sv));
+  EXPECT_EQ(wkc::ConfigType::Boolean, cfg.Type("flag_tagged"sv));
+  EXPECT_FALSE(cfg.GetBool("flag_tagged"sv));
+
+  // Type deduction/tagging for date:
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date"sv));
+  EXPECT_EQ(wkc::date(2019, 1, 1), cfg.GetDate("date"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_date"sv));
+  EXPECT_EQ("2019-01-01", cfg.GetString("str_date"sv));
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date_tagged1"sv));
+  EXPECT_EQ(wkc::date(2019, 1, 1), cfg.GetDate("date_tagged1"sv));
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date_tagged2"sv));
+  EXPECT_EQ(wkc::date(2019, 1, 2), cfg.GetDate("date_tagged2"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_date_tagged"sv));
+  EXPECT_EQ("2019-01-01", cfg.GetString("str_date_tagged"sv));
+
+  // Type deduction/tagging for time:
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time"sv));
+  EXPECT_EQ(wkc::time(12, 0, 0), cfg.GetTime("time"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_time"sv));
+  EXPECT_EQ("12:00:00", cfg.GetString("str_time"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time_tagged1"sv));
+  EXPECT_EQ(wkc::time(12, 0, 0), cfg.GetTime("time_tagged1"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time_tagged2"sv));
+  EXPECT_EQ(wkc::time(14, 0, 0), cfg.GetTime("time_tagged2"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_time_tagged"sv));
+  EXPECT_EQ("12:00:00", cfg.GetString("str_time_tagged"sv));
+
+  // Sequence/list:
+  // * Each sequence element is a map.
+  // * The initial-release years are tagged differently to additionally
+  //   test the type deduction.
+  EXPECT_EQ(wkc::ConfigType::List, cfg.Type("list"sv));
+  EXPECT_EQ(4, cfg.Size("list"sv));
+  EXPECT_EQ("toml", cfg.GetString("list[0]"sv));
+  EXPECT_EQ("json", cfg.GetString("list[1]"sv));
+  EXPECT_EQ("yaml", cfg.GetString("list[2]"sv));
+  EXPECT_EQ("libconfig", cfg.GetString("list[3]"sv));
+
+  EXPECT_EQ(wkc::ConfigType::List, cfg.Type("format-list"sv));
+  EXPECT_EQ(4, cfg.Size("format-list"sv));
+  EXPECT_EQ("YAML Ain't Markup Language",
+      cfg.GetString("format-list[0].yaml.name"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint,
+      cfg.Type("format-list[0].yaml.initial-release"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-list[0].yaml.initial-release"sv));
+
+  EXPECT_EQ("JavaScript Object Notation",
+      cfg.GetString("format-list[1].json.name"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer,
+      cfg.Type("format-list[1].json.initial-release"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-list[1].json.initial-release"sv));
+
+  EXPECT_EQ(
+      "Extensible Markup Language", cfg.GetString("format-list[2].xml.name"sv));
+  EXPECT_EQ(wkc::ConfigType::String,
+      cfg.Type("format-list[2].xml.initial-release"sv));
+  EXPECT_EQ("1998", cfg.GetString("format-list[2].xml.initial-release"sv));
+
+  EXPECT_EQ("Tom's Obvious, Minimal Language",
+      cfg.GetString("format-list[3].toml.name"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer,
+      cfg.Type("format-list[3].toml.initial-release"sv));
+  EXPECT_EQ(2013, cfg.GetInt64("format-list[3].toml.initial-release"sv));
+
+  // Map/group:
+  EXPECT_EQ(wkc::ConfigType::Group, cfg.Type("format-group"sv));
+  EXPECT_EQ(4, cfg.Size("format-group"sv));
+  EXPECT_EQ("Tom's Obvious, Minimal Language",
+      cfg.GetString("format-group.toml.name"sv));
+  EXPECT_EQ(2013, cfg.GetInt64("format-group.toml.initial-release"sv));
+  EXPECT_EQ(
+      "JavaScript Object Notation", cfg.GetString("format-group.json.name"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-group.json.initial-release"sv));
+  EXPECT_EQ(
+      "YAML Ain't Markup Language", cfg.GetString("format-group.yaml.name"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-group.yaml.initial-release"sv));
+  EXPECT_EQ(
+      "Extensible Markup Language", cfg.GetString("format-group.xml.name"sv));
+  EXPECT_EQ("1998", cfg.GetString("format-group.xml.initial-release"sv));
+
+  // Test none/nil values:
+  EXPECT_FALSE(cfg.Contains("none1"sv));
+  EXPECT_FALSE(cfg.Contains("none2"sv));
+  EXPECT_FALSE(cfg.Contains("none3"sv));
+
+  cfg = wkc::LoadYAMLString(ystr, wkc::NullValuePolicy::NullString);
+  EXPECT_EQ("null", cfg.GetString("none1"sv));
+  EXPECT_EQ("null", cfg.GetString("none2"sv));
+  EXPECT_EQ("null", cfg.GetString("none3"sv));
+
+  cfg = wkc::LoadYAMLString(ystr, wkc::NullValuePolicy::EmptyList);
+  EXPECT_EQ(0, cfg.Size("none1"sv));
+  EXPECT_EQ(0, cfg.Size("none2"sv));
+  EXPECT_EQ(0, cfg.Size("none3"sv));
+
+  EXPECT_THROW(
+      wkc::LoadYAMLString(ystr, wkc::NullValuePolicy::Fail), wkc::ParseError);
+
+  // Deserialization
+  // (Remove date/time first, because they are serialized as strings)
+  copy = wkc::LoadYAMLString(cfg.ToYAML());
+  EXPECT_NE(cfg, copy);
+  cfg.Delete("date");
+  cfg.Delete("date_tagged1");
+  cfg.Delete("date_tagged2");
+  cfg.Delete("time");
+  cfg.Delete("time_tagged1");
+  cfg.Delete("time_tagged2");
+  copy = wkc::LoadYAMLString(cfg.ToYAML());
+
+  EXPECT_EQ(
+      wkc::ConfigType::String, cfg.Type("format-group.xml.initial-release"sv));
+  EXPECT_EQ(
+      wkc::ConfigType::String, copy.Type("format-group.xml.initial-release"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_date"sv));
+  EXPECT_EQ(wkc::ConfigType::String, copy.Type("str_date"sv));
+  /*
+  TODO differs for
+  str_date = [str in cfg] vs date in copy! 2019-01-01
+  str_date_tagged = 2019-01-01  // SAME
+  str_int = 42 // SAME
+  str_int_tagged = 42 // SAME
+  ...xml.initial-release = 1998 // SAME
+  */
+  EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" << copy.ToTOML();
+
+  // Multi-document YAML:
+  // Currently, yaml-cpp parses only the first document. If this changes, this
+  // test should break to indicate that we need to adjust our loading routine.
   ystr = R"yml(---
-doc1-value: 17
-domain:
-- devops
-- devsecops
+label: doc1
 ---
-label: this is doc 2, TODO seems to be ignored!
-date: 2019-01-01
-time: 12:00:00
+label: doc2
+---
+label: doc3
+...
 )yml";
   cfg = wkc::LoadYAMLString(ystr);
+  EXPECT_EQ(1, cfg.Size());
+  EXPECT_TRUE(cfg.Contains("label"sv));
+  EXPECT_EQ("doc1", cfg.GetString("label"sv));
 
+  // YAML consisting of a single list (will be loaded into a named list)
   ystr = "[1, 2, 3]";
   cfg = wkc::LoadYAMLString(ystr);
+  EXPECT_EQ(1, cfg.Size());
+  EXPECT_TRUE(cfg.Contains("list"sv));
+  EXPECT_EQ(3, cfg.Size("list"sv));
 
+  // Parsing errors:
   std::string fail_str{"[a: b\n}"};
-  // // std::string fail_str{R"yml({
-  // //   arr: [1, 2]
-  // //   R"(
-  // //   en: "Planet (Gas)
-  // //    - bla
-  // //     - : !.:: blub
-  // //   )yml"};
   EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
 
-  fail_str = "{[a: b\n}";  // segfaults with ryml
+  // ryml segfaulted with this input, yaml-cpp correctly raises an exception:
+  fail_str = "{[a: b\n}";
   EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
-
-  EXPECT_FALSE(true);
-  // Skip loading null/none values
-  //   auto config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::Skip);
-  //   EXPECT_EQ(1, config.Size());
-  //   EXPECT_FALSE(config.Contains("val"sv));
-
-  //   EXPECT_EQ(3, config.Size("arr"sv));
-  //   EXPECT_TRUE(config.IsHomogeneousScalarList("arr"sv));
-  //   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("arr[0]"sv));
-
-  //   // Replace null/none values by the string "null"
-  //   config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::NullString);
-  //   EXPECT_EQ(2, config.Size());
-  //   EXPECT_TRUE(config.Contains("val"sv));
-  //   EXPECT_EQ("null", config.GetString("val"sv));
-
-  //   EXPECT_EQ(4, config.Size("arr"sv));
-  //   EXPECT_EQ("null", config.GetString("arr[2]"sv));
-  // }
-
-  // TEST(ConfigIOTest, DumpYAML) {
-  //   // TODO mixed lsit/nested lists/groups
-  //   const auto cfg = wkc::LoadTOMLString(R"toml(
-  //     flag = true
-  //     int = 42
-  //     flt = 1e6
-  //     str = "value"
-  //     )toml");
-
-  //   const std::string yaml = wkc::DumpYAMLString(cfg);
 }
 
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG

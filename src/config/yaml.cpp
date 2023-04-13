@@ -92,26 +92,27 @@ template <typename Tp>
 std::optional<Tp> DecodeUntaggedScalarNode(const YAML::Node &node) {
   // LCOV_EXCL_START
   if (!node.IsScalar()) {
-    WZKLOG_CRITICAL(  // TODO remove
-        "NODE IS NOT SCALAR! map {}, seq {}, scalar {}, null {}, defined {}",
-        node.IsMap(),
-        node.IsSequence(),
-        node.IsScalar(),
-        node.IsNull()),
-        node.IsDefined();
+    // WZKLOG_CRITICAL(  // TODO remove
+    //     "NODE IS NOT SCALAR! map {}, seq {}, scalar {}, null {}, defined {}",
+    //     node.IsMap(),
+    //     node.IsSequence(),
+    //     node.IsScalar(),
+    //     node.IsNull()),
+    //     node.IsDefined();
     return std::nullopt;
   }
   // LCOV_EXCL_STOP
 
-  WZKLOG_CRITICAL("try decoding node into type {}, value {}, tag {}",
-      TypeName<Tp>(),
-      node.Scalar(),
-      node.Tag());  // TODO remove
+  // WZKLOG_CRITICAL("try decoding UNTAGGED node into type {}, value {}, tag
+  // {}",
+  //     TypeName<Tp>(),
+  //     node.Scalar(),
+  //     node.Tag());  // TODO remove
 
   // Use YAML::convert to avoid YAML::BadConversion being thrown.
   Tp typed;
   if (YAML::convert<Tp>::decode(node, typed)) {
-    WZKLOG_CRITICAL("-----> succeeded");  // TODO remove
+    // WZKLOG_CRITICAL("-----> succeeded");  // TODO remove
     return typed;
   }
 
@@ -119,6 +120,7 @@ std::optional<Tp> DecodeUntaggedScalarNode(const YAML::Node &node) {
 }
 
 /// @brief Simplified node handling if the node is tagged.
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void HandleTaggedScalar(const YAML::Node &node,
     Configuration &cfg,
     std::string_view fqn,
@@ -164,12 +166,41 @@ void HandleTaggedScalar(const YAML::Node &node,
     } else {
       cfg.SetDouble(fqn, val);
     }
+  } else if ((tag == "tag:yaml.org,2002:date") || (tag == "!date")) {
+    // A YAML date can be either a date or a date-time.
+    date val_date{};
+    date_time val_dt{};
+    if (YAML::convert<date>::decode(node, val_date)) {
+      if (append) {
+        cfg.Append(fqn, val_date);
+      } else {
+        cfg.SetDate(fqn, val_date);
+      }
+    } else if (YAML::convert<date_time>::decode(node, val_dt)) {
+      if (append) {
+        cfg.Append(fqn, val_dt);
+      } else {
+        cfg.SetDateTime(fqn, val_dt);
+      }
+    } else {
+      std::string msg{
+          "Failed to parse date from tagged YAML node `" + value + "`!"};
+      throw ParseError{msg};
+    }
+  } else if ((tag == "tag:yaml.org,2002:time") || (tag == "!time")) {
+    time val_time{};
+    if (YAML::convert<time>::decode(node, val_time)) {
+      if (append) {
+        cfg.Append(fqn, val_time);
+      } else {
+        cfg.SetTime(fqn, val_time);
+      }
+    } else {
+      std::string msg{
+          "Failed to parse time from tagged YAML node `" + value + "`!"};
+      throw ParseError{msg};
+    }
   } else {
-    // if (tag == "tag:yaml.org,2002:date") {
-    //   return date{val};
-    // return;
-    // }
-
     std::string msg{"YAML tag `" + tag + "` is not supported!"};
     throw std::logic_error{msg};
   }
@@ -211,6 +242,7 @@ void HandleScalarNode(const YAML::Node &node,
     } else {
       cfg.SetInt64(fqn, val_int.value());
     }
+    return;
   }
 
   const auto val_double = DecodeUntaggedScalarNode<double>(node);
@@ -377,12 +409,12 @@ Configuration FromYAMLNode(const YAML::Node &node,
 Configuration LoadYAMLString(const std::string &yaml_string,
     NullValuePolicy none_policy) {
   try {
-    WZKLOG_CRITICAL("INPUT TO PARSER\n{}", yaml_string);
+    // WZKLOG_CRITICAL("INPUT TO PARSER\n{}", yaml_string); // TODO remove
     YAML::Node node = YAML::Load(yaml_string);
     if (node.IsMap()) {
       auto cfg = detail::FromYAMLNode(node, none_policy);
       // TODO remove
-      WZKLOG_CRITICAL("parsed into config:\n{}", cfg.ToTOML());
+      // WZKLOG_CRITICAL("parsed into config:\n{}", cfg.ToTOML());
       return cfg;
     }
 
@@ -391,7 +423,7 @@ Configuration LoadYAMLString(const std::string &yaml_string,
       const std::string_view key{"list"};
       cfg.CreateList(key);
       detail::AppendListItems(node, cfg, key, none_policy);
-      WZKLOG_CRITICAL("parsed LIST into config:\n{}", cfg.ToTOML());
+      // WZKLOG_CRITICAL("parsed LIST into config:\n{}", cfg.ToTOML());
       return cfg;
     }
 
