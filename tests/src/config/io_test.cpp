@@ -441,25 +441,57 @@ TEST(ConfigIOTest, SerializeJSONStrings) {
 }
 
 TEST(ConfigIOTest, LoadingYAML) {
-  // const std::string ystr{R"yml({
+  // const std::string ystr{R"yml(
   //   val: null,
   //   arr: [1, 2, null, 4]
+  //   nones: [null, ~,  ]
 
-  //   })yml"};
-
-  // wkc::LoadYAMLString(ystr);
-
-  std::string fail_str{R"yml({
-    [a: b
-    }
-    )yml"};
-  // std::string fail_str{R"yml({
-  //   arr: [1, 2]
-  //   R"(
-  //   en: "Planet (Gas)
-  //    - bla
-  //     - : !.:: blub
   //   )yml"};
+  // https://spacelift.io/blog/yaml
+
+  // TODO indentation can lead to aborts in ryml subprocesses - need to
+  // investigate further
+  std::string ystr{R"yml(---
+intval: 42
+pi: 3.14159
+domain:
+- devops
+- devsecops
+tutorial:
+  - yaml:
+      name: "YAML Ain't Markup Language"
+      type: !!str awesome
+      born: 2001
+  - json:
+      name: JavaScript Object Notation
+      type: great
+      born: 2001
+  - xml:
+      name: Extensible Markup Language
+      type: good
+      born: 1996
+published: true
+)yml"};
+
+  auto cfg = wkc::LoadYAMLString(ystr);
+
+  ystr = R"yml(value: 17
+domain:
+- devops
+- devsecops
+)yml";
+  cfg = wkc::LoadYAMLString(ystr);
+
+  EXPECT_FALSE(true);
+
+  std::string fail_str{"[a: b\n}"};
+  // // std::string fail_str{R"yml({
+  // //   arr: [1, 2]
+  // //   R"(
+  // //   en: "Planet (Gas)
+  // //    - bla
+  // //     - : !.:: blub
+  // //   )yml"};
   EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
   // Skip loading null/none values
   //   auto config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::Skip);

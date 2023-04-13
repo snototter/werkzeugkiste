@@ -22,12 +22,12 @@ namespace detail {
 struct ErrorHandler {
   // this will be called on error
   void on_error(const char *msg, size_t len, ryml::Location loc) {
-    throw ParseError{ryml::formatrs<std::string>("{}:{}:{} ({}B): ERROR: {}",
+    throw ParseError(ryml::formatrs<std::string>("{}:{}:{} ({}B): ERROR: {}",
         loc.name,
         loc.line,
         loc.col,
         loc.offset,
-        ryml::csubstr(msg, len))};
+        ryml::csubstr(msg, len)));
   }
 
   // bridge
@@ -215,40 +215,109 @@ struct ErrorHandler {
 //       "report at https://github.com/snototter/werkzeugkiste/issues"};
 //   // LCOV_EXCL_STOP
 // }
+
+void Test(ryml::ConstNodeRef node, Configuration &cfg, std::string_view fqn) {
+  // TODO is_keyval
+  std::string fqn_child{fqn};
+  fqn_child += "    ";
+  if (node.is_map()) {
+    for (const ryml::ConstNodeRef &child : node.children()) {
+      if (child.has_key()) {
+        WZKLOG_INFO("{}map child: key {}", fqn, child.key());
+      } else {
+        if (child.has_val()) {
+          WZKLOG_INFO("{}seq child - no key, val {}", fqn, child.val());
+        } else {
+          WZKLOG_INFO("{}seq child - no key, no val", fqn);
+        }
+      }
+      Test(child, cfg, fqn_child);  // TODO fqn
+      // std::string_view key = child.key();
+      // std::string_view new_fqn = fqn;
+      // if (!new_fqn.empty()) {
+      //   new_fqn += '.';
+      // }
+      // new_fqn += key;
+      // Test(child, cfg, new_fqn);
+    }
+  } else if (node.is_seq()) {
+    for (const ryml::ConstNodeRef &child : node.children()) {
+      // Test(child, cfg, fqn);
+      if (child.has_key()) {
+        WZKLOG_INFO("{}seq child: key {}", fqn, child.key());
+      } else {
+        if (child.has_val()) {
+          WZKLOG_INFO("{}seq child - no key, val {}", fqn, child.val());
+        } else {
+          WZKLOG_INFO("{}seq child - no key, no val", fqn);
+        }
+      }
+      Test(child, cfg, fqn_child);  // TODO fqn
+    }
+  } else if (node.is_val()) {
+    WZKLOG_INFO("{}node is value: {}", fqn, node.val());
+    // std::string_view value = node.val();
+    // if (value == "true"sv) {
+    //   cfg.SetBoolean(fqn, true);
+    // } else if (value == "false"sv) {
+    //   cfg.SetBoolean(fqn, false);
+    // } else if (value == "null"sv) {
+    //   cfg.SetNull(fqn);
+    // } else {
+    //   try {
+    //     cfg.SetInt64(fqn, std::stoll(std::string{value}));
+    //   } catch (const std::invalid_argument &) {
+    //     try {
+    //       cfg.SetDouble(fqn, std::stod(std::string{value}));
+    //     } catch (const std::invalid_argument &) {
+    //       cfg.SetString(fqn, std::string{value});
+    //     }
+    //   }
+    // }
+  }
+}
+
+Configuration FromlYAMLRoot(ryml::ConstNodeRef root) {
+  WZKLOG_CRITICAL("from root, is_map: {}", root.is_map());
+  Configuration cfg{};
+  using namespace std::string_view_literals;
+  if (root.is_seq()) {
+    WZKLOG_CRITICAL("root is seq with {} children", root.num_children());
+    for (const ryml::ConstNodeRef &child : root.children()) {
+      WZKLOG_CRITICAL("seq child");
+      Test(child, cfg, ""sv);
+    }
+  } else if (root.is_map()) {
+    WZKLOG_CRITICAL("root is map");
+    for (const ryml::ConstNodeRef &child : root.children()) {
+      WZKLOG_CRITICAL("map child");
+      Test(child, cfg, ""sv);
+    }
+  }
+  // Test(root, cfg, ""sv);
+  return cfg;
+}
 }  // namespace detail
 
 Configuration LoadYAMLString(const std::string &yaml_string,
     NullValuePolicy none_policy) {
-  //   try {
-  //     ryml::Tree fails = ryml::parse_in_arena(R"(
-  // en: "Planet (Gas)
-  //   bla
-  //  decode this: "\u263A \xE2\x98\xBA"
-  // )");
+  // TODO ryml segfault:
+  // "{[a: b}"
+  // Dive deeper into docs, prepare MWE for bug report
+  // Older, possibly related issues:
+  // https://github.com/biojppm/rapidyaml/issues/34
+  // https://github.com/biojppm/rapidyaml/issues/32
+
   detail::ErrorHandler err_hnd;
   ryml::set_callbacks(err_hnd.callbacks());
-  // err_hnd.check_error_occurs([]{
-  //     ryml::Tree tree = ryml::parse_in_arena("errorhandler.yml", "[a: b\n}");
-  //     std::cout << tree;
-  // });
-  // try {
-  //     ryml::Tree tree = ryml::parse_in_arena("errorhandler.yml", "[a: b\n}");
-  //     std::cout << tree;
-  // } catch (const ryml::Exception &e) {
-  //     std::cout << "Exception: " << e.what() << std::endl;
   auto cs = ryml::csubstr(yaml_string.c_str(), yaml_string.length());
+  WZKLOG_CRITICAL("INPUT TO PARSER\n{}", cs);
   ryml::Tree tree = ryml::parse_in_arena(cs);
 
+  // Restore default error handler
   ryml::set_callbacks(err_hnd.defaults);
-  // ryml::Parser parser{};
-  // // ryml::Tree tree = parser.parse_in_arena();
-  // ryml::Tree tree = parser.parse_in_arena({}, yaml_string.c_str());
-  //     return detail::FromJSONRoot(json::parse(json_string), none_policy);
-  //   } catch (const std::exception &e) {
-  //     std::string msg{"Parsing JSON input failed! "};
-  //     msg += e.what();
-  //     throw ParseError{msg};
-  //   }
+
+  return detail::FromlYAMLRoot(tree.rootref());
 }
 
 Configuration LoadYAMLFile(std::string_view filename,
