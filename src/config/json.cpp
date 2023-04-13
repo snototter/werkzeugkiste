@@ -34,24 +34,7 @@ void AppendListValue(std::string_view lst_key,
     NullValuePolicy none_policy) {
   using namespace std::string_view_literals;
   if (value.is_null()) {
-    switch (none_policy) {
-      case NullValuePolicy::Skip:
-        break;
-
-      case NullValuePolicy::NullString:
-        cfg.Append(lst_key, "null"sv);
-        break;
-
-      case NullValuePolicy::EmptyList:
-        cfg.AppendList(lst_key);
-        break;
-
-      case NullValuePolicy::Fail:
-        std::string msg{"Null/None value occured while parsing JSON list `"};
-        msg += lst_key;
-        msg += "`!";
-        throw ParseError{msg};
-    }
+    Configuration::HandleNullValue(cfg, lst_key, none_policy, /*append=*/true);
   } else if (value.is_boolean()) {
     cfg.Append(lst_key, value.get<bool>());
   } else if (value.is_number_float()) {
@@ -61,12 +44,10 @@ void AppendListValue(std::string_view lst_key,
   } else if (value.is_string()) {
     cfg.Append(lst_key, value.get<std::string>());
   } else if (value.is_array()) {
-    std::size_t sz = cfg.Size(lst_key);
+    std::size_t lst_sz = cfg.Size(lst_key);
+    const std::string elem_key =
+        Configuration::KeyForListElement(lst_key, lst_sz);
     cfg.AppendList(lst_key);
-    std::string elem_key{lst_key};
-    elem_key += '[';
-    elem_key += std::to_string(sz);
-    elem_key += ']';
     for (const json &element : value) {
       AppendListValue(elem_key, cfg, element, none_policy);
     }
@@ -93,25 +74,7 @@ Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
     const json &value = it.value();
     const std::string_view key = it.key();
     if (value.is_null()) {
-      switch (none_policy) {
-        case NullValuePolicy::Skip:
-          break;
-
-        case NullValuePolicy::NullString:
-          grp.SetString(key, "null"sv);
-          break;
-
-        case NullValuePolicy::EmptyList:
-          grp.CreateList(key);
-          break;
-
-        case NullValuePolicy::Fail:
-          std::string msg{
-              "Null/None value occured while parsing JSON parameter `"};
-          msg += key;
-          msg += "`!";
-          throw ParseError{msg};
-      }
+      Configuration::HandleNullValue(grp, key, none_policy, /*append=*/false);
     } else if (value.is_boolean()) {
       grp.SetBool(key, value.get<bool>());
     } else if (value.is_number_float()) {

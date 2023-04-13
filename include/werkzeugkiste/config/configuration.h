@@ -1262,6 +1262,11 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Returns a libconfig-formatted string of this configuration.
   std::string ToLibconfig() const;
 
+  static void HandleNullValue(Configuration &cfg,
+      std::string_view key,
+      NullValuePolicy policy,
+      bool append);
+
  private:
   /// Forward declaration of internal implementation struct.
   struct Impl;
@@ -1301,22 +1306,6 @@ Configuration LoadLibconfigFile(std::string_view filename);
 /// @param lcfg_string String representation of the libconfig configuration.
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadLibconfigString(std::string_view lcfg_string);
-
-/// @brief How to handle Null/None values (e.g. when loading JSON).
-enum class NullValuePolicy : unsigned char {
-  /// @brief Null values will be skipped, i.e. not loaded into the
-  ///   configuration.
-  Skip,
-
-  /// @brief Null values will be **replaced** by the string "null".
-  NullString,
-
-  /// @brief Null values will be **replaced** by an empty list.
-  EmptyList,
-
-  /// @brief A `werkzeugkiste::config::ParseError` will be thrown.
-  Fail
-};
 
 /// @brief Loads a JSON configuration from a string.
 ///

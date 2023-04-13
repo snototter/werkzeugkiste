@@ -2004,6 +2004,42 @@ std::string Configuration::ToLibconfig() const {
   return DumpLibconfigString(*this);
 }
 
+void Configuration::HandleNullValue(Configuration &cfg,
+    std::string_view key,
+    NullValuePolicy policy,
+    bool append) {
+  using namespace std::string_view_literals;
+  switch (policy) {
+    case NullValuePolicy::Skip:
+      break;
+
+    case NullValuePolicy::NullString: {
+      if (append) {
+        cfg.Append(key, "null"sv);
+      } else {
+        cfg.SetString(key, "null"sv);
+      }
+      break;
+    }
+
+    case NullValuePolicy::EmptyList: {
+      if (append) {
+        cfg.AppendList(key);
+      } else {
+        cfg.CreateList(key);
+      }
+      break;
+    }
+
+    case NullValuePolicy::Fail: {
+      std::string msg{"Null/None value occured while parsing parameter `"};
+      msg += key;
+      msg += "`!";
+      throw ParseError{msg};
+    }
+  }
+}
+
 //---------------------------------------------------------------------------
 // Generic loading from file
 Configuration LoadFile(std::string_view filename) {

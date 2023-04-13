@@ -11,60 +11,17 @@
 #include <string>
 #include <string_view>
 
-// Forward declarations
-namespace werkzeugkiste::config::detail {
-void SetScalar(const YAML::Node &node,
-    Configuration &cfg,
-    std::string_view key);
-void AppendListItems(const YAML::Node &node,
-    Configuration &cfg,
-    std::string_view key);
-}  // namespace werkzeugkiste::config::detail
-
 // NOLINTBEGIN(readability-identifier-naming, misc-no-recursion)
 namespace YAML {
-/// @brief Specialization of the YAML::convert template for a Configuration.
-template <>
-struct convert<werkzeugkiste::config::Configuration> {
-  // Encode skipped on purpose, as we reuse the YAML formatter of toml++.
-
-  static bool decode(const Node &node,
-      werkzeugkiste::config::Configuration &rhs) {
-    if (!node.IsMap()) {
-      return false;
-    }
-
-    for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
-      const std::string key = it->first.as<std::string>();
-      WZKLOG_CRITICAL("decoding config, key: {}", key);
-      switch (it->second.Type()) {
-        case YAML::NodeType::Null:
-          // rhs.Set(key, werkzeugkiste::config::NullValue{});
-          // break;
-          break;
-      }
-      if (it->second.IsScalar()) {
-        werkzeugkiste::config::detail::SetScalar(it->second, rhs, key);
-      } else if (it->second.IsSequence()) {
-        rhs.CreateList(key);
-        werkzeugkiste::config::detail::AppendListItems(it->second, rhs, key);
-      } else if (it->second.IsMap()) {
-        rhs.SetGroup(
-            key, it->second.as<werkzeugkiste::config::Configuration>());
-      } else {
-        // TODO undefined or none!
-      }
-    }
-    return true;
-  }
-};
-
+/// @brief YAML converter to load a YAML node as a date.
 template <>
 struct convert<werkzeugkiste::config::date> {
   static bool decode(const Node &node, werkzeugkiste::config::date &rhs) {
+    // LCOV_EXCL_START
     if (!node.IsScalar()) {
       return false;
     }
+    // LCOV_EXCL_STOP
 
     try {
       rhs = werkzeugkiste::config::date(node.as<std::string>());
@@ -75,12 +32,15 @@ struct convert<werkzeugkiste::config::date> {
   }
 };
 
+/// @brief YAML converter to load a YAML node as a time.
 template <>
 struct convert<werkzeugkiste::config::time> {
   static bool decode(const Node &node, werkzeugkiste::config::time &rhs) {
+    // LCOV_EXCL_START
     if (!node.IsScalar()) {
       return false;
     }
+    // LCOV_EXCL_STOP
 
     try {
       rhs = werkzeugkiste::config::time(node.as<std::string>());
@@ -91,12 +51,15 @@ struct convert<werkzeugkiste::config::time> {
   }
 };
 
+/// @brief YAML converter to load a YAML node as a date-time.
 template <>
 struct convert<werkzeugkiste::config::date_time> {
   static bool decode(const Node &node, werkzeugkiste::config::date_time &rhs) {
+    // LCOV_EXCL_START
     if (!node.IsScalar()) {
       return false;
     }
+    // LCOV_EXCL_STOP
 
     try {
       rhs = werkzeugkiste::config::date_time(node.as<std::string>());
@@ -111,6 +74,10 @@ struct convert<werkzeugkiste::config::date_time> {
 
 namespace werkzeugkiste::config {
 namespace detail {
+// Forward declaration
+Configuration FromYAMLNode(const YAML::Node &, NullValuePolicy);
+
+/// @brief Returns true if the scalar node is tagged.
 inline bool HasTag(const YAML::Node &node) {
   // LCOV_EXCL_START
   if (!node.IsScalar()) {
@@ -122,9 +89,10 @@ inline bool HasTag(const YAML::Node &node) {
 }
 
 template <typename Tp>
-std::optional<Tp> DecodeScalarNode(const YAML::Node &node) {
+std::optional<Tp> DecodeUntaggedScalarNode(const YAML::Node &node) {
+  // LCOV_EXCL_START
   if (!node.IsScalar()) {
-    WZKLOG_CRITICAL(
+    WZKLOG_CRITICAL(  // TODO remove
         "NODE IS NOT SCALAR! map {}, seq {}, scalar {}, null {}, defined {}",
         node.IsMap(),
         node.IsSequence(),
@@ -133,32 +101,32 @@ std::optional<Tp> DecodeScalarNode(const YAML::Node &node) {
         node.IsDefined();
     return std::nullopt;
   }
+  // LCOV_EXCL_STOP
 
-  const std::string &tag = node.Tag();
-  const std::string &val = node.Scalar();
-
-  // try {
   WZKLOG_CRITICAL("try decoding node into type {}, value {}, tag {}",
       TypeName<Tp>(),
-      val,
-      node.Tag());
-  Tp typed;
+      node.Scalar(),
+      node.Tag());  // TODO remove
+
   // Use YAML::convert to avoid YAML::BadConversion being thrown.
+  Tp typed;
   if (YAML::convert<Tp>::decode(node, typed)) {
-    WZKLOG_CRITICAL("-----> succeeded");
+    WZKLOG_CRITICAL("-----> succeeded");  // TODO remove
     return typed;
   }
 
   return std::nullopt;
 }
 
-void SetTaggedScalar(const YAML::Node &node,
+/// @brief Simplified node handling if the node is tagged.
+void HandleTaggedScalar(const YAML::Node &node,
     Configuration &cfg,
-    std::string_view fqn) {
+    std::string_view fqn,
+    bool append) {
   // LCOV_EXCL_START
   if (!HasTag(node)) {
     std::string msg{
-        "SetTaggedScalar called with untagged node for parameter `"};
+        "HandleTaggedScalar called with untagged node for parameter `"};
     msg += fqn;
     msg += "`!";
     throw std::logic_error(msg);
@@ -170,14 +138,32 @@ void SetTaggedScalar(const YAML::Node &node,
   const std::string &tag = node.Tag();
   const std::string &value = node.Scalar();
   if ((tag == "tag:yaml.org,2002:str") || (tag == "!")) {
-    cfg.SetString(fqn, value);
+    if (append) {
+      cfg.Append(fqn, value);
+    } else {
+      cfg.SetString(fqn, value);
+    }
   } else if (tag == "tag:yaml.org,2002:bool") {
-    cfg.SetBool(fqn, node.as<bool>());
+    const bool val = node.as<bool>();
+    if (append) {
+      cfg.Append(fqn, val);
+    } else {
+      cfg.SetBool(fqn, val);
+    }
   } else if (tag == "tag:yaml.org,2002:int") {
-    cfg.SetInt64(fqn, std::stol(value));
-    return;
+    const int64_t val = std::stol(value);
+    if (append) {
+      cfg.Append(fqn, val);
+    } else {
+      cfg.SetInt64(fqn, val);
+    }
   } else if (tag == "tag:yaml.org,2002:float") {
-    cfg.SetDouble(fqn, std::stod(value));
+    const double val = std::stod(value);
+    if (append) {
+      cfg.Append(fqn, val);
+    } else {
+      cfg.SetDouble(fqn, val);
+    }
   } else {
     // if (tag == "tag:yaml.org,2002:date") {
     //   return date{val};
@@ -189,231 +175,204 @@ void SetTaggedScalar(const YAML::Node &node,
   }
 }
 
-void AppendTaggedScalar(const YAML::Node &node,
+/// @brief Sets or appends the scalar value to the configuration.
+/// @param node The YAML node which holds the scalar.
+/// @param cfg The configuration.
+/// @param fqn The fully qualified parameter name.
+/// @param append If true, the value is appended (assuming that key is an
+///   existing list). Otherwise, the value is Set<T> according to the
+///   deduced type.
+// NOLINTNEXTLINE(readability-function-cognitive-complexity)
+void HandleScalarNode(const YAML::Node &node,
     Configuration &cfg,
-    std::string_view fqn) {
-  // LCOV_EXCL_START
-  if (!HasTag(node)) {
-    std::string msg{
-        "AppendTaggedScalar called with untagged node for parameter `"};
-    msg += fqn;
-    msg += "`!";
-    throw std::logic_error(msg);
-  }
-  // LCOV_EXCL_STOP
-
-  const std::string &tag = node.Tag();
-  const std::string &value = node.Scalar();
-  if ((tag == "tag:yaml.org,2002:str") || (tag == "!")) {
-    cfg.Append(fqn, value);
-  } else if (tag == "tag:yaml.org,2002:bool") {
-    cfg.Append(fqn, node.as<bool>());
-  } else if (tag == "tag:yaml.org,2002:int") {
-    cfg.Append(fqn, std::stol(value));
-  } else if (tag == "tag:yaml.org,2002:float") {
-    cfg.Append(fqn, std::stod(value));
-  } else {
-    // if (tag == "tag:yaml.org,2002:date") {
-    //   return date{val};
-    // return;
-    // }
-
-    std::string msg{"YAML tag `" + tag + "` is not supported!"};
-    throw std::logic_error{msg};
-  }
-}
-
-void SetScalar(const YAML::Node &node,
-    Configuration &cfg,
-    std::string_view fqn) {
+    std::string_view fqn,
+    bool append) {
   if (HasTag(node)) {
-    SetTaggedScalar(node, cfg, fqn);
+    HandleTaggedScalar(node, cfg, fqn, append);
     return;
   }
 
   // Node is not tagged, so we try to decode it into the supported types.
-  const auto val_bool = DecodeScalarNode<bool>(node);
+  // Any scalar can be represented as a string, thus ensure to check it last!
+  const auto val_bool = DecodeUntaggedScalarNode<bool>(node);
   if (val_bool.has_value()) {
-    cfg.SetBool(fqn, val_bool.value());
+    if (append) {
+      cfg.Append(fqn, val_bool.value());
+    } else {
+      cfg.SetBool(fqn, val_bool.value());
+    }
     return;
   }
 
-  const auto val_int = DecodeScalarNode<int64_t>(node);
+  const auto val_int = DecodeUntaggedScalarNode<int64_t>(node);
   if (val_int.has_value()) {
-    cfg.SetInt64(fqn, val_int.value());
-    return;
+    if (append) {
+      cfg.Append(fqn, val_int.value());
+    } else {
+      cfg.SetInt64(fqn, val_int.value());
+    }
   }
 
-  const auto val_double = DecodeScalarNode<double>(node);
+  const auto val_double = DecodeUntaggedScalarNode<double>(node);
   if (val_double.has_value()) {
-    cfg.SetDouble(fqn, val_double.value());
+    if (append) {
+      cfg.Append(fqn, val_double.value());
+    } else {
+      cfg.SetDouble(fqn, val_double.value());
+    }
     return;
   }
 
-  const auto val_date = DecodeScalarNode<date>(node);
+  const auto val_date = DecodeUntaggedScalarNode<date>(node);
   if (val_date.has_value()) {
-    cfg.SetDate(fqn, val_date.value());
+    if (append) {
+      cfg.Append(fqn, val_date.value());
+    } else {
+      cfg.SetDate(fqn, val_date.value());
+    }
     return;
   }
 
-  const auto val_time = DecodeScalarNode<time>(node);
+  const auto val_time = DecodeUntaggedScalarNode<time>(node);
   if (val_time.has_value()) {
-    cfg.SetTime(fqn, val_time.value());
+    if (append) {
+      cfg.Append(fqn, val_time.value());
+    } else {
+      cfg.SetTime(fqn, val_time.value());
+    }
     return;
   }
 
-  const auto val_datetime = DecodeScalarNode<date_time>(node);
+  // TODO test date types - YAML date examples used a more lenient format; need
+  // to check in detail
+  const auto val_datetime = DecodeUntaggedScalarNode<date_time>(node);
   if (val_datetime.has_value()) {
-    cfg.SetDateTime(fqn, val_datetime.value());
+    if (append) {
+      cfg.Append(fqn, val_datetime.value());
+    } else {
+      cfg.SetDateTime(fqn, val_datetime.value());
+    }
     return;
   }
 
-  const auto val_string = DecodeScalarNode<std::string>(node);
+  const auto val_string = DecodeUntaggedScalarNode<std::string>(node);
   if (val_string.has_value()) {
-    cfg.SetString(fqn, val_string.value());
+    if (append) {
+      cfg.Append(fqn, val_string.value());
+    } else {
+      cfg.SetString(fqn, val_string.value());
+    }
     return;
   }
 
-  // TODO throw
   // LCOV_EXCL_START
   std::string msg{"Could not decode scalar YAML node for parameter `"};
   msg += fqn;
-  msg += "`!";
-  throw TypeError{msg};
+  msg += "`! This is a bug, please report it!";
+  throw std::logic_error{msg};
   // LCOV_EXCL_STOP
-
-  // TODO test date types - YAML date examples used a more lenient format; need
-  // to check in detail
 }
 
-void AppendScalar(const YAML::Node &node,
-    Configuration &cfg,
-    std::string_view key) {
-  const auto val_bool = DecodeScalarNode<bool>(node);
-  if (val_bool.has_value()) {
-    cfg.Append(key, val_bool.value());
-    return;
-  }
-
-  const auto val_int = DecodeScalarNode<int64_t>(node);
-  if (val_int.has_value()) {
-    cfg.Append(key, val_int.value());
-    return;
-  }
-
-  const auto val_double = DecodeScalarNode<double>(node);
-  if (val_double.has_value()) {
-    cfg.Append(key, val_double.value());
-    return;
-  }
-
-  const auto val_date = DecodeScalarNode<date>(node);
-  if (val_date.has_value()) {
-    cfg.Append(key, val_date.value());
-    return;
-  }
-
-  const auto val_time = DecodeScalarNode<time>(node);
-  if (val_time.has_value()) {
-    cfg.Append(key, val_time.value());
-    return;
-  }
-
-  const auto val_datetime = DecodeScalarNode<date_time>(node);
-  if (val_datetime.has_value()) {
-    cfg.Append(key, val_datetime.value());
-    return;
-  }
-
-  const auto val_string = DecodeScalarNode<std::string>(node);
-  if (val_string.has_value()) {
-    cfg.Append(key, val_string.value());
-    return;
-  }
-
-  // TODO throw
-  // LCOV_EXCL_START
-  std::string msg{"Could not decode scalar YAML node for parameter `"};
-  msg += key;
-  msg += "`!";
-  throw TypeError{msg};
-  // LCOV_EXCL_STOP
-
-  // TODO test date types - YAML date examples used a more lenient format; need
-  // to check in detail
-}
-
-// TODO create list
-// TODO append list
+// NOLINTNEXTLINE(misc-no-recursion)
 void AppendListItems(const YAML::Node &node,
     Configuration &cfg,
-    std::string_view key) {
+    std::string_view key,
+    NullValuePolicy none_policy) {
   // LCOV_EXCL_START
   if (!node.IsSequence() || !cfg.Contains(key)) {
-    // TODO throw
-    // std::string msg{"Could not decode list YAML node for parameter `"};
-    // msg += key;
-    // msg += "`!";
-    // throw TypeError{msg};
+    std::string msg{
+        "AppendListItem requires that the YAML node is a sequence ("};
+    msg += (node.IsSequence() ? "which it is" : "which it is NOT");
+    msg += ") and that the list parameter `";
+    msg += key;
+    msg += "` has already been created (";
+    msg +=
+        (cfg.Contains(key) ? "which has been done" : "which has NOT been done");
+    msg += ")!";
+    throw std::logic_error{msg};
   }
   // LCOV_EXCL_STOP
 
   for (const auto &item : node) {
-    if (item.IsScalar()) {
-      AppendScalar(item, cfg, key);
-    } else if (item.IsSequence()) {
-      const std::size_t lst_size = cfg.Size(key);
-      const std::string elem_key =
-          Configuration::KeyForListElement(key, lst_size);
-      cfg.AppendList(key);
-      AppendListItems(item, cfg, elem_key);
-    } else if (item.IsMap()) {
-      cfg.Append(key, item.as<Configuration>());
+    switch (item.Type()) {
+      case YAML::NodeType::Null:
+        Configuration::HandleNullValue(cfg, key, none_policy, /*append=*/true);
+        break;
+
+      case YAML::NodeType::Scalar:
+        HandleScalarNode(item, cfg, key, /*append=*/true);
+        break;
+
+      case YAML::NodeType::Sequence: {
+        const std::size_t lst_size = cfg.Size(key);
+        const std::string elem_key =
+            Configuration::KeyForListElement(key, lst_size);
+        cfg.AppendList(key);
+        AppendListItems(item, cfg, elem_key, none_policy);
+        break;
+      }
+
+      case YAML::NodeType::Map:
+        cfg.Append(key, FromYAMLNode(item, none_policy));
+        break;
     }
   }
 }
 
-// template <typename Tp>
-// std::optional<Tp> DecodeNode(const YAML::Node &node) {
-//   if (!node.IsScalar()) {
-//     return std::nullopt;
-//   }
+// NOLINTNEXTLINE(misc-no-recursion)
+Configuration FromYAMLNode(const YAML::Node &node,
+    NullValuePolicy none_policy) {
+  // LCOV_EXCL_START
+  if (!node.IsMap()) {
+    throw std::logic_error{
+        "FromYAMLNode requires that the YAML node is a map!"};
+  }
+  // LCOV_EXCL_STOP
 
-//   // // TODO check if is numeric
-//   // const std::string val = node.as<std::string>();
-//   // if (werkzeugkiste::strings::IsInteger(val)) {
-//   // }
-//   // if (werkzeugkiste::strings::IsNumeric(node.as<std::string>());
-//   // return node.as<Tp>();
-// }
+  Configuration cfg{};
+  for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
+    const std::string key = it->first.as<std::string>();
+    switch (it->second.Type()) {
+      case YAML::NodeType::Null:
+        Configuration::HandleNullValue(cfg, key, none_policy, /*append=*/false);
+        break;
+
+      case YAML::NodeType::Scalar:
+        HandleScalarNode(it->second, cfg, key, /*append=*/false);
+        break;
+
+      case YAML::NodeType::Sequence: {
+        cfg.CreateList(key);
+        AppendListItems(it->second, cfg, key, none_policy);
+        break;
+      }
+
+      case YAML::NodeType::Map:
+        cfg.SetGroup(key, FromYAMLNode(it->second, none_policy));
+        break;
+
+      // LCOV_EXCL_START
+      case YAML::NodeType::Undefined: {
+        std::string msg{"Undefined YAML node type for parameter `"};
+        msg += key;
+        msg += "`!";
+        throw std::logic_error{msg};
+      }
+        // LCOV_EXCL_STOP
+    }
+  }
+  return cfg;
+}
 }  // namespace detail
 
 Configuration LoadYAMLString(const std::string &yaml_string,
     NullValuePolicy none_policy) {
-  // TODO ryml segfaults on this input:
-  // "{[a: b}"
-  // Dive deeper into docs, prepare MWE for bug report
-  // Older, possibly related issues:
-  // https://github.com/biojppm/rapidyaml/issues/34
-  // https://github.com/biojppm/rapidyaml/issues/32
-
-  // detail::ErrorHandler err_hnd;
-  // ryml::set_callbacks(err_hnd.callbacks());
-  // auto cs = ryml::csubstr(yaml_string.c_str(), yaml_string.length());
-  // WZKLOG_CRITICAL("INPUT TO PARSER\n{}", cs);
-  // ryml::Tree tree = ryml::parse_in_arena(cs);
-
-  // // Restore default error handler
-  // ryml::set_callbacks(err_hnd.defaults);
-
-  // return detail::FromlYAMLRoot(tree.rootref());
-
   try {
     WZKLOG_CRITICAL("INPUT TO PARSER\n{}", yaml_string);
-    YAML::Node config = YAML::Load(yaml_string);
-    WZKLOG_CRITICAL("ismap {}, is_seq {}", config.IsMap(), config.IsSequence());
+    YAML::Node node = YAML::Load(yaml_string);
+    WZKLOG_CRITICAL("ismap {}, is_seq {}", node.IsMap(), node.IsSequence());
     // TODO check if ismap
-    auto cfg = config.as<Configuration>();
+    auto cfg = detail::FromYAMLNode(node, none_policy);
     WZKLOG_CRITICAL("parsed into config:\n{}", cfg.ToTOML());
     return cfg;
 

@@ -514,6 +514,9 @@ time: 12:00:00
 )yml";
   cfg = wkc::LoadYAMLString(ystr);
 
+  ystr = "[1, 2, 3]";
+  cfg = wkc::LoadYAMLString(ystr);
+
   std::string fail_str{"[a: b\n}"};
   // // std::string fail_str{R"yml({
   // //   arr: [1, 2]
