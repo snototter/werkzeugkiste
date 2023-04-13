@@ -452,8 +452,27 @@ TEST(ConfigIOTest, LoadingYAML) {
   // TODO indentation can lead to aborts in ryml subprocesses - need to
   // investigate further
   std::string ystr{R"yml(---
-intval: 42
-pi: 3.14159
+int: 42
+int_str: "42"
+int_tagged: !!int 42
+int_str_tagged: !!str 42
+flt: 3.14159
+flt_str: "3.14159"
+flt_tagged: !!float 3.14159
+flt_str_tagged: !!str 3.14159
+none1: ~
+none2: null
+none3:
+flag: on
+flag_tagged: !!bool true
+date: 2019-01-01
+date_str: "2019-01-01"
+#date_tagged: !!date 2019-01-01
+date_str_tagged: !!str 2019-01-01
+time: 12:00:00
+time_str: "12:00:00"
+#time_tagged: !!time 12:00:00
+time_str_tagged: !!str 12:00:00
 domain:
 - devops
 - devsecops
@@ -475,14 +494,25 @@ published: true
 
   auto cfg = wkc::LoadYAMLString(ystr);
 
-  ystr = R"yml(value: 17
+  ystr = R"yml(---
+value: 17
 domain:
 - devops
 - devsecops
 )yml";
   cfg = wkc::LoadYAMLString(ystr);
 
-  EXPECT_FALSE(true);
+  ystr = R"yml(---
+doc1-value: 17
+domain:
+- devops
+- devsecops
+---
+label: this is doc 2, TODO seems to be ignored!
+date: 2019-01-01
+time: 12:00:00
+)yml";
+  cfg = wkc::LoadYAMLString(ystr);
 
   std::string fail_str{"[a: b\n}"};
   // // std::string fail_str{R"yml({
@@ -493,6 +523,11 @@ domain:
   // //     - : !.:: blub
   // //   )yml"};
   EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
+
+  fail_str = "{[a: b\n}";  // segfaults with ryml
+  EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
+
+  EXPECT_FALSE(true);
   // Skip loading null/none values
   //   auto config = wkc::LoadJSONString(jstr, wkc::NullValuePolicy::Skip);
   //   EXPECT_EQ(1, config.Size());

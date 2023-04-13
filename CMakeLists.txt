@@ -39,12 +39,25 @@ FetchContent_MakeAvailable(tomlplusplus)
 
 # ## yaml-cpp (config) ran into cmake configuration issue: yaml-cpp is not
 # included in the export targets, but required for the werkzeugkiste-config
-# export:
+# export: https://github.com/jbeder/yaml-cpp/issues/566 "Install EXPORT ...
+# requires target "yaml-cpp" that is not in any export set"
+# https://github.com/jbeder/yaml-cpp/pull/1007
 
-# FetchContent_Declare(yaml-cpp GIT_REPOSITORY
-# https://github.com/jbeder/yaml-cpp.git GIT_TAG yaml-cpp-0.7.0)
-# set(YAML_CPP_BUILD_TESTS OFF) set(YAML_CPP_INSTALL ON) set(CMAKE_HOST_WIN32
-# "") FetchContent_MakeAvailable(yaml-cpp)
+FetchContent_Declare(
+  yaml-cpp
+  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+  GIT_TAG master)
+# GIT_TAG yaml-cpp-0.7.0)
+set(YAML_CPP_BUILD_TESTS
+    OFF
+    CACHE INTERNAL BOOL "Disable yaml tests")
+# set(YAML_CPP_BUILD_TOOLS OFF CACHE INTERNAL BOOL "Disable yaml tools")
+# set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL BOOL "yaml contrib")
+set(YAML_CPP_INSTALL
+    ON
+    CACHE INTERNAL BOOL "Export yaml targets")
+set(CMAKE_HOST_WIN32 OFF)
+FetchContent_MakeAvailable(yaml-cpp)
 
 # ## rapidyaml (config) # caused too many uninitialized variable warnings in dev
 # mode FetchContent_Declare(ryml GIT_REPOSITORY
@@ -440,9 +453,9 @@ generate_export_header(
 
 target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
 target_link_libraries(
-  werkzeugkiste-config PRIVATE werkzeugkiste::logging werkzeugkiste::strings
-                               werkzeugkiste::files werkzeugkiste::container)
-# yaml-cpp) #ryml::ryml)
+  werkzeugkiste-config
+  PRIVATE werkzeugkiste::logging werkzeugkiste::strings werkzeugkiste::files
+          werkzeugkiste::container yaml-cpp)
 
 set_target_properties(
   werkzeugkiste-config
