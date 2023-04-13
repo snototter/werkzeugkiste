@@ -49,13 +49,13 @@ FetchContent_Declare(
   GIT_TAG master)
 set(YAML_CPP_BUILD_TESTS
     OFF
-    CACHE INTERNAL BOOL "Disable yaml tests")
-# set(YAML_CPP_BUILD_TOOLS OFF CACHE INTERNAL BOOL "Disable yaml tools")
-# set(YAML_CPP_BUILD_CONTRIB OFF CACHE INTERNAL BOOL "yaml contrib")
+    CACHE BOOL "Disable yaml tests" FORCE)
+# set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "Disable yaml tools" FORCE)
+# set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "yaml contrib" FORCE)
 set(YAML_CPP_INSTALL
     ON
-    CACHE INTERNAL BOOL "Export yaml targets")
-set(CMAKE_HOST_WIN32 OFF)
+    CACHE BOOL "Export yaml targets" FORCE)
+set(CMAKE_HOST_WIN32 OFF CACHE BOOL FORCE)
 FetchContent_MakeAvailable(yaml-cpp)
 
 # libconfig++ (config)
