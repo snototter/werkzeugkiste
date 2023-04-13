@@ -112,12 +112,10 @@ void AppendListValue(std::string_view lst_key,
 
     case libconfig::Setting::TypeArray:
     case libconfig::Setting::TypeList: {
-      std::size_t sz = cfg.Size(lst_key);  // TODO reuse keyfrom...
+      std::size_t lst_sz = cfg.Size(lst_key);
+      const std::string elem_key =
+          Configuration::KeyForListElement(lst_key, lst_sz);
       cfg.AppendList(lst_key);
-      std::string elem_key{lst_key};
-      elem_key += '[';
-      elem_key += std::to_string(sz);
-      elem_key += ']';
 
       for (int i = 0; i < node.getLength(); ++i) {
         AppendListValue(elem_key, cfg, node[i]);
@@ -404,27 +402,26 @@ void PrintList(const Configuration &cfg,
 
   ++indent;
   for (std::size_t idx = 0; idx < size; ++idx) {
-    std::ostringstream elem_key;
-    elem_key << key << '[' << idx << ']';
+    const std::string elem_key = Configuration::KeyForListElement(key, idx);
 
     if (include_newline) {
       PrintIndent(out, indent);
     }
 
-    switch (cfg.Type(elem_key.str())) {
+    switch (cfg.Type(elem_key)) {
       case ConfigType::Group:
-        PrintGroup(cfg.GetGroup(elem_key.str()),
+        PrintGroup(cfg.GetGroup(elem_key),
             out,
             indent,
             /*include_brackets=*/true);
         break;
 
       case ConfigType::List:
-        PrintList(cfg, out, elem_key.str(), indent);
+        PrintList(cfg, out, elem_key, indent);
         break;
 
       default:
-        PrintScalar(cfg, out, elem_key.str());
+        PrintScalar(cfg, out, elem_key);
         break;
     }
 
