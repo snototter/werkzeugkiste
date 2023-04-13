@@ -162,7 +162,7 @@ void AppendKeyValue(Configuration &cfg, const libconfig::Setting &node) {
       break;
 
     case libconfig::Setting::TypeBoolean:
-      cfg.SetBoolean(key, CastSetting<bool>(node));
+      cfg.SetBool(key, CastSetting<bool>(node));
       break;
 
     case libconfig::Setting::TypeGroup:
@@ -327,7 +327,7 @@ void PrintScalar(const Configuration &cfg,
     std::string_view key) {
   switch (cfg.Type(key)) {
     case ConfigType::Boolean:
-      out << std::boolalpha << cfg.GetBoolean(key);
+      out << std::boolalpha << cfg.GetBool(key);
       break;
 
     case ConfigType::Integer:

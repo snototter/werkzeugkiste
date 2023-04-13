@@ -153,8 +153,8 @@ TEST(ConfigCompoundTest, PointLists) {
   EXPECT_THROW(config.GetInt64Points3D("str"sv), wkc::TypeError);
 
   EXPECT_THROW(config.GetInt32List("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBooleanList("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBooleanList("poly1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolList("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolList("poly1"sv), wkc::TypeError);
 
   // Retrieve a polyline
   auto poly = config.GetInt64Points2D("poly1"sv);
@@ -400,7 +400,7 @@ TEST(ConfigCompoundTest, SetGroup) {
   auto group = config.GetGroup("empty"sv);
   EXPECT_TRUE(group.Empty());
 
-  empty.SetBoolean("my-bool", true);
+  empty.SetBool("my-bool", true);
   empty.SetInt32("my-int32", 23);
   empty.SetString("my-str", "value");
   EXPECT_FALSE(empty.Empty());

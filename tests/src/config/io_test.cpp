@@ -107,7 +107,7 @@ TEST(ConfigIOTest, ConfigConstruction) {
   EXPECT_TRUE(tmp.Empty());
   EXPECT_TRUE(copy.Empty());
 
-  tmp.SetBoolean("tbl.val"sv, true);
+  tmp.SetBool("tbl.val"sv, true);
   EXPECT_FALSE(tmp.Empty());
   EXPECT_TRUE(copy.Empty());
   copy = tmp;
@@ -115,14 +115,14 @@ TEST(ConfigIOTest, ConfigConstruction) {
   EXPECT_FALSE(copy.Empty());
   EXPECT_TRUE(tmp.Contains("tbl.val"sv));
   EXPECT_TRUE(copy.Contains("tbl.val"sv));
-  EXPECT_TRUE(tmp.GetBoolean("tbl.val"sv));
-  EXPECT_TRUE(copy.GetBoolean("tbl.val"sv));
+  EXPECT_TRUE(tmp.GetBool("tbl.val"sv));
+  EXPECT_TRUE(copy.GetBool("tbl.val"sv));
 
   // Test move assignment
   moved = std::move(tmp);
   EXPECT_FALSE(moved.Empty());
   EXPECT_TRUE(moved.Contains("tbl.val"sv));
-  EXPECT_TRUE(moved.GetBoolean("tbl.val"sv));
+  EXPECT_TRUE(moved.GetBool("tbl.val"sv));
   EXPECT_FALSE(moved.Contains("value1"sv));  // Previously contained
 }
 
@@ -307,7 +307,7 @@ TEST(ConfigIOTest, LoadingJSON) {
 
   EXPECT_EQ(2, config.Size("grp"sv));
   EXPECT_EQ("value", config.GetString("grp.str"sv));
-  EXPECT_TRUE(config.GetBoolean("grp.flag"sv));
+  EXPECT_TRUE(config.GetBool("grp.flag"sv));
 
   EXPECT_EQ(5, config.Size("nested"sv));
 
@@ -336,7 +336,7 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ("value", config.GetString("nested[3][3][1]"sv));
 
   EXPECT_THROW(config.Size("nested[3][4]"sv), wkc::TypeError);
-  EXPECT_FALSE(config.GetBoolean("nested[3][4]"sv));
+  EXPECT_FALSE(config.GetBool("nested[3][4]"sv));
 
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("nested[4]"sv));
   EXPECT_EQ(2, config.Size("nested[4]"sv));
@@ -608,8 +608,8 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_DOUBLE_EQ(0.0, subgroup.GetDouble("flts[1]"sv));
   EXPECT_DOUBLE_EQ(2.0, subgroup.GetDouble("flts[2]"sv));
 
-  EXPECT_TRUE(subgroup.GetBoolean("flag"sv));
-  EXPECT_TRUE(config.GetBoolean("group.subgroup.flag"sv));
+  EXPECT_TRUE(subgroup.GetBool("flag"sv));
+  EXPECT_TRUE(config.GetBool("group.subgroup.flag"sv));
 
   EXPECT_EQ(1, subgroup.Size("another-group"sv));
   auto str = subgroup.GetString("another-group.long-string"sv);
@@ -617,7 +617,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   str = subgroup.GetString("another-group.long-string"sv);
   EXPECT_TRUE(wks::EndsWith(str, "automatically concatenated."sv));
 
-  EXPECT_FALSE(config.GetBoolean("group.flag"sv));
+  EXPECT_FALSE(config.GetBool("group.flag"sv));
   EXPECT_EQ(-54321, config.GetInt32("group.int"sv));
   EXPECT_DOUBLE_EQ(1e6, config.GetDouble("group.flt"sv));
   EXPECT_EQ("Another String", config.GetString("group.str"sv));
@@ -628,7 +628,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_EQ(3, config.Size("list[0]"sv));
   EXPECT_EQ("abc", config.GetString("list[0][0]"sv));
   EXPECT_EQ(123, config.GetInt32("list[0][1]"sv));
-  EXPECT_TRUE(config.GetBoolean("list[0][2]"sv));
+  EXPECT_TRUE(config.GetBool("list[0][2]"sv));
 
   EXPECT_DOUBLE_EQ(1.234, config.GetDouble("list[1]"sv));
 
@@ -646,7 +646,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_EQ(3, config.Size("list[4].a"sv));
   EXPECT_EQ(1, config.GetInt32("list[4].a[0]"sv));
   EXPECT_EQ(2, config.GetInt32("list[4].a[1]"sv));
-  EXPECT_TRUE(config.GetBoolean("list[4].a[2]"sv));
+  EXPECT_TRUE(config.GetBool("list[4].a[2]"sv));
 
   EXPECT_EQ(0, config.Size("list[5]"sv));
   EXPECT_TRUE(config.GetGroup("list[5]"sv).Empty());
@@ -707,7 +707,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(+2147483648, config.GetInt64("int32_max_overflow"sv));
 
   EXPECT_DOUBLE_EQ(-1000.0, config.GetDouble("flt"sv));
-  EXPECT_FALSE(config.GetBoolean("flag"sv));
+  EXPECT_FALSE(config.GetBool("flag"sv));
   EXPECT_EQ("value", config.GetString("str"sv));
 
   // List of integers
@@ -735,7 +735,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("mixed[0]"sv));
   EXPECT_EQ(1, config.GetInt32("mixed[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("mixed[1]"sv));
-  EXPECT_TRUE(config.GetBoolean("mixed[1]"sv));
+  EXPECT_TRUE(config.GetBool("mixed[1]"sv));
   EXPECT_EQ(wkc::ConfigType::String, config.Type("mixed[2]"sv));
   EXPECT_EQ("string", config.GetString("mixed[2]"sv));
 
@@ -763,11 +763,11 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   // Subgroup/Table
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("group"sv));
   EXPECT_EQ(3, config.Size("group"sv));
-  EXPECT_TRUE(config.GetBoolean("group.flag"sv));
+  EXPECT_TRUE(config.GetBool("group.flag"sv));
   EXPECT_EQ(123, config.GetInt32("group.count"sv));
 
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("group.subgroup"sv));
-  EXPECT_FALSE(config.GetBoolean("group.subgroup.flag"sv));
+  EXPECT_FALSE(config.GetBool("group.subgroup.flag"sv));
   EXPECT_DOUBLE_EQ(1e-6, config.GetDouble("group.subgroup.threshold"sv));
 
   // Try parsing an invalid configuration string.

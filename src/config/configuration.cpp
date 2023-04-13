@@ -1401,33 +1401,32 @@ std::string Configuration::KeyForListElement(std::string_view key,
 //---------------------------------------------------------------------------
 // Boolean
 
-bool Configuration::GetBoolean(std::string_view key) const {
+bool Configuration::GetBool(std::string_view key) const {
   return detail::LookupScalar<bool>(pimpl_->config_root,
       key,
       /*allow_default=*/false);
 }
 
-bool Configuration::GetBooleanOr(std::string_view key, bool default_val) const {
+bool Configuration::GetBoolOr(std::string_view key, bool default_val) const {
   return detail::LookupScalar<bool>(pimpl_->config_root,
       key,
       /*allow_default=*/true,
       default_val);
 }
 
-std::optional<bool> Configuration::GetOptionalBoolean(
-    std::string_view key) const {
+std::optional<bool> Configuration::GetOptionalBool(std::string_view key) const {
   return detail::LookupOptionalScalar<bool>(pimpl_->config_root, key);
 }
 
-void Configuration::SetBoolean(std::string_view key, bool value) {
+void Configuration::SetBool(std::string_view key, bool value) {
   detail::SetScalar<bool>(pimpl_->config_root, key, value);
 }
 
-std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
+std::vector<bool> Configuration::GetBoolList(std::string_view key) const {
   return detail::GetList<bool>(pimpl_->ImmutableList(key), key);
 }
 
-void Configuration::SetBooleanList(std::string_view key,
+void Configuration::SetBoolList(std::string_view key,
     const std::vector<bool> &values) {
   detail::SetList<bool>(pimpl_->config_root, key, values);
 }

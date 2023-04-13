@@ -130,120 +130,118 @@ std::optional<Tp> DecodeScalarNode(const YAML::Node &node) {
   const std::string &tag = node.Tag();
   const std::string &val = node.Scalar();
 
-  if (HasTag(node)) {
-    // TODO document supported tags
-
-    if constexpr (std::is_same_v<Tp, std::string>) {
-      if ((tag == "tag:yaml.org,2002:str") || (tag == "!")) {
-        return val;
-      }
-      return std::nullopt;
-    }
-
-    if constexpr (std::is_same_v<Tp, bool>) {
-      if (tag == "tag:yaml.org,2002:bool") {
-        return node.as<bool>();
-      }
-      return std::nullopt;
-    }
-
-    if constexpr (std::is_integral_v<Tp>) {
-      if (tag == "tag:yaml.org,2002:int") {
-        return std::stol(val);
-        // return node.as<Tp>();
-      }
-      return std::nullopt;
-    }
-
-    if constexpr (std::is_floating_point_v<Tp>) {
-      if (tag == "tag:yaml.org,2002:float") {
-        return std::stod(val);
-      }
-      return std::nullopt;
-    }
-
-    // if constexpr (std::is_same_v<Tp, date>) {
-    //   if (tag == "tag:yaml.org,2002:date") {
-    //     return date{val};
-    //   }
-    //   return std::nullopt;
-    // }
-
-    // WZKLOG_CRITICAL("node has tag '''{}''', but this is not yet handled!",
-    // tag); // TODO
-    return std::nullopt;
-  }
-
   // try {
   WZKLOG_CRITICAL("try decoding node into type {}, value {}, tag {}",
       TypeName<Tp>(),
       val,
       node.Tag());
   Tp typed;
+  // Use YAML::convert to avoid YAML::BadConversion being thrown.
   if (YAML::convert<Tp>::decode(node, typed)) {
     WZKLOG_CRITICAL("-----> succeeded");
     return typed;
   }
-  //   return node.as<Tp>();
-  // } catch (const YAML::BadConversion &e) {
-  //   return std::nullopt;
-  // }
 
   return std::nullopt;
 }
 
+void SetTaggedScalar(const YAML::Node &node,
+    Configuration &cfg,
+    std::string_view fqn) {
+  // LCOV_EXCL_START
+  if (!HasTag(node)) {
+    std::string msg{
+        "SetTaggedScalar called with untagged node for parameter `"};
+    msg += fqn;
+    msg += "`!";
+    throw std::logic_error(msg);
+  }
+  // LCOV_EXCL_STOP
+
+  // TODO document supported tags
+
+  const std::string &tag = node.Tag();
+  const std::string &value = node.Scalar();
+  if ((tag == "tag:yaml.org,2002:str") || (tag == "!")) {
+    cfg.SetString(fqn, value);
+    return;
+  }
+
+  if (tag == "tag:yaml.org,2002:bool") {
+    cfg.SetBool(fqn, node.as<bool>());
+  }
+
+  if (tag == "tag:yaml.org,2002:int") {
+    cfg.SetInt64(fqn, std::stol(value));
+  }
+
+  if (tag == "tag:yaml.org,2002:float") {
+    cfg.SetDouble(fqn, std::stod(value));
+  }
+
+  // if (tag == "tag:yaml.org,2002:date") {
+  //   return date{val};
+  // }
+
+  std::string msg{"YAML tag `" + tag + "` is not supported!"};
+  throw std::logic_error{msg};
+}
+
 void SetScalar(const YAML::Node &node,
     Configuration &cfg,
-    std::string_view key) {
-  // if (HasTag(node)) {
-  //   SetTaggedScalar(node, cfg, key);
-  // }
+    std::string_view fqn) {
+  if (HasTag(node)) {
+    SetTaggedScalar(node, cfg, fqn);
+    return;
+  }
+
+  // Node is not tagged, so we try to decode it into the supported types.
   const auto val_bool = DecodeScalarNode<bool>(node);
   if (val_bool.has_value()) {
-    cfg.SetBoolean(key, val_bool.value());
+    cfg.SetBool(fqn, val_bool.value());
     return;
   }
 
   const auto val_int = DecodeScalarNode<int64_t>(node);
   if (val_int.has_value()) {
-    cfg.SetInt64(key, val_int.value());
+    cfg.SetInt64(fqn, val_int.value());
     return;
   }
 
   const auto val_double = DecodeScalarNode<double>(node);
   if (val_double.has_value()) {
-    cfg.SetDouble(key, val_double.value());
+    cfg.SetDouble(fqn, val_double.value());
     return;
   }
 
   const auto val_date = DecodeScalarNode<date>(node);
   if (val_date.has_value()) {
-    cfg.SetDate(key, val_date.value());
+    cfg.SetDate(fqn, val_date.value());
     return;
   }
 
   const auto val_time = DecodeScalarNode<time>(node);
   if (val_time.has_value()) {
-    cfg.SetTime(key, val_time.value());
+    cfg.SetTime(fqn, val_time.value());
     return;
   }
 
   const auto val_datetime = DecodeScalarNode<date_time>(node);
   if (val_datetime.has_value()) {
-    cfg.SetDateTime(key, val_datetime.value());
+    cfg.SetDateTime(fqn, val_datetime.value());
     return;
   }
 
   const auto val_string = DecodeScalarNode<std::string>(node);
   if (val_string.has_value()) {
-    cfg.SetString(key, val_string.value());
+    cfg.SetString(fqn, val_string.value());
     return;
   }
 
   // TODO throw
   // LCOV_EXCL_START
   std::string msg{"Could not decode scalar YAML node for parameter `"};
-  msg += key;
+  msg += fqn;
   msg += "`!";
   throw TypeError{msg};
   // LCOV_EXCL_STOP

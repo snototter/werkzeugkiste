@@ -242,7 +242,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
   /// @param key Fully qualified parameter name.
-  bool GetBoolean(std::string_view key) const;
+  bool GetBool(std::string_view key) const;
 
   /// @brief Returns the boolean parameter or the `default_val` if it does not
   ///   exist.
@@ -251,7 +251,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
-  bool GetBooleanOr(std::string_view key, bool default_val) const;
+  bool GetBoolOr(std::string_view key, bool default_val) const;
 
   /// @brief Returns an optional boolean or `std::nullopt` if it does not
   ///   exist.
@@ -259,7 +259,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
   /// @param key Fully qualified parameter name.
-  std::optional<bool> GetOptionalBoolean(std::string_view key) const;
+  std::optional<bool> GetOptionalBool(std::string_view key) const;
 
   /// @brief Sets a boolean parameter.
   ///
@@ -269,7 +269,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
-  void SetBoolean(std::string_view key, bool value);
+  void SetBool(std::string_view key, bool value);
 
   /// @brief Returns a list of boolean flags.
   ///
@@ -277,7 +277,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
   /// @param key Fully qualified parameter name.
-  std::vector<bool> GetBooleanList(std::string_view key) const;
+  std::vector<bool> GetBoolList(std::string_view key) const;
 
   /// @brief Sets or replaces a list of boolean flags.
   ///
@@ -285,7 +285,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully qualified parameter name.
   /// @param values List of flags.
-  void SetBooleanList(std::string_view key, const std::vector<bool> &values);
+  void SetBoolList(std::string_view key, const std::vector<bool> &values);
 
   //---------------------------------------------------------------------------
   // Integers (32-bit)
