@@ -21,45 +21,152 @@ namespace detail {
 // Forward declaration
 Configuration FromJSONObject(const json &object, NullValuePolicy none_policy);
 
-/// @brief Appends the JSON `value` to an already created list of the given
-///   Configuration `cfg`.
-/// @param lst_key Parameter name of the list to be appended to.
-/// @param cfg The configuration which already holds the list.
-/// @param value The JSON value to append to the list.
+void AppendListItems(const json &list,
+    Configuration &cfg,
+    std::string_view fqn,
+    NullValuePolicy none_policy);
+
+// LCOV_EXCL_START
+/// @brief Throws a std::logic_error with a hint to report an error.
+/// @param prefix Error message prefix.
+/// @param fqn Fully qualified name of the parameter that caused the error. If
+///   provided, " for parameter `fqn`!" will be appended to the error message.
+/// @throws std::logic_error
+inline void ThrowImplementationError(std::string_view prefix,
+    std::string_view fqn) {
+  std::string msg{prefix};
+  if (!fqn.empty()) {
+    msg += " for parameter `";
+    msg += fqn;
+    msg += "`!";
+  }
+  msg +=
+      " Please report at "
+      "https://github.com/snototter/werkzeugkiste/issues";
+  throw std::logic_error{msg};
+}
+// LCOV_EXCL_STOP
+
+/// @brief Appends or sets a configuration value from a scalar json value.
+/// @tparam Tp Type of the scalar value.
+/// @param object The JSON value.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+/// @param append If true, fqn is assumed to be a list and the value will be
+///   appended. Otherwise, the value will be set, i.e. "cfg[fqn] = value";
+template <typename Tp>
+void HandleBuiltinScalar(const json &object,
+    Configuration &cfg,
+    std::string_view fqn,
+    bool append) {
+  if (append) {
+    cfg.Append(fqn, object.get<Tp>());
+  } else {
+    cfg.Set(fqn, object.get<Tp>());
+  }
+}
+
+/// @brief Appends or sets a configuration value from a parsed json value.
+/// @param value Value to be added to the configuration.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+/// @param append If true, fqn is assumed to be a list and the value will be
+///   appended. Otherwise, the value will be set, i.e. "cfg[fqn] = value";
+// NOLINTNEXTLINE(misc-no-recursion)
+void HandleValue(const json &value,
+    Configuration &cfg,
+    std::string_view fqn,
+    NullValuePolicy none_policy,
+    bool append) {
+  switch (value.type()) {
+    case json::value_t::null:
+      Configuration::HandleNullValue(cfg, fqn, none_policy, append);
+      break;
+
+    case json::value_t::boolean:
+      HandleBuiltinScalar<bool>(value, cfg, fqn, append);
+      break;
+
+    case json::value_t::number_integer:
+    case json::value_t::number_unsigned:
+      // https://json.nlohmann.me/api/basic_json/number_integer_t/
+      HandleBuiltinScalar<int64_t>(value, cfg, fqn, append);
+      break;
+
+    case json::value_t::number_float:
+      // https://json.nlohmann.me/api/basic_json/number_float_t/
+      HandleBuiltinScalar<double>(value, cfg, fqn, append);
+      break;
+
+    case json::value_t::string:
+      HandleBuiltinScalar<std::string>(value, cfg, fqn, append);
+      break;
+
+    case json::value_t::array: {
+      if (append) {
+        const std::size_t lst_sz = cfg.Size(fqn);
+        const std::string elem_key =
+            Configuration::KeyForListElement(fqn, lst_sz);
+        cfg.AppendList(fqn);
+        AppendListItems(value, cfg, elem_key, none_policy);
+      } else {
+        cfg.CreateList(fqn);
+        AppendListItems(value, cfg, fqn, none_policy);
+      }
+      break;
+    }
+
+    case json::value_t::object: {
+      if (append) {
+        cfg.Append(fqn, FromJSONObject(value, none_policy));
+      } else {
+        cfg.Set(fqn, FromJSONObject(value, none_policy));
+      }
+      break;
+    }
+
+    // LCOV_EXCL_START
+    case json::value_t::binary: {
+      std::string msg{
+          "Binary JSON values are not supported, check parameter `"};
+      msg += fqn;
+      msg += "`!";
+      throw ValueError{msg};
+    }
+
+    case json::value_t::discarded:
+      break;
+      // LCOV_EXCL_STOP
+  }
+}
+
+/// @brief Appends all child nodes of the given JSON list to the configuration.
+/// @param list The JSON list.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name. This must be a list already
+///   existing in the configuration.
 /// @param none_policy How to deal with null/none values.
 // NOLINTNEXTLINE(misc-no-recursion)
-void AppendListValue(std::string_view lst_key,
+void AppendListItems(const json &list,
     Configuration &cfg,
-    const json &value,
+    std::string_view fqn,
     NullValuePolicy none_policy) {
-  using namespace std::string_view_literals;
-  if (value.is_null()) {
-    Configuration::HandleNullValue(cfg, lst_key, none_policy, /*append=*/true);
-  } else if (value.is_boolean()) {
-    cfg.Append(lst_key, value.get<bool>());
-  } else if (value.is_number_float()) {
-    cfg.Append(lst_key, value.get<double>());
-  } else if (value.is_number_integer()) {
-    cfg.Append(lst_key, value.get<int64_t>());
-  } else if (value.is_string()) {
-    cfg.Append(lst_key, value.get<std::string>());
-  } else if (value.is_array()) {
-    std::size_t lst_sz = cfg.Size(lst_key);
-    const std::string elem_key =
-        Configuration::KeyForListElement(lst_key, lst_sz);
-    cfg.AppendList(lst_key);
-    for (const json &element : value) {
-      AppendListValue(elem_key, cfg, element, none_policy);
-    }
-  } else if (value.is_object()) {
-    cfg.Append(lst_key, FromJSONObject(value, none_policy));
-  } else if (value.is_binary()) {
-    // LCOV_EXCL_START
-    std::string msg{"Cannot load the binary JSON value for parameter `"};
-    msg += lst_key;
-    msg += "`!";
-    throw ValueError{msg};
-    // LCOV_EXCL_STOP
+  // LCOV_EXCL_START
+  if (!list.is_array()) {
+    ThrowImplementationError(
+        "Internal JSON util `AppendListItems` called with non-list/array node",
+        fqn);
+  }
+  if (!cfg.Contains(fqn)) {
+    ThrowImplementationError(
+        "Internal JSON util `AppendListItems` requires that list already "
+        "exists",
+        fqn);
+  }
+  // LCOV_EXCL_STOP
+
+  for (const json &elem : list) {
+    HandleValue(elem, cfg, fqn, none_policy, /*append=*/true);
   }
 }
 
@@ -68,70 +175,38 @@ void AppendListValue(std::string_view lst_key,
 /// @param none_policy How to deal with null/none values.
 // NOLINTNEXTLINE(misc-no-recursion)
 Configuration FromJSONObject(const json &object, NullValuePolicy none_policy) {
-  using namespace std::string_view_literals;
   Configuration grp{};
   for (json::const_iterator it = object.begin(); it != object.end(); ++it) {
-    const json &value = it.value();
-    const std::string_view key = it.key();
-    if (value.is_null()) {
-      Configuration::HandleNullValue(grp, key, none_policy, /*append=*/false);
-    } else if (value.is_boolean()) {
-      grp.SetBool(key, value.get<bool>());
-    } else if (value.is_number_float()) {
-      // https://json.nlohmann.me/api/basic_json/number_float_t/
-      grp.SetDouble(key, value.get<double>());
-    } else if (value.is_number_integer()) {
-      // https://json.nlohmann.me/api/basic_json/number_integer_t/
-      grp.SetInt64(key, value.get<int64_t>());
-    } else if (value.is_string()) {
-      grp.SetString(key, value.get<std::string>());
-    } else if (value.is_array()) {
-      grp.CreateList(key);
-      for (const json &element : value) {
-        AppendListValue(key, grp, element, none_policy);
-      }
-    } else if (value.is_object()) {
-      grp.SetGroup(key, FromJSONObject(value, none_policy));
-    } else if (value.is_binary()) {
-      // LCOV_EXCL_START
-      std::string msg{"Cannot load the binary JSON value for parameter `"};
-      msg += key;
-      msg += "`!";
-      throw ValueError{msg};
-      // LCOV_EXCL_STOP
-    }
+    HandleValue(it.value(), grp, it.key(), none_policy, /*append=*/false);
   }
   return grp;
 }
 
-Configuration FromJSONRoot(const json &object, NullValuePolicy none_policy) {
-  if (object.is_object()) {
-    return FromJSONObject(object, none_policy);
-  }
-  if (object.is_array()) {
-    Configuration cfg{};
-    const std::string_view key{"list"};
-    cfg.CreateList(key);
-    for (const json &element : object) {
-      AppendListValue(key, cfg, element, none_policy);
-    }
-    return cfg;
-  }
-
-  // LCOV_EXCL_START
-  // This branch should be unreachable.
-  throw std::logic_error{
-      "Internal util `FromJSONRoot` invoked with neither JSON object nor "
-      "array! Please "
-      "report at https://github.com/snototter/werkzeugkiste/issues"};
-  // LCOV_EXCL_STOP
-}
 }  // namespace detail
 
 Configuration LoadJSONString(std::string_view json_string,
     NullValuePolicy none_policy) {
   try {
-    return detail::FromJSONRoot(json::parse(json_string), none_policy);
+    const json &object = json::parse(json_string);
+    if (object.is_object()) {
+      return detail::FromJSONObject(object, none_policy);
+    }
+
+    if (object.is_array()) {
+      Configuration cfg{};
+      const std::string_view key{"list"};
+      cfg.CreateList(key);
+      detail::AppendListItems(object, cfg, key, none_policy);
+      return cfg;
+    }
+
+    // LCOV_EXCL_START
+    // This branch should be unreachable.
+    throw std::logic_error{
+        "Internal util `FromJSONRoot` invoked with neither JSON object nor "
+        "array! Please "
+        "report at https://github.com/snototter/werkzeugkiste/issues"};
+    // LCOV_EXCL_STOP
   } catch (const json::parse_error &e) {
     std::string msg{"Parsing JSON input failed! "};
     msg += e.what();
