@@ -1,6 +1,5 @@
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/fileio.h>
-#include <werkzeugkiste/logging.h>  // TODO remove
 #include <werkzeugkiste/strings/strings.h>
 
 // NOLINTBEGIN
@@ -71,6 +70,32 @@ namespace detail {
 // Forward declaration
 Configuration FromYAMLNode(const YAML::Node &node, NullValuePolicy none_policy);
 
+void AppendListItems(const YAML::Node &node,
+    Configuration &cfg,
+    std::string_view key,
+    NullValuePolicy none_policy);
+
+// LCOV_EXCL_START
+/// @brief Throws a std::logic_error with a hint to report an error.
+/// @param prefix Error message prefix.
+/// @param fqn Fully qualified name of the parameter that caused the error. If
+///   provided, " for parameter `fqn`!" will be appended to the error message.
+/// @throws std::logic_error
+inline void ThrowImplementationError(std::string_view prefix,
+    std::string_view fqn) {
+  std::string msg{prefix};
+  if (!fqn.empty()) {
+    msg += " for parameter `";
+    msg += fqn;
+    msg += "`!";
+  }
+  msg +=
+      " Please report at "
+      "https://github.com/snototter/werkzeugkiste/issues";
+  throw std::logic_error{msg};
+}
+// LCOV_EXCL_STOP
+
 /// @brief Appends or sets a configuration value from a decoded scalar value.
 /// @tparam Tp Type of the scalar value.
 /// @param value The decoded value.
@@ -90,7 +115,8 @@ void AppendOrSet(Tp value,
   }
 }
 
-/// @brief Returns true if the scalar node is tagged.
+/// @brief Returns true if the scalar node is tagged, i.e. has a
+/// non-s
 inline bool ScalarHasTag(const YAML::Node &node) {
   if (!node.IsScalar()) {
     // LCOV_EXCL_START
@@ -165,11 +191,8 @@ void HandleTaggedScalar(const YAML::Node &node,
   if (!ScalarHasTag(node)) {
     // LCOV_EXCL_START
     // This should never happen.
-    std::string msg{
-        "HandleTaggedScalar called with untagged node for parameter `"};
-    msg += fqn;
-    msg += "`!";
-    throw std::logic_error(msg);
+    ThrowImplementationError(
+        "HandleTaggedScalar called with untagged node", fqn);
     // LCOV_EXCL_STOP
   }
 
@@ -190,7 +213,8 @@ void HandleTaggedScalar(const YAML::Node &node,
   } else if (tag == "tag:yaml.org,2002:bool") {
     AppendOrSet(node.as<bool>(), cfg, fqn, append);
   } else if (tag == "tag:yaml.org,2002:int") {
-    AppendOrSet(std::stol(value), cfg, fqn, append);
+    const int64_t val = std::stol(value);
+    AppendOrSet(val, cfg, fqn, append);
   } else if (tag == "tag:yaml.org,2002:float") {
     AppendOrSet(std::stod(value), cfg, fqn, append);
   } else if ((tag == "tag:yaml.org,2002:date") ||
@@ -199,12 +223,20 @@ void HandleTaggedScalar(const YAML::Node &node,
   } else if ((tag == "tag:yaml.org,2002:time") || (tag == "!time")) {
     DecodeTime(node, cfg, fqn, append);
   } else {
-    std::string msg{"YAML tag `" + tag + "` is not supported!"};
-    throw std::logic_error{msg};
+    std::string msg{"YAML tag `" + tag + "` is not supported"};
+    ThrowImplementationError(msg, fqn);
   }
 }
 
-// TODO doc
+/// @brief Tries to decode the scalar node into a value of type Tp. Upon
+///   success, the value is set or appended to the configuration.
+/// @tparam Tp Type to decode the node into.
+/// @param node The YAML node which holds the scalar.
+/// @param cfg The configuration.
+/// @param fqn The fully qualified parameter name.
+/// @param append If true, the value is `Append`ed (assuming that `fqn` is an
+///   existing list). Otherwise, the value is `Set`.
+/// @return true if the node was decoded successfully, false otherwise.
 template <typename Tp>
 bool HandleUntaggedScalar(const YAML::Node &node,
     Configuration &cfg,
@@ -272,111 +304,113 @@ void HandleScalarNode(const YAML::Node &node,
   }
 
   // LCOV_EXCL_START
-  std::string msg{"Could not decode scalar YAML node for parameter `"};
-  msg += fqn;
-  msg +=
-      "`! This is a bug, please report at "
-      "https://github.com/snototter/werkzeugkiste/issues";
-  throw std::logic_error{msg};
+  // This should never happen (any scalar should be convertible to a string).
+  ThrowImplementationError("Could not decode the YAML scalar", fqn);
   // LCOV_EXCL_STOP
 }
 
+/// @brief Appends or sets a configuration value from a parsed YAML node.
+/// @param node Value to be added to the configuration.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+/// @param append If true, fqn is assumed to be a list and the value will be
+///   appended. Otherwise, the value will be set, i.e. "cfg[fqn] = value";
+// NOLINTNEXTLINE(misc-no-recursion)
+void HandleNode(const YAML::Node &node,
+    Configuration &cfg,
+    std::string_view fqn,
+    NullValuePolicy none_policy,
+    bool append) {
+  switch (node.Type()) {
+    case YAML::NodeType::Null:
+      Configuration::HandleNullValue(cfg, fqn, none_policy, append);
+      break;
+
+    case YAML::NodeType::Scalar:
+      HandleScalarNode(node, cfg, fqn, append);
+      break;
+
+    case YAML::NodeType::Sequence: {
+      if (append) {
+        const std::size_t lst_size = cfg.Size(fqn);
+        const std::string elem_key =
+            Configuration::KeyForListElement(fqn, lst_size);
+        cfg.AppendList(fqn);
+        AppendListItems(node, cfg, elem_key, none_policy);
+      } else {
+        cfg.CreateList(fqn);
+        AppendListItems(node, cfg, fqn, none_policy);
+      }
+      break;
+    }
+
+    case YAML::NodeType::Map: {
+      if (append) {
+        cfg.Append(fqn, FromYAMLNode(node, none_policy));
+      } else {
+        cfg.Set(fqn, FromYAMLNode(node, none_policy));
+      }
+      break;
+    }
+
+    // LCOV_EXCL_START
+    case YAML::NodeType::Undefined: {
+      std::string msg{"Undefined YAML node type for parameter `"};
+      msg += fqn;
+      msg += "`!";
+      throw TypeError{msg};
+    }
+      // LCOV_EXCL_STOP
+  }
+}
+
+/// @brief Appends all child nodes of the given YAML list to the configuration.
+/// @param node The YAML list.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name. This must be a list already
+///   existing in the configuration.
+/// @param none_policy How to deal with null/none values.
 // NOLINTNEXTLINE(misc-no-recursion)
 void AppendListItems(const YAML::Node &node,
     Configuration &cfg,
-    std::string_view key,
+    std::string_view fqn,
     NullValuePolicy none_policy) {
   // LCOV_EXCL_START
-  if (!node.IsSequence() || !cfg.Contains(key)) {
-    std::string msg{
-        "AppendListItem requires that the YAML node is a sequence ("};
-    msg += (node.IsSequence() ? "which it is" : "which it is NOT");
-    msg += ") and that the list parameter `";
-    msg += key;
-    msg += "` has already been created (";
-    msg +=
-        (cfg.Contains(key) ? "which has been done" : "which has NOT been done");
-    msg += ")!";
-    throw std::logic_error{msg};
+  // The following failures should never happen, unless we messed
+  //  up the internal logic.
+  if (!node.IsSequence()) {
+    ThrowImplementationError(
+        "Internal util `AppendListItem` called without sequence node", fqn);
+  }
+  if (!cfg.Contains(fqn)) {
+    ThrowImplementationError(
+        "Internal util `AppendListItem` called without existing list", fqn);
   }
   // LCOV_EXCL_STOP
 
   for (const auto &item : node) {
-    switch (item.Type()) {
-      case YAML::NodeType::Null:
-        Configuration::HandleNullValue(cfg, key, none_policy, /*append=*/true);
-        break;
-
-      case YAML::NodeType::Scalar:
-        HandleScalarNode(item, cfg, key, /*append=*/true);
-        break;
-
-      case YAML::NodeType::Sequence: {
-        const std::size_t lst_size = cfg.Size(key);
-        const std::string elem_key =
-            Configuration::KeyForListElement(key, lst_size);
-        cfg.AppendList(key);
-        AppendListItems(item, cfg, elem_key, none_policy);
-        break;
-      }
-
-      case YAML::NodeType::Map:
-        cfg.Append(key, FromYAMLNode(item, none_policy));
-        break;
-
-      // LCOV_EXCL_START
-      case YAML::NodeType::Undefined: {
-        std::string msg{"Undefined YAML node type for parameter `"};
-        msg += key;
-        msg += "`!";
-        throw std::logic_error{msg};
-      }
-        // LCOV_EXCL_STOP
-    }
+    HandleNode(item, cfg, fqn, none_policy, /*append=*/true);
   }
 }
 
+/// @brief Parses a YAML map into a Configuration.
+/// @param node The YAML map.
+/// @param none_policy How to deal with null/none values.
 // NOLINTNEXTLINE(misc-no-recursion)
 Configuration FromYAMLNode(const YAML::Node &node,
     NullValuePolicy none_policy) {
-  // LCOV_EXCL_START
   if (!node.IsMap()) {
-    throw std::logic_error{
-        "FromYAMLNode requires that the YAML node is a map!"};
+    // LCOV_EXCL_START
+    // This should never happen.
+    ThrowImplementationError(
+        "Internal util `FromYAMLNode` called without map!", "");
+    // LCOV_EXCL_STOP
   }
-  // LCOV_EXCL_STOP
 
   Configuration cfg{};
   for (YAML::const_iterator it = node.begin(); it != node.end(); ++it) {
     const std::string key = it->first.as<std::string>();
-    switch (it->second.Type()) {
-      case YAML::NodeType::Null:
-        Configuration::HandleNullValue(cfg, key, none_policy, /*append=*/false);
-        break;
-
-      case YAML::NodeType::Scalar:
-        HandleScalarNode(it->second, cfg, key, /*append=*/false);
-        break;
-
-      case YAML::NodeType::Sequence: {
-        cfg.CreateList(key);
-        AppendListItems(it->second, cfg, key, none_policy);
-        break;
-      }
-
-      case YAML::NodeType::Map:
-        cfg.SetGroup(key, FromYAMLNode(it->second, none_policy));
-        break;
-
-      // LCOV_EXCL_START
-      case YAML::NodeType::Undefined: {
-        std::string msg{"Undefined YAML node type for parameter `"};
-        msg += key;
-        msg += "`!";
-        throw std::logic_error{msg};
-      }
-        // LCOV_EXCL_STOP
-    }
+    HandleNode(it->second, cfg, key, none_policy, /*append=*/false);
   }
   return cfg;
 }
@@ -385,7 +419,6 @@ Configuration FromYAMLNode(const YAML::Node &node,
 Configuration LoadYAMLString(const std::string &yaml_string,
     NullValuePolicy none_policy) {
   try {
-    // WZKLOG_CRITICAL("INPUT TO PARSER\n{}", yaml_string); // TODO remove
     YAML::Node node = YAML::Load(yaml_string);
     if (node.IsMap()) {
       auto cfg = detail::FromYAMLNode(node, none_policy);

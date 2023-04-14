@@ -152,6 +152,8 @@ void AppendListItems(const json &list,
     std::string_view fqn,
     NullValuePolicy none_policy) {
   // LCOV_EXCL_START
+  // The following failures should never happen, unless we messed
+  //  up the internal logic.
   if (!list.is_array()) {
     ThrowImplementationError(
         "Internal JSON util `AppendListItems` called with non-list/array node",

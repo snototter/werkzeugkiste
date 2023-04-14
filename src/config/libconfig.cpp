@@ -169,9 +169,17 @@ void AppendListItems(const libconfig::Setting &node,
     Configuration &cfg,
     std::string_view fqn) {
   // LCOV_EXCL_START
+  // The following failures should never happen, unless we messed
+  //  up the internal logic.
   if (!node.isList() && !node.isArray()) {
     ThrowImplementationError(
         "Internal util `AppendListItems` called with non-list/array node ",
+        fqn);
+  }
+  if (!cfg.Contains(fqn)) {
+    ThrowImplementationError(
+        "Internal util `AppendListItems` requires that list already "
+        "exists",
         fqn);
   }
   // LCOV_EXCL_STOP

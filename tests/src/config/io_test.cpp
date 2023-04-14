@@ -676,6 +676,10 @@ none3:
   // EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" <<
   // copy.ToTOML();
 
+  // TODO Not sure if the type deduction is really that useful/intuitive.
+  // Currently, it seems convenient, but this feature might be dropped in the
+  // future. Could be replaced by only converting explicitly tagged values...
+
   // Multi-document YAML:
   // Currently, yaml-cpp parses only the first document. If this changes, this
   // test should break to indicate that we need to adjust our loading routine.
