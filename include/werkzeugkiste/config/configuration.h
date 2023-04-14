@@ -19,7 +19,8 @@
 #include <utility>
 #include <vector>
 
-/// @brief Utilities to handle configurations in a unified manner.
+/// @brief Utilities to handle configurations in a unified manner via the
+///   `werkzeugkiste::config::Configuration` class.
 ///
 /// @code {.cpp}
 /// #include <werkzeugkiste/config/configuration.h>
@@ -37,6 +38,11 @@
 ///       [800,   0, 400],
 ///       [  0, 750, 300],
 ///       [  0,   0,   1]
+///     ]
+///
+///     polyline = [
+///       [ 1, 2],            # Points can be specified as lists...
+///       { x = -1, y = -2},  # ... or as groups (key/value pairs).
 ///     ]
 ///     )toml");
 ///
@@ -67,12 +73,14 @@
 ///
 /// // TODO not yet available
 /// // namespace wkg = werkzeugkiste::geometry;
-/// // std::vector<wkg::Vec2i> polyline = cfg.GetVec2iList("poly2"sv);
+/// // const std::vector<wkg::Vec2i> polyline = cfg.GetVec2iList("polyline"sv);
 /// // Type conversion
-/// // std::vector<wkg::Vec2d> polyline = cfg.GetVec2dList("poly2"sv);
+/// // const std::vector<wkg::Vec2d> polyline = cfg.GetVec2dList("polyline"sv);
 /// @endcode
 namespace werkzeugkiste::config {
 
+/// @brief Alias for a dynamic-size row-major matrix.
+/// @tparam Tp Scalar type of the matrix.
 template <typename Tp>
 using Matrix =
     Eigen::Matrix<Tp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -96,13 +104,27 @@ using Matrix =
 /// * <a href="https://toml.io/en">TOML</a>,
 /// * <a href="https://www.json.org/">JSON</a>,
 /// * <a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and
-/// * <a href="https://yaml.org/">YAML</a> (only for exporting).
+/// * <a href="https://yaml.org/">YAML</a>.
 ///
 /// For usage convenience, this class support conversion from the
 /// TOML-compatible parameter types to:
 /// * <a href="https://eigen.tuxfamily.org/">`Eigen` matrices</a> (1- and
 ///   2-dimensional) can be loaded from (nested) numeric lists.
 /// * Basic geometry types defined within `werkzeugkiste::geometry`.
+///
+/// @code {.cpp}
+/// #include <werkzeugkiste/config/configuration.h>
+/// namespace wkc = werkzeugkiste::config;
+/// using namespace std::string_view_literals;
+/// // Load a configuration from a file (format will be deduced from the
+/// // file extension)...
+/// wkc::Configuration cfg = wkc::LoadFile("path/to/config.toml");
+/// // ... or a string:
+/// wkc::Configuration cfg = wkc::LoadTOMLString("value = 42.17"sv);
+/// wkc::Configuration cfg = wkc::LoadJSONString("{ 'value': 42.17 }"sv);
+///
+/// // TODO Extend example
+/// @endcode
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -438,6 +460,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Similarly, a group which holds (at least) `x` and `y` parameters can also
   /// be loaded as a 2D point.
   ///
+  /// @code {.cpp}
+  /// const wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+  ///     lst-2d = [1, 2]
+  ///     lst-nd = [1, 2, 3, 4, 5]
+  ///     grp-2d = { x = 1, y = 2 }
+  ///     )toml");
+  /// // Load 2-element list as 2D point:
+  /// const auto pt1 = cfg.GetInt64Point2D("lst-2d");
+  /// // Load 2D point from the first 2 elements of a 5-element list:
+  /// const auto pt2 = cfg.GetInt64Point2D("lst-nd");
+  /// // Load 2D point from a group containing x and y parameters:
+  /// const auto pt3 = cfg.GetInt64Point2D("grp-2d");
+  /// @endcode
+  ///
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
@@ -454,6 +490,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// coordinate, respectively.
   /// Similarly, a group which holds (at least) `x`, `y` and `z` parameters can
   /// also be loaded as a 3D point.
+  ///
+  /// @code {.cpp}
+  /// const wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+  ///     lst-3d = [1, 2, 3]
+  ///     lst-nd = [1, 2, 3, 4, 5]
+  ///     grp-3d = { x = 1, y = 2, z = 3 }
+  ///     )toml");
+  /// // Load 3-element list as 3D point:
+  /// const auto pt1 = cfg.GetInt64Point3D("lst-3d");
+  /// // Load 3D point from the first 3 elements of a 5-element list:
+  /// const auto pt2 = cfg.GetInt64Point3D("lst-nd");
+  /// // Load 3D point from a group containing x, y and z parameters:
+  /// const auto pt3 = cfg.GetInt64Point3D("grp-3d");
+  /// @endcode
   ///
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
