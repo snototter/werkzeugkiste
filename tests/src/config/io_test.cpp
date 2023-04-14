@@ -1,6 +1,5 @@
 #include <werkzeugkiste/config/configuration.h>
 #include <werkzeugkiste/files/filesys.h>
-#include <werkzeugkiste/logging.h>  // TODO remove
 #include <werkzeugkiste/strings/strings.h>
 
 #include <sstream>
@@ -643,39 +642,6 @@ none3:
   EXPECT_THROW(
       wkc::LoadYAMLString(ystr, wkc::NullValuePolicy::Fail), wkc::ParseError);
 
-  // Deserialization
-  // (Remove date/time first, because they are serialized as strings)
-  // copy = wkc::LoadYAMLString(cfg.ToYAML());
-  // EXPECT_NE(cfg, copy);
-  // cfg.Delete("date");
-  // cfg.Delete("date_tagged1");
-  // cfg.Delete("date_tagged2");
-  // cfg.Delete("time");
-  // cfg.Delete("time_tagged1");
-  // cfg.Delete("time_tagged2");
-  // copy = wkc::LoadYAMLString(cfg.ToYAML());
-
-  // TODO YAML formatter does not quote strings explicitly. Thus, the following
-  // checks fail:
-  // EXPECT_EQ(
-  //     wkc::ConfigType::String,
-  //     cfg.Type("format-group.xml.initial-release"sv));
-  // EXPECT_EQ(
-  //     wkc::ConfigType::String,
-  //     copy.Type("format-group.xml.initial-release"sv));
-  // EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_date"sv));
-  // EXPECT_EQ(wkc::ConfigType::String, copy.Type("str_date"sv));
-  // /*
-  // TODO differs for
-  // str_date = [str in cfg] vs date in copy! 2019-01-01
-  // str_date_tagged = 2019-01-01  // SAME
-  // str_int = 42 // SAME
-  // str_int_tagged = 42 // SAME
-  // ...xml.initial-release = 1998 // SAME
-  // */
-  // EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" <<
-  // copy.ToTOML();
-
   // Multi-document YAML:
   // Currently, yaml-cpp parses only the first document. If this changes, this
   // test should break to indicate that we need to adjust our loading routine.
@@ -800,6 +766,48 @@ lst:
 
   ystr = R"yml(unknown_tag: !!foo bar)yml";
   EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
+}
+
+TEST(ConfigIOTest, YAMLSerialization) {
+  wkc::Configuration cfg{};
+  const bool bool_val{true};
+  const int32_t int32_val{42};
+  const int64_t int64_val{-2147483649};
+  const double double_val{3.1415};
+  const std::string str_val{"some value"};
+  const wkc::date date{2023, 4, 14};
+  const wkc::time time{21, 27, 28};
+  const wkc::date_time dt{date, time, wkc::time_offset{-30}};
+
+  cfg.Set("bool", bool_val);
+  cfg.Set("int32", int32_val);
+  cfg.Set("int64", int64_val);
+  cfg.Set("double", double_val);
+  cfg.Set("str", str_val);
+
+  auto copy = wkc::LoadYAMLString(wkc::DumpYAMLString(cfg));
+  EXPECT_EQ(cfg, copy);
+
+  // JSON is a subset of YAML, and we can parse it as well:
+  copy = wkc::LoadYAMLString(wkc::DumpJSONString(cfg));
+  EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" << copy.ToTOML();
+
+  // TODO The toml::yaml_formatter converts dates to quoted strings, thus we
+  // cannot reload a date/time/datetime:
+  cfg.Set("date", date);
+  cfg.Set("time", time);
+  cfg.Set("dt", dt);
+  // EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" <<
+  // copy.ToTOML();
+  EXPECT_NE(cfg, copy);
+  copy = wkc::LoadYAMLString(cfg.ToYAML());
+  EXPECT_NE(cfg, copy);  // They're not(!!) the same because:
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date"sv));
+  EXPECT_EQ(wkc::ConfigType::String, copy.Type("date"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time"sv));
+  EXPECT_EQ(wkc::ConfigType::String, copy.Type("time"sv));
+  EXPECT_EQ(wkc::ConfigType::DateTime, cfg.Type("dt"sv));
+  EXPECT_EQ(wkc::ConfigType::String, copy.Type("dt"sv));
 }
 
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
