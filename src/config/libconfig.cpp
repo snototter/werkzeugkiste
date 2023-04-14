@@ -92,6 +92,12 @@ void HandleBuiltinScalar(const libconfig::Setting &value,
 }
 
 /// @brief Appends or sets a configuration value from a libconfig node.
+/// @param node Value to be stored to the configuration.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+/// @param append If true, fqn is assumed to be a list and the value will be
+///   appended. Otherwise, the value will be set, i.e. "cfg[fqn] = value";
+// NOLINTNEXTLINE(misc-no-recursion)
 void HandleNode(const libconfig::Setting &node,
     Configuration &cfg,
     std::string_view fqn,
@@ -153,6 +159,12 @@ void HandleNode(const libconfig::Setting &node,
   }
 }
 
+/// @brief Appends all children of the list/array node to the existing
+///   `fqn` list of the configuration.
+/// @param node A list node.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+// NOLINTNEXTLINE(misc-no-recursion)
 void AppendListItems(const libconfig::Setting &node,
     Configuration &cfg,
     std::string_view fqn) {
