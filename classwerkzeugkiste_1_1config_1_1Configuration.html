@@ -62,11 +62,34 @@
                 <li><a href="#pub-static-methods">Public static functions</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#boolean">Boolean</a></li>
+                <li><a href="#integer">Integer</a></li>
+                <li><a href="#floating-point">Floating point</a></li>
+                <li><a href="#string">String</a></li>
+                <li><a href="#date">Date</a></li>
+                <li><a href="#time">Time</a></li>
+                <li><a href="#date-time">Date-Time</a></li>
+                <li><a href="#lists">Lists</a></li>
+                <li><a href="#groupsub-configuration">Group/Sub-Configuration</a></li>
+                <li><a href="#matrix">Matrix</a></li>
+                <li><a href="#generic-setters">Generic Setters</a></li>
+                <li><a href="#utilities">Utilities</a></li>
+                <li><a href="#serialization">Serialization</a></li>
               </ul>
             </li>
           </ul>
         </div>
-<p>This class provides a unified access to different configuration file formats, as well as several convenience utilities, such as replacing string placeholders, adjusting file paths, <em>etc.</em></p><p>This utitility class is intended for *&quot;typical&quot;*, human-friendly configuration scenarios and, similar to <a href="https://toml.io/en">TOML</a>, supports the following parameter types:</p><ul><li>Basic scalars: <code>bool</code>, <code>int32_t</code>, <code>int64_t</code>, <code>double</code>, and <code>std::string</code>.</li><li>Local date, local time, and date-time (date + time + time zone offset) types.</li><li>Aggregate types, <em>i.e.</em> lists and groups of parameters.</li></ul><p>The following configuration formats are supported:</p><ul><li><a href="https://toml.io/en">TOML</a>,</li><li><a href="https://www.json.org/">JSON</a>,</li><li><a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and</li><li><a href="https://yaml.org/">YAML</a> (only for exporting).</li></ul><p>For usage convenience, this class support conversion from the TOML-compatible parameter types to:</p><ul><li><a href="https://eigen.tuxfamily.org/"><code>Eigen</code> matrices</a> (1- and 2-dimensional) can be loaded from (nested) numeric lists.</li><li>Basic geometry types defined within <code><a href="namespacewerkzeugkiste_1_1geometry.html" class="m-doc">werkzeugkiste::<wbr />geometry</a></code>.</li></ul>
+<p>This class provides a unified access to different configuration file formats, as well as several convenience utilities, such as replacing string placeholders, adjusting file paths, <em>etc.</em></p><p>This utitility class is intended for *&quot;typical&quot;*, human-friendly configuration scenarios and, similar to <a href="https://toml.io/en">TOML</a>, supports the following parameter types:</p><ul><li>Basic scalars: <code>bool</code>, <code>int32_t</code>, <code>int64_t</code>, <code>double</code>, and <code>std::string</code>.</li><li>Local date, local time, and date-time (date + time + time zone offset) types.</li><li>Aggregate types, <em>i.e.</em> lists and groups of parameters.</li></ul><p>The following configuration formats are supported:</p><ul><li><a href="https://toml.io/en">TOML</a>,</li><li><a href="https://www.json.org/">JSON</a>,</li><li><a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and</li><li><a href="https://yaml.org/">YAML</a>.</li></ul><p>For usage convenience, this class support conversion from the TOML-compatible parameter types to:</p><ul><li><a href="https://eigen.tuxfamily.org/"><code>Eigen</code> matrices</a> (1- and 2-dimensional) can be loaded from (nested) numeric lists.</li><li>Basic geometry types defined within <code><a href="namespacewerkzeugkiste_1_1geometry.html" class="m-doc">werkzeugkiste::<wbr />geometry</a></code>.</li></ul><pre class="m-code"><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;werkzeugkiste/config/configuration.h&gt;</span>
+<span class="k">namespace</span><span class="w"> </span><span class="nn">wkc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">werkzeugkiste</span><span class="o">::</span><span class="nn">config</span><span class="p">;</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">std</span><span class="o">::</span><span class="nn">string_view_literals</span><span class="p">;</span>
+<span class="c1">// Load a configuration from a file (format will be deduced from the</span>
+<span class="c1">// file extension)...</span>
+<span class="n">wkc</span><span class="o">::</span><span class="n">Configuration</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">LoadFile</span><span class="p">(</span><span class="s">&quot;path/to/config.toml&quot;</span><span class="p">);</span>
+<span class="c1">// ... or a string:</span>
+<span class="n">wkc</span><span class="o">::</span><span class="n">Configuration</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">LoadTOMLString</span><span class="p">(</span><span class="s">&quot;value = 42.17&quot;</span><span class="n">sv</span><span class="p">);</span>
+<span class="n">wkc</span><span class="o">::</span><span class="n">Configuration</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">LoadJSONString</span><span class="p">(</span><span class="s">&quot;{ &#39;value&#39;: 42.17 }&quot;</span><span class="n">sv</span><span class="p">);</span>
+
+<span class="c1">// TODO Extend example</span></pre>
         <section id="pub-static-methods">
           <h2><a href="#pub-static-methods">Public static functions</a></h2>
           <dl class="m-doc">
@@ -83,6 +106,13 @@
               std::size_t index) -&gt; std::string</span>
             </dt>
             <dd>Returns the Fully qualified parameter name for the given parameter name and element index.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">static void <a href="#af367223e6601bb153bd7e416afbbc8ad" class="m-doc">HandleNullValue</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg,
+              std::string_view key,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> policy,
+              bool append)</span>
+            </dt>
+            <dd>Applies the selected <code>NullValuePolicy</code> to the given parameter.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -173,33 +203,45 @@
               <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a> expected) const -&gt; bool</span>
             </dt>
             <dd>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists, but is of a different type.</dd>
+          </dl>
+        </section>
+        <section id="boolean">
+          <h2><a href="#boolean">Boolean</a></h2>
+<p>@desc Getter/Setter for boolean parameters.</p>
+          <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a95296db8058e86db55350c4ba94107cd" class="m-doc">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0448fed5bdfeb0645e386a53a38d7d63" class="m-doc">GetBool</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; bool</span>
             </dt>
             <dd>Returns the boolean parameter.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#aa802d50f4b9cd05b476b6235f6bc1ae5" class="m-doc">GetBooleanOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <span class="m-doc-wrap-bumper">auto <a href="#a187efe2cd517d7a6bf6c8b897d0986c1" class="m-doc">GetBoolOr</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool default_val) const -&gt; bool</span>
             </dt>
             <dd>Returns the boolean parameter or the <code>default_val</code> if it does not exist.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a141877639ace7b745753da10ad1b8a93" class="m-doc">GetOptionalBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;bool&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a38236bdf748a4a95bf94819648a0d050" class="m-doc">GetOptionalBool</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::optional&lt;bool&gt;</span>
             </dt>
             <dd>Returns an optional boolean or <code>std::nullopt</code> if it does not exist.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ab00f7367e393073156bbc990338ced55" class="m-doc">SetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <span class="m-doc-wrap-bumper">void <a href="#a42d58baaf54c90aff51d510d943abeda" class="m-doc">SetBool</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool value)</span>
             </dt>
             <dd>Sets a boolean parameter.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ab197d2481a56782e58b6c78ce20b68e9" class="m-doc">GetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;bool&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a href="#a41b1c993670d64d25811024da92c280e" class="m-doc">GetBoolList</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;bool&gt;</span>
             </dt>
             <dd>Returns a list of boolean flags.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">void <a href="#ace35bfc16f7c0353332c03e002dee5a0" class="m-doc">SetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <span class="m-doc-wrap-bumper">void <a href="#a2eb8ecf1294acc361972ef686cfb23c9" class="m-doc">SetBoolList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;bool&gt;&amp; values)</span>
             </dt>
             <dd>Sets or replaces a list of boolean flags.</dd>
+          </dl>
+        </section>
+        <section id="integer">
+          <h2><a href="#integer">Integer</a></h2>
+<p>@desc Getter/Setter for 32- and 64-bit integer parameters.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a6d9323a4863452f436582edc80f6c9b0" class="m-doc">GetInt32</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; int32_t</span>
             </dt>
@@ -270,6 +312,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#ae0843d627c50b6ece383b1ce8c72e658" class="m-doc">GetInt64Points3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;int64_t&gt;&gt;</span>
             </dt>
             <dd>Returns a list of 3D points (e.g. a polyline or polygon).</dd>
+          </dl>
+        </section>
+        <section id="floating-point">
+          <h2><a href="#floating-point">Floating point</a></h2>
+<p>@desc Getter/Setter for double-precision floating point parameters.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a749e5cc0b14f47da66a8872c06492bb2" class="m-doc">GetDouble</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; double</span>
             </dt>
@@ -313,6 +361,12 @@
               <span class="m-doc-wrap-bumper">auto <a href="#a1a57ca4ba522e69f9a3abbc319c68245" class="m-doc">GetDoublePoints3D</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1point3d.html" class="m-doc">point3d</a>&lt;double&gt;&gt;</span>
             </dt>
             <dd>Returns a list of 3D points (e.g. a polyline or polygon).</dd>
+          </dl>
+        </section>
+        <section id="string">
+          <h2><a href="#string">String</a></h2>
+<p>@desc Getter/Setter for string parameters.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a4e524cbe51f6900224854ec8ab887e85" class="m-doc">GetString</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; std::string</span>
             </dt>
@@ -340,6 +394,12 @@
               const std::vector&lt;std::string_view&gt;&amp; values)</span>
             </dt>
             <dd>Creates or replaces a parameter holding a list of strings.</dd>
+          </dl>
+        </section>
+        <section id="date">
+          <h2><a href="#date">Date</a></h2>
+<p>@desc Getter/Setter for <code><a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">werkzeugkiste::<wbr />config::<wbr />date</a></code> parameters.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a0b19984d96199fc0d40b6a2111d46132" class="m-doc">GetDate</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a></span>
             </dt>
@@ -367,6 +427,12 @@
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&gt;&amp; values)</span>
             </dt>
             <dd>Sets or replaces a list of date parameters.</dd>
+          </dl>
+        </section>
+        <section id="time">
+          <h2><a href="#time">Time</a></h2>
+<p>@desc Getter/Setter for <code><a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">werkzeugkiste::<wbr />config::<wbr />time</a></code> parameters.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a249009878cfff298d08dd4bcf3ca1c66" class="m-doc">GetTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a></span>
             </dt>
@@ -394,6 +460,12 @@
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&gt;&amp; values)</span>
             </dt>
             <dd>Sets or replaces a list of time parameters.</dd>
+          </dl>
+        </section>
+        <section id="date-time">
+          <h2><a href="#date-time">Date-Time</a></h2>
+<p>@desc Getter/Setter for <code><a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">werkzeugkiste::<wbr />config::<wbr />date_time</a></code> parameters.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a73413ae7bd5f14a8fe2367f7faabc868" class="m-doc">GetDateTime</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a></span>
             </dt>
@@ -421,6 +493,12 @@
               const std::vector&lt;<a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&gt;&amp; values)</span>
             </dt>
             <dd>Sets or replaces a list of date-time parameters.</dd>
+          </dl>
+        </section>
+        <section id="lists">
+          <h2><a href="#lists">Lists</a></h2>
+<p>@desc These methods allow working with mixed type lists.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">void <a href="#afa87b18dd0a7c101e118004da78e533d" class="m-doc">CreateList</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
@@ -478,6 +556,12 @@
               const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
             </dt>
             <dd>Appends a group/sub-configuration to an existing list.</dd>
+          </dl>
+        </section>
+        <section id="groupsub-configuration">
+          <h2><a href="#groupsub-configuration">Group/Sub-Configuration</a></h2>
+<p>@desc Getter/Setter for groups.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#ab0678e52fff3e9c871bb0480702a1c34" class="m-doc">GetGroup</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
             </dt>
@@ -487,6 +571,12 @@
               const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
             </dt>
             <dd>Inserts (or replaces) the given configuration group.</dd>
+          </dl>
+        </section>
+        <section id="matrix">
+          <h2><a href="#matrix">Matrix</a></h2>
+<p>@desc Conversion between <code>Eigen::Matrix</code> and (nested) lists.</p>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a61566032cc997e80d2d6729cf57dc8ab" class="m-doc">GetMatrixUInt8</a>(</span><span class="m-doc-wrap">std::string_view key) const -&gt; <a href="namespacewerkzeugkiste_1_1config.html#a3c2e43ca8a59877dfcaca608559618e1" class="m-doc">Matrix</a>&lt;uint8_t&gt;</span>
             </dt>
@@ -513,6 +603,62 @@
               const Eigen::MatrixBase&lt;Derived&gt;&amp; mat)</span>
             </dt>
             <dd>Stores a matrix as list.</dd>
+          </dl>
+        </section>
+        <section id="generic-setters">
+          <h2><a href="#generic-setters">Generic Setters</a></h2>
+<p>@desc Creates or replaces a parameter value.</p>
+          <dl class="m-doc">
+            <dt id="a41c7ae19a6e0155b71629299d43a1709">
+              <span class="m-doc-wrap-bumper">void <a href="#a41c7ae19a6e0155b71629299d43a1709" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a4df46e34ba4a016ee29da22d94ee9c0c">
+              <span class="m-doc-wrap-bumper">void <a href="#a4df46e34ba4a016ee29da22d94ee9c0c" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int32_t value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a622d5348168a6908986415fa8ce470e1">
+              <span class="m-doc-wrap-bumper">void <a href="#a622d5348168a6908986415fa8ce470e1" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              int64_t value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a027ce8930bd3ec3f9246ab9c51fae32c">
+              <span class="m-doc-wrap-bumper">void <a href="#a027ce8930bd3ec3f9246ab9c51fae32c" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              double value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ab28ab0c302ec5207e448e752d018aa01">
+              <span class="m-doc-wrap-bumper">void <a href="#ab28ab0c302ec5207e448e752d018aa01" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              std::string_view value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="afc9ee41427a4a9480223fd4410476c30">
+              <span class="m-doc-wrap-bumper">void <a href="#afc9ee41427a4a9480223fd4410476c30" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date.html" class="m-doc">date</a>&amp; value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="ad92c6c8b3f525539d3cba749d43109ed">
+              <span class="m-doc-wrap-bumper">void <a href="#ad92c6c8b3f525539d3cba749d43109ed" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1time.html" class="m-doc">time</a>&amp; value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="af7329a3f040c7039f9c1a2b9449087de">
+              <span class="m-doc-wrap-bumper">void <a href="#af7329a3f040c7039f9c1a2b9449087de" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="structwerkzeugkiste_1_1config_1_1date__time.html" class="m-doc">date_<wbr />time</a>&amp; value)</span>
+            </dt>
+            <dd><span></span></dd>
+            <dt id="a1651598f6891d0dbec567c8edb5927f8">
+              <span class="m-doc-wrap-bumper">void <a href="#a1651598f6891d0dbec567c8edb5927f8" class="m-doc-self">Set</a>(</span><span class="m-doc-wrap">std::string_view key,
+              const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; group)</span>
+            </dt>
+            <dd><span></span></dd>
+          </dl>
+        </section>
+        <section id="utilities">
+          <h2><a href="#utilities">Utilities</a></h2>
+          <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#a601337e82b1a37da15e1c5624989b360" class="m-doc">AdjustRelativePaths</a>(</span><span class="m-doc-wrap">std::string_view key,
               std::string_view base_path,
@@ -537,6 +683,12 @@
               <span class="m-doc-wrap-bumper">void <a href="#ad74771f215027f596925374fa6045ff8" class="m-doc">LoadNestedConfiguration</a>(</span><span class="m-doc-wrap">std::string_view key)</span>
             </dt>
             <dd>Loads a nested configuration.</dd>
+          </dl>
+        </section>
+        <section id="serialization">
+          <h2><a href="#serialization">Serialization</a></h2>
+<p>@desc Represent this configuration as a string in a specific format.</p>
+          <dl class="m-doc">
             <dt id="a6f1f7c117ca9cf128abfe64e2b279f9f">
               <span class="m-doc-wrap-bumper">auto <a href="#a6f1f7c117ca9cf128abfe64e2b279f9f" class="m-doc-self">ToTOML</a>(</span><span class="m-doc-wrap">) const -&gt; std::string</span>
             </dt>
@@ -618,6 +770,39 @@
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="af367223e6601bb153bd7e416afbbc8ad"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">static void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#af367223e6601bb153bd7e416afbbc8ad" class="m-doc-self">HandleNullValue</a>(</span><span class="m-doc-wrap"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg,
+              std::string_view key,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> policy,
+              bool append)</span></span>
+            </h3>
+            <p>Applies the selected <code>NullValuePolicy</code> to the given parameter.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">cfg</td>
+                  <td><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> to be modified.</td>
+                </tr>
+                <tr>
+                  <td>key</td>
+                  <td>Fully qualified parameter name.</td>
+                </tr>
+                <tr>
+                  <td>policy</td>
+                  <td>The selected NullValuePolicy.</td>
+                </tr>
+                <tr>
+                  <td>append</td>
+                  <td>If true, <code>key</code> is assumed to be a list and the replacement value (depending on the <code>policy</code>) will be <code>Append</code>ed, otherwise, it will be <code>Set</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>This method is intended for parsers and should be called if the parsed <code>key</code> parameter was a null/none value.</p>
           </div></section>
           <section class="m-doc-details" id="a9457f9510a75a6a245277a683b02177a"><div>
             <h3>
@@ -791,9 +976,9 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a95296db8058e86db55350c4ba94107cd"><div>
+          <section class="m-doc-details" id="a0448fed5bdfeb0645e386a53a38d7d63"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a95296db8058e86db55350c4ba94107cd" class="m-doc-self">GetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0448fed5bdfeb0645e386a53a38d7d63" class="m-doc-self">GetBool</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
             </h3>
             <p>Returns the boolean parameter.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -809,9 +994,9 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
-          <section class="m-doc-details" id="aa802d50f4b9cd05b476b6235f6bc1ae5"><div>
+          <section class="m-doc-details" id="a187efe2cd517d7a6bf6c8b897d0986c1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aa802d50f4b9cd05b476b6235f6bc1ae5" class="m-doc-self">GetBooleanOr</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <span class="m-doc-wrap-bumper">bool werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a187efe2cd517d7a6bf6c8b897d0986c1" class="m-doc-self">GetBoolOr</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool default_val) const</span></span>
             </h3>
             <p>Returns the boolean parameter or the <code>default_val</code> if it does not exist.</p>
@@ -832,9 +1017,9 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
-          <section class="m-doc-details" id="a141877639ace7b745753da10ad1b8a93"><div>
+          <section class="m-doc-details" id="a38236bdf748a4a95bf94819648a0d050"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::optional&lt;bool&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a141877639ace7b745753da10ad1b8a93" class="m-doc-self">GetOptionalBoolean</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+              <span class="m-doc-wrap-bumper">std::optional&lt;bool&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a38236bdf748a4a95bf94819648a0d050" class="m-doc-self">GetOptionalBool</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
             </h3>
             <p>Returns an optional boolean or <code>std::nullopt</code> if it does not exist.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -850,9 +1035,9 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists but is of a different type.</p>
           </div></section>
-          <section class="m-doc-details" id="ab00f7367e393073156bbc990338ced55"><div>
+          <section class="m-doc-details" id="a42d58baaf54c90aff51d510d943abeda"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab00f7367e393073156bbc990338ced55" class="m-doc-self">SetBoolean</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a42d58baaf54c90aff51d510d943abeda" class="m-doc-self">SetBool</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool value)</span></span>
             </h3>
             <p>Sets a boolean parameter.</p>
@@ -873,9 +1058,9 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter exists and is of a different type. Raises a <code>std::logic_error</code> if setting the value in the underlying TOML library failed for unforeseen/not handled reasons.</p>
           </div></section>
-          <section class="m-doc-details" id="ab197d2481a56782e58b6c78ce20b68e9"><div>
+          <section class="m-doc-details" id="a41b1c993670d64d25811024da92c280e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">std::vector&lt;bool&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ab197d2481a56782e58b6c78ce20b68e9" class="m-doc-self">GetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
+              <span class="m-doc-wrap-bumper">std::vector&lt;bool&gt; werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a41b1c993670d64d25811024da92c280e" class="m-doc-self">GetBoolList</a>(</span><span class="m-doc-wrap">std::string_view key) const</span></span>
             </h3>
             <p>Returns a list of boolean flags.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -891,9 +1076,9 @@
             </table>
 <p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter is of a different type.</p>
           </div></section>
-          <section class="m-doc-details" id="ace35bfc16f7c0353332c03e002dee5a0"><div>
+          <section class="m-doc-details" id="a2eb8ecf1294acc361972ef686cfb23c9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#ace35bfc16f7c0353332c03e002dee5a0" class="m-doc-self">SetBooleanList</a>(</span><span class="m-doc-wrap">std::string_view key,
+              <span class="m-doc-wrap-bumper">void werkzeugkiste::<wbr />config::<wbr />Configuration::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a2eb8ecf1294acc361972ef686cfb23c9" class="m-doc-self">SetBoolList</a>(</span><span class="m-doc-wrap">std::string_view key,
               const std::vector&lt;bool&gt;&amp; values)</span></span>
             </h3>
             <p>Sets or replaces a list of boolean flags.</p>
@@ -1176,7 +1361,17 @@
                 </tr>
               </tbody>
             </table>
-<p>Interprets a list of numbers as 2D point. If the list contains more than two elements, only the first two entries are loaded as x and y coordinate, respectively. Similarly, a group which holds (at least) <code>x</code> and <code>y</code> parameters can also be loaded as a 2D point.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
+<p>Interprets a list of numbers as 2D point. If the list contains more than two elements, only the first two entries are loaded as x and y coordinate, respectively. Similarly, a group which holds (at least) <code>x</code> and <code>y</code> parameters can also be loaded as a 2D point.</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">Configuration</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">LoadTOMLString</span><span class="p">(</span><span class="sa">R</span><span class="s">&quot;</span><span class="dl">toml(</span>
+<span class="s">    lst-2d = [1, 2]</span>
+<span class="s">    lst-nd = [1, 2, 3, 4, 5]</span>
+<span class="s">    grp-2d = { x = 1, y = 2 }</span>
+<span class="s">    </span><span class="dl">)toml</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="c1">// Load 2-element list as 2D point:</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">pt1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64Point2D</span><span class="p">(</span><span class="s">&quot;lst-2d&quot;</span><span class="p">);</span>
+<span class="c1">// Load 2D point from the first 2 elements of a 5-element list:</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">pt2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64Point2D</span><span class="p">(</span><span class="s">&quot;lst-nd&quot;</span><span class="p">);</span>
+<span class="c1">// Load 2D point from a group containing x and y parameters:</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">pt3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64Point2D</span><span class="p">(</span><span class="s">&quot;grp-2d&quot;</span><span class="p">);</span></pre><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
           </div></section>
           <section class="m-doc-details" id="a248677326293f5adb6f1d9d5c3c1407d"><div>
             <h3>
@@ -1194,7 +1389,17 @@
                 </tr>
               </tbody>
             </table>
-<p>Interprets a list of numbers as 3D point. If the list contains more than three elements, only the first three entries are loaded as x, y and z coordinate, respectively. Similarly, a group which holds (at least) <code>x</code>, <code>y</code> and <code>z</code> parameters can also be loaded as a 3D point.</p><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
+<p>Interprets a list of numbers as 3D point. If the list contains more than three elements, only the first three entries are loaded as x, y and z coordinate, respectively. Similarly, a group which holds (at least) <code>x</code>, <code>y</code> and <code>z</code> parameters can also be loaded as a 3D point.</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">Configuration</span><span class="w"> </span><span class="n">cfg</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">wkc</span><span class="o">::</span><span class="n">LoadTOMLString</span><span class="p">(</span><span class="sa">R</span><span class="s">&quot;</span><span class="dl">toml(</span>
+<span class="s">    lst-3d = [1, 2, 3]</span>
+<span class="s">    lst-nd = [1, 2, 3, 4, 5]</span>
+<span class="s">    grp-3d = { x = 1, y = 2, z = 3 }</span>
+<span class="s">    </span><span class="dl">)toml</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="c1">// Load 3-element list as 3D point:</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">pt1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64Point3D</span><span class="p">(</span><span class="s">&quot;lst-3d&quot;</span><span class="p">);</span>
+<span class="c1">// Load 3D point from the first 3 elements of a 5-element list:</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">pt2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64Point3D</span><span class="p">(</span><span class="s">&quot;lst-nd&quot;</span><span class="p">);</span>
+<span class="c1">// Load 3D point from a group containing x, y and z parameters:</span>
+<span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="n">pt3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cfg</span><span class="p">.</span><span class="n">GetInt64Point3D</span><span class="p">(</span><span class="s">&quot;grp-3d&quot;</span><span class="p">);</span></pre><p>Raises a <code><a href="classwerkzeugkiste_1_1config_1_1KeyError.html" class="m-doc">KeyError</a></code> if the parameter does not exist. Raises a <code><a href="classwerkzeugkiste_1_1config_1_1TypeError.html" class="m-doc">TypeError</a></code> if the parameter cannot be converted to a 2D point.</p>
           </div></section>
           <section class="m-doc-details" id="aab18422b511de59b3bd32c296de9d30e"><div>
             <h3>

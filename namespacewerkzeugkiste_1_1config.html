@@ -51,7 +51,7 @@
         <h1>
           <span class="m-breadcrumb"><a href="namespacewerkzeugkiste.html">werkzeugkiste</a>::<wbr/></span>config <span class="m-thin">namespace</span>
         </h1>
-        <p>Utilities to handle configurations in a unified manner.</p>
+        <p>Utilities to handle configurations in a unified manner via the <code><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">werkzeugkiste::<wbr />config::<wbr />Configuration</a></code> class.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -64,6 +64,8 @@
                 <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
                 <li><a href="#var-members">Variables</a></li>
+                <li><a href="#loading-a-configuration">Loading a configuration</a></li>
+                <li><a href="#string-representation">String Representation</a></li>
               </ul>
             </li>
           </ul>
@@ -83,6 +85,11 @@
 <span class="s">      [800,   0, 400],</span>
 <span class="s">      [  0, 750, 300],</span>
 <span class="s">      [  0,   0,   1]</span>
+<span class="s">    ]</span>
+
+<span class="s">    polyline = [</span>
+<span class="s">      [ 1, 2],            # Points can be specified as lists...</span>
+<span class="s">      { x = -1, y = -2},  # ... or as groups (key/value pairs).</span>
 <span class="s">    ]</span>
 <span class="s">    </span><span class="dl">)toml</span><span class="s">&quot;</span><span class="p">);</span>
 
@@ -113,9 +120,9 @@
 
 <span class="c1">// TODO not yet available</span>
 <span class="c1">// namespace wkg = werkzeugkiste::geometry;</span>
-<span class="c1">// std::vector&lt;wkg::Vec2i&gt; polyline = cfg.GetVec2iList(&quot;poly2&quot;sv);</span>
+<span class="c1">// const std::vector&lt;wkg::Vec2i&gt; polyline = cfg.GetVec2iList(&quot;polyline&quot;sv);</span>
 <span class="c1">// Type conversion</span>
-<span class="c1">// std::vector&lt;wkg::Vec2d&gt; polyline = cfg.GetVec2dList(&quot;poly2&quot;sv);</span></pre>
+<span class="c1">// const std::vector&lt;wkg::Vec2d&gt; polyline = cfg.GetVec2dList(&quot;polyline&quot;sv);</span></pre>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -192,13 +199,6 @@
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a>: unsigned char { </span><span class="m-doc-wrap"><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">Skip</a>,
-              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc">NullString</a>,
-              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215" class="m-doc">EmptyList</a>,
-              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1" class="m-doc">Fail</a> }</span>
-            </dt>
-            <dd>How to handle Null/None values (e.g. when loading JSON).</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">enum class <a href="#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>: unsigned char { </span><span class="m-doc-wrap"><a href="#aa45c374d0d5c8db2ba494b4789867222a27226c864bac7454a8504f8edb15d95b" class="m-doc">Boolean</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222aa0faef0851b4294c06f2b94bb1cb2044" class="m-doc">Integer</a>,
               <a href="#aa45c374d0d5c8db2ba494b4789867222a072f02cab92dcb89792657037629ac66" class="m-doc">FloatingPoint</a>,
@@ -210,6 +210,13 @@
               <a href="#aa45c374d0d5c8db2ba494b4789867222a03937134cedab9078be39a77ee3a48a0" class="m-doc">Group</a> }</span>
             </dt>
             <dd>Available configuration parameters.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a>: unsigned char { </span><span class="m-doc-wrap"><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">Skip</a>,
+              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc">NullString</a>,
+              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215" class="m-doc">EmptyList</a>,
+              <a href="#aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1" class="m-doc">Fail</a> }</span>
+            </dt>
+            <dd>How to handle Null/None values (e.g. when loading JSON).</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -219,7 +226,7 @@
               <div class="m-doc-template">template&lt;typename Tp&gt;</div>
               using <a href="#a3c2e43ca8a59877dfcaca608559618e1" class="m-doc">Matrix</a> = Eigen::Matrix&lt;Tp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor&gt;
             </dt>
-            <dd><span></span></dd>
+            <dd>Alias for a dynamic-size row-major matrix.</dd>
           </dl>
         </section>
         <section id="func-members">
@@ -240,52 +247,6 @@
               <span class="m-doc-wrap-bumper">auto <a href="#af8e81d7980abef9e581e991bc4286cff" class="m-doc">checked_numcast</a>(</span><span class="m-doc-wrap">const S value) -&gt; T</span>
             </dt>
             <dd>Returns the value as type T iff it can be exactly represented in the target type.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4cf1b57b8f84da2e32f9afa2f1d642c1" class="m-doc">LoadFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
-            </dt>
-            <dd>Loads a configuration file.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a94407362a42c1ce626bfb1e9ca747296" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
-            </dt>
-            <dd>Loads a TOML configuration from the given file.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a2ce8591bf157775d1c73f8a12b3d588f" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
-            </dt>
-            <dd>Loads a TOML configuration from a string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a4fb2f464f7d663a4c59046361e9b0871" class="m-doc">LoadLibconfigFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
-            </dt>
-            <dd>Loads a libconfig configuration from the given file.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a76796c89410173fb184f53233dcbf021" class="m-doc">LoadLibconfigString</a>(</span><span class="m-doc-wrap">std::string_view lcfg_string) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
-            </dt>
-            <dd>Loads a libconfig configuration from a string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3f77b468fea0a3d9536e3d0f8a682839" class="m-doc">LoadJSONFile</a>(</span><span class="m-doc-wrap">std::string_view filename,
-              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
-            </dt>
-            <dd>Loads a JSON configuration from a string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a9ced5b61209169a632c5c952912fdf71" class="m-doc">LoadJSONString</a>(</span><span class="m-doc-wrap">std::string_view json_string,
-              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
-            </dt>
-            <dd>Loads a JSON configuration from a string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a3510019f455b434e44b60cfa2675bd80" class="m-doc">DumpLibconfigString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::string</span>
-            </dt>
-            <dd>Returns a libconfig-formatted string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#ad741fb67ad156c0883c8780488eb46b6" class="m-doc">DumpTOMLString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; std::string</span>
-            </dt>
-            <dd>Returns a TOML-formatted string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a100b7def0473b3518dc5568ec8e8028f" class="m-doc">DumpJSONString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; std::string</span>
-            </dt>
-            <dd>Returns a JSON-formatted string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a href="#a0f5b0d334e55ced6fd6f09cba04a9e2d" class="m-doc">DumpYAMLString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; std::string</span>
-            </dt>
-            <dd>Returns a YAML-formatted string.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a href="#abd47cd321e2710898e9086d55e583966" class="m-doc">IsValidKey</a>(</span><span class="m-doc-wrap">std::string_view key,
               bool allow_dots) -&gt; WERKZEUGKISTE_CONFIG_EXPORT bool <span class="m-label m-flat m-success">noexcept</span></span>
@@ -322,44 +283,76 @@
             <dd>Helper variable template to check whether both types are floating point types.</dd>
           </dl>
         </section>
+        <section id="loading-a-configuration">
+          <h2><a href="#loading-a-configuration">Loading a configuration</a></h2>
+<p>@desc Utilities to load a configuration from files or strings.</p>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4cf1b57b8f84da2e32f9afa2f1d642c1" class="m-doc">LoadFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a configuration file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a94407362a42c1ce626bfb1e9ca747296" class="m-doc">LoadTOMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a TOML configuration from the given file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a2ce8591bf157775d1c73f8a12b3d588f" class="m-doc">LoadTOMLString</a>(</span><span class="m-doc-wrap">std::string_view toml_string) -&gt; <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a TOML configuration from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4fb2f464f7d663a4c59046361e9b0871" class="m-doc">LoadLibconfigFile</a>(</span><span class="m-doc-wrap">std::string_view filename) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a libconfig configuration from the given file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a76796c89410173fb184f53233dcbf021" class="m-doc">LoadLibconfigString</a>(</span><span class="m-doc-wrap">std::string_view lcfg_string) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a libconfig configuration from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3f77b468fea0a3d9536e3d0f8a682839" class="m-doc">LoadJSONFile</a>(</span><span class="m-doc-wrap">std::string_view filename,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a JSON configuration from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a9ced5b61209169a632c5c952912fdf71" class="m-doc">LoadJSONString</a>(</span><span class="m-doc-wrap">std::string_view json_string,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a JSON configuration from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a4e439f1d2187f5a08223d36054b3d6c5" class="m-doc">LoadYAMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a YAML configuration from a file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#aed7ef6802cf0e950ca67b1c670d6bbe4" class="m-doc">LoadYAMLString</a>(</span><span class="m-doc-wrap">const std::string&amp; yaml_string,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>) -&gt; WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></span>
+            </dt>
+            <dd>Loads a YAML configuration from a string.</dd>
+          </dl>
+        </section>
+        <section id="string-representation">
+          <h2><a href="#string-representation">String Representation</a></h2>
+<p>@desc Represent a configuration as a string in a specific format.</p>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a3510019f455b434e44b60cfa2675bd80" class="m-doc">DumpLibconfigString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; WERKZEUGKISTE_CONFIG_EXPORT std::string</span>
+            </dt>
+            <dd>Returns a libconfig-formatted string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#ad741fb67ad156c0883c8780488eb46b6" class="m-doc">DumpTOMLString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; std::string</span>
+            </dt>
+            <dd>Returns a TOML-formatted string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a100b7def0473b3518dc5568ec8e8028f" class="m-doc">DumpJSONString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; std::string</span>
+            </dt>
+            <dd>Returns a JSON-formatted string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a href="#a0f5b0d334e55ced6fd6f09cba04a9e2d" class="m-doc">DumpYAMLString</a>(</span><span class="m-doc-wrap">const <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a>&amp; cfg) -&gt; std::string</span>
+            </dt>
+            <dd>Returns a YAML-formatted string.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="aec7bf4e4f6a02d709ee919dcb56d0b1f"><div>
-            <h3>
-              enum class werkzeugkiste::<wbr />config::<wbr /><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc-self">NullValuePolicy</a>: unsigned char
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
-            </h3>
-            <p>How to handle Null/None values (e.g. when loading JSON).</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c">Skip</a></td>
-                  <td>
-                  <p>Null values will be skipped, i.e. not loaded into the configuration.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf">NullString</a></td>
-                  <td>
-                  <p>Null values will be <strong>replaced</strong> by the string &quot;null&quot;.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215">EmptyList</a></td>
-                  <td>
-                  <p>Null values will be <strong>replaced</strong> by an empty list.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1">Fail</a></td>
-                  <td>
-                  <p>A <code><a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">werkzeugkiste::<wbr />config::<wbr />ParseError</a></code> will be thrown.</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="aa45c374d0d5c8db2ba494b4789867222"><div>
             <h3>
               enum class werkzeugkiste::<wbr />config::<wbr /><a href="#aa45c374d0d5c8db2ba494b4789867222" class="m-doc-self">ConfigType</a>: unsigned char
@@ -428,6 +421,42 @@
               </tbody>
             </table>
           </div></section>
+          <section class="m-doc-details" id="aec7bf4e4f6a02d709ee919dcb56d0b1f"><div>
+            <h3>
+              enum class werkzeugkiste::<wbr />config::<wbr /><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc-self">NullValuePolicy</a>: unsigned char
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
+            </h3>
+            <p>How to handle Null/None values (e.g. when loading JSON).</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c">Skip</a></td>
+                  <td>
+                  <p>Null values will be skipped, i.e. not loaded into the configuration.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fa5ce563401497a5a222d94834c274ecbf">NullString</a></td>
+                  <td>
+                  <p>Null values will be <strong>replaced</strong> by the string &quot;null&quot;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1fabf9e98975c302c7e777aba55b232b215">EmptyList</a></td>
+                  <td>
+                  <p>Null values will be <strong>replaced</strong> by an empty list.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a href="#aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1" class="m-doc-self" id="aec7bf4e4f6a02d709ee919dcb56d0b1faceaa0734f0b3c738120c67344d8f3ec1">Fail</a></td>
+                  <td>
+                  <p>A <code><a href="classwerkzeugkiste_1_1config_1_1ParseError.html" class="m-doc">werkzeugkiste::<wbr />config::<wbr />ParseError</a></code> will be thrown.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
         <section>
           <h2>Typedef documentation</h2>
@@ -439,7 +468,18 @@
               </div>
               using werkzeugkiste::<wbr />config::<wbr /><a href="#a3c2e43ca8a59877dfcaca608559618e1" class="m-doc-self">Matrix</a> = Eigen::Matrix&lt;Tp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor&gt;
             </h3>
-            <p><span></span></p>
+            <p>Alias for a dynamic-size row-major matrix.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Tp</td>
+                  <td>Scalar type of the matrix.</td>
+                </tr>
+              </tbody>
+            </table>
           </div></section>
         </section>
         <section>
@@ -528,6 +568,55 @@
             </table>
 <p>If the value is not exactly representable in the target type (i.e. the cast is not possible without losing precision/information), an exception of type E will be thrown.</p>
           </div></section>
+          <section class="m-doc-details" id="abd47cd321e2710898e9086d55e583966"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT bool werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd47cd321e2710898e9086d55e583966" class="m-doc-self">IsValidKey</a>(</span><span class="m-doc-wrap">std::string_view key,
+              bool allow_dots) <span class="m-label m-success">noexcept</span></span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
+            </h3>
+            <p>Checks if the given key is a valid parameter name.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The key to be checked.</td>
+                </tr>
+                <tr>
+                  <td>allow_dots</td>
+                  <td>If true, dots (as in a key path / fully qualified parameter name) are also allowed.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>A valid parameter name consists of alpha-numeric characters, dashes and underscores. Optionally, dots are also allowed (if )</p>
+          </div></section>
+          <section class="m-doc-details" id="a0ccee9dccf309d5590d43326ba5f9312"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT std::string werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc-self">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
+            </h3>
+            <p>Returns the string representation.</p>
+          </div></section>
+          <section class="m-doc-details" id="adcc3853bbac411c5ca64f5d3e7fdf171"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT std::ostream&amp; werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adcc3853bbac411c5ca64f5d3e7fdf171" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
+              const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
+            </h3>
+            <p>Prints the string representation of a <code>ConfigType</code> out to the stream.</p>
+          </div></section>
+          <section class="m-doc-details" id="a45f2ad9a909269007a0bd927aa5da3fd"><div>
+            <h3>
+              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const char* werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f2ad9a909269007a0bd927aa5da3fd" class="m-doc-self">TypeName</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
+            </h3>
+            <p><span></span></p>
+          </div></section>
           <section class="m-doc-details" id="a4cf1b57b8f84da2e32f9afa2f1d642c1"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4cf1b57b8f84da2e32f9afa2f1d642c1" class="m-doc-self">LoadFile</a>(</span><span class="m-doc-wrap">std::string_view filename)</span></span>
@@ -545,7 +634,7 @@
                 </tr>
               </tbody>
             </table>
-<p>The configuration type will be deduced from the file extension, <em>i.e.</em> <code>.toml</code>, <code>.json</code>, or <code>.cfg</code>. For JSON files, the default <code>NullValuePolicy</code> will be used, see <code>LoadJSONFile</code>.</p>
+<p>The configuration type will be deduced from the file extension, <em>i.e.</em> <code>.toml</code>, <code>.json</code>, <code>.yml</code>/<code>.yaml</code> or <code>.cfg</code>. For JSON and YAML files, the default <code>NullValuePolicy</code> will be used, see <code>LoadJSONFile</code> or <code>LoadYAMLFile</code>.</p>
           </div></section>
           <section class="m-doc-details" id="a94407362a42c1ce626bfb1e9ca747296"><div>
             <h3>
@@ -641,7 +730,7 @@
                 </tr>
               </tbody>
             </table>
-<p>Because a configuration must consist of key/value pairs, a plain JSON array (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>json</code>. Thus, the configuration would have 1 element, and you need to access it via its key. For example, cfg.Size(&quot;json&quot;), cfg.GetDouble(&quot;json[0]&quot;), etc.</p>
+<p>Because a <code><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></code> must consist of key/value pairs, a plain JSON array (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>list</code>. Thus, the (root) configuration would have 1 element, and it must be accessed via this key, for example, cfg.Size(&quot;list&quot;), cfg.GetDouble(&quot;list[0]&quot;), etc.</p>
           </div></section>
           <section class="m-doc-details" id="a9ced5b61209169a632c5c952912fdf71"><div>
             <h3>
@@ -665,7 +754,55 @@
                 </tr>
               </tbody>
             </table>
-<p>Because a configuration must consist of key/value pairs, a plain JSON array (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>json</code>. Thus, the configuration would have 1 element, and you need to access it via its key. For example, cfg.Size(&quot;json&quot;), cfg.GetDouble(&quot;json[0]&quot;), etc.</p>
+<p>Because a <code><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></code> must consist of key/value pairs, a plain JSON array (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>list</code>. Thus, the (root) configuration would have 1 element, and it must be accessed via this key, for example, cfg.Size(&quot;list&quot;), cfg.GetDouble(&quot;list[0]&quot;), etc.</p>
+          </div></section>
+          <section class="m-doc-details" id="a4e439f1d2187f5a08223d36054b3d6c5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a4e439f1d2187f5a08223d36054b3d6c5" class="m-doc-self">LoadYAMLFile</a>(</span><span class="m-doc-wrap">std::string_view filename,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+            </h3>
+            <p>Loads a YAML configuration from a file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">filename</td>
+                  <td>Path to the YAML file.</td>
+                </tr>
+                <tr>
+                  <td>none_policy</td>
+                  <td>How to deal with None values.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Because a <code><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></code> must consist of key/value pairs, a plain YAML sequence (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>list</code>. Thus, the (root) configuration would have 1 element, and it must be accessed via this key, for example, cfg.Size(&quot;list&quot;), cfg.GetDouble(&quot;list[0]&quot;), etc.</p>
+          </div></section>
+          <section class="m-doc-details" id="aed7ef6802cf0e950ca67b1c670d6bbe4"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT <a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a> werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#aed7ef6802cf0e950ca67b1c670d6bbe4" class="m-doc-self">LoadYAMLString</a>(</span><span class="m-doc-wrap">const std::string&amp; yaml_string,
+              <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1f" class="m-doc">NullValuePolicy</a> none_policy = <a href="namespacewerkzeugkiste_1_1config.html#aec7bf4e4f6a02d709ee919dcb56d0b1fa72ef2b9b6965d078e3c7f95487a82d1c" class="m-doc">NullValuePolicy::<wbr />Skip</a>)</span></span>
+              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
+            </h3>
+            <p>Loads a YAML configuration from a string.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">yaml_string</td>
+                  <td>String representation of the YAML configuration.</td>
+                </tr>
+                <tr>
+                  <td>none_policy</td>
+                  <td>How to deal with None values.</td>
+                </tr>
+              </tbody>
+            </table>
+<p>Because a <code><a href="classwerkzeugkiste_1_1config_1_1Configuration.html" class="m-doc">Configuration</a></code> must consist of key/value pairs, a plain YAML sequence (e.g. &quot;[1, 2, 3]&quot;) will be loaded into the key <code>list</code>. Thus, the (root) configuration would have 1 element, and it must be accessed via this key, for example, cfg.Size(&quot;list&quot;), cfg.GetDouble(&quot;list[0]&quot;), etc.</p>
           </div></section>
           <section class="m-doc-details" id="a3510019f455b434e44b60cfa2675bd80"><div>
             <h3>
@@ -694,55 +831,6 @@
               <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="configuration_8h.html">&lt;werkzeugkiste/config/configuration.h&gt;</a></div>
             </h3>
             <p>Returns a YAML-formatted string.</p>
-          </div></section>
-          <section class="m-doc-details" id="abd47cd321e2710898e9086d55e583966"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT bool werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#abd47cd321e2710898e9086d55e583966" class="m-doc-self">IsValidKey</a>(</span><span class="m-doc-wrap">std::string_view key,
-              bool allow_dots) <span class="m-label m-success">noexcept</span></span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="keymatcher_8h.html">&lt;werkzeugkiste/config/keymatcher.h&gt;</a></div>
-            </h3>
-            <p>Checks if the given key is a valid parameter name.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">key</td>
-                  <td>The key to be checked.</td>
-                </tr>
-                <tr>
-                  <td>allow_dots</td>
-                  <td>If true, dots (as in a key path / fully qualified parameter name) are also allowed.</td>
-                </tr>
-              </tbody>
-            </table>
-<p>A valid parameter name consists of alpha-numeric characters, dashes and underscores. Optionally, dots are also allowed (if )</p>
-          </div></section>
-          <section class="m-doc-details" id="a0ccee9dccf309d5590d43326ba5f9312"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT std::string werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a0ccee9dccf309d5590d43326ba5f9312" class="m-doc-self">ConfigTypeToString</a>(</span><span class="m-doc-wrap">const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
-            </h3>
-            <p>Returns the string representation.</p>
-          </div></section>
-          <section class="m-doc-details" id="adcc3853bbac411c5ca64f5d3e7fdf171"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">WERKZEUGKISTE_CONFIG_EXPORT std::ostream&amp; werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#adcc3853bbac411c5ca64f5d3e7fdf171" class="m-doc-self">operator&lt;&lt;</a>(</span><span class="m-doc-wrap">std::ostream&amp; os,
-              const <a href="namespacewerkzeugkiste_1_1config.html#aa45c374d0d5c8db2ba494b4789867222" class="m-doc">ConfigType</a>&amp; ct)</span></span>
-              <div class="m-doc-include m-code m-inverted m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
-            </h3>
-            <p>Prints the string representation of a <code>ConfigType</code> out to the stream.</p>
-          </div></section>
-          <section class="m-doc-details" id="a45f2ad9a909269007a0bd927aa5da3fd"><div>
-            <h3>
-              <div class="m-doc-include m-code m-inverted m-right-m m-text-right"><span class="cp">#include</span> <a class="cpf" href="types_8h.html">&lt;werkzeugkiste/config/types.h&gt;</a></div>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">const char* werkzeugkiste::<wbr />config::<wbr /></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a href="#a45f2ad9a909269007a0bd927aa5da3fd" class="m-doc-self">TypeName</a>(</span><span class="m-doc-wrap">) <span class="m-label m-primary">constexpr</span></span></span>
-            </h3>
-            <p><span></span></p>
           </div></section>
         </section>
         <section>
