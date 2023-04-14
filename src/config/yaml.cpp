@@ -17,11 +17,9 @@ namespace YAML {
 template <>
 struct convert<werkzeugkiste::config::date> {
   static bool decode(const Node &node, werkzeugkiste::config::date &rhs) {
-    // LCOV_EXCL_START
     if (!node.IsScalar()) {
       return false;
     }
-    // LCOV_EXCL_STOP
 
     try {
       rhs = werkzeugkiste::config::date(node.as<std::string>());
@@ -36,11 +34,9 @@ struct convert<werkzeugkiste::config::date> {
 template <>
 struct convert<werkzeugkiste::config::time> {
   static bool decode(const Node &node, werkzeugkiste::config::time &rhs) {
-    // LCOV_EXCL_START
     if (!node.IsScalar()) {
       return false;
     }
-    // LCOV_EXCL_STOP
 
     try {
       rhs = werkzeugkiste::config::time(node.as<std::string>());
@@ -55,11 +51,9 @@ struct convert<werkzeugkiste::config::time> {
 template <>
 struct convert<werkzeugkiste::config::date_time> {
   static bool decode(const Node &node, werkzeugkiste::config::date_time &rhs) {
-    // LCOV_EXCL_START
     if (!node.IsScalar()) {
       return false;
     }
-    // LCOV_EXCL_STOP
 
     try {
       rhs = werkzeugkiste::config::date_time(node.as<std::string>());
@@ -183,6 +177,7 @@ void HandleTaggedScalar(const YAML::Node &node,
   // !!str "some string"
   // !!bool !!int !!float !!date !!timestamp
   // non-standard local tags: !date !time
+  // https://yaml.org/type/timestamp.html
 
   const std::string &tag = node.Tag();
   const std::string &value = node.Scalar();

@@ -443,6 +443,7 @@ TEST(ConfigIOTest, SerializeJSONStrings) {
 
 TEST(ConfigIOTest, LoadingYAML) {
   // Load YAML files
+  EXPECT_THROW(wkc::LoadYAMLFile("no such file"), wkc::ParseError);
   EXPECT_THROW(wkc::LoadYAMLFile(__FILE__), wkc::ParseError);
 
   const auto fname_ci = wkf::FullFile({wkf::DirName(__FILE__),
@@ -705,6 +706,89 @@ label: doc3
   // ryml segfaulted with this input, yaml-cpp correctly raises an exception:
   fail_str = "{[a: b\n}";
   EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
+}
+
+TEST(ConfigIOTest, YAMLTypes) {
+  auto cfg = wkc::LoadYAMLString(R"yml(
+dt_rfc_deduced: 2023-04-14T21:27:28Z
+dt_rfc_tagged:  !!timestamp 2023-04-15T21:27:28Z
+dt_rfc_str:     "2023-04-15T21:27:28Z"
+
+time_deduced: 21:27:28
+time_tagged1: !time 21:27:28
+time_tagged2: !time 2023-04-15 21:27:28Z
+time_str:     "21:27:28"
+
+canonical:       2001-12-15T02:59:43.1Z
+iso8601:         2001-12-14t21:59:43.10-05:00
+local_date_time: 2001-12-15 2:59:43.10
+
+# Space separation between date/time and offset is
+# allowed by the YAML spec, but this is not a valid
+# timestamp according to the RFC (thus, not supported by
+# werkzeugkiste): it will be interpreted as a string scalar.
+space_separated: 2001-12-14 21:59:43.10 -5
+
+lst:
+  - 1
+  - 2.5
+  - on
+  - some value
+  - 2023-04-14T21:27:28Z
+  - 21:50:00
+  - { name: "John Doe", age: 42 }
+  - [1, 2, 3]
+)yml");
+  wkc::date date{2023, 4, 14};
+  wkc::time time{21, 27, 28};
+  wkc::date_time expected{date, time, wkc::time_offset{0}};
+  wkc::date_time dt = cfg.GetDateTime("dt_rfc_deduced"sv);
+  EXPECT_EQ(expected, dt);
+
+  ++expected.date;
+  dt = cfg.GetDateTime("dt_rfc_tagged"sv);
+  EXPECT_EQ(expected, dt);
+
+  EXPECT_EQ(dt.ToString(), cfg.GetString("dt_rfc_str"sv));
+
+  // werkzeugkiste adds a non-standard "!time" tag which can be used to denote
+  // a time or a date_time.
+  EXPECT_EQ(time, cfg.GetTime("time_deduced"sv));
+  EXPECT_EQ(time, cfg.GetTime("time_tagged1"sv));
+  EXPECT_EQ(dt, cfg.GetDateTime("time_tagged2"sv));
+  EXPECT_EQ(time.ToString(), cfg.GetString("time_str"sv));
+
+  // Other formats supported by YAML:
+  expected = wkc::date_time{"2001-12-15T02:59:43.1Z"sv};
+  EXPECT_EQ(expected, cfg.GetDateTime("canonical"sv));
+
+  expected = wkc::date_time{"2001-12-14t21:59:43.10-05:00"sv};
+  EXPECT_EQ(expected, cfg.GetDateTime("iso8601"sv));
+
+  expected = wkc::date_time{"2001-12-15 2:59:43.10"sv};
+  EXPECT_EQ(expected, cfg.GetDateTime("local_date_time"sv));
+
+  EXPECT_EQ("2001-12-14 21:59:43.10 -5"sv, cfg.GetString("space_separated"sv));
+
+  EXPECT_EQ(8, cfg.Size("lst"sv));
+  EXPECT_EQ(1, cfg.GetInt32("lst[0]"sv));
+  EXPECT_EQ(2.5, cfg.GetDouble("lst[1]"sv));
+  EXPECT_TRUE(cfg.GetBool("lst[2]"sv));
+  EXPECT_EQ("some value"sv, cfg.GetString("lst[3]"sv));
+  expected = wkc::date_time{date, time, wkc::time_offset{0}};
+  EXPECT_EQ(expected, cfg.GetDateTime("lst[4]"sv));
+  EXPECT_EQ(wkc::time(21, 50, 0), cfg.GetTime("lst[5]"sv));
+  EXPECT_EQ(2, cfg.Size("lst[6]"sv));
+  EXPECT_EQ("John Doe"sv, cfg.GetString("lst[6].name"sv));
+  EXPECT_EQ(42, cfg.GetInt32("lst[6].age"sv));
+  EXPECT_EQ(3, cfg.Size("lst[7]"sv));
+  EXPECT_EQ(1, cfg.GetInt32("lst[7][0]"sv));
+  EXPECT_EQ(2, cfg.GetInt32("lst[7][1]"sv));
+  EXPECT_EQ(3, cfg.GetInt32("lst[7][2]"sv));
+
+  // Value that is tagged as timestamp but is not a valid date:
+  std::string ystr = R"yml(invalid_tagged1: !!timestamp 2023-99-17)yml";
+  EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
 }
 
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
