@@ -178,16 +178,16 @@ TEST(ConfigScalarTest, LookupScalars) {
     )toml"sv);
 
   // Boolean parameter
-  EXPECT_EQ(true, config.GetBoolean("bool"sv));
-  EXPECT_TRUE(config.GetOptionalBoolean("bool"sv).has_value());
-  EXPECT_EQ(true, config.GetOptionalBoolean("bool"sv).value());
+  EXPECT_EQ(true, config.GetBool("bool"sv));
+  EXPECT_TRUE(config.GetOptionalBool("bool"sv).has_value());
+  EXPECT_EQ(true, config.GetOptionalBool("bool"sv).value());
 
-  EXPECT_THROW(config.GetBoolean("no-such.bool"sv), wkc::KeyError);
-  EXPECT_FALSE(config.GetOptionalBoolean("no-such.bool"sv).has_value());
-  EXPECT_TRUE(config.GetBooleanOr("no-such.bool"sv, true));
-  EXPECT_FALSE(config.GetBooleanOr("no-such.bool"sv, false));
+  EXPECT_THROW(config.GetBool("no-such.bool"sv), wkc::KeyError);
+  EXPECT_FALSE(config.GetOptionalBool("no-such.bool"sv).has_value());
+  EXPECT_TRUE(config.GetBoolOr("no-such.bool"sv, true));
+  EXPECT_FALSE(config.GetBoolOr("no-such.bool"sv, false));
 
-  EXPECT_THROW(config.GetBooleanList("bool"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolList("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt32("bool"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt32Or("bool"sv, 0), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInt32("bool"sv), wkc::TypeError);
@@ -209,8 +209,8 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_EQ(42, config.GetInt32("int"sv));
   EXPECT_EQ(42, config.GetInt64("int"sv));
 
-  EXPECT_THROW(config.GetBoolean("int"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBooleanOr("int"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("int"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBoolOr("int"sv, true), wkc::TypeError);
   EXPECT_THROW(config.GetString("int"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringOr("int"sv, "..."sv), wkc::TypeError);
   // This integer is exactly representable by a double
@@ -219,7 +219,7 @@ TEST(ConfigScalarTest, LookupScalars) {
   // Double parameter
   EXPECT_DOUBLE_EQ(1.0, config.GetDouble("flt"sv));
 
-  EXPECT_THROW(config.GetBoolean("flt"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetStringOr("flt"sv, "..."sv), wkc::TypeError);
   // This float is exactly representable by an integer
@@ -233,12 +233,12 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_EQ("A string", config.GetOptionalString("str"sv).value());
 
   EXPECT_THROW(config.GetString("no-such-key"sv), wkc::KeyError);
-  EXPECT_FALSE(config.GetOptionalBoolean("no-such-key"sv).has_value());
+  EXPECT_FALSE(config.GetOptionalBool("no-such-key"sv).has_value());
 
   EXPECT_EQ("...", config.GetStringOr("no-such-key"sv, "..."sv));
 
-  EXPECT_THROW(config.GetBoolean("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetOptionalBoolean("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetOptionalBool("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt32("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetOptionalInt32("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt64("str"sv), wkc::TypeError);
@@ -298,8 +298,8 @@ TEST(ConfigScalarTest, LookupScalars) {
   EXPECT_EQ(dt2, config.GetDateTime("dates.dt2"sv));
 
   // Invalid access
-  EXPECT_THROW(config.GetBoolean("int_list"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolean("tbl"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetBool("int_list"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("tbl"sv), wkc::KeyError);
   EXPECT_THROW(config.GetInt32("int_list"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt32("tbl"sv), wkc::KeyError);
   EXPECT_THROW(config.GetInt64("int_list"sv), wkc::TypeError);
@@ -340,63 +340,63 @@ TEST(ConfigScalarTest, SetBoolean) {
     )toml"sv);
 
   // Adjust a boolean parameter
-  EXPECT_EQ(true, config.GetBoolean("bool"sv));
-  EXPECT_NO_THROW(config.SetBoolean("bool"sv, false));
-  EXPECT_EQ(false, config.GetBoolean("bool"sv));
+  EXPECT_EQ(true, config.GetBool("bool"sv));
+  EXPECT_NO_THROW(config.SetBool("bool"sv, false));
+  EXPECT_EQ(false, config.GetBool("bool"sv));
 
   // White space in keys is not allowed when setting a value
-  EXPECT_THROW(config.SetBoolean(""sv, true), wkc::KeyError);
-  EXPECT_THROW(config.SetBoolean(" invalid-key"sv, true), wkc::KeyError);
-  EXPECT_THROW(config.SetBoolean("invalid-key "sv, true), wkc::KeyError);
-  EXPECT_THROW(config.SetBoolean("invalid key"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBool(""sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBool(" invalid-key"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBool("invalid-key "sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBool("invalid key"sv, true), wkc::KeyError);
 
   // Cannot change the type of an existing parameter
-  EXPECT_THROW(config.SetBoolean("int"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetBool("int"sv, true), wkc::TypeError);
 
   // Set a non-existing parameter
-  EXPECT_THROW(config.GetBoolean("another_bool"sv), wkc::KeyError);
-  EXPECT_NO_THROW(config.SetBoolean("another_bool"sv, false));
-  EXPECT_NO_THROW(config.GetBoolean("another_bool"sv));
-  EXPECT_EQ(false, config.GetBoolean("another_bool"sv));
+  EXPECT_THROW(config.GetBool("another_bool"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.SetBool("another_bool"sv, false));
+  EXPECT_NO_THROW(config.GetBool("another_bool"sv));
+  EXPECT_EQ(false, config.GetBool("another_bool"sv));
 
   // Set a nested parameter (must create the hierarchy)
-  EXPECT_THROW(config.GetBoolean("others.bool"sv), wkc::KeyError);
-  EXPECT_NO_THROW(config.SetBoolean("others.bool"sv, false));
-  EXPECT_NO_THROW(config.GetBoolean("others.bool"sv));
-  EXPECT_EQ(false, config.GetBoolean("others.bool"sv));
+  EXPECT_THROW(config.GetBool("others.bool"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.SetBool("others.bool"sv, false));
+  EXPECT_NO_THROW(config.GetBool("others.bool"sv));
+  EXPECT_EQ(false, config.GetBool("others.bool"sv));
 
   // Test a deeper path hierarchy
-  EXPECT_THROW(config.GetBoolean("a.deeper.hierarchy.bool"sv), wkc::KeyError);
-  EXPECT_NO_THROW(config.SetBoolean("a.deeper.hierarchy.bool"sv, false));
-  EXPECT_NO_THROW(config.GetBoolean("a.deeper.hierarchy.bool"sv));
-  EXPECT_EQ(false, config.GetBoolean("a.deeper.hierarchy.bool"sv));
+  EXPECT_THROW(config.GetBool("a.deeper.hierarchy.bool"sv), wkc::KeyError);
+  EXPECT_NO_THROW(config.SetBool("a.deeper.hierarchy.bool"sv, false));
+  EXPECT_NO_THROW(config.GetBool("a.deeper.hierarchy.bool"sv));
+  EXPECT_EQ(false, config.GetBool("a.deeper.hierarchy.bool"sv));
 
   // We can't add another parameter as a "child" of a scalar value
-  EXPECT_THROW(config.SetBoolean("a.string.below.bool"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBool("a.string.below.bool"sv, true), wkc::KeyError);
 
   // Similarly, automatically creating an array as (one of the) parent(s) is
   // also not supported (how should we initialize array elements up to the
   // requested index, anyhow?). Instead, we would have to first create a
   // list, and then fill it by ourselves. For this, refer to the
   // `ConfigListTest` test suite (list_test.cpp).
-  EXPECT_THROW(config.SetBoolean("no_such_array[3]"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBool("no_such_array[3]"sv, true), wkc::KeyError);
   // Creating a table within an existing array is also not supported:
-  EXPECT_THROW(config.SetBoolean("array[3].bool"sv, true), wkc::KeyError);
+  EXPECT_THROW(config.SetBool("array[3].bool"sv, true), wkc::KeyError);
   EXPECT_THROW(
-      config.SetBoolean("array[4].another_table.value"sv, true), wkc::KeyError);
+      config.SetBool("array[4].another_table.value"sv, true), wkc::KeyError);
 
   // Changing the type of an existing array item is also not supported:
-  EXPECT_THROW(config.SetBoolean("array[2]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetBool("array[2]"sv, true), wkc::TypeError);
 
   // But setting an existing array element is supported:
-  EXPECT_NO_THROW(config.SetBoolean("booleans[1]"sv, true));
-  EXPECT_EQ(true, config.GetBoolean("booleans[0]"sv));
-  EXPECT_EQ(true, config.GetBoolean("booleans[1]"sv));
-  EXPECT_EQ(true, config.GetBoolean("booleans[2]"sv));
+  EXPECT_NO_THROW(config.SetBool("booleans[1]"sv, true));
+  EXPECT_EQ(true, config.GetBool("booleans[0]"sv));
+  EXPECT_EQ(true, config.GetBool("booleans[1]"sv));
+  EXPECT_EQ(true, config.GetBool("booleans[2]"sv));
 
-  EXPECT_EQ(false, config.GetBoolean("array[2].bool"sv));
-  EXPECT_NO_THROW(config.SetBoolean("array[2].bool"sv, true));
-  EXPECT_EQ(true, config.GetBoolean("array[2].bool"sv));
+  EXPECT_EQ(false, config.GetBool("array[2].bool"sv));
+  EXPECT_NO_THROW(config.SetBool("array[2].bool"sv, true));
+  EXPECT_EQ(true, config.GetBool("array[2].bool"sv));
 }
 
 TEST(ConfigScalarTest, SetNonBooleanScalars) {
@@ -568,7 +568,7 @@ TEST(ConfigScalarTest, ReplaceListElements) {
 
   EXPECT_THROW(config.SetDouble("ints [0] "sv, 5.0), wkc::KeyError);
 
-  EXPECT_THROW(config.SetBoolean("ints[0]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetBool("ints[0]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetString("ints[1]"sv, "test"sv), wkc::TypeError);
 
   //---------------------------------------------------------------------------
@@ -581,7 +581,7 @@ TEST(ConfigScalarTest, ReplaceListElements) {
   EXPECT_NO_THROW(config.SetString("strs[1]"sv, ""sv));
   EXPECT_EQ("", config.GetString("strs[1]"sv));
 
-  EXPECT_THROW(config.SetBoolean("strs[0]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetBool("strs[0]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetInt32("strs[1]"sv, 1), wkc::TypeError);
 
   //---------------------------------------------------------------------------
@@ -590,13 +590,13 @@ TEST(ConfigScalarTest, ReplaceListElements) {
 
   // Changing a type is not supported, but we can replace a value by a
   // compatible type.
-  EXPECT_THROW(config.SetBoolean("mixed[0]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetBool("mixed[0]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetDouble("mixed[0]"sv, -4.5), wkc::TypeError);
   EXPECT_NO_THROW(config.SetDouble("mixed[0]"sv, -4.0));
   EXPECT_EQ(-4, config.GetInt32("mixed[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("mixed[0]"sv));
 
-  EXPECT_THROW(config.SetBoolean("mixed[1]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetBool("mixed[1]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetString("mixed[1]"sv, "3/2"), wkc::TypeError);
   EXPECT_NO_THROW(config.SetInt64("mixed[1]"sv, -12345));
   EXPECT_DOUBLE_EQ(-12345.0, config.GetDouble("mixed[1]"sv));
@@ -604,7 +604,7 @@ TEST(ConfigScalarTest, ReplaceListElements) {
 
   EXPECT_NO_THROW(config.SetString("mixed[2]"sv, "done"));
   EXPECT_EQ("done", config.GetString("mixed[2]"sv));
-  EXPECT_THROW(config.SetBoolean("mixed[2]"sv, true), wkc::TypeError);
+  EXPECT_THROW(config.SetBool("mixed[2]"sv, true), wkc::TypeError);
   EXPECT_THROW(config.SetDouble("mixed[2]"sv, 3.0), wkc::TypeError);
   EXPECT_EQ(wkc::ConfigType::String, config.Type("mixed[2]"sv));
 }

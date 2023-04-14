@@ -114,13 +114,13 @@ TEST(ConfigTypeTest, TypeQueries) {
   EXPECT_EQ(wkc::ConfigType::DateTime, config.Type("dates.date_time"sv));
 
   // Access invalid types
-  EXPECT_THROW(config.GetBoolean("lst"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("lst"sv), wkc::TypeError);
   EXPECT_THROW(config.GetString("bool"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolean("dates"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolean("dates.day"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolean("dates.time1"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolean("dates.time2"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolean("dates.date_time"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("dates"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("dates.day"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("dates.time1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("dates.time2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetBool("dates.date_time"sv), wkc::TypeError);
 
   // Verify the string representation of the custom type enum:
   EXPECT_EQ("boolean", wkc::ConfigTypeToString(wkc::ConfigType::Boolean));

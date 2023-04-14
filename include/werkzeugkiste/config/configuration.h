@@ -19,7 +19,8 @@
 #include <utility>
 #include <vector>
 
-/// @brief Utilities to handle configurations in a unified manner.
+/// @brief Utilities to handle configurations in a unified manner via the
+///   `werkzeugkiste::config::Configuration` class.
 ///
 /// @code {.cpp}
 /// #include <werkzeugkiste/config/configuration.h>
@@ -37,6 +38,11 @@
 ///       [800,   0, 400],
 ///       [  0, 750, 300],
 ///       [  0,   0,   1]
+///     ]
+///
+///     polyline = [
+///       [ 1, 2],            # Points can be specified as lists...
+///       { x = -1, y = -2},  # ... or as groups (key/value pairs).
 ///     ]
 ///     )toml");
 ///
@@ -67,12 +73,14 @@
 ///
 /// // TODO not yet available
 /// // namespace wkg = werkzeugkiste::geometry;
-/// // std::vector<wkg::Vec2i> polyline = cfg.GetVec2iList("poly2"sv);
+/// // const std::vector<wkg::Vec2i> polyline = cfg.GetVec2iList("polyline"sv);
 /// // Type conversion
-/// // std::vector<wkg::Vec2d> polyline = cfg.GetVec2dList("poly2"sv);
+/// // const std::vector<wkg::Vec2d> polyline = cfg.GetVec2dList("polyline"sv);
 /// @endcode
 namespace werkzeugkiste::config {
 
+/// @brief Alias for a dynamic-size row-major matrix.
+/// @tparam Tp Scalar type of the matrix.
 template <typename Tp>
 using Matrix =
     Eigen::Matrix<Tp, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
@@ -96,13 +104,27 @@ using Matrix =
 /// * <a href="https://toml.io/en">TOML</a>,
 /// * <a href="https://www.json.org/">JSON</a>,
 /// * <a href="http://hyperrealm.github.io/libconfig/">libconfig</a>, and
-/// * <a href="https://yaml.org/">YAML</a> (only for exporting).
+/// * <a href="https://yaml.org/">YAML</a>.
 ///
 /// For usage convenience, this class support conversion from the
 /// TOML-compatible parameter types to:
 /// * <a href="https://eigen.tuxfamily.org/">`Eigen` matrices</a> (1- and
 ///   2-dimensional) can be loaded from (nested) numeric lists.
 /// * Basic geometry types defined within `werkzeugkiste::geometry`.
+///
+/// @code {.cpp}
+/// #include <werkzeugkiste/config/configuration.h>
+/// namespace wkc = werkzeugkiste::config;
+/// using namespace std::string_view_literals;
+/// // Load a configuration from a file (format will be deduced from the
+/// // file extension)...
+/// wkc::Configuration cfg = wkc::LoadFile("path/to/config.toml");
+/// // ... or a string:
+/// wkc::Configuration cfg = wkc::LoadTOMLString("value = 42.17"sv);
+/// wkc::Configuration cfg = wkc::LoadJSONString("{ 'value': 42.17 }"sv);
+///
+/// // TODO Extend example
+/// @endcode
 class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
  public:
   /// @brief Constructs an empty configuration.
@@ -236,13 +258,19 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Booleans
 
+  /// @name Boolean
+  ///
+  /// @desc Getter/Setter for boolean parameters.
+  ///
+  /// @{
+
   /// @brief Returns the boolean parameter.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
   /// @param key Fully qualified parameter name.
-  bool GetBoolean(std::string_view key) const;
+  bool GetBool(std::string_view key) const;
 
   /// @brief Returns the boolean parameter or the `default_val` if it does not
   ///   exist.
@@ -251,7 +279,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully qualified parameter name.
   /// @param default_val Value to return if the parameter does not exist.
-  bool GetBooleanOr(std::string_view key, bool default_val) const;
+  bool GetBoolOr(std::string_view key, bool default_val) const;
 
   /// @brief Returns an optional boolean or `std::nullopt` if it does not
   ///   exist.
@@ -259,7 +287,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter exists but is of a different type.
   ///
   /// @param key Fully qualified parameter name.
-  std::optional<bool> GetOptionalBoolean(std::string_view key) const;
+  std::optional<bool> GetOptionalBool(std::string_view key) const;
 
   /// @brief Sets a boolean parameter.
   ///
@@ -269,7 +297,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
-  void SetBoolean(std::string_view key, bool value);
+  void SetBool(std::string_view key, bool value);
 
   /// @brief Returns a list of boolean flags.
   ///
@@ -277,7 +305,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter is of a different type.
   ///
   /// @param key Fully qualified parameter name.
-  std::vector<bool> GetBooleanList(std::string_view key) const;
+  std::vector<bool> GetBoolList(std::string_view key) const;
 
   /// @brief Sets or replaces a list of boolean flags.
   ///
@@ -285,10 +313,18 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///
   /// @param key Fully qualified parameter name.
   /// @param values List of flags.
-  void SetBooleanList(std::string_view key, const std::vector<bool> &values);
+  void SetBoolList(std::string_view key, const std::vector<bool> &values);
+
+  /// @}
 
   //---------------------------------------------------------------------------
   // Integers (32-bit)
+
+  /// @name Integer
+  ///
+  /// @desc Getter/Setter for 32- and 64-bit integer parameters.
+  ///
+  /// @{
 
   /// @brief Returns the 32-bit integer parameter.
   ///
@@ -435,6 +471,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Similarly, a group which holds (at least) `x` and `y` parameters can also
   /// be loaded as a 2D point.
   ///
+  /// @code {.cpp}
+  /// const wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+  ///     lst-2d = [1, 2]
+  ///     lst-nd = [1, 2, 3, 4, 5]
+  ///     grp-2d = { x = 1, y = 2 }
+  ///     )toml");
+  /// // Load 2-element list as 2D point:
+  /// const auto pt1 = cfg.GetInt64Point2D("lst-2d");
+  /// // Load 2D point from the first 2 elements of a 5-element list:
+  /// const auto pt2 = cfg.GetInt64Point2D("lst-nd");
+  /// // Load 2D point from a group containing x and y parameters:
+  /// const auto pt3 = cfg.GetInt64Point2D("grp-2d");
+  /// @endcode
+  ///
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
@@ -451,6 +501,20 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// coordinate, respectively.
   /// Similarly, a group which holds (at least) `x`, `y` and `z` parameters can
   /// also be loaded as a 3D point.
+  ///
+  /// @code {.cpp}
+  /// const wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+  ///     lst-3d = [1, 2, 3]
+  ///     lst-nd = [1, 2, 3, 4, 5]
+  ///     grp-3d = { x = 1, y = 2, z = 3 }
+  ///     )toml");
+  /// // Load 3-element list as 3D point:
+  /// const auto pt1 = cfg.GetInt64Point3D("lst-3d");
+  /// // Load 3D point from the first 3 elements of a 5-element list:
+  /// const auto pt2 = cfg.GetInt64Point3D("lst-nd");
+  /// // Load 3D point from a group containing x, y and z parameters:
+  /// const auto pt3 = cfg.GetInt64Point3D("grp-3d");
+  /// @endcode
   ///
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
@@ -488,8 +552,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   std::vector<point3d<int64_t>> GetInt64Points3D(std::string_view key) const;
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Floating Point
+
+  /// @name Floating point
+  ///
+  /// @desc Getter/Setter for double-precision floating point parameters.
+  ///
+  /// @{
 
   /// @brief Returns the double-precision floating point parameter.
   ///
@@ -618,8 +690,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   std::vector<point3d<double>> GetDoublePoints3D(std::string_view key) const;
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Strings
+
+  /// @name String
+  ///
+  /// @desc Getter/Setter for string parameters.
+  ///
+  /// @{
 
   /// @brief Returns the string parameter.
   ///
@@ -675,8 +755,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetStringList(std::string_view key,
       const std::vector<std::string_view> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Date
+
+  /// @name Date
+  ///
+  /// @desc Getter/Setter for `werkzeugkiste::config::date` parameters.
+  ///
+  /// @{
 
   /// @brief Returns the date parameter.
   ///
@@ -729,8 +817,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of dates.
   void SetDateList(std::string_view key, const std::vector<date> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Time
+
+  /// @name Time
+  ///
+  /// @desc Getter/Setter for `werkzeugkiste::config::time` parameters.
+  ///
+  /// @{
 
   /// @brief Returns the time parameter.
   ///
@@ -783,8 +879,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of times.
   void SetTimeList(std::string_view key, const std::vector<time> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Date-time
+
+  /// @name Date-Time
+  ///
+  /// @desc Getter/Setter for `werkzeugkiste::config::date_time` parameters.
+  ///
+  /// @{
 
   /// @brief Returns the date-time parameter with optional timezone offset.
   ///
@@ -842,8 +946,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetDateTimeList(std::string_view key,
       const std::vector<date_time> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Mixed list support
+
+  /// @name Lists
+  ///
+  /// @desc These methods allow working with mixed type lists.
+  ///
+  /// @{
 
   /// @brief Creates an empty list with the given name.
   ///
@@ -955,8 +1067,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param group Group/"Sub-Configuration" to be appended.
   void Append(std::string_view key, const Configuration &group);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Group/"Sub-Configuration"
+
+  /// @name Group/Sub-Configuration
+  ///
+  /// @desc Getter/Setter for groups.
+  ///
+  /// @{
 
   /// @brief Returns a copy of the sub-group.
   /// @param key Fully qualified name of the parameter (which must be a
@@ -977,8 +1097,22 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param group The group to be inserted.
   void SetGroup(std::string_view key, const Configuration &group);
 
+  /// @} // Group/Sub-Configuration
+
   //---------------------------------------------------------------------------
   // Matrices
+  //
+  // To add support for additional data types, we need to:
+  // 1) Add GetMatrixType below.
+  // 2) Add test case to tests/config/compound_test.
+  // 3) Extend GetMatrix in pyzeugkiste.
+  // 4) Add test cases to test_get_numpy in pyzeugkiste.
+
+  /// @name Matrix
+  ///
+  /// @desc Conversion between `Eigen::Matrix` and (nested) lists.
+  ///
+  /// @{
 
   /// @brief Returns a list/nested list as a 2D matrix.
   ///
@@ -1162,8 +1296,43 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
     }
   }
 
+  /// @}
+
+  //---------------------------------------------------------------------------
+  // Overloaded setter to simplify templates
+
+  /// @name Generic Setters
+  ///
+  /// @desc Creates or replaces a parameter value.
+  ///
+  /// @{
+  inline void Set(std::string_view key, bool value) { SetBool(key, value); }
+  inline void Set(std::string_view key, int32_t value) { SetInt32(key, value); }
+  inline void Set(std::string_view key, int64_t value) { SetInt64(key, value); }
+  inline void Set(std::string_view key, double value) { SetDouble(key, value); }
+  inline void Set(std::string_view key, std::string_view value) {
+    SetString(key, value);
+  }
+  inline void Set(std::string_view key, const date &value) {
+    SetDate(key, value);
+  }
+  inline void Set(std::string_view key, const time &value) {
+    SetTime(key, value);
+  }
+  inline void Set(std::string_view key, const date_time &value) {
+    SetDateTime(key, value);
+  }
+  inline void Set(std::string_view key, const Configuration &group) {
+    SetGroup(key, group);
+  }
+  /// @}
+
   //---------------------------------------------------------------------------
   // Convenience utilities
+
+  /// @name Utilities
+  ///
+  /// @{
 
   /// @brief Adjusts the given parameters below the `key` group to hold either
   ///   an absolute file path, or the result of "base_path / <param>" if they
@@ -1241,8 +1410,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///     given as string.
   void LoadNestedConfiguration(std::string_view key);
 
+  /// @}  // Utilities
+
   //---------------------------------------------------------------------------
   // Serialization
+
+  /// @name Serialization
+  ///
+  /// @desc Represent this configuration as a string in a specific format.
+  ///
+  /// @{
 
   /// @brief Returns a TOML-formatted string of this configuration.
   std::string ToTOML() const;
@@ -1256,6 +1433,24 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Returns a libconfig-formatted string of this configuration.
   std::string ToLibconfig() const;
 
+  /// @}  // Serialization
+
+  /// @brief Applies the selected `NullValuePolicy` to the given parameter.
+  ///
+  /// This method is intended for parsers and should be called if the
+  /// parsed `key` parameter was a null/none value.
+  ///
+  /// @param cfg Configuration to be modified.
+  /// @param key Fully qualified parameter name.
+  /// @param policy The selected NullValuePolicy.
+  /// @param append If true, `key` is assumed to be a list and the replacement
+  ///   value (depending on the `policy`) will be `Append`ed, otherwise, it
+  ///   will be `Set`.
+  static void HandleNullValue(Configuration &cfg,
+      std::string_view key,
+      NullValuePolicy policy,
+      bool append);
+
  private:
   /// Forward declaration of internal implementation struct.
   struct Impl;
@@ -1264,12 +1459,18 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   std::unique_ptr<Impl> pimpl_;
 };
 
+/// @name Loading a configuration
+///
+/// @desc Utilities to load a configuration from files or strings.
+///
+/// @{
+
 /// @brief Loads a configuration file.
 ///
 /// The configuration type will be deduced from the file extension, *i.e.*
-/// `.toml`, `.json`, or `.cfg`.
-/// For JSON files, the default `NullValuePolicy` will be used, see
-/// `LoadJSONFile`.
+/// `.toml`, `.json`, `.yml`/`.yaml` or `.cfg`.
+/// For JSON and YAML files, the default `NullValuePolicy` will be used, see
+/// `LoadJSONFile` or `LoadYAMLFile`.
 ///
 /// @param filename Path to the configuration file.
 Configuration LoadFile(std::string_view filename);
@@ -1296,28 +1497,12 @@ Configuration LoadLibconfigFile(std::string_view filename);
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadLibconfigString(std::string_view lcfg_string);
 
-/// @brief How to handle Null/None values (e.g. when loading JSON).
-enum class NullValuePolicy : unsigned char {
-  /// @brief Null values will be skipped, i.e. not loaded into the
-  ///   configuration.
-  Skip,
-
-  /// @brief Null values will be **replaced** by the string "null".
-  NullString,
-
-  /// @brief Null values will be **replaced** by an empty list.
-  EmptyList,
-
-  /// @brief A `werkzeugkiste::config::ParseError` will be thrown.
-  Fail
-};
-
 /// @brief Loads a JSON configuration from a string.
 ///
-/// Because a configuration must consist of key/value pairs, a plain JSON
-/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
-/// configuration would have 1 element, and you need to access it via its key.
-/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+/// Because a `Configuration` must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
 ///
 /// @param filename Path to the `.json` file.
 /// @param none_policy How to deal with None values.
@@ -1327,16 +1512,50 @@ Configuration LoadJSONFile(std::string_view filename,
 
 /// @brief Loads a JSON configuration from a string.
 ///
-/// Because a configuration must consist of key/value pairs, a plain JSON
-/// array (e.g. "[1, 2, 3]") will be loaded into the key `json`. Thus, the
-/// configuration would have 1 element, and you need to access it via its key.
-/// For example, cfg.Size("json"), cfg.GetDouble("json[0]"), etc.
+/// Because a `Configuration` must consist of key/value pairs, a plain JSON
+/// array (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
 ///
 /// @param json_string String representation of the JSON configuration.
 /// @param none_policy How to deal with None values.
 WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadJSONString(std::string_view json_string,
     NullValuePolicy none_policy = NullValuePolicy::Skip);
+
+/// @brief Loads a YAML configuration from a file.
+///
+/// Because a `Configuration` must consist of key/value pairs, a plain YAML
+/// sequence (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
+///
+/// @param filename Path to the YAML file.
+/// @param none_policy How to deal with None values.
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadYAMLFile(std::string_view filename,
+    NullValuePolicy none_policy = NullValuePolicy::Skip);
+
+/// @brief Loads a YAML configuration from a string.
+///
+/// Because a `Configuration` must consist of key/value pairs, a plain YAML
+/// sequence (e.g. "[1, 2, 3]") will be loaded into the key `list`. Thus, the
+/// (root) configuration would have 1 element, and it must be accessed via
+/// this key, for example, cfg.Size("list"), cfg.GetDouble("list[0]"), etc.
+///
+/// @param yaml_string String representation of the YAML configuration.
+/// @param none_policy How to deal with None values.
+WERKZEUGKISTE_CONFIG_EXPORT
+Configuration LoadYAMLString(const std::string &yaml_string,
+    NullValuePolicy none_policy = NullValuePolicy::Skip);
+
+/// @}
+
+/// @name String Representation
+///
+/// @desc Represent a configuration as a string in a specific format.
+///
+/// @{
 
 /// @brief Returns a libconfig-formatted string.
 WERKZEUGKISTE_CONFIG_EXPORT
@@ -1356,6 +1575,8 @@ inline std::string DumpJSONString(const Configuration &cfg) {
 inline std::string DumpYAMLString(const Configuration &cfg) {
   return cfg.ToYAML();
 }
+
+/// @}
 
 }  // namespace werkzeugkiste::config
 

@@ -107,7 +107,7 @@ TEST(ConfigIOTest, ConfigConstruction) {
   EXPECT_TRUE(tmp.Empty());
   EXPECT_TRUE(copy.Empty());
 
-  tmp.SetBoolean("tbl.val"sv, true);
+  tmp.SetBool("tbl.val"sv, true);
   EXPECT_FALSE(tmp.Empty());
   EXPECT_TRUE(copy.Empty());
   copy = tmp;
@@ -115,14 +115,14 @@ TEST(ConfigIOTest, ConfigConstruction) {
   EXPECT_FALSE(copy.Empty());
   EXPECT_TRUE(tmp.Contains("tbl.val"sv));
   EXPECT_TRUE(copy.Contains("tbl.val"sv));
-  EXPECT_TRUE(tmp.GetBoolean("tbl.val"sv));
-  EXPECT_TRUE(copy.GetBoolean("tbl.val"sv));
+  EXPECT_TRUE(tmp.GetBool("tbl.val"sv));
+  EXPECT_TRUE(copy.GetBool("tbl.val"sv));
 
   // Test move assignment
   moved = std::move(tmp);
   EXPECT_FALSE(moved.Empty());
   EXPECT_TRUE(moved.Contains("tbl.val"sv));
-  EXPECT_TRUE(moved.GetBoolean("tbl.val"sv));
+  EXPECT_TRUE(moved.GetBool("tbl.val"sv));
   EXPECT_FALSE(moved.Contains("value1"sv));  // Previously contained
 }
 
@@ -247,7 +247,6 @@ TEST(ConfigIOTest, ParsingInvalidDateTimes) {
       wkc::date_time{"1990-12-31T23:59:59+00:00"sv});
 }
 
-// TODO Can be properly tested once we have LoadJSONString()
 TEST(ConfigIOTest, LoadingJSON) {
   // Invalid file inputs:
   EXPECT_THROW(wkc::LoadJSONFile("no-such-file"sv), wkc::ParseError);
@@ -308,7 +307,7 @@ TEST(ConfigIOTest, LoadingJSON) {
 
   EXPECT_EQ(2, config.Size("grp"sv));
   EXPECT_EQ("value", config.GetString("grp.str"sv));
-  EXPECT_TRUE(config.GetBoolean("grp.flag"sv));
+  EXPECT_TRUE(config.GetBool("grp.flag"sv));
 
   EXPECT_EQ(5, config.Size("nested"sv));
 
@@ -337,7 +336,7 @@ TEST(ConfigIOTest, LoadingJSON) {
   EXPECT_EQ("value", config.GetString("nested[3][3][1]"sv));
 
   EXPECT_THROW(config.Size("nested[3][4]"sv), wkc::TypeError);
-  EXPECT_FALSE(config.GetBoolean("nested[3][4]"sv));
+  EXPECT_FALSE(config.GetBool("nested[3][4]"sv));
 
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("nested[4]"sv));
   EXPECT_EQ(2, config.Size("nested[4]"sv));
@@ -352,42 +351,42 @@ TEST(ConfigIOTest, LoadingJSON) {
     )json"sv};
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::Skip);
   EXPECT_EQ(1, config.Size());
-  EXPECT_EQ(4, config.Size("json"sv));
-  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
-  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
-  EXPECT_EQ(2, config.Size("json[2]"sv));
-  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
-  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
-  EXPECT_FALSE(config.Contains("json[2].none"sv));
-  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
+  EXPECT_EQ(4, config.Size("list"sv));
+  EXPECT_EQ(1, config.GetInt32("list[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("list[1]"sv));
+  EXPECT_EQ(2, config.Size("list[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("list[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("list[2].flt"sv));
+  EXPECT_FALSE(config.Contains("list[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("list[3]"sv));
 
   // Replace null values with "null" strings
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::NullString);
   EXPECT_EQ(1, config.Size());
-  EXPECT_EQ(5, config.Size("json"sv));
-  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
-  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
-  EXPECT_EQ(3, config.Size("json[2]"sv));
-  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
-  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
-  EXPECT_EQ("null", config.GetString("json[2].none"sv));
-  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
-  EXPECT_EQ("null", config.GetString("json[4]"sv));
+  EXPECT_EQ(5, config.Size("list"sv));
+  EXPECT_EQ(1, config.GetInt32("list[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("list[1]"sv));
+  EXPECT_EQ(3, config.Size("list[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("list[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("list[2].flt"sv));
+  EXPECT_EQ("null", config.GetString("list[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("list[3]"sv));
+  EXPECT_EQ("null", config.GetString("list[4]"sv));
 
   // Replace null values with empty lists
   config = wkc::LoadJSONString(js, wkc::NullValuePolicy::EmptyList);
   EXPECT_EQ(1, config.Size());
-  EXPECT_EQ(5, config.Size("json"sv));
-  EXPECT_EQ(1, config.GetInt32("json[0]"sv));
-  EXPECT_EQ(2, config.GetInt32("json[1]"sv));
-  EXPECT_EQ(3, config.Size("json[2]"sv));
-  EXPECT_EQ(1, config.GetInt32("json[2].int"sv));
-  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("json[2].flt"sv));
-  EXPECT_EQ(wkc::ConfigType::List, config.Type("json[2].none"sv));
-  EXPECT_EQ(0, config.Size("json[2].none"sv));
-  EXPECT_EQ(4, config.GetInt32("json[3]"sv));
-  EXPECT_EQ(wkc::ConfigType::List, config.Type("json[4]"sv));
-  EXPECT_EQ(0, config.Size("json[4]"sv));
+  EXPECT_EQ(5, config.Size("list"sv));
+  EXPECT_EQ(1, config.GetInt32("list[0]"sv));
+  EXPECT_EQ(2, config.GetInt32("list[1]"sv));
+  EXPECT_EQ(3, config.Size("list[2]"sv));
+  EXPECT_EQ(1, config.GetInt32("list[2].int"sv));
+  EXPECT_DOUBLE_EQ(2.5, config.GetDouble("list[2].flt"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("list[2].none"sv));
+  EXPECT_EQ(0, config.Size("list[2].none"sv));
+  EXPECT_EQ(4, config.GetInt32("list[3]"sv));
+  EXPECT_EQ(wkc::ConfigType::List, config.Type("list[4]"sv));
+  EXPECT_EQ(0, config.Size("list[4]"sv));
 
   // Null values should throw an exception
   js = R"json({ "int": 1, "flt": 2.5, "none": null})json"sv;
@@ -441,16 +440,374 @@ TEST(ConfigIOTest, SerializeJSONStrings) {
   EXPECT_EQ(config1, config2);
 }
 
-TEST(ConfigIOTest, DumpYAML) {
-  // TODO mixed lsit/nested lists/groups
-  const auto cfg = wkc::LoadTOMLString(R"toml(
-    flag = true
-    int = 42
-    flt = 1e6
-    str = "value"
-    )toml");
+TEST(ConfigIOTest, LoadingYAML) {
+  // Load YAML files
+  EXPECT_THROW(wkc::LoadYAMLFile("no such file"), wkc::ParseError);
+  EXPECT_THROW(wkc::LoadYAMLFile(__FILE__), wkc::ParseError);
 
-  const std::string yaml = wkc::DumpYAMLString(cfg);
+  const auto fname_ci = wkf::FullFile({wkf::DirName(__FILE__),
+      "..",
+      "..",
+      "..",
+      ".github",
+      "workflows",
+      "ci.yml"});
+  auto cfg = wkc::LoadYAMLFile(fname_ci);
+  EXPECT_TRUE(cfg.Contains("jobs.lint.runs-on"sv));
+  EXPECT_EQ("ubuntu-22.04", cfg.GetString("jobs.lint.runs-on"sv));
+
+  // Generic file loading
+  auto copy = wkc::LoadFile(fname_ci);
+  EXPECT_EQ(cfg, copy);
+
+  // Indentation of the test inputs matters!
+  std::string ystr{R"yml(---
+int: 42
+str_int: "42"
+int_tagged: !!int 42
+str_int_tagged: !!str 42
+
+flt: 3.14159
+flt_str: "3.14159"
+flt_tagged: !!float 3.14159
+flt_str_tagged: !!str 3.14159
+
+flag: on
+flag_tagged: !!bool off
+
+date: 2019-01-01
+str_date: "2019-01-01"
+date_tagged1: !date 2019-01-01
+date_tagged2: !!date 2019-01-02
+str_date_tagged: !!str 2019-01-01
+
+time: 12:00:00
+str_time: "12:00:00"
+time_tagged1: !time 12:00:00
+time_tagged2: !!time 14:00:00
+str_time_tagged: !!str 12:00:00
+
+list:
+- toml
+- json
+- yaml
+- libconfig
+
+# A sequence of maps
+format-list:
+  - yaml: &fmt_yaml
+      name: "YAML Ain't Markup Language"
+      initial-release: !!float 2001
+  - json: &fmt_json
+      name: JavaScript Object Notation
+      initial-release: !!int 2001
+  - xml: &fmt_xml
+      name: Extensible Markup Language
+      initial-release: !!str 1998
+  - toml: &fmt_toml
+      name: Tom's Obvious, Minimal Language
+      initial-release: 2013
+
+# A map (using references)
+format-group:
+  yaml: *fmt_yaml
+  json: *fmt_json
+  xml: *fmt_xml
+  toml: *fmt_toml
+
+none1: ~
+none2: null
+none3:
+)yml"};
+  cfg = wkc::LoadYAMLString(ystr);
+
+  // Type deduction/tagging for integer:
+  EXPECT_EQ(wkc::ConfigType::Integer, cfg.Type("int"sv));
+  EXPECT_EQ(42, cfg.GetInt64("int"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_int"sv));
+  EXPECT_EQ("42", cfg.GetString("str_int"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer, cfg.Type("int_tagged"sv));
+  EXPECT_EQ(42, cfg.GetInt64("int_tagged"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_int_tagged"sv));
+  EXPECT_EQ("42", cfg.GetString("str_int_tagged"sv));
+
+  // Type deduction/tagging for floating point:
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, cfg.Type("flt"sv));
+  EXPECT_DOUBLE_EQ(3.14159, cfg.GetDouble("flt"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("flt_str"sv));
+  EXPECT_EQ("3.14159", cfg.GetString("flt_str"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint, cfg.Type("flt_tagged"sv));
+  EXPECT_DOUBLE_EQ(3.14159, cfg.GetDouble("flt_tagged"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("flt_str_tagged"sv));
+  EXPECT_EQ("3.14159", cfg.GetString("flt_str_tagged"sv));
+
+  // Type deduction/tagging for boolean:
+  EXPECT_EQ(wkc::ConfigType::Boolean, cfg.Type("flag"sv));
+  EXPECT_TRUE(cfg.GetBool("flag"sv));
+  EXPECT_EQ(wkc::ConfigType::Boolean, cfg.Type("flag_tagged"sv));
+  EXPECT_FALSE(cfg.GetBool("flag_tagged"sv));
+
+  // Type deduction/tagging for date:
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date"sv));
+  EXPECT_EQ(wkc::date(2019, 1, 1), cfg.GetDate("date"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_date"sv));
+  EXPECT_EQ("2019-01-01", cfg.GetString("str_date"sv));
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date_tagged1"sv));
+  EXPECT_EQ(wkc::date(2019, 1, 1), cfg.GetDate("date_tagged1"sv));
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date_tagged2"sv));
+  EXPECT_EQ(wkc::date(2019, 1, 2), cfg.GetDate("date_tagged2"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_date_tagged"sv));
+  EXPECT_EQ("2019-01-01", cfg.GetString("str_date_tagged"sv));
+
+  // Type deduction/tagging for time:
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time"sv));
+  EXPECT_EQ(wkc::time(12, 0, 0), cfg.GetTime("time"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_time"sv));
+  EXPECT_EQ("12:00:00", cfg.GetString("str_time"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time_tagged1"sv));
+  EXPECT_EQ(wkc::time(12, 0, 0), cfg.GetTime("time_tagged1"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time_tagged2"sv));
+  EXPECT_EQ(wkc::time(14, 0, 0), cfg.GetTime("time_tagged2"sv));
+  EXPECT_EQ(wkc::ConfigType::String, cfg.Type("str_time_tagged"sv));
+  EXPECT_EQ("12:00:00", cfg.GetString("str_time_tagged"sv));
+
+  // Sequence/list:
+  // * Each sequence element is a map.
+  // * The initial-release years are tagged differently to additionally
+  //   test the type deduction.
+  EXPECT_EQ(wkc::ConfigType::List, cfg.Type("list"sv));
+  EXPECT_EQ(4, cfg.Size("list"sv));
+  EXPECT_EQ("toml", cfg.GetString("list[0]"sv));
+  EXPECT_EQ("json", cfg.GetString("list[1]"sv));
+  EXPECT_EQ("yaml", cfg.GetString("list[2]"sv));
+  EXPECT_EQ("libconfig", cfg.GetString("list[3]"sv));
+
+  EXPECT_EQ(wkc::ConfigType::List, cfg.Type("format-list"sv));
+  EXPECT_EQ(4, cfg.Size("format-list"sv));
+  EXPECT_EQ("YAML Ain't Markup Language",
+      cfg.GetString("format-list[0].yaml.name"sv));
+  EXPECT_EQ(wkc::ConfigType::FloatingPoint,
+      cfg.Type("format-list[0].yaml.initial-release"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-list[0].yaml.initial-release"sv));
+
+  EXPECT_EQ("JavaScript Object Notation",
+      cfg.GetString("format-list[1].json.name"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer,
+      cfg.Type("format-list[1].json.initial-release"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-list[1].json.initial-release"sv));
+
+  EXPECT_EQ(
+      "Extensible Markup Language", cfg.GetString("format-list[2].xml.name"sv));
+  EXPECT_EQ(wkc::ConfigType::String,
+      cfg.Type("format-list[2].xml.initial-release"sv));
+  EXPECT_EQ("1998", cfg.GetString("format-list[2].xml.initial-release"sv));
+
+  EXPECT_EQ("Tom's Obvious, Minimal Language",
+      cfg.GetString("format-list[3].toml.name"sv));
+  EXPECT_EQ(wkc::ConfigType::Integer,
+      cfg.Type("format-list[3].toml.initial-release"sv));
+  EXPECT_EQ(2013, cfg.GetInt64("format-list[3].toml.initial-release"sv));
+
+  // Map/group:
+  EXPECT_EQ(wkc::ConfigType::Group, cfg.Type("format-group"sv));
+  EXPECT_EQ(4, cfg.Size("format-group"sv));
+  EXPECT_EQ("Tom's Obvious, Minimal Language",
+      cfg.GetString("format-group.toml.name"sv));
+  EXPECT_EQ(2013, cfg.GetInt64("format-group.toml.initial-release"sv));
+  EXPECT_EQ(
+      "JavaScript Object Notation", cfg.GetString("format-group.json.name"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-group.json.initial-release"sv));
+  EXPECT_EQ(
+      "YAML Ain't Markup Language", cfg.GetString("format-group.yaml.name"sv));
+  EXPECT_EQ(2001, cfg.GetInt64("format-group.yaml.initial-release"sv));
+  EXPECT_EQ(
+      "Extensible Markup Language", cfg.GetString("format-group.xml.name"sv));
+  EXPECT_EQ("1998", cfg.GetString("format-group.xml.initial-release"sv));
+
+  // Test none/nil values:
+  EXPECT_FALSE(cfg.Contains("none1"sv));
+  EXPECT_FALSE(cfg.Contains("none2"sv));
+  EXPECT_FALSE(cfg.Contains("none3"sv));
+
+  cfg = wkc::LoadYAMLString(ystr, wkc::NullValuePolicy::NullString);
+  EXPECT_EQ("null", cfg.GetString("none1"sv));
+  EXPECT_EQ("null", cfg.GetString("none2"sv));
+  EXPECT_EQ("null", cfg.GetString("none3"sv));
+
+  cfg = wkc::LoadYAMLString(ystr, wkc::NullValuePolicy::EmptyList);
+  EXPECT_EQ(0, cfg.Size("none1"sv));
+  EXPECT_EQ(0, cfg.Size("none2"sv));
+  EXPECT_EQ(0, cfg.Size("none3"sv));
+
+  EXPECT_THROW(
+      wkc::LoadYAMLString(ystr, wkc::NullValuePolicy::Fail), wkc::ParseError);
+
+  // Multi-document YAML:
+  // Currently, yaml-cpp parses only the first document. If this changes, this
+  // test should break to indicate that we need to adjust our loading routine.
+  ystr = R"yml(---
+label: doc1
+---
+label: doc2
+---
+label: doc3
+...
+)yml";
+  cfg = wkc::LoadYAMLString(ystr);
+  EXPECT_EQ(1, cfg.Size());
+  EXPECT_TRUE(cfg.Contains("label"sv));
+  EXPECT_EQ("doc1", cfg.GetString("label"sv));
+
+  // YAML consisting of a single list (will be loaded into a named list)
+  ystr = "[1, 2, 3]";
+  cfg = wkc::LoadYAMLString(ystr);
+  EXPECT_EQ(1, cfg.Size());
+  EXPECT_TRUE(cfg.Contains("list"sv));
+  EXPECT_EQ(3, cfg.Size("list"sv));
+
+  // Parsing errors:
+  std::string fail_str{"[a: b\n}"};
+  EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
+
+  // ryml segfaulted with this input, yaml-cpp correctly raises an exception:
+  fail_str = "{[a: b\n}";
+  EXPECT_THROW(wkc::LoadYAMLString(fail_str), wkc::ParseError);
+}
+
+TEST(ConfigIOTest, YAMLTypes) {
+  auto cfg = wkc::LoadYAMLString(R"yml(
+dt_rfc_deduced: 2023-04-14T21:27:28Z
+dt_rfc_tagged:  !!timestamp 2023-04-15T21:27:28Z
+dt_rfc_str:     "2023-04-15T21:27:28Z"
+
+time_deduced: 21:27:28
+time_tagged1: !time 21:27:28
+time_tagged2: !time 2023-04-15 21:27:28Z
+time_str:     "21:27:28"
+
+canonical:       2001-12-15T02:59:43.1Z
+iso8601:         2001-12-14t21:59:43.10-05:00
+local_date_time: 2001-12-15 2:59:43.10
+
+# Space separation between date/time and offset is
+# allowed by the YAML spec, but this is not a valid
+# timestamp according to the RFC (thus, not supported by
+# werkzeugkiste): it will be interpreted as a string scalar.
+space_separated: 2001-12-14 21:59:43.10 -5
+
+lst:
+  - 1
+  - 2.5
+  - !!bool on
+  - "some value"
+  - 2023-04-14T21:27:28Z
+  - 21:50:00
+  - { name: "John Doe", age: 42 }
+  - [1, 2.5, !!int 3, "str", 2023-04-15, 00:08:09, { age: 23 }]
+)yml");
+  wkc::date date{2023, 4, 14};
+  wkc::time time{21, 27, 28};
+  wkc::date_time expected{date, time, wkc::time_offset{0}};
+  wkc::date_time dt = cfg.GetDateTime("dt_rfc_deduced"sv);
+  EXPECT_EQ(expected, dt);
+
+  ++expected.date;
+  dt = cfg.GetDateTime("dt_rfc_tagged"sv);
+  EXPECT_EQ(expected, dt);
+
+  EXPECT_EQ(dt.ToString(), cfg.GetString("dt_rfc_str"sv));
+
+  // werkzeugkiste adds a non-standard "!time" tag which can be used to denote
+  // a time or a date_time.
+  EXPECT_EQ(time, cfg.GetTime("time_deduced"sv));
+  EXPECT_EQ(time, cfg.GetTime("time_tagged1"sv));
+  EXPECT_EQ(dt, cfg.GetDateTime("time_tagged2"sv));
+  EXPECT_EQ(time.ToString(), cfg.GetString("time_str"sv));
+
+  // Other formats supported by YAML:
+  expected = wkc::date_time{"2001-12-15T02:59:43.1Z"sv};
+  EXPECT_EQ(expected, cfg.GetDateTime("canonical"sv));
+
+  expected = wkc::date_time{"2001-12-14t21:59:43.10-05:00"sv};
+  EXPECT_EQ(expected, cfg.GetDateTime("iso8601"sv));
+
+  expected = wkc::date_time{"2001-12-15 2:59:43.10"sv};
+  EXPECT_EQ(expected, cfg.GetDateTime("local_date_time"sv));
+
+  EXPECT_EQ("2001-12-14 21:59:43.10 -5"sv, cfg.GetString("space_separated"sv));
+
+  EXPECT_EQ(8, cfg.Size("lst"sv));
+  EXPECT_EQ(1, cfg.GetInt32("lst[0]"sv));
+  EXPECT_DOUBLE_EQ(2.5, cfg.GetDouble("lst[1]"sv));
+  EXPECT_TRUE(cfg.GetBool("lst[2]"sv));
+  EXPECT_EQ("some value"sv, cfg.GetString("lst[3]"sv));
+  expected = wkc::date_time{date, time, wkc::time_offset{0}};
+  EXPECT_EQ(expected, cfg.GetDateTime("lst[4]"sv));
+  EXPECT_EQ(wkc::time(21, 50, 0), cfg.GetTime("lst[5]"sv));
+  EXPECT_EQ(2, cfg.Size("lst[6]"sv));
+  EXPECT_EQ("John Doe"sv, cfg.GetString("lst[6].name"sv));
+  EXPECT_EQ(42, cfg.GetInt32("lst[6].age"sv));
+  EXPECT_EQ(7, cfg.Size("lst[7]"sv));
+  EXPECT_EQ(1, cfg.GetInt32("lst[7][0]"sv));
+  EXPECT_DOUBLE_EQ(2.5, cfg.GetDouble("lst[7][1]"sv));
+  EXPECT_EQ(3, cfg.GetInt32("lst[7][2]"sv));
+  EXPECT_EQ("str", cfg.GetString("lst[7][3]"sv));
+  EXPECT_EQ(wkc::date("2023-04-15"sv), cfg.GetDate("lst[7][4]"sv));
+  EXPECT_EQ(wkc::time("00:08:09"sv), cfg.GetTime("lst[7][5]"sv));
+  EXPECT_EQ(1, cfg.Size("lst[7][6]"sv));
+  EXPECT_EQ(23, cfg.GetInt32("lst[7][6].age"sv));
+
+  // Value that is tagged as timestamp but is not a valid date:
+  std::string ystr = R"yml(invalid_tagged: !!timestamp 2023-99-17)yml";
+  EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
+
+  ystr = R"yml(invalid_tagged1: !time 99:00:00)yml";
+  EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
+
+  ystr = R"yml(unknown_tag: !!foo bar)yml";
+  EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
+}
+
+TEST(ConfigIOTest, YAMLSerialization) {
+  wkc::Configuration cfg{};
+  const bool bool_val{true};
+  const int32_t int32_val{42};
+  const int64_t int64_val{-2147483649};
+  const double double_val{3.1415};
+  const std::string str_val{"some value"};
+  const wkc::date date{2023, 4, 14};
+  const wkc::time time{21, 27, 28};
+  const wkc::date_time dt{date, time, wkc::time_offset{-30}};
+
+  cfg.Set("bool", bool_val);
+  cfg.Set("int32", int32_val);
+  cfg.Set("int64", int64_val);
+  cfg.Set("double", double_val);
+  cfg.Set("str", str_val);
+
+  auto copy = wkc::LoadYAMLString(wkc::DumpYAMLString(cfg));
+  EXPECT_EQ(cfg, copy);
+
+  // JSON is a subset of YAML, and we can parse it as well:
+  copy = wkc::LoadYAMLString(wkc::DumpJSONString(cfg));
+  EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" << copy.ToTOML();
+
+  // TODO The toml::yaml_formatter converts dates to quoted strings, thus we
+  // cannot reload a date/time/datetime:
+  cfg.Set("date", date);
+  cfg.Set("time", time);
+  cfg.Set("dt", dt);
+  // EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" <<
+  // copy.ToTOML();
+  EXPECT_NE(cfg, copy);
+  copy = wkc::LoadYAMLString(cfg.ToYAML());
+  EXPECT_NE(cfg, copy);  // They're not(!!) the same because:
+  EXPECT_EQ(wkc::ConfigType::Date, cfg.Type("date"sv));
+  EXPECT_EQ(wkc::ConfigType::String, copy.Type("date"sv));
+  EXPECT_EQ(wkc::ConfigType::Time, cfg.Type("time"sv));
+  EXPECT_EQ(wkc::ConfigType::String, copy.Type("time"sv));
+  EXPECT_EQ(wkc::ConfigType::DateTime, cfg.Type("dt"sv));
+  EXPECT_EQ(wkc::ConfigType::String, copy.Type("dt"sv));
 }
 
 #ifdef WERKZEUGKISTE_WITH_LIBCONFIG
@@ -502,8 +859,8 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_DOUBLE_EQ(0.0, subgroup.GetDouble("flts[1]"sv));
   EXPECT_DOUBLE_EQ(2.0, subgroup.GetDouble("flts[2]"sv));
 
-  EXPECT_TRUE(subgroup.GetBoolean("flag"sv));
-  EXPECT_TRUE(config.GetBoolean("group.subgroup.flag"sv));
+  EXPECT_TRUE(subgroup.GetBool("flag"sv));
+  EXPECT_TRUE(config.GetBool("group.subgroup.flag"sv));
 
   EXPECT_EQ(1, subgroup.Size("another-group"sv));
   auto str = subgroup.GetString("another-group.long-string"sv);
@@ -511,7 +868,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   str = subgroup.GetString("another-group.long-string"sv);
   EXPECT_TRUE(wks::EndsWith(str, "automatically concatenated."sv));
 
-  EXPECT_FALSE(config.GetBoolean("group.flag"sv));
+  EXPECT_FALSE(config.GetBool("group.flag"sv));
   EXPECT_EQ(-54321, config.GetInt32("group.int"sv));
   EXPECT_DOUBLE_EQ(1e6, config.GetDouble("group.flt"sv));
   EXPECT_EQ("Another String", config.GetString("group.str"sv));
@@ -522,7 +879,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_EQ(3, config.Size("list[0]"sv));
   EXPECT_EQ("abc", config.GetString("list[0][0]"sv));
   EXPECT_EQ(123, config.GetInt32("list[0][1]"sv));
-  EXPECT_TRUE(config.GetBoolean("list[0][2]"sv));
+  EXPECT_TRUE(config.GetBool("list[0][2]"sv));
 
   EXPECT_DOUBLE_EQ(1.234, config.GetDouble("list[1]"sv));
 
@@ -540,7 +897,7 @@ TEST(ConfigIOTest, ParseLibconfigFiles) {
   EXPECT_EQ(3, config.Size("list[4].a"sv));
   EXPECT_EQ(1, config.GetInt32("list[4].a[0]"sv));
   EXPECT_EQ(2, config.GetInt32("list[4].a[1]"sv));
-  EXPECT_TRUE(config.GetBoolean("list[4].a[2]"sv));
+  EXPECT_TRUE(config.GetBool("list[4].a[2]"sv));
 
   EXPECT_EQ(0, config.Size("list[5]"sv));
   EXPECT_TRUE(config.GetGroup("list[5]"sv).Empty());
@@ -561,7 +918,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
     int_neg = -123456;
     int32_max = 2147483647;
     int32_min = -2147483648;
-    // Previous libconfig versions require explicit ..L suffix for long ints:
+    // Previous libconfig versions require explicit L suffix for long ints:
     int32_max_overflow = 2147483648L;
     int32_min_underflow = -2147483649L;
     flt = -1e3;
@@ -601,7 +958,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(+2147483648, config.GetInt64("int32_max_overflow"sv));
 
   EXPECT_DOUBLE_EQ(-1000.0, config.GetDouble("flt"sv));
-  EXPECT_FALSE(config.GetBoolean("flag"sv));
+  EXPECT_FALSE(config.GetBool("flag"sv));
   EXPECT_EQ("value", config.GetString("str"sv));
 
   // List of integers
@@ -629,7 +986,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("mixed[0]"sv));
   EXPECT_EQ(1, config.GetInt32("mixed[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("mixed[1]"sv));
-  EXPECT_TRUE(config.GetBoolean("mixed[1]"sv));
+  EXPECT_TRUE(config.GetBool("mixed[1]"sv));
   EXPECT_EQ(wkc::ConfigType::String, config.Type("mixed[2]"sv));
   EXPECT_EQ("string", config.GetString("mixed[2]"sv));
 
@@ -657,11 +1014,11 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
   // Subgroup/Table
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("group"sv));
   EXPECT_EQ(3, config.Size("group"sv));
-  EXPECT_TRUE(config.GetBoolean("group.flag"sv));
+  EXPECT_TRUE(config.GetBool("group.flag"sv));
   EXPECT_EQ(123, config.GetInt32("group.count"sv));
 
   EXPECT_EQ(wkc::ConfigType::Group, config.Type("group.subgroup"sv));
-  EXPECT_FALSE(config.GetBoolean("group.subgroup.flag"sv));
+  EXPECT_FALSE(config.GetBool("group.subgroup.flag"sv));
   EXPECT_DOUBLE_EQ(1e-6, config.GetDouble("group.subgroup.threshold"sv));
 
   // Try parsing an invalid configuration string.

@@ -25,21 +25,23 @@ namespace werkzeugkiste::config {
 namespace detail::parsing {
 // Forward declarations
 Configuration FromLibconfigGroup(const libconfig::Setting &node);
+void AppendListItems(const libconfig::Setting &node,
+    Configuration &cfg,
+    std::string_view fqn);
 
 // LCOV_EXCL_START
-
-/// @brief Throws a std::logic_error indicating an implementation error, i.e.
-///   that we miss-used the libconfig++ API.
-/// @param description Error description.
-/// @param node_name Name of the libconfig::Setting / node in the configuration
-///   file at which this error occured. Can be NULL/nullptr.
-void ThrowImplementationError(std::string_view description,
-    const char *node_name) {
-  std::string msg{description};
-  if (node_name != nullptr) {
-    msg += " Node name was `";
-    msg += node_name;
-    msg += ".";
+/// @brief Throws a std::logic_error with a hint to report an error.
+/// @param prefix Error message prefix.
+/// @param fqn Fully qualified name of the parameter that caused the error. If
+///   provided, " for parameter `fqn`!" will be appended to the error message.
+/// @throws std::logic_error
+inline void ThrowImplementationError(std::string_view prefix,
+    std::string_view fqn) {
+  std::string msg{prefix};
+  if (!fqn.empty()) {
+    msg += " for parameter `";
+    msg += fqn;
+    msg += "`!";
   }
   msg +=
       " Please report at "
@@ -48,18 +50,32 @@ void ThrowImplementationError(std::string_view description,
 }
 // LCOV_EXCL_STOP
 
-/// @brief Casts a libconfig value to our corresponding data type.
+/// @brief Appends or sets a configuration value from a libconfig scalar node.
 /// @tparam Tcfg Data type used in werkzeugkiste.
-/// @tparam Tlibcfg Data type used in libconfig (see their operator overlaods).
+/// @tparam Tlibcfg Data type used in libconfig (see their operator overloads).
 /// @param value Value to be converted.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+/// @param append If true, fqn is assumed to be a list and the value will be
+///   appended. Otherwise, the value will be set, i.e. "cfg[fqn] = value";
 template <typename Tcfg, typename Tlibcfg = Tcfg>
-Tcfg CastSetting(const libconfig::Setting &value) {
+void HandleBuiltinScalar(const libconfig::Setting &value,
+    Configuration &cfg,
+    std::string_view fqn,
+    bool append) {
   try {
+    Tcfg val{};
     if constexpr (std::is_same_v<Tcfg, Tlibcfg>) {
-      return static_cast<Tcfg>(value);
+      val = static_cast<Tcfg>(value);
     } else {
-      const Tlibcfg val = static_cast<Tlibcfg>(value);
-      return static_cast<Tcfg>(val);
+      const Tlibcfg tmp = static_cast<Tlibcfg>(value);
+      val = static_cast<Tcfg>(tmp);
+    }
+
+    if (append) {
+      cfg.Append(fqn, val);
+    } else {
+      cfg.Set(fqn, val);
     }
   } catch (const libconfig::SettingTypeException &e) {
     // LCOV_EXCL_START
@@ -75,52 +91,60 @@ Tcfg CastSetting(const libconfig::Setting &value) {
   }
 }
 
-/// @brief Appends the libconfig value to a werkzeugkiste list.
-/// @param lst_key Fully qualified parameter name of the list.
-/// @param cfg werkzeugkiste configuration.
-/// @param node Node/Setting holding the libconfig value.
-// NOLINTNEXTLINE(misc-no-recursion, google-runtime-references)
-void AppendListValue(std::string_view lst_key,
+/// @brief Appends or sets a configuration value from a libconfig node.
+/// @param node Value to be stored to the configuration.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+/// @param append If true, fqn is assumed to be a list and the value will be
+///   appended. Otherwise, the value will be set, i.e. "cfg[fqn] = value";
+// NOLINTNEXTLINE(misc-no-recursion)
+void HandleNode(const libconfig::Setting &node,
     Configuration &cfg,
-    const libconfig::Setting &node) {
+    std::string_view fqn,
+    bool append) {
   switch (node.getType()) {
     case libconfig::Setting::TypeInt:
       // NOLINTNEXTLINE(google-runtime-int)
-      cfg.Append(lst_key, CastSetting<int64_t, int>(node));
+      HandleBuiltinScalar<int64_t, int>(node, cfg, fqn, append);
       break;
 
     case libconfig::Setting::TypeInt64:
       // NOLINTNEXTLINE(google-runtime-int)
-      cfg.Append(lst_key, CastSetting<int64_t, long long>(node));
+      HandleBuiltinScalar<int64_t, long long>(node, cfg, fqn, append);
       break;
 
     case libconfig::Setting::TypeFloat:
-      cfg.Append(lst_key, CastSetting<double>(node));
+      HandleBuiltinScalar<double>(node, cfg, fqn, append);
       break;
 
     case libconfig::Setting::TypeString:
-      cfg.Append(lst_key, CastSetting<std::string>(node));
+      HandleBuiltinScalar<std::string>(node, cfg, fqn, append);
       break;
 
     case libconfig::Setting::TypeBoolean:
-      cfg.Append(lst_key, CastSetting<bool>(node));
+      HandleBuiltinScalar<bool>(node, cfg, fqn, append);
       break;
 
-    case libconfig::Setting::TypeGroup:
-      cfg.Append(lst_key, FromLibconfigGroup(node));
+    case libconfig::Setting::TypeGroup: {
+      if (append) {
+        cfg.Append(fqn, FromLibconfigGroup(node));
+      } else {
+        cfg.Set(fqn, FromLibconfigGroup(node));
+      }
       break;
+    }
 
     case libconfig::Setting::TypeArray:
     case libconfig::Setting::TypeList: {
-      std::size_t sz = cfg.Size(lst_key);
-      cfg.AppendList(lst_key);
-      std::string elem_key{lst_key};
-      elem_key += '[';
-      elem_key += std::to_string(sz);
-      elem_key += ']';
-
-      for (int i = 0; i < node.getLength(); ++i) {
-        AppendListValue(elem_key, cfg, node[i]);
+      if (append) {
+        const std::size_t lst_sz = cfg.Size(fqn);
+        const std::string elem_key =
+            Configuration::KeyForListElement(fqn, lst_sz);
+        cfg.AppendList(fqn);
+        AppendListItems(node, cfg, elem_key);
+      } else {
+        cfg.CreateList(fqn);
+        AppendListItems(node, cfg, fqn);
       }
       break;
     }
@@ -129,63 +153,40 @@ void AppendListValue(std::string_view lst_key,
       // LCOV_EXCL_START
       // This branch should be unreachable.
       ThrowImplementationError(
-          "Internal util `AppendListValue` called with node type `none`!",
-          node.getName());
+          "Internal util `AppendListValue` called with node type `none`", fqn);
       break;
       // LCOV_EXCL_STOP
   }
 }
 
-/// @brief Appends a key/value pair to the werkzeugkiste configuration.
-/// @param cfg The werkzeugkiste configuration.
-/// @param node Node/setting holding the libconfig value & parameter name.
+/// @brief Appends all children of the list/array node to the existing
+///   `fqn` list of the configuration.
+/// @param node A list node.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
 // NOLINTNEXTLINE(misc-no-recursion)
-void AppendKeyValue(Configuration &cfg, const libconfig::Setting &node) {
-  std::string_view key{node.getName()};
-  switch (node.getType()) {
-    case libconfig::Setting::TypeInt:
-      // NOLINTNEXTLINE(google-runtime-int)
-      cfg.SetInt64(key, CastSetting<int64_t, int>(node));
-      break;
+void AppendListItems(const libconfig::Setting &node,
+    Configuration &cfg,
+    std::string_view fqn) {
+  // LCOV_EXCL_START
+  // The following failures should never happen, unless we messed
+  //  up the internal logic.
+  if (!node.isList() && !node.isArray()) {
+    ThrowImplementationError(
+        "Internal util `AppendListItems` called with non-list/array node ",
+        fqn);
+  }
+  if (!cfg.Contains(fqn)) {
+    ThrowImplementationError(
+        "Internal util `AppendListItems` requires that list already "
+        "exists",
+        fqn);
+  }
+  // LCOV_EXCL_STOP
 
-    case libconfig::Setting::TypeInt64:
-      // NOLINTNEXTLINE(google-runtime-int)
-      cfg.SetInt64(key, CastSetting<int64_t, long long>(node));
-      break;
-
-    case libconfig::Setting::TypeFloat:
-      cfg.SetDouble(key, CastSetting<double>(node));
-      break;
-
-    case libconfig::Setting::TypeString:
-      cfg.SetString(key, CastSetting<std::string>(node));
-      break;
-
-    case libconfig::Setting::TypeBoolean:
-      cfg.SetBoolean(key, CastSetting<bool>(node));
-      break;
-
-    case libconfig::Setting::TypeGroup:
-      cfg.SetGroup(key, FromLibconfigGroup(node));
-      break;
-
-    case libconfig::Setting::TypeArray:
-    case libconfig::Setting::TypeList: {
-      cfg.CreateList(key);
-      for (int i = 0; i < node.getLength(); ++i) {
-        AppendListValue(key, cfg, node[i]);
-      }
-      break;
-    }
-
-    case libconfig::Setting::TypeNone:
-      // LCOV_EXCL_START
-      // This branch should be unreachable.
-      ThrowImplementationError(
-          "Internal util `AppendKeyValue` called with node type `none`!",
-          node.getName());
-      break;
-      // LCOV_EXCL_STOP
+  for (int i = 0; i < node.getLength(); ++i) {
+    const libconfig::Setting &elem = node[i];
+    HandleNode(elem, cfg, fqn, /*append=*/true);
   }
 }
 
@@ -193,18 +194,17 @@ void AppendKeyValue(Configuration &cfg, const libconfig::Setting &node) {
 /// @param node The libconfig group to be converted.
 // NOLINTNEXTLINE(misc-no-recursion)
 Configuration FromLibconfigGroup(const libconfig::Setting &node) {
+  // LCOV_EXCL_START
   if (!node.isGroup()) {
-    // LCOV_EXCL_START
     // This branch should be unreachable.
     ThrowImplementationError(
-        "Internal util `FromLibconfigGroup` invoked with non-group node!",
-        node.getName());
-    // LCOV_EXCL_STOP
+        "Internal util `FromLibconfigGroup` invoked with non-group node!", "");
   }
+  // LCOV_EXCL_STOP
 
   Configuration grp{};
   for (int i = 0; i < node.getLength(); ++i) {
-    AppendKeyValue(grp, node[i]);
+    HandleNode(node[i], grp, node[i].getName(), /**append=*/false);
   }
   return grp;
 }
@@ -327,7 +327,7 @@ void PrintScalar(const Configuration &cfg,
     std::string_view key) {
   switch (cfg.Type(key)) {
     case ConfigType::Boolean:
-      out << std::boolalpha << cfg.GetBoolean(key);
+      out << std::boolalpha << cfg.GetBool(key);
       break;
 
     case ConfigType::Integer:
@@ -404,27 +404,26 @@ void PrintList(const Configuration &cfg,
 
   ++indent;
   for (std::size_t idx = 0; idx < size; ++idx) {
-    std::ostringstream elem_key;
-    elem_key << key << '[' << idx << ']';
+    const std::string elem_key = Configuration::KeyForListElement(key, idx);
 
     if (include_newline) {
       PrintIndent(out, indent);
     }
 
-    switch (cfg.Type(elem_key.str())) {
+    switch (cfg.Type(elem_key)) {
       case ConfigType::Group:
-        PrintGroup(cfg.GetGroup(elem_key.str()),
+        PrintGroup(cfg.GetGroup(elem_key),
             out,
             indent,
             /*include_brackets=*/true);
         break;
 
       case ConfigType::List:
-        PrintList(cfg, out, elem_key.str(), indent);
+        PrintList(cfg, out, elem_key, indent);
         break;
 
       default:
-        PrintScalar(cfg, out, elem_key.str());
+        PrintScalar(cfg, out, elem_key);
         break;
     }
 

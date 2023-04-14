@@ -87,6 +87,25 @@ WERKZEUGKISTE_CONFIG_EXPORT
 std::ostream &operator<<(std::ostream &os, const ConfigType &ct);
 
 //-----------------------------------------------------------------------------
+// Null value handling (e.g. when loading JSON & YAML)
+
+/// @brief How to handle Null/None values (e.g. when loading JSON).
+enum class NullValuePolicy : unsigned char {
+  /// @brief Null values will be skipped, i.e. not loaded into the
+  ///   configuration.
+  Skip,
+
+  /// @brief Null values will be **replaced** by the string "null".
+  NullString,
+
+  /// @brief Null values will be **replaced** by an empty list.
+  EmptyList,
+
+  /// @brief A `werkzeugkiste::config::ParseError` will be thrown.
+  Fail
+};
+
+//-----------------------------------------------------------------------------
 // Date
 
 /// @brief Represents a local date.

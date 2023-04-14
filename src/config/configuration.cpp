@@ -1401,33 +1401,32 @@ std::string Configuration::KeyForListElement(std::string_view key,
 //---------------------------------------------------------------------------
 // Boolean
 
-bool Configuration::GetBoolean(std::string_view key) const {
+bool Configuration::GetBool(std::string_view key) const {
   return detail::LookupScalar<bool>(pimpl_->config_root,
       key,
       /*allow_default=*/false);
 }
 
-bool Configuration::GetBooleanOr(std::string_view key, bool default_val) const {
+bool Configuration::GetBoolOr(std::string_view key, bool default_val) const {
   return detail::LookupScalar<bool>(pimpl_->config_root,
       key,
       /*allow_default=*/true,
       default_val);
 }
 
-std::optional<bool> Configuration::GetOptionalBoolean(
-    std::string_view key) const {
+std::optional<bool> Configuration::GetOptionalBool(std::string_view key) const {
   return detail::LookupOptionalScalar<bool>(pimpl_->config_root, key);
 }
 
-void Configuration::SetBoolean(std::string_view key, bool value) {
+void Configuration::SetBool(std::string_view key, bool value) {
   detail::SetScalar<bool>(pimpl_->config_root, key, value);
 }
 
-std::vector<bool> Configuration::GetBooleanList(std::string_view key) const {
+std::vector<bool> Configuration::GetBoolList(std::string_view key) const {
   return detail::GetList<bool>(pimpl_->ImmutableList(key), key);
 }
 
-void Configuration::SetBooleanList(std::string_view key,
+void Configuration::SetBoolList(std::string_view key,
     const std::vector<bool> &values) {
   detail::SetList<bool>(pimpl_->config_root, key, values);
 }
@@ -2005,6 +2004,42 @@ std::string Configuration::ToLibconfig() const {
   return DumpLibconfigString(*this);
 }
 
+void Configuration::HandleNullValue(Configuration &cfg,
+    std::string_view key,
+    NullValuePolicy policy,
+    bool append) {
+  using namespace std::string_view_literals;
+  switch (policy) {
+    case NullValuePolicy::Skip:
+      break;
+
+    case NullValuePolicy::NullString: {
+      if (append) {
+        cfg.Append(key, "null"sv);
+      } else {
+        cfg.SetString(key, "null"sv);
+      }
+      break;
+    }
+
+    case NullValuePolicy::EmptyList: {
+      if (append) {
+        cfg.AppendList(key);
+      } else {
+        cfg.CreateList(key);
+      }
+      break;
+    }
+
+    case NullValuePolicy::Fail: {
+      std::string msg{"Null/None value occured while parsing parameter `"};
+      msg += key;
+      msg += "`!";
+      throw ParseError{msg};
+    }
+  }
+}
+
 //---------------------------------------------------------------------------
 // Generic loading from file
 Configuration LoadFile(std::string_view filename) {
@@ -2016,6 +2051,9 @@ Configuration LoadFile(std::string_view filename) {
   }
   if (lower == ".json") {
     return LoadJSONFile(filename);
+  }
+  if ((lower == ".yaml") || (lower == ".yml")) {
+    return LoadYAMLFile(filename);
   }
   if (lower == ".cfg") {
     return LoadLibconfigFile(filename);
