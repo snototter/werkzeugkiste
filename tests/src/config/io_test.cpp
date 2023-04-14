@@ -815,7 +815,7 @@ TEST(ConfigIOTest, ParseLibconfigStrings) {
     int_neg = -123456;
     int32_max = 2147483647;
     int32_min = -2147483648;
-    // Previous libconfig versions require explicit ..L suffix for long ints:
+    // Previous libconfig versions require explicit L suffix for long ints:
     int32_max_overflow = 2147483648L;
     int32_min_underflow = -2147483649L;
     flt = -1e3;

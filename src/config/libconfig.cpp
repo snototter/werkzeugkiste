@@ -130,16 +130,16 @@ void HandleNode(const libconfig::Setting &node,
 
     case libconfig::Setting::TypeArray:
     case libconfig::Setting::TypeList: {
-      std::size_t lst_sz = cfg.Size(fqn);
-      const std::string elem_key =
-          Configuration::KeyForListElement(fqn, lst_sz);
       if (append) {
+        const std::size_t lst_sz = cfg.Size(fqn);
+        const std::string elem_key =
+            Configuration::KeyForListElement(fqn, lst_sz);
         cfg.AppendList(fqn);
+        AppendListItems(node, cfg, elem_key);
       } else {
         cfg.CreateList(fqn);
+        AppendListItems(node, cfg, fqn);
       }
-
-      AppendListItems(node, cfg, elem_key);
       break;
     }
 
@@ -174,13 +174,13 @@ void AppendListItems(const libconfig::Setting &node,
 /// @param node The libconfig group to be converted.
 // NOLINTNEXTLINE(misc-no-recursion)
 Configuration FromLibconfigGroup(const libconfig::Setting &node) {
+  // LCOV_EXCL_START
   if (!node.isGroup()) {
-    // LCOV_EXCL_START
     // This branch should be unreachable.
     ThrowImplementationError(
         "Internal util `FromLibconfigGroup` invoked with non-group node!", "");
-    // LCOV_EXCL_STOP
   }
+  // LCOV_EXCL_STOP
 
   Configuration grp{};
   for (int i = 0; i < node.getLength(); ++i) {
