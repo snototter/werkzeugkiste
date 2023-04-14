@@ -270,6 +270,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetBool(std::string_view key, bool value);
+  inline void Set(std::string_view key, bool value) { SetBool(key, value); }
 
   /// @brief Returns a list of boolean flags.
   ///
@@ -333,6 +334,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetInt32(std::string_view key, int32_t value);
+  inline void Set(std::string_view key, int32_t value) { SetInt32(key, value); }
 
   /// @brief Returns a list of 32-bit integers.
   ///
@@ -403,6 +405,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetInt64(std::string_view key, int64_t value);
+  inline void Set(std::string_view key, int64_t value) { SetInt64(key, value); }
 
   /// @brief Returns a list of 64-bit integers.
   ///
@@ -534,6 +537,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDouble(std::string_view key, double value);
+  inline void Set(std::string_view key, double value) { SetDouble(key, value); }
 
   /// @brief Returns a list of double-precision floating point values.
   ///
@@ -655,6 +659,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetString(std::string_view key, std::string_view value);
+  inline void Set(std::string_view key, std::string_view value) {
+    SetString(key, value);
+  }
 
   /// @brief Returns a list of strings.
   ///
@@ -712,6 +719,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDate(std::string_view key, const date &value);
+  inline void Set(std::string_view key, const date &value) {
+    SetDate(key, value);
+  }
 
   /// @brief Returns a list of date parameters.
   ///
@@ -766,6 +776,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetTime(std::string_view key, const time &value);
+  inline void Set(std::string_view key, const time &value) {
+    SetTime(key, value);
+  }
 
   /// @brief Returns a list of time parameters.
   ///
@@ -824,6 +837,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDateTime(std::string_view key, const date_time &value);
+  inline void Set(std::string_view key, const date_time &value) {
+    SetDateTime(key, value);
+  }
 
   /// @brief Returns a list of date-time parameters.
   ///
@@ -976,6 +992,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   overloaded assignment operators.
   /// @param group The group to be inserted.
   void SetGroup(std::string_view key, const Configuration &group);
+  inline void Set(std::string_view key, const Configuration &group) {
+    SetGroup(key, group);
+  }
 
   //---------------------------------------------------------------------------
   // Matrices
