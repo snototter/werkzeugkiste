@@ -11,6 +11,10 @@
 #include <string>
 #include <string_view>
 
+// TODOs
+// * Overload Set for all SetXXX methods in Configuration
+// * Extend YAML tests
+
 // NOLINTBEGIN(readability-identifier-naming, misc-no-recursion)
 namespace YAML {
 /// @brief YAML converter to load a YAML node as a date.
@@ -92,31 +96,69 @@ template <typename Tp>
 std::optional<Tp> DecodeUntaggedScalarNode(const YAML::Node &node) {
   // LCOV_EXCL_START
   if (!node.IsScalar()) {
-    // WZKLOG_CRITICAL(  // TODO remove
-    //     "NODE IS NOT SCALAR! map {}, seq {}, scalar {}, null {}, defined {}",
-    //     node.IsMap(),
-    //     node.IsSequence(),
-    //     node.IsScalar(),
-    //     node.IsNull()),
-    //     node.IsDefined();
     return std::nullopt;
   }
   // LCOV_EXCL_STOP
 
-  // WZKLOG_CRITICAL("try decoding UNTAGGED node into type {}, value {}, tag
-  // {}",
-  //     TypeName<Tp>(),
-  //     node.Scalar(),
-  //     node.Tag());  // TODO remove
-
   // Use YAML::convert to avoid YAML::BadConversion being thrown.
   Tp typed;
   if (YAML::convert<Tp>::decode(node, typed)) {
-    // WZKLOG_CRITICAL("-----> succeeded");  // TODO remove
     return typed;
   }
 
   return std::nullopt;
+}
+
+void DecodeDateOrDateTime(const YAML::Node &node,
+    Configuration &cfg,
+    std::string_view fqn,
+    bool append) {
+  // A YAML date can be either a date or a date-time.
+  date val_date{};
+  date_time val_dt{};
+  if (YAML::convert<date>::decode(node, val_date)) {
+    if (append) {
+      cfg.Append(fqn, val_date);
+    } else {
+      cfg.SetDate(fqn, val_date);
+    }
+  } else if (YAML::convert<date_time>::decode(node, val_dt)) {
+    if (append) {
+      cfg.Append(fqn, val_dt);
+    } else {
+      cfg.SetDateTime(fqn, val_dt);
+    }
+  } else {
+    std::string msg{
+        "Failed to parse date from YAML node `" + node.Scalar() + "`!"};
+    throw ParseError{msg};
+  }
+}
+
+void DecodeTime(const YAML::Node &node,
+    Configuration &cfg,
+    std::string_view fqn,
+    bool append) {
+  // A YAML time can be either a time or a date-time.
+  time val_time{};
+  date_time val_dt{};
+  if (YAML::convert<time>::decode(node, val_time)) {
+    if (append) {
+      cfg.Append(fqn, val_time);
+    } else {
+      cfg.SetTime(fqn, val_time);
+    }
+  } else if (YAML::convert<date_time>::decode(node, val_dt)) {
+    if (append) {
+      cfg.Append(fqn, val_dt);
+    } else {
+      cfg.SetDateTime(fqn, val_dt);
+    }
+  } else {
+    std::string msg{
+        "Failed to parse time from YAML node `" + node.Scalar() + "`!"};
+    throw ParseError{msg};
+  }
 }
 
 /// @brief Simplified node handling if the node is tagged.
@@ -136,6 +178,9 @@ void HandleTaggedScalar(const YAML::Node &node,
   // LCOV_EXCL_STOP
 
   // TODO document supported tags
+  // !!str "some string"
+  // !!bool !!int !!float !!date
+  // non-standard local tags: !date !time
 
   const std::string &tag = node.Tag();
   const std::string &value = node.Scalar();
@@ -167,43 +212,32 @@ void HandleTaggedScalar(const YAML::Node &node,
       cfg.SetDouble(fqn, val);
     }
   } else if ((tag == "tag:yaml.org,2002:date") || (tag == "!date")) {
-    // A YAML date can be either a date or a date-time.
-    date val_date{};
-    date_time val_dt{};
-    if (YAML::convert<date>::decode(node, val_date)) {
-      if (append) {
-        cfg.Append(fqn, val_date);
-      } else {
-        cfg.SetDate(fqn, val_date);
-      }
-    } else if (YAML::convert<date_time>::decode(node, val_dt)) {
-      if (append) {
-        cfg.Append(fqn, val_dt);
-      } else {
-        cfg.SetDateTime(fqn, val_dt);
-      }
-    } else {
-      std::string msg{
-          "Failed to parse date from tagged YAML node `" + value + "`!"};
-      throw ParseError{msg};
-    }
+    DecodeDateOrDateTime(node, cfg, fqn, append);
   } else if ((tag == "tag:yaml.org,2002:time") || (tag == "!time")) {
-    time val_time{};
-    if (YAML::convert<time>::decode(node, val_time)) {
-      if (append) {
-        cfg.Append(fqn, val_time);
-      } else {
-        cfg.SetTime(fqn, val_time);
-      }
-    } else {
-      std::string msg{
-          "Failed to parse time from tagged YAML node `" + value + "`!"};
-      throw ParseError{msg};
-    }
+    DecodeTime(node, cfg, fqn, append);
   } else {
     std::string msg{"YAML tag `" + tag + "` is not supported!"};
     throw std::logic_error{msg};
   }
+}
+
+// TODO doc
+template <typename Tp>
+bool HandleUntaggedScalar(const YAML::Node &node,
+    Configuration &cfg,
+    std::string_view fqn,
+    bool append) {
+  const auto val = DecodeUntaggedScalarNode<Tp>(node);
+  if (!val.has_value()) {
+    return false;
+  }
+
+  if (append) {
+    cfg.Append(fqn, val.value());
+  } else {
+    cfg.Set(fqn, val.value());
+  }
+  return true;
 }
 
 /// @brief Sets or appends the scalar value to the configuration.
@@ -213,7 +247,6 @@ void HandleTaggedScalar(const YAML::Node &node,
 /// @param append If true, the value is appended (assuming that key is an
 ///   existing list). Otherwise, the value is Set<T> according to the
 ///   deduced type.
-// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 void HandleScalarNode(const YAML::Node &node,
     Configuration &cfg,
     std::string_view fqn,
@@ -224,83 +257,43 @@ void HandleScalarNode(const YAML::Node &node,
   }
 
   // Node is not tagged, so we try to decode it into the supported types.
-  // Any scalar can be represented as a string, thus ensure to check it last!
-  const auto val_bool = DecodeUntaggedScalarNode<bool>(node);
-  if (val_bool.has_value()) {
-    if (append) {
-      cfg.Append(fqn, val_bool.value());
-    } else {
-      cfg.SetBool(fqn, val_bool.value());
-    }
+  if (HandleUntaggedScalar<bool>(node, cfg, fqn, append)) {
     return;
   }
 
-  const auto val_int = DecodeUntaggedScalarNode<int64_t>(node);
-  if (val_int.has_value()) {
-    if (append) {
-      cfg.Append(fqn, val_int.value());
-    } else {
-      cfg.SetInt64(fqn, val_int.value());
-    }
+  if (HandleUntaggedScalar<int64_t>(node, cfg, fqn, append)) {
     return;
   }
 
-  const auto val_double = DecodeUntaggedScalarNode<double>(node);
-  if (val_double.has_value()) {
-    if (append) {
-      cfg.Append(fqn, val_double.value());
-    } else {
-      cfg.SetDouble(fqn, val_double.value());
-    }
+  if (HandleUntaggedScalar<double>(node, cfg, fqn, append)) {
     return;
   }
 
-  const auto val_date = DecodeUntaggedScalarNode<date>(node);
-  if (val_date.has_value()) {
-    if (append) {
-      cfg.Append(fqn, val_date.value());
-    } else {
-      cfg.SetDate(fqn, val_date.value());
-    }
+  if (HandleUntaggedScalar<date>(node, cfg, fqn, append)) {
     return;
   }
 
-  const auto val_time = DecodeUntaggedScalarNode<time>(node);
-  if (val_time.has_value()) {
-    if (append) {
-      cfg.Append(fqn, val_time.value());
-    } else {
-      cfg.SetTime(fqn, val_time.value());
-    }
+  if (HandleUntaggedScalar<time>(node, cfg, fqn, append)) {
     return;
   }
 
   // TODO test date types - YAML date examples used a more lenient format; need
   // to check in detail
-  const auto val_datetime = DecodeUntaggedScalarNode<date_time>(node);
-  if (val_datetime.has_value()) {
-    if (append) {
-      cfg.Append(fqn, val_datetime.value());
-    } else {
-      cfg.SetDateTime(fqn, val_datetime.value());
-    }
+  if (HandleUntaggedScalar<date_time>(node, cfg, fqn, append)) {
     return;
   }
 
-  const auto val_string = DecodeUntaggedScalarNode<std::string>(node);
-  if (val_string.has_value()) {
-    if (append) {
-      cfg.Append(fqn, val_string.value());
-    } else {
-      cfg.SetString(fqn, val_string.value());
-    }
+  // Any scalar can be represented as a string, thus ensure to check it last!
+  if (HandleUntaggedScalar<std::string>(node, cfg, fqn, append)) {
     return;
   }
 
   // LCOV_EXCL_START
   std::string msg{"Could not decode scalar YAML node for parameter `"};
   msg += fqn;
-  msg += "`! This is a bug, please report it!";
+  msg +=
+      "`! This is a bug, please report at "
+      "https://github.com/snototter/werkzeugkiste/issues";
   throw std::logic_error{msg};
   // LCOV_EXCL_STOP
 }
@@ -413,8 +406,6 @@ Configuration LoadYAMLString(const std::string &yaml_string,
     YAML::Node node = YAML::Load(yaml_string);
     if (node.IsMap()) {
       auto cfg = detail::FromYAMLNode(node, none_policy);
-      // TODO remove
-      // WZKLOG_CRITICAL("parsed into config:\n{}", cfg.ToTOML());
       return cfg;
     }
 
@@ -423,7 +414,6 @@ Configuration LoadYAMLString(const std::string &yaml_string,
       const std::string_view key{"list"};
       cfg.CreateList(key);
       detail::AppendListItems(node, cfg, key, none_policy);
-      // WZKLOG_CRITICAL("parsed LIST into config:\n{}", cfg.ToTOML());
       return cfg;
     }
 
