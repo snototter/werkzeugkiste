@@ -258,6 +258,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   //---------------------------------------------------------------------------
   // Booleans
 
+  /// @name Boolean
+  ///
+  /// @desc Getter/Setter for boolean parameters.
+  ///
+  /// @{
+
   /// @brief Returns the boolean parameter.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
@@ -292,7 +298,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetBool(std::string_view key, bool value);
-  inline void Set(std::string_view key, bool value) { SetBool(key, value); }
 
   /// @brief Returns a list of boolean flags.
   ///
@@ -310,8 +315,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of flags.
   void SetBoolList(std::string_view key, const std::vector<bool> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Integers (32-bit)
+
+  /// @name Integer
+  ///
+  /// @desc Getter/Setter for 32- and 64-bit integer parameters.
+  ///
+  /// @{
 
   /// @brief Returns the 32-bit integer parameter.
   ///
@@ -356,7 +369,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetInt32(std::string_view key, int32_t value);
-  inline void Set(std::string_view key, int32_t value) { SetInt32(key, value); }
 
   /// @brief Returns a list of 32-bit integers.
   ///
@@ -427,7 +439,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetInt64(std::string_view key, int64_t value);
-  inline void Set(std::string_view key, int64_t value) { SetInt64(key, value); }
 
   /// @brief Returns a list of 64-bit integers.
   ///
@@ -541,8 +552,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   std::vector<point3d<int64_t>> GetInt64Points3D(std::string_view key) const;
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Floating Point
+
+  /// @name Floating point
+  ///
+  /// @desc Getter/Setter for double-precision floating point parameters.
+  ///
+  /// @{
 
   /// @brief Returns the double-precision floating point parameter.
   ///
@@ -587,7 +606,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDouble(std::string_view key, double value);
-  inline void Set(std::string_view key, double value) { SetDouble(key, value); }
 
   /// @brief Returns a list of double-precision floating point values.
   ///
@@ -672,8 +690,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   std::vector<point3d<double>> GetDoublePoints3D(std::string_view key) const;
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Strings
+
+  /// @name String
+  ///
+  /// @desc Getter/Setter for string parameters.
+  ///
+  /// @{
 
   /// @brief Returns the string parameter.
   ///
@@ -709,9 +735,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetString(std::string_view key, std::string_view value);
-  inline void Set(std::string_view key, std::string_view value) {
-    SetString(key, value);
-  }
 
   /// @brief Returns a list of strings.
   ///
@@ -732,8 +755,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetStringList(std::string_view key,
       const std::vector<std::string_view> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Date
+
+  /// @name Date
+  ///
+  /// @desc Getter/Setter for `werkzeugkiste::config::date` parameters.
+  ///
+  /// @{
 
   /// @brief Returns the date parameter.
   ///
@@ -769,9 +800,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDate(std::string_view key, const date &value);
-  inline void Set(std::string_view key, const date &value) {
-    SetDate(key, value);
-  }
 
   /// @brief Returns a list of date parameters.
   ///
@@ -789,8 +817,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of dates.
   void SetDateList(std::string_view key, const std::vector<date> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Time
+
+  /// @name Time
+  ///
+  /// @desc Getter/Setter for `werkzeugkiste::config::time` parameters.
+  ///
+  /// @{
 
   /// @brief Returns the time parameter.
   ///
@@ -826,9 +862,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetTime(std::string_view key, const time &value);
-  inline void Set(std::string_view key, const time &value) {
-    SetTime(key, value);
-  }
 
   /// @brief Returns a list of time parameters.
   ///
@@ -846,8 +879,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of times.
   void SetTimeList(std::string_view key, const std::vector<time> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Date-time
+
+  /// @name Date-Time
+  ///
+  /// @desc Getter/Setter for `werkzeugkiste::config::date_time` parameters.
+  ///
+  /// @{
 
   /// @brief Returns the date-time parameter with optional timezone offset.
   ///
@@ -887,9 +928,6 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param key Fully qualified parameter name.
   /// @param value The value to be set.
   void SetDateTime(std::string_view key, const date_time &value);
-  inline void Set(std::string_view key, const date_time &value) {
-    SetDateTime(key, value);
-  }
 
   /// @brief Returns a list of date-time parameters.
   ///
@@ -908,8 +946,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   void SetDateTimeList(std::string_view key,
       const std::vector<date_time> &values);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Mixed list support
+
+  /// @name Lists
+  ///
+  /// @desc These methods allow working with mixed type lists.
+  ///
+  /// @{
 
   /// @brief Creates an empty list with the given name.
   ///
@@ -1021,8 +1067,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param group Group/"Sub-Configuration" to be appended.
   void Append(std::string_view key, const Configuration &group);
 
+  /// @}
+
   //---------------------------------------------------------------------------
   // Group/"Sub-Configuration"
+
+  /// @name Group/Sub-Configuration
+  ///
+  /// @desc Getter/Setter for groups.
+  ///
+  /// @{
 
   /// @brief Returns a copy of the sub-group.
   /// @param key Fully qualified name of the parameter (which must be a
@@ -1042,9 +1096,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///   overloaded assignment operators.
   /// @param group The group to be inserted.
   void SetGroup(std::string_view key, const Configuration &group);
-  inline void Set(std::string_view key, const Configuration &group) {
-    SetGroup(key, group);
-  }
+
+  /// @} // Group/Sub-Configuration
 
   //---------------------------------------------------------------------------
   // Matrices
@@ -1054,6 +1107,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   // 2) Add test case to tests/config/compound_test.
   // 3) Extend GetMatrix in pyzeugkiste.
   // 4) Add test cases to test_get_numpy in pyzeugkiste.
+
+  /// @name Matrix
+  ///
+  /// @desc Conversion between `Eigen::Matrix` and (nested) lists.
+  ///
+  /// @{
 
   /// @brief Returns a list/nested list as a 2D matrix.
   ///
@@ -1237,8 +1296,43 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
     }
   }
 
+  /// @}
+
+  //---------------------------------------------------------------------------
+  // Overloaded setter to simplify templates
+
+  /// @name Generic Setters
+  ///
+  /// @desc Creates or replaces a parameter value.
+  ///
+  /// @{
+  inline void Set(std::string_view key, bool value) { SetBool(key, value); }
+  inline void Set(std::string_view key, int32_t value) { SetInt32(key, value); }
+  inline void Set(std::string_view key, int64_t value) { SetInt64(key, value); }
+  inline void Set(std::string_view key, double value) { SetDouble(key, value); }
+  inline void Set(std::string_view key, std::string_view value) {
+    SetString(key, value);
+  }
+  inline void Set(std::string_view key, const date &value) {
+    SetDate(key, value);
+  }
+  inline void Set(std::string_view key, const time &value) {
+    SetTime(key, value);
+  }
+  inline void Set(std::string_view key, const date_time &value) {
+    SetDateTime(key, value);
+  }
+  inline void Set(std::string_view key, const Configuration &group) {
+    SetGroup(key, group);
+  }
+  /// @}
+
   //---------------------------------------------------------------------------
   // Convenience utilities
+
+  /// @name Utilities
+  ///
+  /// @{
 
   /// @brief Adjusts the given parameters below the `key` group to hold either
   ///   an absolute file path, or the result of "base_path / <param>" if they
@@ -1316,8 +1410,16 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   ///     given as string.
   void LoadNestedConfiguration(std::string_view key);
 
+  /// @}  // Utilities
+
   //---------------------------------------------------------------------------
   // Serialization
+
+  /// @name Serialization
+  ///
+  /// @desc Represent this configuration as a string in a specific format.
+  ///
+  /// @{
 
   /// @brief Returns a TOML-formatted string of this configuration.
   std::string ToTOML() const;
@@ -1331,6 +1433,19 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @brief Returns a libconfig-formatted string of this configuration.
   std::string ToLibconfig() const;
 
+  /// @}  // Serialization
+
+  /// @brief Applies the selected `NullValuePolicy` to the given parameter.
+  ///
+  /// This method is intended for parsers and should be called if the
+  /// parsed `key` parameter was a null/none value.
+  ///
+  /// @param cfg Configuration to be modified.
+  /// @param key Fully qualified parameter name.
+  /// @param policy The selected NullValuePolicy.
+  /// @param append If true, `key` is assumed to be a list and the replacement
+  ///   value (depending on the `policy`) will be `Append`ed, otherwise, it
+  ///   will be `Set`.
   static void HandleNullValue(Configuration &cfg,
       std::string_view key,
       NullValuePolicy policy,
@@ -1343,6 +1458,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Pointer to internal implementation.
   std::unique_ptr<Impl> pimpl_;
 };
+
+/// @name Loading a configuration
+///
+/// @desc Utilities to load a configuration from files or strings.
+///
+/// @{
 
 /// @brief Loads a configuration file.
 ///
@@ -1428,6 +1549,14 @@ WERKZEUGKISTE_CONFIG_EXPORT
 Configuration LoadYAMLString(const std::string &yaml_string,
     NullValuePolicy none_policy = NullValuePolicy::Skip);
 
+/// @}
+
+/// @name String Representation
+///
+/// @desc Represent a configuration as a string in a specific format.
+///
+/// @{
+
 /// @brief Returns a libconfig-formatted string.
 WERKZEUGKISTE_CONFIG_EXPORT
 std::string DumpLibconfigString(const Configuration &cfg);
@@ -1446,6 +1575,8 @@ inline std::string DumpJSONString(const Configuration &cfg) {
 inline std::string DumpYAMLString(const Configuration &cfg) {
   return cfg.ToYAML();
 }
+
+/// @}
 
 }  // namespace werkzeugkiste::config
 
