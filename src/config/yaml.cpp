@@ -11,10 +11,6 @@
 #include <string>
 #include <string_view>
 
-// TODOs
-// * Overload Set for all SetXXX methods in Configuration
-// * Extend YAML tests
-
 // NOLINTBEGIN(readability-identifier-naming, misc-no-recursion)
 namespace YAML {
 /// @brief YAML converter to load a YAML node as a date.
@@ -81,24 +77,45 @@ namespace detail {
 // Forward declaration
 Configuration FromYAMLNode(const YAML::Node &node, NullValuePolicy none_policy);
 
-/// @brief Returns true if the scalar node is tagged.
-inline bool HasTag(const YAML::Node &node) {
-  // LCOV_EXCL_START
-  if (!node.IsScalar()) {
-    return false;
+/// @brief Appends or sets a configuration value from a decoded scalar value.
+/// @tparam Tp Type of the scalar value.
+/// @param value The decoded value.
+/// @param cfg Configuration to be modified.
+/// @param fqn Fully qualified parameter name.
+/// @param append If true, fqn is assumed to be a list and the value will be
+///   `Append`ed. Otherwise, the value will be `Set`.
+template <typename Tp>
+void AppendOrSet(Tp value,
+    Configuration &cfg,
+    std::string_view fqn,
+    bool append) {
+  if (append) {
+    cfg.Append(fqn, value);
+  } else {
+    cfg.Set(fqn, value);
   }
-  // LCOV_EXCL_STOP
+}
+
+/// @brief Returns true if the scalar node is tagged.
+inline bool ScalarHasTag(const YAML::Node &node) {
+  if (!node.IsScalar()) {
+    // LCOV_EXCL_START
+    // This should never happen.
+    return false;
+    // LCOV_EXCL_STOP
+  }
   const std::string &tag = node.Tag();
   return (!tag.empty() && (tag != "?"));
 }
 
 template <typename Tp>
 std::optional<Tp> DecodeUntaggedScalarNode(const YAML::Node &node) {
-  // LCOV_EXCL_START
   if (!node.IsScalar()) {
+    // LCOV_EXCL_START
+    // This should never happen.
     return std::nullopt;
+    // LCOV_EXCL_STOP
   }
-  // LCOV_EXCL_STOP
 
   // Use YAML::convert to avoid YAML::BadConversion being thrown.
   Tp typed;
@@ -117,17 +134,9 @@ void DecodeDateOrDateTime(const YAML::Node &node,
   date val_date{};
   date_time val_dt{};
   if (YAML::convert<date>::decode(node, val_date)) {
-    if (append) {
-      cfg.Append(fqn, val_date);
-    } else {
-      cfg.SetDate(fqn, val_date);
-    }
+    AppendOrSet(val_date, cfg, fqn, append);
   } else if (YAML::convert<date_time>::decode(node, val_dt)) {
-    if (append) {
-      cfg.Append(fqn, val_dt);
-    } else {
-      cfg.SetDateTime(fqn, val_dt);
-    }
+    AppendOrSet(val_dt, cfg, fqn, append);
   } else {
     std::string msg{
         "Failed to parse date from YAML node `" + node.Scalar() + "`!"};
@@ -143,17 +152,9 @@ void DecodeTime(const YAML::Node &node,
   time val_time{};
   date_time val_dt{};
   if (YAML::convert<time>::decode(node, val_time)) {
-    if (append) {
-      cfg.Append(fqn, val_time);
-    } else {
-      cfg.SetTime(fqn, val_time);
-    }
+    AppendOrSet(val_time, cfg, fqn, append);
   } else if (YAML::convert<date_time>::decode(node, val_dt)) {
-    if (append) {
-      cfg.Append(fqn, val_dt);
-    } else {
-      cfg.SetDateTime(fqn, val_dt);
-    }
+    AppendOrSet(val_dt, cfg, fqn, append);
   } else {
     std::string msg{
         "Failed to parse time from YAML node `" + node.Scalar() + "`!"};
@@ -167,51 +168,38 @@ void HandleTaggedScalar(const YAML::Node &node,
     Configuration &cfg,
     std::string_view fqn,
     bool append) {
-  // LCOV_EXCL_START
-  if (!HasTag(node)) {
+  if (!ScalarHasTag(node)) {
+    // LCOV_EXCL_START
+    // This should never happen.
     std::string msg{
         "HandleTaggedScalar called with untagged node for parameter `"};
     msg += fqn;
     msg += "`!";
     throw std::logic_error(msg);
+    // LCOV_EXCL_STOP
   }
-  // LCOV_EXCL_STOP
 
   // TODO document supported tags
   // !!str "some string"
-  // !!bool !!int !!float !!date
+  // !!bool !!int !!float !!date !!timestamp
   // non-standard local tags: !date !time
 
   const std::string &tag = node.Tag();
   const std::string &value = node.Scalar();
   if ((tag == "tag:yaml.org,2002:str") || (tag == "!")) {
-    if (append) {
-      cfg.Append(fqn, value);
-    } else {
-      cfg.SetString(fqn, value);
-    }
+    // If a node has the "!" (non-specific) tag, it is either a map, sequence
+    // or string. Since we already checked for it being a scalar, "!" must
+    // indicate it is a string according to the specification:
+    // https://yaml.org/spec/1.2.2/
+    AppendOrSet(value, cfg, fqn, append);
   } else if (tag == "tag:yaml.org,2002:bool") {
-    const bool val = node.as<bool>();
-    if (append) {
-      cfg.Append(fqn, val);
-    } else {
-      cfg.SetBool(fqn, val);
-    }
+    AppendOrSet(node.as<bool>(), cfg, fqn, append);
   } else if (tag == "tag:yaml.org,2002:int") {
-    const int64_t val = std::stol(value);
-    if (append) {
-      cfg.Append(fqn, val);
-    } else {
-      cfg.SetInt64(fqn, val);
-    }
+    AppendOrSet(std::stol(value), cfg, fqn, append);
   } else if (tag == "tag:yaml.org,2002:float") {
-    const double val = std::stod(value);
-    if (append) {
-      cfg.Append(fqn, val);
-    } else {
-      cfg.SetDouble(fqn, val);
-    }
-  } else if ((tag == "tag:yaml.org,2002:date") || (tag == "!date")) {
+    AppendOrSet(std::stod(value), cfg, fqn, append);
+  } else if ((tag == "tag:yaml.org,2002:date") ||
+             (tag == "tag:yaml.org,2002:timestamp") || (tag == "!date")) {
     DecodeDateOrDateTime(node, cfg, fqn, append);
   } else if ((tag == "tag:yaml.org,2002:time") || (tag == "!time")) {
     DecodeTime(node, cfg, fqn, append);
@@ -251,7 +239,7 @@ void HandleScalarNode(const YAML::Node &node,
     Configuration &cfg,
     std::string_view fqn,
     bool append) {
-  if (HasTag(node)) {
+  if (ScalarHasTag(node)) {
     HandleTaggedScalar(node, cfg, fqn, append);
     return;
   }
