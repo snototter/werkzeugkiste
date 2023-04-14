@@ -223,8 +223,10 @@ void HandleTaggedScalar(const YAML::Node &node,
   } else if ((tag == "tag:yaml.org,2002:time") || (tag == "!time")) {
     DecodeTime(node, cfg, fqn, append);
   } else {
-    std::string msg{"YAML tag `" + tag + "` is not supported"};
-    ThrowImplementationError(msg, fqn);
+    std::string msg{"YAML tag `" + tag + "` for parameter `"};
+    msg += fqn;
+    msg += "` is not supported!";
+    throw ParseError{msg};
   }
 }
 

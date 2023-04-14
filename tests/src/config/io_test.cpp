@@ -676,10 +676,6 @@ none3:
   // EXPECT_EQ(cfg, copy) << cfg.ToTOML() << "\n---- vs ----\n" <<
   // copy.ToTOML();
 
-  // TODO Not sure if the type deduction is really that useful/intuitive.
-  // Currently, it seems convenient, but this feature might be dropped in the
-  // future. Could be replaced by only converting explicitly tagged values...
-
   // Multi-document YAML:
   // Currently, yaml-cpp parses only the first document. If this changes, this
   // test should break to indicate that we need to adjust our loading routine.
@@ -736,12 +732,12 @@ space_separated: 2001-12-14 21:59:43.10 -5
 lst:
   - 1
   - 2.5
-  - on
-  - some value
+  - !!bool on
+  - "some value"
   - 2023-04-14T21:27:28Z
   - 21:50:00
   - { name: "John Doe", age: 42 }
-  - [1, 2, 3]
+  - [1, 2.5, !!int 3, "str", 2023-04-15, 00:08:09, { age: 23 }]
 )yml");
   wkc::date date{2023, 4, 14};
   wkc::time time{21, 27, 28};
@@ -776,7 +772,7 @@ lst:
 
   EXPECT_EQ(8, cfg.Size("lst"sv));
   EXPECT_EQ(1, cfg.GetInt32("lst[0]"sv));
-  EXPECT_EQ(2.5, cfg.GetDouble("lst[1]"sv));
+  EXPECT_DOUBLE_EQ(2.5, cfg.GetDouble("lst[1]"sv));
   EXPECT_TRUE(cfg.GetBool("lst[2]"sv));
   EXPECT_EQ("some value"sv, cfg.GetString("lst[3]"sv));
   expected = wkc::date_time{date, time, wkc::time_offset{0}};
@@ -785,13 +781,24 @@ lst:
   EXPECT_EQ(2, cfg.Size("lst[6]"sv));
   EXPECT_EQ("John Doe"sv, cfg.GetString("lst[6].name"sv));
   EXPECT_EQ(42, cfg.GetInt32("lst[6].age"sv));
-  EXPECT_EQ(3, cfg.Size("lst[7]"sv));
+  EXPECT_EQ(7, cfg.Size("lst[7]"sv));
   EXPECT_EQ(1, cfg.GetInt32("lst[7][0]"sv));
-  EXPECT_EQ(2, cfg.GetInt32("lst[7][1]"sv));
+  EXPECT_DOUBLE_EQ(2.5, cfg.GetDouble("lst[7][1]"sv));
   EXPECT_EQ(3, cfg.GetInt32("lst[7][2]"sv));
+  EXPECT_EQ("str", cfg.GetString("lst[7][3]"sv));
+  EXPECT_EQ(wkc::date("2023-04-15"sv), cfg.GetDate("lst[7][4]"sv));
+  EXPECT_EQ(wkc::time("00:08:09"sv), cfg.GetTime("lst[7][5]"sv));
+  EXPECT_EQ(1, cfg.Size("lst[7][6]"sv));
+  EXPECT_EQ(23, cfg.GetInt32("lst[7][6].age"sv));
 
   // Value that is tagged as timestamp but is not a valid date:
-  std::string ystr = R"yml(invalid_tagged1: !!timestamp 2023-99-17)yml";
+  std::string ystr = R"yml(invalid_tagged: !!timestamp 2023-99-17)yml";
+  EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
+
+  ystr = R"yml(invalid_tagged1: !time 99:00:00)yml";
+  EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
+
+  ystr = R"yml(unknown_tag: !!foo bar)yml";
   EXPECT_THROW(wkc::LoadYAMLString(ystr), wkc::ParseError);
 }
 
