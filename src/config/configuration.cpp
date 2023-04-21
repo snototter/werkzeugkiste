@@ -1344,21 +1344,7 @@ void Configuration::Delete(std::string_view key) {
 }
 
 bool Configuration::IsHomogeneousScalarList(std::string_view key) const {
-  if (!detail::ContainsKey(pimpl_->config_root, key)) {
-    throw detail::KeyErrorWithSimilarKeys(pimpl_->config_root, key);
-  }
-
-  auto node = pimpl_->config_root.at_path(key);
-  if (!node.is_array()) {
-    std::string msg{"Cannot check if `"};
-    msg += key;
-    msg += "` is homogeneous, because it is of type `";
-    msg += detail::TomlTypeName(node, key);
-    msg += "` instead of a list!";
-    throw TypeError{msg};
-  }
-
-  const toml::array &arr = *node.as_array();
+  const toml::array &arr = pimpl_->ImmutableList(key);
   for (const auto &value : arr) {
     if (!detail::IsScalar(value.type()) || (value.type() != arr[0].type())) {
       return false;
