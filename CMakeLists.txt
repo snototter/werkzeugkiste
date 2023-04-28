@@ -55,7 +55,9 @@ set(YAML_CPP_BUILD_TESTS
 set(YAML_CPP_INSTALL
     ON
     CACHE BOOL "Export yaml targets" FORCE)
-set(CMAKE_HOST_WIN32 "" CACHE STRING "TODO needed to suppress uninitialized var in yaml cpp" FORCE)
+set(CMAKE_HOST_WIN32
+    ""
+    CACHE STRING "TODO needed to suppress uninitialized var in yaml cpp" FORCE)
 FetchContent_MakeAvailable(yaml-cpp)
 
 # libconfig++ (config)
@@ -445,7 +447,8 @@ generate_export_header(
   CUSTOM_CONTENT_FROM_VARIABLE
   pragma_suppress_c4251)
 
-target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen)
+target_link_libraries(werkzeugkiste-config PUBLIC Eigen3::Eigen
+                                                  werkzeugkiste::geometry)
 target_link_libraries(
   werkzeugkiste-config
   PRIVATE werkzeugkiste::logging werkzeugkiste::strings werkzeugkiste::files

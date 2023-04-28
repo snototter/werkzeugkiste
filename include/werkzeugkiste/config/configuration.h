@@ -5,6 +5,7 @@
 #include <werkzeugkiste/config/config_export.h>
 #include <werkzeugkiste/config/keymatcher.h>
 #include <werkzeugkiste/config/types.h>
+#include <werkzeugkiste/geometry/vector.h>
 
 #include <Eigen/Core>
 #include <cmath>
@@ -393,6 +394,93 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of flags.
   void SetInt32List(std::string_view key, const std::vector<int32_t> &values);
 
+  /// @brief Returns a 2D point with 32-bit integer coordinates.
+  ///
+  /// Interprets a list of numbers as 2D point. If the list contains more than
+  /// two elements, only the first two entries are loaded as x and y
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x` and `y` parameters can also
+  /// be loaded as a 2D point.
+  ///
+  /// @code {.cpp}
+  /// const wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+  ///     lst-2d = [1, 2]
+  ///     lst-nd = [1, 2, 3, 4, 5]
+  ///     grp-2d = { x = 1, y = 2 }
+  ///     )toml");
+  /// // Load 2-element list as 2D point:
+  /// const auto pt1 = cfg.GetInt32Point2D("lst-2d");
+  /// // Load 2D point from the first 2 elements of a 5-element list:
+  /// const auto pt2 = cfg.GetInt32Point2D("lst-nd");
+  /// // Load 2D point from a group containing x and y parameters:
+  /// const auto pt3 = cfg.GetInt32Point2D("grp-2d");
+  /// @endcode
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  ///
+  /// @param key Fully qualified parameter name
+  geometry::Vec<int32_t, 2> GetInt32Point2D(std::string_view key) const;
+
+  /// @brief Returns a 3D point with 32-bit integer coordinates.
+  ///
+  /// Interprets a list of numbers as 3D point. If the list contains more than
+  /// three elements, only the first three entries are loaded as x, y and z
+  /// coordinate, respectively.
+  /// Similarly, a group which holds (at least) `x`, `y` and `z` parameters can
+  /// also be loaded as a 3D point.
+  ///
+  /// @code {.cpp}
+  /// const wkc::Configuration cfg = wkc::LoadTOMLString(R"toml(
+  ///     lst-3d = [1, 2, 3]
+  ///     lst-nd = [1, 2, 3, 4, 5]
+  ///     grp-3d = { x = 1, y = 2, z = 3 }
+  ///     )toml");
+  /// // Load 3-element list as 3D point:
+  /// const auto pt1 = cfg.GetInt32Point3D("lst-3d");
+  /// // Load 3D point from the first 3 elements of a 5-element list:
+  /// const auto pt2 = cfg.GetInt32Point3D("lst-nd");
+  /// // Load 3D point from a group containing x, y and z parameters:
+  /// const auto pt3 = cfg.GetInt32Point3D("grp-3d");
+  /// @endcode
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 3D point.
+  ///
+  /// @param key Fully qualified parameter name
+  geometry::Vec<int32_t, 3> GetInt32Point3D(std::string_view key) const;
+
+  /// @brief Returns a list of 2D points (e.g. a polyline or polygon) with
+  ///   32-bit integral coordinates.
+  ///
+  /// Supports loading nested lists and lists of {x, y} parameter groups as a
+  /// list of 2D points. Each point in the configuration must have at least
+  /// 2 dimensions, but may also have more (i.e. only loading the x/y
+  /// components of 3D points is allowed).
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully qualified parameter name.
+  std::vector<geometry::Vec<int32_t, 2>> GetInt32Points2D(
+      std::string_view key) const;
+
+  /// @brief Returns a list of 3D points (e.g. a polyline or polygon) with
+  ///   32-bit integral coordinates.
+  ///
+  /// Supports loading nested lists and lists of {x, y, z} parameter groups as
+  /// a list of 3D points. Each point in the configuration must have at least
+  /// 3 dimensions, but may also have more.
+  ///
+  /// Raises a `KeyError` if the parameter does not exist.
+  /// Raises a `TypeError` if any coordinate is defined as a different type,
+  /// unless it can be safely cast.
+  ///
+  /// @param key Fully qualified parameter name.
+  std::vector<geometry::Vec<int32_t, 3>> GetInt32Points3D(
+      std::string_view key) const;
+
   //---------------------------------------------------------------------------
   // Integers (64-bit)
 
@@ -463,7 +551,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @param values List of flags.
   void SetInt64List(std::string_view key, const std::vector<int64_t> &values);
 
-  /// @brief Returns a 2D point with integer coordinates.
+  /// @brief Returns a 2D point with 64-bit integer coordinates.
   ///
   /// Interprets a list of numbers as 2D point. If the list contains more than
   /// two elements, only the first two entries are loaded as x and y
@@ -489,12 +577,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
   /// @param key Fully qualified parameter name
-  point2d<int64_t> GetInt64Point2D(std::string_view key) const;
-  // TODO replace by vec2i
+  geometry::Vec<int64_t, 2> GetInt64Point2D(std::string_view key) const;
 
-  // TODO For consistency, add: GetInt64Point2DOr / GetOptional...
-
-  /// @brief Returns a 3D point with integer coordinates.
+  /// @brief Returns a 3D point with 64-bit integer coordinates.
   ///
   /// Interprets a list of numbers as 3D point. If the list contains more than
   /// three elements, only the first three entries are loaded as x, y and z
@@ -517,16 +602,15 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// @endcode
   ///
   /// Raises a `KeyError` if the parameter does not exist.
-  /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
+  /// Raises a `TypeError` if the parameter cannot be converted to a 3D point.
   ///
   /// @param key Fully qualified parameter name
-  point3d<int64_t> GetInt64Point3D(std::string_view key) const;
+  geometry::Vec<int64_t, 3> GetInt64Point3D(std::string_view key) const;
 
-  // TODO For consistency, add: GetInt64Point3DOr / GetOptional...
-
-  /// @brief Returns a list of 2D points (e.g. a polyline or polygon).
+  /// @brief Returns a list of 2D points (e.g. a polyline or polygon) with
+  ///   64-bit integral coordinates.
   ///
-  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// Supports loading nested lists and lists of {x, y} parameter groups as a
   /// list of 2D points. Each point in the configuration must have at least
   /// 2 dimensions, but may also have more (i.e. only loading the x/y
   /// components of 3D points is allowed).
@@ -536,21 +620,23 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// unless it can be safely cast.
   ///
   /// @param key Fully qualified parameter name.
-  std::vector<point2d<int64_t>> GetInt64Points2D(std::string_view key) const;
+  std::vector<geometry::Vec<int64_t, 2>> GetInt64Points2D(
+      std::string_view key) const;
 
-  /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
+  /// @brief Returns a list of 3D points (e.g. a polyline or polygon) with
+  ///   64-bit integral coordinates.
   ///
-  /// Supports loading nested lists and lists of {x, y} tables as a
-  /// list of 3D points. Each point in the configuration must have at least
-  /// 3 dimensions, but may also have more (i.e. only loading the first 3
-  /// components of n-dim points is allowed).
+  /// Supports loading nested lists and lists of {x, y, z} parameter groups as
+  /// a list of 3D points. Each point in the configuration must have at least
+  /// 3 dimensions, but may also have more.
   ///
   /// Raises a `KeyError` if the parameter does not exist.
   /// Raises a `TypeError` if any coordinate is defined as a different type,
   /// unless it can be safely cast.
   ///
   /// @param key Fully qualified parameter name.
-  std::vector<point3d<int64_t>> GetInt64Points3D(std::string_view key) const;
+  std::vector<geometry::Vec<int64_t, 3>> GetInt64Points3D(
+      std::string_view key) const;
 
   /// @}
 
@@ -642,7 +728,9 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
   /// @param key Fully qualified parameter name
-  point2d<double> GetDoublePoint2D(std::string_view key) const;
+  geometry::Vec<double, 2> GetDoublePoint2D(std::string_view key) const;
+
+  // TODO add GetInt32Size / GetDoubleSize....
 
   // TODO For consistency, add: GetDoublePoint2DOr / GetOptional...
 
@@ -658,7 +746,7 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// Raises a `TypeError` if the parameter cannot be converted to a 2D point.
   ///
   /// @param key Fully qualified parameter name
-  point3d<double> GetDoublePoint3D(std::string_view key) const;
+  geometry::Vec<double, 3> GetDoublePoint3D(std::string_view key) const;
 
   // TODO For consistency, add: GetDoublePoint3DOr / GetOptional...
 
@@ -674,11 +762,12 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// unless it can be safely cast.
   ///
   /// @param key Fully qualified parameter name.
-  std::vector<point2d<double>> GetDoublePoints2D(std::string_view key) const;
+  std::vector<geometry::Vec<double, 2>> GetDoublePoints2D(
+      std::string_view key) const;
 
   /// @brief Returns a list of 3D points (e.g. a polyline or polygon).
   ///
-  /// Supports loading nested lists and lists of {x, y} tables as a
+  /// Supports loading nested lists and lists of {x, y, z} tables as a
   /// list of 3D points. Each point in the configuration must have at least
   /// 3 dimensions, but may also have more (i.e. only loading the x/y/z
   /// components of n-dim points is allowed).
@@ -688,7 +777,8 @@ class WERKZEUGKISTE_CONFIG_EXPORT Configuration {
   /// unless it can be safely cast.
   ///
   /// @param key Fully qualified parameter name.
-  std::vector<point3d<double>> GetDoublePoints3D(std::string_view key) const;
+  std::vector<geometry::Vec<double, 3>> GetDoublePoints3D(
+      std::string_view key) const;
 
   /// @}
 

@@ -844,6 +844,8 @@ void SetList(toml::table &tbl,
   }
 }
 
+// TODO document
+// TODO refactor --> pimpl could reuse this
 toml::array *GetExistingList(toml::table &tbl, std::string_view key) {
   if (!ContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
@@ -862,6 +864,7 @@ toml::array *GetExistingList(toml::table &tbl, std::string_view key) {
   return node.as_array();
 }
 
+// TODO document
 template <typename Ttoml, typename Tcfg>
 void AppendScalarListElement(toml::table &tbl,
     std::string_view key,
@@ -870,71 +873,88 @@ void AppendScalarListElement(toml::table &tbl,
   arr->push_back(ConvertConfigTypeToToml<Ttoml>(value, key));
 }
 
-/// @brief Extracts a single pointXd from the given toml::table.
-template <typename Pt>
-inline Pt ConvertTableToPoint(const toml::table &tbl, std::string_view key) {
-  using namespace std::string_view_literals;
-  constexpr std::array<std::string_view, 3> point_keys{"x"sv, "y"sv, "z"sv};
-  static_assert(Pt::ndim <= point_keys.size(),
-      "Table keys for higher-dimensional points have not yet been defined!");
-
-  using CoordType = typename Pt::value_type;
-
-  std::array<CoordType, Pt::ndim> values{};
-  for (std::size_t idx = 0; idx < Pt::ndim; ++idx) {
-    if (!tbl.contains(point_keys[idx])) {
-      std::ostringstream msg;
-      msg << "Invalid parameter `" << key
-          << "`. Table entry does not specify the `" << point_keys[idx]
-          << "` coordinate!";
-      throw TypeError{msg.str()};
-    }
-
-    values[idx] = ConvertTomlToConfigType<CoordType>(tbl[point_keys[idx]], key);
-  }
-
-  Pt point{};
-  point.x = values[0];
-  point.y = values[1];
-  if constexpr (Pt::ndim > 2) {
-    point.z = values[2];
-  }
-  return point;
-}
-
-/// @brief Extracts a single pointXd from the given toml::table.
-template <typename Pt>
-inline Pt ConvertArrayToPoint(const toml::array &arr, std::string_view key) {
-  using CoordType = typename Pt::value_type;
-
+/// @brief Converts the first Dim entries of the given array/list to a vector.
+/// @tparam T Data type of the vector.
+/// @tparam Dim Dimensionality.
+/// @param arr The array/list parameter.
+/// @param key Fully qualified name of the parameter (for descriptive error
+///   messages).
+/// @param lookup_as Name of the type to which the parameter should be
+///   converted, e.g. "size" or "point".
+template <typename T, std::size_t Dim>
+geometry::Vec<T, Dim> ConvertArrayToVec(const toml::array &arr,
+    std::string_view key,
+    std::string_view lookup_as) {
   // The array must have at least Dim entries - more are also allowed, as
   // they will just be ignored.
-  if (arr.size() < Pt::ndim) {
+  if (arr.size() < Dim) {
     std::ostringstream msg;
-    msg << "Invalid parameter `" << key << "`. Cannot extract a " << Pt::ndim
-        << "D point from a " << arr.size() << "-element array!";
+    msg << "Cannot convert list parameter `" << key << "` with " << arr.size()
+        << ((arr.size() == 1) ? "element" : "elements") << " to a " << Dim
+        << "D " << lookup_as << "!";
     throw TypeError{msg.str()};
   }
 
-  std::array<CoordType, Pt::ndim> values{};
-  for (std::size_t idx = 0; idx < Pt::ndim; ++idx) {
+  geometry::Vec<T, Dim> vec{};
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
     const auto fqn = FullyQualifiedArrayElementPath(key, idx);
-    values[idx] = ConvertTomlToConfigType<CoordType>(arr[idx], fqn);
+    vec[idx] = ConvertTomlToConfigType<T>(arr[idx], fqn);
   }
-
-  Pt point{};
-  point.x = values[0];
-  point.y = values[1];
-  if constexpr (Pt::ndim > 2) {
-    point.z = values[2];
-  }
-  return point;
+  return vec;
 }
 
-template <typename Pt>
-Pt GetPoint(const toml::table &tbl, std::string_view key) {
-  static_assert(std::is_arithmetic_v<typename Pt::value_type>);
-  static_assert(Pt::ndim == 2 || Pt::ndim == 3);
+/// @brief Converts the table to a vector by looking up the given
+///   `config_keys`.
+/// @tparam T Data type of the vector.
+/// @tparam Dim Dimensionality.
+/// @param tbl The parameter group. Must contain all sub-parameters given by
+///   `config_keys`. Can contain additional sub-parameters (which will be
+///   ignored).
+/// @param key Fully qualified name of the parameter (for descriptive error
+///   messages).
+/// @param lookup_as Name of the type to which the parameter should be
+///   converted, e.g. "size" or "point".
+/// @param config_keys Parameter names of the vector's coefficients, e.g. "x",
+///   "y", or "width".
+template <typename T, std::size_t Dim>
+geometry::Vec<T, Dim> ConvertTableToVec(const toml::table &tbl,
+    std::string_view key,
+    std::string_view lookup_as,
+    const std::vector<std::string_view> &config_keys) {
+  geometry::Vec<T, Dim> vec{};
+  for (std::size_t idx = 0; idx < Dim; ++idx) {
+    if (!tbl.contains(config_keys[idx])) {
+      std::ostringstream msg;
+      msg << "Cannot convert parameter group `" << key << "` to a " << Dim
+          << "D " << lookup_as << ", because it is missing the `"
+          << config_keys[idx] << "` entry!";
+      throw TypeError{msg.str()};
+    }
+
+    std::string fqn{key};
+    fqn += '.';
+    fqn += config_keys[idx];
+    vec[idx] = ConvertTomlToConfigType<T>(tbl[config_keys[idx]], fqn);
+  }
+
+  return vec;
+}
+
+/// @brief Common logic for extracting Dim-dimensional point/size parameters.
+/// @tparam T Underlying data type of the vector.
+/// @tparam Dim Dimensionality.
+/// @param tbl The root configuration table.
+/// @param key Fully qualified parameter name.
+/// @param lookup_as Name of the type to which the parameter should be
+///   converted, e.g. "size" or "point".
+/// @param config_keys The sub-parameters to look up the individual
+///   coefficients of the vector (if parameter `key` is a table).
+template <typename T, std::size_t Dim>
+geometry::Vec<T, Dim> LookupVecHelper(const toml::table &tbl,
+    std::string_view key,
+    std::string_view lookup_as,
+    const std::vector<std::string_view> &config_keys) {
+  static_assert(std::is_arithmetic_v<T>);
   if (!ContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
@@ -942,65 +962,90 @@ Pt GetPoint(const toml::table &tbl, std::string_view key) {
   const auto node = tbl.at_path(key);
   if (node.is_array()) {
     const auto &pt = *node.as_array();
-    return ConvertArrayToPoint<Pt>(pt, key);
+    return ConvertArrayToVec<T, Dim>(pt, key, lookup_as);
   }
   if (node.is_table()) {
     const auto &pt = *node.as_table();
-    return ConvertTableToPoint<Pt>(pt, key);
+    return ConvertTableToVec<T, Dim>(pt, key, lookup_as, config_keys);
   }
 
-  std::string msg{"Cannot convert `"};
-  msg += key;
-  msg += "` to a ";
-  msg += std::to_string(Pt::ndim);
-  msg += "D point. Expected a group or list, but got `";
-  msg += TomlTypeName(node, key);
-  msg += "`!";
-  throw TypeError{msg};
+  std::ostringstream msg;
+  msg << "Cannot convert parameter `" << key << "` to a " << Dim << "D "
+      << lookup_as << ", because it is of type `" << TomlTypeName(node, key)
+      << "` (Must be a list or a group)!";
+  throw TypeError{msg.str()};
 }
 
-template <typename Pt>
-std::vector<Pt> GetPoints(const toml::table &tbl, std::string_view key) {
-  static_assert(std::is_arithmetic_v<typename Pt::value_type>);
-  static_assert(Pt::ndim == 2 || Pt::ndim == 3);
+/// @brief Converts a parameter list or group (with parameters "x", "y", etc.)
+///   to a Dim-dimensional vector.
+/// @tparam T Type of the vector's coefficients.
+/// @tparam Dim Dimensionality of the vector.
+/// @param tbl The root table to look up the parameter in.
+/// @param key Fully qualified name of the parameter.
+template <typename T, std::size_t Dim>
+geometry::Vec<T, Dim> LookupPoint(const toml::table &tbl,
+    std::string_view key) {
+  static_assert(std::is_arithmetic_v<T>);
+  static_assert(Dim == 2 || Dim == 3);
+  using namespace std::string_view_literals;
+
+  if constexpr (Dim == 2) {
+    const std::vector<std::string_view> config_keys{"x"sv, "y"sv};
+    return LookupVecHelper<T, Dim>(tbl, key, "point"sv, config_keys);
+  }
+
+  const std::vector<std::string_view> config_keys{"x"sv, "y"sv, "z"sv};
+  return LookupVecHelper<T, Dim>(tbl, key, "point"sv, config_keys);
+}
+
+/// @brief Converts a parameter list or group (with parameters "width" &
+///   "height") to a 2-dimensional vector.
+/// @tparam T Type of the vector's coefficients.
+/// @tparam Dim Dimensionality of the vector.
+/// @param tbl The root table to look up the parameter in.
+/// @param key Fully qualified name of the parameter.
+template <typename T, std::size_t Dim>
+geometry::Vec<T, Dim> LookupSize(const toml::table &tbl, std::string_view key) {
+  static_assert(std::is_arithmetic_v<T>);
+  // Currently, 3D sizes are not supported, because we need to fix the
+  // order of the dimensions first, e.g. length, width, height (when loading
+  // a 3-element list).
+  static_assert(Dim == 2);
+  using namespace std::string_view_literals;
+  const std::vector<std::string_view> config_keys{"width"sv, "height"sv};
+  return LookupVecHelper<T, Dim>(tbl, key, "size"sv, config_keys);
+}
+
+// TODO document
+template <typename T, std::size_t Dim>
+std::vector<geometry::Vec<T, Dim>> LookupPointList(const toml::table &tbl,
+    std::string_view key) {
+  static_assert(std::is_arithmetic_v<T>);
+  static_assert(Dim == 2 || Dim == 3);
   if (!ContainsKey(tbl, key)) {
     throw KeyErrorWithSimilarKeys(tbl, key);
   }
 
   const auto node = tbl.at_path(key);
   if (!node.is_array()) {
-    std::string msg{"Invalid point list configuration: `"};
+    std::string msg{"Cannot convert parameter `"};
     msg += key;
-    msg += "` must be a list, but is of type `";
+    msg += "` to a list of points, because it is of type `";
     msg += TomlTypeName(node, key);
-    msg += "`!";
+    msg += "` and not a list!";
     throw TypeError{msg};
   }
 
   const toml::array &arr = *node.as_array();
-  std::size_t arr_index = 0;
-  std::vector<Pt> points;
-  for (auto &&value : arr) {
-    const auto fqn = FullyQualifiedArrayElementPath(key, arr_index);
-    if (value.is_array()) {
-      const auto &pt = *value.as_array();
-      points.push_back(ConvertArrayToPoint<Pt>(pt, fqn));
-    } else if (value.is_table()) {
-      const auto &pt = *value.as_table();
-      points.push_back(ConvertTableToPoint<Pt>(pt, fqn));
-    } else {
-      std::string msg{
-          "Invalid point list. All parameter entries must be either arrays or "
-          "tables, but `"};
-      msg += fqn;
-      msg += "` is not!";
-      throw TypeError{msg};
-    }
-    ++arr_index;
+  std::vector<geometry::Vec<T, Dim>> points;
+  for (std::size_t idx = 0; idx < arr.size(); ++idx) {
+    const auto fqn = FullyQualifiedArrayElementPath(key, idx);
+    points.push_back(LookupPoint<T, Dim>(tbl, fqn));
   }
   return points;
 }
 
+// TODO document
 template <typename Tcfg>
 std::vector<Tcfg> GetList(const toml::array &arr, std::string_view key) {
   std::size_t arr_index = 0;
@@ -1453,6 +1498,26 @@ void Configuration::SetInt32List(std::string_view key,
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
+geometry::Vec<int32_t, 2> Configuration::GetInt32Point2D(
+    std::string_view key) const {
+  return detail::LookupPoint<int32_t, 2>(pimpl_->config_root, key);
+}
+
+geometry::Vec<int32_t, 3> Configuration::GetInt32Point3D(
+    std::string_view key) const {
+  return detail::LookupPoint<int32_t, 3>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<int32_t, 2>> Configuration::GetInt32Points2D(
+    std::string_view key) const {
+  return detail::LookupPointList<int32_t, 2>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<int32_t, 3>> Configuration::GetInt32Points3D(
+    std::string_view key) const {
+  return detail::LookupPointList<int32_t, 3>(pimpl_->config_root, key);
+}
+
 //---------------------------------------------------------------------------
 // Integer (64-bit)
 
@@ -1488,22 +1553,24 @@ void Configuration::SetInt64List(std::string_view key,
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
-point2d<int64_t> Configuration::GetInt64Point2D(std::string_view key) const {
-  return detail::GetPoint<point2d<int64_t>>(pimpl_->config_root, key);
-}
-
-point3d<int64_t> Configuration::GetInt64Point3D(std::string_view key) const {
-  return detail::GetPoint<point3d<int64_t>>(pimpl_->config_root, key);
-}
-
-std::vector<point2d<int64_t>> Configuration::GetInt64Points2D(
+geometry::Vec<int64_t, 2> Configuration::GetInt64Point2D(
     std::string_view key) const {
-  return detail::GetPoints<point2d<int64_t>>(pimpl_->config_root, key);
+  return detail::LookupPoint<int64_t, 2>(pimpl_->config_root, key);
 }
 
-std::vector<point3d<int64_t>> Configuration::GetInt64Points3D(
+geometry::Vec<int64_t, 3> Configuration::GetInt64Point3D(
     std::string_view key) const {
-  return detail::GetPoints<point3d<int64_t>>(pimpl_->config_root, key);
+  return detail::LookupPoint<int64_t, 3>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<int64_t, 2>> Configuration::GetInt64Points2D(
+    std::string_view key) const {
+  return detail::LookupPointList<int64_t, 2>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<int64_t, 3>> Configuration::GetInt64Points3D(
+    std::string_view key) const {
+  return detail::LookupPointList<int64_t, 3>(pimpl_->config_root, key);
 }
 
 //---------------------------------------------------------------------------
@@ -1541,22 +1608,24 @@ void Configuration::SetDoubleList(std::string_view key,
   detail::SetList<double>(pimpl_->config_root, key, values);
 }
 
-point2d<double> Configuration::GetDoublePoint2D(std::string_view key) const {
-  return detail::GetPoint<point2d<double>>(pimpl_->config_root, key);
-}
-
-point3d<double> Configuration::GetDoublePoint3D(std::string_view key) const {
-  return detail::GetPoint<point3d<double>>(pimpl_->config_root, key);
-}
-
-std::vector<point2d<double>> Configuration::GetDoublePoints2D(
+geometry::Vec<double, 2> Configuration::GetDoublePoint2D(
     std::string_view key) const {
-  return detail::GetPoints<point2d<double>>(pimpl_->config_root, key);
+  return detail::LookupPoint<double, 2>(pimpl_->config_root, key);
 }
 
-std::vector<point3d<double>> Configuration::GetDoublePoints3D(
+geometry::Vec<double, 3> Configuration::GetDoublePoint3D(
     std::string_view key) const {
-  return detail::GetPoints<point3d<double>>(pimpl_->config_root, key);
+  return detail::LookupPoint<double, 3>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<double, 2>> Configuration::GetDoublePoints2D(
+    std::string_view key) const {
+  return detail::LookupPointList<double, 2>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<double, 3>> Configuration::GetDoublePoints3D(
+    std::string_view key) const {
+  return detail::LookupPointList<double, 3>(pimpl_->config_root, key);
 }
 
 //---------------------------------------------------------------------------

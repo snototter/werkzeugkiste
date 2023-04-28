@@ -43,27 +43,69 @@ TEST(ConfigCompoundTest, Points) {
     )toml"sv);
 
   // 2D integral point
+  EXPECT_THROW(config.GetInt32Point2D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32Point2D("str"sv), wkc::TypeError);
+
+  EXPECT_THROW(config.GetInt32Point2D("poly1"sv), wkc::TypeError);
+  auto p2i = config.GetInt32Point2D("poly1[0]"sv);
+  EXPECT_EQ(1, p2i.X());
+  EXPECT_EQ(2, p2i.Y());
+
+  // TODO Add interface method, then test
+  // EXPECT_THROW(config.GetInt32Size2D("poly2[0]"sv), wkc::TypeError);
+
+  p2i = config.GetInt32Point2D("poly2[2]"sv);
+  EXPECT_EQ(50, p2i.X());
+  EXPECT_EQ(60, p2i.Y());
+
+  p2i = config.GetInt32Point2D("poly3[0]"sv);
+  EXPECT_EQ(1, p2i.X());
+  EXPECT_EQ(2, p2i.Y());
+
+  p2i = config.GetInt32Point2D("poly3[2]"sv);
+  EXPECT_EQ(-9, p2i.X());
+  EXPECT_EQ(0, p2i.Y());
+
+  // 3D integral point
+  EXPECT_THROW(config.GetInt32Point3D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32Point3D("str"sv), wkc::TypeError);
+
+  EXPECT_THROW(config.GetInt32Point3D("poly1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Point3D("poly1[0]"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Point3D("poly2[0]"sv), wkc::TypeError);
+
+  auto p3i = config.GetInt32Point3D("poly3[0]"sv);
+  EXPECT_EQ(1, p3i.X());
+  EXPECT_EQ(2, p3i.Y());
+  EXPECT_EQ(3, p3i.Z());
+
+  p3i = config.GetInt32Point3D("poly3[2]"sv);
+  EXPECT_EQ(-9, p3i.X());
+  EXPECT_EQ(0, p3i.Y());
+  EXPECT_EQ(-3, p3i.Z());
+
+  // 2D integral point - 64 bit
   EXPECT_THROW(config.GetInt64Point2D("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetInt64Point2D("str"sv), wkc::TypeError);
 
   EXPECT_THROW(config.GetInt64Point2D("poly1"sv), wkc::TypeError);
-  auto p2i = config.GetInt64Point2D("poly1[0]"sv);
-  EXPECT_EQ(1, p2i.x);
-  EXPECT_EQ(2, p2i.y);
+  auto p2l = config.GetInt64Point2D("poly1[0]"sv);
+  EXPECT_EQ(1, p2l.X());
+  EXPECT_EQ(2, p2l.Y());
 
-  p2i = config.GetInt64Point2D("poly2[2]"sv);
-  EXPECT_EQ(50, p2i.x);
-  EXPECT_EQ(60, p2i.y);
+  p2l = config.GetInt64Point2D("poly2[2]"sv);
+  EXPECT_EQ(50, p2l.X());
+  EXPECT_EQ(60, p2l.Y());
 
-  p2i = config.GetInt64Point2D("poly3[0]"sv);
-  EXPECT_EQ(1, p2i.x);
-  EXPECT_EQ(2, p2i.y);
+  p2l = config.GetInt64Point2D("poly3[0]"sv);
+  EXPECT_EQ(1, p2l.X());
+  EXPECT_EQ(2, p2l.Y());
 
-  p2i = config.GetInt64Point2D("poly3[2]"sv);
-  EXPECT_EQ(-9, p2i.x);
-  EXPECT_EQ(0, p2i.y);
+  p2l = config.GetInt64Point2D("poly3[2]"sv);
+  EXPECT_EQ(-9, p2l.X());
+  EXPECT_EQ(0, p2l.Y());
 
-  // 3D integral point
+  // 3D integral point - 64-bit
   EXPECT_THROW(config.GetInt64Point3D("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetInt64Point3D("str"sv), wkc::TypeError);
 
@@ -71,27 +113,27 @@ TEST(ConfigCompoundTest, Points) {
   EXPECT_THROW(config.GetInt64Point3D("poly1[0]"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt64Point3D("poly2[0]"sv), wkc::TypeError);
 
-  auto p3i = config.GetInt64Point3D("poly3[0]"sv);
-  EXPECT_EQ(1, p3i.x);
-  EXPECT_EQ(2, p3i.y);
-  EXPECT_EQ(3, p3i.z);
+  auto p3l = config.GetInt64Point3D("poly3[0]"sv);
+  EXPECT_EQ(1, p3l.X());
+  EXPECT_EQ(2, p3l.Y());
+  EXPECT_EQ(3, p3l.Z());
 
-  p3i = config.GetInt64Point3D("poly3[2]"sv);
-  EXPECT_EQ(-9, p3i.x);
-  EXPECT_EQ(0, p3i.y);
-  EXPECT_EQ(-3, p3i.z);
+  p3l = config.GetInt64Point3D("poly3[2]"sv);
+  EXPECT_EQ(-9, p3l.X());
+  EXPECT_EQ(0, p3l.Y());
+  EXPECT_EQ(-3, p3l.Z());
 
   // Double precision points
   EXPECT_THROW(config.GetDoublePoint2D("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetDoublePoint2D("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetDoublePoint2D("poly1"sv), wkc::TypeError);
   auto p2d = config.GetDoublePoint2D("poly1[0]"sv);
-  EXPECT_DOUBLE_EQ(1.0, p2d.x);
-  EXPECT_DOUBLE_EQ(2.0, p2d.y);
+  EXPECT_DOUBLE_EQ(1.0, p2d.X());
+  EXPECT_DOUBLE_EQ(2.0, p2d.Y());
 
   p2d = config.GetDoublePoint2D("poly2[2]"sv);
-  EXPECT_DOUBLE_EQ(50.0, p2d.x);
-  EXPECT_DOUBLE_EQ(60.0, p2d.y);
+  EXPECT_DOUBLE_EQ(50.0, p2d.X());
+  EXPECT_DOUBLE_EQ(60.0, p2d.Y());
 
   EXPECT_THROW(config.GetDoublePoint3D("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetDoublePoint3D("str"sv), wkc::TypeError);
@@ -99,14 +141,14 @@ TEST(ConfigCompoundTest, Points) {
   EXPECT_THROW(config.GetDoublePoint3D("poly1[0]"sv), wkc::TypeError);
 
   auto p3d = config.GetDoublePoint3D("poly3[0]"sv);
-  EXPECT_DOUBLE_EQ(1.0, p3d.x);
-  EXPECT_DOUBLE_EQ(2.0, p3d.y);
-  EXPECT_DOUBLE_EQ(3.0, p3d.z);
+  EXPECT_DOUBLE_EQ(1.0, p3d.X());
+  EXPECT_DOUBLE_EQ(2.0, p3d.Y());
+  EXPECT_DOUBLE_EQ(3.0, p3d.Z());
 
   p3d = config.GetDoublePoint3D("poly3[2]"sv);
-  EXPECT_DOUBLE_EQ(-9.0, p3d.x);
-  EXPECT_DOUBLE_EQ(0.0, p3d.y);
-  EXPECT_DOUBLE_EQ(-3.0, p3d.z);
+  EXPECT_DOUBLE_EQ(-9.0, p3d.X());
+  EXPECT_DOUBLE_EQ(0.0, p3d.Y());
+  EXPECT_DOUBLE_EQ(-3.0, p3d.Z());
 }
 
 TEST(ConfigCompoundTest, PointLists) {
@@ -148,16 +190,24 @@ TEST(ConfigCompoundTest, PointLists) {
 
     )toml"sv);
 
-  // Sanity checks
+  // Sanity checks - unknown keys:
+  EXPECT_THROW(config.GetInt32Points2D("unknown"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32Points3D("unknown"sv), wkc::KeyError);
+
+  EXPECT_THROW(config.GetInt64Points2D("unknown"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt64Points3D("unknown"sv), wkc::KeyError);
+
+  // Sanity checks - wrong parameter type (scalar):
+  EXPECT_THROW(config.GetInt32Points2D("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Points3D("str"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32List("str"sv), wkc::TypeError);
+
   EXPECT_THROW(config.GetInt64Points2D("str"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt64Points3D("str"sv), wkc::TypeError);
-
-  EXPECT_THROW(config.GetInt32List("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolList("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetBoolList("poly1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt64List("str"sv), wkc::TypeError);
 
   // Retrieve a polyline
-  auto poly = config.GetInt64Points2D("poly1"sv);
+  auto poly = config.GetInt32Points2D("poly1"sv);
   EXPECT_EQ(4, poly.size());
 
   auto list = config.GetInt32List("poly1[0]"sv);
@@ -169,56 +219,66 @@ TEST(ConfigCompoundTest, PointLists) {
   EXPECT_EQ(5, list[0]);
   EXPECT_EQ(6, list[1]);
 
-  EXPECT_EQ(1, poly[0].x);
-  EXPECT_EQ(2, poly[0].y);
+  EXPECT_EQ(1, poly[0].X());
+  EXPECT_EQ(2, poly[0].Y());
 
-  EXPECT_EQ(3, poly[1].x);
-  EXPECT_EQ(4, poly[1].y);
+  EXPECT_EQ(3, poly[1].X());
+  EXPECT_EQ(4, poly[1].Y());
 
-  EXPECT_EQ(5, poly[2].x);
-  EXPECT_EQ(6, poly[2].y);
+  EXPECT_EQ(5, poly[2].X());
+  EXPECT_EQ(6, poly[2].Y());
 
-  EXPECT_EQ(-7, poly[3].x);
-  EXPECT_EQ(-8, poly[3].y);
+  EXPECT_EQ(-7, poly[3].X());
+  EXPECT_EQ(-8, poly[3].Y());
 
-  poly = config.GetInt64Points2D("poly2"sv);
+  poly = config.GetInt32Points2D("poly2"sv);
   EXPECT_EQ(3, poly.size());
 
-  EXPECT_EQ(10, poly[0].x);
-  EXPECT_EQ(20, poly[0].y);
-  EXPECT_EQ(30, poly[1].x);
-  EXPECT_EQ(40, poly[1].y);
-  EXPECT_EQ(50, poly[2].x);
-  EXPECT_EQ(60, poly[2].y);
+  EXPECT_EQ(10, poly[0].X());
+  EXPECT_EQ(20, poly[0].Y());
+  EXPECT_EQ(30, poly[1].X());
+  EXPECT_EQ(40, poly[1].Y());
+  EXPECT_EQ(50, poly[2].X());
+  EXPECT_EQ(60, poly[2].Y());
+
+  auto poly64 = config.GetInt64Points2D("poly2"sv);
+  EXPECT_EQ(poly.size(), poly64.size());
+  for (std::size_t idx = 0; idx < poly.size(); ++idx) {
+    EXPECT_EQ(poly[idx].ToInteger(), poly64[idx].ToInteger());
+  }
 
   // Cannot load an array of tables as a scalar list:
   EXPECT_THROW(config.GetInt32List("poly2"sv), wkc::TypeError);
 
   // An N-dimensional polygon can be looked up from any list of at
   // least N-dimensional points:
-  EXPECT_NO_THROW(config.GetInt64Points2D("poly3"sv));
-  EXPECT_NO_THROW(config.GetInt64Points3D("poly3"sv));
+  EXPECT_NO_THROW(config.GetInt32Points2D("poly3"sv));
+  EXPECT_NO_THROW(config.GetInt32Points3D("poly3"sv));
 
   EXPECT_NO_THROW(config.GetDoublePoints2D("poly3"sv));
   EXPECT_NO_THROW(config.GetDoublePoints3D("poly3"sv));
 
-  EXPECT_NO_THROW(config.GetInt64Points2D("poly4"sv));
-  EXPECT_NO_THROW(config.GetInt64Points3D("poly4"sv));
+  EXPECT_NO_THROW(config.GetInt32Points2D("poly4"sv));
+  EXPECT_NO_THROW(config.GetInt32Points3D("poly4"sv));
 
   EXPECT_NO_THROW(config.GetDoublePoints2D("poly4"sv));
   EXPECT_NO_THROW(config.GetDoublePoints3D("poly4"sv));
 
   // 'poly64' contains values that would overflow 32-bit ints
-  // EXPECT_THROW(config.GetIndices2D("poly64"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Points2D("poly64"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetInt64Points2D("poly64"sv));
   EXPECT_NO_THROW(config.GetDoublePoints2D("poly64"sv));
+  //  poly64 = [[-10, 20], [1, 3], [2147483647, 2147483648], [0, 21474836480]]
+  poly64 = config.GetInt64Points2D("poly64"sv);
+  EXPECT_EQ(4, poly64.size());
+  EXPECT_EQ(2147483647L, poly64[2].X());
+  EXPECT_EQ(2147483648L, poly64[2].Y());
 
   // TODO p3 and others should be retrievable as Points (i.e. floating points)
-  EXPECT_THROW(config.GetInt64Points2D("no-such-key"sv), wkc::KeyError);
-  EXPECT_THROW(config.GetInt64Points2D("str"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInt64Points2D("invalid.p1"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInt64Points2D("invalid.p2"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInt64Points2D("invalid.p3"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Points2D("no-such-key"sv), wkc::KeyError);
+  EXPECT_THROW(config.GetInt32Points2D("invalid.p1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Points2D("invalid.p2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Points2D("invalid.p3"sv), wkc::TypeError);
 
   EXPECT_THROW(config.GetDoublePoints2D("no-such-key"sv), wkc::KeyError);
   EXPECT_THROW(config.GetDoublePoints2D("str"sv), wkc::TypeError);
@@ -228,62 +288,64 @@ TEST(ConfigCompoundTest, PointLists) {
 
   // A "point" parameter can have more values than the dimensionality of
   // the queried points (e.g. to load a list of 3D coordinates as 2D points)
-  EXPECT_NO_THROW(config.GetInt64Points2D("mixed_2d_3d.p1"sv));
-  EXPECT_THROW(config.GetInt64Points3D("mixed_2d_3d.p1"sv), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetInt32Points2D("mixed_2d_3d.p1"sv));
+  EXPECT_THROW(config.GetInt32Points3D("mixed_2d_3d.p1"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetDoublePoints2D("mixed_2d_3d.p1"sv));
   EXPECT_THROW(config.GetDoublePoints3D("mixed_2d_3d.p1"sv), wkc::TypeError);
 
-  EXPECT_NO_THROW(config.GetInt64Points2D("mixed_2d_3d.p2"sv));
-  EXPECT_THROW(config.GetInt64Points3D("mixed_2d_3d.p2"sv), wkc::TypeError);
+  EXPECT_NO_THROW(config.GetInt32Points2D("mixed_2d_3d.p2"sv));
+  EXPECT_THROW(config.GetInt32Points3D("mixed_2d_3d.p2"sv), wkc::TypeError);
   EXPECT_NO_THROW(config.GetDoublePoints2D("mixed_2d_3d.p2"sv));
   EXPECT_THROW(config.GetDoublePoints3D("mixed_2d_3d.p2"sv), wkc::TypeError);
 
   // 3D polygons
-  EXPECT_THROW(config.GetInt64Points3D("poly1"sv), wkc::TypeError);
-  EXPECT_THROW(config.GetInt64Points3D("poly2"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Points3D("poly1"sv), wkc::TypeError);
+  EXPECT_THROW(config.GetInt32Points3D("poly2"sv), wkc::TypeError);
 
-  auto poly3d = config.GetInt64Points3D("poly3"sv);
+  auto poly3d = config.GetInt32Points3D("poly3"sv);
   EXPECT_EQ(3, poly3d.size());
 
-  EXPECT_EQ(1, poly3d[0].x);
-  EXPECT_EQ(2, poly3d[0].y);
-  EXPECT_EQ(3, poly3d[0].z);
+  EXPECT_EQ(1, poly3d[0].X());
+  EXPECT_EQ(2, poly3d[0].Y());
+  EXPECT_EQ(3, poly3d[0].Z());
 
-  EXPECT_EQ(4, poly3d[1].x);
-  EXPECT_EQ(5, poly3d[1].y);
-  EXPECT_EQ(6, poly3d[1].z);
+  EXPECT_EQ(4, poly3d[1].X());
+  EXPECT_EQ(5, poly3d[1].Y());
+  EXPECT_EQ(6, poly3d[1].Z());
 
-  EXPECT_EQ(-9, poly3d[2].x);
-  EXPECT_EQ(0, poly3d[2].y);
-  EXPECT_EQ(-3, poly3d[2].z);
+  EXPECT_EQ(-9, poly3d[2].X());
+  EXPECT_EQ(0, poly3d[2].Y());
+  EXPECT_EQ(-3, poly3d[2].Z());
 
   // Load the same point list as floating point
   auto poly3d_dbl = config.GetDoublePoints3D("poly3"sv);
   EXPECT_EQ(3, poly3d_dbl.size());
 
-  EXPECT_DOUBLE_EQ(1.0, poly3d_dbl[0].x);
-  EXPECT_DOUBLE_EQ(2.0, poly3d_dbl[0].y);
-  EXPECT_DOUBLE_EQ(3.0, poly3d_dbl[0].z);
+  EXPECT_DOUBLE_EQ(1.0, poly3d_dbl[0].X());
+  EXPECT_DOUBLE_EQ(2.0, poly3d_dbl[0].Y());
+  EXPECT_DOUBLE_EQ(3.0, poly3d_dbl[0].Z());
 
-  EXPECT_DOUBLE_EQ(4.0, poly3d_dbl[1].x);
-  EXPECT_DOUBLE_EQ(5.0, poly3d_dbl[1].y);
-  EXPECT_DOUBLE_EQ(6.0, poly3d_dbl[1].z);
+  EXPECT_DOUBLE_EQ(4.0, poly3d_dbl[1].X());
+  EXPECT_DOUBLE_EQ(5.0, poly3d_dbl[1].Y());
+  EXPECT_DOUBLE_EQ(6.0, poly3d_dbl[1].Z());
 
-  EXPECT_DOUBLE_EQ(-9.0, poly3d_dbl[2].x);
-  EXPECT_DOUBLE_EQ(0.0, poly3d_dbl[2].y);
-  EXPECT_DOUBLE_EQ(-3.0, poly3d_dbl[2].z);
+  EXPECT_DOUBLE_EQ(-9.0, poly3d_dbl[2].X());
+  EXPECT_DOUBLE_EQ(0.0, poly3d_dbl[2].Y());
+  EXPECT_DOUBLE_EQ(-3.0, poly3d_dbl[2].Z());
 
   // Floating point polygon only:
+  EXPECT_THROW(config.GetInt32Points2D("poly_flt"sv), wkc::TypeError);
   EXPECT_THROW(config.GetInt64Points2D("poly_flt"sv), wkc::TypeError);
+  // poly_flt is 2-dimensional:
   EXPECT_THROW(config.GetDoublePoints3D("poly_flt"sv), wkc::TypeError);
 
   auto poly2d_dbl = config.GetDoublePoints2D("poly_flt"sv);
   EXPECT_EQ(2, poly2d_dbl.size());
-  EXPECT_DOUBLE_EQ(1e3, poly2d_dbl[0].x);
-  EXPECT_DOUBLE_EQ(2e3, poly2d_dbl[0].y);
+  EXPECT_DOUBLE_EQ(1e3, poly2d_dbl[0].X());
+  EXPECT_DOUBLE_EQ(2e3, poly2d_dbl[0].Y());
 
-  EXPECT_DOUBLE_EQ(-3.5, poly2d_dbl[1].x);
-  EXPECT_DOUBLE_EQ(-4.5, poly2d_dbl[1].y);
+  EXPECT_DOUBLE_EQ(-3.5, poly2d_dbl[1].X());
+  EXPECT_DOUBLE_EQ(-4.5, poly2d_dbl[1].Y());
 }
 
 TEST(ConfigCompoundTest, GetGroup) {
