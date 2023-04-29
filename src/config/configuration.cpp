@@ -1498,26 +1498,6 @@ void Configuration::SetInt32List(std::string_view key,
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
-geometry::Vec<int32_t, 2> Configuration::GetInt32Point2D(
-    std::string_view key) const {
-  return detail::LookupPoint<int32_t, 2>(pimpl_->config_root, key);
-}
-
-geometry::Vec<int32_t, 3> Configuration::GetInt32Point3D(
-    std::string_view key) const {
-  return detail::LookupPoint<int32_t, 3>(pimpl_->config_root, key);
-}
-
-std::vector<geometry::Vec<int32_t, 2>> Configuration::GetInt32Points2D(
-    std::string_view key) const {
-  return detail::LookupPointList<int32_t, 2>(pimpl_->config_root, key);
-}
-
-std::vector<geometry::Vec<int32_t, 3>> Configuration::GetInt32Points3D(
-    std::string_view key) const {
-  return detail::LookupPointList<int32_t, 3>(pimpl_->config_root, key);
-}
-
 //---------------------------------------------------------------------------
 // Integer (64-bit)
 
@@ -1553,25 +1533,26 @@ void Configuration::SetInt64List(std::string_view key,
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
-geometry::Vec<int64_t, 2> Configuration::GetInt64Point2D(
-    std::string_view key) const {
-  return detail::LookupPoint<int64_t, 2>(pimpl_->config_root, key);
-}
+// TODO remove
+// geometry::Vec<int64_t, 2> Configuration::GetInt64Point2D(
+//     std::string_view key) const {
+//   return detail::LookupPoint<int64_t, 2>(pimpl_->config_root, key);
+// }
 
-geometry::Vec<int64_t, 3> Configuration::GetInt64Point3D(
-    std::string_view key) const {
-  return detail::LookupPoint<int64_t, 3>(pimpl_->config_root, key);
-}
+// geometry::Vec<int64_t, 3> Configuration::GetInt64Point3D(
+//     std::string_view key) const {
+//   return detail::LookupPoint<int64_t, 3>(pimpl_->config_root, key);
+// }
 
-std::vector<geometry::Vec<int64_t, 2>> Configuration::GetInt64Points2D(
-    std::string_view key) const {
-  return detail::LookupPointList<int64_t, 2>(pimpl_->config_root, key);
-}
+// std::vector<geometry::Vec<int64_t, 2>> Configuration::GetInt64Points2D(
+//     std::string_view key) const {
+//   return detail::LookupPointList<int64_t, 2>(pimpl_->config_root, key);
+// }
 
-std::vector<geometry::Vec<int64_t, 3>> Configuration::GetInt64Points3D(
-    std::string_view key) const {
-  return detail::LookupPointList<int64_t, 3>(pimpl_->config_root, key);
-}
+// std::vector<geometry::Vec<int64_t, 3>> Configuration::GetInt64Points3D(
+//     std::string_view key) const {
+//   return detail::LookupPointList<int64_t, 3>(pimpl_->config_root, key);
+// }
 
 //---------------------------------------------------------------------------
 // Floating Point
@@ -1606,26 +1587,6 @@ std::vector<double> Configuration::GetDoubleList(std::string_view key) const {
 void Configuration::SetDoubleList(std::string_view key,
     const std::vector<double> &values) {
   detail::SetList<double>(pimpl_->config_root, key, values);
-}
-
-geometry::Vec<double, 2> Configuration::GetDoublePoint2D(
-    std::string_view key) const {
-  return detail::LookupPoint<double, 2>(pimpl_->config_root, key);
-}
-
-geometry::Vec<double, 3> Configuration::GetDoublePoint3D(
-    std::string_view key) const {
-  return detail::LookupPoint<double, 3>(pimpl_->config_root, key);
-}
-
-std::vector<geometry::Vec<double, 2>> Configuration::GetDoublePoints2D(
-    std::string_view key) const {
-  return detail::LookupPointList<double, 2>(pimpl_->config_root, key);
-}
-
-std::vector<geometry::Vec<double, 3>> Configuration::GetDoublePoints3D(
-    std::string_view key) const {
-  return detail::LookupPointList<double, 3>(pimpl_->config_root, key);
 }
 
 //---------------------------------------------------------------------------
@@ -1764,6 +1725,48 @@ std::vector<date_time> Configuration::GetDateTimeList(
 void Configuration::SetDateTimeList(std::string_view key,
     const std::vector<date_time> &values) {
   detail::SetList<toml::date_time>(pimpl_->config_root, key, values);
+}
+
+//---------------------------------------------------------------------------
+// Geometric primitives
+geometry::Vec<int32_t, 2> Configuration::GetVec2i(std::string_view key) const {
+  return detail::LookupPoint<int32_t, 2>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<int32_t, 2>> Configuration::GetVec2iList(
+    std::string_view key) const {
+  return detail::LookupPointList<int32_t, 2>(pimpl_->config_root, key);
+}
+
+geometry::Vec<int32_t, 3> Configuration::GetVec3i(std::string_view key) const {
+  return detail::LookupPoint<int32_t, 3>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<int32_t, 3>> Configuration::GetVec3iList(
+    std::string_view key) const {
+  return detail::LookupPointList<int32_t, 3>(pimpl_->config_root, key);
+}
+
+geometry::Vec<double, 2> Configuration::GetVec2d(std::string_view key) const {
+  return detail::LookupPoint<double, 2>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<double, 2>> Configuration::GetVec2dList(
+    std::string_view key) const {
+  return detail::LookupPointList<double, 2>(pimpl_->config_root, key);
+}
+
+geometry::Vec<double, 3> Configuration::GetVec3d(std::string_view key) const {
+  return detail::LookupPoint<double, 3>(pimpl_->config_root, key);
+}
+
+std::vector<geometry::Vec<double, 3>> Configuration::GetVec3dList(
+    std::string_view key) const {
+  return detail::LookupPointList<double, 3>(pimpl_->config_root, key);
+}
+
+geometry::Vec<double, 2> Configuration::GetSize2i(std::string_view key) const {
+  return detail::LookupSize<double, 2>(pimpl_->config_root, key);
 }
 
 //---------------------------------------------------------------------------
