@@ -1533,27 +1533,6 @@ void Configuration::SetInt64List(std::string_view key,
   detail::SetList<int64_t>(pimpl_->config_root, key, values);
 }
 
-// TODO remove
-// geometry::Vec<int64_t, 2> Configuration::GetInt64Point2D(
-//     std::string_view key) const {
-//   return detail::LookupPoint<int64_t, 2>(pimpl_->config_root, key);
-// }
-
-// geometry::Vec<int64_t, 3> Configuration::GetInt64Point3D(
-//     std::string_view key) const {
-//   return detail::LookupPoint<int64_t, 3>(pimpl_->config_root, key);
-// }
-
-// std::vector<geometry::Vec<int64_t, 2>> Configuration::GetInt64Points2D(
-//     std::string_view key) const {
-//   return detail::LookupPointList<int64_t, 2>(pimpl_->config_root, key);
-// }
-
-// std::vector<geometry::Vec<int64_t, 3>> Configuration::GetInt64Points3D(
-//     std::string_view key) const {
-//   return detail::LookupPointList<int64_t, 3>(pimpl_->config_root, key);
-// }
-
 //---------------------------------------------------------------------------
 // Floating Point
 
