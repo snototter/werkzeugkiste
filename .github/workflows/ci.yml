@@ -64,7 +64,7 @@ jobs:
       run: cmake --build build/coverage -t coverage
 
     - name: Update coveralls.io
-      uses: coverallsapp/github-action@v2.1.2
+      uses: coverallsapp/github-action@v2.2.0
       with:
         github-token: ${{ github.token }}
         file: build/coverage/coverage.info
