@@ -58,6 +58,15 @@ set(YAML_CPP_INSTALL
 set(CMAKE_HOST_WIN32 "" CACHE STRING "TODO needed to suppress uninitialized var in yaml cpp" FORCE)
 FetchContent_MakeAvailable(yaml-cpp)
 
+# Disable warnings for yaml-cpp (third-party dependency). Otherwise, we cannot
+# build werkzeugkiste with strict error checks unfortunately.
+if(TARGET yaml-cpp)
+  target_compile_options(yaml-cpp PRIVATE
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-float-equal -Wno-sign-conversion>
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-float-equal -Wno-sign-conversion -Wshorten-64-to-32 -Wundef -Wshadow>
+  )
+endif()
+
 # libconfig++ (config)
 option(werkzeugkiste_WITH_LIBCONFIG "Build with libconfig++ support." OFF)
 if(werkzeugkiste_WITH_LIBCONFIG)

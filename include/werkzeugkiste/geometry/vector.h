@@ -1106,4 +1106,16 @@ void MinMaxCoordinates(const Container<Vec<T, Dim>>& values,
 
 }  // namespace werkzeugkiste::geometry
 
+// Add fmt formatter specialization for Vec in order to prevent SPDLOG implicit instantiation errors (with 0-dim vectors)
+#if __has_include(<spdlog/fmt/fmt.h>)
+#include <spdlog/fmt/fmt.h>
+
+template <typename T, std::size_t Dim>
+struct fmt::formatter<werkzeugkiste::geometry::Vec<T, Dim>> : fmt::formatter<std::string> {
+  auto format(const werkzeugkiste::geometry::Vec<T, Dim>& vec, format_context& ctx) const {
+    return fmt::formatter<std::string>::format(vec.ToString(), ctx);
+  }
+};
+#endif
+
 #endif  // WERKZEUGKISTE_GEOMETRY_VECTOR_H

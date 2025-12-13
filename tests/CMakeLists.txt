@@ -70,6 +70,12 @@ target_link_libraries(
           # werkzeugkiste::timing) std::filesystem)
 )
 
+# Disable float-equal warning for gtest headers (third-party dependency)
+target_compile_options(werkzeugkiste-test PRIVATE
+  $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-float-equal>
+  $<$<CXX_COMPILER_ID:GNU>:-Wno-float-equal>
+)
+
 if(werkzeugkiste_WITH_LIBCONFIG)
   target_compile_definitions(werkzeugkiste-test
                              PRIVATE WERKZEUGKISTE_WITH_LIBCONFIG)

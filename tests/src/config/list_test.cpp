@@ -742,16 +742,16 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_TRUE(config.GetBool("lst[0]"sv));
   EXPECT_EQ(wkc::ConfigType::Boolean, config.Type("lst[0]"sv));
 
-  EXPECT_THROW(config.Append("str"sv, 42), wkc::TypeError);
-  EXPECT_THROW(config.Append("no-such-key"sv, 42), wkc::KeyError);
-  EXPECT_NO_THROW(config.Append("lst"sv, 42));
+  EXPECT_THROW(config.Append("str"sv, int32_t{42}), wkc::TypeError);
+  EXPECT_THROW(config.Append("no-such-key"sv, int32_t{42}), wkc::KeyError);
+  EXPECT_NO_THROW(config.Append("lst"sv, int32_t{42}));
   EXPECT_EQ(2, config.Size("lst"sv));
   EXPECT_EQ(42, config.GetInt32("lst[1]"sv));
   EXPECT_EQ(wkc::ConfigType::Integer, config.Type("lst[1]"sv));
 
-  EXPECT_THROW(config.Append("str"sv, 17L), wkc::TypeError);
-  EXPECT_THROW(config.Append("no-such-key"sv, 17L), wkc::KeyError);
-  EXPECT_NO_THROW(config.Append("lst"sv, 17L));
+  EXPECT_THROW(config.Append("str"sv, int64_t{17L}), wkc::TypeError);
+  EXPECT_THROW(config.Append("no-such-key"sv, int64_t{17L}), wkc::KeyError);
+  EXPECT_NO_THROW(config.Append("lst"sv, int64_t{17L}));
   EXPECT_EQ(3, config.Size("lst"sv));
   EXPECT_EQ(17, config.GetInt32("lst[2]"sv));
   EXPECT_EQ(17L, config.GetInt64("lst[2]"sv));
@@ -782,8 +782,8 @@ TEST(ConfigListTest, CreateMixedList) {
   EXPECT_EQ(6, config.Size("lst"sv));
   EXPECT_EQ(wkc::ConfigType::List, config.Type("lst[5]"sv));
   EXPECT_EQ(0, config.Size("lst[5]"sv));
-  EXPECT_NO_THROW(config.Append("lst[5]"sv, 1));
-  EXPECT_NO_THROW(config.Append("lst[5]"sv, -2));
+  EXPECT_NO_THROW(config.Append("lst[5]"sv, int32_t{1}));
+  EXPECT_NO_THROW(config.Append("lst[5]"sv, int32_t{-2}));
   EXPECT_EQ(6, config.Size("lst"sv));
   EXPECT_EQ(2, config.Size("lst[5]"sv));
   EXPECT_EQ(1, config.GetInt32("lst[5][0]"sv));
