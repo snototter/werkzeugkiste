@@ -63,7 +63,7 @@ FetchContent_MakeAvailable(yaml-cpp)
 if(TARGET yaml-cpp)
   target_compile_options(yaml-cpp PRIVATE
     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-float-equal -Wno-sign-conversion>
-    $<$<CXX_COMPILER_ID:GNU>:-Wno-float-equal -Wno-sign-conversion -Wshorten-64-to-32 -Wundef -Wshadow>
+    $<$<CXX_COMPILER_ID:GNU>:-Wno-float-equal -Wno-sign-conversion -Wundef -Wshadow>
   )
 endif()
 
